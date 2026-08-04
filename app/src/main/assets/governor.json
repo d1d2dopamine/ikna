@@ -1,0 +1,21 @@
+{
+  "targetDailyReviews": 40,
+  "maxNewPerDay": 6,
+  "maxNewCeiling": 20,
+  "costPerNew": 4.0,
+  "backlogWeight": 0.5,
+  "backlogHardLimit": 120,
+  "minAccuracy": 0.75,
+  "warmupReviewsAfterSkip": 10,
+  "amnestyQuotaRatio": 0.2,
+  "forecastHorizonDays": 3,
+  "recentWindowSize": 100,
+  "safetyValveDays": 7,
+  "accelerateAfterCleanDays": 5,
+  "accelerateStep": 2,
+  "returnModeGapDays": 14,
+  "returnModeDays": 3,
+  "returnModeCapacity": 10,
+  "dailyMinimumCards": 1,
+  "desiredRetention": 0.9
+}

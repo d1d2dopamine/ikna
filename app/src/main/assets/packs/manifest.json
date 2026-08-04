@@ -1,0 +1,13 @@
+{
+  "packs": [
+    {
+      "id": "en-ru-core",
+      "version": 1,
+      "lang": "en",
+      "sourceLang": "ru",
+      "title": "English core chunks",
+      "chunkCount": 70,
+      "file": "en-ru-core.jsonl"
+    }
+  ]
+}
