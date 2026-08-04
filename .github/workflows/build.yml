@@ -1,1 +1,48 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # No wrapper jar is committed; the action provisions Gradle itself.
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      # The signing key is committed as ikna.keystore, so there is nothing to
+      # restore and no repository secrets to configure. Every APK is signed by
+      # the same key and installs over the previous one, so the review history
+      # survives updates.
+      - name: Build debug APK
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+        run: gradle --no-daemon assembleDebug
+
+      - name: Report signer
+        run: |
+          APK=$(find app/build/outputs/apk/debug -name "*.apk" | head -n1)
+          echo "APK: $APK"
+          "$JAVA_HOME/bin/keytool" -printcert -jarfile "$APK" | grep -E "Owner|SHA256" || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ikna-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
 
