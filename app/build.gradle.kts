@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    // Compose compiler is a separate Gradle plugin since Kotlin 2.0; without it
+    // AGP fails configuration as soon as buildFeatures.compose is enabled.
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }
