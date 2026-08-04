@@ -6,12 +6,11 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -35,6 +34,10 @@ import kotlin.math.abs
  *
  *   left  -> Again      right -> Good
  *   down  -> Hard       up    -> Easy
+ *
+ * Two Float animatables instead of one Offset animatable: an Offset animation
+ * needs a TwoWayConverter that only exists as an extension on Offset.Companion,
+ * and two independent floats read exactly as well here.
  */
 @Composable
 fun SwipeableCard(
@@ -45,71 +48,83 @@ fun SwipeableCard(
 ) {
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
-    val offset = remember(key) { Animatable(Offset.Zero, Offset.VectorConverter) }
-    val threshold = remember { 140f }
-    var crossed = remember(key) { false }
+    val offsetX = remember(key) { Animatable(0f) }
+    val offsetY = remember(key) { Animatable(0f) }
+    val threshold = 140f
+    // Plain state, not a local var: the drag callback outlives recomposition.
+    val crossed = remember(key) { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp, vertical = 12.dp)
             .graphicsLayer {
-                translationX = offset.value.x
-                translationY = offset.value.y
-                rotationZ = (offset.value.x / 60f).coerceIn(-6f, 6f)
+                translationX = offsetX.value
+                translationY = offsetY.value
+                rotationZ = (offsetX.value / 60f).coerceIn(-6f, 6f)
             }
             .pointerInput(key, enabled) {
                 if (!enabled) return@pointerInput
                 detectDragGestures(
                     onDrag = { _, delta ->
                         scope.launch {
-                            offset.snapTo(offset.value + delta)
-                            val past = abs(offset.value.x) > threshold || abs(offset.value.y) > threshold
-                            if (past && !crossed) {
-                                crossed = true
+                            offsetX.snapTo(offsetX.value + delta.x)
+                            offsetY.snapTo(offsetY.value + delta.y)
+                            val past = abs(offsetX.value) > threshold ||
+                                abs(offsetY.value) > threshold
+                            if (past && !crossed.value) {
+                                crossed.value = true
                                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                             } else if (!past) {
-                                crossed = false
+                                crossed.value = false
                             }
                         }
                     },
                     onDragEnd = {
-                        val o = offset.value
+                        val x = offsetX.value
+                        val y = offsetY.value
                         val rating = when {
-                            o.x < -threshold -> Rating.AGAIN
-                            o.x > threshold -> Rating.GOOD
-                            o.y < -threshold -> Rating.EASY
-                            o.y > threshold -> Rating.HARD
+                            x < -threshold -> Rating.AGAIN
+                            x > threshold -> Rating.GOOD
+                            y < -threshold -> Rating.EASY
+                            y > threshold -> Rating.HARD
                             else -> null
                         }
                         scope.launch {
                             if (rating != null) {
                                 // Smooth slide out, no throw physics: the card
                                 // leaves calmly and the next one is simply there.
-                                val exit = when (rating) {
-                                    Rating.AGAIN -> Offset(-1400f, 0f)
-                                    Rating.GOOD -> Offset(1400f, 0f)
-                                    Rating.EASY -> Offset(0f, -1800f)
-                                    Rating.HARD -> Offset(0f, 1800f)
+                                val exitX = when (rating) {
+                                    Rating.AGAIN -> -1400f
+                                    Rating.GOOD -> 1400f
+                                    else -> 0f
                                 }
-                                offset.animateTo(exit, tween(180))
+                                val exitY = when (rating) {
+                                    Rating.EASY -> -1800f
+                                    Rating.HARD -> 1800f
+                                    else -> 0f
+                                }
+                                if (exitX != 0f) {
+                                    offsetX.animateTo(exitX, tween(180))
+                                } else {
+                                    offsetY.animateTo(exitY, tween(180))
+                                }
                                 onRate(rating)
-                                offset.snapTo(Offset.Zero)
+                                offsetX.snapTo(0f)
+                                offsetY.snapTo(0f)
                             } else {
-                                offset.animateTo(Offset.Zero, tween(160))
+                                offsetX.animateTo(0f, tween(160))
+                                offsetY.animateTo(0f, tween(160))
                             }
-                            crossed = false
+                            crossed.value = false
                         }
                     }
                 )
             }
     ) {
         content(
-            (offset.value.x / threshold).coerceIn(-1f, 1f),
-            (offset.value.y / threshold).coerceIn(-1f, 1f)
+            (offsetX.value / threshold).coerceIn(-1f, 1f),
+            (offsetY.value / threshold).coerceIn(-1f, 1f)
         )
     }
 }
-
-val MaterialCardElevation = 2.dp
-private val unusedTheme = MaterialTheme
