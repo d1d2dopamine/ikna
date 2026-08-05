@@ -38,6 +38,13 @@ data class SessionUiState(
     val encodedKeys: Set<String> = emptySet(),
     val extraAdded: Int = 0,
     val noMoreExtra: Boolean = false,
+    /**
+     * True once enough answers have been given by swiping. The two rare ratings
+     * then leave the button row and stay on the gesture. Read once per session
+     * on purpose: a row that rearranges itself mid-session would move a target
+     * under a thumb that is already moving.
+     */
+    val swipeFluent: Boolean = false,
     val finished: Boolean = false
 ) {
     val current: SessionCard? get() = queue.getOrNull(index)
@@ -88,6 +95,7 @@ class SessionViewModel(
     private var shownAt = 0L
     private var undoToken = 0
     private var hintsShown = 0
+    private var swipesDone = 0
 
     init { load() }
 
@@ -97,7 +105,9 @@ class SessionViewModel(
             val plan = repo.buildSession()
             planned = plan.cards
             answeredKeys.clear()
-            hintsShown = settings.current().revealHintsShown
+            val prefs = settings.current()
+            hintsShown = prefs.revealHintsShown
+            swipesDone = prefs.swipesDone
             _state.value = SessionUiState(
                 loading = false,
                 queue = plan.cards,
@@ -111,6 +121,7 @@ class SessionViewModel(
                 nextDueAt = plan.nextDueAt,
                 canUndo = plan.answeredToday > 0,
                 showRevealHint = hintsShown < HINT_LIMIT,
+                swipeFluent = swipesDone >= SWIPE_FLUENCY,
                 finished = plan.cards.isEmpty()
             )
             shownAt = System.currentTimeMillis()
@@ -139,11 +150,21 @@ class SessionViewModel(
         shownAt = System.currentTimeMillis()
     }
 
-    fun rate(rating: Rating) {
+    /**
+     * [viaSwipe] is counted, not just logged: it is the only evidence that the
+     * gesture has actually been found. Until there is enough of it the button
+     * row keeps teaching all four directions.
+     */
+    fun rate(rating: Rating, viaSwipe: Boolean = false) {
         val s = _state.value
         val card = s.current ?: return
         val now = System.currentTimeMillis()
         val duration = (now - shownAt).coerceIn(0L, 120_000L)
+
+        if (viaSwipe && swipesDone < SWIPE_FLUENCY) {
+            swipesDone++
+            viewModelScope.launch { settings.bumpSwipe() }
+        }
 
         answeredKeys += card.card.key
 
@@ -258,6 +279,12 @@ class SessionViewModel(
         private const val EXTRA_BATCH = 5
         /** The tap hint disappears once, after five cards. No permanent chrome. */
         private const val HINT_LIMIT = 5
+
+        /**
+         * A dozen answers given by swiping is roughly two short sessions, which
+         * is where the movement stops being a thing you decide to do.
+         */
+        private const val SWIPE_FLUENCY = 12
 
         fun factory(repo: LearningRepository, settings: SettingsStore): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {

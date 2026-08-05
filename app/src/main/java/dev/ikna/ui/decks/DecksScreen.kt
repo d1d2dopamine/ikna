@@ -5,6 +5,7 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,13 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,7 +33,11 @@ import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
 import dev.ikna.data.repo.DeckSummary
 import dev.ikna.ui.theme.IknaGood
+import dev.ikna.ui.theme.IknaLine
 import dev.ikna.ui.theme.IknaMuted
+import dev.ikna.ui.theme.IknaProgress
+import dev.ikna.ui.theme.IknaToggle
+import dev.ikna.ui.theme.IknaWideButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -128,11 +127,12 @@ fun DecksScreen(container: AppContainer) {
             Spacer(Modifier.height(8.dp))
         }
 
-        OutlinedButton(
+        IknaWideButton(
+            label = if (busy) "ЧИТАЮ ФАЙЛ…" else "ДОБАВИТЬ НАБОР (.JSONL)",
             onClick = { picker.launch(arrayOf("*/*")) },
             enabled = !busy,
-            modifier = Modifier.fillMaxWidth()
-        ) { Text(if (busy) "Читаю файл…" else "Добавить свой набор (.jsonl)") }
+            height = 54.dp
+        )
         Spacer(Modifier.height(6.dp))
         Text(
             text = "Формат тот же, что у встроенного набора: одна строка — один чанк.",
@@ -143,40 +143,47 @@ fun DecksScreen(container: AppContainer) {
     }
 }
 
+/**
+ * One deck.
+ *
+ * An outline and nothing else. It used to be a Material Card, which fills itself
+ * with the surface colour and sits on the background like a tile — the same
+ * "panel floating on a screen" look the session card had, in a place where the
+ * only job is to separate one row from the next.
+ */
 @Composable
 private fun DeckRow(deck: DeckSummary, onToggle: (Boolean) -> Unit) {
-    Card(
-        shape = RectangleShape,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, IknaLine.copy(alpha = 0.45f))
+            .padding(18.dp)
     ) {
-        Column(modifier = Modifier.padding(18.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = deck.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = "введено " + deck.introduced + " из " + deck.total +
-                            " · знаешь " + deck.known,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = IknaMuted
-                    )
-                }
-                Switch(checked = deck.isActive, onCheckedChange = onToggle)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = deck.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "введено " + deck.introduced + " из " + deck.total +
+                        " · знаешь " + deck.known,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = IknaMuted
+                )
             }
-            Spacer(Modifier.height(14.dp))
-            LinearProgressIndicator(
-                progress = { if (deck.total == 0) 0f else deck.introduced.toFloat() / deck.total },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp),
-                color = IknaGood,
-                trackColor = IknaMuted.copy(alpha = 0.22f)
-            )
+            IknaToggle(checked = deck.isActive, onCheckedChange = onToggle)
         }
+        Spacer(Modifier.height(14.dp))
+        IknaProgress(
+            fraction = if (deck.total == 0) 0f else deck.introduced.toFloat() / deck.total,
+            height = 4.dp,
+            color = IknaGood,
+            // Here the empty part means something — it is the rest of the deck.
+            track = true
+        )
     }
 }
 

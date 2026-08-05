@@ -46,7 +46,13 @@ data class IknaSettings(
     val autoExport: Boolean = true,
     val onboardingDone: Boolean = false,
     /** How many times the tap-to-reveal hint has been shown. Stops at 5. */
-    val revealHintsShown: Int = 0
+    val revealHintsShown: Int = 0,
+    /**
+     * How many answers have been given by swiping rather than by pressing a
+     * button. Once there are enough of them the two rare ratings drop off the
+     * screen and stay on the gesture, which is where they belong.
+     */
+    val swipesDone: Int = 0
 )
 
 private val Context.iknaDataStore: DataStore<Preferences> by preferencesDataStore(name = "ikna-settings")
@@ -66,6 +72,7 @@ class SettingsStore(private val context: Context) {
         val autoExport = booleanPreferencesKey("autoExport")
         val onboardingDone = booleanPreferencesKey("onboardingDone")
         val revealHintsShown = intPreferencesKey("revealHintsShown")
+        val swipesDone = intPreferencesKey("swipesDone")
     }
 
     val flow: Flow<IknaSettings> = context.iknaDataStore.data.map { p ->
@@ -84,7 +91,8 @@ class SettingsStore(private val context: Context) {
             animations = p[Keys.animations] ?: defaults.animations,
             autoExport = p[Keys.autoExport] ?: defaults.autoExport,
             onboardingDone = p[Keys.onboardingDone] ?: defaults.onboardingDone,
-            revealHintsShown = p[Keys.revealHintsShown] ?: defaults.revealHintsShown
+            revealHintsShown = p[Keys.revealHintsShown] ?: defaults.revealHintsShown,
+            swipesDone = p[Keys.swipesDone] ?: defaults.swipesDone
         )
     }
 
@@ -112,6 +120,10 @@ class SettingsStore(private val context: Context) {
 
     suspend fun bumpRevealHint() = put {
         it[Keys.revealHintsShown] = (it[Keys.revealHintsShown] ?: 0) + 1
+    }
+
+    suspend fun bumpSwipe() = put {
+        it[Keys.swipesDone] = (it[Keys.swipesDone] ?: 0) + 1
     }
 
     /**

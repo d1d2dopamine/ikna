@@ -16,14 +16,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,8 +36,13 @@ import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.LoadPreset
 import dev.ikna.data.prefs.ThemeMode
 import dev.ikna.ui.theme.IknaAgain
+import dev.ikna.ui.theme.IknaChip
 import dev.ikna.ui.theme.IknaDanger
+import dev.ikna.ui.theme.IknaDialog
 import dev.ikna.ui.theme.IknaMuted
+import dev.ikna.ui.theme.IknaRule
+import dev.ikna.ui.theme.IknaTextButton
+import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.work.WorkScheduler
 import kotlinx.coroutines.Dispatchers
@@ -59,6 +58,11 @@ import kotlin.system.exitProcess
  * sentence. The load switch is the important one: it is the only place where the
  * user can tell the app "this is too much", instead of the app finding out by
  * being abandoned.
+ *
+ * This screen was where the app looked least like itself: chips, switches and
+ * buttons all came from Material and all of them are pill-shaped no matter what
+ * the theme says, so a square session screen led to a rounded settings screen.
+ * Everything on it is drawn by the app now.
  */
 @Composable
 fun SettingsScreen(
@@ -128,28 +132,25 @@ fun SettingsScreen(
             "Нагрузка",
             "Сколько повторений в день считать нормой. От этого зависит, сколько новых чанков придёт завтра. По умолчанию норма считается сама — по тому, сколько ты реально отвечал за последние две недели."
         ) {
+            IknaChip(
+                label = when {
+                    // Never print a figure as if it were measured when it is
+                    // still the cold-start default.
+                    !settings.autoLoad -> "АВТО"
+                    !normMeasured -> "АВТО · ИЗМЕРЯЮ"
+                    measuredNorm > 0 -> "АВТО · " + measuredNorm
+                    else -> "АВТО"
+                },
+                selected = settings.autoLoad,
+                onClick = { scope.launch { container.settings.setAutoLoad(true) } }
+            )
+            Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(
-                    selected = settings.autoLoad,
-                    onClick = { scope.launch { container.settings.setAutoLoad(true) } },
-                    label = {
-                        Text(
-                            when {
-                                // Never print a figure as if it were measured when it
-                                // is still the cold-start default.
-                                !settings.autoLoad -> "Авто"
-                                !normMeasured -> "Авто · измеряю"
-                                measuredNorm > 0 -> "Авто · " + measuredNorm
-                                else -> "Авто"
-                            }
-                        )
-                    }
-                )
                 LoadPreset.entries.forEach { preset ->
-                    FilterChip(
+                    IknaChip(
+                        label = loadLabel(preset),
                         selected = !settings.autoLoad && settings.load == preset,
-                        onClick = { scope.launch { container.settings.setLoad(preset) } },
-                        label = { Text(loadLabel(preset)) }
+                        onClick = { scope.launch { container.settings.setLoad(preset) } }
                     )
                 }
             }
@@ -158,10 +159,10 @@ fun SettingsScreen(
         Section("Вид", null) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ThemeMode.entries.forEach { mode ->
-                    FilterChip(
+                    IknaChip(
+                        label = themeLabel(mode),
                         selected = settings.theme == mode,
-                        onClick = { scope.launch { container.settings.setTheme(mode) } },
-                        label = { Text(themeLabel(mode)) }
+                        onClick = { scope.launch { container.settings.setTheme(mode) } }
                     )
                 }
             }
@@ -215,7 +216,8 @@ fun SettingsScreen(
                     REMINDER_TIMES.forEach { time ->
                         val hour = time.first
                         val minute = time.second
-                        FilterChip(
+                        IknaChip(
+                            label = timeText(hour, minute),
                             selected = settings.reminderHour == hour &&
                                 settings.reminderMinute == minute,
                             onClick = {
@@ -223,8 +225,7 @@ fun SettingsScreen(
                                     container.settings.setReminder(true, hour, minute)
                                     WorkScheduler.scheduleReminder(context, true, hour, minute)
                                 }
-                            },
-                            label = { Text(timeText(hour, minute)) }
+                            }
                         )
                     }
                 }
@@ -248,7 +249,10 @@ fun SettingsScreen(
             )
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(
+                IknaWideButton(
+                    label = "ВЫГРУЗИТЬ",
+                    modifier = Modifier.weight(1f),
+                    height = 52.dp,
                     enabled = !busy,
                     onClick = {
                         scope.launch {
@@ -261,16 +265,21 @@ fun SettingsScreen(
                             else "Не удалось сохранить файл"
                         }
                     }
-                ) { Text("Выгрузить сейчас") }
-                OutlinedButton(
+                )
+                IknaWideButton(
+                    label = "ВОССТАНОВИТЬ",
+                    modifier = Modifier.weight(1f),
+                    height = 52.dp,
                     enabled = !busy,
                     onClick = { restorePicker.launch(arrayOf("*/*")) }
-                ) { Text("Восстановить") }
+                )
             }
         }
 
         Section("Если что-то пошло не так", null) {
-            OutlinedButton(
+            IknaWideButton(
+                label = "ПЕРЕСЧИТАТЬ СЛОЙ СЛОВ",
+                height = 52.dp,
                 enabled = !busy,
                 onClick = {
                     scope.launch {
@@ -279,18 +288,20 @@ fun SettingsScreen(
                         busy = false
                         message = "Слой слов пересчитан по журналу"
                     }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) { Text("Пересчитать слой слов") }
+                }
+            )
             Spacer(Modifier.height(8.dp))
-            OutlinedButton(
-                onClick = onOpenDebug,
-                modifier = Modifier.fillMaxWidth()
-            ) { Text("Технический экран") }
+            IknaWideButton(
+                label = "ТЕХНИЧЕСКИЙ ЭКРАН",
+                height = 52.dp,
+                onClick = onOpenDebug
+            )
             Spacer(Modifier.height(8.dp))
-            TextButton(onClick = { confirmReset = true }) {
-                Text("Начать заново", color = IknaAgain)
-            }
+            IknaTextButton(
+                label = "НАЧАТЬ ЗАНОВО",
+                onClick = { confirmReset = true },
+                color = IknaAgain
+            )
         }
 
         Section(
@@ -352,26 +363,20 @@ fun SettingsScreen(
     }
 
     if (confirmReset) {
-        AlertDialog(
-            onDismissRequest = { confirmReset = false },
-            title = { Text("Начать заново?") },
-            text = {
-                Text(
-                    "Сроки карточек, статистика и слой слов обнулятся. Журнал ответов останется — из него можно будет всё вернуть кнопкой «Восстановить»."
-                )
+        IknaDialog(
+            title = "Начать заново?",
+            body = "Сроки карточек, статистика и слой слов обнулятся. Журнал ответов останется — из него можно будет всё вернуть кнопкой «Восстановить».",
+            confirmLabel = "НАЧАТЬ ЗАНОВО",
+            confirmColor = IknaAgain,
+            onConfirm = {
+                confirmReset = false
+                scope.launch {
+                    withContext(Dispatchers.IO) { container.learningRepository.resetProgress() }
+                    message = "Прогресс обнулён"
+                }
             },
-            confirmButton = {
-                TextButton(onClick = {
-                    confirmReset = false
-                    scope.launch {
-                        withContext(Dispatchers.IO) { container.learningRepository.resetProgress() }
-                        message = "Прогресс обнулён"
-                    }
-                }) { Text("Начать заново", color = IknaAgain) }
-            },
-            dismissButton = {
-                TextButton(onClick = { confirmReset = false }) { Text("Отмена") }
-            }
+            dismissLabel = "ОТМЕНА",
+            onDismiss = { confirmReset = false }
         )
     }
 }
@@ -383,7 +388,7 @@ private fun Section(
     content: @Composable () -> Unit
 ) {
     Spacer(Modifier.height(22.dp))
-    HorizontalDivider(color = IknaMuted.copy(alpha = 0.18f))
+    IknaRule(color = IknaMuted.copy(alpha = 0.18f))
     Spacer(Modifier.height(16.dp))
     Text(
         text = title,
@@ -425,24 +430,23 @@ private fun ToggleRow(
                 )
             }
         }
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        IknaToggle(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
 
 private val REMINDER_TIMES = listOf(9 to 0, 13 to 0, 20 to 0, 22 to 0)
 
 private fun loadLabel(preset: LoadPreset): String = when (preset) {
-    LoadPreset.CALM -> "Спокойно · 25"
-    LoadPreset.NORMAL -> "Обычно · 40"
-    LoadPreset.DENSE -> "Плотно · 60"
+    LoadPreset.CALM -> "СПОКОЙНО · 25"
+    LoadPreset.NORMAL -> "ОБЫЧНО · 40"
+    LoadPreset.DENSE -> "ПЛОТНО · 60"
 }
 
 private fun themeLabel(mode: ThemeMode): String = when (mode) {
-    ThemeMode.SYSTEM -> "Как в системе"
-    ThemeMode.DARK -> "Тёмная"
-    ThemeMode.LIGHT -> "Светлая"
+    ThemeMode.SYSTEM -> "СИСТЕМА"
+    ThemeMode.DARK -> "ТЁМНАЯ"
+    ThemeMode.LIGHT -> "СВЕТЛАЯ"
 }
 
 private fun timeText(hour: Int, minute: Int): String =
     String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
-
