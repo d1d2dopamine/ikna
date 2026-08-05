@@ -55,6 +55,18 @@ class JsonExporter(
                         append("\"difficultyAfter\":").append(r.difficultyAfter).append(',')
                         append("\"durationMs\":").append(r.durationMs).append(',')
                         append("\"wasAmnesty\":").append(r.wasAmnesty)
+                        // v2: the undo trail. Exported so a restore replays the
+                        // history the user actually kept, retractions included,
+                        // instead of reviving answers they took back.
+                        r.prevStability?.let { append(",\"prevStability\":").append(it) }
+                        r.prevDifficulty?.let { append(",\"prevDifficulty\":").append(it) }
+                        r.prevDueAt?.let { append(",\"prevDueAt\":").append(it) }
+                        r.prevLastReviewAt?.let { append(",\"prevLastReviewAt\":").append(it) }
+                        r.prevReps?.let { append(",\"prevReps\":").append(it) }
+                        r.prevLapses?.let { append(",\"prevLapses\":").append(it) }
+                        r.prevIsNew?.let { append(",\"prevIsNew\":").append(it) }
+                        r.prevInAmnesty?.let { append(",\"prevInAmnesty\":").append(it) }
+                        r.undoOf?.let { append(",\"undoOf\":").append(it) }
                         append('}')
                     }
                 )

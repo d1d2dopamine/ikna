@@ -18,6 +18,25 @@ data class GovernorConfig(
     val backlogWeight: Double = 0.5,
     val backlogHardLimit: Int = 120,
     val minAccuracy: Double = 0.75,
+    /** Below this share of the last week actually used, no new chunks appear. */
+    val minActivityRatio: Double = 0.5,
+    /** Share of the daily norm that already counts as a day fully used. */
+    val idleCreditRatio: Double = 0.3,
+    /** Window for the activity signal, in completed days. */
+    val activityWindowDays: Int = 7,
+    /**
+     * How many days inside that window a normal week is expected to contain.
+     * Four or five, not seven: the norm is weekly on purpose, so an ordinary
+     * week with three quiet days still reads as a week that went fine.
+     */
+    val activeDaysPerWeek: Double = 4.5,
+    /**
+     * After this hour nothing new is introduced today. Only introductions wait;
+     * reviews stay available all night.
+     */
+    val nightCutoffHour: Int = 23,
+    /** Days from the first session during which the load ceiling stays flat. */
+    val settlingDays: Int = 60,
     val warmupReviewsAfterSkip: Int = 10,
     val amnestyQuotaRatio: Double = 0.2,
     val forecastHorizonDays: Int = 3,

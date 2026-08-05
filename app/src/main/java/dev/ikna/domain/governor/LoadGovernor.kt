@@ -8,7 +8,20 @@ data class GovernorSignals(
     val forecastAvg3d: Double,
     val backlog: Int,
     val accuracyRecent: Double,
+    /**
+     * How much of the last week was actually used, 0..1: work done divided by
+     * work a day is expected to hold. This is the graded version of "did the
+     * user show up" — a day missed, a day of two cards and a normal day are
+     * three different numbers, not two states.
+     */
+    val activityRatio: Double,
     val daysSinceLastSession: Int,
+    /**
+     * Days since the very first session. The ceiling does not rise inside the
+     * settling window: a routine needs months to become automatic, and the
+     * fastest way to lose one is to make it heavier while it is still fragile.
+     */
+    val daysSinceStart: Int,
     val reviewsDoneToday: Int,
     val cleanDays: Int,
     val newIntroducedLastWeek: Int,
@@ -21,6 +34,10 @@ enum class GovernorReason {
     NO_HEADROOM,
     BACKLOG_LIMIT,
     POST_SKIP_WARMUP,
+    /** The last week was mostly empty. Nothing new until attention comes back. */
+    LOW_ACTIVITY,
+    /** Too late in the day to meet something new. Reviews are unaffected. */
+    LATE_NIGHT,
     LOW_ACCURACY,
     RETURN_MODE,
     SAFETY_VALVE
@@ -80,6 +97,10 @@ class LoadGovernor(private val config: GovernorConfig) {
         val gate: GovernorReason? = when {
             inReturnMode -> GovernorReason.RETURN_MODE
             s.backlog > config.backlogHardLimit -> GovernorReason.BACKLOG_LIMIT
+            // Barely being here counts as being away. Adding chunks to a week
+            // that is already going badly is how the pile that ends the habit
+            // gets built, and it gets built while nobody is watching.
+            s.activityRatio < config.minActivityRatio -> GovernorReason.LOW_ACTIVITY
             // New material is earned by attention after a skipped day, never
             // handed out to help the user "catch up".
             s.daysSinceLastSession >= 1 &&
@@ -130,6 +151,10 @@ class LoadGovernor(private val config: GovernorConfig) {
 
     /** Load rises to meet current form without being asked. */
     private fun effectiveMaxNew(s: GovernorSignals): Int {
+        // Flat for the first two months. That is roughly how long a daily
+        // routine takes to stop needing willpower, and the acceleration below
+        // is exactly what turns one good week into a week nobody can repeat.
+        if (s.daysSinceStart < config.settlingDays) return config.maxNewPerDay
         if (s.cleanDays < config.accelerateAfterCleanDays || s.accuracyRecent < 0.9) {
             return config.maxNewPerDay
         }

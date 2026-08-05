@@ -4,6 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.ui.nav.IknaNavHost
 import dev.ikna.ui.theme.IknaTheme
 
@@ -14,8 +17,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val container = (application as IknaApp).container
         setContent {
-            IknaTheme {
-                IknaNavHost(container = container)
+            val settings by container.settings.flow.collectAsState(initial = IknaSettings())
+            IknaTheme(mode = settings.theme, dynamicColor = settings.dynamicColor) {
+                IknaNavHost(container = container, settings = settings)
             }
         }
     }

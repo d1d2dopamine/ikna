@@ -1,5 +1,6 @@
 package dev.ikna.data.db
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -42,7 +43,15 @@ data class PackEntity(
     val version: Int,
     val lang: String,
     val chunkCount: Int,
-    val installedAt: Long
+    val installedAt: Long,
+    // ---- schema v2 -------------------------------------------------------
+    val title: String? = null,
+    /**
+     * Switching a deck off stops NEW chunks being introduced from it. Cards
+     * that already exist keep their schedule and their history, so turning a
+     * deck off can never read as losing progress.
+     */
+    @ColumnInfo(defaultValue = "1") val isActive: Boolean = true
 )
 
 // ---------------------------------------------------------------------------
@@ -68,11 +77,14 @@ data class CardEntity(
     val inAmnesty: Boolean = false,
     // true until the card has been answered once
     val isNew: Boolean = true
-)
+) {
+    /** Stable identity of a single question. Used by the daily plan. */
+    val key: String get() = chunkId + ":" + level
+}
 
 // APPEND ONLY. Source of truth for everything else in the database.
 // Migrations may add columns. Migrations may never rewrite or delete rows.
-@Entity(tableName = "reviews", indices = [Index("ts"), Index("chunkId")])
+@Entity(tableName = "reviews", indices = [Index("ts"), Index("chunkId"), Index("undoOf")])
 data class ReviewEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val chunkId: String,
@@ -85,7 +97,27 @@ data class ReviewEntity(
     val difficultyBefore: Double,
     val difficultyAfter: Double,
     val durationMs: Long,
-    val wasAmnesty: Boolean
+    val wasAmnesty: Boolean,
+
+    // ---- schema v2: undo -------------------------------------------------
+    // Snapshot of the card as it was BEFORE this answer. Undo restores it
+    // verbatim rather than trying to invert FSRS, which is not invertible.
+    val prevStability: Double? = null,
+    val prevDifficulty: Double? = null,
+    val prevDueAt: Long? = null,
+    val prevLastReviewAt: Long? = null,
+    val prevReps: Int? = null,
+    val prevLapses: Int? = null,
+    val prevIsNew: Boolean? = null,
+    val prevInAmnesty: Boolean? = null,
+    /**
+     * When set, this row is not an answer: it retracts review #undoOf.
+     * The log stays strictly append-only — nothing is updated, nothing is
+     * deleted — and every consumer filters retracted answers out. `rating` is
+     * 0 on these rows, which is not a valid FSRS rating, so old readers that
+     * are unaware of undo cannot mistake one for a real answer.
+     */
+    val undoOf: Long? = null
 )
 
 // ---------------------------------------------------------------------------
@@ -129,3 +161,31 @@ data class GovernorLogEntity(
     val allowedNew: Int,
     val reason: String
 )
+
+/**
+ * The plan for one calendar day. Added in schema v2 to fix the counter bug.
+ *
+ * Before this table the plan was recomputed on every entry to the session
+ * screen. Answering cards freed governor headroom, the governor then honestly
+ * spent that headroom on new chunks, and the number at the top of the screen
+ * went UP as the user worked. The day's plan is now decided exactly once and
+ * persisted: the set of questions for today can only shrink as they are
+ * answered, and it grows only when the user explicitly asks for more.
+ */
+@Entity(tableName = "daily_plan")
+data class DailyPlanEntity(
+    @PrimaryKey val day: String,
+    /** "chunkId:level" keys in presentation order, comma separated. */
+    val plannedIds: String,
+    val plannedTotal: Int,
+    val capacity: Int,
+    val allowedNew: Int,
+    val amnestyQuota: Int,
+    val reason: String,
+    /** How many extra cards the user asked for today, via "ещё немного". */
+    val extraRequested: Int,
+    val createdAt: Long
+) {
+    val ids: List<String>
+        get() = if (plannedIds.isEmpty()) emptyList() else plannedIds.split(",")
+}

@@ -41,6 +41,17 @@ data class SessionCard(
             Level.PRODUCTION -> chunk.contextSentence
         }
 
+    /**
+     * Never answered before: level zero, no repetitions yet.
+     *
+     * The first meeting with a chunk is the weakest link in this app. Retrieval
+     * practice helps, but it cannot repair material that was never properly
+     * encoded, so a first contact is shown as an introduction rather than asked
+     * as a question the user is guaranteed to fail.
+     */
+    val isFirstContact: Boolean
+        get() = level == Level.RECOGNITION && card.isNew && card.reps == 0
+
     val target: String
         get() = chunk.contextSentence.substring(
             chunk.targetStart.coerceIn(0, chunk.contextSentence.length),

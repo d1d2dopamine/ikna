@@ -14,9 +14,11 @@ import androidx.room.RoomDatabase
         ReviewEntity::class,
         ComponentEntity::class,
         DailyStatEntity::class,
-        GovernorLogEntity::class
+        GovernorLogEntity::class,
+        DailyPlanEntity::class
     ],
-    version = 1,
+    // v2: undo snapshots on `reviews`, deck switches on `packs`, `daily_plan`.
+    version = 2,
     // Schemas are committed under app/schemas so migrations stay reproducible.
     exportSchema = true
 )
@@ -27,6 +29,7 @@ abstract class IknaDatabase : RoomDatabase() {
     abstract fun componentDao(): ComponentDao
     abstract fun statsDao(): StatsDao
     abstract fun governorDao(): GovernorDao
+    abstract fun planDao(): PlanDao
 
     companion object {
         fun build(context: Context): IknaDatabase =

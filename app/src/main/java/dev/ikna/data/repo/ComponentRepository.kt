@@ -89,5 +89,8 @@ class ComponentRepository(
         }
     }
 
+    /** Danger zone: wipes the derived word layer. Rebuildable from `reviews`. */
+    suspend fun clearAll() = componentDao.clear()
+
     suspend fun knownWordCount(): Int = componentDao.knownCount(minStability = 7.0)
 }
