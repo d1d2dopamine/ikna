@@ -114,6 +114,14 @@ class SettingsStore(private val context: Context) {
         it[Keys.revealHintsShown] = (it[Keys.revealHintsShown] ?: 0) + 1
     }
 
+    /**
+     * Back to first-run defaults, including the onboarding flag.
+     *
+     * Used by "стереть всё" in settings: a wipe that leaves the app thinking
+     * it is already set up is not a wipe, it is a bug factory.
+     */
+    suspend fun clearAll() = put { it.clear() }
+
     private suspend fun put(block: (androidx.datastore.preferences.core.MutablePreferences) -> Unit) {
         context.iknaDataStore.edit { block(it) }
     }

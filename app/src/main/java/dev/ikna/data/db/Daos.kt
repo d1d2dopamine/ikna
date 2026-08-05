@@ -107,6 +107,20 @@ interface CardDao {
     )
     suspend fun amnestyCardsExcluding(exclude: List<String>, limit: Int): List<CardEntity>
 
+    // Fuel for "ещё немного" when nothing is due any more: the soonest cards
+    // from the future, never unseen ones. Answering a card a day early costs a
+    // little scheduling precision and nothing else, which is a fair price for a
+    // button that is supposed to always do something.
+    @Query(
+        "SELECT * FROM cards WHERE inAmnesty = 0 AND isNew = 0 AND dueAt > :after " +
+            "AND (chunkId || ':' || level) NOT IN (:exclude) ORDER BY dueAt ASC LIMIT :limit"
+    )
+    suspend fun upcomingCardsExcluding(
+        after: Long,
+        exclude: List<String>,
+        limit: Int
+    ): List<CardEntity>
+
     // Forecast: how many cards fall due on each of the next days.
     @Query(
         "SELECT COUNT(*) FROM cards WHERE inAmnesty = 0 " +

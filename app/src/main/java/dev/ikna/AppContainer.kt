@@ -75,6 +75,18 @@ class AppContainer(context: Context) {
 
     val components: ComponentRepository get() = componentRepository
 
+    /**
+     * Full wipe, as if the app had just been installed.
+     *
+     * Room's own clearAllTables does it in one transaction, so a wipe cannot
+     * leave half a database behind. Blocking call — keep it off the main thread.
+     * The caller is expected to clear settings and restart the process too:
+     * singletons and in-memory session state outlive the tables otherwise.
+     */
+    fun wipeDatabase() {
+        db.clearAllTables()
+    }
+
     val jsonExporter = JsonExporter(context, db.reviewDao())
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)

@@ -1,6 +1,7 @@
 package dev.ikna.ui.settings
 
 import android.Manifest
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -36,16 +37,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
+import dev.ikna.MainActivity
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.LoadPreset
 import dev.ikna.data.prefs.ThemeMode
 import dev.ikna.ui.theme.IknaAgain
+import dev.ikna.ui.theme.IknaDanger
 import dev.ikna.ui.theme.IknaMuted
+import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.work.WorkScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
+import kotlin.system.exitProcess
 
 /**
  * Settings.
@@ -67,12 +72,19 @@ fun SettingsScreen(
     var confirmReset by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
 
+    // Wiping everything is two taps on the same button rather than a dialog:
+    // a dialog is one more thing to read at the exact moment you already know
+    // what you want.
+    var wipeArmed by remember { mutableStateOf(false) }
+
     // The measured norm is shown rather than asked for: the number on the "Авто"
     // chip is what the app has decided the day looks like, so the setting stays
     // readable without turning into another decision.
     var measuredNorm by remember { mutableStateOf(0) }
+    var normMeasured by remember { mutableStateOf(true) }
     LaunchedEffect(settings.autoLoad, settings.load) {
         measuredNorm = container.learningRepository.currentDailyTarget()
+        normMeasured = container.learningRepository.normIsMeasured()
     }
 
     val notificationPermission = rememberLauncherForActivityResult(
@@ -122,8 +134,14 @@ fun SettingsScreen(
                     onClick = { scope.launch { container.settings.setAutoLoad(true) } },
                     label = {
                         Text(
-                            if (settings.autoLoad && measuredNorm > 0) "Авто · " + measuredNorm
-                            else "Авто"
+                            when {
+                                // Never print a figure as if it were measured when it
+                                // is still the cold-start default.
+                                !settings.autoLoad -> "Авто"
+                                !normMeasured -> "Авто · измеряю"
+                                measuredNorm > 0 -> "Авто · " + measuredNorm
+                                else -> "Авто"
+                            }
                         )
                     }
                 )
@@ -148,12 +166,6 @@ fun SettingsScreen(
                 }
             }
             Spacer(Modifier.height(12.dp))
-            ToggleRow(
-                title = "Цвета системы",
-                subtitle = "Подстроиться под обои телефона",
-                checked = settings.dynamicColor,
-                onCheckedChange = { scope.launch { container.settings.setDynamicColor(it) } }
-            )
             ToggleRow(
                 title = "Анимации",
                 subtitle = "Карточки улетают, конец дня с анимацией",
@@ -279,6 +291,54 @@ fun SettingsScreen(
             TextButton(onClick = { confirmReset = true }) {
                 Text("Начать заново", color = IknaAgain)
             }
+        }
+
+        Section(
+            "Стереть всё",
+            "Полный сброс: карточки, сроки, статистика, журнал ответов и сами настройки. " +
+                "Приложение станет таким, как сразу после установки, и перезапустится. " +
+                "Это для тестов, когда данные старой версии мешают новой. " +
+                "Перед стиранием журнал выгружается в Документы/Ikna — его потом можно восстановить."
+        ) {
+            IknaWideButton(
+                label = if (wipeArmed) "ТОЧНО СТЕРЕТЬ ВСЁ" else "СТЕРЕТЬ ДАННЫЕ",
+                enabled = !busy,
+                height = 58.dp,
+                onClick = {
+                    if (!wipeArmed) {
+                        wipeArmed = true
+                        message = "Нажми ещё раз, если правда стереть. Отмены не будет."
+                    } else {
+                        wipeArmed = false
+                        busy = true
+                        scope.launch {
+                            withContext(Dispatchers.IO) {
+                                // Export first: if it fails, the wipe still proceeds,
+                                // because the user asked for a wipe, not for a backup.
+                                runCatching { container.jsonExporter.export() }
+                                container.wipeDatabase()
+                                container.settings.clearAll()
+                            }
+                            // Restart the process: repositories, workers and session
+                            // state all outlive the tables otherwise, and a half-empty
+                            // app in memory looks exactly like a bug.
+                            val restart = Intent(context, MainActivity::class.java)
+                                .addFlags(
+                                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                                        Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                )
+                            context.startActivity(restart)
+                            exitProcess(0)
+                        }
+                    }
+                }
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = if (wipeArmed) "второе нажатие стирает сразу" else "нажать надо дважды",
+                style = MaterialTheme.typography.bodySmall,
+                color = IknaDanger
+            )
         }
 
         message?.let {

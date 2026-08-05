@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#12100E</color>
+    <!-- Electric blue field behind the spark: the recognisable parallel to Anki,
+         flat and saturated instead of a light gradient. -->
+    <color name="ic_launcher_background">#2340E0</color>
 </resources>

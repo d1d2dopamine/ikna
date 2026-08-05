@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         val container = (application as IknaApp).container
         setContent {
             val settings by container.settings.flow.collectAsState(initial = IknaSettings())
-            IknaTheme(mode = settings.theme, dynamicColor = settings.dynamicColor) {
+            IknaTheme(mode = settings.theme) {
                 IknaNavHost(container = container, settings = settings)
             }
         }

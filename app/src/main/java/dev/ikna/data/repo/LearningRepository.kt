@@ -269,6 +269,30 @@ class LearningRepository(
     suspend fun currentDailyTarget(): Int =
         if (autoLoad) autoTarget() else (dailyTargetOverride ?: baseConfig.targetDailyReviews)
 
+    /**
+     * Whether the norm above is measured or still a placeholder.
+     *
+     * [AUTO_COLD_START] is a guess for the first days, and showing a guess as a
+     * measurement is how an app teaches the user to distrust all of its numbers.
+     * The screens ask this before printing a figure.
+     */
+    suspend fun normIsMeasured(): Boolean =
+        !autoLoad || statsDao.lastDays(AUTO_WINDOW_DAYS).count { it.reviewsDone > 0 } >= 3
+
+    /**
+     * Which of the last [days] days had a session, most recent first.
+     *
+     * A map, not a chain: the progress screen draws these as separate marks so a
+     * gap is a gap and not a broken streak.
+     */
+    suspend fun activityMap(days: Int = 30, now: Long = System.currentTimeMillis()): List<Boolean> {
+        val active = statsDao.lastDays(days)
+            .filter { it.reviewsDone > 0 }
+            .map { it.day }
+            .toSet()
+        return (0 until days).map { d -> dayKey(now - d * DAY_MS) in active }
+    }
+
     suspend fun collectSignals(now: Long): GovernorSignals {
         val dueToday = cardDao.dueCount(now)
         val backlog = cardDao.amnestyCount()

@@ -1,11 +1,22 @@
+// ---------------------------------------------------------------------------
+// Plugin ids and versions are written out in full, on purpose.
+//
+// They used to be `alias(libs.plugins.…)` entries resolved from
+// gradle/libs.versions.toml. That catalog is generated into an accessor called
+// `libs` only if the file is actually present in the checkout; when it is not,
+// the build script itself fails to compile with "Unresolved reference: libs"
+// and nothing else in the project ever gets a chance to run. A single module
+// does not need the indirection, and this way the build depends on this file
+// alone.
+// ---------------------------------------------------------------------------
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    id("com.android.application") version "8.6.1"
+    id("org.jetbrains.kotlin.android") version "2.0.20"
     // Compose compiler is a separate Gradle plugin since Kotlin 2.0; without it
     // AGP fails configuration as soon as buildFeatures.compose is enabled.
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ksp)
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.20"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.20"
+    id("com.google.devtools.ksp") version "2.0.20-1.0.25"
 }
 
 // ---------------------------------------------------------------------------
@@ -30,6 +41,10 @@ val keystorePassword = "iknafixedkey"
 val keystoreAlias = "ikna"
 val hasFixedKey = keystoreFile.exists()
 
+// Build number from CI. `toIntOrNull` rather than `toInt`: an empty or unset
+// RUN_NUMBER must produce version 1, not a configuration-time crash.
+val runNumber = System.getenv("RUN_NUMBER")?.trim()?.toIntOrNull() ?: 1
+
 android {
     namespace = "dev.ikna"
     compileSdk = 35
@@ -40,10 +55,8 @@ android {
         applicationId = "dev.ikna"
         minSdk = 29
         targetSdk = 35
-        versionCode = (System.getenv("RUN_NUMBER") ?: "1").toInt()
-        versionName = "0.1." + (System.getenv("RUN_NUMBER") ?: "1")
-
-        ksp { arg("room.schemaLocation", "$projectDir/schemas") }
+        versionCode = runNumber
+        versionName = "0.1." + runNumber
     }
 
     signingConfigs {
@@ -78,29 +91,45 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
 
+    testOptions {
+        unitTests {
+            // The unit tests below are pure arithmetic, but Room and DataStore
+            // types are on their classpath; stubbed Android calls return
+            // defaults instead of throwing.
+            isReturnDefaultValues = true
+        }
+    }
+
     packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
 }
 
+// Room writes its schema history here. Top level, not inside defaultConfig:
+// this configures KSP, not a product flavour, and nesting it only worked by
+// accident of Kotlin scoping.
+ksp { arg("room.schemaLocation", "$projectDir/schemas") }
+
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.activity:activity-compose:1.9.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
 
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.lottie.compose)
+    implementation(platform("androidx.compose:compose-bom:2024.09.03"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.navigation:navigation-compose:2.8.2")
+    implementation("com.airbnb.android:lottie-compose:6.5.2")
 
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
 
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.work.runtime.ktx)
-    implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.kotlinx.serialization.json)
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+
+    testImplementation("junit:junit:4.13.2")
 }

@@ -3,10 +3,18 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!--
+      Ikna: the moment a chunk clicks.
+
+      Same idea as Anki's star, executed the opposite way: flat fill instead of a
+      gloss gradient, sharp concave points instead of rounded ones, off-centre and
+      paired with a small second spark so the shape reads as motion rather than a
+      badge. No shadow, no bevel, no outline.
+    -->
     <path
-        android:fillColor="#E8C547"
-        android:pathData="M34,32h8v44h-8z" />
+        android:fillColor="#F2EFE6"
+        android:pathData="M50,22 Q54,46 71,50 Q54,54 50,78 Q46,54 29,50 Q46,46 50,22 Z" />
     <path
-        android:fillColor="#E8C547"
-        android:pathData="M50,54l16,-22h10L58,54l18,22H66z" />
+        android:fillColor="#F2EFE6"
+        android:pathData="M74,63 Q76,70 81,72 Q76,74 74,81 Q72,74 67,72 Q72,70 74,63 Z" />
 </vector>

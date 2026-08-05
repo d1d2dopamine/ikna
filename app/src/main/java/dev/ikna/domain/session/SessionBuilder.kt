@@ -54,17 +54,28 @@ class SessionBuilder(
     }
 
     /**
-     * "Ещё немного": strictly more of what is already due or in amnesty.
-     * Never introduces new chunks, so a burst of motivation today cannot become
-     * a heavier queue tomorrow.
+     * "Ещё немного": more repetitions, never new chunks, so a burst of
+     * motivation today cannot become a heavier queue tomorrow.
+     *
+     * Three sources in order: what is due, what waits in amnesty, and — when
+     * both are empty — the soonest cards from the future. The old version stopped
+     * at the first two, which meant the button did nothing precisely when the day
+     * was finished, which is the only time anyone presses it.
      */
     suspend fun pickExtra(exclude: List<String>, count: Int, now: Long): List<CardEntity> {
         if (count <= 0) return emptyList()
         val safeExclude = if (exclude.isEmpty()) listOf("") else exclude
+
         val due = cardDao.dueCardsExcluding(now, safeExclude, count)
         if (due.size >= count) return due
+
         val amnesty = cardDao.amnestyCardsExcluding(safeExclude, count - due.size)
-        return due + amnesty
+        val repeats = due + amnesty
+        if (repeats.size >= count) return repeats
+
+        val taken = safeExclude + repeats.map { it.key }
+        val ahead = cardDao.upcomingCardsExcluding(now, taken, count - repeats.size)
+        return repeats + ahead
     }
 
     /**
