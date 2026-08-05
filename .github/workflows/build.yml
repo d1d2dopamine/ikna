@@ -2,47 +2,59 @@ name: build
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
-  apk:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      # No wrapper jar is committed; the action provisions Gradle itself.
-      - name: Set up Gradle
+      # No wrapper jar is committed, so the Gradle version is pinned here.
+      # 8.10.2 is the version this project's AGP 8.6.1 / Kotlin 2.0.20 pair is
+      # tested against; letting the action pick "latest" silently changes the
+      # toolchain under the build.
+      - name: Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.10.2"
 
-      # The signing key is committed as ikna.keystore, so there is nothing to
-      # restore and no repository secrets to configure. Every APK is signed by
-      # the same key and installs over the previous one, so the review history
-      # survives updates.
-      - name: Build debug APK
+      # Runs first: the scheduler and the governor are pure logic, and a broken
+      # one produces an APK that installs fine and teaches badly.
+      - name: Unit tests
+        run: gradle --no-daemon --stacktrace testReleaseUnitTest
+
+      - name: Build APK
         env:
           RUN_NUMBER: ${{ github.run_number }}
-        run: gradle --no-daemon assembleDebug
+        run: gradle --no-daemon --stacktrace assembleDebug
 
-      - name: Report signer
+      # Prints the signing certificate so a failed "install over the old app"
+      # can be diagnosed from the log instead of the phone.
+      - name: Signer
         run: |
-          APK=$(find app/build/outputs/apk/debug -name "*.apk" | head -n1)
-          echo "APK: $APK"
-          "$JAVA_HOME/bin/keytool" -printcert -jarfile "$APK" | grep -E "Owner|SHA256" || true
+          apk=$(find app/build/outputs/apk/debug -name '*.apk' | head -1)
+          echo "APK: $apk"
+          keytool -printcert -jarfile "$apk" | grep -E 'Owner|SHA256' || true
 
-      - uses: actions/upload-artifact@v4
+      - name: Test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ikna-test-report
+          path: app/build/reports/tests/testReleaseUnitTest
+          if-no-files-found: ignore
+
+      - name: APK
+        uses: actions/upload-artifact@v4
         with:
           name: ikna-apk
           path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-
-
