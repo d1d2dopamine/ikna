@@ -22,12 +22,13 @@ import dev.ikna.domain.governor.LoadGovernor
 import dev.ikna.domain.session.SessionBuilder
 import dev.ikna.domain.session.SessionCard
 import dev.ikna.domain.session.SessionPlan
-import java.time.Instant
+import dev.ikna.domain.time.DayBoundary
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import kotlin.math.max
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class LearningRepository(
     private val cardDao: CardDao,
@@ -53,6 +54,20 @@ class LearningRepository(
      */
     @Volatile var autoLoad: Boolean = true
 
+    /**
+     * One writer at a time.
+     *
+     * Answering is a read-modify-write: read today's counter, add one,
+     * write it back. Two fast swipes overlapped, both read the same value,
+     * and the second write erased the first — a card answered but not
+     * counted. That number is not cosmetic: it feeds the measured norm and
+     * the load governor, so a lost answer quietly shrinks tomorrow. Swiping
+     * fast is not misuse here, it is the normal speed of a good session.
+     * These writes are milliseconds long, so serialising them costs nothing
+     * the user can feel.
+     */
+    private val writeLock = Mutex()
+
     private val config: GovernorConfig
         get() = baseConfig.copy(
             targetDailyReviews = dailyTargetOverride ?: baseConfig.targetDailyReviews
@@ -64,8 +79,15 @@ class LearningRepository(
 
     private val dayFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
-    fun dayKey(ts: Long): String =
-        dayFormat.format(Instant.ofEpochMilli(ts).atZone(ZoneId.systemDefault()))
+    // Rebuilt per call so a config change takes effect immediately.
+    private val boundary: DayBoundary
+        get() = DayBoundary(config.dayStartHour)
+
+    /**
+     * Which day a moment belongs to. The night belongs to the evening that
+     * produced it: see [DayBoundary].
+     */
+    fun dayKey(ts: Long): String = boundary.key(ts)
 
     fun dailyMinimum(): Int = config.dailyMinimumCards
 
@@ -81,7 +103,10 @@ class LearningRepository(
      * Now the day's questions are decided once and stored; the only way the set
      * grows is [addExtra], which the user triggers on purpose.
      */
-    suspend fun ensureDailyPlan(now: Long = System.currentTimeMillis()): DailyPlanEntity {
+    suspend fun ensureDailyPlan(now: Long = System.currentTimeMillis()): DailyPlanEntity =
+        writeLock.withLock { ensureDailyPlanLocked(now) }
+
+    private suspend fun ensureDailyPlanLocked(now: Long): DailyPlanEntity {
         val day = dayKey(now)
         val existing = planDao.plan(day)
 
@@ -342,7 +367,8 @@ class LearningRepository(
     }
 
     /**
-     * Nothing new after [GovernorConfig.nightCutoffHour].
+     * Nothing new between [GovernorConfig.nightCutoffHour] and the hour the
+     * day rolls over.
      *
      * A chunk met once at midnight gets the worst possible first contact:
      * overnight consolidation is weaker here than it is for most people, so that
@@ -356,8 +382,7 @@ class LearningRepository(
         if (decision.allowedNew <= 0 || decision.reason == GovernorReason.FIRST_RUN) {
             return decision
         }
-        val hour = Instant.ofEpochMilli(now).atZone(ZoneId.systemDefault()).hour
-        if (hour < config.nightCutoffHour) return decision
+        if (!boundary.isNight(now, config.nightCutoffHour)) return decision
         return decision.copy(allowedNew = 0, reason = GovernorReason.LATE_NIGHT)
     }
 
@@ -437,7 +462,15 @@ class LearningRepository(
         return extra.size
     }
 
-    suspend fun answer(sessionCard: SessionCard, rating: Rating, durationMs: Long, now: Long) {
+    suspend fun answer(sessionCard: SessionCard, rating: Rating, durationMs: Long, now: Long) =
+        writeLock.withLock { answerLocked(sessionCard, rating, durationMs, now) }
+
+    private suspend fun answerLocked(
+        sessionCard: SessionCard,
+        rating: Rating,
+        durationMs: Long,
+        now: Long
+    ) {
         // Read the row instead of trusting the copy the UI holds: a card that
         // was rated "again" earlier in the same session is shown again from an
         // in-memory copy, and that copy is stale.
@@ -510,7 +543,10 @@ class LearningRepository(
      * Returns the key of the restored card, or null if there was nothing that
      * could be undone (answers recorded before this version carry no snapshot).
      */
-    suspend fun undoLast(now: Long = System.currentTimeMillis()): String? {
+    suspend fun undoLast(now: Long = System.currentTimeMillis()): String? =
+        writeLock.withLock { undoLastLocked(now) }
+
+    private suspend fun undoLastLocked(now: Long): String? {
         val last = reviewDao.lastAnswer() ?: return null
         val stability = last.prevStability ?: return null
         val difficulty = last.prevDifficulty ?: return null
@@ -594,10 +630,7 @@ class LearningRepository(
         )
     }
 
-    private fun startOfDay(ts: Long): Long =
-        Instant.ofEpochMilli(ts).atZone(ZoneId.systemDefault())
-            .toLocalDate().atStartOfDay(ZoneId.systemDefault())
-            .toInstant().toEpochMilli()
+    private fun startOfDay(ts: Long): Long = boundary.startOfDay(ts)
 
     // ---- maintenance ------------------------------------------------------
 
@@ -636,6 +669,24 @@ class LearningRepository(
     suspend fun answeredToday(now: Long = System.currentTimeMillis()): Int =
         statsDao.day(dayKey(now))?.reviewsDone ?: 0
 
+    /**
+     * How long one answer actually takes, so the queue can be shown in
+     * minutes instead of card counts.
+     *
+     * Median rather than mean, and mis-swipes and put-the-phone-down pauses
+     * are dropped, so one interrupted evening cannot inflate the estimate.
+     * Null until there is enough history: an invented number is worse than
+     * no number, because the whole point is that the estimate can be
+     * trusted.
+     */
+    suspend fun medianAnswerMs(): Long? {
+        val samples = reviewDao.recentDurations(DURATION_SAMPLE)
+            .filter { it in MIN_SANE_ANSWER_MS..MAX_SANE_ANSWER_MS }
+        if (samples.size < DURATION_MIN_SAMPLES) return null
+        val sorted = samples.sorted()
+        return sorted[sorted.size / 2]
+    }
+
     private companion object {
         /** Upper bound on how far back an absence is repaid, in days. */
         const val MAX_CREDIT_DAYS = 120L
@@ -644,5 +695,11 @@ class LearningRepository(
         const val AUTO_MIN = 12
         const val AUTO_MAX = 80
         const val AUTO_HEADROOM = 1.15
+
+        /** Sample size and sanity bounds for the time estimate. */
+        const val DURATION_SAMPLE = 100
+        const val DURATION_MIN_SAMPLES = 8
+        const val MIN_SANE_ANSWER_MS = 800L
+        const val MAX_SANE_ANSWER_MS = 60_000L
     }
 }

@@ -26,19 +26,19 @@ import dev.ikna.data.prefs.ThemeMode
  * one here.
  */
 
-private val Paper = Color(0xFFF0EBDF)
-private val PaperPanel = Color(0xFFE6E0D0)
-private val PaperLine = Color(0xFFC9C1AE)
-private val InkOnPaper = Color(0xFF15130F)
+private val Paper = Color(0xFFF1EFE9)
+private val PaperPanel = Color(0xFFE7E4DA)
+private val PaperLine = Color(0xFFC8C4B6)
+private val InkOnPaper = Color(0xFF262320)
 private val MutedOnPaper = Color(0xFF6A6454)
-private val AccentOnPaper = Color(0xFF2340E0)
+private val AccentOnPaper = Color(0xFF4251A3)
 
 private val Ink = Color(0xFF100E0B)
 private val InkPanel = Color(0xFF1B1813)
 private val InkLine = Color(0xFF322D25)
 private val PaperOnInk = Color(0xFFEFEADE)
 private val MutedOnInk = Color(0xFF8C8574)
-private val AccentOnInk = Color(0xFF7C90FF)
+private val AccentOnInk = Color(0xFF9AA6D8)
 
 /**
  * Mid-tone warm grey that reads as secondary on both schemes, so screens can use
@@ -53,7 +53,7 @@ val IknaLine = Color(0xFF7A7466)
  * Swipe tints. "Remembered" is the accent, "forgot" is warm graphite — not red.
  * Forgetting is the normal half of the method and must not look like a mistake.
  */
-val IknaGood = Color(0xFF3350E8)
+val IknaGood = Color(0xFF4251A3)
 val IknaAgain = Color(0xFF6E6656)
 
 /** Reserved for destructive controls only: wiping data, starting over. */
@@ -105,19 +105,19 @@ private val IknaTypography = Typography(
     displayLarge = TextStyle(
         fontSize = 50.sp,
         lineHeight = 54.sp,
-        fontWeight = FontWeight.Black,
+        fontWeight = FontWeight.ExtraBold,
         letterSpacing = (-1.2).sp
     ),
     displayMedium = TextStyle(
         fontSize = 40.sp,
         lineHeight = 46.sp,
-        fontWeight = FontWeight.Black,
+        fontWeight = FontWeight.ExtraBold,
         letterSpacing = (-0.8).sp
     ),
     displaySmall = TextStyle(
         fontSize = 32.sp,
         lineHeight = 38.sp,
-        fontWeight = FontWeight.Black,
+        fontWeight = FontWeight.ExtraBold,
         letterSpacing = (-0.5).sp
     ),
     headlineMedium = TextStyle(fontSize = 26.sp, lineHeight = 32.sp, fontWeight = FontWeight.Bold),

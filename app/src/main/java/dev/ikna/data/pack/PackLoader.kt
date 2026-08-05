@@ -46,7 +46,8 @@ class PackLoader(
                 chunkCount = if (count > 0) count else manifest.chunkCount,
                 installedAt = System.currentTimeMillis(),
                 title = manifest.title,
-                isActive = chunkDao.pack(manifest.id)?.isActive ?: true
+                // A deck the user already switched keeps their choice.
+                isActive = chunkDao.pack(manifest.id)?.isActive ?: manifest.active
             )
         )
     }

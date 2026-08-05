@@ -66,3 +66,24 @@ incapable of displaying a four-digit number of pending cards.
 Every decision writes a `governor_log` row with all inputs, the computed headroom, the result
 and a reason code. Without this the valve is impossible to debug when it declines to hand out
 new material.
+
+## Day boundary
+
+`dayStartHour` (default 4) decides which day an answer belongs to, and it is the same boundary
+everywhere: the daily plan, `daily_stats`, the activity ratio the governor reads, the activity map
+on the progress screen, and the replay that rebuilds stats from an imported log.
+
+It also widens the night rule. `nightCutoffHour` alone said "nothing new after 23:00", which
+reopened the gate at 00:00 — the worst possible time to meet a chunk for the first time. New
+material is now blocked from `nightCutoffHour` until `dayStartHour`; reviews are never blocked.
+
+The arithmetic lives in `dev.ikna.domain.time.DayBoundary`, which has no Android dependency and is
+covered by `DayBoundaryTest` — date maths is easy to get subtly wrong and cheap to test.
+
+## Serialised writes
+
+Answering is a read-modify-write on one `daily_stats` row. Two fast swipes used to overlap and the
+second write erased the first, so a card was answered but not counted — and that counter feeds the
+measured norm, which feeds capacity, which decides how much new material the day gets. Writes that
+touch card state, the review log and the day counter now go through a single mutex in
+`LearningRepository`. Swiping fast is the normal speed of a good session, not misuse.

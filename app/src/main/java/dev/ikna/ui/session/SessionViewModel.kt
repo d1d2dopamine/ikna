@@ -23,6 +23,11 @@ data class SessionUiState(
     val remaining: Int = 0,
     val answeredToday: Int = 0,
     val dailyMinimum: Int = 1,
+    /**
+     * Measured median answer time. Null until there is enough history to
+     * say anything honest about it, in which case no estimate is shown.
+     */
+    val perCardMs: Long? = null,
     val reason: GovernorReason = GovernorReason.OK,
     val nextDueAt: Long? = null,
     val canUndo: Boolean = false,
@@ -101,6 +106,7 @@ class SessionViewModel(
                 remaining = plan.cards.size,
                 answeredToday = plan.answeredToday,
                 dailyMinimum = repo.dailyMinimum(),
+                perCardMs = repo.medianAnswerMs(),
                 reason = plan.reason,
                 nextDueAt = plan.nextDueAt,
                 canUndo = plan.answeredToday > 0,

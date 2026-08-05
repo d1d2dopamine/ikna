@@ -41,3 +41,24 @@ the character span and refuses rows where it cannot.
 This is where an LLM belongs: generate thousands of rows in this TSV in one
 batch, validate with this script, commit the artefact. It is explicitly not
 something the app does at runtime, and not something the user ever does.
+
+## Languages
+
+`--lang` selects a profile:
+
+| Profile | Lemmas | Function words |
+| --- | --- | --- |
+| `en` | suffix rules plus an irregular-verb table | `FUNCTION_WORDS` |
+| anything else (`pl`) | surface form, lowercased | `PL_FUNCTION_WORDS` for `pl` |
+
+Polish gets no suffix stripping on purpose. Its morphology needs a real analyser (Morfeusz), and a
+guessed lemma is worse than no lemma: it merges unrelated words in the component layer, so credit
+for an answer leaks to words that were never involved. The tokeniser itself is Unicode-aware — the
+old `[A-Za-z]` pattern quietly ate every diacritic and turned `śniadaniem` into `niadaniem`.
+
+## Shipping a second deck
+
+Pass `--inactive` so the pack is installed but switched off. Two active decks interleave two
+languages inside one session; the user turns the new one on in *Колоды* when they want it. The
+flag only affects a first install — a deck the user has already switched keeps their choice when a
+newer version of the pack is installed.

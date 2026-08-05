@@ -166,8 +166,7 @@ private fun StatusLine(state: SessionUiState) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = if (state.remaining > 0) "ОСТАЛОСЬ " + state.remaining
-            else "НА СЕГОДНЯ ВСЁ",
+            text = if (state.remaining > 0) remainingText(state) else "НА СЕГОДНЯ ВСЁ",
             style = MaterialTheme.typography.labelMedium,
             color = IknaMuted,
             maxLines = 1
@@ -240,7 +239,7 @@ private fun ActionArea(
                 label = "ПОНЯТНО",
                 onClick = onAcknowledge,
                 filled = true,
-                height = 80.dp
+                height = 64.dp
             )
 
             revealed -> Row(
@@ -251,21 +250,21 @@ private fun ActionArea(
                     label = "НЕ ПОМНЮ",
                     onClick = { onRate(Rating.AGAIN) },
                     modifier = Modifier.weight(1f),
-                    height = 80.dp
+                    height = 64.dp
                 )
                 IknaWideButton(
                     label = "ПОМНЮ",
                     onClick = { onRate(Rating.GOOD) },
                     modifier = Modifier.weight(1f),
                     filled = true,
-                    height = 80.dp
+                    height = 64.dp
                 )
             }
 
             else -> IknaWideButton(
                 label = "ПОКАЗАТЬ",
                 onClick = onReveal,
-                height = 80.dp
+                height = 64.dp
             )
         }
     }
@@ -444,4 +443,26 @@ private fun dayWord(days: Long): String {
         mod10 in 2..4 -> "дня"
         else -> "дней"
     }
+}
+
+// ---- how long this will take ----------------------------------------------
+
+/**
+ * "ОСТАЛОСЬ 12 · ~3 МИН".
+ *
+ * A number of cards is not a unit anyone can plan with, and "some cards" is
+ * exactly the shape of task that gets postponed: the cost is unknown, so the
+ * brain prices it as expensive. Minutes are a unit you can decide about while
+ * the kettle boils. The figure comes from the user's own recent answers rather
+ * than a constant, and while there is not enough history to measure it,
+ * nothing is shown — an estimate that turns out to be a lie costs more trust
+ * than it buys.
+ */
+private fun remainingText(state: SessionUiState): String {
+    val base = "ОСТАЛОСЬ " + state.remaining
+    val perCard = state.perCardMs ?: return base
+    val totalMs = state.remaining * perCard
+    if (totalMs < 45_000L) return base + " · <1 МИН"
+    val minutes = ((totalMs + 30_000L) / 60_000L).toInt().coerceAtLeast(1)
+    return base + " · ~" + minutes + " МИН"
 }

@@ -102,23 +102,23 @@ fun IknaWideButton(
     enabled: Boolean = true,
     height: Dp = 60.dp
 ) {
-    val accent = MaterialTheme.colorScheme.primary
     val ink = MaterialTheme.colorScheme.onBackground
+    val paper = MaterialTheme.colorScheme.background
     val alpha = if (enabled) 1f else 0.35f
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
-            .background(if (filled) accent.copy(alpha = alpha) else Color.Transparent)
-            .border(2.dp, (if (filled) accent else ink).copy(alpha = alpha))
+            .background(if (filled) ink.copy(alpha = alpha) else Color.Transparent)
+            .border(1.dp, ink.copy(alpha = alpha))
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
-            color = (if (filled) MaterialTheme.colorScheme.onPrimary else ink).copy(alpha = alpha),
+            color = (if (filled) paper else ink).copy(alpha = alpha),
             textAlign = TextAlign.Center
         )
     }

@@ -59,11 +59,43 @@ IRREGULAR = {
     "photos": "photo", "times": "time", "things": "thing", "days": "day",
 }
 
-TOKEN_RE = re.compile(r"[A-Za-z]+(?:'[A-Za-z]+)?")
+# Polish function words. Same role as FUNCTION_WORDS above: these carry no
+# weight in the component layer, so credit for an answer goes to the words
+# that actually had to be known.
+PL_FUNCTION_WORDS = {
+    "a", "aby", "albo", "ale", "ani", "aż", "bardzo", "bez", "bo", "by", "być",
+    "był", "była", "byłem", "było", "byli", "będą", "będę", "będzie", "chyba",
+    "ci", "ciebie", "cię", "co", "czy", "dla", "do", "dopiero", "gdy", "gdzie",
+    "go", "i", "ich", "ile", "im", "ja", "jak", "jako", "je", "jego", "jej",
+    "jest", "jestem", "jesteś", "jesteśmy", "jeszcze", "ją", "już", "kiedy",
+    "która", "które", "który", "ma", "mają", "mam", "mamy", "masz", "mi", "mnie",
+    "moim", "moja", "moje", "mój", "może", "możesz", "można", "mu", "musi", "musisz",
+    "muszę", "my", "na", "nad", "nam", "nas", "nasz", "nawet", "nic", "nie",
+    "niż", "no", "o", "obok", "od", "ona", "one", "oni", "ono", "oraz", "po",
+    "pod", "podczas", "potem", "poza", "przed", "przez", "przy", "się", "sobie",
+    "są", "tak", "taki", "tam", "te", "tego", "tej", "ten", "teraz", "też", "to",
+    "trzeba", "tu", "twoja", "twój", "tylko", "tym", "u", "w", "wam", "was",
+    "wasz", "we", "wy", "z", "za", "ze", "że", "żeby", "około",
+}
+
+# Unicode aware on purpose: [A-Za-z] silently ate every Polish diacritic and
+# turned "śniadaniem" into "niadaniem".
+TOKEN_RE = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)?", re.UNICODE)
 
 
-def lemmatise(word):
+def function_words(lang):
+    return PL_FUNCTION_WORDS if lang == "pl" else FUNCTION_WORDS
+
+
+def lemmatise(word, lang="en"):
     lower = word.lower()
+    # Polish needs a real morphological analyser (Morfeusz), not suffix
+    # rules, and guessed lemmas are worse than none: they merge unrelated
+    # words in the component layer, which then hands out credit nobody
+    # earned. Until an analyser is wired in, the surface form is the lemma:
+    # aggregation is weaker, but nothing is invented.
+    if lang != "en":
+        return lower
     if lower in IRREGULAR:
         return IRREGULAR[lower]
     if lower in FUNCTION_WORDS:
@@ -87,8 +119,16 @@ def lemmatise(word):
     return lower
 
 
-def guess_pos(word, lemma):
+def guess_pos(word, lemma, lang="en"):
     lower = word.lower()
+    if lang == "pl":
+        if lower in PL_FUNCTION_WORDS:
+            return "FUNC"
+        if lower.endswith("ć"):
+            return "VERB"
+        if lower.endswith(("ość", "acja", "enie", "anie")):
+            return "NOUN"
+        return "WORD"
     if lower in FUNCTION_WORDS:
         return "FUNC"
     if lower.endswith("ly"):
@@ -100,17 +140,18 @@ def guess_pos(word, lemma):
     return "WORD"
 
 
-def tokenise(sentence):
+def tokenise(sentence, lang="en"):
     tokens = []
+    stop = function_words(lang)
     for match in TOKEN_RE.finditer(sentence):
         surface = match.group(0)
-        lemma = lemmatise(surface)
-        pos = guess_pos(surface, lemma)
+        lemma = lemmatise(surface, lang)
+        pos = guess_pos(surface, lemma, lang)
         tokens.append({
             "surface": surface,
             "lemma": lemma,
             "pos": pos,
-            "isContent": lemma not in FUNCTION_WORDS,
+            "isContent": lemma not in stop,
         })
     return tokens
 
@@ -169,7 +210,7 @@ def build(seed_path, pack_id, version, lang, source_lang, title):
                 # Seed order is the frequency order: the selector uses this to
                 # prefer common phrases when everything else is equal.
                 "freqRank": len(chunks) + 1,
-                "tokens": tokenise(context),
+                "tokens": tokenise(context, lang),
                 "audioRef": None,
             })
 
@@ -186,6 +227,12 @@ def main():
     parser.add_argument("--source-lang", default="ru")
     parser.add_argument("--title", default="English core chunks")
     parser.add_argument("--strict", action="store_true", help="fail on any validation error")
+    parser.add_argument(
+        "--inactive",
+        action="store_true",
+        help="ship the deck switched off, so a second language does not "
+             "interleave itself into an active session",
+    )
     args = parser.parse_args()
 
     chunks, errors = build(
@@ -222,6 +269,7 @@ def main():
         "title": args.title,
         "chunkCount": len(chunks),
         "file": pack_file,
+        "active": not args.inactive,
     }
     manifest["packs"] = [p for p in manifest.get("packs", []) if p.get("id") != args.pack_id]
     manifest["packs"].append(entry)

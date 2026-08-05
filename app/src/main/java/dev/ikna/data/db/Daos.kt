@@ -201,6 +201,13 @@ interface ReviewDao {
     @Query("SELECT * FROM reviews WHERE " + NOT_RETRACTED + " ORDER BY ts DESC LIMIT 1")
     suspend fun lastAnswer(): ReviewEntity?
 
+    /** Recent answer times, newest first: turns "12 left" into "~3 min". */
+    @Query(
+        "SELECT durationMs FROM reviews WHERE " + NOT_RETRACTED +
+            " AND durationMs > 0 ORDER BY ts DESC LIMIT :limit"
+    )
+    suspend fun recentDurations(limit: Int): List<Long>
+
     /** Identity used to skip duplicates when restoring from an export file. */
     @Query("SELECT chunkId || ':' || level || ':' || ts FROM reviews")
     suspend fun signatures(): List<String>

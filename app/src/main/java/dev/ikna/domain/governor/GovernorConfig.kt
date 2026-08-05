@@ -35,6 +35,14 @@ data class GovernorConfig(
      * reviews stay available all night.
      */
     val nightCutoffHour: Int = 23,
+    /**
+     * The hour a day rolls over. Not midnight, because midnight is the
+     * middle of the evening for a good share of the people this app is for:
+     * a session finished at 01:30 landed on the next day, showed up as a
+     * hole in the activity map, and built tomorrow's plan as if last night
+     * had never happened.
+     */
+    val dayStartHour: Int = 4,
     /** Days from the first session during which the load ceiling stays flat. */
     val settlingDays: Int = 60,
     val warmupReviewsAfterSkip: Int = 10,

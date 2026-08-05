@@ -152,17 +152,17 @@ fun ChunkCard(
     modifier: Modifier = Modifier
 ) {
     val tint = when {
-        progressX < -0.35f -> IknaAgain.copy(alpha = 0.14f)
-        progressX > 0.35f -> IknaGood.copy(alpha = 0.14f)
-        progressY < -0.35f -> IknaGood.copy(alpha = 0.09f)
-        progressY > 0.35f -> IknaAgain.copy(alpha = 0.09f)
+        progressX < -0.35f -> IknaAgain.copy(alpha = 0.10f)
+        progressX > 0.35f -> IknaGood.copy(alpha = 0.10f)
+        progressY < -0.35f -> IknaGood.copy(alpha = 0.06f)
+        progressY > 0.35f -> IknaAgain.copy(alpha = 0.06f)
         else -> Color.Transparent
     }
 
     Box(
         modifier = modifier
             .background(MaterialTheme.colorScheme.surface)
-            .border(2.dp, MaterialTheme.colorScheme.outline)
+            .border(1.dp, MaterialTheme.colorScheme.outline)
             .clickable(enabled = !revealed, onClick = onReveal)
     ) {
         Box(

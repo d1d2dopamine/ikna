@@ -8,6 +8,16 @@
       "title": "English core chunks",
       "chunkCount": 70,
       "file": "en-ru-core.jsonl"
+    },
+    {
+      "id": "pl-ru-core",
+      "version": 1,
+      "lang": "pl",
+      "sourceLang": "ru",
+      "title": "Polish core chunks",
+      "chunkCount": 110,
+      "file": "pl-ru-core.jsonl",
+      "active": false
     }
   ]
 }

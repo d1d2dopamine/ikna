@@ -62,3 +62,68 @@ docs             architecture, governor spec, keystore setup
 - `docs/ARCHITECTURE.md`
 - `docs/GOVERNOR.md`
 - `docs/KEYSTORE.md`
+
+## When a day starts
+
+Not at midnight. `dayStartHour = 4` in `governor.json`, and every day key, daily counter,
+activity mark and "nothing new tonight" rule is measured from there.
+
+Delayed sleep phase comes with the territory: the session at 01:00 is the *evening* session. With
+a midnight boundary it was filed under a day that had not begun yet, so the activity map grew a
+hole for a day that was actually worked, the measured norm dropped, and the load governor throttled
+new material because of a break that never happened. Four in the morning is late enough to catch
+almost every real night session and early enough that nobody works through it by accident.
+
+## Decks
+
+Two packs ship in `app/src/main/assets/packs`:
+
+| Deck | Chunks | Shipped |
+| --- | --- | --- |
+| `en-ru-core` — English core chunks | 70 | on |
+| `pl-ru-core` — Polish core chunks | 110 | off |
+
+A second language ships **off** on purpose: two active decks interleave two languages inside one
+session, and the switch lives in *Колоды*. Everything else about a Polish chunk is identical to an
+English one — same three levels, same FSRS state, same governor, same component layer — because a
+chunk is content and none of the machinery knows what language it is looking at.
+
+Both packs are built offline by the same generator, from a three-column TSV
+(`phrase`, `carrier sentence`, `translation`):
+
+```
+python3 tools/genpack/generate_pack.py \
+  --seed tools/genpack/seed_chunks_pl.tsv \
+  --out app/src/main/assets/packs \
+  --pack-id pl-ru-core --lang pl --title "Polish core chunks" --inactive --strict
+```
+
+Polish is tokenised but deliberately **not** lemmatised: Polish inflection needs a real
+morphological analyser, and guessed lemmas are worse than none, because a wrong lemma merges
+unrelated words in the component layer and hands out credit nobody earned. Surface forms aggregate
+less, but they never lie.
+
+## License
+
+Ikna is free software, licensed under the **GNU General Public License, version 3 or (at your
+option) any later version**. The full text is in [LICENSE](LICENSE).
+
+This licence covers **the whole repository**: every file, every commit, every branch and every
+release — the ones published before this notice was added as well as every future one. No
+per-file headers and no per-release notices are needed; this section and the `LICENSE` file are
+the entire statement, and nothing has to be re-stated when a new version ships.
+
+    Copyright (C) 2026 the Ikna authors
+
+    This program is free software: you can redistribute it and/or modify it under the terms of
+    the GNU General Public License as published by the Free Software Foundation, either version 3
+    of the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with this program.
+    If not, see <https://www.gnu.org/licenses/>.
+
+For tools that ask: `SPDX-License-Identifier: GPL-3.0-or-later`.

@@ -10,7 +10,13 @@ data class PackManifest(
     val sourceLang: String,
     val title: String,
     val chunkCount: Int,
-    val file: String
+    val file: String,
+    /**
+     * Whether the deck is switched on the first time it is installed. A
+     * second language shipped as "on" would interleave two languages inside
+     * one session, so extra packs arrive off and wait in the decks screen.
+     */
+    val active: Boolean = true
 )
 
 @Serializable

@@ -10,11 +10,9 @@ import dev.ikna.data.db.StatsDao
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.fsrs.Scheduler
 import dev.ikna.domain.governor.GovernorConfig
+import dev.ikna.domain.time.DayBoundary
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @Serializable
 private data class ReviewRecord(
@@ -64,7 +62,6 @@ class RestoreRepository(
 ) {
 
     private val json = Json { ignoreUnknownKeys = true }
-    private val dayFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     suspend fun restoreFromJsonl(text: String): RestoreResult {
         val known = reviewDao.signatures().toHashSet()
@@ -144,7 +141,9 @@ class RestoreRepository(
             )
             cardDao.upsert(scheduler.apply(card, ratingOf(r.rating), r.ts).card)
 
-            val day = dayFormat.format(Instant.ofEpochMilli(r.ts).atZone(ZoneId.systemDefault()))
+            // Same boundary as the live counters, or a restore would rebuild
+            // stats that disagree with the app that wrote them.
+            val day = DayBoundary(config.dayStartHour).key(r.ts)
             val stat = days[day] ?: DailyStatEntity(day, 0, 0, 0L, 1.0, false)
             val done = stat.reviewsDone + 1
             val correct = stat.accuracy * stat.reviewsDone + if (r.rating >= 3) 1.0 else 0.0
