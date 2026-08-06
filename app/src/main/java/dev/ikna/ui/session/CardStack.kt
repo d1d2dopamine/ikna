@@ -3,10 +3,10 @@ package dev.ikna.ui.session
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -27,12 +28,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import dev.ikna.domain.fsrs.Rating
-import dev.ikna.ui.theme.IknaAgain
-import dev.ikna.ui.theme.IknaGood
-import dev.ikna.ui.theme.IknaMuted
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+import kotlin.math.max
 
 private const val THRESHOLD = 140f
 private const val EXIT_X = 1400f
@@ -130,12 +129,17 @@ private fun ratingFor(x: Float, y: Float): Rating? = when {
 /**
  * The card itself: a rectangle that takes the whole screen.
  *
- * Not a small rounded tile floating in padding. The chunk is set large and
- * left-aligned like a line in a book, because that is how it will be read in the
- * wild, and because centred text of unpredictable length moves its own first
- * letter around between cards.
+ * Not a small rounded tile floating in padding, and not a panel on a background
+ * either — there is no window around the text and nothing behind it. The card is
+ * the screen, and the only thing separating it from the edges is the text inset.
  *
- * The whole surface is the reveal target, so there is nothing small to aim at.
+ * The chunk is set large and left-aligned like a line in a book, because that is
+ * how it will be read in the wild, and because centred text of unpredictable
+ * length moves its own first letter around between cards.
+ *
+ * [tapEnabled] rather than a look at `revealed`: the same surface means "show me
+ * the answer" on a question and "understood" on an introduction, and the
+ * introduction is revealed from the start.
  */
 @Composable
 fun ChunkCard(
@@ -148,22 +152,29 @@ fun ChunkCard(
     fromAmnesty: Boolean,
     progressX: Float,
     progressY: Float,
-    onReveal: () -> Unit,
-    modifier: Modifier = Modifier
+    onTap: () -> Unit,
+    tapEnabled: Boolean,
+    modifier: Modifier = Modifier,
+    showSwipeLegend: Boolean = false
 ) {
+    // Which way the card is going, as a wash of colour rather than a verdict.
+    // Accent for the two "kept it" directions, muted for the two "lost it" ones:
+    // a red tint on a card you just failed is a punishment animation, and this
+    // app does not have those.
+    val kept = MaterialTheme.colorScheme.primary
+    val lost = MaterialTheme.colorScheme.onSurfaceVariant
     val tint = when {
-        progressX < -0.35f -> IknaAgain.copy(alpha = 0.10f)
-        progressX > 0.35f -> IknaGood.copy(alpha = 0.10f)
-        progressY < -0.35f -> IknaGood.copy(alpha = 0.06f)
-        progressY > 0.35f -> IknaAgain.copy(alpha = 0.06f)
+        progressX < -0.35f -> lost.copy(alpha = 0.10f)
+        progressX > 0.35f -> kept.copy(alpha = 0.10f)
+        progressY < -0.35f -> kept.copy(alpha = 0.06f)
+        progressY > 0.35f -> lost.copy(alpha = 0.06f)
         else -> Color.Transparent
     }
 
     Box(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.outline)
-            .clickable(enabled = !revealed, onClick = onReveal)
+            .background(MaterialTheme.colorScheme.background)
+            .clickable(enabled = tapEnabled, onClick = onTap)
     ) {
         Box(
             modifier = Modifier
@@ -178,7 +189,7 @@ fun ChunkCard(
             Text(
                 text = if (fromAmnesty) label.uppercase() + " · ВЕРНУЛАСЬ" else label.uppercase(),
                 style = MaterialTheme.typography.labelSmall,
-                color = IknaMuted
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(Modifier.weight(1f))
@@ -186,7 +197,7 @@ fun ChunkCard(
             Text(
                 text = prompt,
                 style = promptStyle(prompt),
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             if (revealed) {
@@ -201,14 +212,14 @@ fun ChunkCard(
                 Text(
                     text = answer,
                     style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 if (!hint.isNullOrBlank()) {
                     Spacer(Modifier.height(14.dp))
                     Text(
                         text = hint,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = IknaMuted
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             } else if (showTapHint) {
@@ -216,13 +227,95 @@ fun ChunkCard(
                 Text(
                     text = "тап в любом месте",
                     style = MaterialTheme.typography.labelSmall,
-                    color = IknaMuted
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             Spacer(Modifier.weight(1f))
         }
+
+        if (revealed) {
+            SwipeLegend(
+                progressX = progressX,
+                progressY = progressY,
+                base = if (showSwipeLegend) 0.30f else 0f
+            )
+        }
     }
+}
+
+/**
+ * The four directions, written at the four edges they belong to.
+ *
+ * The gesture has always understood four directions while the buttons offered
+ * two, so half of the answers were reachable only by accident. This is the map,
+ * drawn where the map actually is.
+ *
+ * [base] is how visible it is at rest: faint while the gesture is still being
+ * learned, invisible afterwards. Dragging always brings the matching edge up to
+ * full strength, so the label under your thumb tells you what will happen if you
+ * let go — and, more importantly, what will happen if you do not.
+ */
+@Composable
+private fun BoxScope.SwipeLegend(progressX: Float, progressY: Float, base: Float) {
+    val ax = abs(progressX)
+    val ay = abs(progressY)
+    val left = if (progressX < 0f && ax >= ay) ax else 0f
+    val right = if (progressX > 0f && ax >= ay) ax else 0f
+    val up = if (progressY < 0f && ay > ax) ay else 0f
+    val down = if (progressY > 0f && ay > ax) ay else 0f
+
+    val kept = MaterialTheme.colorScheme.primary
+    val lost = MaterialTheme.colorScheme.onSurfaceVariant
+
+    LegendLabel(
+        text = "↑ ЛЕГКО",
+        active = up,
+        base = base,
+        activeColor = kept,
+        modifier = Modifier.align(Alignment.TopCenter).padding(top = 10.dp)
+    )
+    LegendLabel(
+        text = "↓ ТРУДНО",
+        active = down,
+        base = base,
+        activeColor = lost,
+        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 10.dp)
+    )
+    LegendLabel(
+        text = "← НЕ ПОМНЮ",
+        active = left,
+        base = base,
+        activeColor = lost,
+        modifier = Modifier.align(Alignment.CenterStart).padding(start = 10.dp)
+    )
+    LegendLabel(
+        text = "ПОМНЮ →",
+        active = right,
+        base = base,
+        activeColor = kept,
+        modifier = Modifier.align(Alignment.CenterEnd).padding(end = 10.dp)
+    )
+}
+
+@Composable
+private fun LegendLabel(
+    text: String,
+    active: Float,
+    base: Float,
+    activeColor: Color,
+    modifier: Modifier = Modifier
+) {
+    val alpha = max(base, active)
+    if (alpha <= 0.01f) return
+    val resting = MaterialTheme.colorScheme.onSurfaceVariant
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        color = (if (active > 0.45f) activeColor else resting).copy(alpha = alpha),
+        maxLines = 1,
+        modifier = modifier
+    )
 }
 
 /**

@@ -423,20 +423,50 @@ class LearningRepository(
      * after a rotation, a tab switch or a process death yields exactly the same
      * queue and the same count, which is what makes the counter trustworthy.
      */
-    suspend fun buildSession(now: Long = System.currentTimeMillis()): SessionPlan {
+    suspend fun buildSession(
+        deckId: String? = null,
+        now: Long = System.currentTimeMillis()
+    ): SessionPlan {
         val plan = ensureDailyPlan(now)
         val answered = reviewDao.answeredKeysSince(startOfDay(now)).toSet()
-        val pending = plan.ids.filterNot { it in answered }
-        val cards = builder().materialize(pending)
+
+        // The whole plan is materialised here, not just its pending part, because
+        // a deck session has to know how much of its own share is already done —
+        // and the deck of a card is only reachable through its chunk. The plan is
+        // a few dozen keys at most, so this costs one query and no joins.
+        val all = builder().materialize(plan.ids)
+        val scope = if (deckId == null) all else all.filter { it.chunk.packId == deckId }
+        val pending = scope.filterNot { it.card.key in answered }
 
         return SessionPlan(
-            cards = cards,
+            cards = pending,
             plannedTotal = plan.plannedTotal,
             answeredToday = statsDao.day(plan.day)?.reviewsDone ?: 0,
             reason = runCatching { GovernorReason.valueOf(plan.reason) }
                 .getOrDefault(GovernorReason.OK),
-            nextDueAt = cardDao.nextDueAt(now)
+            nextDueAt = cardDao.nextDueAt(now),
+            deckId = deckId,
+            deckTitle = deckId?.let { id -> chunkDao.pack(id)?.title ?: id },
+            sessionTotal = scope.size,
+            sessionDone = scope.size - pending.size
         )
+    }
+
+    /**
+     * What each deck still owes today.
+     *
+     * Read by the deck list, which is the first screen. A deck showing zero is
+     * not a deck that failed — the day's capacity is one number for the whole
+     * app and the plan spends it where the schedule points, so a quiet deck today
+     * is simply a deck whose cards are not due today.
+     */
+    suspend fun remainingByDeck(now: Long = System.currentTimeMillis()): Map<String, Int> {
+        val plan = ensureDailyPlan(now)
+        val answered = reviewDao.answeredKeysSince(startOfDay(now)).toSet()
+        return builder().materialize(plan.ids)
+            .filterNot { it.card.key in answered }
+            .groupingBy { it.chunk.packId }
+            .eachCount()
     }
 
     /**
@@ -444,12 +474,25 @@ class LearningRepository(
      * nothing else: no new chunks, so a good day today never inflates tomorrow.
      * Returns how many were actually added.
      */
-    suspend fun addExtra(count: Int = 5, now: Long = System.currentTimeMillis()): Int {
+    suspend fun addExtra(
+        count: Int = 5,
+        deckId: String? = null,
+        now: Long = System.currentTimeMillis()
+    ): Int {
         val plan = ensureDailyPlan(now)
         val answered = reviewDao.answeredKeysSince(startOfDay(now))
         val exclude = (plan.ids + answered).distinct()
 
-        val extra = builder().pickExtra(exclude, count, now)
+        // Inside a deck session the extra cards have to come from that deck. The
+        // card table has no deck column, so we over-ask and filter by chunk
+        // rather than teaching the DAO to join. Without this the button appeared
+        // to do nothing whenever the extra cards happened to be from elsewhere.
+        val candidates = builder().pickExtra(exclude, if (deckId == null) count else count * 10, now)
+        val extra = if (deckId == null) candidates else {
+            val packOf = chunkDao.chunks(candidates.map { it.chunkId }.distinct())
+                .associate { it.id to it.packId }
+            candidates.filter { packOf[it.chunkId] == deckId }.take(count)
+        }
         if (extra.isEmpty()) return 0
 
         planDao.upsert(

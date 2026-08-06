@@ -7,15 +7,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,13 +20,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
-import dev.ikna.ui.theme.IknaGood
-import dev.ikna.ui.theme.IknaMuted
+import dev.ikna.ui.theme.IknaTextButton
+import dev.ikna.ui.theme.IknaWideButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -91,26 +86,35 @@ fun OnboardingScreen(container: AppContainer, onDone: () -> Unit) {
         Text(
             text = slide.body,
             style = MaterialTheme.typography.bodyLarge,
-            color = IknaMuted,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
 
         Spacer(Modifier.weight(1f))
 
+        // Square marks, like every other mark in the app. These were the only
+        // circles left outside Material's own components.
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             SLIDES.indices.forEach { i ->
                 Box(
                     modifier = Modifier
                         .size(if (i == step) 9.dp else 7.dp)
-                        .clip(CircleShape)
-                        .background(if (i == step) IknaGood else IknaMuted.copy(alpha = 0.35f))
+                        .background(if (i == step) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f))
                 )
             }
         }
 
         Spacer(Modifier.height(20.dp))
 
-        Button(
+        IknaWideButton(
+            label = when {
+                busy -> "ГОТОВЛЮ КАРТОЧКИ…"
+                step < SLIDES.lastIndex -> "ДАЛЬШЕ"
+                else -> "НАЧАТЬ"
+            },
+            filled = true,
+            enabled = !busy,
+            height = 56.dp,
             onClick = {
                 if (step < SLIDES.lastIndex) {
                     step++
@@ -129,25 +133,17 @@ fun OnboardingScreen(container: AppContainer, onDone: () -> Unit) {
                         onDone()
                     }
                 }
-            },
-            enabled = !busy,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                when {
-                    busy -> "Готовлю карточки…"
-                    step < SLIDES.lastIndex -> "Дальше"
-                    else -> "Начать"
-                }
-            )
-        }
+            }
+        )
 
         if (step < SLIDES.lastIndex) {
-            TextButton(onClick = { step = SLIDES.lastIndex }) {
-                Text("Пропустить", color = IknaMuted)
-            }
+            IknaTextButton(
+                label = "ПРОПУСТИТЬ",
+                onClick = { step = SLIDES.lastIndex },
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         } else {
-            Spacer(Modifier.height(48.dp))
+            Spacer(Modifier.height(44.dp))
         }
     }
 }

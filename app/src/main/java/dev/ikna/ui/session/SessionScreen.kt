@@ -10,9 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,9 +30,11 @@ import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.governor.GovernorReason
 import dev.ikna.domain.session.Level
-import dev.ikna.ui.theme.IknaMuted
+import dev.ikna.ui.theme.IknaGlyph
+import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.IknaRule
+import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaWideButton
 import java.time.Instant
 import java.time.ZoneId
@@ -47,41 +49,58 @@ import java.time.temporal.ChronoUnit
  * appears, disappears or resizes while you answer, so a thumb already moving
  * towards a button never lands on something else — which is exactly what used to
  * happen when the hint above the buttons showed up only on the speaking level.
+ *
+ * The card itself now runs edge to edge. It used to sit in a 20dp margin with an
+ * outline around it, which turned the one thing you are supposed to be reading
+ * into a small window in the middle of a screen full of nothing.
+ *
+ * One bar at the top instead of two rows. It carries the way out, the cost of
+ * the session before it starts, and — when the session belongs to one deck —
+ * which deck that is.
  */
 
-private val STATUS_HEIGHT = 36.dp
+private val BAR_HEIGHT = 44.dp
 private val HINT_HEIGHT = 26.dp
-private val ACTION_HEIGHT = 96.dp
+private val ACTION_HEIGHT = 124.dp
 private val UNDO_HEIGHT = 46.dp
 private val EDGE = 20.dp
 
 @Composable
-fun SessionScreen(container: AppContainer) {
+fun SessionScreen(
+    container: AppContainer,
+    deckId: String?,
+    onBack: () -> Unit
+) {
+    // Keyed by deck: opening Polish and then English must not hand the second
+    // session the first one's queue.
     val vm: SessionViewModel = viewModel(
-        factory = SessionViewModel.factory(container.learningRepository, container.settings)
+        key = "session:" + (deckId ?: "all"),
+        factory = SessionViewModel.factory(
+            container.learningRepository,
+            container.settings,
+            deckId
+        )
     )
     val state by vm.state.collectAsState()
     val settings by container.settings.flow.collectAsState(initial = IknaSettings())
 
     val card = state.current
-    val total = (state.answeredToday + state.remaining).coerceAtLeast(1)
 
     Column(modifier = Modifier.fillMaxSize()) {
-        IknaProgress(fraction = state.answeredToday.toFloat() / total)
-        StatusLine(state)
+        TopBar(state = state, onBack = onBack)
+        IknaProgress(fraction = state.progress)
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
-                .padding(horizontal = EDGE),
+                .weight(1f),
             contentAlignment = Alignment.Center
         ) {
             when {
                 state.loading -> Text(
                     text = "секунду…",
                     style = MaterialTheme.typography.labelMedium,
-                    color = IknaMuted
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 // First contact: shown, not asked. Nothing to grade, nothing to fail.
@@ -95,8 +114,10 @@ fun SessionScreen(container: AppContainer) {
                     fromAmnesty = false,
                     progressX = 0f,
                     progressY = 0f,
-                    onReveal = {},
-                    modifier = Modifier.fillMaxSize()
+                    onTap = vm::acknowledgeEncoding,
+                    tapEnabled = true,
+                    modifier = Modifier.fillMaxSize(),
+                    showSwipeLegend = false
                 )
 
                 card != null -> SwipeableCard(
@@ -104,7 +125,7 @@ fun SessionScreen(container: AppContainer) {
                     enabled = state.revealed,
                     animations = settings.animations,
                     haptics = settings.haptics,
-                    onRate = vm::rate
+                    onRate = { rating -> vm.rate(rating, viaSwipe = true) }
                 ) { progressX, progressY ->
                     ChunkCard(
                         label = levelLabel(card.level),
@@ -116,8 +137,10 @@ fun SessionScreen(container: AppContainer) {
                         fromAmnesty = card.fromAmnesty,
                         progressX = progressX,
                         progressY = progressY,
-                        onReveal = vm::reveal,
-                        modifier = Modifier.fillMaxSize()
+                        onTap = vm::reveal,
+                        tapEnabled = !state.revealed,
+                        modifier = Modifier.fillMaxSize(),
+                        showSwipeLegend = !state.swipeFluent
                     )
                 }
 
@@ -135,9 +158,10 @@ fun SessionScreen(container: AppContainer) {
             ActionArea(
                 encoding = state.encoding,
                 revealed = state.revealed,
+                fluent = state.swipeFluent,
                 onAcknowledge = vm::acknowledgeEncoding,
                 onReveal = vm::reveal,
-                onRate = vm::rate
+                onRate = { rating -> vm.rate(rating) }
             )
         }
 
@@ -151,37 +175,56 @@ fun SessionScreen(container: AppContainer) {
 }
 
 /**
- * One line of service text, always the same height.
+ * Way out on the left, deck on the right, one line of service text between them.
  *
- * Two values at most, both named. No streak, no day counter, nothing that turns
- * into a record worth protecting — a number you can break is a reason to quit.
+ * The way out is a real 44dp target. It used to be a 20dp invisible strip at the
+ * screen edge that opened a drawer — the same strip Android 10 and later claims
+ * for its own back gesture, so the app lost that fight roughly every other try,
+ * and on this screen the strip was disabled outright, which left the session with
+ * no exit at all.
+ *
+ * The service text used to carry a live "осталось 12 · ~3 мин" and "дальше:
+ * вставить" beside the card for the whole session. Both answer questions nobody
+ * asks in the middle of recalling something, and a counter ticking down next to
+ * the thing you are reading is an invitation to watch the counter instead. So the
+ * cost of the session is shown once, before the first answer, where it is a
+ * decision — and then the line goes quiet. The one thing that earns a word back
+ * is the minimum being reached, for one card only.
  */
 @Composable
-private fun StatusLine(state: SessionUiState) {
+private fun TopBar(state: SessionUiState, onBack: () -> Unit) {
+    val minimumJustMet = state.minimumMet && state.answeredToday == state.dailyMinimum
+    val text = when {
+        state.index == 0 && !state.revealed && state.remaining > 0 -> startEstimate(state)
+        minimumJustMet -> "МИНИМУМ СДЕЛАН"
+        else -> ""
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(STATUS_HEIGHT)
-            .padding(horizontal = EDGE),
+            .height(BAR_HEIGHT)
+            .padding(horizontal = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack)
         Text(
-            text = if (state.remaining > 0) remainingText(state) else "НА СЕГОДНЯ ВСЁ",
+            text = text,
             style = MaterialTheme.typography.labelMedium,
-            color = IknaMuted,
-            maxLines = 1
+            color = if (minimumJustMet) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            modifier = Modifier.weight(1f)
         )
-        Spacer(Modifier.weight(1f))
-        Text(
-            text = statusRight(state),
-            style = MaterialTheme.typography.labelSmall,
-            color = if (state.minimumMet && state.remaining == 0) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                IknaMuted
-            },
-            maxLines = 1
-        )
+        if (state.deckTitle != null) {
+            Text(
+                text = state.deckTitle.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                modifier = Modifier.padding(end = 14.dp)
+            )
+        }
     }
 }
 
@@ -189,8 +232,9 @@ private fun StatusLine(state: SessionUiState) {
 @Composable
 private fun HintLine(state: SessionUiState, level: Level) {
     val text = when {
-        state.encoding -> "скажи вслух один раз — дальше спрошу"
-        state.revealed -> "свайп вверх — легко, вниз — трудно"
+        state.encoding -> "скажи вслух один раз — потом тап по карточке"
+        state.revealed && !state.swipeFluent -> "то же самое можно свайпом"
+        state.revealed -> ""
         level == Level.PRODUCTION -> "скажи вслух, потом открой"
         state.showRevealHint -> "тап по карточке — или кнопка ниже"
         else -> ""
@@ -206,7 +250,7 @@ private fun HintLine(state: SessionUiState, level: Level) {
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodySmall,
-                color = IknaMuted,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 maxLines = 1
             )
@@ -215,15 +259,30 @@ private fun HintLine(state: SessionUiState, level: Level) {
 }
 
 /**
- * The thumb zone: one slot, three contents, one height.
+ * The thumb zone: one slot, one height, and the two common answers always in the
+ * same place at the bottom of it.
  *
- * Before the answer there is a wide reveal button as well as tap-anywhere, since
- * two ways in cost nothing and one of them is always the one you remember.
+ * There are four ratings and there always were — the gesture has understood all
+ * four since the first version. Offering two of them on screen made the other
+ * two invisible, which is how a swipe interface teaches people that swiping does
+ * nothing. So all four are here, sized by how often they are honestly used:
+ * "не помню" and "помню" full size at the bottom, "легко" and "трудно" quiet and
+ * smaller above them, each labelled with the direction that does the same thing.
+ *
+ * Once the gesture is in the hand — [fluent], after a dozen answers given by
+ * swiping — the two quiet ones drop out and only the fallback pair stays. The
+ * slot keeps its height either way, so nothing under the thumb ever moves.
+ *
+ * Everything in here is 56dp and outlined except the single most common answer.
+ * An introduction used to end with a 64dp ink-filled slab reading "ПОНЯТНО" —
+ * the largest, heaviest object on the screen, attached to the least important
+ * decision in the app: acknowledging something you were only asked to read.
  */
 @Composable
 private fun ActionArea(
     encoding: Boolean,
     revealed: Boolean,
+    fluent: Boolean,
     onAcknowledge: () -> Unit,
     onReveal: () -> Unit,
     onRate: (Rating) -> Unit
@@ -234,38 +293,67 @@ private fun ActionArea(
             .height(ACTION_HEIGHT)
             .padding(horizontal = EDGE, vertical = 8.dp)
     ) {
-        when {
-            encoding -> IknaWideButton(
-                label = "ПОНЯТНО",
-                onClick = onAcknowledge,
-                filled = true,
-                height = 64.dp
-            )
-
-            revealed -> Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                IknaWideButton(
-                    label = "НЕ ПОМНЮ",
-                    onClick = { onRate(Rating.AGAIN) },
-                    modifier = Modifier.weight(1f),
-                    height = 64.dp
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            when {
+                encoding -> IknaWideButton(
+                    label = "ПОНЯТНО",
+                    onClick = onAcknowledge,
+                    height = 56.dp
                 )
-                IknaWideButton(
-                    label = "ПОМНЮ",
-                    onClick = { onRate(Rating.GOOD) },
-                    modifier = Modifier.weight(1f),
-                    filled = true,
-                    height = 64.dp
+
+                revealed -> {
+                    if (!fluent) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            IknaWideButton(
+                                label = "↑ ЛЕГКО",
+                                onClick = { onRate(Rating.EASY) },
+                                modifier = Modifier.weight(1f),
+                                quiet = true,
+                                height = 40.dp
+                            )
+                            IknaWideButton(
+                                label = "↓ ТРУДНО",
+                                onClick = { onRate(Rating.HARD) },
+                                modifier = Modifier.weight(1f),
+                                quiet = true,
+                                height = 40.dp
+                            )
+                        }
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        IknaWideButton(
+                            label = "← НЕ ПОМНЮ",
+                            onClick = { onRate(Rating.AGAIN) },
+                            modifier = Modifier.weight(1f),
+                            height = 56.dp
+                        )
+                        IknaWideButton(
+                            label = "ПОМНЮ →",
+                            onClick = { onRate(Rating.GOOD) },
+                            modifier = Modifier.weight(1f),
+                            filled = true,
+                            height = 56.dp
+                        )
+                    }
+                }
+
+                else -> IknaWideButton(
+                    label = "ПОКАЗАТЬ",
+                    onClick = onReveal,
+                    height = 56.dp
                 )
             }
-
-            else -> IknaWideButton(
-                label = "ПОКАЗАТЬ",
-                onClick = onReveal,
-                height = 64.dp
-            )
         }
     }
 }
@@ -277,7 +365,9 @@ private fun EmptyState(
     onExtra: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = EDGE),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (animations && state.answeredToday > 0) {
@@ -303,7 +393,7 @@ private fun EmptyState(
         Text(
             text = emptyExplanation(state),
             style = MaterialTheme.typography.bodyMedium,
-            color = IknaMuted,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
 
@@ -312,7 +402,7 @@ private fun EmptyState(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
-                color = IknaMuted,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
         }
@@ -323,24 +413,24 @@ private fun EmptyState(
             Text(
                 text = "Повторять больше нечего — остальное ещё не подошло по сроку",
                 style = MaterialTheme.typography.bodySmall,
-                color = IknaMuted,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(6.dp))
             // Never a dead end: the same request again, in case something came due
             // in the meantime.
-            TextButton(onClick = onExtra) { Text("ПРОВЕРИТЬ ЕЩЁ РАЗ") }
+            IknaTextButton(label = "ПРОВЕРИТЬ ЕЩЁ РАЗ", onClick = onExtra)
         } else {
             IknaWideButton(
                 label = "ЕЩЁ НЕМНОГО  +5",
                 onClick = onExtra,
-                height = 64.dp
+                height = 56.dp
             )
             Spacer(Modifier.height(10.dp))
             Text(
                 text = "только повторения, новые чанки от этого не добавятся",
                 style = MaterialTheme.typography.bodySmall,
-                color = IknaMuted,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
         }
@@ -366,7 +456,7 @@ private fun UndoBar(
             failed -> Text(
                 text = "этот ответ отменить уже нельзя",
                 style = MaterialTheme.typography.bodySmall,
-                color = IknaMuted
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             visible -> Row(
@@ -376,22 +466,14 @@ private fun UndoBar(
                 Text(
                     text = "ответ записан",
                     style = MaterialTheme.typography.bodySmall,
-                    color = IknaMuted
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.weight(1f))
-                TextButton(onClick = onUndo) { Text("ОТМЕНИТЬ") }
-                TextButton(onClick = onDismiss) { Text("ОК") }
+                IknaTextButton(label = "ОТМЕНИТЬ", onClick = onUndo)
+                Spacer(Modifier.width(10.dp))
+                IknaTextButton(label = "ОК", onClick = onDismiss, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-    }
-}
-
-private fun statusRight(state: SessionUiState): String {
-    val next = state.nextCard
-    return when {
-        state.minimumMet && state.remaining == 0 -> "МИНИМУМ СДЕЛАН"
-        next != null -> "ДАЛЬШЕ: " + levelLabel(next.level).uppercase()
-        else -> "СЕГОДНЯ " + state.answeredToday
     }
 }
 
@@ -448,21 +530,36 @@ private fun dayWord(days: Long): String {
 // ---- how long this will take ----------------------------------------------
 
 /**
- * "ОСТАЛОСЬ 12 · ~3 МИН".
+ * "12 КАРТОЧЕК · ~3 МИН", shown once, before the first answer.
  *
  * A number of cards is not a unit anyone can plan with, and "some cards" is
  * exactly the shape of task that gets postponed: the cost is unknown, so the
  * brain prices it as expensive. Minutes are a unit you can decide about while
  * the kettle boils. The figure comes from the user's own recent answers rather
- * than a constant, and while there is not enough history to measure it,
- * nothing is shown — an estimate that turns out to be a lie costs more trust
- * than it buys.
+ * than a constant, and while there is not enough history to measure it, nothing
+ * is shown — an estimate that turns out to be a lie costs more trust than it
+ * buys.
+ *
+ * It disappears the moment the first card is opened, because after the decision
+ * to start has been made the same figure is just a countdown.
  */
-private fun remainingText(state: SessionUiState): String {
-    val base = "ОСТАЛОСЬ " + state.remaining
+private fun startEstimate(state: SessionUiState): String {
+    val count = state.remaining
+    val base = (count.toString() + " " + cardWord(count)).uppercase()
     val perCard = state.perCardMs ?: return base
-    val totalMs = state.remaining * perCard
+    val totalMs = count * perCard
     if (totalMs < 45_000L) return base + " · <1 МИН"
     val minutes = ((totalMs + 30_000L) / 60_000L).toInt().coerceAtLeast(1)
     return base + " · ~" + minutes + " МИН"
+}
+
+private fun cardWord(count: Int): String {
+    val mod100 = count % 100
+    val mod10 = count % 10
+    return when {
+        mod100 in 11..14 -> "карточек"
+        mod10 == 1 -> "карточка"
+        mod10 in 2..4 -> "карточки"
+        else -> "карточек"
+    }
 }

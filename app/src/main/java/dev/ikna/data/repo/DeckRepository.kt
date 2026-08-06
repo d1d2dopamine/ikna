@@ -53,7 +53,7 @@ class DeckRepository(
             .ifEmpty { "pack" }
         return packLoader.importJsonl(
             packId = "user-" + slug,
-            title = stem.ifEmpty { "Свой набор" },
+            title = stem.ifEmpty { "Своя колода" },
             lang = "custom",
             text = text
         )

@@ -1,41 +1,22 @@
 package dev.ikna.ui.nav
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.dp
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import dev.ikna.AppContainer
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.ui.debug.DebugScreen
@@ -44,230 +25,124 @@ import dev.ikna.ui.onboarding.OnboardingScreen
 import dev.ikna.ui.session.SessionScreen
 import dev.ikna.ui.settings.SettingsScreen
 import dev.ikna.ui.stats.StatsScreen
-import dev.ikna.ui.theme.IknaGlyph
-import dev.ikna.ui.theme.IknaGlyphIcon
-import dev.ikna.ui.theme.IknaMuted
-import dev.ikna.ui.theme.IknaRule
-import kotlinx.coroutines.launch
 
+/**
+ * Where the app can be.
+ *
+ * A session belongs to a deck or to the whole day, and that is part of the
+ * address rather than of some ambient state: coming back from Settings has to
+ * land in the same session that was left, and process death has to restore it
+ * too. [ALL_DECKS] is the word used when there is no deck, because a route
+ * argument cannot be absent and "" is not a legal path segment.
+ */
 object Routes {
     const val ONBOARDING = "onboarding"
-    const val SESSION = "session"
-    const val DECKS = "decks"
+    const val HOME = "home"
+    const val SESSION = "session/{deck}"
     const val STATS = "stats"
     const val SETTINGS = "settings"
     const val DEBUG = "debug"
+
+    const val ALL_DECKS = "all"
+
+    fun session(deckId: String?): String = "session/" + (deckId ?: ALL_DECKS)
 }
 
-private data class Tab(val route: String, val label: String, val glyph: IknaGlyph)
-
-private val TABS = listOf(
-    Tab(Routes.SESSION, "Карточки", IknaGlyph.SPARK),
-    Tab(Routes.DECKS, "Наборы", IknaGlyph.STACK),
-    Tab(Routes.STATS, "Прогресс", IknaGlyph.BARS),
-    Tab(Routes.SETTINGS, "Настройки", IknaGlyph.SLIDERS)
-)
-
-/** Width of the invisible strip along the left edge that the panel is pulled from. */
-private val HANDLE_WIDTH = 20.dp
-
 /**
- * No tab bar.
+ * Navigation, without a navigation panel.
  *
- * The four screens live in a panel pulled out from the left edge, so the session
- * gets the entire screen instead of sharing it with navigation that is used a few
- * times a day at most. The pull zone is a narrow strip, not the whole surface:
- * the card itself is swiped horizontally, and the two gestures must not compete.
+ * There used to be a drawer of five tabs, opened by dragging from the left edge
+ * — a 20dp invisible strip that Android 10 and later also claims for its own
+ * back gesture, so it worked about every other try and was switched off during a
+ * session entirely. Five destinations behind a hidden gesture is not navigation,
+ * it is a puzzle.
+ *
+ * What replaced it is the shape of the thing itself: decks are the home screen,
+ * a session opens out of a deck and closes back into it, and the two screens
+ * that are neither — progress and settings — hang off marks in the top row. The
+ * "cards" tab is gone because it was a second door into the same session.
  */
 @Composable
 fun IknaNavHost(container: AppContainer, settings: IknaSettings) {
-    // One-shot read so the start destination is correct on the very first frame;
-    // reading it from the flow would briefly say "not onboarded" every launch.
-    val onboarded by produceState<Boolean?>(initialValue = null) {
-        value = runCatching { container.settings.current().onboardingDone }.getOrDefault(false)
+    val navController = rememberNavController()
+
+    // The stored flag arrives a frame or two after the first composition, and a
+    // NavHost reads its start destination exactly once. Deciding from the value
+    // that is merely current would show the onboarding screen for those frames on
+    // every single launch, so nothing is drawn until the real flag is known.
+    var onboarded by remember { mutableStateOf<Boolean?>(null) }
+    LaunchedEffect(Unit) {
+        onboarded = runCatching { container.settings.current().onboardingDone }
+            .getOrDefault(false)
     }
-    val start = onboarded ?: return
 
-    val nav = rememberNavController()
-    val entry by nav.currentBackStackEntryAsState()
-    val route = entry?.destination?.route
-    val scope = rememberCoroutineScope()
-    val drawer = rememberDrawerState(DrawerValue.Closed)
-    val navigable = TABS.any { it.route == route }
-
-    ModalNavigationDrawer(
-        drawerState = drawer,
-        // Only while open: closing by swipe should work, opening must stay the
-        // job of the edge strip so a card swipe is never mistaken for it.
-        gesturesEnabled = drawer.isOpen,
-        scrimColor = Color.Black.copy(alpha = 0.55f),
-        drawerContent = {
-            NavPanel(
-                current = route,
-                onPick = { picked ->
-                    scope.launch { drawer.close() }
-                    if (picked != route) {
-                        nav.navigate(picked) {
-                            popUpTo(Routes.SESSION) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                }
-            )
-        }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            // Drawn edge to edge, so every screen keeps clear of the status bar
+            // and the gesture area in one place instead of five.
+            .windowInsetsPadding(WindowInsets.safeDrawing)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            NavHost(
-                navController = nav,
-                startDestination = if (start) Routes.SESSION else Routes.ONBOARDING,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .windowInsetsPadding(WindowInsets.safeDrawing)
-            ) {
-                composable(Routes.ONBOARDING) {
-                    OnboardingScreen(container = container) {
-                        nav.navigate(Routes.SESSION) {
+        val known = onboarded ?: return@Box
+
+        NavHost(
+            navController = navController,
+            startDestination = if (known) Routes.HOME else Routes.ONBOARDING
+        ) {
+            composable(Routes.ONBOARDING) {
+                OnboardingScreen(
+                    container = container,
+                    onDone = {
+                        navController.navigate(Routes.HOME) {
                             popUpTo(Routes.ONBOARDING) { inclusive = true }
                         }
                     }
-                }
-                composable(Routes.SESSION) {
-                    SessionScreen(container = container)
-                }
-                composable(Routes.DECKS) {
-                    DecksScreen(container = container)
-                }
-                composable(Routes.STATS) {
-                    StatsScreen(container = container)
-                }
-                composable(Routes.SETTINGS) {
-                    SettingsScreen(
-                        container = container,
-                        settings = settings,
-                        onOpenDebug = { nav.navigate(Routes.DEBUG) }
-                    )
-                }
-                composable(Routes.DEBUG) {
-                    DebugScreen(container = container, onBack = { nav.popBackStack() })
-                }
-            }
-
-            if (navigable) {
-                EdgeHandle(
-                    tapToOpen = route != Routes.SESSION,
-                    onOpen = { scope.launch { drawer.open() } }
                 )
             }
-        }
-    }
-}
 
-/**
- * The pull tab itself: a short accent bar on the left edge.
- *
- * Visible enough to be found once, quiet enough to be forgotten afterwards. On
- * the session screen it only responds to a pull, because a tap belongs to the
- * card.
- */
-@Composable
-private fun EdgeHandle(tapToOpen: Boolean, onOpen: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxHeight()
-            .width(HANDLE_WIDTH)
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures { _, dragAmount ->
-                    if (dragAmount > 6f) onOpen()
-                }
-            }
-            .then(if (tapToOpen) Modifier.clickable(onClick = onOpen) else Modifier),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Box(
-            modifier = Modifier
-                .width(3.dp)
-                .height(64.dp)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.55f))
-        )
-    }
-}
-
-@Composable
-private fun NavPanel(current: String?, onPick: (String) -> Unit) {
-    ModalDrawerSheet(
-        drawerShape = RectangleShape,
-        drawerContainerColor = MaterialTheme.colorScheme.background,
-        drawerContentColor = MaterialTheme.colorScheme.onBackground,
-        drawerTonalElevation = 0.dp,
-        modifier = Modifier.width(272.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .windowInsetsPadding(WindowInsets.safeDrawing)
-        ) {
-            Row(
-                modifier = Modifier.padding(start = 24.dp, top = 28.dp, bottom = 22.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IknaGlyphIcon(
-                    glyph = IknaGlyph.SPARK,
-                    color = MaterialTheme.colorScheme.primary,
-                    size = 18.dp
-                )
-                Spacer(Modifier.width(12.dp))
-                Text(
-                    text = "IKNA",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onBackground
+            composable(Routes.HOME) {
+                DecksScreen(
+                    container = container,
+                    onOpenSession = { deckId -> navController.navigate(Routes.session(deckId)) },
+                    onOpenStats = { navController.navigate(Routes.STATS) },
+                    onOpenSettings = { navController.navigate(Routes.SETTINGS) }
                 )
             }
-            IknaRule()
 
-            TABS.forEach { tab ->
-                val selected = tab.route == current
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                        .clickable { onPick(tab.route) },
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(4.dp)
-                            .fillMaxHeight()
-                            .background(
-                                if (selected) MaterialTheme.colorScheme.primary
-                                else Color.Transparent
-                            )
-                    )
-                    Spacer(Modifier.width(20.dp))
-                    IknaGlyphIcon(
-                        glyph = tab.glyph,
-                        color = if (selected) MaterialTheme.colorScheme.onBackground
-                        else IknaMuted,
-                        size = 20.dp
-                    )
-                    Spacer(Modifier.width(16.dp))
-                    Text(
-                        text = tab.label,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (selected) MaterialTheme.colorScheme.onBackground
-                        else IknaMuted
-                    )
-                }
-                IknaRule()
+            composable(
+                route = Routes.SESSION,
+                arguments = listOf(navArgument("deck") { type = NavType.StringType })
+            ) { entry ->
+                val raw = entry.arguments?.getString("deck")
+                SessionScreen(
+                    container = container,
+                    deckId = if (raw == null || raw == Routes.ALL_DECKS) null else raw,
+                    onBack = { navController.popBackStack() }
+                )
             }
 
-            Spacer(Modifier.weight(1f))
-            Text(
-                text = "потяни от левого края, чтобы открыть это снова",
-                style = MaterialTheme.typography.labelSmall,
-                color = IknaMuted,
-                modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
-            )
+            composable(Routes.STATS) {
+                StatsScreen(
+                    container = container,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Routes.SETTINGS) {
+                SettingsScreen(
+                    container = container,
+                    settings = settings,
+                    onOpenDebug = { navController.navigate(Routes.DEBUG) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Routes.DEBUG) {
+                DebugScreen(
+                    container = container,
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -21,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
 import dev.ikna.data.db.GovernorLogEntity
-import dev.ikna.ui.theme.IknaMuted
+import dev.ikna.ui.theme.IknaTextButton
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -45,37 +44,46 @@ fun DebugScreen(container: AppContainer, onBack: () -> Unit) {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        TextButton(onClick = onBack) { Text("← Назад") }
-        TextButton(onClick = {
-            scope.launch {
-                note = runCatching { "Файл: Документы/Ikna/" + container.jsonExporter.export() }
-                    .getOrElse { "Не удалось сохранить файл" }
+        IknaTextButton(label = "← НАЗАД", onClick = onBack)
+        IknaTextButton(
+            label = "ВЫГРУЗИТЬ ЖУРНАЛ ОТВЕТОВ",
+            onClick = {
+                scope.launch {
+                    note = runCatching { "Файл: Документы/Ikna/" + container.jsonExporter.export() }
+                        .getOrElse { "Не удалось сохранить файл" }
+                }
             }
-        }) { Text("Выгрузить журнал ответов") }
-        TextButton(onClick = {
-            scope.launch {
-                container.components.rebuildFromReviews()
-                note = "Слой слов пересчитан"
+        )
+        IknaTextButton(
+            label = "ПЕРЕСЧИТАТЬ СЛОЙ СЛОВ",
+            onClick = {
+                scope.launch {
+                    container.components.rebuildFromReviews()
+                    note = "Слой слов пересчитан"
+                }
             }
-        }) { Text("Пересчитать слой слов") }
-        TextButton(onClick = {
-            scope.launch {
-                container.learningRepository.invalidatePlan()
-                container.learningRepository.ensureDailyPlan()
-                log = container.learningRepository.governorLog(40)
-                note = "План на сегодня пересобран"
+        )
+        IknaTextButton(
+            label = "ПЕРЕСОБРАТЬ ПЛАН ДНЯ",
+            onClick = {
+                scope.launch {
+                    container.learningRepository.invalidatePlan()
+                    container.learningRepository.ensureDailyPlan()
+                    log = container.learningRepository.governorLog(40)
+                    note = "План на сегодня пересобран"
+                }
             }
-        }) { Text("Пересобрать план дня") }
+        )
 
         note?.let {
-            Text(text = it, color = IknaMuted, style = MaterialTheme.typography.bodySmall)
+            Text(text = it, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
         }
 
         Spacer(Modifier.height(16.dp))
         Text(
             text = "Решения регулятора по дням",
             style = MaterialTheme.typography.labelSmall,
-            color = IknaMuted
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(8.dp))
 

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -19,12 +20,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
-import dev.ikna.ui.theme.IknaMuted
+import dev.ikna.ui.theme.IknaGlyph
+import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaRule
 
 /*
@@ -39,7 +42,7 @@ import dev.ikna.ui.theme.IknaRule
 private val EDGE = 20.dp
 
 @Composable
-fun StatsScreen(container: AppContainer) {
+fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
     var days by remember { mutableStateOf(emptyList<Boolean>()) }
     var norm by remember { mutableStateOf(0) }
     var measured by remember { mutableStateOf(true) }
@@ -62,7 +65,19 @@ fun StatsScreen(container: AppContainer) {
             .verticalScroll(rememberScrollState())
             .padding(horizontal = EDGE)
     ) {
-        Spacer(Modifier.height(24.dp))
+        // The glyph box is 44dp with a 19dp mark in the middle, so it is pulled
+        // back by half the difference to stand on the same left margin as every
+        // line of text below it.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(44.dp)
+                .offset(x = (-12).dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack)
+        }
+        Spacer(Modifier.height(6.dp))
         Text(
             text = "Прогресс",
             style = MaterialTheme.typography.displaySmall,
@@ -78,7 +93,7 @@ fun StatsScreen(container: AppContainer) {
             text = "Каждая метка — день с занятием, справа сегодня. " +
                 "Пропуск ничего не обнуляет и не обрывает: цепочки здесь нет, ломать нечего.",
             style = MaterialTheme.typography.bodySmall,
-            color = IknaMuted
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(Modifier.height(28.dp))
@@ -103,7 +118,7 @@ fun StatsScreen(container: AppContainer) {
                     "Свою цифру посчитаю, когда наберётся хотя бы три дня с занятиями — до того это было бы выдумкой."
             },
             style = MaterialTheme.typography.bodyMedium,
-            color = IknaMuted
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(Modifier.height(28.dp))
@@ -134,7 +149,7 @@ fun StatsScreen(container: AppContainer) {
         Text(
             text = "Слова считаются отдельно от чанков: одно слово встречается в разных фразах и держится крепче любой из них.",
             style = MaterialTheme.typography.bodySmall,
-            color = IknaMuted
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(Modifier.height(28.dp))
@@ -148,7 +163,7 @@ fun StatsScreen(container: AppContainer) {
         Text(
             text = "Сколько карточек подошлёт по сроку. Если где-то вырастает гора — новые чанки в те дни добавляться не будут.",
             style = MaterialTheme.typography.bodySmall,
-            color = IknaMuted
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(36.dp))
     }
@@ -159,7 +174,7 @@ private fun Label(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelSmall,
-        color = IknaMuted
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
 
@@ -172,7 +187,7 @@ private fun Label(text: String) {
 @Composable
 private fun ActivityMap(days: List<Boolean>) {
     val accent = MaterialTheme.colorScheme.primary
-    val idle = IknaMuted.copy(alpha = 0.22f)
+    val idle = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.22f)
     // Repository order is most recent first; drawing goes the other way round.
     val ordered = days.reversed()
 
@@ -200,7 +215,7 @@ private fun ActivityMap(days: List<Boolean>) {
 @Composable
 private fun ForecastBars(values: List<Int>) {
     val accent = MaterialTheme.colorScheme.primary
-    val base = IknaMuted.copy(alpha = 0.22f)
+    val base = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.22f)
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Canvas(

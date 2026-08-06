@@ -11,19 +11,33 @@ import kotlin.math.roundToInt
 /**
  * What the session screen shows right now.
  *
- * `cards` is exactly the set of questions still owed today: the day's plan
- * minus everything already answered. There is no second counter derived from
- * anything else, because the previous version had two — a display count and a
- * queue length — and they disagreed.
+ * `cards` is exactly the set of questions still owed: the day's plan minus
+ * everything already answered, narrowed to one deck when the session was opened
+ * from a deck. There is no second counter derived from anything else, because
+ * the previous version had two — a display count and a queue length — and they
+ * disagreed.
+ *
+ * The deck is a filter over the day's plan and never a plan of its own. The
+ * governor measures one capacity for the whole day from real behaviour; giving
+ * every deck its own budget would let three decks quietly authorise three times
+ * the load, which is the exact failure this app exists to avoid.
  */
 data class SessionPlan(
     val cards: List<SessionCard>,
-    /** Size of today's plan, including any "ещё немного" the user asked for. */
+    /** Size of today's plan across all decks, including any "ещё немного". */
     val plannedTotal: Int,
+    /** Answers recorded today across all decks. The daily minimum reads this. */
     val answeredToday: Int,
     val reason: GovernorReason,
     /** When the next card comes back, for the empty state. */
-    val nextDueAt: Long?
+    val nextDueAt: Long?,
+    /** Null for "everything due today", otherwise the pack this session is limited to. */
+    val deckId: String? = null,
+    val deckTitle: String? = null,
+    /** Cards in today's plan belonging to this session's scope. */
+    val sessionTotal: Int = cards.size,
+    /** How many of those are already answered. Drives the progress band. */
+    val sessionDone: Int = 0
 ) {
     /**
      * Monotonic by construction: the plan is fixed for the day and answers only
@@ -31,6 +45,61 @@ data class SessionPlan(
      * works. It grows only when the user explicitly asks for more.
      */
     val remaining: Int get() = cards.size
+}
+
+/** A chunk being met for the first time: shown, not asked. */
+private fun CardEntity.isFirstContact(): Boolean = level == 0 && isNew && reps == 0
+
+/** Introductions per block, and how many reviews separate one block from the next. */
+private const val INTRO_BLOCK = 2
+private const val INTRO_GAP = 3
+
+/**
+ * Puts first contacts at the front, in small blocks.
+ *
+ * Before this the order was whatever the due dates produced, which in practice
+ * meant one introduction, one review, one introduction, one review for the first
+ * third of the session. Two costs, both real: attention is at its best at the
+ * start of a session and that is where new material should land, and the screen
+ * itself changes shape between the two — an introduction has one action, a
+ * question has four — so alternating them one for one makes the bottom of the
+ * screen flicker between two layouts on every card.
+ *
+ * Total and contents are unchanged; this only reorders.
+ */
+internal fun groupIntroductions(
+    cards: List<CardEntity>,
+    block: Int = INTRO_BLOCK,
+    gap: Int = INTRO_GAP
+): List<CardEntity> {
+    if (block <= 0 || gap <= 0) return cards
+    val intro = cards.filter { it.isFirstContact() }
+    if (intro.isEmpty()) return cards
+    val rest = cards.filterNot { it.isFirstContact() }
+    if (rest.isEmpty()) return cards
+
+    val out = ArrayList<CardEntity>(cards.size)
+    var i = 0
+    var r = 0
+    while (i < intro.size) {
+        var placed = 0
+        while (placed < block && i < intro.size) {
+            out += intro[i]
+            i++
+            placed++
+        }
+        var spacer = 0
+        while (spacer < gap && r < rest.size) {
+            out += rest[r]
+            r++
+            spacer++
+        }
+    }
+    while (r < rest.size) {
+        out += rest[r]
+        r++
+    }
+    return out
 }
 
 class SessionBuilder(
@@ -50,7 +119,7 @@ class SessionBuilder(
         val due = cardDao.dueCards(now, capacity - amnestyQuota)
         val amnesty = cardDao.amnestyCards(amnestyQuota)
 
-        return interleave(due + amnesty).take(capacity)
+        return groupIntroductions(interleave(due + amnesty).take(capacity))
     }
 
     /**

@@ -19,9 +19,19 @@ data class SessionUiState(
     val queue: List<SessionCard> = emptyList(),
     val index: Int = 0,
     val revealed: Boolean = false,
-    /** Distinct questions still owed today. Falls only. */
+    /** Distinct questions still owed in this session. Falls only. */
     val remaining: Int = 0,
+    /** Answers recorded today across every deck. The daily minimum reads this. */
     val answeredToday: Int = 0,
+    /**
+     * Progress within this session: how many of its cards are done out of how
+     * many it had. Separate from [answeredToday] because a Polish session should
+     * not show a band that is already half full because of English this morning.
+     */
+    val sessionDone: Int = 0,
+    val sessionTotal: Int = 0,
+    /** Null when the session covers every deck. */
+    val deckTitle: String? = null,
     val dailyMinimum: Int = 1,
     /**
      * Measured median answer time. Null until there is enough history to
@@ -38,10 +48,21 @@ data class SessionUiState(
     val encodedKeys: Set<String> = emptySet(),
     val extraAdded: Int = 0,
     val noMoreExtra: Boolean = false,
+    /**
+     * True once enough answers have been given by swiping. The two rare ratings
+     * then leave the button row and stay on the gesture. Read once per session
+     * on purpose: a row that rearranges itself mid-session would move a target
+     * under a thumb that is already moving.
+     */
+    val swipeFluent: Boolean = false,
     val finished: Boolean = false
 ) {
     val current: SessionCard? get() = queue.getOrNull(index)
     val minimumMet: Boolean get() = answeredToday >= dailyMinimum
+
+    /** 0f..1f for the band at the top of the screen. */
+    val progress: Float
+        get() = if (sessionTotal <= 0) 0f else sessionDone.toFloat() / sessionTotal
 
     /**
      * The card in front has never been seen and has not been introduced yet, so
@@ -58,16 +79,21 @@ data class SessionUiState(
 }
 
 /**
- * A real ViewModel now, not an object remembered inside a composable.
+ * A real ViewModel, not an object remembered inside a composable.
  *
  * The old version was recreated on every rotation and every tab switch, and
  * each recreation rebuilt the day's plan — which is how the "cards left" number
  * used to grow while the user was answering. Session state now survives
  * configuration changes, and the plan itself lives in the database.
+ *
+ * [deckId] is a filter over that one plan, never a plan of its own. The day has
+ * a single measured capacity; letting each deck bring its own budget would let
+ * two decks quietly authorise twice the load.
  */
 class SessionViewModel(
     private val repo: LearningRepository,
-    private val settings: SettingsStore
+    private val settings: SettingsStore,
+    private val deckId: String? = null
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SessionUiState())
@@ -88,16 +114,19 @@ class SessionViewModel(
     private var shownAt = 0L
     private var undoToken = 0
     private var hintsShown = 0
+    private var swipesDone = 0
 
     init { load() }
 
     fun load(showLoading: Boolean = true) {
         viewModelScope.launch {
             if (showLoading) _state.value = _state.value.copy(loading = true)
-            val plan = repo.buildSession()
+            val plan = repo.buildSession(deckId)
             planned = plan.cards
             answeredKeys.clear()
-            hintsShown = settings.current().revealHintsShown
+            val prefs = settings.current()
+            hintsShown = prefs.revealHintsShown
+            swipesDone = prefs.swipesDone
             _state.value = SessionUiState(
                 loading = false,
                 queue = plan.cards,
@@ -105,12 +134,16 @@ class SessionViewModel(
                 revealed = false,
                 remaining = plan.cards.size,
                 answeredToday = plan.answeredToday,
+                sessionDone = plan.sessionDone,
+                sessionTotal = plan.sessionTotal,
+                deckTitle = plan.deckTitle,
                 dailyMinimum = repo.dailyMinimum(),
                 perCardMs = repo.medianAnswerMs(),
                 reason = plan.reason,
                 nextDueAt = plan.nextDueAt,
                 canUndo = plan.answeredToday > 0,
                 showRevealHint = hintsShown < HINT_LIMIT,
+                swipeFluent = swipesDone >= SWIPE_FLUENCY,
                 finished = plan.cards.isEmpty()
             )
             shownAt = System.currentTimeMillis()
@@ -128,7 +161,11 @@ class SessionViewModel(
         }
     }
 
-    /** "Понятно" on an introduction card. Nothing is graded, nothing is logged. */
+    /**
+     * Done reading an introduction. Nothing is graded and nothing is logged, so
+     * this is a tap on the card rather than a button: there is no decision here
+     * to make a target for.
+     */
     fun acknowledgeEncoding() {
         val s = _state.value
         val card = s.current ?: return
@@ -139,11 +176,21 @@ class SessionViewModel(
         shownAt = System.currentTimeMillis()
     }
 
-    fun rate(rating: Rating) {
+    /**
+     * [viaSwipe] is counted, not just logged: it is the only evidence that the
+     * gesture has actually been found. Until there is enough of it the button
+     * row keeps teaching all four directions.
+     */
+    fun rate(rating: Rating, viaSwipe: Boolean = false) {
         val s = _state.value
         val card = s.current ?: return
         val now = System.currentTimeMillis()
         val duration = (now - shownAt).coerceIn(0L, 120_000L)
+
+        if (viaSwipe && swipesDone < SWIPE_FLUENCY) {
+            swipesDone++
+            viewModelScope.launch { settings.bumpSwipe() }
+        }
 
         answeredKeys += card.card.key
 
@@ -166,6 +213,7 @@ class SessionViewModel(
             revealed = false,
             remaining = planned.count { it.card.key !in answeredKeys },
             answeredToday = s.answeredToday + 1,
+            sessionDone = (s.sessionDone + 1).coerceAtMost(s.sessionTotal),
             canUndo = true,
             undoVisible = true,
             undoFailed = false,
@@ -195,7 +243,7 @@ class SessionViewModel(
                 return@launch
             }
             undoToken++
-            val plan = repo.buildSession()
+            val plan = repo.buildSession(deckId)
             planned = plan.cards
             answeredKeys.clear()
             val ordered = plan.cards.sortedBy { if (it.card.key == key) 0 else 1 }
@@ -206,6 +254,8 @@ class SessionViewModel(
                 revealed = false,
                 remaining = ordered.size,
                 answeredToday = plan.answeredToday,
+                sessionDone = plan.sessionDone,
+                sessionTotal = plan.sessionTotal,
                 reason = plan.reason,
                 nextDueAt = plan.nextDueAt,
                 undoVisible = false,
@@ -224,17 +274,18 @@ class SessionViewModel(
     }
 
     /**
-     * "Ещё немного": five more cards that are already due. Never new ones,
-     * so a good mood today cannot buy a heavier queue tomorrow.
+     * "Ещё немного": five more cards that are already due, from this session's
+     * deck when it has one. Never new ones, so a good mood today cannot buy a
+     * heavier queue tomorrow.
      */
     fun addExtra() {
         viewModelScope.launch {
-            val added = repo.addExtra(EXTRA_BATCH)
+            val added = repo.addExtra(EXTRA_BATCH, deckId)
             if (added == 0) {
                 _state.value = _state.value.copy(noMoreExtra = true)
                 return@launch
             }
-            val plan = repo.buildSession()
+            val plan = repo.buildSession(deckId)
             planned = plan.cards
             answeredKeys.clear()
             _state.value = _state.value.copy(
@@ -243,6 +294,8 @@ class SessionViewModel(
                 revealed = false,
                 remaining = plan.cards.size,
                 answeredToday = plan.answeredToday,
+                sessionDone = plan.sessionDone,
+                sessionTotal = plan.sessionTotal,
                 nextDueAt = plan.nextDueAt,
                 extraAdded = added,
                 noMoreExtra = false,
@@ -259,11 +312,21 @@ class SessionViewModel(
         /** The tap hint disappears once, after five cards. No permanent chrome. */
         private const val HINT_LIMIT = 5
 
-        fun factory(repo: LearningRepository, settings: SettingsStore): ViewModelProvider.Factory =
+        /**
+         * A dozen answers given by swiping is roughly two short sessions, which
+         * is where the movement stops being a thing you decide to do.
+         */
+        private const val SWIPE_FLUENCY = 12
+
+        fun factory(
+            repo: LearningRepository,
+            settings: SettingsStore,
+            deckId: String? = null
+        ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                    SessionViewModel(repo, settings) as T
+                    SessionViewModel(repo, settings, deckId) as T
             }
     }
 }

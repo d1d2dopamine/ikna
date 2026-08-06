@@ -1,6 +1,5 @@
 package dev.ikna.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
@@ -14,116 +13,189 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.ThemeMode
 
 /*
  * Paper and ink, one accent, right angles.
  *
  * What this deliberately is not: a Material 3 default. No dynamic colour from
- * the wallpaper (the palette used to change per phone, which is why it never
- * looked designed), no rounded corners, no elevation tints, no green/red pair on
+ * the wallpaper, no rounded corners, no elevation tints, no green/red pair on
  * the answer buttons. Punishment colours are a bad idea for anyone and a worse
  * one here.
+ *
+ * A theme is exactly four colours — background, ink, muted, accent — and
+ * everything else is derived from them. That is not minimalism for its own sake:
+ * it is what makes a user-defined theme possible at all. The old file also kept
+ * four colours as top-level constants shared by both schemes, which is why the
+ * light theme came out brown: a muted warm grey that works on near-black is a
+ * brown smudge on paper, and it was the same value in both.
  */
 
-private val Paper = Color(0xFFF1EFE9)
-private val PaperPanel = Color(0xFFE7E4DA)
-private val PaperLine = Color(0xFFC8C4B6)
-private val InkOnPaper = Color(0xFF262320)
-private val MutedOnPaper = Color(0xFF6A6454)
-private val AccentOnPaper = Color(0xFF4251A3)
+// ---- light: actually light -------------------------------------------------
+//
+// The previous "light" theme was #F1EFE9 paper with a #6A6454 brown for
+// secondary text — a beige scheme with a navy accent, which reads as an inverted
+// dark theme rather than as a light one. This is near-white and hue-neutral.
+private val LightBackground = Color(0xFFFBFAF8)
+private val LightInk = Color(0xFF2C2A27)
+private val LightMuted = Color(0xFF6B685F)
+private val LightAccent = Color(0xFF33469E)
 
-private val Ink = Color(0xFF100E0B)
-private val InkPanel = Color(0xFF1B1813)
-private val InkLine = Color(0xFF322D25)
-private val PaperOnInk = Color(0xFFEFEADE)
-private val MutedOnInk = Color(0xFF8C8574)
-private val AccentOnInk = Color(0xFF9AA6D8)
+// ---- dark ------------------------------------------------------------------
+private val DarkBackground = Color(0xFF121110)
+private val DarkInk = Color(0xFFEDE9E1)
+private val DarkMuted = Color(0xFF8F887A)
+private val DarkAccent = Color(0xFF97A4D8)
 
 /**
- * Mid-tone warm grey that reads as secondary on both schemes, so screens can use
- * one constant instead of branching on the theme.
+ * Reserved for destructive controls only: wiping data, starting over.
+ *
+ * Deliberately not part of [IknaPalette]. "This one is dangerous" has to survive
+ * any colour scheme the user invents, including one where the accent is red.
  */
-val IknaMuted = Color(0xFF8A8474)
-
-/** Line weight colour for borders and rules, readable on both schemes. */
-val IknaLine = Color(0xFF7A7466)
-
-/**
- * Swipe tints. "Remembered" is the accent, "forgot" is warm graphite — not red.
- * Forgetting is the normal half of the method and must not look like a mistake.
- */
-val IknaGood = Color(0xFF4251A3)
-val IknaAgain = Color(0xFF6E6656)
-
-/** Reserved for destructive controls only: wiping data, starting over. */
 val IknaDanger = Color(0xFFB44A34)
 
-private val DarkColors = darkColorScheme(
-    primary = AccentOnInk,
-    onPrimary = Ink,
-    secondary = AccentOnInk,
-    background = Ink,
-    onBackground = PaperOnInk,
-    surface = InkPanel,
-    onSurface = PaperOnInk,
-    surfaceVariant = InkPanel,
-    onSurfaceVariant = MutedOnInk,
-    outline = InkLine,
-    outlineVariant = InkLine,
-    error = IknaDanger,
-    onError = PaperOnInk
+/**
+ * A whole theme.
+ *
+ * Four colours in, everything else out. Panel and line are mixed from the first
+ * two rather than picked, so a custom theme cannot end up with a panel that is
+ * invisible against its own background.
+ */
+data class IknaPalette(
+    val background: Color,
+    val ink: Color,
+    val muted: Color,
+    val accent: Color
+) {
+    /** Surfaces that need to be a step away from the background. */
+    val panel: Color get() = mix(background, ink, 0.07f)
+
+    /** Borders and rules. */
+    val line: Color get() = mix(background, ink, 0.28f)
+
+    /** Drives the colour scheme choice and the system bar icons. */
+    val light: Boolean get() = isLight(background)
+}
+
+val DarkPalette = IknaPalette(
+    background = DarkBackground,
+    ink = DarkInk,
+    muted = DarkMuted,
+    accent = DarkAccent
 )
 
-private val LightColors = lightColorScheme(
-    primary = AccentOnPaper,
-    onPrimary = Paper,
-    secondary = AccentOnPaper,
-    background = Paper,
-    onBackground = InkOnPaper,
-    surface = PaperPanel,
-    onSurface = InkOnPaper,
-    surfaceVariant = PaperPanel,
-    onSurfaceVariant = MutedOnPaper,
-    outline = PaperLine,
-    outlineVariant = PaperLine,
-    error = IknaDanger,
-    onError = Paper
+val LightPalette = IknaPalette(
+    background = LightBackground,
+    ink = LightInk,
+    muted = LightMuted,
+    accent = LightAccent
 )
+
+private fun mix(a: Color, b: Color, t: Float): Color = Color(
+    red = a.red + (b.red - a.red) * t,
+    green = a.green + (b.green - a.green) * t,
+    blue = a.blue + (b.blue - a.blue) * t,
+    alpha = 1f
+)
+
+/** The user's four colours, as stored. */
+fun customPaletteOf(settings: IknaSettings): IknaPalette = IknaPalette(
+    background = Color(settings.customBackground),
+    ink = Color(settings.customInk),
+    muted = Color(settings.customMuted),
+    accent = Color(settings.customAccent)
+)
+
+/** Which palette a mode resolves to. Used by the theme and by the system bars. */
+fun paletteFor(settings: IknaSettings): IknaPalette = when (settings.theme) {
+    ThemeMode.DARK -> DarkPalette
+    ThemeMode.LIGHT -> LightPalette
+    ThemeMode.CUSTOM -> customPaletteOf(settings)
+}
 
 /**
- * Two poles and nothing in between: content is huge, service text is tiny and
- * monospaced. The gap is what gives the screen a rhythm — the old version set
- * everything two steps apart, which is why it read as flat and dull at once.
+ * Every Material slot the app actually reads, filled from four colours.
  *
- * Monospace for labels is a free way to look intentional without shipping a font
- * file, and it is the same family Material uses for nothing, so it reads as ours.
+ * onSurfaceVariant is the muted colour and outline is the line colour, so a
+ * screen never has to import a constant to draw secondary text — which is what
+ * made the old palette impossible to theme.
+ */
+private fun schemeOf(p: IknaPalette) = if (p.light) {
+    lightColorScheme(
+        primary = p.accent,
+        onPrimary = p.background,
+        secondary = p.accent,
+        onSecondary = p.background,
+        background = p.background,
+        onBackground = p.ink,
+        surface = p.panel,
+        onSurface = p.ink,
+        surfaceVariant = p.panel,
+        onSurfaceVariant = p.muted,
+        outline = p.line,
+        outlineVariant = p.line,
+        error = IknaDanger,
+        onError = p.background
+    )
+} else {
+    darkColorScheme(
+        primary = p.accent,
+        onPrimary = p.background,
+        secondary = p.accent,
+        onSecondary = p.background,
+        background = p.background,
+        onBackground = p.ink,
+        surface = p.panel,
+        onSurface = p.ink,
+        surfaceVariant = p.panel,
+        onSurfaceVariant = p.muted,
+        outline = p.line,
+        outlineVariant = p.line,
+        error = IknaDanger,
+        onError = p.background
+    )
+}
+
+/**
+ * Two poles and nothing in between: content is large, service text is small and
+ * monospaced.
+ *
+ * Weights come down a step from the previous version. Display text was
+ * ExtraBold at 50sp in near-black, which is not emphasis, it is a stain — the
+ * size already carries the emphasis and the weight was only adding ink.
+ *
+ * Nothing here names a font family except the labels, because no font file ships
+ * with the app yet and naming one that does not exist fails the build. Content
+ * therefore renders in the platform sans, which is the one honest placeholder
+ * until the bundled faces are chosen.
  */
 private val Mono = FontFamily.Monospace
 
 private val IknaTypography = Typography(
     displayLarge = TextStyle(
-        fontSize = 50.sp,
-        lineHeight = 54.sp,
-        fontWeight = FontWeight.ExtraBold,
-        letterSpacing = (-1.2).sp
+        fontSize = 46.sp,
+        lineHeight = 52.sp,
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = (-1.0).sp
     ),
     displayMedium = TextStyle(
-        fontSize = 40.sp,
-        lineHeight = 46.sp,
-        fontWeight = FontWeight.ExtraBold,
-        letterSpacing = (-0.8).sp
+        fontSize = 38.sp,
+        lineHeight = 44.sp,
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = (-0.7).sp
     ),
     displaySmall = TextStyle(
-        fontSize = 32.sp,
-        lineHeight = 38.sp,
-        fontWeight = FontWeight.ExtraBold,
-        letterSpacing = (-0.5).sp
+        fontSize = 30.sp,
+        lineHeight = 36.sp,
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = (-0.4).sp
     ),
-    headlineMedium = TextStyle(fontSize = 26.sp, lineHeight = 32.sp, fontWeight = FontWeight.Bold),
-    headlineSmall = TextStyle(fontSize = 21.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold),
-    titleMedium = TextStyle(fontSize = 16.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold),
-    bodyLarge = TextStyle(fontSize = 18.sp, lineHeight = 26.sp),
+    headlineMedium = TextStyle(fontSize = 25.sp, lineHeight = 32.sp, fontWeight = FontWeight.SemiBold),
+    headlineSmall = TextStyle(fontSize = 20.sp, lineHeight = 27.sp, fontWeight = FontWeight.SemiBold),
+    titleMedium = TextStyle(fontSize = 16.sp, lineHeight = 22.sp, fontWeight = FontWeight.Medium),
+    bodyLarge = TextStyle(fontSize = 17.sp, lineHeight = 25.sp),
     bodyMedium = TextStyle(fontSize = 15.sp, lineHeight = 22.sp),
     bodySmall = TextStyle(fontSize = 13.sp, lineHeight = 19.sp),
     labelLarge = TextStyle(
@@ -159,17 +231,11 @@ private val IknaShapes = Shapes(
 
 @Composable
 fun IknaTheme(
-    mode: ThemeMode = ThemeMode.SYSTEM,
+    palette: IknaPalette = DarkPalette,
     content: @Composable () -> Unit
 ) {
-    val dark = when (mode) {
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
-        ThemeMode.DARK -> true
-        ThemeMode.LIGHT -> false
-    }
-
     MaterialTheme(
-        colorScheme = if (dark) DarkColors else LightColors,
+        colorScheme = schemeOf(palette),
         typography = IknaTypography,
         shapes = IknaShapes,
         content = content
