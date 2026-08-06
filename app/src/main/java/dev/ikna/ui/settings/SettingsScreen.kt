@@ -36,6 +36,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -845,7 +846,17 @@ private fun Anchored(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .onGloballyPositioned { anchors[id] = it.positionInParent().y.roundToInt() }
+            .onGloballyPositioned { coords ->
+                // positionInParent() reads better, but it is an extension that has
+                // to be imported, and the import was missing — nothing here could
+                // tell me that until a build reached this file. The parent's own
+                // coordinates answer the same question using members only.
+                val y = coords.parentLayoutCoordinates
+                    ?.localPositionOf(coords, Offset.Zero)
+                    ?.y
+                    ?: 0f
+                anchors[id] = y.roundToInt()
+            }
     ) {
         content()
     }
