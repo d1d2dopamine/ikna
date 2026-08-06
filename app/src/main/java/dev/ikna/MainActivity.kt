@@ -13,6 +13,7 @@ import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.ui.nav.IknaNavHost
 import dev.ikna.ui.theme.IknaTheme
 import dev.ikna.ui.theme.paletteFor
+import dev.ikna.ui.theme.rememberContentFont
 
 class MainActivity : ComponentActivity() {
 
@@ -38,7 +39,12 @@ class MainActivity : ComponentActivity() {
                 enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
             }
 
-            IknaTheme(palette = palette) {
+            // The font the user installed, or nothing at all if they have not.
+            // Resolved once here, so every screen is set in it without any of
+            // them knowing that a custom font is a possibility.
+            val contentFont = rememberContentFont(settings.fontName)
+
+            IknaTheme(palette = palette, contentFont = contentFont) {
                 IknaNavHost(container = container, settings = settings)
             }
         }

@@ -75,6 +75,7 @@ fun SessionScreen(
         factory = SessionViewModel.factory(
             container.learningRepository,
             container.settings,
+            container.speaker,
             deckId
         )
     )
@@ -84,7 +85,7 @@ fun SessionScreen(
     val card = state.current
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopBar(state = state, onBack = onBack)
+        TopBar(state = state, onBack = onBack, onSpeak = vm::speakCurrent)
         IknaProgress(fraction = state.progress)
 
         Box(
@@ -176,7 +177,7 @@ fun SessionScreen(
  * is the minimum being reached, for one card only.
  */
 @Composable
-private fun TopBar(state: SessionUiState, onBack: () -> Unit) {
+private fun TopBar(state: SessionUiState, onBack: () -> Unit, onSpeak: () -> Unit) {
     val minimumJustMet = state.minimumMet && state.answeredToday == state.dailyMinimum
     val text = when {
         state.index == 0 && !state.revealed && state.remaining > 0 -> startEstimate(state)
@@ -200,6 +201,17 @@ private fun TopBar(state: SessionUiState, onBack: () -> Unit) {
             maxLines = 1,
             modifier = Modifier.weight(1f)
         )
+        // Sound lives in the bar, not on the card. The card is the one thing on
+        // this screen that must never grow a control, and the mark is only drawn
+        // when pressing it would not give the answer away.
+        if (state.speechReady && state.speakable) {
+            IknaIconButton(
+                glyph = IknaGlyph.SOUND,
+                onClick = onSpeak,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
         if (state.deckTitle != null) {
             Text(
                 text = state.deckTitle.uppercase(),
@@ -237,7 +249,11 @@ private fun EmptyState(
         }
 
         Text(
-            text = if (state.answeredToday > 0) "На сегодня всё" else "Сегодня карточек нет",
+            text = when {
+                state.reason == GovernorReason.PACK_EXHAUSTED -> "Колода пройдена"
+                state.answeredToday > 0 -> "На сегодня всё"
+                else -> "Сегодня карточек нет"
+            },
             style = MaterialTheme.typography.displaySmall,
             textAlign = TextAlign.Center
         )
@@ -337,7 +353,15 @@ private fun levelLabel(level: Level): String = when (level) {
     Level.PRODUCTION -> "сказать"
 }
 
+/**
+ * The end of a deck outranks the end of a day.
+ *
+ * "Новые чанки придут сами завтра" is true on almost every empty screen and
+ * false on exactly one: the deck with nothing left in it. There, tomorrow brings
+ * nothing new, and the app would go on promising it every single day.
+ */
 private fun emptyExplanation(state: SessionUiState): String = when {
+    state.reason == GovernorReason.PACK_EXHAUSTED -> reasonText(state.reason)
     state.answeredToday > 0 -> "План дня закрыт. Новые чанки придут сами завтра."
     else -> reasonText(state.reason)
 }
@@ -353,6 +377,10 @@ private fun reasonText(reason: GovernorReason): String = when (reason) {
     GovernorReason.LOW_ACCURACY -> "Пока старое не закрепится — без новых."
     GovernorReason.RETURN_MODE -> "Режим возвращения: несколько коротких дней, без долгов."
     GovernorReason.SAFETY_VALVE -> "Добавлю хотя бы один новый чанк, чтобы не стоять на месте."
+    GovernorReason.PACK_EXHAUSTED ->
+        "Новых чанков здесь больше нет — все уже знакомы. " +
+            "Повторения продолжат приходить по срокам, а за новым материалом " +
+            "нужна ещё одна колода."
 }
 
 private fun nextDueLabel(nextDueAt: Long?): String? {

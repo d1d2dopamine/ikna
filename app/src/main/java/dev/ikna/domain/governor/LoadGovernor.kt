@@ -40,7 +40,16 @@ enum class GovernorReason {
     LATE_NIGHT,
     LOW_ACCURACY,
     RETURN_MODE,
-    SAFETY_VALVE
+    SAFETY_VALVE,
+
+    /**
+     * Nothing left in the deck to meet for the first time.
+     *
+     * Not a governor decision — the governor rules on how much new material is
+     * allowed, never on how much exists — so it is set by the repository, which
+     * is the layer that can count. It is here because the screen reads one enum.
+     */
+    PACK_EXHAUSTED
 }
 
 data class GovernorDecision(

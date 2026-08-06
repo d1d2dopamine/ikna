@@ -1,9 +1,12 @@
 package dev.ikna.ui.settings
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.provider.OpenableColumns
+import android.speech.tts.TextToSpeech
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -36,9 +39,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
 import dev.ikna.MainActivity
+import dev.ikna.audio.SpeakerStatus
+import dev.ikna.audio.SpeakerVoice
+import dev.ikna.data.export.SettingsBackup
+import dev.ikna.data.prefs.FontStore
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.LoadPreset
 import dev.ikna.data.prefs.ThemeMode
+import dev.ikna.data.prefs.voiceFor
 import dev.ikna.ui.theme.IknaChip
 import dev.ikna.ui.theme.IknaDanger
 import dev.ikna.ui.theme.IknaDialog
@@ -103,6 +111,62 @@ fun SettingsScreen(
         normMeasured = container.learningRepository.normIsMeasured()
     }
 
+    // Voices are asked for when the screen opens and again if speech is switched
+    // on. Answering means starting the engine, which takes seconds, so it never
+    // happens while drawing.
+    var speechStatus by remember { mutableStateOf(SpeakerStatus.UNKNOWN) }
+    var speechLangs by remember { mutableStateOf<List<String>>(emptyList()) }
+    var speechVoices by remember { mutableStateOf<Map<String, List<SpeakerVoice>>>(emptyMap()) }
+    LaunchedEffect(settings.speechEnabled) {
+        if (!settings.speechEnabled) return@LaunchedEffect
+        val langs = withContext(Dispatchers.IO) {
+            container.deckRepository.decks()
+                .map { it.lang }
+                .filter { it.isNotBlank() && it != "custom" }
+                .distinct()
+        }
+        speechLangs = langs
+        if (!container.speaker.warmUp()) {
+            speechStatus = SpeakerStatus.NO_ENGINE
+            return@LaunchedEffect
+        }
+        if (langs.isEmpty()) {
+            speechStatus = SpeakerStatus.READY
+            return@LaunchedEffect
+        }
+        val found = langs.associateWith { container.speaker.voices(it) }
+        speechVoices = found
+        speechStatus = if (found.values.all { it.isEmpty() }) SpeakerStatus.NO_VOICE
+        else SpeakerStatus.READY
+    }
+
+    // A font file is validated before it is stored, not after: Compose parses a
+    // font on the first frame that lays out text, so a bad file would throw on
+    // every screen at once, including this one.
+    val fontPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            busy = true
+            val name = withContext(Dispatchers.IO) { displayNameOf(context, uri) }
+            val problem = withContext(Dispatchers.IO) {
+                runCatching {
+                    context.contentResolver.openInputStream(uri)
+                        ?.use { FontStore.install(context, it) }
+                        ?: "Не удалось открыть файл"
+                }.getOrElse { "Не удалось открыть файл" }
+            }
+            if (problem == null) {
+                container.settings.setFontName(name)
+                message = "Шрифт применён: " + name
+            } else {
+                message = problem
+            }
+            busy = false
+        }
+    }
+
     val notificationPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -115,9 +179,34 @@ fun SettingsScreen(
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
             busy = true
+            val text = withContext(Dispatchers.IO) {
+                runCatching {
+                    context.contentResolver.openInputStream(uri)
+                        ?.bufferedReader()?.use { it.readText() } ?: ""
+                }.getOrDefault("")
+            }
+
+            // One button for both files. Asking the user which of the two they
+            // picked would be asking them to remember a distinction the app
+            // invented; the file says what it is in its first line.
+            if (SettingsBackup.looksLikeSettings(text)) {
+                val snapshot = SettingsBackup.decode(text)
+                if (snapshot == null) {
+                    message = "Файл настроек повреждён"
+                } else {
+                    SettingsBackup.apply(container.settings, snapshot)
+                    message = if (snapshot.fontName.isBlank()) {
+                        "Настройки восстановлены"
+                    } else {
+                        "Настройки восстановлены. Шрифт «" + snapshot.fontName +
+                            "» нужно выбрать заново — сам файл шрифта твой, и в бэкап он не кладётся."
+                    }
+                }
+                busy = false
+                return@launch
+            }
+
             val result = withContext(Dispatchers.IO) {
-                val text = context.contentResolver.openInputStream(uri)
-                    ?.bufferedReader()?.use { it.readText() } ?: ""
                 container.restoreRepository.restoreFromJsonl(text)
             }
             busy = false
@@ -267,6 +356,173 @@ fun SettingsScreen(
         }
 
         Section(
+            "Шрифт",
+            "Свой .ttf или .otf для текста карточек и заголовков. Служебные подписи остаются " +
+                "моноширинными — по ним читается интерфейс. Файл проверяется перед тем, как его применить: " +
+                "битый шрифт уронил бы все экраны сразу, включая этот."
+        ) {
+            Text(
+                text = if (settings.fontName.isBlank()) "СЕЙЧАС · СИСТЕМНЫЙ"
+                else "СЕЙЧАС · " + settings.fontName.uppercase(),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                IknaWideButton(
+                    label = "ВЫБРАТЬ ФАЙЛ",
+                    modifier = Modifier.weight(1f),
+                    height = 52.dp,
+                    enabled = !busy,
+                    onClick = { fontPicker.launch(arrayOf("*/*")) }
+                )
+                if (settings.fontName.isNotBlank()) {
+                    IknaWideButton(
+                        label = "СБРОСИТЬ",
+                        modifier = Modifier.weight(1f),
+                        height = 52.dp,
+                        enabled = !busy,
+                        onClick = {
+                            scope.launch {
+                                container.settings.setFontName("")
+                                withContext(Dispatchers.IO) { FontStore.clear(context) }
+                                message = "Вернул системный шрифт"
+                            }
+                        }
+                    )
+                }
+            }
+        }
+
+        Section(
+            "Озвучка",
+            "Говорит движок синтеза речи, который уже стоит на телефоне. Ничего не скачивается и " +
+                "ничего не уходит в сеть: голоса, которым нужен интернет, в список не попадают вообще."
+        ) {
+            ToggleRow(
+                title = "Читать вслух",
+                subtitle = "Значок звука появляется только там, где он не выдаёт ответ",
+                checked = settings.speechEnabled,
+                onCheckedChange = { on ->
+                    scope.launch {
+                        container.settings.setSpeechEnabled(on)
+                        if (!on) container.speaker.stop()
+                    }
+                }
+            )
+
+            if (settings.speechEnabled) {
+                when (speechStatus) {
+                    SpeakerStatus.UNKNOWN -> {
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            text = "смотрю, что есть на телефоне…",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    SpeakerStatus.NO_ENGINE -> {
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            text = "На телефоне нет движка синтеза речи. Подойдёт любой офлайновый — " +
+                                "например RHVoice или SherpaTTS из F-Droid. После установки вернись сюда.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        IknaTextButton(
+                            label = "НАСТРОЙКИ СИНТЕЗА РЕЧИ",
+                            onClick = {
+                                if (!openTtsSettings(context)) {
+                                    message = "Не нашёл этот раздел в настройках телефона"
+                                }
+                            }
+                        )
+                    }
+
+                    SpeakerStatus.NO_VOICE -> {
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            text = "Движок есть, но офлайн-голосов для этих языков в нём нет. Их надо доставить — " +
+                                "один раз, и дальше они работают без сети.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        IknaTextButton(
+                            label = "ДОУСТАНОВИТЬ ГОЛОСА",
+                            onClick = {
+                                if (!installVoices(context)) {
+                                    message = "Движок не умеет докачивать голоса сам — посмотри в его настройках"
+                                }
+                            }
+                        )
+                    }
+
+                    SpeakerStatus.READY -> {
+                        speechLangs.forEach { lang ->
+                            val list = speechVoices[lang].orEmpty()
+                            Spacer(Modifier.height(14.dp))
+                            Text(
+                                text = langLabel(lang),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            if (list.isEmpty()) {
+                                Text(
+                                    text = "офлайн-голосов для этого языка нет",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            } else {
+                                val chosen = settings.voiceFor(lang)
+                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    IknaChip(
+                                        label = "ПО УМОЛЧАНИЮ",
+                                        selected = chosen == null,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        onClick = {
+                                            scope.launch {
+                                                container.settings.setVoiceFor(lang, null)
+                                                container.speaker.clearCache()
+                                            }
+                                        }
+                                    )
+                                    list.take(6).forEach { voice ->
+                                        IknaChip(
+                                            label = voice.label,
+                                            selected = voice.name == chosen,
+                                            modifier = Modifier.fillMaxWidth(),
+                                            onClick = {
+                                                scope.launch {
+                                                    container.settings.setVoiceFor(lang, voice.name)
+                                                    // Cached audio was made with
+                                                    // the old voice; keeping it
+                                                    // would play the previous one
+                                                    // back for weeks.
+                                                    container.speaker.clearCache()
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            text = "Первый звук после запуска может задуматься на пару секунд — движок просыпается. " +
+                                "Следующая карточка озвучивается заранее, поэтому дальше звук идёт сразу.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+
+        Section(
             "Перерывы",
             "Настраивать нечего и включать нечего. Приложение смотрит, сколько ты реально занимался, и само сдвигает сроки: день без заходов — на день, день вполсилы — на полдня. Новые чанки не добавляются, пока темп не вернётся. Долгов не копится."
         ) {}
@@ -291,12 +547,30 @@ fun SettingsScreen(
                     onClick = {
                         scope.launch {
                             busy = true
-                            val ok = withContext(Dispatchers.IO) {
-                                runCatching { container.jsonExporter.export() }.isSuccess
+                            val current = container.settings.current()
+                            // Two files: the log, and the look. The second one is
+                            // small and it is the difference between a restore
+                            // that gives your app back and one that gives you a
+                            // stranger's app with your history in it.
+                            val outcome = withContext(Dispatchers.IO) {
+                                runCatching {
+                                    val log = container.jsonExporter.export()
+                                    container.jsonExporter.exportSettings(
+                                        SettingsBackup.encode(current)
+                                    )
+                                    log
+                                }
                             }
                             busy = false
-                            message = if (ok) "Файл сохранён в Документы/Ikna"
-                            else "Не удалось сохранить файл"
+                            // An empty log is not a failure, and saying "не
+                            // удалось" for it sends the user looking for a
+                            // problem that does not exist.
+                            message = when {
+                                outcome.isFailure -> "Не удалось сохранить файл"
+                                outcome.getOrNull() == null ->
+                                    "Настройки сохранены. Журнал пока пуст — выгружать нечего."
+                                else -> "Журнал и настройки сохранены в Документы/Ikna"
+                            }
                         }
                     }
                 )
@@ -569,3 +843,49 @@ private fun themeLabel(mode: ThemeMode): String = when (mode) {
 
 private fun timeText(hour: Int, minute: Int): String =
     String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
+
+private fun langLabel(lang: String): String = when (lang.substringBefore('-').lowercase()) {
+    "pl" -> "ПОЛЬСКИЙ"
+    "ru" -> "РУССКИЙ"
+    "en" -> "АНГЛИЙСКИЙ"
+    "de" -> "НЕМЕЦКИЙ"
+    "es" -> "ИСПАНСКИЙ"
+    "fr" -> "ФРАНЦУЗСКИЙ"
+    else -> lang.uppercase()
+}
+
+/**
+ * Opens the phone's speech settings. Not every ROM has this screen, so the
+ * caller is told whether it worked instead of the app throwing.
+ */
+private fun openTtsSettings(context: Context): Boolean = runCatching {
+    context.startActivity(
+        Intent("com.android.settings.TTS_SETTINGS").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    )
+    true
+}.getOrDefault(false)
+
+/** Asks the installed engine to fetch its voice data. Same caveat as above. */
+private fun installVoices(context: Context): Boolean = runCatching {
+    context.startActivity(
+        Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    )
+    true
+}.getOrDefault(false)
+
+/** The picked file's own name, for showing which font is in use. */
+private fun displayNameOf(context: Context, uri: Uri): String {
+    runCatching {
+        context.contentResolver
+            .query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+            ?.use { cursor ->
+                val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (index >= 0 && cursor.moveToFirst()) {
+                    val name = cursor.getString(index)
+                    if (!name.isNullOrBlank()) return name
+                }
+            }
+    }
+    return uri.lastPathSegment?.substringAfterLast('/').orEmpty().ifBlank { "шрифт" }
+}

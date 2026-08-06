@@ -49,6 +49,22 @@ interface ChunkDao {
     @Query("SELECT COUNT(*) FROM chunks")
     suspend fun chunkCount(): Int
 
+    // How much is left to meet for the first time. The session screen needs this
+    // to tell "nothing is due yet" apart from "there is nothing left" — the two
+    // look identical in an empty plan, and only one of them means new cards are
+    // coming tomorrow.
+    @Query(
+        "SELECT COUNT(*) FROM chunks WHERE packId IN (SELECT id FROM packs WHERE isActive = 1) " +
+            "AND id NOT IN (SELECT DISTINCT chunkId FROM cards)"
+    )
+    suspend fun untouchedCount(): Int
+
+    @Query(
+        "SELECT COUNT(*) FROM chunks WHERE packId = :packId " +
+            "AND id NOT IN (SELECT DISTINCT chunkId FROM cards)"
+    )
+    suspend fun untouchedCountFor(packId: String): Int
+
     // ---- per deck counters, for the Decks screen -------------------------
 
     @Query("SELECT COUNT(*) FROM chunks WHERE packId = :packId")

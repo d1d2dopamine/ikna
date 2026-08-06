@@ -71,6 +71,21 @@ data class IknaSettings(
     val haptics: Boolean = true,
     val animations: Boolean = true,
     val autoExport: Boolean = true,
+    /**
+     * Speech, through the engine already installed on the phone. On by default
+     * because on a phone that has no engine it simply never appears — the mark
+     * is not drawn rather than drawn dead.
+     */
+    val speechEnabled: Boolean = true,
+    /**
+     * Chosen voice per language, stored as "pl=voice;ru=voice". A map is not a
+     * preference type, and one string keeps every language's choice in a single
+     * write — which matters, because a half-written pair is a voice that silently
+     * falls back to the engine default.
+     */
+    val speechVoices: String = "",
+    /** File name of the installed content font. Empty means the built-in one. */
+    val fontName: String = "",
     val onboardingDone: Boolean = false,
     /** How many times the tap-to-reveal hint has been shown. Stops at 5. */
     val revealHintsShown: Int = 0,
@@ -100,6 +115,9 @@ class SettingsStore(private val context: Context) {
         val haptics = booleanPreferencesKey("haptics")
         val animations = booleanPreferencesKey("animations")
         val autoExport = booleanPreferencesKey("autoExport")
+        val speechEnabled = booleanPreferencesKey("speechEnabled")
+        val speechVoices = stringPreferencesKey("speechVoices")
+        val fontName = stringPreferencesKey("fontName")
         val onboardingDone = booleanPreferencesKey("onboardingDone")
         val revealHintsShown = intPreferencesKey("revealHintsShown")
         val swipesDone = intPreferencesKey("swipesDone")
@@ -125,6 +143,9 @@ class SettingsStore(private val context: Context) {
             haptics = p[Keys.haptics] ?: defaults.haptics,
             animations = p[Keys.animations] ?: defaults.animations,
             autoExport = p[Keys.autoExport] ?: defaults.autoExport,
+            speechEnabled = p[Keys.speechEnabled] ?: defaults.speechEnabled,
+            speechVoices = p[Keys.speechVoices] ?: defaults.speechVoices,
+            fontName = p[Keys.fontName] ?: defaults.fontName,
             onboardingDone = p[Keys.onboardingDone] ?: defaults.onboardingDone,
             revealHintsShown = p[Keys.revealHintsShown] ?: defaults.revealHintsShown,
             swipesDone = p[Keys.swipesDone] ?: defaults.swipesDone
@@ -158,6 +179,23 @@ class SettingsStore(private val context: Context) {
     suspend fun setAutoExport(on: Boolean) = put { it[Keys.autoExport] = on }
     suspend fun setOnboardingDone(done: Boolean) = put { it[Keys.onboardingDone] = done }
 
+    suspend fun setSpeechEnabled(on: Boolean) = put { it[Keys.speechEnabled] = on }
+
+    /** Whole map at once. Used by a restore, which brings every language back. */
+    suspend fun setSpeechVoices(value: String) = put { it[Keys.speechVoices] = value }
+
+    /**
+     * One language's voice, read-modify-write inside the same edit so choosing a
+     * Polish voice cannot drop the Russian one picked a second earlier.
+     */
+    suspend fun setVoiceFor(lang: String, voiceName: String?) = put { prefs ->
+        val map = parseVoiceMap(prefs[Keys.speechVoices] ?: "").toMutableMap()
+        if (voiceName.isNullOrBlank()) map.remove(lang) else map[lang] = voiceName
+        prefs[Keys.speechVoices] = encodeVoiceMap(map)
+    }
+
+    suspend fun setFontName(name: String) = put { it[Keys.fontName] = name }
+
     suspend fun setReminder(enabled: Boolean, hour: Int, minute: Int) = put {
         it[Keys.reminderEnabled] = enabled
         it[Keys.reminderHour] = hour.coerceIn(0, 23)
@@ -183,4 +221,42 @@ class SettingsStore(private val context: Context) {
     private suspend fun put(block: (androidx.datastore.preferences.core.MutablePreferences) -> Unit) {
         context.iknaDataStore.edit { block(it) }
     }
+}
+
+// ---- voice map -------------------------------------------------------------
+//
+// Deliberately hand-rolled rather than JSON: it is two or three pairs, it has to
+// survive being read by an older build, and a parse failure here must never be
+// able to take the settings screen down. Anything malformed is skipped and the
+// engine default is used for that language.
+
+fun parseVoiceMap(value: String): Map<String, String> =
+    value.split(';')
+        .asSequence()
+        .mapNotNull { pair ->
+            val at = pair.indexOf('=')
+            if (at <= 0 || at == pair.lastIndex) return@mapNotNull null
+            val lang = pair.substring(0, at).trim()
+            val voice = pair.substring(at + 1).trim()
+            if (lang.isEmpty() || voice.isEmpty()) null else lang to voice
+        }
+        .toMap()
+
+fun encodeVoiceMap(map: Map<String, String>): String =
+    map.entries
+        .filter { it.key.isNotBlank() && it.value.isNotBlank() }
+        .joinToString(";") { it.key + "=" + it.value }
+
+/**
+ * The voice chosen for a language, or null to let the engine decide.
+ *
+ * Matching is by the language part alone: a deck tagged "pl" and a voice stored
+ * for "pl-PL" are the same choice to everyone except a string comparison.
+ */
+fun IknaSettings.voiceFor(lang: String): String? {
+    if (lang.isBlank()) return null
+    val map = parseVoiceMap(speechVoices)
+    map[lang]?.let { return it }
+    val head = lang.substringBefore('-').lowercase()
+    return map.entries.firstOrNull { it.key.substringBefore('-').lowercase() == head }?.value
 }

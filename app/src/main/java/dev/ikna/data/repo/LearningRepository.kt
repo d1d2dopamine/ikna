@@ -438,12 +438,26 @@ class LearningRepository(
         val scope = if (deckId == null) all else all.filter { it.chunk.packId == deckId }
         val pending = scope.filterNot { it.card.key in answered }
 
+        val storedReason = runCatching { GovernorReason.valueOf(plan.reason) }
+            .getOrDefault(GovernorReason.OK)
+
+        // A finished deck and a quiet day produce exactly the same empty plan,
+        // and the governor cannot tell them apart: it rules on how much new
+        // material is allowed, never on how much exists. So the one layer that
+        // can count does it here. Without this the end of a deck was reported as
+        // "everything is repeated, the next ones are not due yet" — a promise of
+        // cards that are never coming.
+        val reason = if (pending.isEmpty() && untouchedIn(deckId) == 0) {
+            GovernorReason.PACK_EXHAUSTED
+        } else {
+            storedReason
+        }
+
         return SessionPlan(
             cards = pending,
             plannedTotal = plan.plannedTotal,
             answeredToday = statsDao.day(plan.day)?.reviewsDone ?: 0,
-            reason = runCatching { GovernorReason.valueOf(plan.reason) }
-                .getOrDefault(GovernorReason.OK),
+            reason = reason,
             nextDueAt = cardDao.nextDueAt(now),
             deckId = deckId,
             deckTitle = deckId?.let { id -> chunkDao.pack(id)?.title ?: id },
@@ -451,6 +465,15 @@ class LearningRepository(
             sessionDone = scope.size - pending.size
         )
     }
+
+    /**
+     * Chunks never met, in one deck or across every active deck.
+     *
+     * Zero does not mean the deck is over for good — its cards keep coming back
+     * for review — it means there is nothing left in it to meet for a first time.
+     */
+    private suspend fun untouchedIn(deckId: String?): Int =
+        if (deckId == null) chunkDao.untouchedCount() else chunkDao.untouchedCountFor(deckId)
 
     /**
      * What each deck still owes today.

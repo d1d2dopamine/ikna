@@ -3,6 +3,18 @@
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!--
+        Android 11 and later hide other installed packages by default, and a
+        speech engine is another package. Without this the platform answers
+        "no engine" on a phone that has one, and the speaker mark would never
+        appear. This asks for visibility of speech services only.
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
+
     <application
         android:name=".IknaApp"
         android:allowBackup="true"

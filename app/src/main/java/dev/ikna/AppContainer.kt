@@ -2,6 +2,7 @@ package dev.ikna
 
 import android.content.Context
 import dev.ikna.data.db.IknaDatabase
+import dev.ikna.audio.Speaker
 import dev.ikna.data.export.JsonExporter
 import dev.ikna.data.pack.PackLoader
 import dev.ikna.data.prefs.SettingsStore
@@ -88,6 +89,13 @@ class AppContainer(context: Context) {
     }
 
     val jsonExporter = JsonExporter(context, db.reviewDao())
+
+    /**
+     * Speech, through whatever engine the phone has. Held here because starting
+     * one takes seconds and a per-screen instance would pay that price again on
+     * every navigation.
+     */
+    val speaker = Speaker(context)
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 

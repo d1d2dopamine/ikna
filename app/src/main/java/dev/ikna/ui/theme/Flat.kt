@@ -57,7 +57,7 @@ import androidx.compose.ui.window.Dialog
  * clip-art, and a pulled-in icon font would bring Material's rounded geometry
  * back through the side door.
  */
-enum class IknaGlyph { SPARK, STACK, BARS, SLIDERS, GEAR, PLUS, BACK }
+enum class IknaGlyph { SPARK, STACK, BARS, SLIDERS, GEAR, PLUS, BACK, SOUND }
 
 @Composable
 fun IknaGlyphIcon(
@@ -133,6 +133,22 @@ fun IknaGlyphIcon(
                 val mid = (s - bar) / 2f
                 drawRect(color, Offset(mid, 0f), Size(bar, s))
                 drawRect(color, Offset(0f, mid), Size(s, bar))
+            }
+            // Speech. Angular on purpose — a rounded speaker would be the only
+            // curve in the app.
+            IknaGlyph.SOUND -> {
+                val cone = Path().apply {
+                    moveTo(s * 0.04f, s * 0.36f)
+                    lineTo(s * 0.24f, s * 0.36f)
+                    lineTo(s * 0.46f, s * 0.12f)
+                    lineTo(s * 0.46f, s * 0.88f)
+                    lineTo(s * 0.24f, s * 0.64f)
+                    lineTo(s * 0.04f, s * 0.64f)
+                    close()
+                }
+                drawPath(cone, color)
+                drawRect(color, Offset(s * 0.60f, s * 0.34f), Size(s * 0.09f, s * 0.32f))
+                drawRect(color, Offset(s * 0.78f, s * 0.22f), Size(s * 0.09f, s * 0.56f))
             }
             // Back out of a screen.
             IknaGlyph.BACK -> {

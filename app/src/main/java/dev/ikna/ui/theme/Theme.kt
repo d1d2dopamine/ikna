@@ -12,13 +12,17 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.ikna.data.prefs.FontStore
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.ThemeMode
 
@@ -235,15 +239,62 @@ private val IknaShapes = Shapes(
     extraLarge = Square
 )
 
+/**
+ * The same scale, set in the user's own font.
+ *
+ * Only the reading styles change. The mono labels stay mono on purpose: they are
+ * the app's instrument panel — counters, section marks, button captions — and
+ * they are legible because they are monospaced and spaced out, not because of
+ * which face they use. Letting a decorative font into them is how a settings
+ * screen turns into a ransom note.
+ */
+private fun typographyOf(content: FontFamily?): Typography {
+    if (content == null) return IknaTypography
+    val base = IknaTypography
+    return base.copy(
+        displayLarge = base.displayLarge.copy(fontFamily = content),
+        displayMedium = base.displayMedium.copy(fontFamily = content),
+        displaySmall = base.displaySmall.copy(fontFamily = content),
+        headlineMedium = base.headlineMedium.copy(fontFamily = content),
+        headlineSmall = base.headlineSmall.copy(fontFamily = content),
+        titleMedium = base.titleMedium.copy(fontFamily = content),
+        bodyLarge = base.bodyLarge.copy(fontFamily = content),
+        bodyMedium = base.bodyMedium.copy(fontFamily = content),
+        bodySmall = base.bodySmall.copy(fontFamily = content)
+    )
+}
+
+/**
+ * Loads the installed font file, or nothing.
+ *
+ * Every failure here has to end in null rather than an exception. Compose parses
+ * a font at layout time, not at load time, so a bad file does not fail on the
+ * screen where it was chosen — it throws on the next frame of every screen,
+ * including the one with the button that would undo it. The file is validated
+ * before it is ever stored (see FontStore), and this is the second line: a font
+ * that disappeared, or was truncated on the way in, simply does not apply.
+ */
+@Composable
+fun rememberContentFont(fontName: String): FontFamily? {
+    val context = LocalContext.current
+    return remember(fontName) {
+        if (fontName.isBlank()) return@remember null
+        val file = FontStore.file(context)
+        if (!file.exists() || file.length() <= 0) return@remember null
+        runCatching { FontFamily(Font(file)) }.getOrNull()
+    }
+}
+
 @Composable
 fun IknaTheme(
     palette: IknaPalette = DarkPalette,
+    contentFont: FontFamily? = null,
     content: @Composable () -> Unit
 ) {
     val scheme = schemeOf(palette)
     MaterialTheme(
         colorScheme = scheme,
-        typography = IknaTypography,
+        typography = typographyOf(contentFont),
         shapes = IknaShapes
     ) {
         // Two defaults were quietly overriding the whole palette.

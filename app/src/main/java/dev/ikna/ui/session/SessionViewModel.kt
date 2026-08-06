@@ -3,10 +3,13 @@ package dev.ikna.ui.session
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dev.ikna.audio.Speaker
 import dev.ikna.data.prefs.SettingsStore
+import dev.ikna.data.prefs.voiceFor
 import dev.ikna.data.repo.LearningRepository
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.governor.GovernorReason
+import dev.ikna.domain.session.Level
 import dev.ikna.domain.session.SessionCard
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,6 +58,12 @@ data class SessionUiState(
      * under a thumb that is already moving.
      */
     val swipeFluent: Boolean = false,
+    /**
+     * A speech engine answered and has an offline voice for this material. Until
+     * it does, the speaker mark is not drawn at all: a control that does nothing
+     * when pressed is worse than a missing one.
+     */
+    val speechReady: Boolean = false,
     val finished: Boolean = false
 ) {
     val current: SessionCard? get() = queue.getOrNull(index)
@@ -76,6 +85,19 @@ data class SessionUiState(
 
     /** The level of the next question, so the next step is never a surprise. */
     val nextCard: SessionCard? get() = queue.getOrNull(index + 1)
+
+    /**
+     * Whether saying it out loud right now would hand over the answer.
+     *
+     * An introduction and a recognition card already show the sentence, so
+     * hearing it adds pronunciation to something visible. A cloze with a gap in
+     * it, or a production card showing only the translation, would be the answer
+     * itself — those wait until the card is turned.
+     */
+    val speakable: Boolean
+        get() = current?.let { card ->
+            encoding || card.level == Level.RECOGNITION || revealed
+        } == true
 }
 
 /**
@@ -93,6 +115,7 @@ data class SessionUiState(
 class SessionViewModel(
     private val repo: LearningRepository,
     private val settings: SettingsStore,
+    private val speaker: Speaker,
     private val deckId: String? = null
 ) : ViewModel() {
 
@@ -116,7 +139,88 @@ class SessionViewModel(
     private var hintsShown = 0
     private var swipesDone = 0
 
-    init { load() }
+    init {
+        load()
+        warmUpSpeech()
+    }
+
+    /**
+     * Starting a speech engine is the slow part — seconds on some phones — and
+     * saying six words afterwards is not. So it starts while the first card is
+     * still being read, never on the press of the speaker mark.
+     */
+    private fun warmUpSpeech() {
+        viewModelScope.launch {
+            if (!settings.current().speechEnabled) return@launch
+            val ready = speaker.warmUp()
+            _state.value = _state.value.copy(speechReady = ready)
+            if (ready) onCardShown()
+        }
+    }
+
+    /**
+     * The speaker mark. Plays the cached audio when there is some, otherwise asks
+     * the engine directly rather than letting the press do nothing visible while
+     * a file is written.
+     */
+    fun speakCurrent() {
+        val s = _state.value
+        val card = s.current ?: return
+        if (!s.speakable) return
+        viewModelScope.launch {
+            val prefs = settings.current()
+            if (!prefs.speechEnabled) return@launch
+            speaker.speak(spokenText(card), card.chunk.lang, prefs.voiceFor(card.chunk.lang))
+        }
+    }
+
+    /**
+     * Runs whenever the card in front changes.
+     *
+     * Two quiet things happen: the next card is synthesised in the background so
+     * its mark answers instantly, and a first contact speaks by itself — but only
+     * if its audio is already waiting. Sound that arrives on its own two seconds
+     * late, over a card being read, is worse than no sound, so nothing here ever
+     * makes the card wait.
+     */
+    private fun onCardShown() {
+        viewModelScope.launch {
+            val s = _state.value
+            if (!s.speechReady) return@launch
+            val prefs = settings.current()
+            if (!prefs.speechEnabled) return@launch
+
+            val card = s.current
+            if (card != null && s.encoding) {
+                speaker.speakIfReady(
+                    spokenText(card),
+                    card.chunk.lang,
+                    prefs.voiceFor(card.chunk.lang)
+                )
+            }
+
+            listOfNotNull(card, s.nextCard).forEach { ahead ->
+                speaker.prefetch(
+                    spokenText(ahead),
+                    ahead.chunk.lang,
+                    prefs.voiceFor(ahead.chunk.lang)
+                )
+            }
+        }
+    }
+
+    /**
+     * Always the whole sentence in the target language, never the bare chunk and
+     * never the translation. A chunk pronounced alone loses the rhythm it has
+     * inside a sentence, and that rhythm is most of what makes it stick.
+     */
+    private fun spokenText(card: SessionCard): String =
+        card.chunk.contextSentence.ifBlank { card.chunk.text }
+
+    override fun onCleared() {
+        super.onCleared()
+        speaker.stop()
+    }
 
     fun load(showLoading: Boolean = true) {
         viewModelScope.launch {
@@ -147,6 +251,7 @@ class SessionViewModel(
                 finished = plan.cards.isEmpty()
             )
             shownAt = System.currentTimeMillis()
+            onCardShown()
         }
     }
 
@@ -174,6 +279,7 @@ class SessionViewModel(
             revealed = false
         )
         shownAt = System.currentTimeMillis()
+        onCardShown()
     }
 
     /**
@@ -222,6 +328,7 @@ class SessionViewModel(
             finished = nextIndex >= queue.size
         )
         shownAt = now
+        onCardShown()
 
         viewModelScope.launch { repo.answer(card, rating, duration, now) }
         viewModelScope.launch {
@@ -265,6 +372,7 @@ class SessionViewModel(
                 finished = ordered.isEmpty()
             )
             shownAt = System.currentTimeMillis()
+            onCardShown()
         }
     }
 
@@ -303,6 +411,7 @@ class SessionViewModel(
                 finished = plan.cards.isEmpty()
             )
             shownAt = System.currentTimeMillis()
+            onCardShown()
         }
     }
 
@@ -321,12 +430,13 @@ class SessionViewModel(
         fun factory(
             repo: LearningRepository,
             settings: SettingsStore,
+            speaker: Speaker,
             deckId: String? = null
         ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                    SessionViewModel(repo, settings, deckId) as T
+                    SessionViewModel(repo, settings, speaker, deckId) as T
             }
     }
 }
