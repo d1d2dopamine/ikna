@@ -33,7 +33,6 @@ import dev.ikna.domain.session.Level
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
-import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaWideButton
 import java.time.Instant
@@ -60,8 +59,6 @@ import java.time.temporal.ChronoUnit
  */
 
 private val BAR_HEIGHT = 44.dp
-private val HINT_HEIGHT = 26.dp
-private val ACTION_HEIGHT = 124.dp
 private val UNDO_HEIGHT = 46.dp
 private val EDGE = 20.dp
 
@@ -133,14 +130,14 @@ fun SessionScreen(
                         answer = card.answer,
                         hint = if (card.level == Level.CLOZE) card.chunk.translation else null,
                         revealed = state.revealed,
-                        showTapHint = state.showRevealHint,
+                        showTapHint = false,
                         fromAmnesty = card.fromAmnesty,
                         progressX = progressX,
                         progressY = progressY,
                         onTap = vm::reveal,
                         tapEnabled = !state.revealed,
                         modifier = Modifier.fillMaxSize(),
-                        showSwipeLegend = !state.swipeFluent
+                        showSwipeLegend = false
                     )
                 }
 
@@ -150,19 +147,6 @@ fun SessionScreen(
                     onExtra = vm::addExtra
                 )
             }
-        }
-
-        if (card != null && !state.loading) {
-            HintLine(state = state, level = card.level)
-            IknaRule()
-            ActionArea(
-                encoding = state.encoding,
-                revealed = state.revealed,
-                fluent = state.swipeFluent,
-                onAcknowledge = vm::acknowledgeEncoding,
-                onReveal = vm::reveal,
-                onRate = { rating -> vm.rate(rating) }
-            )
         }
 
         UndoBar(
@@ -224,136 +208,6 @@ private fun TopBar(state: SessionUiState, onBack: () -> Unit) {
                 maxLines = 1,
                 modifier = Modifier.padding(end = 14.dp)
             )
-        }
-    }
-}
-
-/** Reserved room for one hint. Empty is a valid state and takes the same space. */
-@Composable
-private fun HintLine(state: SessionUiState, level: Level) {
-    val text = when {
-        state.encoding -> "скажи вслух один раз — потом тап по карточке"
-        state.revealed && !state.swipeFluent -> "то же самое можно свайпом"
-        state.revealed -> ""
-        level == Level.PRODUCTION -> "скажи вслух, потом открой"
-        state.showRevealHint -> "тап по карточке — или кнопка ниже"
-        else -> ""
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(HINT_HEIGHT)
-            .padding(horizontal = EDGE),
-        contentAlignment = Alignment.Center
-    ) {
-        if (text.isNotEmpty()) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                maxLines = 1
-            )
-        }
-    }
-}
-
-/**
- * The thumb zone: one slot, one height, and the two common answers always in the
- * same place at the bottom of it.
- *
- * There are four ratings and there always were — the gesture has understood all
- * four since the first version. Offering two of them on screen made the other
- * two invisible, which is how a swipe interface teaches people that swiping does
- * nothing. So all four are here, sized by how often they are honestly used:
- * "не помню" and "помню" full size at the bottom, "легко" and "трудно" quiet and
- * smaller above them, each labelled with the direction that does the same thing.
- *
- * Once the gesture is in the hand — [fluent], after a dozen answers given by
- * swiping — the two quiet ones drop out and only the fallback pair stays. The
- * slot keeps its height either way, so nothing under the thumb ever moves.
- *
- * Everything in here is 56dp and outlined except the single most common answer.
- * An introduction used to end with a 64dp ink-filled slab reading "ПОНЯТНО" —
- * the largest, heaviest object on the screen, attached to the least important
- * decision in the app: acknowledging something you were only asked to read.
- */
-@Composable
-private fun ActionArea(
-    encoding: Boolean,
-    revealed: Boolean,
-    fluent: Boolean,
-    onAcknowledge: () -> Unit,
-    onReveal: () -> Unit,
-    onRate: (Rating) -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(ACTION_HEIGHT)
-            .padding(horizontal = EDGE, vertical = 8.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            when {
-                encoding -> IknaWideButton(
-                    label = "ПОНЯТНО",
-                    onClick = onAcknowledge,
-                    height = 56.dp
-                )
-
-                revealed -> {
-                    if (!fluent) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            IknaWideButton(
-                                label = "↑ ЛЕГКО",
-                                onClick = { onRate(Rating.EASY) },
-                                modifier = Modifier.weight(1f),
-                                quiet = true,
-                                height = 40.dp
-                            )
-                            IknaWideButton(
-                                label = "↓ ТРУДНО",
-                                onClick = { onRate(Rating.HARD) },
-                                modifier = Modifier.weight(1f),
-                                quiet = true,
-                                height = 40.dp
-                            )
-                        }
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        IknaWideButton(
-                            label = "← НЕ ПОМНЮ",
-                            onClick = { onRate(Rating.AGAIN) },
-                            modifier = Modifier.weight(1f),
-                            height = 56.dp
-                        )
-                        IknaWideButton(
-                            label = "ПОМНЮ →",
-                            onClick = { onRate(Rating.GOOD) },
-                            modifier = Modifier.weight(1f),
-                            filled = true,
-                            height = 56.dp
-                        )
-                    }
-                }
-
-                else -> IknaWideButton(
-                    label = "ПОКАЗАТЬ",
-                    onClick = onReveal,
-                    height = 56.dp
-                )
-            }
         }
     }
 }
