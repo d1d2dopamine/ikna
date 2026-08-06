@@ -27,11 +27,11 @@ jobs:
         with:
           gradle-version: "8.10.2"
 
-      # Runs first: the scheduler and the governor are pure logic, and a broken
-      # one produces an APK that installs fine and teaches badly.
-      - name: Unit tests
-        run: gradle --no-daemon --stacktrace testReleaseUnitTest
-
+      # The APK is built and uploaded before the tests run, on purpose. The tests
+      # cover the scheduler and the governor, which are worth failing the run
+      # over — but a failing test used to mean no artifact at all, so a run that
+      # was meant to produce something installable produced a red cross instead.
+      # Now the run still goes red, and the APK is still there.
       - name: Build APK
         env:
           RUN_NUMBER: ${{ github.run_number }}
@@ -45,6 +45,17 @@ jobs:
           echo "APK: $apk"
           keytool -printcert -jarfile "$apk" | grep -E 'Owner|SHA256' || true
 
+      - name: APK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ikna-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: warn
+
+      - name: Unit tests
+        run: gradle --no-daemon --stacktrace testReleaseUnitTest
+
       - name: Test report
         if: always()
         uses: actions/upload-artifact@v4
@@ -52,9 +63,3 @@ jobs:
           name: ikna-test-report
           path: app/build/reports/tests/testReleaseUnitTest
           if-no-files-found: ignore
-
-      - name: APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: ikna-apk
-          path: app/build/outputs/apk/debug/*.apk
