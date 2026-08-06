@@ -1,5 +1,8 @@
 package dev.ikna.ui.session
 
+import dev.ikna.ui.text.S
+
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,17 +17,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
 import dev.ikna.AppContainer
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.domain.fsrs.Rating
@@ -33,8 +34,10 @@ import dev.ikna.domain.session.Level
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
+import dev.ikna.ui.theme.IknaSpark
 import dev.ikna.ui.theme.IknaTextButton
-import dev.ikna.ui.theme.IknaWideButton
+import dev.ikna.ui.theme.Motion
+import dev.ikna.ui.theme.Space
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -59,7 +62,7 @@ import java.time.temporal.ChronoUnit
  */
 
 private val BAR_HEIGHT = 44.dp
-private val UNDO_HEIGHT = 46.dp
+private val UNDO_HEIGHT = 48.dp
 private val EDGE = 20.dp
 
 @Composable
@@ -96,14 +99,14 @@ fun SessionScreen(
         ) {
             when {
                 state.loading -> Text(
-                    text = "секунду…",
+                    text = S.t("sess.001"),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 // First contact: shown, not asked. Nothing to grade, nothing to fail.
                 card != null && state.encoding -> ChunkCard(
-                    label = "знакомство",
+                    label = S.t("sess.002"),
                     prompt = card.chunk.text,
                     answer = card.chunk.translation,
                     hint = card.chunk.contextSentence,
@@ -181,7 +184,7 @@ private fun TopBar(state: SessionUiState, onBack: () -> Unit, onSpeak: () -> Uni
     val minimumJustMet = state.minimumMet && state.answeredToday == state.dailyMinimum
     val text = when {
         state.index == 0 && !state.revealed && state.remaining > 0 -> startEstimate(state)
-        minimumJustMet -> "МИНИМУМ СДЕЛАН"
+        minimumJustMet -> S.t("sess.003")
         else -> ""
     }
 
@@ -189,7 +192,7 @@ private fun TopBar(state: SessionUiState, onBack: () -> Unit, onSpeak: () -> Uni
         modifier = Modifier
             .fillMaxWidth()
             .height(BAR_HEIGHT)
-            .padding(horizontal = 6.dp),
+            .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack)
@@ -218,7 +221,7 @@ private fun TopBar(state: SessionUiState, onBack: () -> Unit, onSpeak: () -> Uni
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
-                modifier = Modifier.padding(end = 14.dp)
+                modifier = Modifier.padding(end = 16.dp)
             )
         }
     }
@@ -236,29 +239,35 @@ private fun EmptyState(
             .padding(horizontal = EDGE),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (animations && state.answeredToday > 0) {
-            val composition by rememberLottieComposition(
-                LottieCompositionSpec.Asset("lottie/session_done.json")
+        // The app's own mark, drawn once when the day closes. This was a Lottie
+        // file: an animation runtime plus a JSON asset, shipped to play one shape
+        // once a day. The shape is now the launcher icon itself, in the user's own
+        // accent colour, so the object that ends a session is the object that
+        // started it.
+        if (state.answeredToday > 0) {
+            val appear = remember { Animatable(if (animations) 0f else 1f) }
+            LaunchedEffect(animations) {
+                if (animations) appear.animateTo(1f, Motion.reveal)
+            }
+            IknaSpark(
+                color = MaterialTheme.colorScheme.primary,
+                size = 120.dp,
+                progress = appear.value
             )
-            val progress by animateLottieCompositionAsState(composition, iterations = 1)
-            LottieAnimation(
-                composition = composition,
-                progress = { progress },
-                modifier = Modifier.size(140.dp)
-            )
+            Spacer(Modifier.height(Space.lg))
         }
 
         Text(
             text = when {
-                state.reason == GovernorReason.PACK_EXHAUSTED -> "Колода пройдена"
-                state.answeredToday > 0 -> "На сегодня всё"
-                else -> "Сегодня карточек нет"
+                state.reason == GovernorReason.PACK_EXHAUSTED -> S.t("sess.004")
+                state.answeredToday > 0 -> S.t("sess.005")
+                else -> S.t("sess.006")
             },
             style = MaterialTheme.typography.displaySmall,
             textAlign = TextAlign.Center
         )
 
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(16.dp))
 
         Text(
             text = emptyExplanation(state),
@@ -281,24 +290,23 @@ private fun EmptyState(
 
         if (state.noMoreExtra) {
             Text(
-                text = "Повторять больше нечего — остальное ещё не подошло по сроку",
+                text = S.t("sess.007"),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(8.dp))
             // Never a dead end: the same request again, in case something came due
             // in the meantime.
-            IknaTextButton(label = "ПРОВЕРИТЬ ЕЩЁ РАЗ", onClick = onExtra)
+            IknaTextButton(label = S.t("sess.008"), onClick = onExtra)
         } else {
-            IknaWideButton(
-                label = "ЕЩЁ НЕМНОГО  +5",
-                onClick = onExtra,
-                height = 56.dp
-            )
-            Spacer(Modifier.height(10.dp))
+            // "A bit more" is an offer, not the way out. It used to be a
+            // full-width 56dp slab — the loudest object on a screen whose entire
+            // message is that you are finished, arguing with the sentence above it.
+            IknaTextButton(label = S.t("sess.009"), onClick = onExtra)
+            Spacer(Modifier.height(Space.md))
             Text(
-                text = "только повторения, новые чанки от этого не добавятся",
+                text = S.t("sess.010"),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -324,7 +332,7 @@ private fun UndoBar(
     ) {
         when {
             failed -> Text(
-                text = "этот ответ отменить уже нельзя",
+                text = S.t("sess.011"),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -334,23 +342,23 @@ private fun UndoBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "ответ записан",
+                    text = S.t("sess.012"),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.weight(1f))
-                IknaTextButton(label = "ОТМЕНИТЬ", onClick = onUndo)
-                Spacer(Modifier.width(10.dp))
-                IknaTextButton(label = "ОК", onClick = onDismiss, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                IknaTextButton(label = S.t("sess.013"), onClick = onUndo)
+                Spacer(Modifier.width(12.dp))
+                IknaTextButton(label = S.t("sess.014"), onClick = onDismiss, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
 }
 
 private fun levelLabel(level: Level): String = when (level) {
-    Level.RECOGNITION -> "узнать"
-    Level.CLOZE -> "вставить"
-    Level.PRODUCTION -> "сказать"
+    Level.RECOGNITION -> S.t("sess.015")
+    Level.CLOZE -> S.t("sess.016")
+    Level.PRODUCTION -> S.t("sess.017")
 }
 
 /**
@@ -362,25 +370,23 @@ private fun levelLabel(level: Level): String = when (level) {
  */
 private fun emptyExplanation(state: SessionUiState): String = when {
     state.reason == GovernorReason.PACK_EXHAUSTED -> reasonText(state.reason)
-    state.answeredToday > 0 -> "План дня закрыт. Новые чанки придут сами завтра."
+    state.answeredToday > 0 -> S.t("sess.018")
     else -> reasonText(state.reason)
 }
 
 private fun reasonText(reason: GovernorReason): String = when (reason) {
-    GovernorReason.FIRST_RUN -> "Первый день — берём совсем немного."
-    GovernorReason.OK -> "Всё повторено, срок следующих ещё не наступил."
-    GovernorReason.NO_HEADROOM -> "Повторений впереди и так много — новые слова подождут."
-    GovernorReason.BACKLOG_LIMIT -> "Сначала разбираем накопившееся, потом новое."
-    GovernorReason.POST_SKIP_WARMUP -> "После перерыва сначала разогрев на старом."
-    GovernorReason.LOW_ACTIVITY -> "Неделя вышла тихая — новое подождёт, сроки уже сдвинуты, долгов нет."
-    GovernorReason.LATE_NIGHT -> "Для новых чанков поздно — познакомимся утром, повторения на месте."
-    GovernorReason.LOW_ACCURACY -> "Пока старое не закрепится — без новых."
-    GovernorReason.RETURN_MODE -> "Режим возвращения: несколько коротких дней, без долгов."
-    GovernorReason.SAFETY_VALVE -> "Добавлю хотя бы один новый чанк, чтобы не стоять на месте."
+    GovernorReason.FIRST_RUN -> S.t("sess.019")
+    GovernorReason.OK -> S.t("sess.020")
+    GovernorReason.NO_HEADROOM -> S.t("sess.021")
+    GovernorReason.BACKLOG_LIMIT -> S.t("sess.022")
+    GovernorReason.POST_SKIP_WARMUP -> S.t("sess.023")
+    GovernorReason.LOW_ACTIVITY -> S.t("sess.024")
+    GovernorReason.LATE_NIGHT -> S.t("sess.025")
+    GovernorReason.LOW_ACCURACY -> S.t("sess.026")
+    GovernorReason.RETURN_MODE -> S.t("sess.027")
+    GovernorReason.SAFETY_VALVE -> S.t("sess.028")
     GovernorReason.PACK_EXHAUSTED ->
-        "Новых чанков здесь больше нет — все уже знакомы. " +
-            "Повторения продолжат приходить по срокам, а за новым материалом " +
-            "нужна ещё одна колода."
+        S.t("sess.029")
 }
 
 private fun nextDueLabel(nextDueAt: Long?): String? {
@@ -392,9 +398,9 @@ private fun nextDueLabel(nextDueAt: Long?): String? {
     val today = Instant.ofEpochMilli(now).atZone(zone).toLocalDate()
     val time = then.format(DateTimeFormatter.ofPattern("HH:mm"))
     return when (val days = ChronoUnit.DAYS.between(today, then.toLocalDate())) {
-        0L -> "следующие — сегодня в " + time
-        1L -> "следующие — завтра в " + time
-        else -> "следующие — через " + days + " " + dayWord(days)
+        0L -> S.t("sess.030") + time
+        1L -> S.t("sess.031") + time
+        else -> S.t("sess.032") + days + " " + dayWord(days)
     }
 }
 
@@ -402,10 +408,10 @@ private fun dayWord(days: Long): String {
     val mod100 = days % 100
     val mod10 = days % 10
     return when {
-        mod100 in 11..14 -> "дней"
-        mod10 == 1L -> "день"
-        mod10 in 2..4 -> "дня"
-        else -> "дней"
+        mod100 in 11..14 -> S.t("sess.033")
+        mod10 == 1L -> S.t("sess.034")
+        mod10 in 2..4 -> S.t("sess.035")
+        else -> S.t("sess.036")
     }
 }
 
@@ -430,18 +436,18 @@ private fun startEstimate(state: SessionUiState): String {
     val base = (count.toString() + " " + cardWord(count)).uppercase()
     val perCard = state.perCardMs ?: return base
     val totalMs = count * perCard
-    if (totalMs < 45_000L) return base + " · <1 МИН"
+    if (totalMs < 45_000L) return base + S.t("sess.037")
     val minutes = ((totalMs + 30_000L) / 60_000L).toInt().coerceAtLeast(1)
-    return base + " · ~" + minutes + " МИН"
+    return base + " · ~" + minutes + S.t("sess.038")
 }
 
 private fun cardWord(count: Int): String {
     val mod100 = count % 100
     val mod10 = count % 10
     return when {
-        mod100 in 11..14 -> "карточек"
-        mod10 == 1 -> "карточка"
-        mod10 in 2..4 -> "карточки"
-        else -> "карточек"
+        mod100 in 11..14 -> S.t("sess.039")
+        mod10 == 1 -> S.t("sess.040")
+        mod10 in 2..4 -> S.t("sess.041")
+        else -> S.t("sess.042")
     }
 }

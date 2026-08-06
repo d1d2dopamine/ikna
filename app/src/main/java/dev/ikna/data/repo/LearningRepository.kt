@@ -23,7 +23,9 @@ import dev.ikna.domain.session.SessionBuilder
 import dev.ikna.domain.session.SessionCard
 import dev.ikna.domain.session.SessionPlan
 import dev.ikna.domain.time.DayBoundary
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import kotlin.math.max
@@ -753,6 +755,75 @@ class LearningRepository(
         return sorted[sorted.size / 2]
     }
 
+    /**
+     * The four measurements added to the statistics screen, in one read.
+     *
+     * Deliberately computed here rather than in SQL: the day starts at 04:00,
+     * the hour of an answer depends on the phone's timezone, and a review has to
+     * be told apart from a first contact by its snapshot. All three are things
+     * SQLite would have to be taught and Kotlin already knows.
+     */
+    suspend fun statsDigest(now: Long = System.currentTimeMillis()): StatsDigest {
+        val answers = reviewDao.since(now - STATS_WINDOW_DAYS * DAY_MS)
+
+        // Only real reviews count towards retention. A first contact cannot be
+        // "forgotten", so counting it would quietly inflate every figure here.
+        // Rows written before the undo schema carry no snapshot and are skipped.
+        val reviews = answers.filter { it.prevIsNew == false }
+        val recalled = reviews.count { it.rating >= Rating.HARD.value }
+        val retention =
+            if (reviews.size >= RETENTION_MIN_SAMPLE) recalled.toDouble() / reviews.size else null
+
+        val zone = ZoneId.systemDefault()
+        val buckets = HashMap<Int, IntArray>()
+        reviews.forEach { review ->
+            val hour = Instant.ofEpochMilli(review.ts).atZone(zone).hour
+            val slot = buckets.getOrPut(hour) { IntArray(2) }
+            slot[0]++
+            if (review.rating >= Rating.HARD.value) slot[1]++
+        }
+        val hours = buckets.entries
+            .sortedBy { it.key }
+            .map { (hour, slot) ->
+                HourSlice(hour = hour, answers = slot[0], accuracy = slot[1].toDouble() / slot[0])
+            }
+        val bestHour = hours
+            .filter { it.answers >= HOUR_MIN_SAMPLE }
+            .maxWithOrNull(compareBy<HourSlice> { it.accuracy }.thenBy { it.answers })
+            ?.hour
+
+        // Minutes come from the daily counters rather than from the log: they
+        // already exclude the gaps where the phone was put down mid-session.
+        val todayMs = statsDao.day(dayKey(now))?.activeMs ?: 0L
+        val weekMs = statsDao.lastDays(7).sumOf { it.activeMs }
+
+        val leechCards = cardDao.leeches(LEECH_MIN_LAPSES, LEECH_LIMIT)
+        val chunks = chunkDao.chunks(leechCards.map { it.chunkId }.distinct()).associateBy { it.id }
+        val leeches = leechCards
+            .mapNotNull { card ->
+                val chunk = chunks[card.chunkId] ?: return@mapNotNull null
+                LeechItem(
+                    text = chunk.text,
+                    translation = chunk.translation,
+                    lapses = card.lapses
+                )
+            }
+            // The same phrase can be a leech at two levels. It is one phrase to
+            // the person reading the list.
+            .distinctBy { it.text }
+
+        return StatsDigest(
+            retention = retention,
+            retentionSample = reviews.size,
+            minutesToday = (todayMs / 60_000L).toInt(),
+            minutesLast7 = (weekMs / 60_000L).toInt(),
+            medianSeconds = medianAnswerMs()?.let { ((it + 500L) / 1000L).toInt() },
+            hours = hours,
+            bestHour = bestHour,
+            leeches = leeches
+        )
+    }
+
     private companion object {
         /** Upper bound on how far back an absence is repaid, in days. */
         const val MAX_CREDIT_DAYS = 120L
@@ -767,5 +838,20 @@ class LearningRepository(
         const val DURATION_MIN_SAMPLES = 8
         const val MIN_SANE_ANSWER_MS = 800L
         const val MAX_SANE_ANSWER_MS = 60_000L
+
+        /**
+         * Sizes for the statistics screen.
+         *
+         * The two sample floors are the difference between a measurement and a
+         * rumour: twenty reviews before a retention figure is shown at all, and
+         * twelve answers inside one hour before that hour may compete for
+         * "best". Four forgettings is where a phrase stops being hard and starts
+         * being broken.
+         */
+        const val STATS_WINDOW_DAYS = 30L
+        const val RETENTION_MIN_SAMPLE = 20
+        const val HOUR_MIN_SAMPLE = 12
+        const val LEECH_MIN_LAPSES = 4
+        const val LEECH_LIMIT = 8
     }
 }

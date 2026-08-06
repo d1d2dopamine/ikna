@@ -1,13 +1,17 @@
 package dev.ikna.ui.decks
 
+import dev.ikna.ui.text.S
+
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -34,10 +39,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
 import dev.ikna.data.repo.DeckSummary
+import dev.ikna.ui.theme.BarHeight
+import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.IknaToggle
+import dev.ikna.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -100,9 +108,9 @@ fun DecksScreen(
             container.learningRepository.invalidatePlan()
             reload()
             busy = false
-            message = if (result.installed == 0) "Не получилось прочитать ни одной строки"
-            else "Добавлено чанков: " + result.installed +
-                (if (result.skipped > 0) ", пропущено " + result.skipped else "")
+            message = if (result.installed == 0) S.t("deck.001")
+            else S.t("deck.002") + result.installed +
+                (if (result.skipped > 0) S.t("deck.003") + result.skipped else "")
         }
     }
 
@@ -116,12 +124,12 @@ fun DecksScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
-                .padding(start = 20.dp, end = 6.dp),
+                .height(BarHeight)
+                .padding(start = Edge, end = Space.sm),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Колоды",
+                text = S.t("deck.004"),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.weight(1f)
@@ -135,17 +143,17 @@ fun DecksScreen(
             IknaIconButton(glyph = IknaGlyph.GEAR, onClick = onOpenSettings)
         }
 
-        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-            Spacer(Modifier.height(4.dp))
-            TodayRow(total = todayTotal, onClick = { onOpenSession(null) })
-            Spacer(Modifier.height(18.dp))
+        Column(modifier = Modifier.padding(horizontal = Edge)) {
+            Spacer(Modifier.height(Space.md))
+            TodayBlock(total = todayTotal, onClick = { onOpenSession(null) })
+            Spacer(Modifier.height(Space.xl))
         }
 
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = Edge),
+            verticalArrangement = Arrangement.spacedBy(Space.lg)
         ) {
             items(decks, key = { it.id }) { deck ->
                 DeckRow(
@@ -163,7 +171,7 @@ fun DecksScreen(
             if (decks.isEmpty()) {
                 item {
                     Text(
-                        text = "Пока ни одной колоды. Плюс сверху добавит файл .jsonl.",
+                        text = S.t("deck.005"),
                         style = MaterialTheme.typography.bodyMedium,
                         color = muted
                     )
@@ -171,80 +179,99 @@ fun DecksScreen(
             }
         }
 
-        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Column(modifier = Modifier.padding(horizontal = Edge)) {
             val note = when {
-                busy -> "читаю файл…"
+                busy -> S.t("deck.006")
                 message != null -> message
                 else -> null
             }
             if (note != null) {
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Space.sm))
                 Text(
                     text = note,
                     style = MaterialTheme.typography.bodySmall,
                     color = muted
                 )
             }
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(Space.md))
         }
     }
 }
 
 /**
- * Everything due today, in one row, at the top.
+ * Everything due today, as a number and nothing else.
  *
- * Mixed learning means most days start here rather than in a particular deck:
- * the schedule already knows what is owed and in what order, and picking a deck
- * by hand is the exception, not the default.
+ * This was a bordered box with a heading inside it — a control, competing for
+ * attention with every other bordered box below. It is not a control. It is the
+ * answer to the only question the screen is asked, so it is set at display size
+ * in the accent colour and given room, and the frame is gone. The eye lands on
+ * the number before it has read a single word, which is the whole job.
+ *
+ * On a finished day it drops to the muted colour and stops being clickable. No
+ * congratulation, no badge, no streak: the reward for finishing is that the
+ * screen goes quiet.
  */
 @Composable
-private fun TodayRow(total: Int, onClick: () -> Unit) {
+private fun TodayBlock(total: Int, onClick: () -> Unit) {
     val enabled = total > 0
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .border(
-                width = if (enabled) 2.dp else 1.dp,
-                color = if (enabled) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.outline
-            )
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 18.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = Space.sm)
     ) {
-        Column(modifier = Modifier.weight(1f)) {
+        Text(
+            text = S.t("deck.007"),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(Space.sm))
+        if (enabled) {
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(
+                    text = total.toString(),
+                    style = MaterialTheme.typography.displayLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.alignByBaseline()
+                )
+                Spacer(Modifier.width(Space.md))
+                Text(
+                    text = cardWord(total),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.alignByBaseline()
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = "\u2192",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.alignByBaseline()
+                )
+            }
+        } else {
             Text(
-                text = "СЕГОДНЯ",
-                style = MaterialTheme.typography.labelMedium,
+                text = S.t("deck.008"),
+                style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = if (enabled) total.toString() + " " + cardWord(total)
-                else "ничего не ждёт",
-                style = MaterialTheme.typography.headlineMedium,
-                color = if (enabled) MaterialTheme.colorScheme.onBackground
-                else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        if (enabled) {
-            Text(
-                text = "→",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(Modifier.width(2.dp))
         }
     }
 }
 
 /**
- * One deck: what it owes today, and how far through it you are.
+ * One deck: its mark, what it owes today, and how far through it you are.
  *
- * An outline and nothing else. It used to be a Material Card, which fills itself
- * with the surface colour and sits on the background like a tile — the same
- * "panel floating on a screen" look the session card had, in a place where the
- * only job is to separate one row from the next.
+ * The outline is gone. A list of identical rectangles is read as a list of
+ * identical rectangles — nothing in it is faster to find than anything else, so
+ * the eye has to read every title in order. The mark on the left fixes that: two
+ * large letters, filled with the accent when the deck owes work and hollow when
+ * it does not, so "which deck do I owe today" is answered by colour and shape
+ * before any reading happens. That is the whole reason this screen exists.
+ *
+ * Rows are separated by space rather than by lines. With a solid mark anchoring
+ * each row, a border adds nothing except another rectangle.
  */
 @Composable
 private fun DeckRow(
@@ -254,42 +281,98 @@ private fun DeckRow(
     onToggle: (Boolean) -> Unit
 ) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    Column(
+    val accent = MaterialTheme.colorScheme.primary
+    val owes = dueToday > 0
+
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, MaterialTheme.colorScheme.outline)
-            .clickable(enabled = dueToday > 0, onClick = onOpen)
-            .padding(18.dp)
+            .clickable(enabled = owes, onClick = onOpen),
+        verticalAlignment = Alignment.Top
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = deck.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
+        DeckMark(deck = deck, owes = owes)
+        Spacer(Modifier.width(Space.md))
+        Column(modifier = Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = deck.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onBackground.copy(
+                            alpha = if (deck.isActive) 1f else 0.55f
+                        )
+                    )
+                    Spacer(Modifier.height(Space.xs))
+                    Text(
+                        text = if (owes) S.t("deck.009") + dueToday else S.t("deck.010"),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (owes) accent else muted
+                    )
+                }
+                IknaToggle(checked = deck.isActive, onCheckedChange = onToggle)
+            }
+            if (deck.isActive) {
+                Spacer(Modifier.height(Space.md))
+                IknaProgress(
+                    fraction = if (deck.total == 0) 0f else deck.introduced.toFloat() / deck.total,
+                    height = 2.dp,
+                    color = if (owes) accent else muted,
+                    // Here the empty part means something — it is the rest of the deck.
+                    track = true
                 )
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(Space.sm))
                 Text(
-                    text = if (dueToday > 0) "сегодня " + dueToday else "на сегодня нет",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = if (dueToday > 0) MaterialTheme.colorScheme.primary else muted
+                    text = S.t("deck.011") + deck.introduced + S.t("deck.012") + deck.total +
+                        S.t("deck.013") + deck.known,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = muted
                 )
             }
-            IknaToggle(checked = deck.isActive, onCheckedChange = onToggle)
         }
-        Spacer(Modifier.height(14.dp))
-        IknaProgress(
-            fraction = if (deck.total == 0) 0f else deck.introduced.toFloat() / deck.total,
-            height = 4.dp,
-            color = MaterialTheme.colorScheme.primary,
-            // Here the empty part means something — it is the rest of the deck.
-            track = true
-        )
-        Spacer(Modifier.height(8.dp))
+    }
+}
+
+/**
+ * Two letters in a square, and the square is the whole signal.
+ *
+ * Filled means this deck wants something from you today. Hollow means it is done
+ * or resting. Faint means it is switched off. Three states, no words, readable
+ * across a room — and the letters come from the deck's language, so PL and EN
+ * stay in the same place on the screen every day and become landmarks instead of
+ * labels.
+ */
+@Composable
+private fun DeckMark(deck: DeckSummary, owes: Boolean) {
+    val accent = MaterialTheme.colorScheme.primary
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    val background = MaterialTheme.colorScheme.background
+
+    val fill = if (owes) accent else background
+    val ink = when {
+        owes -> background
+        deck.isActive -> MaterialTheme.colorScheme.onBackground
+        else -> muted.copy(alpha = 0.6f)
+    }
+    val edge = when {
+        owes -> accent
+        deck.isActive -> MaterialTheme.colorScheme.outline
+        else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+    }
+
+    Box(
+        modifier = Modifier
+            .size(52.dp)
+            .background(fill)
+            .border(Space.hair, edge),
+        contentAlignment = Alignment.Center
+    ) {
         Text(
-            text = "введено " + deck.introduced + " из " + deck.total + " · знаешь " + deck.known,
-            style = MaterialTheme.typography.bodySmall,
-            color = muted
+            text = monogramOf(deck.lang, deck.title),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = ink,
+            maxLines = 1
         )
     }
 }
@@ -298,10 +381,10 @@ private fun cardWord(count: Int): String {
     val mod100 = count % 100
     val mod10 = count % 10
     return when {
-        mod100 in 11..14 -> "карточек"
-        mod10 == 1 -> "карточка"
-        mod10 in 2..4 -> "карточки"
-        else -> "карточек"
+        mod100 in 11..14 -> S.t("deck.014")
+        mod10 == 1 -> S.t("deck.015")
+        mod10 in 2..4 -> S.t("deck.016")
+        else -> S.t("deck.017")
     }
 }
 

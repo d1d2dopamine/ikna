@@ -1,7 +1,7 @@
 package dev.ikna.data.export
 
 import dev.ikna.data.prefs.IknaSettings
-import dev.ikna.data.prefs.LoadPreset
+import dev.ikna.data.prefs.LANGUAGE_SYSTEM
 import dev.ikna.data.prefs.SettingsStore
 import dev.ikna.data.prefs.ThemeMode
 import kotlinx.serialization.Serializable
@@ -29,14 +29,29 @@ const val SETTINGS_BACKUP_KIND = "ikna-settings"
 
 @Serializable
 data class SettingsSnapshot(
-    val kind: String = SETTINGS_BACKUP_KIND,
+    /*
+     * No default here, on purpose, and it is the only field without one.
+     *
+     * Every other field has a default so that a file written by a newer build
+     * still opens in an older one. But a default on this field meant that any
+     * JSON object at all decoded into a complete, valid-looking snapshot:
+     * unknown keys were ignored, missing keys were filled in, and the marker the
+     * check relies on was invented by the parser. A line of the review log
+     * decoded into "settings" whose every value was a default — so restoring the
+     * wrong file of the two would have quietly reset the theme, the four custom
+     * colours and the font instead of refusing.
+     *
+     * A settings file has to say that it is one.
+     */
+    val kind: String,
     val version: Int = 1,
     val theme: String = ThemeMode.DARK.name,
     val customBackground: Int = 0,
     val customInk: Int = 0,
     val customMuted: Int = 0,
     val customAccent: Int = 0,
-    val load: String = LoadPreset.NORMAL.name,
+    val manualLoad: Int = 40,
+    val language: String = LANGUAGE_SYSTEM,
     val autoLoad: Boolean = true,
     val reminderEnabled: Boolean = true,
     val reminderHour: Int = 20,
@@ -58,12 +73,14 @@ object SettingsBackup {
     }
 
     fun snapshotOf(settings: IknaSettings): SettingsSnapshot = SettingsSnapshot(
+        kind = SETTINGS_BACKUP_KIND,
         theme = settings.theme.name,
         customBackground = settings.customBackground,
         customInk = settings.customInk,
         customMuted = settings.customMuted,
         customAccent = settings.customAccent,
-        load = settings.load.name,
+        manualLoad = settings.manualLoad,
+        language = settings.language,
         autoLoad = settings.autoLoad,
         reminderEnabled = settings.reminderEnabled,
         reminderHour = settings.reminderHour,
@@ -81,6 +98,13 @@ object SettingsBackup {
         snapshotOf(settings)
     )
 
+    /**
+     * Returns null for anything that is not one of our settings files.
+     *
+     * Two guards, because they fail on different inputs: a missing `kind` makes
+     * the parser throw, and a `kind` belonging to some other tool makes the
+     * check below reject it.
+     */
     fun decode(text: String): SettingsSnapshot? =
         runCatching { json.decodeFromString(SettingsSnapshot.serializer(), text) }
             .getOrNull()
@@ -101,7 +125,6 @@ object SettingsBackup {
      */
     suspend fun apply(store: SettingsStore, snapshot: SettingsSnapshot) {
         val theme = runCatching { ThemeMode.valueOf(snapshot.theme) }.getOrDefault(ThemeMode.DARK)
-        val load = runCatching { LoadPreset.valueOf(snapshot.load) }.getOrDefault(LoadPreset.NORMAL)
 
         store.setCustomColors(
             background = snapshot.customBackground,
@@ -110,7 +133,8 @@ object SettingsBackup {
             accent = snapshot.customAccent
         )
         store.setTheme(theme)
-        if (snapshot.autoLoad) store.setAutoLoad(true) else store.setLoad(load)
+        if (snapshot.autoLoad) store.setAutoLoad(true) else store.setManualLoad(snapshot.manualLoad)
+        store.setLanguage(snapshot.language)
         store.setReminder(snapshot.reminderEnabled, snapshot.reminderHour, snapshot.reminderMinute)
         store.setHaptics(snapshot.haptics)
         store.setAnimations(snapshot.animations)

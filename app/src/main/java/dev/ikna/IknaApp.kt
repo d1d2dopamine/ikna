@@ -1,5 +1,7 @@
 package dev.ikna
 
+import dev.ikna.ui.text.S
+
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -25,10 +27,10 @@ class IknaApp : Application() {
         val manager = getSystemService(NotificationManager::class.java) ?: return
         val channel = NotificationChannel(
             REMINDER_CHANNEL_ID,
-            "Напоминание",
+            S.t("app.001"),
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
-            description = "Одно напоминание в день, если минимум ещё не сделан"
+            description = S.t("app.002")
             setShowBadge(false)
         }
         manager.createNotificationChannel(channel)

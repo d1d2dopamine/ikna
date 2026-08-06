@@ -10,4 +10,12 @@
         <item name="android:windowBackground">@color/window_background</item>
         <item name="android:colorBackground">@color/window_background</item>
     </style>
+
+    <!-- The theme the launcher window wears for the fraction of a second before
+         Compose draws. MainActivity hands the window back to Theme.Ikna in
+         onCreate, before super, so the mark never lingers under the app. On API
+         31+ the platform overrides this with values-v31. -->
+    <style name="Theme.Ikna.Launch" parent="Theme.Ikna">
+        <item name="android:windowBackground">@drawable/launch_screen</item>
+    </style>
 </resources>

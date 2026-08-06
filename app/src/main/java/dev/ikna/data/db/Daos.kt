@@ -101,6 +101,19 @@ interface CardDao {
     @Query("SELECT COUNT(*) FROM cards WHERE inAmnesty = 1")
     suspend fun amnestyCount(): Int
 
+    /**
+     * Cards that keep coming back: [minLapses] forgettings or more.
+     *
+     * Anki calls these leeches and suspends them behind the user's back. Here
+     * they are only listed, because a phrase that will not stick is information
+     * about the phrase, not a verdict on the person answering it.
+     */
+    @Query(
+        "SELECT * FROM cards WHERE lapses >= :minLapses " +
+            "ORDER BY lapses DESC, dueAt ASC LIMIT :limit"
+    )
+    suspend fun leeches(minLapses: Int, limit: Int): List<CardEntity>
+
     @Query(
         "SELECT * FROM cards WHERE inAmnesty = 0 AND dueAt <= :until " +
             "ORDER BY dueAt ASC LIMIT :limit"
@@ -193,6 +206,17 @@ interface ReviewDao {
 
     @Query("SELECT * FROM reviews WHERE " + NOT_RETRACTED + " ORDER BY ts ASC")
     suspend fun allAnswers(): List<ReviewEntity>
+
+    /**
+     * Every real answer since a moment, oldest first.
+     *
+     * Retention, minutes spent and the hour of the day are all derived from this
+     * one read instead of three SQL aggregates. SQLite would have to be told
+     * that a day here starts at 04:00 and that the phone has a timezone; Kotlin
+     * already knows both.
+     */
+    @Query("SELECT * FROM reviews WHERE ts >= :from AND " + NOT_RETRACTED + " ORDER BY ts ASC")
+    suspend fun since(from: Long): List<ReviewEntity>
 
     @Query("SELECT COUNT(*) FROM reviews WHERE ts >= :from AND " + NOT_RETRACTED)
     suspend fun countSince(from: Long): Int

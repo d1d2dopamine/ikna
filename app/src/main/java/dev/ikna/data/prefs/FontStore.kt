@@ -1,5 +1,7 @@
 package dev.ikna.data.prefs
 
+import dev.ikna.ui.text.S
+
 import android.content.Context
 import java.io.File
 import java.io.InputStream
@@ -41,9 +43,9 @@ object FontStore {
      */
     fun install(context: Context, input: InputStream): String? {
         val bytes = runCatching { input.readBytes() }.getOrNull()
-            ?: return "Не удалось прочитать файл"
+            ?: return S.t("font.001")
 
-        if (bytes.size > MAX_BYTES) return "Файл слишком большой для шрифта"
+        if (bytes.size > MAX_BYTES) return S.t("font.002")
 
         val problem = validate(bytes)
         if (problem != null) return problem
@@ -57,11 +59,11 @@ object FontStore {
                 null
             } else {
                 tmp.delete()
-                "Не удалось сохранить шрифт"
+                S.t("font.003")
             }
         }.getOrElse {
             tmp.delete()
-            "Не удалось сохранить шрифт"
+            S.t("font.004")
         }
     }
 
@@ -71,22 +73,22 @@ object FontStore {
      * @return null when the file is a usable single font, otherwise the reason.
      */
     fun validate(bytes: ByteArray): String? {
-        if (bytes.size < 12) return "Это не файл шрифта"
+        if (bytes.size < 12) return S.t("font.005")
 
         when (u32(bytes, 0)) {
             0x00010000L, 0x74727565L /* true */, 0x4F54544FL /* OTTO */ -> Unit
             0x74746366L /* ttcf */ ->
-                return "Это коллекция шрифтов .ttc — нужен один шрифт, .ttf или .otf"
+                return S.t("font.006")
             0x774F4632L /* wOF2 */, 0x774F4646L /* wOFF */ ->
-                return "Это веб-шрифт .woff — Android его не читает, нужен .ttf или .otf"
-            else -> return "Это не файл шрифта"
+                return S.t("font.007")
+            else -> return S.t("font.008")
         }
 
         val tableCount = u16(bytes, 4)
-        if (tableCount <= 0 || tableCount > 512) return "Файл шрифта повреждён"
+        if (tableCount <= 0 || tableCount > 512) return S.t("font.009")
 
         val directoryEnd = 12 + tableCount * 16
-        if (directoryEnd > bytes.size) return "Файл шрифта обрезан"
+        if (directoryEnd > bytes.size) return S.t("font.010")
 
         var hasCmap = false
         var hasOutlines = false
@@ -97,7 +99,7 @@ object FontStore {
             val offset = u32(bytes, record + 8)
             val length = u32(bytes, record + 12)
             if (offset < 0 || length < 0 || offset + length > bytes.size) {
-                return "Файл шрифта обрезан"
+                return S.t("font.011")
             }
             when (name) {
                 "cmap" -> hasCmap = true
@@ -105,8 +107,8 @@ object FontStore {
             }
         }
 
-        if (!hasCmap) return "В шрифте нет таблицы символов"
-        if (!hasOutlines) return "В шрифте нет самих букв"
+        if (!hasCmap) return S.t("font.012")
+        if (!hasOutlines) return S.t("font.013")
         return null
     }
 

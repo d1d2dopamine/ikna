@@ -1,5 +1,7 @@
 package dev.ikna.ui.settings
 
+import dev.ikna.ui.text.S
+
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -9,6 +11,7 @@ import android.provider.OpenableColumns
 import android.speech.tts.TextToSpeech
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,8 +38,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
 import dev.ikna.MainActivity
@@ -44,7 +50,10 @@ import dev.ikna.audio.SpeakerVoice
 import dev.ikna.data.export.SettingsBackup
 import dev.ikna.data.prefs.FontStore
 import dev.ikna.data.prefs.IknaSettings
-import dev.ikna.data.prefs.LoadPreset
+import dev.ikna.data.prefs.LANGUAGE_SYSTEM
+import dev.ikna.data.prefs.MANUAL_LOAD_MAX
+import dev.ikna.data.prefs.MANUAL_LOAD_MIN
+import dev.ikna.data.prefs.MANUAL_LOAD_STEP
 import dev.ikna.data.prefs.ThemeMode
 import dev.ikna.data.prefs.voiceFor
 import dev.ikna.ui.theme.IknaChip
@@ -68,20 +77,33 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
+import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 
 /**
- * Settings.
+ * Settings: one screen, with a row of jumps pinned above it.
  *
- * Every switch here is either reversible or explains its consequence in the same
- * sentence. The load switch is the important one: it is the only place where the
- * user can tell the app "this is too much", instead of the app finding out by
- * being abandoned.
+ * Anki opens a menu of eleven categories first and hides a search box in it.
+ * That was considered and rejected. A category menu turns every setting into at
+ * least two taps and one act of recall — you must remember which of "general",
+ * "reviewing" and "advanced" the thing lives in — and recall is exactly the part
+ * that is expensive here: reordering held items is one of the most reliably
+ * impaired abilities in ADHD, and a search box is worse still, because it
+ * requires knowing the app's own word for the thing before you can type it.
+ * Depth also buys nothing at this size: flat structures beat deep ones until a
+ * screen has far more entries than this one has.
  *
- * This screen was where the app looked least like itself: chips, switches and
- * buttons all came from Material and all of them are pill-shaped no matter what
- * the theme says, so a square session screen led to a rounded settings screen.
- * Everything on it is drawn by the app now.
+ * The opposite extreme — an undifferentiated canvas of everything — was rejected
+ * too: the usability study of an ADHD self-management app found its users "did
+ * not know where to start" when a screen offered content without visible
+ * structure. So: sections stay visible and ordered by how often they are
+ * actually touched, the pinned row gives one-tap access to any of them without
+ * hiding anything, and the rare or destructive things sit behind one expander at
+ * the bottom, where they cannot be hit by accident but are still findable
+ * without a menu.
+ *
+ * The other rule this screen keeps: every switch is either reversible or
+ * explains its consequence in the same sentence.
  */
 @Composable
 fun SettingsScreen(
@@ -101,12 +123,22 @@ fun SettingsScreen(
     // what you want.
     var wipeArmed by remember { mutableStateOf(false) }
 
-    // The measured norm is shown rather than asked for: the number on the "Авто"
-    // chip is what the app has decided the day looks like, so the setting stays
-    // readable without turning into another decision.
+    // The rare and the irreversible live behind one expander. Closed by default,
+    // so nothing here can be hit while scrolling past it.
+    var advancedOpen by remember { mutableStateOf(false) }
+
+    val scroll = rememberScrollState()
+    // Filled in as the sections are laid out, so the pinned row can jump to a
+    // real offset instead of a guessed one.
+    val anchors = remember { mutableStateMapOf<String, Int>() }
+
+    // The measured norm is shown rather than asked for. The chip says "АВТО" and
+    // nothing else; the number goes on its own line, in the same form the font
+    // section uses, because a chip that changes its own text is a chip that
+    // moves under your finger.
     var measuredNorm by remember { mutableStateOf(0) }
     var normMeasured by remember { mutableStateOf(true) }
-    LaunchedEffect(settings.autoLoad, settings.load) {
+    LaunchedEffect(settings.autoLoad, settings.manualLoad) {
         measuredNorm = container.learningRepository.currentDailyTarget()
         normMeasured = container.learningRepository.normIsMeasured()
     }
@@ -154,12 +186,12 @@ fun SettingsScreen(
                 runCatching {
                     context.contentResolver.openInputStream(uri)
                         ?.use { FontStore.install(context, it) }
-                        ?: "Не удалось открыть файл"
-                }.getOrElse { "Не удалось открыть файл" }
+                        ?: S.t("set.001")
+                }.getOrElse { S.t("set.002") }
             }
             if (problem == null) {
                 container.settings.setFontName(name)
-                message = "Шрифт применён: " + name
+                message = S.t("set.003") + name
             } else {
                 message = problem
             }
@@ -170,7 +202,7 @@ fun SettingsScreen(
     val notificationPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
-        if (!granted) message = "Без разрешения на уведомления напоминание не придёт"
+        if (!granted) message = S.t("set.004")
     }
 
     val restorePicker = rememberLauncherForActivityResult(
@@ -192,14 +224,14 @@ fun SettingsScreen(
             if (SettingsBackup.looksLikeSettings(text)) {
                 val snapshot = SettingsBackup.decode(text)
                 if (snapshot == null) {
-                    message = "Файл настроек повреждён"
+                    message = S.t("set.005")
                 } else {
                     SettingsBackup.apply(container.settings, snapshot)
                     message = if (snapshot.fontName.isBlank()) {
-                        "Настройки восстановлены"
+                        S.t("set.006")
                     } else {
-                        "Настройки восстановлены. Шрифт «" + snapshot.fontName +
-                            "» нужно выбрать заново — сам файл шрифта твой, и в бэкап он не кладётся."
+                        S.t("set.007") + snapshot.fontName +
+                            S.t("set.008")
                     }
                 }
                 busy = false
@@ -210,481 +242,651 @@ fun SettingsScreen(
                 container.restoreRepository.restoreFromJsonl(text)
             }
             busy = false
-            message = "Добавлено ответов: " + result.imported +
-                " · пересчитано " + result.replayed +
-                (if (result.skipped > 0) " · пропущено " + result.skipped else "")
+            message = S.t("set.009") + result.imported +
+                S.t("set.010") + result.replayed +
+                (if (result.skipped > 0) S.t("set.011") + result.skipped else "")
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
-    ) {
-        // The glyph box is 44dp with a 19dp mark in it, so it is pulled back by
-        // half the difference to stand on the same margin as the text below.
-        Row(
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Header and jump row stay put; only the settings themselves scroll.
+        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+            // The glyph box is 44dp with a 19dp mark in it, so it is pulled back
+            // by half the difference to stand on the same margin as the text.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .offset(x = (-12).dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack)
+            }
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = S.t("set.012"),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+        Spacer(Modifier.height(16.dp))
+        JumpRow { id ->
+            val target = anchors[id] ?: return@JumpRow
+            scope.launch { scroll.animateScrollTo(target) }
+        }
+        Spacer(Modifier.height(12.dp))
+        IknaRule(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.18f))
+
+        Column(
             modifier = Modifier
+                .weight(1f)
                 .fillMaxWidth()
-                .height(44.dp)
-                .offset(x = (-12).dp),
-            verticalAlignment = Alignment.CenterVertically
+                .verticalScroll(scroll)
+                .padding(horizontal = 20.dp)
         ) {
-            IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack)
-        }
-        Spacer(Modifier.height(2.dp))
-        Text(
-            text = "Настройки",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        Section(
-            "Нагрузка",
-            "Сколько повторений в день считать нормой. От этого зависит, сколько новых чанков придёт завтра. По умолчанию норма считается сама — по тому, сколько ты реально отвечал за последние две недели."
-        ) {
-            IknaChip(
-                label = when {
-                    // Never print a figure as if it were measured when it is
-                    // still the cold-start default.
-                    !settings.autoLoad -> "АВТО"
-                    !normMeasured -> "АВТО · ИЗМЕРЯЮ"
-                    measuredNorm > 0 -> "АВТО · " + measuredNorm
-                    else -> "АВТО"
-                },
-                selected = settings.autoLoad,
-                onClick = { scope.launch { container.settings.setAutoLoad(true) } }
-            )
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                LoadPreset.entries.forEach { preset ->
-                    IknaChip(
-                        label = loadLabel(preset),
-                        selected = !settings.autoLoad && settings.load == preset,
-                        onClick = { scope.launch { container.settings.setLoad(preset) } }
-                    )
-                }
-            }
-        }
-
-        Section("Вид", null) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ThemeMode.entries.forEach { mode ->
-                    IknaChip(
-                        label = themeLabel(mode),
-                        selected = settings.theme == mode,
-                        onClick = { scope.launch { container.settings.setTheme(mode) } }
-                    )
-                }
-            }
-            if (settings.theme == ThemeMode.CUSTOM) {
-                Spacer(Modifier.height(16.dp))
-                CustomColors(
-                    settings = settings,
-                    onChange = { background, ink, muted, accent ->
-                        scope.launch {
-                            container.settings.setCustomColors(background, ink, muted, accent)
-                        }
-                    }
-                )
-            }
-            Spacer(Modifier.height(12.dp))
-            ToggleRow(
-                title = "Анимации",
-                subtitle = "Карточки улетают, конец дня с анимацией",
-                checked = settings.animations,
-                onCheckedChange = { scope.launch { container.settings.setAnimations(it) } }
-            )
-            ToggleRow(
-                title = "Вибрация",
-                subtitle = "Короткий отклик на свайп",
-                checked = settings.haptics,
-                onCheckedChange = { scope.launch { container.settings.setHaptics(it) } }
-            )
-        }
-
-        Section(
-            "Напоминание",
-            "Одно в день, и только если минимум ещё не сделан. Никаких серий и укоров."
-        ) {
-            ToggleRow(
-                title = "Напоминать",
-                subtitle = if (settings.reminderEnabled)
-                    "в " + timeText(settings.reminderHour, settings.reminderMinute)
-                else "выключено",
-                checked = settings.reminderEnabled,
-                onCheckedChange = { enabled ->
-                    scope.launch {
-                        container.settings.setReminder(
-                            enabled,
-                            settings.reminderHour,
-                            settings.reminderMinute
-                        )
-                        WorkScheduler.scheduleReminder(
-                            context,
-                            enabled,
-                            settings.reminderHour,
-                            settings.reminderMinute
-                        )
-                    }
-                    if (enabled && Build.VERSION.SDK_INT >= 33) {
-                        notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    }
-                }
-            )
-            if (settings.reminderEnabled) {
-                Spacer(Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    REMINDER_TIMES.forEach { time ->
-                        val hour = time.first
-                        val minute = time.second
+            Anchored(ID_LOAD, anchors) {
+                Section(
+                    S.t("set.013"),
+                    S.t("set.014")
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         IknaChip(
-                            label = timeText(hour, minute),
-                            selected = settings.reminderHour == hour &&
-                                settings.reminderMinute == minute,
+                            label = S.t("set.015"),
+                            selected = settings.autoLoad,
+                            onClick = { scope.launch { container.settings.setAutoLoad(true) } }
+                        )
+                        IknaChip(
+                            label = S.t("set.016"),
+                            selected = !settings.autoLoad,
                             onClick = {
                                 scope.launch {
-                                    container.settings.setReminder(true, hour, minute)
-                                    WorkScheduler.scheduleReminder(context, true, hour, minute)
+                                    container.settings.setManualLoad(settings.manualLoad)
                                 }
                             }
                         )
                     }
-                }
-            }
-        }
-
-        Section(
-            "Шрифт",
-            "Свой .ttf или .otf для текста карточек и заголовков. Служебные подписи остаются " +
-                "моноширинными — по ним читается интерфейс. Файл проверяется перед тем, как его применить: " +
-                "битый шрифт уронил бы все экраны сразу, включая этот."
-        ) {
-            Text(
-                text = if (settings.fontName.isBlank()) "СЕЙЧАС · СИСТЕМНЫЙ"
-                else "СЕЙЧАС · " + settings.fontName.uppercase(),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.height(10.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                IknaWideButton(
-                    label = "ВЫБРАТЬ ФАЙЛ",
-                    modifier = Modifier.weight(1f),
-                    height = 52.dp,
-                    enabled = !busy,
-                    onClick = { fontPicker.launch(arrayOf("*/*")) }
-                )
-                if (settings.fontName.isNotBlank()) {
-                    IknaWideButton(
-                        label = "СБРОСИТЬ",
-                        modifier = Modifier.weight(1f),
-                        height = 52.dp,
-                        enabled = !busy,
-                        onClick = {
-                            scope.launch {
-                                container.settings.setFontName("")
-                                withContext(Dispatchers.IO) { FontStore.clear(context) }
-                                message = "Вернул системный шрифт"
-                            }
-                        }
-                    )
-                }
-            }
-        }
-
-        Section(
-            "Озвучка",
-            "Говорит движок синтеза речи, который уже стоит на телефоне. Ничего не скачивается и " +
-                "ничего не уходит в сеть: голоса, которым нужен интернет, в список не попадают вообще."
-        ) {
-            ToggleRow(
-                title = "Читать вслух",
-                subtitle = "Значок звука появляется только там, где он не выдаёт ответ",
-                checked = settings.speechEnabled,
-                onCheckedChange = { on ->
-                    scope.launch {
-                        container.settings.setSpeechEnabled(on)
-                        if (!on) container.speaker.stop()
-                    }
-                }
-            )
-
-            if (settings.speechEnabled) {
-                when (speechStatus) {
-                    SpeakerStatus.UNKNOWN -> {
-                        Spacer(Modifier.height(10.dp))
-                        Text(
-                            text = "смотрю, что есть на телефоне…",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    SpeakerStatus.NO_ENGINE -> {
-                        Spacer(Modifier.height(10.dp))
-                        Text(
-                            text = "На телефоне нет движка синтеза речи. Подойдёт любой офлайновый — " +
-                                "например RHVoice или SherpaTTS из F-Droid. После установки вернись сюда.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        IknaTextButton(
-                            label = "НАСТРОЙКИ СИНТЕЗА РЕЧИ",
-                            onClick = {
-                                if (!openTtsSettings(context)) {
-                                    message = "Не нашёл этот раздел в настройках телефона"
-                                }
-                            }
-                        )
-                    }
-
-                    SpeakerStatus.NO_VOICE -> {
-                        Spacer(Modifier.height(10.dp))
-                        Text(
-                            text = "Движок есть, но офлайн-голосов для этих языков в нём нет. Их надо доставить — " +
-                                "один раз, и дальше они работают без сети.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        IknaTextButton(
-                            label = "ДОУСТАНОВИТЬ ГОЛОСА",
-                            onClick = {
-                                if (!installVoices(context)) {
-                                    message = "Движок не умеет докачивать голоса сам — посмотри в его настройках"
-                                }
-                            }
-                        )
-                    }
-
-                    SpeakerStatus.READY -> {
-                        speechLangs.forEach { lang ->
-                            val list = speechVoices[lang].orEmpty()
-                            Spacer(Modifier.height(14.dp))
+                    if (settings.autoLoad) {
+                        if (normMeasured && measuredNorm > 0) {
+                            Spacer(Modifier.height(12.dp))
                             Text(
-                                text = langLabel(lang),
+                                text = S.t("set.017") + measuredNorm,
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            Spacer(Modifier.height(6.dp))
-                            if (list.isEmpty()) {
-                                Text(
-                                    text = "офлайн-голосов для этого языка нет",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            } else {
-                                val chosen = settings.voiceFor(lang)
-                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    IknaChip(
-                                        label = "ПО УМОЛЧАНИЮ",
-                                        selected = chosen == null,
-                                        modifier = Modifier.fillMaxWidth(),
-                                        onClick = {
-                                            scope.launch {
-                                                container.settings.setVoiceFor(lang, null)
-                                                container.speaker.clearCache()
-                                            }
-                                        }
-                                    )
-                                    list.take(6).forEach { voice ->
-                                        IknaChip(
-                                            label = voice.label,
-                                            selected = voice.name == chosen,
-                                            modifier = Modifier.fillMaxWidth(),
-                                            onClick = {
-                                                scope.launch {
-                                                    container.settings.setVoiceFor(lang, voice.name)
-                                                    // Cached audio was made with
-                                                    // the old voice; keeping it
-                                                    // would play the previous one
-                                                    // back for weeks.
-                                                    container.speaker.clearCache()
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
-                            }
                         }
-                        Spacer(Modifier.height(10.dp))
+                    } else {
+                        Spacer(Modifier.height(16.dp))
+                        Stepper(
+                            value = settings.manualLoad,
+                            enabled = !busy,
+                            onChange = { next ->
+                                scope.launch { container.settings.setManualLoad(next) }
+                            }
+                        )
+                        Spacer(Modifier.height(8.dp))
                         Text(
-                            text = "Первый звук после запуска может задуматься на пару секунд — движок просыпается. " +
-                                "Следующая карточка озвучивается заранее, поэтому дальше звук идёт сразу.",
-                            style = MaterialTheme.typography.bodySmall,
+                            text = S.t("set.018"),
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
             }
-        }
 
-        Section(
-            "Перерывы",
-            "Настраивать нечего и включать нечего. Приложение смотрит, сколько ты реально занимался, и само сдвигает сроки: день без заходов — на день, день вполсилы — на полдня. Новые чанки не добавляются, пока темп не вернётся. Долгов не копится."
-        ) {}
-
-        Section(
-            "Данные",
-            "Журнал ответов — единственное, что нельзя восстановить. Всё остальное считается из него заново."
-        ) {
-            ToggleRow(
-                title = "Авто-выгрузка раз в неделю",
-                subtitle = "В папку Документы/Ikna",
-                checked = settings.autoExport,
-                onCheckedChange = { scope.launch { container.settings.setAutoExport(it) } }
-            )
-            Spacer(Modifier.height(10.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                IknaWideButton(
-                    label = "ВЫГРУЗИТЬ",
-                    modifier = Modifier.weight(1f),
-                    height = 52.dp,
-                    enabled = !busy,
-                    onClick = {
-                        scope.launch {
-                            busy = true
-                            val current = container.settings.current()
-                            // Two files: the log, and the look. The second one is
-                            // small and it is the difference between a restore
-                            // that gives your app back and one that gives you a
-                            // stranger's app with your history in it.
-                            val outcome = withContext(Dispatchers.IO) {
-                                runCatching {
-                                    val log = container.jsonExporter.export()
-                                    container.jsonExporter.exportSettings(
-                                        SettingsBackup.encode(current)
-                                    )
-                                    log
+            Anchored(ID_LOOK, anchors) {
+                Section(S.t("set.019"), null) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        ThemeMode.entries.forEach { mode ->
+                            IknaChip(
+                                label = themeLabel(mode),
+                                selected = settings.theme == mode,
+                                onClick = { scope.launch { container.settings.setTheme(mode) } }
+                            )
+                        }
+                    }
+                    if (settings.theme == ThemeMode.CUSTOM) {
+                        Spacer(Modifier.height(16.dp))
+                        CustomColors(
+                            settings = settings,
+                            onChange = { background, ink, muted, accent ->
+                                scope.launch {
+                                    container.settings.setCustomColors(background, ink, muted, accent)
                                 }
                             }
-                            busy = false
-                            // An empty log is not a failure, and saying "не
-                            // удалось" for it sends the user looking for a
-                            // problem that does not exist.
-                            message = when {
-                                outcome.isFailure -> "Не удалось сохранить файл"
-                                outcome.getOrNull() == null ->
-                                    "Настройки сохранены. Журнал пока пуст — выгружать нечего."
-                                else -> "Журнал и настройки сохранены в Документы/Ikna"
+                        )
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    ToggleRow(
+                        title = S.t("set.020"),
+                        subtitle = S.t("set.021"),
+                        checked = settings.animations,
+                        onCheckedChange = { scope.launch { container.settings.setAnimations(it) } }
+                    )
+                    ToggleRow(
+                        title = S.t("set.022"),
+                        subtitle = S.t("set.023"),
+                        checked = settings.haptics,
+                        onCheckedChange = { scope.launch { container.settings.setHaptics(it) } }
+                    )
+                }
+            }
+
+            Anchored(ID_LANGUAGE, anchors) {
+                Section(
+                    S.t("set.024"),
+                    S.t("set.025")
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        LANGUAGES.forEach { code ->
+                            IknaChip(
+                                label = languageLabel(code),
+                                selected = settings.language == code,
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    scope.launch { container.settings.setLanguage(code) }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            Anchored(ID_SPEECH, anchors) {
+                Section(
+                    S.t("set.026"),
+                    S.t("set.027")
+                ) {
+                    ToggleRow(
+                        title = S.t("set.028"),
+                        subtitle = S.t("set.029"),
+                        checked = settings.speechEnabled,
+                        onCheckedChange = { on ->
+                            scope.launch {
+                                container.settings.setSpeechEnabled(on)
+                                if (!on) container.speaker.stop()
+                            }
+                        }
+                    )
+
+                    if (settings.speechEnabled) {
+                        when (speechStatus) {
+                            SpeakerStatus.UNKNOWN -> {
+                                Spacer(Modifier.height(12.dp))
+                                Text(
+                                    text = S.t("set.030"),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            SpeakerStatus.NO_ENGINE -> {
+                                Spacer(Modifier.height(12.dp))
+                                Text(
+                                    text = S.t("set.031"),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                IknaTextButton(
+                                    label = S.t("set.032"),
+                                    onClick = {
+                                        if (!openTtsSettings(context)) {
+                                            message = S.t("set.033")
+                                        }
+                                    }
+                                )
+                            }
+
+                            SpeakerStatus.NO_VOICE -> {
+                                Spacer(Modifier.height(12.dp))
+                                Text(
+                                    text = S.t("set.034"),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                IknaTextButton(
+                                    label = S.t("set.035"),
+                                    onClick = {
+                                        if (!installVoices(context)) {
+                                            message = S.t("set.036")
+                                        }
+                                    }
+                                )
+                            }
+
+                            SpeakerStatus.READY -> {
+                                speechLangs.forEach { lang ->
+                                    val list = speechVoices[lang].orEmpty()
+                                    Spacer(Modifier.height(16.dp))
+                                    Text(
+                                        text = langLabel(lang),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    if (list.isEmpty()) {
+                                        Text(
+                                            text = S.t("set.037"),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    } else {
+                                        val chosen = settings.voiceFor(lang)
+                                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            IknaChip(
+                                                label = S.t("set.038"),
+                                                selected = chosen == null,
+                                                modifier = Modifier.fillMaxWidth(),
+                                                onClick = {
+                                                    scope.launch {
+                                                        container.settings.setVoiceFor(lang, null)
+                                                        container.speaker.clearCache()
+                                                    }
+                                                }
+                                            )
+                                            list.take(6).forEach { voice ->
+                                                IknaChip(
+                                                    label = voice.label,
+                                                    selected = voice.name == chosen,
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    onClick = {
+                                                        scope.launch {
+                                                            container.settings.setVoiceFor(
+                                                                lang,
+                                                                voice.name
+                                                            )
+                                                            // Cached audio was made
+                                                            // with the old voice;
+                                                            // keeping it would play
+                                                            // the previous one back
+                                                            // for weeks.
+                                                            container.speaker.clearCache()
+                                                        }
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                                Spacer(Modifier.height(12.dp))
+                                Text(
+                                    text = S.t("set.039"),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
                     }
-                )
-                IknaWideButton(
-                    label = "ВОССТАНОВИТЬ",
-                    modifier = Modifier.weight(1f),
-                    height = 52.dp,
-                    enabled = !busy,
-                    onClick = { restorePicker.launch(arrayOf("*/*")) }
+                }
+            }
+
+            Anchored(ID_FONT, anchors) {
+                Section(
+                    S.t("set.040"),
+                    S.t("set.041")
+                ) {
+                    Text(
+                        text = if (settings.fontName.isBlank()) S.t("set.042")
+                        else S.t("set.043") + settings.fontName.uppercase(),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        IknaWideButton(
+                            label = S.t("set.044"),
+                            modifier = Modifier.weight(1f),
+                            height = 52.dp,
+                            enabled = !busy,
+                            onClick = { fontPicker.launch(arrayOf("*/*")) }
+                        )
+                        if (settings.fontName.isNotBlank()) {
+                            IknaWideButton(
+                                label = S.t("set.045"),
+                                modifier = Modifier.weight(1f),
+                                height = 52.dp,
+                                enabled = !busy,
+                                onClick = {
+                                    scope.launch {
+                                        container.settings.setFontName("")
+                                        withContext(Dispatchers.IO) { FontStore.clear(context) }
+                                        message = S.t("set.046")
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            Anchored(ID_REMINDER, anchors) {
+                Section(
+                    S.t("set.047"),
+                    S.t("set.048")
+                ) {
+                    ToggleRow(
+                        title = S.t("set.049"),
+                        subtitle = if (settings.reminderEnabled)
+                            S.t("set.050") + timeText(settings.reminderHour, settings.reminderMinute)
+                        else S.t("set.051"),
+                        checked = settings.reminderEnabled,
+                        onCheckedChange = { enabled ->
+                            scope.launch {
+                                container.settings.setReminder(
+                                    enabled,
+                                    settings.reminderHour,
+                                    settings.reminderMinute
+                                )
+                                WorkScheduler.scheduleReminder(
+                                    context,
+                                    enabled,
+                                    settings.reminderHour,
+                                    settings.reminderMinute
+                                )
+                            }
+                            if (enabled && Build.VERSION.SDK_INT >= 33) {
+                                notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            }
+                        }
+                    )
+                    if (settings.reminderEnabled) {
+                        Spacer(Modifier.height(8.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            REMINDER_TIMES.forEach { time ->
+                                val hour = time.first
+                                val minute = time.second
+                                IknaChip(
+                                    label = timeText(hour, minute),
+                                    selected = settings.reminderHour == hour &&
+                                        settings.reminderMinute == minute,
+                                    onClick = {
+                                        scope.launch {
+                                            container.settings.setReminder(true, hour, minute)
+                                            WorkScheduler.scheduleReminder(context, true, hour, minute)
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Anchored(ID_DATA, anchors) {
+                Section(
+                    S.t("set.052"),
+                    S.t("set.053")
+                ) {
+                    ToggleRow(
+                        title = S.t("set.054"),
+                        subtitle = S.t("set.055"),
+                        checked = settings.autoExport,
+                        onCheckedChange = { scope.launch { container.settings.setAutoExport(it) } }
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        IknaWideButton(
+                            label = S.t("set.056"),
+                            modifier = Modifier.weight(1f),
+                            height = 52.dp,
+                            enabled = !busy,
+                            onClick = {
+                                scope.launch {
+                                    busy = true
+                                    val current = container.settings.current()
+                                    // Two files: the log, and the look. The second
+                                    // one is small and it is the difference between
+                                    // a restore that gives your app back and one
+                                    // that gives you a stranger's app with your
+                                    // history in it.
+                                    val outcome = withContext(Dispatchers.IO) {
+                                        runCatching {
+                                            val log = container.jsonExporter.export()
+                                            container.jsonExporter.exportSettings(
+                                                SettingsBackup.encode(current)
+                                            )
+                                            log
+                                        }
+                                    }
+                                    busy = false
+                                    // An empty log is not a failure, and saying "не
+                                    // удалось" for it sends the user looking for a
+                                    // problem that does not exist.
+                                    message = when {
+                                        outcome.isFailure -> S.t("set.057")
+                                        outcome.getOrNull() == null ->
+                                            S.t("set.058")
+                                        else -> S.t("set.059")
+                                    }
+                                }
+                            }
+                        )
+                        IknaWideButton(
+                            label = S.t("set.060"),
+                            modifier = Modifier.weight(1f),
+                            height = 52.dp,
+                            enabled = !busy,
+                            onClick = { restorePicker.launch(arrayOf("*/*")) }
+                        )
+                    }
+                }
+            }
+
+            Section(
+                S.t("set.061"),
+                S.t("set.062")
+            ) {}
+
+            Anchored(ID_ADVANCED, anchors) {
+                Section(
+                    S.t("set.063"),
+                    S.t("set.064")
+                ) {
+                    IknaTextButton(
+                        label = if (advancedOpen) S.t("set.065") else S.t("set.066"),
+                        onClick = { advancedOpen = !advancedOpen },
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    if (advancedOpen) {
+                        Spacer(Modifier.height(16.dp))
+                        IknaWideButton(
+                            label = S.t("set.067"),
+                            height = 52.dp,
+                            enabled = !busy,
+                            onClick = {
+                                scope.launch {
+                                    busy = true
+                                    withContext(Dispatchers.IO) {
+                                        container.components.rebuildFromReviews()
+                                    }
+                                    busy = false
+                                    message = S.t("set.068")
+                                }
+                            }
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        IknaWideButton(
+                            label = S.t("set.069"),
+                            height = 52.dp,
+                            onClick = onOpenDebug
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        IknaTextButton(
+                            label = S.t("set.070"),
+                            onClick = { confirmReset = true },
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(Modifier.height(24.dp))
+                        Text(
+                            text = S.t("set.071"),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = S.t("set.072"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        IknaWideButton(
+                            label = if (wipeArmed) S.t("set.073") else S.t("set.074"),
+                            enabled = !busy,
+                            height = 60.dp,
+                            onClick = {
+                                if (!wipeArmed) {
+                                    wipeArmed = true
+                                    message = S.t("set.075")
+                                } else {
+                                    wipeArmed = false
+                                    busy = true
+                                    scope.launch {
+                                        withContext(Dispatchers.IO) {
+                                            // Export first: if it fails, the wipe
+                                            // still proceeds, because the user
+                                            // asked for a wipe, not for a backup.
+                                            runCatching { container.jsonExporter.export() }
+                                            container.wipeDatabase()
+                                            container.settings.clearAll()
+                                        }
+                                        // Restart the process: repositories, workers
+                                        // and session state all outlive the tables
+                                        // otherwise, and a half-empty app in memory
+                                        // looks exactly like a bug.
+                                        val restart = Intent(context, MainActivity::class.java)
+                                            .addFlags(
+                                                Intent.FLAG_ACTIVITY_NEW_TASK or
+                                                    Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                            )
+                                        context.startActivity(restart)
+                                        exitProcess(0)
+                                    }
+                                }
+                            }
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = if (wipeArmed) S.t("set.076") else S.t("set.077"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = IknaDanger
+                        )
+                    }
+                }
+            }
+
+            message?.let {
+                Spacer(Modifier.height(20.dp))
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            Spacer(Modifier.height(40.dp))
         }
-
-        Section("Если что-то пошло не так", null) {
-            IknaWideButton(
-                label = "ПЕРЕСЧИТАТЬ СЛОЙ СЛОВ",
-                height = 52.dp,
-                enabled = !busy,
-                onClick = {
-                    scope.launch {
-                        busy = true
-                        withContext(Dispatchers.IO) { container.components.rebuildFromReviews() }
-                        busy = false
-                        message = "Слой слов пересчитан по журналу"
-                    }
-                }
-            )
-            Spacer(Modifier.height(8.dp))
-            IknaWideButton(
-                label = "ТЕХНИЧЕСКИЙ ЭКРАН",
-                height = 52.dp,
-                onClick = onOpenDebug
-            )
-            Spacer(Modifier.height(8.dp))
-            IknaTextButton(
-                label = "НАЧАТЬ ЗАНОВО",
-                onClick = { confirmReset = true },
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        Section(
-            "Стереть всё",
-            "Полный сброс: карточки, сроки, статистика, журнал ответов и сами настройки. " +
-                "Приложение станет таким, как сразу после установки, и перезапустится. " +
-                "Это для тестов, когда данные старой версии мешают новой. " +
-                "Перед стиранием журнал выгружается в Документы/Ikna — его потом можно восстановить."
-        ) {
-            IknaWideButton(
-                label = if (wipeArmed) "ТОЧНО СТЕРЕТЬ ВСЁ" else "СТЕРЕТЬ ДАННЫЕ",
-                enabled = !busy,
-                height = 58.dp,
-                onClick = {
-                    if (!wipeArmed) {
-                        wipeArmed = true
-                        message = "Нажми ещё раз, если правда стереть. Отмены не будет."
-                    } else {
-                        wipeArmed = false
-                        busy = true
-                        scope.launch {
-                            withContext(Dispatchers.IO) {
-                                // Export first: if it fails, the wipe still proceeds,
-                                // because the user asked for a wipe, not for a backup.
-                                runCatching { container.jsonExporter.export() }
-                                container.wipeDatabase()
-                                container.settings.clearAll()
-                            }
-                            // Restart the process: repositories, workers and session
-                            // state all outlive the tables otherwise, and a half-empty
-                            // app in memory looks exactly like a bug.
-                            val restart = Intent(context, MainActivity::class.java)
-                                .addFlags(
-                                    Intent.FLAG_ACTIVITY_NEW_TASK or
-                                        Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                )
-                            context.startActivity(restart)
-                            exitProcess(0)
-                        }
-                    }
-                }
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = if (wipeArmed) "второе нажатие стирает сразу" else "нажать надо дважды",
-                style = MaterialTheme.typography.bodySmall,
-                color = IknaDanger
-            )
-        }
-
-        message?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Spacer(Modifier.height(28.dp))
     }
 
     if (confirmReset) {
         IknaDialog(
-            title = "Начать заново?",
-            body = "Сроки карточек, статистика и слой слов обнулятся. Журнал ответов останется — из него можно будет всё вернуть кнопкой «Восстановить».",
-            confirmLabel = "НАЧАТЬ ЗАНОВО",
+            title = S.t("set.078"),
+            body = S.t("set.079"),
+            confirmLabel = S.t("set.080"),
             confirmColor = MaterialTheme.colorScheme.onSurfaceVariant,
             onConfirm = {
                 confirmReset = false
                 scope.launch {
                     withContext(Dispatchers.IO) { container.learningRepository.resetProgress() }
-                    message = "Прогресс обнулён"
+                    message = S.t("set.081")
                 }
             },
-            dismissLabel = "ОТМЕНА",
+            dismissLabel = S.t("set.082"),
             onDismiss = { confirmReset = false }
+        )
+    }
+}
+
+/**
+ * The pinned row of jumps.
+ *
+ * This is the whole answer to "menu or canvas": it gives the one thing a menu is
+ * good for — naming what exists — without the tap, the back button, or the need
+ * to remember which drawer a switch was filed in. Nothing is hidden behind it,
+ * so scrolling still works for anyone who would rather scroll.
+ */
+@Composable
+private fun JumpRow(onJump: (String) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp),
+        horizontalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        JUMPS.forEach { jump ->
+            IknaTextButton(
+                label = S.t(jump.second),
+                onClick = { onJump(jump.first) },
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/** Remembers where a section starts, so the row above can scroll straight to it. */
+@Composable
+private fun Anchored(
+    id: String,
+    anchors: MutableMap<String, Int>,
+    content: @Composable () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .onGloballyPositioned { anchors[id] = it.positionInParent().y.roundToInt() }
+    ) {
+        content()
+    }
+}
+
+/**
+ * Minus, number, plus.
+ *
+ * A slider would be smaller on screen and worse in every other way: it demands a
+ * precise drag to land on a number, it has no idea what a sensible step is, and
+ * it invites fiddling with a figure that only matters in steps of five.
+ */
+@Composable
+private fun Stepper(
+    value: Int,
+    enabled: Boolean,
+    onChange: (Int) -> Unit
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        IknaWideButton(
+            label = "-",
+            modifier = Modifier.width(72.dp),
+            height = 52.dp,
+            enabled = enabled && value > MANUAL_LOAD_MIN,
+            onClick = { onChange((value - MANUAL_LOAD_STEP).coerceAtLeast(MANUAL_LOAD_MIN)) }
+        )
+        Text(
+            text = value.toString(),
+            style = MaterialTheme.typography.displaySmall,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 16.dp)
+        )
+        IknaWideButton(
+            label = "+",
+            modifier = Modifier.width(72.dp),
+            height = 52.dp,
+            enabled = enabled && value < MANUAL_LOAD_MAX,
+            onClick = { onChange((value + MANUAL_LOAD_STEP).coerceAtMost(MANUAL_LOAD_MAX)) }
         )
     }
 }
@@ -695,7 +897,7 @@ private fun Section(
     subtitle: String?,
     content: @Composable () -> Unit
 ) {
-    Spacer(Modifier.height(22.dp))
+    Spacer(Modifier.height(24.dp))
     IknaRule(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.18f))
     Spacer(Modifier.height(16.dp))
     Text(
@@ -725,7 +927,7 @@ private fun ToggleRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -761,16 +963,16 @@ private fun CustomColors(
     val muted = Color(settings.customMuted)
     val accent = Color(settings.customAccent)
 
-    ColorRow("ФОН", background) {
+    ColorRow(S.t("set.083"), background) {
         onChange(it, settings.customInk, settings.customMuted, settings.customAccent)
     }
-    ColorRow("ТЕКСТ", ink) {
+    ColorRow(S.t("set.084"), ink) {
         onChange(settings.customBackground, it, settings.customMuted, settings.customAccent)
     }
-    ColorRow("ПРИГЛУШЁННЫЙ", muted) {
+    ColorRow(S.t("set.085"), muted) {
         onChange(settings.customBackground, settings.customInk, it, settings.customAccent)
     }
-    ColorRow("АКЦЕНТ", accent) {
+    ColorRow(S.t("set.086"), accent) {
         onChange(settings.customBackground, settings.customInk, settings.customMuted, it)
     }
 
@@ -780,17 +982,17 @@ private fun CustomColors(
     val mutedRatio = contrastRatio(muted, background)
     val accentRatio = contrastRatio(accent, background)
     Text(
-        text = "КОНТРАСТ · ТЕКСТ " + ratioText(inkRatio) +
-            "  ·  ПРИГЛУШЁННЫЙ " + ratioText(mutedRatio) +
-            "  ·  АКЦЕНТ " + ratioText(accentRatio),
+        text = S.t("set.087") + ratioText(inkRatio) +
+            S.t("set.088") + ratioText(mutedRatio) +
+            S.t("set.089") + ratioText(accentRatio),
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 
     if (minOf(inkRatio, mutedRatio, accentRatio) < MIN_READABLE_CONTRAST) {
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(8.dp))
         Text(
-            text = "что-то из этого плохо читается на своём фоне — цвет всё равно применён",
+            text = S.t("set.090"),
             style = MaterialTheme.typography.bodySmall,
             color = IknaDanger
         )
@@ -805,7 +1007,7 @@ private fun ColorRow(label: String, color: Color, onColor: (Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 5.dp),
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IknaSwatch(color = color)
@@ -827,30 +1029,70 @@ private fun ColorRow(label: String, color: Color, onColor: (Int) -> Unit) {
     }
 }
 
-private val REMINDER_TIMES = listOf(9 to 0, 13 to 0, 20 to 0, 22 to 0)
+private const val ID_LOAD = "load"
+private const val ID_LOOK = "look"
+private const val ID_LANGUAGE = "language"
+private const val ID_SPEECH = "speech"
+private const val ID_FONT = "font"
+private const val ID_REMINDER = "reminder"
+private const val ID_DATA = "data"
+private const val ID_ADVANCED = "advanced"
 
-private fun loadLabel(preset: LoadPreset): String = when (preset) {
-    LoadPreset.CALM -> "СПОКОЙНО · 25"
-    LoadPreset.NORMAL -> "ОБЫЧНО · 40"
-    LoadPreset.DENSE -> "ПЛОТНО · 60"
+/**
+ * Order is by how often a thing is actually touched, not by how important it
+ * sounds. The load and the look are changed in the first week; the wipe button
+ * is changed once, by someone who came looking for it.
+ */
+private val JUMPS = listOf(
+    ID_LOAD to "set.091",
+    ID_LOOK to "set.092",
+    ID_LANGUAGE to "set.093",
+    ID_SPEECH to "set.094",
+    ID_FONT to "set.095",
+    ID_REMINDER to "set.096",
+    ID_DATA to "set.097",
+    ID_ADVANCED to "set.098"
+)
+
+/**
+ * Interface languages. English and Polish are here because the app is used in
+ * both directions: the person learning Polish from Russian today is the person
+ * learning English tomorrow, and an interface stuck in one language turns the
+ * other deck into homework in translation.
+ */
+private val LANGUAGES = listOf(LANGUAGE_SYSTEM, "ru", "en", "pl")
+
+/**
+ * Language names stay in their own language: a person looking for Polish looks
+ * for "POLSKI", not for its translation. Only "as in the system" is translated,
+ * because it is a sentence about the phone rather than a name.
+ */
+private fun languageLabel(code: String): String = when (code) {
+    LANGUAGE_SYSTEM -> S.t("set.099")
+    "ru" -> S.t("set.100")
+    "en" -> "ENGLISH"
+    "pl" -> "POLSKI"
+    else -> code.uppercase(Locale.getDefault())
 }
 
+private val REMINDER_TIMES = listOf(9 to 0, 13 to 0, 20 to 0, 22 to 0)
+
 private fun themeLabel(mode: ThemeMode): String = when (mode) {
-    ThemeMode.DARK -> "ТЁМНАЯ"
-    ThemeMode.LIGHT -> "СВЕТЛАЯ"
-    ThemeMode.CUSTOM -> "СВОЯ"
+    ThemeMode.DARK -> S.t("set.101")
+    ThemeMode.LIGHT -> S.t("set.102")
+    ThemeMode.CUSTOM -> S.t("set.103")
 }
 
 private fun timeText(hour: Int, minute: Int): String =
     String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
 
 private fun langLabel(lang: String): String = when (lang.substringBefore('-').lowercase()) {
-    "pl" -> "ПОЛЬСКИЙ"
-    "ru" -> "РУССКИЙ"
-    "en" -> "АНГЛИЙСКИЙ"
-    "de" -> "НЕМЕЦКИЙ"
-    "es" -> "ИСПАНСКИЙ"
-    "fr" -> "ФРАНЦУЗСКИЙ"
+    "pl" -> S.t("set.104")
+    "ru" -> S.t("set.105")
+    "en" -> S.t("set.106")
+    "de" -> S.t("set.107")
+    "es" -> S.t("set.108")
+    "fr" -> S.t("set.109")
     else -> lang.uppercase()
 }
 
@@ -887,5 +1129,5 @@ private fun displayNameOf(context: Context, uri: Uri): String {
                 }
             }
     }
-    return uri.lastPathSegment?.substringAfterLast('/').orEmpty().ifBlank { "шрифт" }
+    return uri.lastPathSegment?.substringAfterLast('/').orEmpty().ifBlank { S.t("set.110") }
 }

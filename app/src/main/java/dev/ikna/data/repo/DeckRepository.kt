@@ -1,5 +1,7 @@
 package dev.ikna.data.repo
 
+import dev.ikna.ui.text.S
+
 import dev.ikna.data.db.ChunkDao
 import dev.ikna.data.pack.ImportResult
 import dev.ikna.data.pack.PackLoader
@@ -53,7 +55,7 @@ class DeckRepository(
             .ifEmpty { "pack" }
         return packLoader.importJsonl(
             packId = "user-" + slug,
-            title = stem.ifEmpty { "Своя колода" },
+            title = stem.ifEmpty { S.t("deckrepo.001") },
             lang = "custom",
             text = text
         )

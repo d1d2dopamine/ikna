@@ -28,17 +28,34 @@ import kotlinx.coroutines.flow.map
 enum class ThemeMode { DARK, LIGHT, CUSTOM }
 
 /**
- * The only load control exposed to the user.
+ * The hand-set daily norm.
  *
- * One switch with three positions instead of the twenty numbers in
- * `assets/governor.json`. The numbers stay in the asset on purpose: tuning a
- * scheduler is far more entertaining than using one, and an app that invites
- * tuning gets tuned instead of studied.
+ * The three named presets are gone. "Спокойно / обычно / плотно" asked the user
+ * to translate a mood into a number the app had already chosen for them, and the
+ * names lied in both directions: "плотно" is a decision about tomorrow's queue
+ * dressed up as a personality trait, and none of the three said what it would
+ * actually cost. Either the app measures the norm — the default — or the user
+ * states it as a number. Nothing in between.
  */
-enum class LoadPreset(val dailyReviews: Int) {
-    CALM(25),
-    NORMAL(40),
-    DENSE(60)
+const val MANUAL_LOAD_MIN = 10
+const val MANUAL_LOAD_MAX = 120
+const val MANUAL_LOAD_STEP = 5
+const val MANUAL_LOAD_DEFAULT = 40
+
+/** Interface language: "system" follows the phone, or "ru" / "en" / "pl". */
+const val LANGUAGE_SYSTEM = "system"
+
+/**
+ * Installs from before the presets were removed still have "CALM" written in
+ * their preferences. The number behind the name is recovered here rather than
+ * reset, because a norm that silently jumps from 25 to 40 on update is a load
+ * increase nobody asked for.
+ */
+private fun legacyLoad(name: String?): Int? = when (name) {
+    "CALM" -> 25
+    "NORMAL" -> 40
+    "DENSE" -> 60
+    else -> null
 }
 
 /** Dark palette values, duplicated here as the starting point for a custom theme. */
@@ -58,9 +75,16 @@ data class IknaSettings(
     val customInk: Int = DEFAULT_CUSTOM_INK.toInt(),
     val customMuted: Int = DEFAULT_CUSTOM_MUTED.toInt(),
     val customAccent: Int = DEFAULT_CUSTOM_ACCENT.toInt(),
-    val load: LoadPreset = LoadPreset.NORMAL,
+    /** The daily norm in answers. Used only when [autoLoad] is off. */
+    val manualLoad: Int = MANUAL_LOAD_DEFAULT,
     /**
-     * When true the daily norm is measured from behaviour and [load] is ignored.
+     * Interface language. Defaults to following the phone, so the app speaks the
+     * right language before the user has been asked anything at all.
+     */
+    val language: String = LANGUAGE_SYSTEM,
+    /**
+     * When true the daily norm is measured from behaviour and [manualLoad] is
+     * ignored.
      * On by default: the app should work out the right size of a day by itself.
      */
     val autoLoad: Boolean = true,
@@ -108,6 +132,8 @@ class SettingsStore(private val context: Context) {
         val customMuted = intPreferencesKey("customMuted")
         val customAccent = intPreferencesKey("customAccent")
         val load = stringPreferencesKey("load")
+        val manualLoad = intPreferencesKey("manualLoad")
+        val language = stringPreferencesKey("language")
         val autoLoad = booleanPreferencesKey("autoLoad")
         val reminderEnabled = booleanPreferencesKey("reminderEnabled")
         val reminderHour = intPreferencesKey("reminderHour")
@@ -134,8 +160,8 @@ class SettingsStore(private val context: Context) {
             customInk = p[Keys.customInk] ?: defaults.customInk,
             customMuted = p[Keys.customMuted] ?: defaults.customMuted,
             customAccent = p[Keys.customAccent] ?: defaults.customAccent,
-            load = p[Keys.load]?.let { name -> runCatching { LoadPreset.valueOf(name) }.getOrNull() }
-                ?: defaults.load,
+            manualLoad = p[Keys.manualLoad] ?: legacyLoad(p[Keys.load]) ?: defaults.manualLoad,
+            language = p[Keys.language] ?: defaults.language,
             autoLoad = p[Keys.autoLoad] ?: defaults.autoLoad,
             reminderEnabled = p[Keys.reminderEnabled] ?: defaults.reminderEnabled,
             reminderHour = p[Keys.reminderHour] ?: defaults.reminderHour,
@@ -167,11 +193,13 @@ class SettingsStore(private val context: Context) {
         it[Keys.customAccent] = accent
     }
 
-    /** Picking a preset by hand turns the measured norm off. */
-    suspend fun setLoad(preset: LoadPreset) = put {
-        it[Keys.load] = preset.name
+    /** Naming the number by hand turns the measured norm off. */
+    suspend fun setManualLoad(value: Int) = put {
+        it[Keys.manualLoad] = value.coerceIn(MANUAL_LOAD_MIN, MANUAL_LOAD_MAX)
         it[Keys.autoLoad] = false
     }
+
+    suspend fun setLanguage(code: String) = put { it[Keys.language] = code }
 
     suspend fun setAutoLoad(on: Boolean) = put { it[Keys.autoLoad] = on }
     suspend fun setHaptics(on: Boolean) = put { it[Keys.haptics] = on }

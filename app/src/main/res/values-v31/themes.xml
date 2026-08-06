@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android 12 and later draw the launch screen themselves and ignore
+    windowBackground for it. On those versions the system splash is told to use
+    the same mark and the same field as the drawable in res/drawable, so the two
+    code paths look identical and nobody has to own a second design.
+-->
+<resources>
+    <style name="Theme.Ikna.Launch" parent="Theme.Ikna">
+        <item name="android:windowSplashScreenBackground">@color/window_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/ic_launcher_background</item>
+    </style>
+</resources>

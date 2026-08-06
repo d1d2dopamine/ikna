@@ -2,7 +2,6 @@ package dev.ikna
 
 import dev.ikna.data.export.SettingsBackup
 import dev.ikna.data.prefs.IknaSettings
-import dev.ikna.data.prefs.LoadPreset
 import dev.ikna.data.prefs.ThemeMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -24,7 +23,8 @@ class SettingsBackupTest {
             theme = ThemeMode.CUSTOM,
             customBackground = 0x11223344,
             customInk = 0x55667788,
-            load = LoadPreset.DENSE,
+            manualLoad = 65,
+            language = "pl",
             autoLoad = false,
             reminderHour = 7,
             reminderMinute = 30,
@@ -38,7 +38,8 @@ class SettingsBackupTest {
 
         assertEquals(ThemeMode.CUSTOM.name, decoded?.theme)
         assertEquals(0x11223344, decoded?.customBackground)
-        assertEquals(LoadPreset.DENSE.name, decoded?.load)
+        assertEquals(65, decoded?.manualLoad)
+        assertEquals("pl", decoded?.language)
         assertEquals(false, decoded?.autoLoad)
         assertEquals(7, decoded?.reminderHour)
         assertEquals(false, decoded?.animations)
@@ -51,6 +52,17 @@ class SettingsBackupTest {
         val logLine = "{\"id\":1,\"chunkId\":\"pl-0001\",\"level\":0,\"ts\":1700000000000}"
         assertFalse(SettingsBackup.looksLikeSettings(logLine))
         assertNull(SettingsBackup.decode(logLine))
+    }
+
+    @Test
+    fun `a json file that never says what it is decodes to nothing`() {
+        // This is the one CI caught. Every field except kind has a default, so a
+        // default on kind too meant any JSON object decoded into a complete
+        // snapshot of defaults — and restoring the wrong file would have reset
+        // the theme, the custom colours and the font without saying so.
+        assertNull(SettingsBackup.decode("{}"))
+        assertNull(SettingsBackup.decode("{\"theme\":\"LIGHT\",\"manualLoad\":95}"))
+        assertNull(SettingsBackup.decode("{\"version\":1}"))
     }
 
     @Test

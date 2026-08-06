@@ -1,5 +1,7 @@
 package dev.ikna.ui.debug
 
+import dev.ikna.ui.text.S
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,33 +46,33 @@ fun DebugScreen(container: AppContainer, onBack: () -> Unit) {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        IknaTextButton(label = "← НАЗАД", onClick = onBack)
+        IknaTextButton(label = S.t("dbg.001"), onClick = onBack)
         IknaTextButton(
-            label = "ВЫГРУЗИТЬ ЖУРНАЛ ОТВЕТОВ",
+            label = S.t("dbg.002"),
             onClick = {
                 scope.launch {
-                    note = runCatching { "Файл: Документы/Ikna/" + container.jsonExporter.export() }
-                        .getOrElse { "Не удалось сохранить файл" }
+                    note = runCatching { S.t("dbg.003") + container.jsonExporter.export() }
+                        .getOrElse { S.t("dbg.004") }
                 }
             }
         )
         IknaTextButton(
-            label = "ПЕРЕСЧИТАТЬ СЛОЙ СЛОВ",
+            label = S.t("dbg.005"),
             onClick = {
                 scope.launch {
                     container.components.rebuildFromReviews()
-                    note = "Слой слов пересчитан"
+                    note = S.t("dbg.006")
                 }
             }
         )
         IknaTextButton(
-            label = "ПЕРЕСОБРАТЬ ПЛАН ДНЯ",
+            label = S.t("dbg.007"),
             onClick = {
                 scope.launch {
                     container.learningRepository.invalidatePlan()
                     container.learningRepository.ensureDailyPlan()
                     log = container.learningRepository.governorLog(40)
-                    note = "План на сегодня пересобран"
+                    note = S.t("dbg.008")
                 }
             }
         )
@@ -81,7 +83,7 @@ fun DebugScreen(container: AppContainer, onBack: () -> Unit) {
 
         Spacer(Modifier.height(16.dp))
         Text(
-            text = "Решения регулятора по дням",
+            text = S.t("dbg.009"),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -90,12 +92,12 @@ fun DebugScreen(container: AppContainer, onBack: () -> Unit) {
         LazyColumn {
             items(log) { e ->
                 Text(
-                    text = e.day + "  новых=" + e.allowedNew + "  " + e.reason +
-                        "  к повтору=" + e.dueToday +
-                        "  прогноз3д=" + String.format(Locale.US, "%.1f", e.forecastAvg3d) +
-                        "  долг=" + e.backlog +
-                        "  точность=" + String.format(Locale.US, "%.2f", e.accuracyRecent) +
-                        "  запас=" + String.format(Locale.US, "%.1f", e.headroom),
+                    text = e.day + S.t("dbg.010") + e.allowedNew + "  " + e.reason +
+                        S.t("dbg.011") + e.dueToday +
+                        S.t("dbg.012") + String.format(Locale.US, "%.1f", e.forecastAvg3d) +
+                        S.t("dbg.013") + e.backlog +
+                        S.t("dbg.014") + String.format(Locale.US, "%.2f", e.accuracyRecent) +
+                        S.t("dbg.015") + String.format(Locale.US, "%.1f", e.headroom),
                     style = MaterialTheme.typography.labelSmall
                 )
             }

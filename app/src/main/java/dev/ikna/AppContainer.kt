@@ -108,7 +108,7 @@ class AppContainer(context: Context) {
             var lastReminder: Triple<Boolean, Int, Int>? = null
             settings.flow.collect { s ->
                 learningRepository.autoLoad = s.autoLoad
-                if (!s.autoLoad) learningRepository.dailyTargetOverride = s.load.dailyReviews
+                if (!s.autoLoad) learningRepository.dailyTargetOverride = s.manualLoad
 
                 // The reminder is scheduled here rather than from the settings
                 // screen, so it exists after a reinstall or a reboot even if the

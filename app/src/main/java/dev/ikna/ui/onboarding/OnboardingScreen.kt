@@ -1,5 +1,7 @@
 package dev.ikna.ui.onboarding
 
+import dev.ikna.ui.text.S
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,21 +32,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private data class Slide(val title: String, val body: String)
+/**
+ * Slides hold text keys, not text.
+ *
+ * The list lives at file scope, so it is built once when the class loads. If it
+ * held finished strings, they would be the strings of whatever language was
+ * active at that moment and the screen would keep them after a language switch.
+ */
+private data class Slide(val titleKey: String, val bodyKey: String)
 
 private val SLIDES = listOf(
-    Slide(
-        "Фразами, а не словами",
-        "Внутри — готовые чанки: короткие живые куски речи. Новые добавляются сами — ничего не надо вставлять руками."
-    ),
-    Slide(
-        "Пропуск — не провал",
-        "Если день или неделя пропали, завала на входе не будет. Старое уйдёт в тихий пул и будет возвращаться понемногу, а новые чанки придут только когда будет место."
-    ),
-    Slide(
-        "Минимум — одна карточка",
-        "Одна карточка закрывает день целиком. Захочется больше — есть кнопка «ещё немного», и она не сделает завтрашний день тяжелее."
-    )
+    Slide("onb.001", "onb.002"),
+    Slide("onb.003", "onb.004"),
+    Slide("onb.005", "onb.006")
 )
 
 /**
@@ -77,14 +77,14 @@ fun OnboardingScreen(container: AppContainer, onDone: () -> Unit) {
         Spacer(Modifier.weight(1f))
 
         Text(
-            text = slide.title,
+            text = S.t(slide.titleKey),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(16.dp))
         Text(
-            text = slide.body,
+            text = S.t(slide.bodyKey),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -98,7 +98,7 @@ fun OnboardingScreen(container: AppContainer, onDone: () -> Unit) {
             SLIDES.indices.forEach { i ->
                 Box(
                     modifier = Modifier
-                        .size(if (i == step) 9.dp else 7.dp)
+                        .size(if (i == step) 8.dp else 8.dp)
                         .background(if (i == step) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f))
                 )
             }
@@ -108,9 +108,9 @@ fun OnboardingScreen(container: AppContainer, onDone: () -> Unit) {
 
         IknaWideButton(
             label = when {
-                busy -> "ГОТОВЛЮ КАРТОЧКИ…"
-                step < SLIDES.lastIndex -> "ДАЛЬШЕ"
-                else -> "НАЧАТЬ"
+                busy -> S.t("onb.007")
+                step < SLIDES.lastIndex -> S.t("onb.008")
+                else -> S.t("onb.009")
             },
             filled = true,
             enabled = !busy,
@@ -138,7 +138,7 @@ fun OnboardingScreen(container: AppContainer, onDone: () -> Unit) {
 
         if (step < SLIDES.lastIndex) {
             IknaTextButton(
-                label = "ПРОПУСТИТЬ",
+                label = S.t("onb.010"),
                 onClick = { step = SLIDES.lastIndex },
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

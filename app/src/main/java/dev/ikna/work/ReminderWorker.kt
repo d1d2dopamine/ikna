@@ -1,5 +1,7 @@
 package dev.ikna.work
 
+import dev.ikna.ui.text.S
+
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -44,8 +46,8 @@ class ReminderWorker(context: Context, params: WorkerParameters) :
 
         val notification = NotificationCompat.Builder(applicationContext, IknaApp.REMINDER_CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_popup_reminder)
-            .setContentTitle("Одна карточка")
-            .setContentText("Одной достаточно, чтобы день был закрыт")
+            .setContentTitle(S.t("remind.001"))
+            .setContentText(S.t("remind.002"))
             .setContentIntent(pending)
             .setAutoCancel(true)
             .build()

@@ -63,7 +63,7 @@ enum class IknaGlyph { SPARK, STACK, BARS, SLIDERS, GEAR, PLUS, BACK, SOUND }
 fun IknaGlyphIcon(
     glyph: IknaGlyph,
     color: Color,
-    size: Dp = 22.dp
+    size: Dp = 24.dp
 ) {
     Canvas(modifier = Modifier.size(size)) {
         val s = this.size.minDimension
@@ -179,7 +179,7 @@ fun IknaIconButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     size: Dp = 44.dp,
-    glyphSize: Dp = 19.dp,
+    glyphSize: Dp = 20.dp,
     color: Color = MaterialTheme.colorScheme.onBackground
 ) {
     Box(
@@ -257,7 +257,7 @@ fun IknaTextButton(
         modifier = modifier
             .height(44.dp)
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 6.dp),
+            .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -288,8 +288,8 @@ fun IknaToggle(
 
     Box(
         modifier = modifier
-            .width(54.dp)
-            .height(30.dp)
+            .width(56.dp)
+            .height(32.dp)
             .border(1.dp, ink.copy(alpha = 0.55f * alpha))
             .clickable(enabled = enabled) { onCheckedChange(!checked) }
             .padding(4.dp),
@@ -297,7 +297,7 @@ fun IknaToggle(
     ) {
         Box(
             modifier = Modifier
-                .size(width = 22.dp, height = 22.dp)
+                .size(width = 24.dp, height = 24.dp)
                 .background(
                     if (checked) ink.copy(alpha = alpha)
                     else ink.copy(alpha = 0.22f * alpha)
@@ -320,7 +320,7 @@ fun IknaChip(
 
     Box(
         modifier = modifier
-            .height(38.dp)
+            .height(40.dp)
             .background(if (selected) ink else Color.Transparent)
             .border(1.dp, if (selected) ink else line)
             .clickable(onClick = onClick)
@@ -355,9 +355,9 @@ fun IknaHexField(
 
     Box(
         modifier = modifier
-            .height(38.dp)
+            .height(40.dp)
             .border(1.dp, line)
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = 12.dp),
         contentAlignment = Alignment.CenterStart
     ) {
         BasicTextField(
@@ -376,7 +376,7 @@ fun IknaHexField(
 fun IknaSwatch(
     color: Color,
     modifier: Modifier = Modifier,
-    size: Dp = 30.dp
+    size: Dp = 32.dp
 ) {
     Box(
         modifier = modifier
@@ -410,7 +410,7 @@ fun IknaDialog(
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.background)
                 .border(1.dp, MaterialTheme.colorScheme.onBackground)
-                .padding(horizontal = 20.dp, vertical = 22.dp)
+                .padding(horizontal = 20.dp, vertical = 24.dp)
         ) {
             Text(text = title, style = MaterialTheme.typography.headlineSmall)
             Spacer(Modifier.height(12.dp))
@@ -419,14 +419,14 @@ fun IknaDialog(
                 style = MaterialTheme.typography.bodyMedium,
                 color = muted
             )
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(20.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IknaTextButton(label = dismissLabel, onClick = onDismiss, color = muted)
-                Spacer(Modifier.width(18.dp))
+                Spacer(Modifier.width(20.dp))
                 IknaTextButton(label = confirmLabel, onClick = onConfirm, color = confirmColor)
             }
         }

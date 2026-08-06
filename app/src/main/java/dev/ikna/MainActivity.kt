@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.ui.nav.IknaNavHost
+import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaTheme
 import dev.ikna.ui.theme.paletteFor
 import dev.ikna.ui.theme.rememberContentFont
@@ -18,12 +19,26 @@ import dev.ikna.ui.theme.rememberContentFont
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // The launcher window wears Theme.Ikna.Launch, which paints the app mark
+        // instead of flashing a black rectangle on the way in. Hand the window
+        // back to the real theme here, before super and before any drawing, or
+        // the splash drawable stays behind the app for the whole session.
+        setTheme(R.style.Theme_Ikna)
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         val container = (application as IknaApp).container
         setContent {
             val settings by container.settings.flow.collectAsState(initial = IknaSettings())
             val palette = paletteFor(settings)
+
+            // The interface language, resolved here and nowhere else. "system"
+            // means whatever the phone is set to, so a person who never opens
+            // settings still gets their own language. Changing it redraws the
+            // screens in place: no activity restart, so nothing is lost from the
+            // card that is open at that moment.
+            LaunchedEffect(settings.language) {
+                S.apply(settings.language)
+            }
 
             // The status and navigation icons have to follow the chosen palette,
             // not the system's idea of dark mode. With a custom background this is

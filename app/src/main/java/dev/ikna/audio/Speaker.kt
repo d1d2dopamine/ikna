@@ -1,5 +1,7 @@
 package dev.ikna.audio
 
+import dev.ikna.ui.text.S
+
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
@@ -329,10 +331,10 @@ class Speaker(context: Context) {
         val head = if (country.isNotBlank()) country.uppercase(Locale.ROOT) else
             voice.locale?.language.orEmpty().uppercase(Locale.ROOT)
         val quality = when {
-            voice.quality >= Voice.QUALITY_VERY_HIGH -> "ОТЛИЧНОЕ"
-            voice.quality >= Voice.QUALITY_HIGH -> "ХОРОШЕЕ"
-            voice.quality >= Voice.QUALITY_NORMAL -> "ОБЫЧНОЕ"
-            else -> "НИЗКОЕ"
+            voice.quality >= Voice.QUALITY_VERY_HIGH -> S.t("speaker.001")
+            voice.quality >= Voice.QUALITY_HIGH -> S.t("speaker.002")
+            voice.quality >= Voice.QUALITY_NORMAL -> S.t("speaker.003")
+            else -> S.t("speaker.004")
         }
         val tail = voice.name.substringAfterLast('-', "").uppercase(Locale.ROOT)
         return listOfNotNull(head, tail.takeIf { it.isNotBlank() && it != head }, quality)

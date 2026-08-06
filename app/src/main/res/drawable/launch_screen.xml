@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    What the phone shows between the tap on the icon and the first frame of the
+    app.
+
+    Until now that was a flat #121110 rectangle on every theme, including the
+    light one, so a user on a light palette got a black flash on every single
+    launch. On an app opened many times a day that flash is the most-seen screen
+    in the product.
+
+    Same mark as the launcher icon, same field, so the icon appears to grow into
+    the app instead of being replaced by it. No text and no spinner: the app is
+    ready in well under a second, and anything that could be read here would only
+    be readable if something were wrong.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/window_background" />
+    <item
+        android:drawable="@drawable/ic_launcher_foreground"
+        android:gravity="center"
+        android:width="128dp"
+        android:height="128dp" />
+</layer-list>
