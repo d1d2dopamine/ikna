@@ -7,4 +7,13 @@
     <!-- DarkBackground from Theme.kt. The app opens dark, so this is what the
          launch window should be; Compose repaints it a frame later. -->
     <color name="window_background">#121110</color>
+
+    <!-- The widget is drawn by the launcher, which cannot read the Compose
+         palette, so the four colours it needs are duplicated here. These are the
+         dark scheme from Theme.kt: a widget that followed the in-app light theme
+         would be a white brick on most people's wallpaper. -->
+    <color name="widget_background">#121110</color>
+    <color name="widget_ink">#EDE9E1</color>
+    <color name="widget_muted">#8F887A</color>
+    <color name="widget_accent">#97A4D8</color>
 </resources>

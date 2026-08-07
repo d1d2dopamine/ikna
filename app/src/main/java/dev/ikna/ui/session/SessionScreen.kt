@@ -195,7 +195,7 @@ private fun TopBar(state: SessionUiState, onBack: () -> Unit, onSpeak: () -> Uni
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack)
+        IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium,
@@ -211,7 +211,8 @@ private fun TopBar(state: SessionUiState, onBack: () -> Unit, onSpeak: () -> Uni
             IknaIconButton(
                 glyph = IknaGlyph.SOUND,
                 onClick = onSpeak,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                label = S.t("a11y.005")
             )
         }
 

@@ -63,7 +63,12 @@ object Routes {
  * "cards" tab is gone because it was a second door into the same session.
  */
 @Composable
-fun IknaNavHost(container: AppContainer, settings: IknaSettings) {
+fun IknaNavHost(
+    container: AppContainer,
+    settings: IknaSettings,
+    /** True when the app was opened from the reminder or from the widget. */
+    startSession: Boolean = false
+) {
     val navController = rememberNavController()
 
     // The stored flag arrives a frame or two after the first composition, and a
@@ -76,6 +81,11 @@ fun IknaNavHost(container: AppContainer, settings: IknaSettings) {
             .getOrDefault(false)
     }
 
+    // The jump into a session happens once per launch. Without this flag any
+    // recomposition would push another session onto the stack, and going back
+    // would walk through a pile of identical screens.
+    var jumped by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -84,6 +94,15 @@ fun IknaNavHost(container: AppContainer, settings: IknaSettings) {
             .windowInsetsPadding(WindowInsets.safeDrawing)
     ) {
         val known = onboarded ?: return@Box
+
+        // Someone who has not been through the introduction yet is not sent into
+        // the cards, whatever tapped the icon.
+        LaunchedEffect(known, startSession) {
+            if (known && startSession && !jumped) {
+                jumped = true
+                navController.navigate(Routes.session(null))
+            }
+        }
 
         NavHost(
             navController = navController,

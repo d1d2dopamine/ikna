@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The languages this app is actually translated into.
+
+    Android 13 and later reads this list to build the per-app language picker in
+    the system settings. Without it that screen simply does not exist for us, and
+    the only way to change the language is the switch inside the app - which is
+    useless to the one person who needs it most: someone whose phone is in a
+    language they cannot read, looking for our setting in a menu they cannot
+    navigate.
+
+    Nothing here duplicates the in-app switch. The switch stores "system", and
+    "system" means whatever the platform resolved for this app, so the two agree
+    by construction.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="ru" />
+    <locale android:name="en" />
+    <locale android:name="pl" />
+</locale-config>

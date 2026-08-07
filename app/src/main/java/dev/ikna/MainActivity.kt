@@ -18,6 +18,19 @@ import dev.ikna.ui.theme.rememberContentFont
 
 class MainActivity : ComponentActivity() {
 
+    companion object {
+        /**
+         * Set by the reminder notification and by the home screen widget: open
+         * the cards, not the deck list.
+         *
+         * Both of those are already an answer to "shall I study now" - the
+         * person tapped them on purpose. Landing on a list and making them
+         * choose a deck reopens a question they just closed, and that is exactly
+         * the gap where the intention is lost.
+         */
+        const val EXTRA_START_SESSION = "dev.ikna.START_SESSION"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // The launcher window wears Theme.Ikna.Launch, which paints the app mark
         // instead of flashing a black rectangle on the way in. Hand the window
@@ -27,6 +40,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         val container = (application as IknaApp).container
+
+        // Read once, from the intent that started this instance. The notification
+        // and the widget both clear the top of the task, so a fresh onCreate is
+        // what arrives here even when the app was already running.
+        val startSession = intent?.getBooleanExtra(EXTRA_START_SESSION, false) == true
+
         setContent {
             val settings by container.settings.flow.collectAsState(initial = IknaSettings())
             val palette = paletteFor(settings)
@@ -60,7 +79,11 @@ class MainActivity : ComponentActivity() {
             val contentFont = rememberContentFont(settings.fontName)
 
             IknaTheme(palette = palette, contentFont = contentFont) {
-                IknaNavHost(container = container, settings = settings)
+                IknaNavHost(
+                    container = container,
+                    settings = settings,
+                    startSession = startSession
+                )
             }
         }
     }

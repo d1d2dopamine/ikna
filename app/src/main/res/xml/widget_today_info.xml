@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    updatePeriodMillis is 0 deliberately. The platform would not honour anything
+    under half an hour anyway, and a periodic wake-up to redraw a number that
+    only changes when the user answers a card is a battery cost with no return.
+    The app pushes a new value whenever it knows one.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="110dp"
+    android:minHeight="40dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="0"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:previewLayout="@layout/widget_today"
+    android:initialLayout="@layout/widget_today" />

@@ -509,4 +509,16 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"remind.001" to "One card",
 	// Одной достаточно, чтобы день был закрыт
 	"remind.002" to "One is enough to close the day",
+	// Назад
+	"a11y.001" to "Back",
+	// Настройки
+	"a11y.002" to "Settings",
+	// Статистика
+	"a11y.003" to "Statistics",
+	// Добавить колоду
+	"a11y.004" to "Add a deck",
+	// Прочитать вслух
+	"a11y.005" to "Read aloud",
+	// Колода в работе
+	"a11y.006" to "Deck in use",
 )

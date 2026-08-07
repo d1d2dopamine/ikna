@@ -90,7 +90,7 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
                 .offset(x = (-12).dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack)
+            IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
         }
         Spacer(Modifier.height(8.dp))
         Text(

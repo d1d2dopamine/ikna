@@ -183,11 +183,18 @@ fun SettingsScreen(
         scope.launch {
             busy = true
             val name = withContext(Dispatchers.IO) { displayNameOf(context, uri) }
-            val problem = withContext(Dispatchers.IO) {
+            // install() answers with null when the font was accepted, and the
+            // elvis operator below used to swallow exactly that: a successful
+            // install produced null, null was replaced by the "could not open
+            // the file" message, and the font was never applied. The compiler
+            // had been saying so all along - it warned that `problem == null`
+            // could never be true. Opening the stream is checked on its own now,
+            // so null keeps meaning success.
+            val problem: String? = withContext(Dispatchers.IO) {
                 runCatching {
-                    context.contentResolver.openInputStream(uri)
-                        ?.use { FontStore.install(context, it) }
-                        ?: S.t("set.001")
+                    val stream = context.contentResolver.openInputStream(uri)
+                        ?: return@runCatching S.t("set.001")
+                    stream.use { FontStore.install(context, it) }
                 }.getOrElse { S.t("set.002") }
             }
             if (problem == null) {
@@ -261,7 +268,7 @@ fun SettingsScreen(
                     .offset(x = (-12).dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack)
+                IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
             }
             Spacer(Modifier.height(2.dp))
             Text(
@@ -951,7 +958,14 @@ private fun ToggleRow(
                 )
             }
         }
-        IknaToggle(checked = checked, onCheckedChange = onCheckedChange)
+        // The row's own title is what the switch is called. A screen reader
+        // treats the switch as a separate stop, so without this it would be
+        // announced as an anonymous "switch, on" after the text has been read.
+        IknaToggle(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            label = title
+        )
     }
 }
 

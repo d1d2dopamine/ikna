@@ -41,9 +41,33 @@ val keystorePassword = "iknafixedkey"
 val keystoreAlias = "ikna"
 val hasFixedKey = keystoreFile.exists()
 
-// Build number from CI. `toIntOrNull` rather than `toInt`: an empty or unset
-// RUN_NUMBER must produce version 1, not a configuration-time crash.
-val runNumber = System.getenv("RUN_NUMBER")?.trim()?.toIntOrNull() ?: 1
+// ---------------------------------------------------------------------------
+// The version is written here and nowhere else.
+//
+// It used to be derived from the CI run number, which was fine for as long as
+// this repository was the only thing that ever built the app. F-Droid builds it
+// on their own machines, where there is no run number and no tag: every build
+// would come out as version 1, and their recipe rejects an APK whose version
+// does not match the one declared for that release.
+//
+// So both numbers are bumped by hand when releasing, and the tag carries the
+// same number. The release workflow refuses to publish when the tag and
+// appVersionName disagree.
+//
+// appVersionCode is major * 10000 + minor * 100 + patch. It only ever goes up,
+// which is what Android requires to install an update over an older build. It
+// also sits far above every CI build number this project ever produced, so a
+// release always installs over a CI build and never the other way round.
+// ---------------------------------------------------------------------------
+val appVersionName = "0.3.0"
+val appVersionCode = 30000
+
+// F-Droid signs with its own key, so the build it runs has to come out
+// unsigned. Passing -Pikna.unsigned=true switches the signing config off
+// without anyone having to patch this file during their build.
+val unsignedBuild =
+    (project.findProperty("ikna.unsigned") as String?)?.toBoolean() == true
+val signWithFixedKey = hasFixedKey && !unsignedBuild
 
 android {
     namespace = "dev.ikna"
@@ -55,13 +79,13 @@ android {
         applicationId = "dev.ikna"
         minSdk = 29
         targetSdk = 35
-        versionCode = runNumber
-        versionName = "0.2." + runNumber
+        versionCode = appVersionCode
+        versionName = appVersionName
     }
 
     signingConfigs {
         create("fixed") {
-            if (hasFixedKey) {
+            if (signWithFixedKey) {
                 storeFile = keystoreFile
                 storeType = "PKCS12"
                 storePassword = keystorePassword
@@ -74,12 +98,12 @@ android {
     buildTypes {
         debug {
             isMinifyEnabled = false
-            if (hasFixedKey) signingConfig = signingConfigs.getByName("fixed")
+            if (signWithFixedKey) signingConfig = signingConfigs.getByName("fixed")
         }
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            if (hasFixedKey) signingConfig = signingConfigs.getByName("fixed")
+            if (signWithFixedKey) signingConfig = signingConfigs.getByName("fixed")
         }
     }
 

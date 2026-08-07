@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Ikna</string>
+
+    <!-- Shown in the widget before the app has ever published a number. Not a
+         zero: zero is a statement about today, and at this point nothing has
+         been counted yet. -->
+    <string name="widget_placeholder">—</string>
 </resources>

@@ -59,9 +59,15 @@ data class GovernorConfig(
     val desiredRetention: Double = 0.9
 ) {
     companion object {
+        // Built once. A Json instance compiles its configuration on creation, so
+        // making a fresh one inside load() paid that cost every call for nothing.
+        // ignoreUnknownKeys is what lets an older build read a governor.json
+        // written by a newer one instead of falling back to the defaults.
+        private val json = Json { ignoreUnknownKeys = true }
+
         fun load(context: Context): GovernorConfig = runCatching {
             val text = context.assets.open("governor.json").bufferedReader().use { it.readText() }
-            Json { ignoreUnknownKeys = true }.decodeFromString<GovernorConfig>(text)
+            json.decodeFromString<GovernorConfig>(text)
         }.getOrElse { GovernorConfig() }
     }
 }

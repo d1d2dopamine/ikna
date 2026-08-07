@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,6 +27,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -63,19 +68,34 @@ enum class IknaGlyph { SPARK, STACK, BARS, SLIDERS, GEAR, PLUS, BACK, SOUND }
 fun IknaGlyphIcon(
     glyph: IknaGlyph,
     color: Color,
-    size: Dp = 24.dp
+    size: Dp = 24.dp,
+    /**
+     * What a screen reader should call this mark. Null means decorative: the
+     * glyph sits next to text that already says the same thing, and announcing
+     * it twice is worse than not announcing it at all.
+     */
+    label: String? = null
 ) {
-    Canvas(modifier = Modifier.size(size)) {
+    // A hand-drawn Canvas has no text in it, so without this a screen reader
+    // finds nothing to say and skips the control entirely. Every mark in this
+    // app is drawn, which is why silence here means a silent interface.
+    val described = if (label == null) {
+        Modifier
+    } else {
+        Modifier.semantics { contentDescription = label }
+    }
+
+    Canvas(modifier = Modifier.size(size).then(described)) {
         val s = this.size.minDimension
         when (glyph) {
             // The app mark: same spark as the launcher icon.
             IknaGlyph.SPARK -> {
                 val path = Path().apply {
                     moveTo(s * 0.5f, 0f)
-                    quadraticBezierTo(s * 0.57f, s * 0.43f, s, s * 0.5f)
-                    quadraticBezierTo(s * 0.57f, s * 0.57f, s * 0.5f, s)
-                    quadraticBezierTo(s * 0.43f, s * 0.57f, 0f, s * 0.5f)
-                    quadraticBezierTo(s * 0.43f, s * 0.43f, s * 0.5f, 0f)
+                    quadraticTo(s * 0.57f, s * 0.43f, s, s * 0.5f)
+                    quadraticTo(s * 0.57f, s * 0.57f, s * 0.5f, s)
+                    quadraticTo(s * 0.43f, s * 0.57f, 0f, s * 0.5f)
+                    quadraticTo(s * 0.43f, s * 0.43f, s * 0.5f, 0f)
                     close()
                 }
                 drawPath(path, color)
@@ -180,11 +200,17 @@ fun IknaIconButton(
     enabled: Boolean = true,
     size: Dp = 44.dp,
     glyphSize: Dp = 20.dp,
-    color: Color = MaterialTheme.colorScheme.onBackground
+    color: Color = MaterialTheme.colorScheme.onBackground,
+    /** The name a screen reader reads out. Every call site should pass one. */
+    label: String? = null
 ) {
     Box(
         modifier = modifier
             .size(size)
+            .semantics {
+                role = Role.Button
+                if (label != null) contentDescription = label
+            }
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -281,7 +307,14 @@ fun IknaToggle(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    /**
+     * A name for the switch itself. Only needed where the row around it does not
+     * already say what is being switched - a deck row, for instance, is read out
+     * as the deck's title, and the switch beside it would otherwise be announced
+     * as a nameless control.
+     */
+    label: String? = null
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
     val alpha = if (enabled) 1f else 0.35f
@@ -291,7 +324,16 @@ fun IknaToggle(
             .width(56.dp)
             .height(32.dp)
             .border(1.dp, ink.copy(alpha = 0.55f * alpha))
-            .clickable(enabled = enabled) { onCheckedChange(!checked) }
+            // toggleable rather than clickable: it is what tells the platform
+            // this is a switch and what state it is in, so a screen reader says
+            // "on" and "off" instead of announcing an anonymous button.
+            .semantics { if (label != null) contentDescription = label }
+            .toggleable(
+                value = checked,
+                enabled = enabled,
+                role = Role.Switch,
+                onValueChange = onCheckedChange
+            )
             .padding(4.dp),
         contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart
     ) {

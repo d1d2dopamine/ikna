@@ -53,10 +53,10 @@ fun IknaSpark(
 
         val main = Path().apply {
             moveTo(u(50f), u(22f))
-            quadraticBezierTo(u(54f), u(46f), u(71f), u(50f))
-            quadraticBezierTo(u(54f), u(54f), u(50f), u(78f))
-            quadraticBezierTo(u(46f), u(54f), u(29f), u(50f))
-            quadraticBezierTo(u(46f), u(46f), u(50f), u(22f))
+            quadraticTo(u(54f), u(46f), u(71f), u(50f))
+            quadraticTo(u(54f), u(54f), u(50f), u(78f))
+            quadraticTo(u(46f), u(54f), u(29f), u(50f))
+            quadraticTo(u(46f), u(46f), u(50f), u(22f))
             close()
         }
         drawPath(main, color)
@@ -64,10 +64,10 @@ fun IknaSpark(
         if (second > 0.01f) {
             val small = Path().apply {
                 moveTo(u(74f), u(63f))
-                quadraticBezierTo(u(76f), u(70f), u(81f), u(72f))
-                quadraticBezierTo(u(76f), u(74f), u(74f), u(81f))
-                quadraticBezierTo(u(72f), u(74f), u(67f), u(72f))
-                quadraticBezierTo(u(72f), u(70f), u(74f), u(63f))
+                quadraticTo(u(76f), u(70f), u(81f), u(72f))
+                quadraticTo(u(76f), u(74f), u(74f), u(81f))
+                quadraticTo(u(72f), u(74f), u(67f), u(72f))
+                quadraticTo(u(72f), u(70f), u(74f), u(63f))
                 close()
             }
             drawPath(small, color.copy(alpha = color.alpha * second))

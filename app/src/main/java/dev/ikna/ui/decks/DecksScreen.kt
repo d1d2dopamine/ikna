@@ -46,6 +46,7 @@ import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.Space
+import dev.ikna.widget.TodayWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -117,6 +118,19 @@ fun DecksScreen(
     val todayTotal = today.values.sum()
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
 
+    // The number on the home screen widget comes from here. A widget cannot read
+    // the database from the launcher's process, so the app hands it the finished
+    // text every time this screen knows a new value - and this screen is the one
+    // a session returns to, so it always does.
+    LaunchedEffect(todayTotal, S.lang) {
+        TodayWidget.publish(
+            context = context,
+            count = todayTotal,
+            title = S.t("deck.007"),
+            label = cardWord(todayTotal)
+        )
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         // Everything that is not learning lives in this one row, as marks rather
         // than as a slab of words. Adding a deck is the rarest action in the app
@@ -137,10 +151,19 @@ fun DecksScreen(
             IknaIconButton(
                 glyph = IknaGlyph.PLUS,
                 onClick = { picker.launch(arrayOf("*/*")) },
-                enabled = !busy
+                enabled = !busy,
+                label = S.t("a11y.004")
             )
-            IknaIconButton(glyph = IknaGlyph.BARS, onClick = onOpenStats)
-            IknaIconButton(glyph = IknaGlyph.GEAR, onClick = onOpenSettings)
+            IknaIconButton(
+                glyph = IknaGlyph.BARS,
+                onClick = onOpenStats,
+                label = S.t("a11y.003")
+            )
+            IknaIconButton(
+                glyph = IknaGlyph.GEAR,
+                onClick = onOpenSettings,
+                label = S.t("a11y.002")
+            )
         }
 
         Column(modifier = Modifier.padding(horizontal = Edge)) {
@@ -310,7 +333,11 @@ private fun DeckRow(
                         color = if (owes) accent else muted
                     )
                 }
-                IknaToggle(checked = deck.isActive, onCheckedChange = onToggle)
+                IknaToggle(
+                    checked = deck.isActive,
+                    onCheckedChange = onToggle,
+                    label = S.t("a11y.006")
+                )
             }
             if (deck.isActive) {
                 Spacer(Modifier.height(Space.md))

@@ -34,8 +34,12 @@ class ReminderWorker(context: Context, params: WorkerParameters) :
         val repo = container.learningRepository
         if (repo.answeredToday() >= repo.dailyMinimum()) return Result.success()
 
+        // Straight into the cards. A reminder that lands on the deck list asks
+        // the question a second time, and the answer given at the notification
+        // does not always survive being asked again.
         val intent = Intent(applicationContext, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(MainActivity.EXTRA_START_SESSION, true)
         }
         val pending = PendingIntent.getActivity(
             applicationContext,
