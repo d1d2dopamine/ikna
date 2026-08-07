@@ -9,6 +9,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    # A build that cannot finish should say so instead of sitting there. Without
+    # this, a stuck download or an unavailable action holds the runner for six
+    # hours - the default - and the only signal is a spinner.
+    timeout-minutes: 25
+
     steps:
       - uses: actions/checkout@v4
 
@@ -33,8 +38,6 @@ jobs:
       # was meant to produce something installable produced a red cross instead.
       # Now the run still goes red, and the APK is still there.
       - name: Build APK
-        env:
-          RUN_NUMBER: ${{ github.run_number }}
         run: gradle --no-daemon --stacktrace assembleDebug
 
       # Prints the signing certificate so a failed "install over the old app"

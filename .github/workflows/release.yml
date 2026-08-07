@@ -1,0 +1,78 @@
+name: release
+
+# Publishing a version is one action: push a tag that starts with v.
+#
+#   git tag v0.3.0
+#   git push origin v0.3.0
+#
+# Everything below happens without anyone opening a browser: tests run, a signed
+# APK is built, it is renamed after the tag, and it is attached to the GitHub
+# release together with generated notes. Nothing is uploaded by hand, so the file
+# on the release page is always the one built from that exact commit.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+# Needed to create the release and attach the file to it.
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+
+    # Same reason as in build.yml: fail loudly rather than hang for six hours.
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      # A red release is worse than a late one: the APK is attached to a page
+      # people download from, so the tests run before it is built, not after.
+      - name: Unit tests
+        run: gradle --no-daemon --stacktrace testReleaseUnitTest
+
+      # The version lives in app/build.gradle.kts, not in the tag, because
+      # F-Droid builds this repository on a machine that knows nothing about
+      # either tags or CI. The tag is only a label - so it has to agree with the
+      # file, and a disagreement is caught here rather than discovered later on
+      # a release page offering an APK with the wrong number inside it.
+      - name: Tag matches the version in the build file
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          declared=$(sed -n 's/^val appVersionName = "\(.*\)"/\1/p' app/build.gradle.kts)
+          echo "build file says $declared, tag says $GITHUB_REF_NAME"
+          if [ "v$declared" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match appVersionName $declared - bump app/build.gradle.kts or move the tag"
+            exit 1
+          fi
+
+      - name: Build release APK
+        run: gradle --no-daemon --stacktrace assembleRelease
+
+      - name: Name the file after the tag
+        run: |
+          mkdir -p out
+          cp app/build/outputs/apk/release/*.apk "out/ikna-${GITHUB_REF_NAME}.apk"
+
+      - name: Signer
+        run: keytool -printcert -jarfile out/*.apk | head -20
+
+      - name: Publish
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*.apk
+          generate_release_notes: true

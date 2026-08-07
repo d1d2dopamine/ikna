@@ -1,0 +1,66 @@
+name: Something is broken
+description: The app did something it should not have, or refused to do something it should
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Short is fine. One sentence and a version number is already a useful report.
+
+        If the app lost or damaged your review history, say so in the title — that
+        is the one thing here that cannot be rebuilt, and it goes to the front of
+        the queue.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      placeholder: I swiped a card to the right and the counter went up instead of down.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Settings, at the very bottom — or the name of the APK you installed.
+      placeholder: "0.3.0"
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Phone and Android version
+      placeholder: Pixel 6a, Android 14
+    validations:
+      required: false
+
+  - type: dropdown
+    id: reproducible
+    attributes:
+      label: Does it happen again if you try the same thing?
+      options:
+        - Every time
+        - Sometimes
+        - It happened once
+        - I have not tried
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: |
+        A screenshot helps. Please do not attach your review log export unless you
+        mean to — it is the record of everything you have studied.
+    validations:
+      required: false

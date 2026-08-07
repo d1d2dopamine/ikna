@@ -1,0 +1,51 @@
+name: An idea
+description: Something the app should do, or should stop doing
+labels: ["idea"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ikna is built for people with ADHD, and that has ruled out more features
+        than it has added. Things this app will not grow, however well argued:
+
+        - streaks, or any counter that punishes a missed day
+        - a visible backlog number
+        - an "add card" button — the system feeds you, not the other way round
+        - accounts, sync servers, or anything that needs a network
+        - Material components
+
+        Everything else is open.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What gets in the way
+      description: The situation, not the solution. It is usually the more useful half.
+      placeholder: I study on the bus and I cannot tell how much is left without opening the app.
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you would do about it
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part
+      options:
+        - Cards and swiping
+        - Decks
+        - Scheduling and daily load
+        - Statistics
+        - Settings and appearance
+        - Speech
+        - Backup and restore
+        - Widget and reminders
+        - Content packs
+        - Something else
+    validations:
+      required: false
