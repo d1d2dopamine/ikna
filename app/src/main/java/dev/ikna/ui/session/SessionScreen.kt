@@ -31,6 +31,7 @@ import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.governor.GovernorReason
 import dev.ikna.domain.session.Level
+import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
@@ -88,7 +89,7 @@ fun SessionScreen(
     val card = state.current
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopBar(state = state, onBack = onBack, onSpeak = vm::speakCurrent)
+        TopBar(state = state)
         IknaProgress(fraction = state.progress)
 
         Box(
@@ -159,6 +160,26 @@ fun SessionScreen(
             onUndo = vm::undo,
             onDismiss = vm::dismissUndo
         )
+
+        // The way out and the loudspeaker, both within reach of the thumb that is
+        // already swiping cards. They used to sit in the top bar, which on this
+        // screen meant the exit was the furthest point from the hand doing the
+        // work.
+        IknaBottomBar {
+            IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
+            Spacer(Modifier.weight(1f))
+            // Sound is a control, not part of the card. The card is the one thing on
+            // this screen that must never grow a control, and the mark is only drawn
+            // when pressing it would not give the answer away.
+            if (state.speechReady && state.speakable) {
+                IknaIconButton(
+                    glyph = IknaGlyph.SOUND,
+                    onClick = vm::speakCurrent,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    label = S.t("a11y.005")
+                )
+            }
+        }
     }
 }
 
@@ -180,7 +201,7 @@ fun SessionScreen(
  * is the minimum being reached, for one card only.
  */
 @Composable
-private fun TopBar(state: SessionUiState, onBack: () -> Unit, onSpeak: () -> Unit) {
+private fun TopBar(state: SessionUiState) {
     val minimumJustMet = state.minimumMet && state.answeredToday == state.dailyMinimum
     val text = when {
         state.index == 0 && !state.revealed && state.remaining > 0 -> startEstimate(state)
@@ -195,26 +216,16 @@ private fun TopBar(state: SessionUiState, onBack: () -> Unit, onSpeak: () -> Uni
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium,
             color = if (minimumJustMet) MaterialTheme.colorScheme.primary
             else MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 8.dp)
         )
-        // Sound lives in the bar, not on the card. The card is the one thing on
-        // this screen that must never grow a control, and the mark is only drawn
-        // when pressing it would not give the answer away.
-        if (state.speechReady && state.speakable) {
-            IknaIconButton(
-                glyph = IknaGlyph.SOUND,
-                onClick = onSpeak,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                label = S.t("a11y.005")
-            )
-        }
 
         if (state.deckTitle != null) {
             Text(

@@ -2,20 +2,21 @@
   "packs": [
     {
       "id": "en-ru-core",
-      "version": 1,
+      "version": 2,
       "lang": "en",
       "sourceLang": "ru",
       "title": "English core chunks",
-      "chunkCount": 70,
-      "file": "en-ru-core.jsonl"
+      "chunkCount": 121,
+      "file": "en-ru-core.jsonl",
+      "active": true
     },
     {
       "id": "pl-ru-core",
-      "version": 1,
+      "version": 2,
       "lang": "pl",
       "sourceLang": "ru",
       "title": "Polish core chunks",
-      "chunkCount": 110,
+      "chunkCount": 121,
       "file": "pl-ru-core.jsonl",
       "active": false
     }

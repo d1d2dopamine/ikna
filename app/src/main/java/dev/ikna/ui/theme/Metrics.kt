@@ -96,13 +96,25 @@ object Motion {
     /**
      * A card that has been thrown.
      *
-     * The duration comes from how hard it was thrown: a flick leaves in 120ms, a
-     * slow deliberate push takes 220. Same gesture, same physics, so the screen
+     * The duration comes from how hard it was thrown: a flick leaves fast, a slow
+     * deliberate push takes its time. Same gesture, same physics, so the screen
      * agrees with the hand instead of playing a fixed animation over it.
+     *
+     * [haste] is what the answer weighs. A card you kept leaves the screen like
+     * something light being tossed aside; a card you lost leaves like something
+     * heavy being set back down. Both are the same swipe as far as the code that
+     * schedules them is concerned, and the hand can still tell them apart with
+     * the eyes half closed — which is the point of having a character at all.
+     * Above 1 the card is quicker than the throw, below 1 it drags.
      */
-    fun thrown(speedPxPerSecond: Float): AnimationSpec<Float> {
+    fun thrown(speedPxPerSecond: Float, haste: Float = 1f): AnimationSpec<Float> {
         val speed = max(abs(speedPxPerSecond), 0f)
-        val millis = (220f - speed / 45f).coerceIn(120f, 220f).toInt()
+        // The throw decides this much on its own, and this part is unchanged: with
+        // no weight asked for, a flick still leaves in 120ms and a slow push in
+        // 220.
+        val base = (220f - speed / 45f).coerceIn(120f, 220f)
+        val scale = if (haste <= 0f) 1f else haste
+        val millis = (base / scale).coerceIn(90f, 340f).toInt()
         return tween(durationMillis = millis, easing = FastOutLinearInEasing)
     }
 }

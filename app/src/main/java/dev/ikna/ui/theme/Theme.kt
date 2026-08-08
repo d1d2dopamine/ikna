@@ -242,11 +242,11 @@ private val IknaShapes = Shapes(
 /**
  * The same scale, set in the user's own font.
  *
- * Only the reading styles change. The mono labels stay mono on purpose: they are
- * the app's instrument panel — counters, section marks, button captions — and
- * they are legible because they are monospaced and spaced out, not because of
- * which face they use. Letting a decorative font into them is how a settings
- * screen turns into a ransom note.
+ * The chosen font applies everywhere, including the label styles: the caps, the
+ * counters, the section marks and the button captions. Monospace survives only
+ * as the fallback for when no font is installed. A font that appears on some
+ * screens and not on others reads as a broken app, not as restraint, and the
+ * letter spacing on the labels is what keeps them legible anyway.
  */
 private fun typographyOf(content: FontFamily?): Typography {
     if (content == null) return IknaTypography
@@ -260,7 +260,10 @@ private fun typographyOf(content: FontFamily?): Typography {
         titleMedium = base.titleMedium.copy(fontFamily = content),
         bodyLarge = base.bodyLarge.copy(fontFamily = content),
         bodyMedium = base.bodyMedium.copy(fontFamily = content),
-        bodySmall = base.bodySmall.copy(fontFamily = content)
+        bodySmall = base.bodySmall.copy(fontFamily = content),
+        labelLarge = base.labelLarge.copy(fontFamily = content),
+        labelMedium = base.labelMedium.copy(fontFamily = content),
+        labelSmall = base.labelSmall.copy(fontFamily = content)
     )
 }
 

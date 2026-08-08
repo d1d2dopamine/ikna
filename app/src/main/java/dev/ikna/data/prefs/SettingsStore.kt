@@ -42,6 +42,19 @@ const val MANUAL_LOAD_MAX = 120
 const val MANUAL_LOAD_STEP = 5
 const val MANUAL_LOAD_DEFAULT = 40
 
+/**
+ * Speech speed and pitch, as a percent of whatever the engine does on its own.
+ *
+ * Percent rather than the float the platform wants, because an integer is the
+ * only form that reads back identically forever: a stored 1.0f that returns as
+ * 0.99999f prints a different number on the screen every time it is shown, and
+ * the same value also has to survive a settings backup unchanged.
+ */
+const val SPEECH_TONE_MIN = 50
+const val SPEECH_TONE_MAX = 150
+const val SPEECH_TONE_STEP = 10
+const val SPEECH_TONE_DEFAULT = 100
+
 /** Interface language: "system" follows the phone, or "ru" / "en" / "pl". */
 const val LANGUAGE_SYSTEM = "system"
 
@@ -108,6 +121,13 @@ data class IknaSettings(
      * falls back to the engine default.
      */
     val speechVoices: String = "",
+    /**
+     * Speed and pitch of the voice, in percent. 100 means untouched, so a phone
+     * with a good engine sounds exactly as its own settings say until the user
+     * decides otherwise here.
+     */
+    val speechRate: Int = SPEECH_TONE_DEFAULT,
+    val speechPitch: Int = SPEECH_TONE_DEFAULT,
     /** File name of the installed content font. Empty means the built-in one. */
     val fontName: String = "",
     val onboardingDone: Boolean = false,
@@ -143,6 +163,8 @@ class SettingsStore(private val context: Context) {
         val autoExport = booleanPreferencesKey("autoExport")
         val speechEnabled = booleanPreferencesKey("speechEnabled")
         val speechVoices = stringPreferencesKey("speechVoices")
+        val speechRate = intPreferencesKey("speechRate")
+        val speechPitch = intPreferencesKey("speechPitch")
         val fontName = stringPreferencesKey("fontName")
         val onboardingDone = booleanPreferencesKey("onboardingDone")
         val revealHintsShown = intPreferencesKey("revealHintsShown")
@@ -171,6 +193,13 @@ class SettingsStore(private val context: Context) {
             autoExport = p[Keys.autoExport] ?: defaults.autoExport,
             speechEnabled = p[Keys.speechEnabled] ?: defaults.speechEnabled,
             speechVoices = p[Keys.speechVoices] ?: defaults.speechVoices,
+            // Clamped on the way out as well as on the way in: a value written by
+            // a restore from a hand-edited file must not be able to produce a
+            // voice too fast to understand.
+            speechRate = (p[Keys.speechRate] ?: defaults.speechRate)
+                .coerceIn(SPEECH_TONE_MIN, SPEECH_TONE_MAX),
+            speechPitch = (p[Keys.speechPitch] ?: defaults.speechPitch)
+                .coerceIn(SPEECH_TONE_MIN, SPEECH_TONE_MAX),
             fontName = p[Keys.fontName] ?: defaults.fontName,
             onboardingDone = p[Keys.onboardingDone] ?: defaults.onboardingDone,
             revealHintsShown = p[Keys.revealHintsShown] ?: defaults.revealHintsShown,
@@ -220,6 +249,16 @@ class SettingsStore(private val context: Context) {
         val map = parseVoiceMap(prefs[Keys.speechVoices] ?: "").toMutableMap()
         if (voiceName.isNullOrBlank()) map.remove(lang) else map[lang] = voiceName
         prefs[Keys.speechVoices] = encodeVoiceMap(map)
+    }
+
+    /**
+     * Both at once, for the same reason the four colours are written together:
+     * one write means the speaker can never be observed with tomorrow's speed and
+     * yesterday's pitch.
+     */
+    suspend fun setSpeechTone(rate: Int, pitch: Int) = put {
+        it[Keys.speechRate] = rate.coerceIn(SPEECH_TONE_MIN, SPEECH_TONE_MAX)
+        it[Keys.speechPitch] = pitch.coerceIn(SPEECH_TONE_MIN, SPEECH_TONE_MAX)
     }
 
     suspend fun setFontName(name: String) = put { it[Keys.fontName] = name }

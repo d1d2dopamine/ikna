@@ -55,6 +55,9 @@ import dev.ikna.data.prefs.LANGUAGE_SYSTEM
 import dev.ikna.data.prefs.MANUAL_LOAD_MAX
 import dev.ikna.data.prefs.MANUAL_LOAD_MIN
 import dev.ikna.data.prefs.MANUAL_LOAD_STEP
+import dev.ikna.data.prefs.SPEECH_TONE_MAX
+import dev.ikna.data.prefs.SPEECH_TONE_MIN
+import dev.ikna.data.prefs.SPEECH_TONE_STEP
 import dev.ikna.data.prefs.ThemeMode
 import dev.ikna.data.prefs.voiceFor
 import dev.ikna.ui.theme.IknaChip
@@ -517,6 +520,79 @@ fun SettingsScreen(
                                         }
                                     }
                                 }
+                                Spacer(Modifier.height(20.dp))
+                                Text(
+                                    text = S.t("set.111"),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                Stepper(
+                                    value = settings.speechRate,
+                                    enabled = !busy,
+                                    min = SPEECH_TONE_MIN,
+                                    max = SPEECH_TONE_MAX,
+                                    step = SPEECH_TONE_STEP,
+                                    onChange = { next ->
+                                        scope.launch {
+                                            container.settings.setSpeechTone(
+                                                next,
+                                                settings.speechPitch
+                                            )
+                                            // The engine is told directly as well as
+                                            // through settings, so the next press in
+                                            // an open session already sounds new.
+                                            container.speaker.setTone(
+                                                next,
+                                                settings.speechPitch
+                                            )
+                                        }
+                                    }
+                                )
+
+                                Spacer(Modifier.height(16.dp))
+                                Text(
+                                    text = S.t("set.112"),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                Stepper(
+                                    value = settings.speechPitch,
+                                    enabled = !busy,
+                                    min = SPEECH_TONE_MIN,
+                                    max = SPEECH_TONE_MAX,
+                                    step = SPEECH_TONE_STEP,
+                                    onChange = { next ->
+                                        scope.launch {
+                                            container.settings.setSpeechTone(
+                                                settings.speechRate,
+                                                next
+                                            )
+                                            container.speaker.setTone(
+                                                settings.speechRate,
+                                                next
+                                            )
+                                        }
+                                    }
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                Text(
+                                    text = S.t("set.113"),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+
+                                Spacer(Modifier.height(16.dp))
+                                IknaTextButton(
+                                    label = S.t("set.032"),
+                                    onClick = {
+                                        if (!openTtsSettings(context)) {
+                                            message = S.t("set.033")
+                                        }
+                                    }
+                                )
+
                                 Spacer(Modifier.height(12.dp))
                                 Text(
                                     text = S.t("set.039"),
@@ -880,6 +956,9 @@ private fun Anchored(
 private fun Stepper(
     value: Int,
     enabled: Boolean,
+    min: Int = MANUAL_LOAD_MIN,
+    max: Int = MANUAL_LOAD_MAX,
+    step: Int = MANUAL_LOAD_STEP,
     onChange: (Int) -> Unit
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -887,8 +966,8 @@ private fun Stepper(
             label = "-",
             modifier = Modifier.width(72.dp),
             height = 52.dp,
-            enabled = enabled && value > MANUAL_LOAD_MIN,
-            onClick = { onChange((value - MANUAL_LOAD_STEP).coerceAtLeast(MANUAL_LOAD_MIN)) }
+            enabled = enabled && value > min,
+            onClick = { onChange((value - step).coerceAtLeast(min)) }
         )
         Text(
             text = value.toString(),
@@ -903,8 +982,8 @@ private fun Stepper(
             label = "+",
             modifier = Modifier.width(72.dp),
             height = 52.dp,
-            enabled = enabled && value < MANUAL_LOAD_MAX,
-            onClick = { onChange((value + MANUAL_LOAD_STEP).coerceAtMost(MANUAL_LOAD_MAX)) }
+            enabled = enabled && value < max,
+            onClick = { onChange((value + step).coerceAtMost(max)) }
         )
     }
 }

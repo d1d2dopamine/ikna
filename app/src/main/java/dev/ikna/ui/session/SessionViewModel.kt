@@ -151,7 +151,11 @@ class SessionViewModel(
      */
     private fun warmUpSpeech() {
         viewModelScope.launch {
-            if (!settings.current().speechEnabled) return@launch
+            val prefs = settings.current()
+            if (!prefs.speechEnabled) return@launch
+            // Speed and pitch belong to the engine rather than to a single call, so
+            // they are set once here, before the first word of the session.
+            speaker.setTone(prefs.speechRate, prefs.speechPitch)
             val ready = speaker.warmUp()
             _state.value = _state.value.copy(speechReady = ready)
             if (ready) onCardShown()
@@ -170,6 +174,9 @@ class SessionViewModel(
         viewModelScope.launch {
             val prefs = settings.current()
             if (!prefs.speechEnabled) return@launch
+            // Cheap when nothing changed, and it is what makes a speed changed in
+            // settings audible on the very next press without leaving the session.
+            speaker.setTone(prefs.speechRate, prefs.speechPitch)
             speaker.speak(spokenText(card), card.chunk.lang, prefs.voiceFor(card.chunk.lang))
         }
     }

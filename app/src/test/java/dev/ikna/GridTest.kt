@@ -71,4 +71,31 @@ class GridTest {
             assertTrue(speed.toString(), ms in 120..220)
         }
     }
+
+    /**
+     * A kept card and a lost card must not leave the screen at the same speed.
+     * This is the whole of the "motion says something" claim, reduced to the one
+     * thing that can be checked without a device: the same throw, weighed
+     * differently, produces different durations, and the light one is quicker.
+     */
+    @Test
+    fun a_kept_card_leaves_lighter_than_a_lost_one() {
+        listOf(0f, 900f, 6000f).forEach { speed ->
+            val kept = (Motion.thrown(speed, haste = 1.25f) as TweenSpec<Float>).durationMillis
+            val lost = (Motion.thrown(speed, haste = 0.58f) as TweenSpec<Float>).durationMillis
+            val plain = (Motion.thrown(speed) as TweenSpec<Float>).durationMillis
+            assertTrue(speed.toString(), kept < plain)
+            assertTrue(speed.toString(), plain < lost)
+        }
+    }
+
+    @Test
+    fun weight_never_stalls_or_snaps_a_card() {
+        listOf(0f, 500f, 99999f).forEach { speed ->
+            listOf(0f, 0.58f, 0.72f, 1f, 1.25f, 1.55f).forEach { haste ->
+                val ms = (Motion.thrown(speed, haste) as TweenSpec<Float>).durationMillis
+                assertTrue("$speed/$haste", ms in 90..340)
+            }
+        }
+    }
 }

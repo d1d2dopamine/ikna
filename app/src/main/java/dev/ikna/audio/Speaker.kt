@@ -83,6 +83,33 @@ class Speaker(context: Context) {
     private var player: MediaPlayer? = null
 
     /**
+     * Speed and pitch in the form the platform wants, where 1.0 is the engine's
+     * own voice. Volatile because they are written from the settings screen and
+     * read on the thread that synthesises.
+     */
+    @Volatile
+    private var rate = 1.0f
+
+    @Volatile
+    private var pitch = 1.0f
+
+    /**
+     * Sets speed and pitch from stored percents.
+     *
+     * Audio already on disk was synthesised at the old values, so it is dropped
+     * when they change: otherwise a card met yesterday keeps playing back at the
+     * speed the user has just moved away from, and only new cards obey.
+     */
+    fun setTone(ratePercent: Int, pitchPercent: Int) {
+        val nextRate = (ratePercent / 100f).coerceIn(MIN_TONE, MAX_TONE)
+        val nextPitch = (pitchPercent / 100f).coerceIn(MIN_TONE, MAX_TONE)
+        if (nextRate == rate && nextPitch == pitch) return
+        rate = nextRate
+        pitch = nextPitch
+        clearCache()
+    }
+
+    /**
      * Start the engine ahead of time. Called when a session opens, because this
      * is the part that can take seconds; everything after it is fast.
      */
@@ -264,6 +291,12 @@ class Speaker(context: Context) {
     // ---- internals ---------------------------------------------------------
 
     private fun applyVoice(tts: TextToSpeech, lang: String, voiceName: String?) {
+        // Both are set before every utterance rather than once at start-up: an
+        // engine that was restarted by the system comes back at its own defaults,
+        // and a silently ignored setting is worse than one that does not exist.
+        runCatching { tts.setSpeechRate(rate) }
+        runCatching { tts.setPitch(pitch) }
+
         val locale = Locale.forLanguageTag(lang)
         val chosen: Voice? = if (voiceName.isNullOrBlank()) null else
             runCatching { tts.voices }.getOrNull()
@@ -299,11 +332,12 @@ class Speaker(context: Context) {
     }
 
     /**
-     * Name of the cached file. The voice is part of the key: changing the voice
-     * must not keep playing the old one back from disk.
+     * Name of the cached file. The voice, the speed and the pitch are all part of
+     * the key: changing any of them must not keep playing the old rendering back
+     * from disk.
      */
     private fun cacheFile(text: String, lang: String, voiceName: String?): File {
-        val key = lang + "|" + (voiceName ?: "") + "|" + text
+        val key = lang + "|" + (voiceName ?: "") + "|" + rate + "|" + pitch + "|" + text
         val name = Integer.toHexString(key.hashCode()) + "-" + text.length + ".wav"
         return File(dir, name)
     }
@@ -344,5 +378,9 @@ class Speaker(context: Context) {
     private companion object {
         const val INIT_TIMEOUT_MS = 8_000L
         const val CACHE_LIMIT = 240
+
+        /** Half speed to one and a half. Past this, speech stops being speech. */
+        const val MIN_TONE = 0.5f
+        const val MAX_TONE = 1.5f
     }
 }

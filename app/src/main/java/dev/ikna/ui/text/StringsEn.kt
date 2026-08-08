@@ -317,6 +317,9 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"set.109" to "FRENCH",
 	// шрифт
 	"set.110" to "font",
+	"set.111" to "SPEED",
+	"set.112" to "PITCH",
+	"set.113" to "100 is whatever the phone itself is set to. Cards already spoken are spoken again at the new values.",
 	// ← НАЗАД
 	"dbg.001" to "← BACK",
 	// ВЫГРУЗИТЬ ЖУРНАЛ ОТВЕТОВ
@@ -368,11 +371,8 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// на сегодня нет
 	"deck.010" to "nothing for today",
 	// введено 
-	"deck.011" to "introduced ",
 	//  из 
-	"deck.012" to " of ",
 	//  · знаешь 
-	"deck.013" to " · you know ",
 	// карточек
 	"deck.014" to "cards",
 	// карточка
@@ -424,9 +424,9 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// узнать
 	"sess.015" to "recognise",
 	// вставить
-	"sess.016" to "fill in",
+	"sess.016" to "complete it",
 	// сказать
-	"sess.017" to "say it",
+	"sess.017" to "say it out loud",
 	// План дня закрыт. Новые чанки придут сами завтра.
 	"sess.018" to "The day's plan is closed. New chunks will come by themselves tomorrow.",
 	// Первый день — берём совсем немного.
@@ -521,4 +521,5 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"a11y.005" to "Read aloud",
 	// Колода в работе
 	"a11y.006" to "Deck in use",
+	"a11y.007" to "Explain this number",
 )

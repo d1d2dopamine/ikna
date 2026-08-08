@@ -3,14 +3,15 @@ package dev.ikna.ui.stats
 import dev.ikna.ui.text.S
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -32,6 +33,7 @@ import dev.ikna.AppContainer
 import dev.ikna.data.repo.HourSlice
 import dev.ikna.data.repo.LeechItem
 import dev.ikna.data.repo.StatsDigest
+import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaRule
@@ -50,6 +52,15 @@ import java.util.Locale
  *
  * Nothing here can be broken or lost, and every figure without enough data
  * behind it says so in words instead of printing a confident zero.
+ *
+ * Why the words are hidden now. Every figure on this screen had its explanation
+ * printed under it permanently, and there are nine figures: the screen came out
+ * as thirty-odd sentences of small grey prose that has to be read in order,
+ * which is precisely the thing this app exists to avoid. The explanations were
+ * not wrong, they were just always on. Each block keeps its own "?" and hands
+ * the sentence over when it is asked for, so the default state of the screen is
+ * numbers and shapes and the reasoning is one tap away, in the same place, every
+ * time.
  */
 
 private val EDGE = 20.dp
@@ -74,121 +85,142 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
         digest = container.learningRepository.statsDigest()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = EDGE)
-    ) {
-        // The glyph box is 44dp with a 19dp mark in the middle, so it is pulled
-        // back by half the difference to stand on the same left margin as every
-        // line of text below it.
-        Row(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(44.dp)
-                .offset(x = (-12).dp),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = EDGE)
         ) {
+            Spacer(Modifier.height(24.dp))
+            Text(
+                text = S.t("stats.001"),
+                style = MaterialTheme.typography.displaySmall,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Spacer(Modifier.height(32.dp))
+            Block(label = S.t("stats.002"), note = S.t("stats.003")) {
+                ActivityMap(days = days)
+            }
+
+            StatsDivider()
+
+            Block(
+                label = S.t("stats.004"),
+                // Honesty about where the figure comes from. Until there are enough
+                // of your own days behind it, it is a starting guess and says so.
+                note = if (measured) S.t("stats.005") else S.t("stats.006")
+            ) {
+                Text(
+                    text = norm.toString(),
+                    style = MaterialTheme.typography.displayLarge,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+
+            StatsDivider()
+
+            // Two figures that belong to one question, so they share one block and
+            // one explanation instead of being asked about twice.
+            Block(note = S.t("stats.009")) {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Label(S.t("stats.007"))
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = known.toString(),
+                            style = MaterialTheme.typography.displayMedium,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Label(S.t("stats.008"))
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = answered.toString(),
+                            style = MaterialTheme.typography.displayMedium,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+            }
+
+            StatsDivider()
+
+            Retention(digest)
+
+            StatsDivider()
+
+            Minutes(digest)
+
+            StatsDivider()
+
+            BestHours(digest)
+
+            StatsDivider()
+
+            Leeches(digest.leeches)
+
+            StatsDivider()
+
+            Block(label = S.t("stats.010"), note = S.t("stats.011")) {
+                ForecastBars(values = forecast)
+            }
+
+            // Room for the bar to sit over nothing but background.
+            Spacer(Modifier.height(96.dp))
+        }
+
+        IknaBottomBar(modifier = Modifier.align(Alignment.BottomCenter)) {
             IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
         }
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = S.t("stats.001"),
-            style = MaterialTheme.typography.displaySmall,
-            color = MaterialTheme.colorScheme.onBackground
-        )
+    }
+}
 
-        Spacer(Modifier.height(32.dp))
-        Label(S.t("stats.002"))
-        Spacer(Modifier.height(12.dp))
-        ActivityMap(days = days)
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = S.t("stats.003"),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+/**
+ * One figure, and the reason for it kept behind a tap.
+ *
+ * The mark on the right is the whole affordance: "?" when there is something to
+ * read, "−" while it is open. It sits in the same place in every block, so the
+ * gesture is learned once and never hunted for. The entire block is the target,
+ * not the mark, because a 12sp question mark is not something a thumb aims at.
+ */
+@Composable
+private fun Block(
+    label: String? = null,
+    note: String,
+    content: @Composable () -> Unit
+) {
+    var open by remember { mutableStateOf(false) }
 
-        StatsDivider()
-
-        Label(S.t("stats.004"))
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = norm.toString(),
-            style = MaterialTheme.typography.displayLarge,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            // Honesty about where the figure comes from. Until there are enough of
-            // your own days behind it, it is a starting guess and says so.
-            text = if (measured) {
-                S.t("stats.005")
-            } else {
-                S.t("stats.006")
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        StatsDivider()
-
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.weight(1f)) {
-                Label(S.t("stats.007"))
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = known.toString(),
-                    style = MaterialTheme.typography.displayMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Label(S.t("stats.008"))
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = answered.toString(),
-                    style = MaterialTheme.typography.displayMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClickLabel = S.t("a11y.007")) { open = !open }
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (label != null) Label(label)
+            Spacer(Modifier.weight(1f))
+            Text(
+                text = if (open) "\u2212" else "?",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
         Spacer(Modifier.height(12.dp))
-        Text(
-            text = S.t("stats.009"),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        StatsDivider()
-
-        Retention(digest)
-
-        StatsDivider()
-
-        Minutes(digest)
-
-        StatsDivider()
-
-        BestHours(digest)
-
-        StatsDivider()
-
-        Leeches(digest.leeches)
-
-        StatsDivider()
-
-        Label(S.t("stats.010"))
-        Spacer(Modifier.height(16.dp))
-        ForecastBars(values = forecast)
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = S.t("stats.011"),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.height(36.dp))
+        content()
+        if (open) {
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = note,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
@@ -197,87 +229,78 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
  *
  * The one number here that could be read as a grade, so it is worded as a
  * property of the schedule: the scheduler aims at nine out of ten, and both
- * sides of that are stated as adjustments rather than as good and bad.
+ * sides of that are stated as adjustments rather than as good and bad. Both
+ * sentences live behind the tap together — the sample size and the verdict are
+ * one thought, and splitting them left the verdict looking like a score.
  */
 @Composable
 private fun Retention(digest: StatsDigest) {
-    Label(S.t("stats.012"))
-    Spacer(Modifier.height(12.dp))
     val retention = digest.retention
     if (retention == null) {
-        Text(
-            text = "—",
-            style = MaterialTheme.typography.displayLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = S.t("stats.013") +
-                digest.retentionSample + ".",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Block(
+            label = S.t("stats.012"),
+            note = S.t("stats.013") + digest.retentionSample + "."
+        ) {
+            Text(
+                text = "—",
+                style = MaterialTheme.typography.displayLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
         return
     }
 
     val percent = Math.round(retention * 100).toInt()
-    Text(
-        text = percent.toString() + "%",
-        style = MaterialTheme.typography.displayLarge,
-        color = MaterialTheme.colorScheme.onBackground
-    )
-    Spacer(Modifier.height(8.dp))
-    Text(
-        text = S.t("stats.014") + digest.retentionSample + S.t("stats.015") + percent +
-            S.t("stats.016"),
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
-    Spacer(Modifier.height(8.dp))
-    Text(
-        text = when {
-            percent < 80 -> S.t("stats.017")
-            percent > 95 -> S.t("stats.018")
-            else -> S.t("stats.019")
-        },
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
+    val verdict = when {
+        percent < 80 -> S.t("stats.017")
+        percent > 95 -> S.t("stats.018")
+        else -> S.t("stats.019")
+    }
+
+    Block(
+        label = S.t("stats.012"),
+        note = S.t("stats.014") + digest.retentionSample + S.t("stats.015") + percent +
+            S.t("stats.016") + " " + verdict
+    ) {
+        Text(
+            text = percent.toString() + "%",
+            style = MaterialTheme.typography.displayLarge,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
 }
 
 /** Time, because "сколько карточек" is not a unit anyone plans an evening in. */
 @Composable
 private fun Minutes(digest: StatsDigest) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.weight(1f)) {
-            Label(S.t("stats.020"))
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = digest.minutesToday.toString(),
-                style = MaterialTheme.typography.displayMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Label(S.t("stats.021"))
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = digest.minutesLast7.toString(),
-                style = MaterialTheme.typography.displayMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        }
-    }
-    Spacer(Modifier.height(12.dp))
-    Text(
-        text = if (digest.medianSeconds != null) {
+    Block(
+        note = if (digest.medianSeconds != null) {
             S.t("stats.022") + digest.medianSeconds + S.t("stats.023")
         } else {
             S.t("stats.024")
-        },
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
+        }
+    ) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.weight(1f)) {
+                Label(S.t("stats.020"))
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = digest.minutesToday.toString(),
+                    style = MaterialTheme.typography.displayMedium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Label(S.t("stats.021"))
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = digest.minutesLast7.toString(),
+                    style = MaterialTheme.typography.displayMedium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+        }
+    }
 }
 
 /**
@@ -290,21 +313,17 @@ private fun Minutes(digest: StatsDigest) {
  */
 @Composable
 private fun BestHours(digest: StatsDigest) {
-    Label(S.t("stats.025"))
-    Spacer(Modifier.height(16.dp))
-    HourBars(digest.hours)
-    Spacer(Modifier.height(12.dp))
     val best = digest.bestHour
-    Text(
-        text = if (best != null) {
-            S.t("stats.026") + hourText(best) +
-                S.t("stats.027")
+    Block(
+        label = S.t("stats.025"),
+        note = if (best != null) {
+            S.t("stats.026") + hourText(best) + S.t("stats.027")
         } else {
             S.t("stats.028")
-        },
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
+        }
+    ) {
+        HourBars(digest.hours)
+    }
 }
 
 /**
@@ -317,48 +336,44 @@ private fun BestHours(digest: StatsDigest) {
  */
 @Composable
 private fun Leeches(items: List<LeechItem>) {
-    Label(S.t("stats.029"))
-    Spacer(Modifier.height(12.dp))
-    if (items.isEmpty()) {
-        Text(
-            text = S.t("stats.030"),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        return
-    }
-    items.forEach { item ->
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = item.text,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Text(
-                    text = item.translation,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Spacer(Modifier.width(12.dp))
+    Block(label = S.t("stats.029"), note = S.t("stats.031")) {
+        if (items.isEmpty()) {
             Text(
-                text = item.lapses.toString(),
-                style = MaterialTheme.typography.labelMedium,
+                text = S.t("stats.030"),
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        } else {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                items.forEach { item ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = item.text,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                            Text(
+                                text = item.translation,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            text = item.lapses.toString(),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
         }
     }
-    Spacer(Modifier.height(12.dp))
-    Text(
-        text = S.t("stats.031"),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
 }
 
 @Composable

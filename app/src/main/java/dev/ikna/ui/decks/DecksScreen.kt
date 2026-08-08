@@ -41,6 +41,7 @@ import dev.ikna.AppContainer
 import dev.ikna.data.repo.DeckSummary
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
+import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
@@ -132,9 +133,10 @@ fun DecksScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // Everything that is not learning lives in this one row, as marks rather
-        // than as a slab of words. Adding a deck is the rarest action in the app
-        // and used to be a full-width button pinned to the bottom of the screen.
+        // The name of the app, and nothing else up here. The marks that used to
+        // share this row now live in the bar at the bottom of the screen: a phone
+        // is held low in one hand, and the top of the screen is the one place a
+        // thumb cannot go without regripping the device.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -147,22 +149,6 @@ fun DecksScreen(
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.weight(1f)
-            )
-            IknaIconButton(
-                glyph = IknaGlyph.PLUS,
-                onClick = { picker.launch(arrayOf("*/*")) },
-                enabled = !busy,
-                label = S.t("a11y.004")
-            )
-            IknaIconButton(
-                glyph = IknaGlyph.BARS,
-                onClick = onOpenStats,
-                label = S.t("a11y.003")
-            )
-            IknaIconButton(
-                glyph = IknaGlyph.GEAR,
-                onClick = onOpenSettings,
-                label = S.t("a11y.002")
             )
         }
 
@@ -217,6 +203,29 @@ fun DecksScreen(
                 )
             }
             Spacer(Modifier.height(Space.md))
+        }
+
+        // Everything that is not learning, as marks rather than as a slab of
+        // words, in the corner the hand already rests in. Adding a deck is the
+        // rarest action in the app and used to be a full-width button.
+        IknaBottomBar {
+            IknaIconButton(
+                glyph = IknaGlyph.BARS,
+                onClick = onOpenStats,
+                label = S.t("a11y.003")
+            )
+            IknaIconButton(
+                glyph = IknaGlyph.GEAR,
+                onClick = onOpenSettings,
+                label = S.t("a11y.002")
+            )
+            Spacer(Modifier.weight(1f))
+            IknaIconButton(
+                glyph = IknaGlyph.PLUS,
+                onClick = { picker.launch(arrayOf("*/*")) },
+                enabled = !busy,
+                label = S.t("a11y.004")
+            )
         }
     }
 }
@@ -349,10 +358,18 @@ private fun DeckRow(
                     track = true
                 )
                 Spacer(Modifier.height(Space.sm))
+                // One number under the bar, not three.
+                //
+                // This line used to read "введено 34 из 121 · знаю 12": three
+                // figures in a sentence, under a bar that already draws the first
+                // two of them. Nobody reads a three-number sentence on a list row
+                // — the eye slides off it — and the two numbers it repeated were
+                // the two the bar was for. What is left is how far through the
+                // deck you are, as a percentage, which is the only part the bar
+                // cannot say out loud.
                 Text(
-                    text = S.t("deck.011") + deck.introduced + S.t("deck.012") + deck.total +
-                        S.t("deck.013") + deck.known,
-                    style = MaterialTheme.typography.bodySmall,
+                    text = percentDone(deck.introduced, deck.total),
+                    style = MaterialTheme.typography.labelMedium,
                     color = muted
                 )
             }
@@ -402,6 +419,12 @@ private fun DeckMark(deck: DeckSummary, owes: Boolean) {
             maxLines = 1
         )
     }
+}
+
+/** How far into the deck, as the one figure the progress bar cannot state. */
+private fun percentDone(introduced: Int, total: Int): String {
+    if (total <= 0) return "0%"
+    return (introduced * 100 / total).toString() + "%"
 }
 
 private fun cardWord(count: Int): String {

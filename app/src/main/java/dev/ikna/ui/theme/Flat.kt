@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -471,6 +472,42 @@ fun IknaDialog(
                 Spacer(Modifier.width(20.dp))
                 IknaTextButton(label = confirmLabel, onClick = onConfirm, color = confirmColor)
             }
+        }
+    }
+}
+
+/**
+ * The row of marks a screen is steered with, pinned to the bottom edge.
+ *
+ * It used to live at the top, which is where a desktop menu bar belongs and where
+ * a thumb does not reach. A phone is held low in one hand: the top eighth of a
+ * six-inch screen is the one part of it that requires regrasping the device, and
+ * every screen in this app put its way out and its settings exactly there.
+ *
+ * A rule above the row separates it from whatever scrolls behind it, so the bar
+ * does not need a panel, a shadow or a colour of its own to stop being part of
+ * the content.
+ */
+@Composable
+fun IknaBottomBar(
+    modifier: Modifier = Modifier,
+    content: @Composable RowScope.() -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        IknaRule()
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(BarHeight)
+                .padding(horizontal = Space.sm),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Space.xs)
+        ) {
+            content()
         }
     }
 }

@@ -61,6 +61,11 @@ data class SettingsSnapshot(
     val autoExport: Boolean = true,
     val speech: Boolean = true,
     val speechVoices: String = "",
+    // 100 means the engine's own speed and pitch, matching SPEECH_TONE_DEFAULT. A
+    // literal is used because a serializable default has to be a constant here,
+    // and a file written by an older build simply has neither field.
+    val speechRate: Int = 100,
+    val speechPitch: Int = 100,
     val fontName: String = ""
 )
 
@@ -90,6 +95,8 @@ object SettingsBackup {
         autoExport = settings.autoExport,
         speech = settings.speechEnabled,
         speechVoices = settings.speechVoices,
+        speechRate = settings.speechRate,
+        speechPitch = settings.speechPitch,
         fontName = settings.fontName
     )
 
@@ -141,5 +148,6 @@ object SettingsBackup {
         store.setAutoExport(snapshot.autoExport)
         store.setSpeechEnabled(snapshot.speech)
         store.setSpeechVoices(snapshot.speechVoices)
+        store.setSpeechTone(snapshot.speechRate, snapshot.speechPitch)
     }
 }

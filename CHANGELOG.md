@@ -25,6 +25,43 @@ and never dropped.** Any change that would touch it is listed here explicitly.
   attaches it to the GitHub release automatically. The version inside the app is
   taken from the tag.
 
+- **Speech speed and pitch.** Two steppers next to the voice picker, 50 to 150
+  per cent, where 100 is whatever the phone itself is set to. Cards already
+  spoken are spoken again at the new values.
+- **The chosen font is used everywhere.** It reached the headings and the body
+  text but not the small caps labels or the counters, which stayed monospaced, so
+  a custom `.ttf` only ever half applied.
+
+### Changed
+
+- **Controls moved to the bottom of the screen.** The way out, the settings, the
+  statistics and "add a deck" used to live in a bar across the top, which on a
+  phone held in one hand is the only part of the screen a thumb cannot reach
+  without regripping the device. Same marks, same order, bottom edge.
+- **The statistics screen stopped explaining itself out loud.** Every figure had
+  its paragraph printed underneath it permanently — nine figures, thirty-odd
+  sentences of small grey prose. Each block now carries a "?" and hands the
+  sentence over when it is asked for. Nothing was deleted; it is one tap away.
+- **One number under each deck instead of three.** The row used to read
+  "introduced 34 of 121, known 12" under a bar that already draws two of those
+  numbers. It now shows how far through the deck you are, as a percentage.
+- **Level names say what is being asked.** "вставить" described what the app does
+  to the sentence rather than what you are being asked for, and "сказать" did not
+  say out loud.
+- **Cards leave the screen differently depending on the answer.** All four exits
+  used to be one animation with the sign flipped. A card you kept is now flicked
+  away light and lifts slightly; a card you lost drags and sinks, because it is
+  going back into the pile. The scheduling is untouched — this is the answer
+  restated in motion.
+
+- **Both built-in decks rewritten in spoken language.** The chunks were
+  textbook sentences — correct and lifeless. English went from 70 to 121 chunks
+  (`no way`, `for real`, `my bad`, `hang in there`), Polish from 110 to 121
+  (`no dobra`, `daj spokoj`, `jakos to bedzie`, `bez cisnienia`), both with a
+  carrier sentence and a Russian gloss for every phrase. The packs are at version
+  2. **Your review log is untouched:** the cards you have already met keep their
+  schedule.
+
 ### Fixed
 
 - **A font you picked was never actually applied.** Installing one reported "could

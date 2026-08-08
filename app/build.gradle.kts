@@ -58,8 +58,8 @@ val hasFixedKey = keystoreFile.exists()
 // also sits far above every CI build number this project ever produced, so a
 // release always installs over a CI build and never the other way round.
 // ---------------------------------------------------------------------------
-val appVersionName = "0.3.0"
-val appVersionCode = 30000
+val appVersionName = "0.4.1"
+val appVersionCode = 40100
 
 // A build from a clone has to be able to come out unsigned: the key committed
 // here is this project's, and nobody else should be shipping APKs under it.
