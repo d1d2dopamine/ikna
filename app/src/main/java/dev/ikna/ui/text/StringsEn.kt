@@ -205,16 +205,16 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"set.053" to "The answer log is the only thing that cannot be restored. Everything else is recomputed from it.",
 	// Авто-выгрузка раз в неделю
 	"set.054" to "Auto-export once a week",
-	// В папку Документы/Ikna
-	"set.055" to "Into the Documents/Ikna folder",
+	// В папку Документы/ikna
+	"set.055" to "Into the Documents/ikna folder",
 	// ВЫГРУЗИТЬ
 	"set.056" to "EXPORT",
 	// Не удалось сохранить файл
 	"set.057" to "Could not save the file",
 	// Настройки сохранены. Журнал пока пуст — выгружать нечего.
 	"set.058" to "Settings saved. The log is still empty — there is nothing to export.",
-	// Журнал и настройки сохранены в Документы/Ikna
-	"set.059" to "Log and settings saved to Documents/Ikna",
+	// Журнал и настройки сохранены в Документы/ikna
+	"set.059" to "Log and settings saved to Documents/ikna",
 	// ВОССТАНОВИТЬ
 	"set.060" to "RESTORE",
 	// Перерывы
@@ -240,7 +240,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Стереть всё
 	"set.071" to "Erase everything",
 	// Полный сброс: карточки, сроки, статистика, журнал ответов и сами настройки. Приложение ста
-	"set.072" to "A full reset: cards, dates, statistics, the answer log and the settings themselves. The app becomes what it was right after installation and restarts. Before erasing, the log is exported to Documents/Ikna — it can be restored afterwards.",
+	"set.072" to "A full reset: cards, dates, statistics, the answer log and the settings themselves. The app becomes what it was right after installation and restarts. Before erasing, the log is exported to Documents/ikna — it can be restored afterwards.",
 	// ТОЧНО СТЕРЕТЬ ВСЁ
 	"set.073" to "REALLY ERASE EVERYTHING",
 	// СТЕРЕТЬ ДАННЫЕ
@@ -321,8 +321,8 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"dbg.001" to "← BACK",
 	// ВЫГРУЗИТЬ ЖУРНАЛ ОТВЕТОВ
 	"dbg.002" to "EXPORT THE ANSWER LOG",
-	// Файл: Документы/Ikna/
-	"dbg.003" to "File: Documents/Ikna/",
+	// Файл: Документы/ikna/
+	"dbg.003" to "File: Documents/ikna/",
 	// Не удалось сохранить файл
 	"dbg.004" to "Could not save the file",
 	// ПЕРЕСЧИТАТЬ СЛОЙ СЛОВ

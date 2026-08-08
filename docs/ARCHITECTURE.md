@@ -40,7 +40,7 @@ which is what makes it safe to change the component model later.
 4. Derived tables (`components`, `daily_stats`, `governor_log`) may be dropped by migrations
    and rebuilt.
 5. `ExportWorker` writes a weekly JSON dump of `reviews` to shared storage
-   (`Documents/Ikna/`) via MediaStore, so it survives uninstall and device changes.
+   (`Documents/ikna/`) via MediaStore, so it survives uninstall and device changes.
 
 ## Packs
 

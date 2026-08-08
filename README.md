@@ -1,8 +1,14 @@
-# Ikna
+<p align="center">
+  <img src="docs/logo.png" alt="ikna" width="420">
+</p>
 
-Anki, but reversed. The system feeds you; you never feed the system.
+<p align="center">
+  Anki, but reversed. The system feeds you; you never feed the system.
+</p>
 
-Ikna is an offline Android app for learning languages in **chunks** — short
+---
+
+ikna is an offline Android app for learning languages in **chunks** — short
 phrases inside a carrier sentence — built around one idea that no other flashcard
 app implements: a **Load Governor** that decides *whether you are allowed new
 material today*, from a forecast of your upcoming review load, your backlog, your
@@ -15,14 +21,23 @@ rejected features: no streaks, no guilt, no growing counter, no queue number, no
 choice where a choice can be avoided, and a day that starts at four in the
 morning because that is when the previous one actually ends.
 
+The name is written in lower case, always. A capital I is a bare vertical bar in
+most sans-serif faces and is read as a lower case L, so "Ikna" invites being read
+as "lkna". The logo, the label under the icon and this file all agree on that.
+
 ## What it looks like
 
-| | |
-| --- | --- |
-| ![The deck screen](docs/screenshots/decks.png) | ![A card mid-session](docs/screenshots/session.png) |
-| Decks. The home screen — everything that is not learning lives in the marks along the top. | A card. No rating buttons: it is answered by throwing it. |
-| ![Statistics](docs/screenshots/stats.png) | ![Settings](docs/screenshots/settings.png) |
-| Retention, minutes, the best hour of your day, and the words that keep slipping. | Light, dark or four colours of your own, and your own font. |
+**[Watch the demo](docs/ikna.mp4)** — 45 seconds, no narration: decks, a card
+thrown four times, the end of a day, statistics, and the appearance settings.
+
+The app records that video itself. Settings → РЕДКОЕ → *record a demo* drives the
+real interface with synthetic decks and writes an MP4 to `Documents/ikna/`. That
+is deliberate: a screenshot cannot show what this app is about, because the whole
+answer mechanism is a gesture, and a hand-held screen recording of a swipe looks
+like a stutter. The video is rendered frame by frame from a virtual clock, so
+every transition runs at its designed speed regardless of the phone.
+
+It is silent by design — sound and titles belong in an editor, not in a recorder.
 
 ## Core design decisions
 
@@ -103,14 +118,14 @@ Your own pack can be imported from the deck screen.
 
 ## Your answers are the only backup that matters
 
-Once a week, and on demand, two files are written to `Documents/Ikna/`:
+Once a week, and on demand, two files are written to `Documents/ikna/`:
 
 - `ikna-reviews-YYYY-MM-DD.jsonl` — the append-only review log.
 - `ikna-settings-YYYY-MM-DD.json` — theme, colours, font, language, reminder.
 
 Deliberately outside the app sandbox, so they survive an uninstall, a factory
 reset and a new phone. *Restore* takes either file and works out which one it is
-from its contents.
+from its contents. Recorded demos land in the same folder.
 
 Restoring the log does not copy a database over the app — it **replays the
 history**. Every answer is fed back through the same scheduler, and the cards, the
@@ -126,8 +141,9 @@ shape scheme and rounds itself back at every opportunity.
 
 Light, dark, or four colours picked by hand (background, ink, muted, accent), with
 a contrast check that refuses combinations that cannot be read. Any `.ttf` or
-`.otf` on the phone can be used for the content text; the file is validated before
-it is accepted, so a broken font cannot leave the app unreadable.
+`.otf` on the phone can be used, and it is applied to the entire interface —
+headings, body, section marks, button captions and counters alike. The file is
+validated before it is accepted, so a broken font cannot leave the app unreadable.
 
 ## Getting to a card
 
@@ -153,11 +169,21 @@ language picker (Android 13+) lists the three languages through
 No servers, no accounts, no analytics, no internet permission. The details, and
 what is stored where, are in [PRIVACY.md](PRIVACY.md).
 
+## Install
+
+From the [releases page](https://github.com/d1d2dopamine/ikna/releases): download
+the APK and open it. Android will ask once whether to allow installing from this
+source.
+
+There is no app store listing. Every release is signed with the key committed to
+this repository, so each new APK installs over the previous one and your answers
+survive the update.
+
 ## Why the signing key is fixed
 
 Gradle generates a throwaway `debug.keystore` on every clean machine. In GitHub
 Actions that means **every build has a different signature**, so a new APK cannot
-be installed over the old one and you lose your entire `reviews` history. Ikna
+be installed over the old one and you lose your entire `reviews` history. ikna
 signs *both* debug and release with one fixed keystore committed to this
 repository as `ikna.keystore`. Nothing to generate, no repository secrets to
 configure. The trade-off is written down in `docs/KEYSTORE.md`.
@@ -165,22 +191,18 @@ configure. The trade-off is written down in `docs/KEYSTORE.md`.
 The review log is the only irreplaceable asset in this app. Packs can be
 re-downloaded, FSRS parameters can be recomputed, four months of answers cannot.
 
-## Install
-
-APKs are attached to every entry on the releases page. There is no Play Store
-listing and no auto-update inside the app.
-
-The repository is also prepared for [IzzyOnDroid](https://apt.izzysoft.de/fdroid/repo),
-an F-Droid-compatible repository that redistributes the APK built here, signed
-with the same key — so an update from it installs over a build downloaded from
-GitHub without losing the review history. `docs/PUBLISHING.md` has the details.
-
 ## Build
 
 Push to `main`, or run the `build` workflow by hand, and download the `ikna-apk`
 artifact. No Gradle wrapper jar is committed; CI provisions Gradle itself. Every
 build carries the version written in `app/build.gradle.kts` — there is exactly
 one place where a version number exists.
+
+Building without the committed key is one flag, and produces an unsigned APK:
+
+```
+./gradlew assembleRelease -Pikna.unsigned=true
+```
 
 ## Release
 
@@ -199,15 +221,12 @@ git push origin v0.3.0
 
 The `release` workflow refuses to continue if the tag and `appVersionName`
 disagree, then runs the tests, builds a signed release APK, names it after the
-tag and attaches it to the GitHub release with generated notes. The About line
-in the app and the file on the release page therefore cannot drift apart.
+tag and attaches it to the GitHub release with generated notes. The About line in
+the app and the file on the release page therefore cannot drift apart.
 
-The version is kept in the build file rather than derived from the tag because
-store repositories that build this project themselves have no tag and no CI run
-number to read. Publishing is described in `docs/PUBLISHING.md`.
-
-A release APK installs straight over a CI build: same key, same `applicationId`,
-same database — nothing is lost in the switch.
+The version lives in the build file rather than being derived from the tag or the
+CI run number, so that a clone of this repository builds the same version number
+on any machine, with no tag and no CI at all.
 
 ## Layout
 
@@ -223,11 +242,12 @@ app/src/main/java/dev/ikna/
   domain/session  session assembly
   domain/time     the 04:00 day boundary
   audio           the phone's speech engine, wrapped
+  demo            the self-recording demo: script, virtual clock, encoder
   work            WorkManager jobs: daily plan, export, reminder
   widget          the home screen widget
   ui              Compose UI (decks, session, stats, settings, theme, text)
 tools/genpack     offline pack generator (Python)
-docs              architecture, governor spec, keystore setup
+docs              architecture, governor spec, keystore setup, demo notes
 ```
 
 ## Docs
@@ -235,12 +255,13 @@ docs              architecture, governor spec, keystore setup
 - `docs/ARCHITECTURE.md`
 - `docs/GOVERNOR.md`
 - `docs/KEYSTORE.md`
+- `docs/DEMO.md`
 - [`CHANGELOG.md`](CHANGELOG.md)
 - [`PRIVACY.md`](PRIVACY.md)
 
 ## License
 
-Ikna is free software, licensed under the **GNU General Public License, version 3
+ikna is free software, licensed under the **GNU General Public License, version 3
 or (at your option) any later version**. The full text is in [LICENSE](LICENSE).
 
 This licence covers **the whole repository**: every file, every commit, every
@@ -249,7 +270,7 @@ as every future one. No per-file headers and no per-release notices are needed;
 this section and the `LICENSE` file are the entire statement, and nothing has to
 be re-stated when a new version ships.
 
-    Copyright (C) 2026 the Ikna authors
+    Copyright (C) 2026 the ikna authors
 
     This program is free software: you can redistribute it and/or modify it under the terms of
     the GNU General Public License as published by the Free Software Foundation, either version 3

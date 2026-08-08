@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter
 /**
  * Weekly dump of the append-only review log to shared storage.
  *
- * Written through MediaStore into Documents/Ikna/, deliberately NOT into the app
+ * Written through MediaStore into Documents/ikna/, deliberately NOT into the app
  * sandbox: the point is to survive an uninstall, a factory reset and a new phone.
  * Everything else in this database can be regenerated; four months of answers
  * cannot.
@@ -98,7 +98,7 @@ class JsonExporter(
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, mime)
-            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS + "/Ikna")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS + "/ikna")
         }
 
         val uri = resolver.insert(MediaStore.Files.getContentUri("external"), values) ?: return null

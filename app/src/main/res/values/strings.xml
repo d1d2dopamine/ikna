@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Ikna</string>
+    <!-- Lower case on purpose, everywhere, including the label under the icon: a
+         capital I is a straight bar in most sans-serif fonts and is read as a
+         lower case L, so "Ikna" invites being read as "lkna". The logo is set the
+         same way, and the two must not disagree. -->
+    <string name="app_name">ikna</string>
 
     <!-- Shown in the widget before the app has ever published a number. Not a
          zero: zero is a statement about today, and at this point nothing has

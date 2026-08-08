@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Muted indigo field behind the spark: the recognisable parallel to Anki,
-         flat instead of a light gradient. -->
-    <color name="ic_launcher_background">#4251A3</color>
+    <!-- The field behind the wordmark, read straight out of the drawn icon
+         artwork so the two cannot disagree. It is not window_background and not
+         the old indigo: the artwork's field is #110F0F, and the adaptive icon has
+         to reproduce that field after the system has applied its own mask. The
+         mask is also why the artwork is not shipped whole as the foreground -
+         Android rounds the corners itself, and a pre-rounded tile handed to it
+         comes out clipped with a rim of wallpaper. -->
+    <color name="ic_launcher_background">#110F0F</color>
 
     <!-- DarkBackground from Theme.kt. The app opens dark, so this is what the
          launch window should be; Compose repaints it a frame later. -->

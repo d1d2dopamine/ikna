@@ -11,6 +11,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dev.ikna.IknaApp
 import dev.ikna.MainActivity
+import dev.ikna.R
 
 /**
  * The daily nudge.
@@ -49,7 +50,12 @@ class ReminderWorker(context: Context, params: WorkerParameters) :
         )
 
         val notification = NotificationCompat.Builder(applicationContext, IknaApp.REMINDER_CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_popup_reminder)
+            // The platform draws this as a white silhouette from the alpha
+            // channel alone, so it is a dedicated file rather than the launcher
+            // icon: the launcher icon has a field behind it, and a field turns
+            // into a solid white square in the status bar. Until now this was a
+            // stock Android bell, which belonged to no app in particular.
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(S.t("remind.001"))
             .setContentText(S.t("remind.002"))
             .setContentIntent(pending)

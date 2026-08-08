@@ -1,5 +1,0 @@
-Widget na ekranie głównym: jedna liczba i jedno dotknięcie do kart.
-Codzienne przypomnienie otwiera kartę, a nie listę tali.
-Systemowy wybór języka aplikacji: rosyjski, angielski, polski.
-Nazwy dla czytnika ekranu przy wszystkich rysowanych przyciskach.
-Poprawka: zainstalowana czcionka zgłaszała błąd i nigdy nie była stosowana.

@@ -31,7 +31,7 @@ What the key does **not** protect:
 
 - It is not an account, not a token, not a password to any service.
 - It gives nobody access to your data. Reviews never leave the phone; exports
-  go to `Documents/Ikna/` on local storage.
+  go to `Documents/ikna/` on local storage.
 
 What it does mean:
 

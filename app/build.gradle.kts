@@ -45,16 +45,15 @@ val hasFixedKey = keystoreFile.exists()
 // The version is written here and nowhere else.
 //
 // It used to be derived from the CI run number, which was fine for as long as
-// this repository was the only thing that ever built the app. F-Droid builds it
-// on their own machines, where there is no run number and no tag: every build
-// would come out as version 1, and their recipe rejects an APK whose version
-// does not match the one declared for that release.
+// this repository was the only thing that ever built the app. It is not: anyone
+// who clones it builds on a machine with no run number and no tag, where every
+// build would come out as version 1 and would refuse to install over a real one.
 //
 // So both numbers are bumped by hand when releasing, and the tag carries the
 // same number. The release workflow refuses to publish when the tag and
 // appVersionName disagree.
 //
-// appVersionCode is major * 10000 + minor * 100 + patch. It only ever goes up,
+// appVersionCode is major * 100000 + minor * 10000 + patch * 100. It only ever goes up,
 // which is what Android requires to install an update over an older build. It
 // also sits far above every CI build number this project ever produced, so a
 // release always installs over a CI build and never the other way round.
@@ -62,9 +61,10 @@ val hasFixedKey = keystoreFile.exists()
 val appVersionName = "0.3.0"
 val appVersionCode = 30000
 
-// F-Droid signs with its own key, so the build it runs has to come out
-// unsigned. Passing -Pikna.unsigned=true switches the signing config off
-// without anyone having to patch this file during their build.
+// A build from a clone has to be able to come out unsigned: the key committed
+// here is this project's, and nobody else should be shipping APKs under it.
+// Passing -Pikna.unsigned=true switches the signing config off without anyone
+// having to patch this file during their build.
 val unsignedBuild =
     (project.findProperty("ikna.unsigned") as String?)?.toBoolean() == true
 val signWithFixedKey = hasFixedKey && !unsignedBuild

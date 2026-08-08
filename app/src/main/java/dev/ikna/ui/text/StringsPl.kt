@@ -205,16 +205,16 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"set.053" to "Dziennik odpowiedzi to jedyne, czego nie da się odtworzyć. Cała reszta liczy się z niego na nowo.",
 	// Авто-выгрузка раз в неделю
 	"set.054" to "Auto-eksport raz w tygodniu",
-	// В папку Документы/Ikna
-	"set.055" to "Do folderu Dokumenty/Ikna",
+	// В папку Документы/ikna
+	"set.055" to "Do folderu Dokumenty/ikna",
 	// ВЫГРУЗИТЬ
 	"set.056" to "EKSPORTUJ",
 	// Не удалось сохранить файл
 	"set.057" to "Nie udało się zapisać pliku",
 	// Настройки сохранены. Журнал пока пуст — выгружать нечего.
 	"set.058" to "Ustawienia zapisane. Dziennik jest jeszcze pusty — nie ma czego eksportować.",
-	// Журнал и настройки сохранены в Документы/Ikna
-	"set.059" to "Dziennik i ustawienia zapisane w Dokumenty/Ikna",
+	// Журнал и настройки сохранены в Документы/ikna
+	"set.059" to "Dziennik i ustawienia zapisane w Dokumenty/ikna",
 	// ВОССТАНОВИТЬ
 	"set.060" to "PRZYWRÓĆ",
 	// Перерывы
@@ -240,7 +240,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// Стереть всё
 	"set.071" to "Wymaż wszystko",
 	// Полный сброс: карточки, сроки, статистика, журнал ответов и сами настройки. Приложение ста
-	"set.072" to "Pełny reset: karty, terminy, statystyka, dziennik odpowiedzi i same ustawienia. Aplikacja stanie się taka jak zaraz po instalacji i uruchomi się ponownie. Przed wymazaniem dziennik trafia do Dokumenty/Ikna — potem można go przywrócić.",
+	"set.072" to "Pełny reset: karty, terminy, statystyka, dziennik odpowiedzi i same ustawienia. Aplikacja stanie się taka jak zaraz po instalacji i uruchomi się ponownie. Przed wymazaniem dziennik trafia do Dokumenty/ikna — potem można go przywrócić.",
 	// ТОЧНО СТЕРЕТЬ ВСЁ
 	"set.073" to "NA PEWNO WYMAŻ WSZYSTKO",
 	// СТЕРЕТЬ ДАННЫЕ
@@ -321,8 +321,8 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"dbg.001" to "← WSTECZ",
 	// ВЫГРУЗИТЬ ЖУРНАЛ ОТВЕТОВ
 	"dbg.002" to "EKSPORTUJ DZIENNIK ODPOWIEDZI",
-	// Файл: Документы/Ikna/
-	"dbg.003" to "Plik: Dokumenty/Ikna/",
+	// Файл: Документы/ikna/
+	"dbg.003" to "Plik: Dokumenty/ikna/",
 	// Не удалось сохранить файл
 	"dbg.004" to "Nie udało się zapisać pliku",
 	// ПЕРЕСЧИТАТЬ СЛОЙ СЛОВ

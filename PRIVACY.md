@@ -20,10 +20,10 @@ dependency tried to open one.
 | Your answers, card schedules, word-level state, daily counts | `ikna.db`, in the app's private storage |
 | Settings: theme, colours, font, language, reminder time, voice | the app's private storage |
 | A font you imported | copied into the app's private storage |
-| Weekly export of the review log and settings | `Documents/Ikna/`, on your own device |
+| Weekly export of the review log and settings | `Documents/ikna/`, on your own device |
 | Widget text | the app's private storage |
 
-The export in `Documents/Ikna/` is the one thing written outside the sandbox, and
+The export in `Documents/ikna/` is the one thing written outside the sandbox, and
 it is written there deliberately: files inside the sandbox are deleted with the
 app, and the point of that export is to survive an uninstall and a new phone. It
 goes nowhere else. Copying it off the device — or not — is your decision.

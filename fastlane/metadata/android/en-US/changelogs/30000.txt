@@ -1,5 +1,0 @@
-Home screen widget: one number, one tap into the cards.
-The daily reminder opens a card instead of the deck list.
-System per-app language picker now lists Russian, English and Polish.
-Screen reader names for every hand-drawn control.
-Fixed: a font you installed reported an error and was never applied.

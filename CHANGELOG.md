@@ -1,8 +1,8 @@
 # Changelog
 
 Every released APK is built by GitHub Actions from the tag it is attached to.
-Versions are `MAJOR.MINOR.PATCH` and live in `app/build.gradle.kts`; the release
-workflow refuses to publish if the tag says something else.
+Versions are `MAJOR.MINOR.PATCH`; the app also shows a build number, which is the
+CI run that produced the file.
 
 This project keeps one rule above all others: **the review log is never rewritten
 and never dropped.** Any change that would touch it is listed here explicitly.
@@ -22,22 +22,8 @@ and never dropped.** Any change that would touch it is listed here explicitly.
   a deck, speak) had no names at all, so TalkBack skipped them silently. They are
   named now, in all three languages.
 - **Tagged releases.** Pushing a `v*` tag builds a signed release APK and
-  attaches it to the GitHub release automatically.
-- **A store listing that lives in the repository.** Title, descriptions and
-  per-version changelogs in Russian, English and Polish under `fastlane/`, plus a
-  512 px icon rendered from the app's own launcher vector, so the picture in a
-  listing cannot drift away from the icon on the phone. `docs/PUBLISHING.md`
-  explains how to submit the app to IzzyOnDroid or F-Droid.
-
-### Changed
-
-- **The version is declared in the build file, not derived from CI.** It used to
-  come from the GitHub run number, which does not exist anywhere else — a build
-  made on another machine called itself version 1 and could not be published. Two
-  lines at the top of `app/build.gradle.kts` are now the only place a version
-  number exists, and the release workflow checks the tag against them.
-- **Unsigned builds are possible.** `-Pikna.unsigned=true` skips the committed
-  keystore, which store repositories that build from source require.
+  attaches it to the GitHub release automatically. The version inside the app is
+  taken from the tag.
 
 ### Fixed
 
@@ -58,7 +44,7 @@ and never dropped.** Any change that would touch it is listed here explicitly.
 - Custom appearance: light, dark or four hand-picked colours, plus your own
   `.ttf` or `.otf` font.
 - Backup and restore: the review log and the settings are written to
-  `Documents/Ikna/`, and either file can be read back in.
+  `Documents/ikna/`, and either file can be read back in.
 - Polish deck (`pl-ru-core`, 110 chunks), shipped switched off.
 - Deck screen as the home screen; sessions open out of a deck.
 - Swipe to answer: left for *not yet*, right for *got it*, up and down for the

@@ -8,7 +8,6 @@
 <resources>
     <style name="Theme.Ikna.Launch" parent="Theme.Ikna">
         <item name="android:windowSplashScreenBackground">@color/window_background</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
-        <item name="android:windowSplashScreenIconBackgroundColor">@color/ic_launcher_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher_wordmark</item>
     </style>
 </resources>

@@ -18,10 +18,22 @@
     android:background="@color/widget_background"
     android:padding="12dp">
 
+    <!-- The pixel wordmark, drawn at its own grid size. This is the one place in
+         the product where the pixel version of the logo belongs: at 38x16 it is
+         smaller than any text could be set here, and a widget needs to say which
+         app it is without spending a line on it. -->
+    <ImageView
+        android:id="@+id/widget_mark"
+        android:layout_width="38dp"
+        android:layout_height="16dp"
+        android:src="@drawable/widget_mark"
+        android:importantForAccessibility="no" />
+
     <TextView
         android:id="@+id/widget_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
         android:textColor="@color/widget_muted"
         android:textSize="11sp"
         android:letterSpacing="0.08"

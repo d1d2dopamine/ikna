@@ -69,7 +69,7 @@ fun OnboardingScreen(container: AppContainer, onDone: () -> Unit) {
     ) {
         Spacer(Modifier.height(48.dp))
         Text(
-            text = "Ikna",
+            text = "ikna",
             style = MaterialTheme.typography.displaySmall,
             color = MaterialTheme.colorScheme.primary
         )
