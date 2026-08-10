@@ -110,21 +110,6 @@ fun SessionScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                // First contact: shown, not asked. Nothing to grade, nothing to fail,
-                // and so no words at the bottom offering to grade it.
-                card != null && state.encoding -> ChunkCard(
-                    label = S.t("sess.002"),
-                    prompt = card.chunk.text,
-                    answer = card.chunk.translation,
-                    hint = card.chunk.contextSentence,
-                    revealed = true,
-                    showTapHint = false,
-                    progress = { 0f },
-                    onTap = vm::acknowledgeEncoding,
-                    tapEnabled = true,
-                    modifier = Modifier.fillMaxSize()
-                )
-
                 card != null -> SwipeableCard(
                     key = card.card.key + ":" + state.index,
                     revealed = state.revealed,

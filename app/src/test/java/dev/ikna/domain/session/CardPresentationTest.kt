@@ -67,7 +67,7 @@ class CardPresentationTest {
     }
 
     @Test
-    fun `a never answered card is shown as an introduction`() {
+    fun `a never answered card is marked for its second pass`() {
         assertTrue(sessionCard(Level.RECOGNITION, isNew = true, reps = 0).isFirstContact)
         assertTrue(!sessionCard(Level.RECOGNITION, isNew = false, reps = 4).isFirstContact)
         assertTrue(!sessionCard(Level.CLOZE, isNew = true, reps = 0).isFirstContact)

@@ -261,9 +261,9 @@ private suspend fun throwOut(
  * label. It marked the user's absence on the material they were in the middle of
  * remembering, which is the one place this app had promised never to keep score.
  *
- * [tapEnabled] rather than a look at [revealed]: the same surface means "show me
- * the answer" on a question and "understood" on an introduction, and the
- * introduction is revealed from the start.
+ * [tapEnabled] rather than a look at [revealed]: turning the card over is a tap
+ * on the card itself, and that surface has to stop answering once the answer is
+ * already on screen.
  */
 @Composable
 fun ChunkCard(

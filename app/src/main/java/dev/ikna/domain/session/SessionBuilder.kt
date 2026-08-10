@@ -47,61 +47,6 @@ data class SessionPlan(
     val remaining: Int get() = cards.size
 }
 
-/** A chunk being met for the first time: shown, not asked. */
-private fun CardEntity.isFirstContact(): Boolean = level == 0 && isNew && reps == 0
-
-/** Introductions per block, and how many reviews separate one block from the next. */
-private const val INTRO_BLOCK = 2
-private const val INTRO_GAP = 3
-
-/**
- * Puts first contacts at the front, in small blocks.
- *
- * Before this the order was whatever the due dates produced, which in practice
- * meant one introduction, one review, one introduction, one review for the first
- * third of the session. Two costs, both real: attention is at its best at the
- * start of a session and that is where new material should land, and the screen
- * itself changes shape between the two — an introduction has one action, a
- * question has four — so alternating them one for one makes the bottom of the
- * screen flicker between two layouts on every card.
- *
- * Total and contents are unchanged; this only reorders.
- */
-internal fun groupIntroductions(
-    cards: List<CardEntity>,
-    block: Int = INTRO_BLOCK,
-    gap: Int = INTRO_GAP
-): List<CardEntity> {
-    if (block <= 0 || gap <= 0) return cards
-    val intro = cards.filter { it.isFirstContact() }
-    if (intro.isEmpty()) return cards
-    val rest = cards.filterNot { it.isFirstContact() }
-    if (rest.isEmpty()) return cards
-
-    val out = ArrayList<CardEntity>(cards.size)
-    var i = 0
-    var r = 0
-    while (i < intro.size) {
-        var placed = 0
-        while (placed < block && i < intro.size) {
-            out += intro[i]
-            i++
-            placed++
-        }
-        var spacer = 0
-        while (spacer < gap && r < rest.size) {
-            out += rest[r]
-            r++
-            spacer++
-        }
-    }
-    while (r < rest.size) {
-        out += rest[r]
-        r++
-    }
-    return out
-}
-
 class SessionBuilder(
     private val cardDao: CardDao,
     private val chunkDao: ChunkDao,
@@ -143,7 +88,9 @@ class SessionBuilder(
             if (amnestyQuota > 0) cardDao.amnestyCardsExcluding(exclude, amnestyQuota)
             else emptyList()
 
-        return groupIntroductions(reserved + interleave(due + amnesty).take(room))
+        // New chunks first, then the day's repetitions. The reserved cards are
+        // prepended, so new material still lands while attention is freshest.
+        return reserved + interleave(due + amnesty).take(room)
     }
 
     /**

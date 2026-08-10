@@ -7,6 +7,50 @@ CI run that produced the file.
 This project keeps one rule above all others: **the review log is never rewritten
 and never dropped.** Any change that would touch it is listed here explicitly.
 
+From `0.1.0 TRAFFIC` onward a version is a number **and an epoch word**. The
+number counts releases inside the epoch; the word says which epoch the build
+belongs to. `TRAFFIC` is the base: everything is built, the road is open, and what
+remains is testing, bug fixes and small corrections. `EPOHAL` is the next era and
+opens only when TRAFFIC has nothing left to correct. Tags replace the space with a
+dash, so `0.1.0 TRAFFIC` is tagged `v0.1.0-TRAFFIC`.
+
+## 0.1.0 TRAFFIC
+
+The same app as 0.6.1, renumbered. Nothing about the scheduler, the governor, the
+packs or the database changed here; what changed is how versions are named from
+now on.
+
+### Changed
+
+- **Versions are now an epoch plus a number.** `appVersionName` is
+  `0.1.0 TRAFFIC`. The old `0.x` line counted the app being assembled piece by
+  piece; TRAFFIC counts a finished app being brought to a releasable state, and
+  continuing from `0.6.1` would have implied that the two scales are comparable.
+  They are not, so the number restarts and the word makes the reset explicit.
+- **`appVersionCode` does not restart.** It is now `100010000` — an epoch offset
+  of `100000000` plus the version. Android refuses to install an APK whose version
+  code is lower than the installed one, and the only irreplaceable thing in this
+  app is the review log inside that installation. The version *you read* reset;
+  the version *Android compares* never has and never will.
+- **The release workflow slugifies the tag.** A git tag cannot contain a space, so
+  the tag check now compares the pushed tag against `appVersionName` with the
+  space replaced by a dash: `0.1.0 TRAFFIC` -> `v0.1.0-TRAFFIC`. A mismatch still
+  aborts the release before anything is built or published.
+- **Two READMEs.** `README.md` (English) and `README.ru.md` (Russian), each with
+  badges, a download link to the first release APK, and a section explaining what
+  TRAFFIC and EPOHAL mean. The two files are kept in step section by section.
+
+### Fixed
+
+- **Six broken characters in the Russian strings.** `StringsRu.kt` carried six
+  U+FFFD replacement characters, left over from an encoding round-trip, inside two
+  visible strings: `set.064` and `dbg.006`. Both now read correctly
+  (`Спрятано не потому...` and `Слой слов пересчитан`). The whole repository was then
+  scanned for replacement characters, mojibake, BOMs, CRLF line endings,
+  non-breaking and zero-width spaces and stray control characters; nothing else
+  was found. The typographic dashes and quotes throughout the sources are
+  intentional and were left alone.
+
 ## 0.6.1
 
 0.6.0 was never published: the first build of it failed to compile, and the fixes
@@ -46,6 +90,19 @@ going to contain is in this version, so there is one release note rather than tw
 
 ### Changed
 
+- **The introduction card is gone; there are two kinds of card left.** A chunk met
+  for the first time used to be shown rather than asked: the phrase, its meaning
+  and its sentence at once, with a tap to move on. It sounded right and worked
+  badly. Every new chunk arrived twice — once as a reading, then, seconds later,
+  as a question whose answer was still on the screen behind it — and the app filed
+  that second pass as a genuine first success and pushed the chunk days into the
+  future. Now every card is a question with the answer one tap away, and a first
+  miss costs nothing. New chunks still arrive at the front of the day and still
+  come back once more inside the same session, except that the second pass is now
+  an actual recall instead of a second reading. Expect first answers on new
+  material to be mostly "don't know" and first intervals to be short: that is the
+  schedule being honest, not a regression.
+
 - **Reading aloud is marked beta and starts switched off.** The feature works, but
   how good it sounds is decided by whichever speech engine is installed on the
   phone, and nothing in this app can inspect that. A bad voice is worse than
@@ -53,6 +110,14 @@ going to contain is in this version, so there is one release note rather than tw
   being asked to.
 
 ### Fixed
+
+- **New chunks alternated between a reading and a question without end.** The
+  builder kept introductions apart by putting two of them between every three
+  repetitions, and quietly did nothing when there were no repetitions to space
+  them with — which is exactly the state of a fresh install, where every card is
+  new. The result was introduction, question, introduction, question for the whole
+  first session, and for every session after it until reviews began to arrive.
+  Removing the introduction card removes the loop with it.
 
 - **A deck could be switched on and still refuse to open.** Two separate causes,
   one symptom. The plan for today is cached, and turning a deck on did not throw

@@ -47,8 +47,6 @@ data class SessionUiState(
     val undoVisible: Boolean = false,
     val undoFailed: Boolean = false,
     val showRevealHint: Boolean = false,
-    /** Keys already introduced in this session. See [encoding]. */
-    val encodedKeys: Set<String> = emptySet(),
     val extraAdded: Int = 0,
     val noMoreExtra: Boolean = false,
     /**
@@ -73,30 +71,20 @@ data class SessionUiState(
     val progress: Float
         get() = if (sessionTotal <= 0) 0f else sessionDone.toFloat() / sessionTotal
 
-    /**
-     * The card in front has never been seen and has not been introduced yet, so
-     * it is shown rather than asked: the chunk, what it means and the sentence it
-     * lives in, all at once, with nothing to grade. Asking first works for
-     * material that was encoded at some point; on a first contact it is a
-     * guaranteed miss before any learning has happened.
-     */
-    val encoding: Boolean
-        get() = current?.let { it.isFirstContact && it.card.key !in encodedKeys } == true
-
     /** The level of the next question, so the next step is never a surprise. */
     val nextCard: SessionCard? get() = queue.getOrNull(index + 1)
 
     /**
      * Whether saying it out loud right now would hand over the answer.
      *
-     * An introduction and a recognition card already show the sentence, so
-     * hearing it adds pronunciation to something visible. A cloze with a gap in
+     * A recognition card already shows the sentence it lives in, so hearing it
+     * adds pronunciation to something already visible. A cloze with a gap in
      * it, or a production card showing only the translation, would be the answer
      * itself — those wait until the card is turned.
      */
     val speakable: Boolean
         get() = current?.let { card ->
-            encoding || card.level == Level.RECOGNITION || revealed
+            card.level == Level.RECOGNITION || revealed
         } == true
 }
 
@@ -198,7 +186,7 @@ class SessionViewModel(
             if (!prefs.speechEnabled) return@launch
 
             val card = s.current
-            if (card != null && s.encoding) {
+            if (card != null && card.isFirstContact) {
                 speaker.speakIfReady(
                     spokenText(card),
                     card.chunk.lang,
@@ -271,22 +259,6 @@ class SessionViewModel(
             hintsShown++
             viewModelScope.launch { settings.bumpRevealHint() }
         }
-    }
-
-    /**
-     * Done reading an introduction. Nothing is graded and nothing is logged, so
-     * this is a tap on the card rather than a button: there is no decision here
-     * to make a target for.
-     */
-    fun acknowledgeEncoding() {
-        val s = _state.value
-        val card = s.current ?: return
-        _state.value = s.copy(
-            encodedKeys = s.encodedKeys + card.card.key,
-            revealed = false
-        )
-        shownAt = System.currentTimeMillis()
-        onCardShown()
     }
 
     /**

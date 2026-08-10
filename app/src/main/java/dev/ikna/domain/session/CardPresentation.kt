@@ -44,10 +44,11 @@ data class SessionCard(
     /**
      * Never answered before: level zero, no repetitions yet.
      *
-     * The first meeting with a chunk is the weakest link in this app. Retrieval
-     * practice helps, but it cannot repair material that was never properly
-     * encoded, so a first contact is shown as an introduction rather than asked
-     * as a question the user is guaranteed to fail.
+     * There is no separate introduction card. A chunk met for the first time
+     * is asked like every other card -- the answer is one tap away and the
+     * first miss costs nothing. This flag only decides that the card comes
+     * back once more inside the same session, because a single pass on the day
+     * a chunk appears is the weakest point of any spaced system.
      */
     val isFirstContact: Boolean
         get() = level == Level.RECOGNITION && card.isNew && card.reps == 0

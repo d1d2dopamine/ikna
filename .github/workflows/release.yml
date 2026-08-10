@@ -50,13 +50,19 @@ jobs:
       # either tags or CI. The tag is only a label - so it has to agree with the
       # file, and a disagreement is caught here rather than discovered later on
       # a release page offering an APK with the wrong number inside it.
+      # A version name is "0.1.0 TRAFFIC" - a number and the epoch it belongs
+      # to - and a git tag cannot contain a space, so the tag is the same string
+      # with the space turned into a dash: v0.1.0-TRAFFIC. That is the only
+      # difference allowed between the two; the number and the epoch word still
+      # have to agree character for character.
       - name: Tag matches the version in the build file
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           declared=$(sed -n 's/^val appVersionName = "\(.*\)"/\1/p' app/build.gradle.kts)
-          echo "build file says $declared, tag says $GITHUB_REF_NAME"
-          if [ "v$declared" != "$GITHUB_REF_NAME" ]; then
-            echo "::error::tag $GITHUB_REF_NAME does not match appVersionName $declared - bump app/build.gradle.kts or move the tag"
+          slug=$(echo "$declared" | tr ' ' '-')
+          echo "build file says '$declared' (tag form v$slug), tag says $GITHUB_REF_NAME"
+          if [ "v$slug" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match appVersionName '$declared' - bump app/build.gradle.kts or move the tag"
             exit 1
           fi
 

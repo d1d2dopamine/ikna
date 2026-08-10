@@ -412,7 +412,6 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// секунду…
 	"sess.001" to "chwilka…",
 	// знакомство
-	"sess.002" to "poznanie",
 	// МИНИМУМ СДЕЛАН
 	"sess.003" to "MINIMUM ZROBIONE",
 	// Колода пройдена

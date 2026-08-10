@@ -3,7 +3,36 @@
 </p>
 
 <p align="center">
-  Anki, but reversed. The system feeds you; you never feed the system.
+  <b>Anki, but reversed. The system feeds you; you never feed the system.</b>
+</p>
+
+<p align="center">
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.1.0-TRAFFIC"><img alt="version" src="https://img.shields.io/badge/version-0.1.0%20TRAFFIC-E4572E?style=for-the-badge&labelColor=17130F"></a>
+  <a href="#-versions-traffic-and-epohal"><img alt="epoch" src="https://img.shields.io/badge/epoch-TRAFFIC-C9A227?style=for-the-badge&labelColor=17130F"></a>
+  <a href="#-license"><img alt="license" src="https://img.shields.io/badge/license-GPL--3.0--or--later-4C8055?style=for-the-badge&labelColor=17130F"></a>
+</p>
+
+<p align="center">
+  <img alt="platform" src="https://img.shields.io/badge/Android-10%2B%20(API%2029)-3DDC84?style=for-the-badge&logo=android&logoColor=white&labelColor=17130F">
+  <img alt="kotlin" src="https://img.shields.io/badge/Kotlin-2.0.20-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white&labelColor=17130F">
+  <img alt="compose" src="https://img.shields.io/badge/Jetpack%20Compose-UI-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white&labelColor=17130F">
+  <img alt="offline" src="https://img.shields.io/badge/100%25%20offline-no%20INTERNET%20permission-8A8178?style=for-the-badge&labelColor=17130F">
+</p>
+
+<p align="center">
+  <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img alt="build" src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&style=for-the-badge&label=build&labelColor=17130F"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/latest"><img alt="downloads" src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?style=for-the-badge&label=downloads&color=E4572E&labelColor=17130F"></a>
+  <a href="CHANGELOG.md"><img alt="changelog" src="https://img.shields.io/badge/changelog-read-8A8178?style=for-the-badge&labelColor=17130F"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.1.0-TRAFFIC/ikna-v0.1.0-TRAFFIC.apk">
+    <img alt="Download APK" src="https://img.shields.io/badge/%E2%AC%87%20DOWNLOAD%20APK-0.1.0%20TRAFFIC-E4572E?style=for-the-badge&logo=android&logoColor=white&labelColor=17130F" height="44">
+  </a>
+</p>
+
+<p align="center">
+  🇬🇧 <b>English</b> · <a href="README.ru.md">🇷🇺 Русский</a>
 </p>
 
 ---
@@ -25,7 +54,33 @@ The name is written in lower case, always. A capital I is a bare vertical bar in
 most sans-serif faces and is read as a lower case L, so "Ikna" invites being read
 as "lkna". The logo, the label under the icon and this file all agree on that.
 
-## What it looks like
+## 🏷️ Versions: TRAFFIC and EPOHAL
+
+A version of ikna is a number **and a word**: `0.1.0 TRAFFIC`. The number counts
+releases inside an epoch; the word says **which epoch** the build belongs to, and
+therefore what kind of change you should expect from the next one.
+
+| Epoch | Meaning | What lands in it |
+| --- | --- | --- |
+| 🚦 **TRAFFIC** | **The base.** Everything essential is built; the app is feature-complete and the road is open. | Testing, bug fixes, small corrections, wording, polish. No new pillars. |
+| 🌑 **EPOHAL** | **The next era.** Opens only when TRAFFIC has nothing left to correct. | The next generation of the app — whatever is big enough to deserve a new word. |
+
+Why the numbering restarted at `0.1.0`: the pre-epoch `0.x` line (up to `0.6.1`)
+counted something else — the app being assembled. TRAFFIC counts a finished app
+being hardened, so carrying `0.6.1` forward would have implied the two scales are
+comparable. They are not.
+
+One thing does **not** restart: `appVersionCode`. Android refuses to install an
+APK whose code is lower than the installed one, and the only irreplaceable thing
+in this app is the review log inside that install — so the internal counter keeps
+climbing straight across the reset (TRAFFIC starts at `100010000`). The version
+**you read** restarted; the version **Android compares** never did.
+
+Tags on GitHub carry the same string with the space turned into a dash, because a
+git tag cannot contain one: `v0.1.0-TRAFFIC`. The release workflow refuses to
+publish if the tag and the build file disagree.
+
+## 👁️ What it looks like
 
 A card, thrown. Answering is a gesture, not a row of buttons: throw the card away
 from you when you knew it, towards you when you did not, and the direction is the
@@ -37,7 +92,7 @@ whole answer mechanism is a movement, and a screen recording of a swipe looks
 like a stutter, so the honest options are to build it properly or to say nothing.
 Build it and see it; it takes one `gradle assembleDebug`.
 
-## Core design decisions
+## 🧠 Core design decisions
 
 | Decision | Value |
 | --- | --- |
@@ -56,7 +111,7 @@ Build it and see it; it takes one `gradle assembleDebug`.
 | Content | pre-baked packs, generated offline in `tools/genpack` |
 | Network | none. The app has no internet permission |
 
-## How a session works
+## 🃏 How a session works
 
 The day's plan is decided once and persisted. It can only shrink as you answer,
 and it grows only when you ask for more — the counter at the top of the screen is
@@ -71,7 +126,7 @@ mark — lives in the thin row above, never on the card itself.
 Undo is an inserted row, not an edit: the log is append-only, and taking an
 answer back is recorded as a retraction of it.
 
-## When a day starts
+## 🕓 When a day starts
 
 Not at midnight. `dayStartHour = 4` in `governor.json`, and every day key, daily
 counter, activity mark and "nothing new tonight" rule is measured from there.
@@ -83,7 +138,7 @@ measured norm dropped, and the governor throttled new material because of a brea
 that never happened. Four in the morning is late enough to catch almost every
 real night session and early enough that nobody works through it by accident.
 
-## Decks
+## 🃋 Decks
 
 Two packs ship in `app/src/main/assets/packs`:
 
@@ -115,7 +170,7 @@ nobody earned. Surface forms aggregate less, but they never lie.
 
 Your own pack can be imported from the deck screen.
 
-## Your answers are the only backup that matters
+## 💾 Your answers are the only backup that matters
 
 Once a week, and on demand, two files are written to `Documents/ikna/`:
 
@@ -132,7 +187,7 @@ word layer and every statistic are recomputed from it. That is why the log may
 only ever gain rows: given the answers, everything else is derivable, including by
 a future version with a different algorithm.
 
-## Appearance
+## 🎨 Appearance
 
 Flat right angles, hand-drawn marks, no Material components anywhere — not a
 style preference but a requirement, since a Material button ignores the theme's
@@ -151,12 +206,12 @@ list of names. Every pair of colours in every palette — including the warning 
 which each lighting defines for itself and which steps aside entirely when the
 palette's accent is already a warm red — is held to 4.5:1 by a unit test, and the
 hand-picked scheme gets the same check live, refusing combinations that cannot be
-read. Any `.ttf` or
-`.otf` on the phone can be used, and it is applied to the entire interface —
-headings, body, section marks, button captions and counters alike. The file is
-validated before it is accepted, so a broken font cannot leave the app unreadable.
+read. Any `.ttf` or `.otf` on the phone can be used, and it is applied to the
+entire interface — headings, body, section marks, button captions and counters
+alike. The file is validated before it is accepted, so a broken font cannot leave
+the app unreadable.
 
-## Getting to a card
+## 📲 Getting to a card
 
 - **The widget.** One number on the home screen and a tap that opens the cards
   directly.
@@ -167,7 +222,7 @@ validated before it is accepted, so a broken font cannot leave the app unreadabl
 Both skip the deck list on purpose: tapping either one is already an answer to
 "shall I study now", and asking again is where the intention is lost.
 
-## Accessibility
+## ♿ Accessibility
 
 Every mark in this app is drawn on a canvas, and a drawn shape has no text for a
 screen reader to find — so each one is given a name, in all three languages, and
@@ -175,22 +230,29 @@ the switches are real toggles that announce their state. The system's per-app
 language picker (Android 13+) lists the three languages through
 `res/xml/locales_config.xml`.
 
-## Privacy
+## 🔒 Privacy
 
 No servers, no accounts, no analytics, no internet permission. The details, and
 what is stored where, are in [PRIVACY.md](PRIVACY.md).
 
-## Install
+## ⬇️ Install
 
-From the [releases page](https://github.com/d1d2dopamine/ikna/releases): download
-the APK and open it. Android will ask once whether to allow installing from this
-source.
+<p align="center">
+  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.1.0-TRAFFIC/ikna-v0.1.0-TRAFFIC.apk">
+    <img alt="Download APK 0.1.0 TRAFFIC" src="https://img.shields.io/badge/%E2%AC%87%20ikna%200.1.0%20TRAFFIC.apk-download-E4572E?style=for-the-badge&logo=android&logoColor=white&labelColor=17130F" height="44">
+  </a>
+</p>
+
+Or pick a file yourself on the
+[releases page](https://github.com/d1d2dopamine/ikna/releases/tag/v0.1.0-TRAFFIC).
+Download the APK and open it; Android will ask once whether to allow installing
+from this source.
 
 There is no app store listing. Every release is signed with the key committed to
 this repository, so each new APK installs over the previous one and your answers
 survive the update.
 
-## Why the signing key is fixed
+## 🗝️ Why the signing key is fixed
 
 Gradle generates a throwaway `debug.keystore` on every clean machine. In GitHub
 Actions that means **every build has a different signature**, so a new APK cannot
@@ -202,7 +264,7 @@ configure. The trade-off is written down in `docs/KEYSTORE.md`.
 The review log is the only irreplaceable asset in this app. Packs can be
 re-downloaded, FSRS parameters can be recomputed, four months of answers cannot.
 
-## Build
+## 🔨 Build
 
 Push to `main`, or run the `build` workflow by hand, and download the `ikna-apk`
 artifact. No Gradle wrapper jar is committed; CI provisions Gradle itself. Every
@@ -215,19 +277,19 @@ Building without the committed key is one flag, and produces an unsigned APK:
 ./gradlew assembleRelease -Pikna.unsigned=true
 ```
 
-## Release
+## 🚀 Release
 
 Bump the two version lines at the top of `app/build.gradle.kts`, then tag the
-commit with the same number:
+commit with the same string, space replaced by a dash:
 
 ```
-val appVersionName = "0.3.0"
-val appVersionCode = 30000        // major * 100000 + minor * 10000 + patch * 100
+val appVersionName = "0.1.0 TRAFFIC"
+val appVersionCode = 100010000    // epoch offset + major * 100000 + minor * 10000 + patch * 100
 ```
 
 ```
-git tag v0.3.0
-git push origin v0.3.0
+git tag v0.1.0-TRAFFIC
+git push origin v0.1.0-TRAFFIC
 ```
 
 The `release` workflow refuses to continue if the tag and `appVersionName`
@@ -239,7 +301,7 @@ The version lives in the build file rather than being derived from the tag or th
 CI run number, so that a clone of this repository builds the same version number
 on any machine, with no tag and no CI at all.
 
-## Layout
+## 🗂️ Layout
 
 ```
 app/src/main/java/dev/ikna/
@@ -267,7 +329,7 @@ tools/genpack     offline pack generator (Python)
 docs              architecture, governor spec, keystore setup
 ```
 
-## Docs
+## 📚 Docs
 
 - `docs/ARCHITECTURE.md`
 - `docs/GOVERNOR.md`
@@ -275,7 +337,7 @@ docs              architecture, governor spec, keystore setup
 - [`CHANGELOG.md`](CHANGELOG.md)
 - [`PRIVACY.md`](PRIVACY.md)
 
-## License
+## ⚖️ License
 
 ikna is free software, licensed under the **GNU General Public License, version 3
 or (at your option) any later version**. The full text is in [LICENSE](LICENSE).
