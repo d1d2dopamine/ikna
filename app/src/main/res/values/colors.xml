@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- The field behind the wordmark, read straight out of the drawn icon
-         artwork so the two cannot disagree. It is not window_background and not
-         the old indigo: the artwork's field is #110F0F, and the adaptive icon has
-         to reproduce that field after the system has applied its own mask. The
-         mask is also why the artwork is not shipped whole as the foreground -
-         Android rounds the corners itself, and a pre-rounded tile handed to it
-         comes out clipped with a rim of wallpaper. -->
-    <color name="ic_launcher_background">#110F0F</color>
+    <!-- The field behind the wordmark on the launcher, and the same colour as
+         window_background and the widget below. Until 0.6.1 it was #110F0F,
+         taken from the original artwork - a colder near-black, chosen before the
+         app had a palette of its own. Next to the new default it read as a grey
+         tile, and the icon, the splash and the first frame of the app are three
+         things the eye takes for one surface.
+
+         The raster icons in mipmap-*dpi still carry the old field, and that is
+         not a leftover to fix: minSdk is 29, so every launcher here draws the
+         adaptive icon from mipmap-anydpi-v26, which takes its background from
+         this colour. The rasters remain only for a launcher that asks for the
+         legacy drawable by name.
+
+         The artwork is not shipped whole as the foreground because the system
+         applies its own mask - a pre-rounded tile handed to it comes out clipped
+         with a rim of wallpaper. -->
+    <color name="ic_launcher_background">#17100C</color>
 
     <!-- The default palette's dark background from Theme.kt — "Уголь". The app
          opens dark, so this is what the launch window should be; Compose repaints

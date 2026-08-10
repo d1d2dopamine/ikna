@@ -19,7 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dev.ikna.AppContainer
 import dev.ikna.data.prefs.IknaSettings
-import dev.ikna.ui.debug.DebugScreen
+import dev.ikna.ui.debug.DebugHooks
 import dev.ikna.ui.decks.DecksScreen
 import dev.ikna.ui.onboarding.OnboardingScreen
 import dev.ikna.ui.session.SessionScreen
@@ -156,8 +156,11 @@ fun IknaNavHost(
                 )
             }
 
+            // Registered in both builds so the graph is the same shape
+            // everywhere, but in a release build DebugHooks.Screen draws nothing
+            // and no button leads here. The screen itself is in src/debug only.
             composable(Routes.DEBUG) {
-                DebugScreen(
+                DebugHooks.Screen(
                     container = container,
                     onBack = { navController.popBackStack() }
                 )

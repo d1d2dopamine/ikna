@@ -255,7 +255,14 @@ app/src/main/java/dev/ikna/
   audio           the phone's speech engine, wrapped
   work            WorkManager jobs: daily plan, export, reminder
   widget          the home screen widget
-  ui              Compose UI (decks, session, stats, settings, theme, text)
+  ui              Compose UI (onboarding, decks, session, stats, settings, theme, text)
+app/src/debug/java/dev/ikna/ui/debug     the technical screen: governor log,
+                                         plan rebuild. Debug builds only.
+app/src/release/java/dev/ikna/ui/debug   its empty stand-in, so the screen is
+                                         absent from a release rather than
+                                         merely unreachable in one.
+app/schemas       the database schema of every version, committed on purpose:
+                  without the old one, a migration cannot be checked
 tools/genpack     offline pack generator (Python)
 docs              architecture, governor spec, keystore setup
 ```

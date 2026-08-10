@@ -7,7 +7,11 @@ CI run that produced the file.
 This project keeps one rule above all others: **the review log is never rewritten
 and never dropped.** Any change that would touch it is listed here explicitly.
 
-## 0.6.0
+## 0.6.1
+
+0.6.0 was never published: the first build of it failed to compile, and the fixes
+below were found while getting it to a state worth releasing. Everything 0.6.0 was
+going to contain is in this version, so there is one release note rather than two.
 
 ### Added
 
@@ -59,6 +63,45 @@ and never dropped.** Any change that would touch it is listed here explicitly.
   was a dead row that swallowed the tap and said nothing. The plan is now
   invalidated the moment a deck is toggled, and both are always openable — an
   empty session says it is empty, which is an answer, unlike silence.
+- **Nothing ever explained how to answer a card.** The first-run screens covered
+  what the app teaches, what happens if you disappear and how little counts as a
+  day — and then handed over a card without mentioning that it is swiped left for
+  "не знаю" and right for "знаю". The words are printed at the bottom corners of
+  a card, but they are only understood after the first answer has already been
+  given, which is exactly one answer too late. There is now a fourth screen that
+  draws the card and its two answers, using the same two strings and the same two
+  colours the session screen uses. It is the last thing shown before the first
+  card, and "ПРОПУСТИТЬ" lands on it rather than past it.
+- **The technical screen is no longer in the app people install.** It was reachable
+  from Settings → Advanced in every build, and it carried fifteen strings in three
+  languages. It now exists only in the debug source set, with an empty stand-in
+  compiled into release builds — R8 is switched off in this project, so a hidden
+  button would still have shipped the screen. Nothing was lost with it: exporting
+  the review log is in Settings → Д А Н Н Ы Е and exports the settings too,
+  rebuilding the word layer is in Advanced, and the one question the governor log
+  answers for a user — why nothing new arrived today — is already answered in a
+  sentence on the session screen.
+- **The database schema history is checked, and CI keeps it in the repository.**
+  Room writes the schema of every version into `app/schemas`, and those files are
+  the only way to tell an upgrade that preserves four months of answers from one
+  that drops them. They had never been committed; CI merely uploaded them as an
+  artifact. A build regenerates the current one, so no test can catch the absence
+  — git can, and now does: the run fails if anything under `app/schemas` is
+  untracked or changed. A unit test checks the part git cannot, that the schema on
+  disk agrees with the migration meant to produce it and that every version step
+  has a migration at all.
+- **The launcher icon was still the old colour.** Its field was `#110F0F`, a colder
+  near-black inherited from the original artwork, while the launch window, the
+  splash and the widget had all moved to Уголь's `#17100C`. On a home screen the
+  icon, the splash and the app's first frame are read as one surface, and this one
+  was visibly grey next to the other two.
+- **The restore path did not compile.** `rebuildFromReviews`, rewritten in 0.5.0 to
+  batch its queries, wrapped them in a `Sequence` — which stores its lambda for
+  later, cannot be inlined, and therefore cannot contain a suspending call. The
+  chain is now an ordinary list chain, which is inline and keeps the coroutine
+  context. Same queries, same batches, same result; it just builds them now
+  instead of later. This was the only compile error in the tree and it was in the
+  file that rebuilds the word layer after a restore.
 
 ## 0.5.0
 

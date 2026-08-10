@@ -27,14 +27,39 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 /**
- * The technical screen.
+ * The debug build's half of the technical screen: all of it.
  *
+ * This file has a twin in `src/release/java` with the same object and the same
+ * two members, which draws nothing and reports `available = false`. Only one of
+ * the two is ever compiled, so the technical screen is absent from the app
+ * people install rather than merely unreachable in it.
+ *
+ * That distinction matters here. R8 is off in both build types of this project
+ * (`isMinifyEnabled = false`), so nothing is dropped for being unreachable: a
+ * `BuildConfig.DEBUG` check around a button would have shipped this screen, its
+ * fifteen strings and its three languages inside every release.
+ *
+ * What is lost by hiding it is close to nothing, which is the other reason this
+ * was safe to do. Exporting the answer log already lives in Settings under
+ * «Д А Н Н Ы Е», and it exports the settings alongside it; rebuilding the word
+ * layer is in Advanced. Only the governor log and the plan rebuild were unique
+ * to this screen, and the one question the log answers for a user — why nothing
+ * new arrived today — is already answered in one sentence on the session screen.
+ */
+object DebugHooks {
+    const val available: Boolean = true
+
+    @Composable
+    fun Screen(container: AppContainer, onBack: () -> Unit) = DebugScreen(container, onBack)
+}
+
+/**
  * The governor log is the only way to answer "why did it not give me anything new
- * today", and without that question being answerable the safety valve is
- * undebuggable.
+ * today" with numbers instead of a sentence, and without that question being
+ * answerable the safety valve is undebuggable.
  */
 @Composable
-fun DebugScreen(container: AppContainer, onBack: () -> Unit) {
+private fun DebugScreen(container: AppContainer, onBack: () -> Unit) {
     var log by remember { mutableStateOf(listOf<GovernorLogEntity>()) }
     var note by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()

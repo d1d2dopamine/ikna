@@ -513,6 +513,10 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"onb.009" to "START",
 	// ПРОПУСТИТЬ
 	"onb.010" to "SKIP",
+	// Влево и вправо
+	"onb.011" to "Left and right",
+	// Карточку смахивают: влево — не знаю, вправо — знаю. Можно вместо этого нажать на слово внизу. Ответ отменяется сразу после него, так что ошибиться не страшно.
+	"onb.012" to "You swipe the card: left if you don't know it, right if you do. Tapping the word at the bottom does the same thing. An answer can be undone right after it, so getting one wrong costs nothing.",
 	// ОТЛИЧНОЕ
 	"speaker.001" to "EXCELLENT",
 	// ХОРОШЕЕ

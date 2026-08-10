@@ -1,6 +1,7 @@
 package dev.ikna.ui.settings
 
 import dev.ikna.ui.text.S
+import dev.ikna.ui.debug.DebugHooks
 
 import android.Manifest
 import android.content.Context
@@ -842,12 +843,21 @@ fun SettingsScreen(
                                 }
                             }
                         )
-                        Spacer(Modifier.height(8.dp))
-                        IknaWideButton(
-                            label = S.t("set.069"),
-                            height = 52.dp,
-                            onClick = onOpenDebug
-                        )
+                        // The way into the technical screen, in debug builds
+                        // only. This is not a hidden button: in a release build
+                        // the screen behind it is not compiled at all, and
+                        // `available` is a constant false, so the branch is gone
+                        // before R8 would have had a chance to look at it (R8 is
+                        // off here anyway). See ui/debug/DebugHooks.kt, of which
+                        // there are two.
+                        if (DebugHooks.available) {
+                            Spacer(Modifier.height(8.dp))
+                            IknaWideButton(
+                                label = S.t("set.069"),
+                                height = 52.dp,
+                                onClick = onOpenDebug
+                            )
+                        }
                         Spacer(Modifier.height(8.dp))
                         IknaTextButton(
                             label = S.t("set.070"),

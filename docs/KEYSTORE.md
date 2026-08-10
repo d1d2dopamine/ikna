@@ -74,7 +74,10 @@ repository and the build fell back to a random debug key. In that case restore
 ## Rotating the key (only if you want to)
 
 This breaks updates once: the app must be uninstalled and reinstalled, so
-export your reviews from the debug screen first.
+export your reviews first — Settings → Д А Н Н Ы Е → the export button, which writes
+both the review log and the settings. (This used to say "from the debug screen";
+that screen is no longer part of a release build, and the export in Settings is
+the same export plus the settings file.)
 
 ```sh
 keytool -genkeypair -v \

@@ -70,6 +70,24 @@ jobs:
           path: app/schemas
           if-no-files-found: warn
 
+      # The artifact above is a convenience; this is the check. A build
+      # regenerates the current schema, so no test can ever notice that the
+      # folder was never committed - by the time tests run, the files are there.
+      # Git can tell the difference. Anything untracked or changed under
+      # app/schemas means this build produced a schema the repository does not
+      # have, and the fix is always the same: commit it.
+      - name: Schemas are committed
+        run: |
+          changes=$(git status --porcelain app/schemas)
+          if [ -n "$changes" ]; then
+            echo "app/schemas is untracked or has changed:"
+            echo "$changes"
+            echo "Download the ikna-room-schemas artifact, or run the build"
+            echo "locally, and commit app/schemas. Migrations cannot be checked"
+            echo "against a schema history that is not in the repository."
+            exit 1
+          fi
+
       - name: Unit tests
         run: gradle --no-daemon --stacktrace testReleaseUnitTest
 
