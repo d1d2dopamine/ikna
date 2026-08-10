@@ -101,11 +101,15 @@ class ComponentRepository(
         val answers = reviewDao.allAnswers()
         if (answers.isEmpty()) return
 
-        val tokens = answers.asSequence()
-            .map { it.chunkId }
+        // Eager, not a Sequence, and that is load-bearing rather than a style
+        // choice: Sequence.flatMap keeps its lambda for later, so it is not
+        // inline, so a suspend call cannot appear inside it. List.flatMap is
+        // inline and runs here and now, which keeps the suspend context. The
+        // sequence version did not compile.
+        val tokens = answers.map { it.chunkId }
             .distinct()
             .chunked(TOKEN_QUERY_BATCH)
-            .flatMap { chunkDao.tokensFor(it).asSequence() }
+            .flatMap { chunkDao.tokensFor(it) }
             .filter { it.weight > 0.0 }
             .groupBy { it.chunkId }
 
