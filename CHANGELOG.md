@@ -7,14 +7,15 @@ CI run that produced the file.
 This project keeps one rule above all others: **the review log is never rewritten
 and never dropped.** Any change that would touch it is listed here explicitly.
 
-From `0.1.0 TRAFFIC` onward a version is a number **and an epoch word**. The
-number counts releases inside the epoch; the word says which epoch the build
-belongs to. `TRAFFIC` is the base: everything is built, the road is open, and what
-remains is testing, bug fixes and small corrections. `EPOHAL` is the next era and
-opens only when TRAFFIC has nothing left to correct. Tags replace the space with a
-dash, so `0.1.0 TRAFFIC` is tagged `v0.1.0-TRAFFIC`.
+From `0.1.0 proof` onward a version is a number **and an epoch word**, written in
+lower case like the app's own name. The number counts releases inside the epoch;
+the word says which epoch the build belongs to. Both words come from printing:
+`proof` is the copy that is read back and corrected before the press runs, and
+`press` is the run itself — the next era, which opens only when `proof` has
+nothing left to correct. Tags replace the space with a dash, so `0.1.0 proof` is
+tagged `v0.1.0-proof`.
 
-## 0.1.0 TRAFFIC
+## 0.1.0 proof
 
 The same app as 0.6.1, renumbered. Nothing about the scheduler, the governor, the
 packs or the database changed here; what changed is how versions are named from
@@ -23,8 +24,8 @@ now on.
 ### Changed
 
 - **Versions are now an epoch plus a number.** `appVersionName` is
-  `0.1.0 TRAFFIC`. The old `0.x` line counted the app being assembled piece by
-  piece; TRAFFIC counts a finished app being brought to a releasable state, and
+  `0.1.0 proof`. The old `0.x` line counted the app being assembled piece by
+  piece; the `proof` epoch counts a finished app being brought to a releasable state, and
   continuing from `0.6.1` would have implied that the two scales are comparable.
   They are not, so the number restarts and the word makes the reset explicit.
 - **`appVersionCode` does not restart.** It is now `100010000` — an epoch offset
@@ -34,11 +35,47 @@ now on.
   the version *Android compares* never has and never will.
 - **The release workflow slugifies the tag.** A git tag cannot contain a space, so
   the tag check now compares the pushed tag against `appVersionName` with the
-  space replaced by a dash: `0.1.0 TRAFFIC` -> `v0.1.0-TRAFFIC`. A mismatch still
+  space replaced by a dash: `0.1.0 proof` -> `v0.1.0-proof`. A mismatch still
   aborts the release before anything is built or published.
-- **Two READMEs.** `README.md` (English) and `README.ru.md` (Russian), each with
-  badges, a download link to the first release APK, and a section explaining what
-  TRAFFIC and EPOHAL mean. The two files are kept in step section by section.
+- **One bilingual README.** `README.md` now carries English on top and a full
+  Russian copy below it, reachable through a language switch at the top of each
+  half. It has badges, a download link to the first release APK, and a section
+  explaining what proof and press mean. `README.ru.md` is gone: two files drifted
+  apart, one file cannot.
+
+### Added
+
+- **The logo, in the app, wearing the palette.** The wordmark now sits at the
+  left end of the bottom row on the deck screen, which until now was the only
+  product in the world that never said its own name anywhere inside itself. The
+  letters are the artwork's own pixels, resampled and tinted, never traced into
+  paths — the same rule the launcher icon has always been under. The square over
+  the i is not part of the bitmap: it is erased from the asset and drawn by the
+  app in the accent colour, so the mark answers whichever of the nine palettes
+  is on. It is not pressable, and the asset is checked before release for the
+  two things that would fail silently — a stale aspect ratio, and a dot left in
+  the bitmap under the one the app draws.
+
+- **Three more palettes, nine in total.** Роза — a wine-dark field and a rose
+  that reads as a highlighter rather than a ribbon; its accent sits at hue 333
+  because the danger guard starts at 34 and an accent that trips it has to hand
+  its warning colour back to the ink. Иней — the only scheme in the set with
+  nothing warm in it anywhere, where every other one answers a cool background
+  with a warm accent. Фосфор — a phosphor tube, and the one that breaks the
+  pattern on purpose: the ink itself is the colour, so the whole surface is a
+  single hue instead of a neutral with one coloured thing on it. All three are
+  authored in both lightings and all three pass the 4.5:1 test on ink, muted,
+  accent and danger, in both. The picker needed no change: it lays the palettes
+  out three to a row, and nine is three rows.
+- **`docs/GRADING.md`.** A design note, not a feature. It records why the card
+  has one swipe axis instead of four, what the two-grade UI costs in scheduling
+  resolution, and the decided replacement: derive `HARD`/`GOOD`/`EASY` from
+  answer latency and the existing peek signal rather than asking the user for a
+  self-assessment. It also fixes the constraints in advance — per-device
+  calibration with no server and no internet permission, percentile thresholds
+  over a rolling window, `GOOD` as the fallback whenever a signal is missing, a
+  bounded effect on intervals, and log replay as the test that decides whether
+  any of it ships. Nothing in it is implemented in this release.
 
 ### Fixed
 

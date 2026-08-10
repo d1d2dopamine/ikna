@@ -46,6 +46,7 @@ import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.IknaToggle
+import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Space
 import dev.ikna.widget.TodayWidget
 import kotlinx.coroutines.Dispatchers
@@ -221,6 +222,21 @@ fun DecksScreen(
         // words, in the corner the hand already rests in. Adding a deck is the
         // rarest action in the app and used to be a full-width button.
         IknaBottomBar {
+            // The name of the thing, on the screen it opens on, in the corner the
+            // hand is already in. Everywhere else the app is deliberately anonymous
+            // — no header, no title bar, no logo over the cards — and that is worth
+            // keeping, but it left the product without a single place where it says
+            // what it is. One line of it here is enough.
+            //
+            // Not pressable. A logo that navigates is a logo pressed by accident,
+            // and this one sits 12dp from the way into Progress and Settings. The
+            // start padding is what lines the letters up with the glyphs beside
+            // them: those are 20dp marks centred in 44dp targets, so their ink
+            // begins 12dp inside the row and the wordmark has to begin there too.
+            //
+            // The square over the i is drawn in the accent, so the mark belongs to
+            // whichever palette is on rather than to the one it was drawn in.
+            IknaWordmark(modifier = Modifier.padding(start = Space.md))
             IknaIconButton(
                 glyph = IknaGlyph.BARS,
                 onClick = onOpenStats,

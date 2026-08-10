@@ -236,6 +236,79 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFF0C7A59)
         )
     ),
+    // Роза. Pink without the sugar: a wine-dark field and a rose that reads as a
+    // highlighter, not a ribbon.
+    //
+    // The accent sits at hue 333 deliberately. Twenty-five degrees further round
+    // the wheel is the danger guard, and an accent that trips it hands the warning
+    // colour back to the ink — a palette with one colour less. Pink is the hue that
+    // gets closest to that line without crossing it, which is the only reason these
+    // particular pinks and not the obvious ones.
+    IknaPaletteSpec(
+        id = "rose",
+        nameKey = "set.125",
+        dark = IknaPalette(
+            background = Color(0xFF1A0E15),
+            ink = Color(0xFFF6E7EE),
+            muted = Color(0xFFA2808F),
+            accent = Color(0xFFFF7FB8)
+        ),
+        light = IknaPalette(
+            background = Color(0xFFFBEEF3),
+            ink = Color(0xFF26121C),
+            muted = Color(0xFF7C5566),
+            accent = Color(0xFFA81E5E)
+        )
+    ),
+    // Иней. The one palette with nothing warm in it anywhere.
+    //
+    // Every other scheme here answers a cool background with a warm accent, because
+    // that is the safe move. This one refuses: cold field, cold ink, cold accent.
+    // Чернила is navy paper with a coral on it and is not this; the difference is
+    // ninety degrees of hue on the one colour that carries the day's number.
+    IknaPaletteSpec(
+        id = "frost",
+        nameKey = "set.126",
+        dark = IknaPalette(
+            background = Color(0xFF08131A),
+            ink = Color(0xFFE2EEF3),
+            muted = Color(0xFF7C929C),
+            accent = Color(0xFF5FD2E8)
+        ),
+        light = IknaPalette(
+            background = Color(0xFFECF3F6),
+            ink = Color(0xFF0C1B22),
+            muted = Color(0xFF516771),
+            accent = Color(0xFF0C6072)
+        )
+    ),
+    // Фосфор. The odd one out, and the reason it is here.
+    //
+    // In all eight above, the ink is a neutral and the accent is the only coloured
+    // thing on the screen. Here the ink itself is the colour, so the whole surface
+    // is one hue and the accent is merely a brighter pass of it — a phosphor tube,
+    // where the glass could only ever glow in one direction.
+    //
+    // It is not Библиотека with the lights off. That one is a green room with a
+    // brass lamp in it; this one has no second colour to fall back on, and the
+    // light version keeps the conceit by putting the same green into the ink rather
+    // than inverting to a neutral black.
+    IknaPaletteSpec(
+        id = "phosphor",
+        nameKey = "set.127",
+        dark = IknaPalette(
+            background = Color(0xFF040A06),
+            ink = Color(0xFFB8F5CB),
+            muted = Color(0xFF6DA981),
+            accent = Color(0xFF4AF08C)
+        ),
+        light = IknaPalette(
+            background = Color(0xFFEEF6EF),
+            ink = Color(0xFF0A1E11),
+            muted = Color(0xFF4E6B58),
+            accent = Color(0xFF116B36)
+        )
+    ),
     // Ноль. No hue at all, in either direction.
     IknaPaletteSpec(
         id = "zero",

@@ -50,9 +50,9 @@ jobs:
       # either tags or CI. The tag is only a label - so it has to agree with the
       # file, and a disagreement is caught here rather than discovered later on
       # a release page offering an APK with the wrong number inside it.
-      # A version name is "0.1.0 TRAFFIC" - a number and the epoch it belongs
+      # A version name is "0.1.0 proof" - a number and the epoch it belongs
       # to - and a git tag cannot contain a space, so the tag is the same string
-      # with the space turned into a dash: v0.1.0-TRAFFIC. That is the only
+      # with the space turned into a dash: v0.1.0-proof. That is the only
       # difference allowed between the two; the number and the epoch word still
       # have to agree character for character.
       - name: Tag matches the version in the build file

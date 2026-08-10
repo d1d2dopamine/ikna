@@ -59,13 +59,13 @@ val hasFixedKey = keystoreFile.exists()
 // release always installs over a CI build and never the other way round.
 //
 // Epochs. The version name carries a word after the number: the epoch the
-// build belongs to. TRAFFIC is the one where the app is feature-complete and
-// what is left is testing, small corrections and polish; EPOHAL is the next
-// one, and it starts when TRAFFIC has nothing left to correct. Both words are
+// build belongs to. proof is the one where the app is feature-complete and
+// what is left is testing, small corrections and polish; press is the next
+// one, and it starts when proof has nothing left to correct. Both words are
 // spelled in capitals, and they are part of the version people read, not a
 // build flavour: there is one artifact and one number, as before.
 //
-// The numbering restarted at 0.1.0 with TRAFFIC, because the pre-epoch 0.x line
+// The numbering restarted at 0.1.0 with proof, because the pre-epoch 0.x line
 // counted something else and carrying 0.6.1 forward would have implied the two
 // scales are comparable. appVersionCode does NOT restart with it. Android
 // refuses to install an APK whose code is lower than the installed one, and the
@@ -73,8 +73,8 @@ val hasFixedKey = keystoreFile.exists()
 // so the counter keeps climbing across the reset and the formula above applies
 // per epoch, offset past everything the pre-epoch line ever shipped.
 // ---------------------------------------------------------------------------
-val appVersionName = "0.1.0 TRAFFIC"
-val appVersionCode = 100010000        // TRAFFIC epoch: 100000000 + 0.1.0
+val appVersionName = "0.1.0 proof"
+val appVersionCode = 100010000        // proof epoch: 100000000 + 0.1.0
 
 // A build from a clone has to be able to come out unsigned: the key committed
 // here is this project's, and nobody else should be shipping APKs under it.

@@ -336,6 +336,12 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"set.120" to "ZERO",
 	// НЕЙТРАЛЬНАЯ
 	"set.121" to "NEUTRAL",
+	// РОЗА
+	"set.125" to "ROSE",
+	// ИНЕЙ
+	"set.126" to "FROST",
+	// ФОСФОР
+	"set.127" to "PHOSPHOR",
 	// ОСВЕЩЕНИЕ
 	"set.122" to "LIGHTING",
 	// БЕТА
