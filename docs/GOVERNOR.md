@@ -13,9 +13,13 @@ introduced?** Not "which cards are due" (that is FSRS) and not "what should the 
 | `backlog` | overdue cards sitting in the amnesty pool |
 | `accuracyRecent` | success rate over the last 100 reviews |
 | `daysSinceLastSession` | 0 if studied today |
+| `activityRatio` | how much of the last week was used, 0..1 |
+| `daysSinceStart` | days since the first session ever |
 | `reviewsDoneToday` | used for the post-skip warm-up gate |
-| `cleanDays` | consecutive days where the day plan was completed |
-| `newIntroducedLast7d` | feeds the safety valve |
+| `cleanDays` | consecutive days where the day's plan was completed |
+| `newIntroducedLastWeek` | new chunks in the last `safetyValveDays` days; feeds the safety valve |
+| `totalReviews` | 0 means a fresh install |
+| `daysSinceReturn` | days since the first session after the last real absence, or null |
 
 ## Decision
 
@@ -23,8 +27,14 @@ introduced?** Not "which cards are due" (that is FSRS) and not "what should the 
 capacity  = targetDailyReviews                 (returnModeCapacity while in return mode)
 projected = max(dueToday, forecastAvg3d) + backlogWeight * backlog
 headroom  = capacity - projected
-allowedNew = clamp(headroom / costPerNew, 0, maxNewPerDay)
+allowedNew = clamp(headroom / costPerNew, 0, effectiveMaxNew)
 ```
+
+`effectiveMaxNew` is `maxNewPerDay`, raised by the accelerator below once the
+settling window has passed.
+
+A fresh install (`totalReviews == 0`) skips all of this and gets `maxNewPerDay`
+unconditionally: there is nothing to forecast yet.
 
 `costPerNew` defaults to 4.0. This is the part every other app gets wrong: one new chunk is not
 one card today, it is roughly four reviews over the following week. Treating new material as
@@ -32,19 +42,35 @@ free is what produces the avalanche three weeks in.
 
 ## Hard gates (force allowedNew = 0)
 
+Checked in this order; the first one that matches wins.
+
 | Gate | Condition |
 | --- | --- |
+| `RETURN_MODE` | `daysSinceLastSession >= returnModeGapDays`, or `daysSinceReturn < returnModeDays` |
 | `BACKLOG_LIMIT` | `backlog > backlogHardLimit` |
-| `POST_SKIP_WARMUP` | skipped a day and `reviewsDoneToday < warmupReviewsAfterSkip` |
+| `LOW_ACTIVITY` | `activityRatio < minActivityRatio` |
+| `POST_SKIP_WARMUP` | `daysSinceLastSession >= 2` and `reviewsDoneToday < warmupReviewsAfterSkip` |
 | `LOW_ACCURACY` | `accuracyRecent < minAccuracy` |
-| `RETURN_MODE` | gap of 14+ days, for `returnModeDays` days |
 
 The post-skip gate is the behavioural core: after a missed day, new material is *earned* by
 attention, not handed out to help you "catch up". Gamified apps do the opposite.
 
+**Two days, not one.** A day's plan is built before that day's first answer
+exists, so `daysSinceLastSession` is 1 on every ordinary morning that follows an
+ordinary evening. Comparing against 1 fired the gate on every normal day of use
+and left the safety valve as the only source of new material — one chunk a week.
+A skipped day is a day with no answers in it, which is two calendar days since
+the last one.
+
+**Return mode covers the days after the return, not just the day of it.** The gap
+itself opens it; `daysSinceReturn` keeps it open for `returnModeDays` afterwards.
+Being handed a full day on the second evening back is how a return becomes the
+next absence.
+
 ## Safety valve
 
-If nothing was introduced in the last 7 days, exactly one new chunk is released regardless of
+If nothing was introduced in the last `safetyValveDays` days (7 by default — the window is
+counted by the repository, not here), exactly one new chunk is released regardless of
 every gate. Without this the governor can latch at zero forever, novelty disappears, and the
 app becomes the treadmill it was built to avoid.
 

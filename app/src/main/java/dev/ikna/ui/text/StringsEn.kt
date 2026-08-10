@@ -320,6 +320,28 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"set.111" to "SPEED",
 	"set.112" to "PITCH",
 	"set.113" to "100 is whatever the phone itself is set to. Cards already spoken are spoken again at the new values.",
+	// ПАЛИТРА
+	"set.114" to "PALETTE",
+	// Цвет самого приложения. Светлая и тёмная версии — это одна палитра при разном освещении, а не две разные темы.
+	"set.115" to "The colour of the app itself. Light and dark are one palette in two lightings, not two different themes.",
+	// УГОЛЬ
+	"set.116" to "EMBER",
+	// БИБЛИОТЕКА
+	"set.117" to "LIBRARY",
+	// ЧЕРНИЛА
+	"set.118" to "INK",
+	// СЛИВА
+	"set.119" to "PLUM",
+	// НОЛЬ
+	"set.120" to "ZERO",
+	// НЕЙТРАЛЬНАЯ
+	"set.121" to "NEUTRAL",
+	// ОСВЕЩЕНИЕ
+	"set.122" to "LIGHTING",
+	// БЕТА
+	"set.123" to "BETA",
+	// Пока в бете и по умолчанию выключено: как звучит голос, решает движок на телефоне, а плохой голос хуже тишины.
+	"set.124" to "In beta and off by default: how the voice sounds is decided by the engine on the phone, and a bad voice is worse than silence.",
 	// ← НАЗАД
 	"dbg.001" to "← BACK",
 	// ВЫГРУЗИТЬ ЖУРНАЛ ОТВЕТОВ
@@ -381,18 +403,12 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"deck.016" to "cards",
 	// карточек
 	"deck.017" to "cards",
-	//  · ВЕРНУЛАСЬ
-	"card.001" to " · CAME BACK",
 	// тап в любом месте
 	"card.002" to "tap anywhere",
-	// ↑ ЛЕГКО
-	"card.003" to "↑ EASY",
-	// ↓ ТРУДНО
-	"card.004" to "↓ HARD",
-	// ← НЕ ПОМНЮ
-	"card.005" to "← FORGOT",
-	// ПОМНЮ →
-	"card.006" to "REMEMBER →",
+	// ← НЕ ЗНАЮ
+	"card.003" to "← DON'T KNOW",
+	// ЗНАЮ →
+	"card.004" to "KNOW →",
 	// секунду…
 	"sess.001" to "one moment…",
 	// знакомство
@@ -522,4 +538,8 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Колода в работе
 	"a11y.006" to "Deck in use",
 	"a11y.007" to "Explain this number",
+	// Не знаю
+	"a11y.008" to "Don't know",
+	// Знаю
+	"a11y.009" to "Know",
 )

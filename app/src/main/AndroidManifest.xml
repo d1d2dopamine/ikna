@@ -15,9 +15,24 @@
         </intent>
     </queries>
 
+    <!--
+        allowBackup is off, and that is a privacy decision rather than a
+        technical one.
+
+        With it on, Android copies the app's data — which here means the review
+        log: every phrase studied, every rating, every timestamp — into the
+        user's Google account. PRIVACY.md promises that nothing leaves the phone,
+        and the whole point of the export is that the user moves that file
+        themselves, on purpose, to a place they chose. Uploading it silently to a
+        third party contradicts both.
+
+        Local device-to-device transfer is still allowed, in
+        data_extraction_rules.xml: it is a direct copy to the new phone, with no
+        server in between.
+    -->
     <application
         android:name=".IknaApp"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@mipmap/ic_launcher"

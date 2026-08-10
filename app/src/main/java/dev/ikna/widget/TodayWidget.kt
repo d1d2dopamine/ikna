@@ -63,6 +63,24 @@ class TodayWidget : AppWidgetProvider() {
             refresh(app)
         }
 
+        /**
+         * Updates the number alone, keeping the words the app stored last time.
+         *
+         * For the nightly worker, which knows the new count but runs nowhere
+         * near a Composable and has no business loading the string catalogue to
+         * find out what "cards" is in the user's language. Without it the widget
+         * kept yesterday evening's number until the deck list was opened — which
+         * is exactly the moment the widget exists to avoid.
+         */
+        fun publishCount(context: Context, count: Int) {
+            val app = context.applicationContext
+            app.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .edit()
+                .putInt(KEY_COUNT, count)
+                .apply()
+            refresh(app)
+        }
+
         fun refresh(context: Context) {
             val app = context.applicationContext
             val manager = AppWidgetManager.getInstance(app)

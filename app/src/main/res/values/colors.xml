@@ -9,16 +9,24 @@
          comes out clipped with a rim of wallpaper. -->
     <color name="ic_launcher_background">#110F0F</color>
 
-    <!-- DarkBackground from Theme.kt. The app opens dark, so this is what the
-         launch window should be; Compose repaints it a frame later. -->
-    <color name="window_background">#121110</color>
+    <!-- The default palette's dark background from Theme.kt — "Уголь". The app
+         opens dark, so this is what the launch window should be; Compose repaints
+         it a frame later. It has to be the brand colour rather than a neutral
+         grey: on Android 12+ this is also the splash field, and a grey flash in
+         front of a warm near-black app is visible every single launch. -->
+    <color name="window_background">#17100C</color>
 
     <!-- The widget is drawn by the launcher, which cannot read the Compose
          palette, so the four colours it needs are duplicated here. These are the
-         dark scheme from Theme.kt: a widget that followed the in-app light theme
-         would be a white brick on most people's wallpaper. -->
-    <color name="widget_background">#121110</color>
-    <color name="widget_ink">#EDE9E1</color>
-    <color name="widget_muted">#8F887A</color>
-    <color name="widget_accent">#97A4D8</color>
+         default palette's dark version from Theme.kt: a widget that followed the
+         in-app light theme would be a white brick on most people's wallpaper.
+
+         The widget deliberately does not follow the palette the user picked. It
+         cannot — the launcher process has no access to the app's preferences at
+         draw time — and a tile that lagged one palette behind the app would look
+         broken rather than themed. It wears the brand instead. -->
+    <color name="widget_background">#17100C</color>
+    <color name="widget_ink">#F2E6D9</color>
+    <color name="widget_muted">#9C8574</color>
+    <color name="widget_accent">#F2683C</color>
 </resources>

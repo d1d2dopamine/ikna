@@ -21,6 +21,7 @@ class SettingsBackupTest {
     fun `round trips through json`() {
         val settings = IknaSettings(
             theme = ThemeMode.CUSTOM,
+            paletteId = "plum",
             customBackground = 0x11223344,
             customInk = 0x55667788,
             manualLoad = 65,
@@ -37,6 +38,10 @@ class SettingsBackupTest {
         val decoded = SettingsBackup.decode(SettingsBackup.encode(settings))
 
         assertEquals(ThemeMode.CUSTOM.name, decoded?.theme)
+        // The palette travels separately from the mode, and has to survive even
+        // when the mode is CUSTOM and nothing on screen is using it: switching
+        // back from your own four colours should return the palette you had.
+        assertEquals("plum", decoded?.paletteId)
         assertEquals(0x11223344, decoded?.customBackground)
         assertEquals(65, decoded?.manualLoad)
         assertEquals("pl", decoded?.language)

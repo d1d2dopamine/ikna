@@ -111,15 +111,39 @@ class SessionBuilder(
     /**
      * Chooses the questions for one day. Called once per day by the repository,
      * never on screen entry.
+     *
+     * [introduced] is what the governor authorised for today and the repository
+     * has just created. It is reserved rather than merely allowed to compete: a
+     * fresh card is written with `dueAt = now`, so in a "soonest first" query it
+     * sorts behind every review that is already overdue and is the first thing a
+     * capacity limit throws away. The day's new-material budget was being spent,
+     * the counter recorded it, and the user was shown none of it.
      */
-    suspend fun pickForDay(decision: GovernorDecision, now: Long): List<CardEntity> {
+    suspend fun pickForDay(
+        decision: GovernorDecision,
+        now: Long,
+        introduced: List<CardEntity> = emptyList()
+    ): List<CardEntity> {
         val capacity = decision.capacity
-        val amnestyQuota = decision.amnestyQuota.coerceIn(0, capacity)
+        if (capacity <= 0) return emptyList()
 
-        val due = cardDao.dueCards(now, capacity - amnestyQuota)
-        val amnesty = cardDao.amnestyCards(amnestyQuota)
+        val reserved = introduced.take(capacity)
+        val room = capacity - reserved.size
+        if (room <= 0) return reserved
 
-        return groupIntroductions(interleave(due + amnesty).take(capacity))
+        val amnestyQuota = decision.amnestyQuota.coerceIn(0, room)
+        // Never offer the same question twice: the reserved cards are due now
+        // and would otherwise come back out of the due query as well.
+        val exclude = reserved.map { it.key }.ifEmpty { listOf("") }
+
+        val dueRoom = room - amnestyQuota
+        val due =
+            if (dueRoom > 0) cardDao.dueCardsExcluding(now, exclude, dueRoom) else emptyList()
+        val amnesty =
+            if (amnestyQuota > 0) cardDao.amnestyCardsExcluding(exclude, amnestyQuota)
+            else emptyList()
+
+        return groupIntroductions(reserved + interleave(due + amnesty).take(room))
     }
 
     /**

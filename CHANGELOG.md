@@ -7,9 +7,160 @@ CI run that produced the file.
 This project keeps one rule above all others: **the review log is never rewritten
 and never dropped.** Any change that would touch it is listed here explicitly.
 
-## Unreleased
+## 0.6.0
 
 ### Added
+
+- **Six palettes, and a palette is not a theme.** The app used to have a dark
+  scheme and a light scheme, which is what an app has when nobody decided what it
+  looks like: near-black plus a blue accent is the default of every framework
+  written in the last ten years. Colour is now one choice — Уголь, Библиотека,
+  Чернила, Слива, Ноль, Нейтральная — and lighting is another. Each palette
+  exists in both lightings and keeps its hue in both: the light version is tinted
+  paper, not white with the colour drained out, which is what "light theme" has
+  usually meant here and elsewhere.
+- **Уголь is the default**, replacing the grey-and-blue pair. Warm near-black,
+  bone-coloured ink, an ember accent. The launch window, the splash field and the
+  home-screen widget were changed with it, so the first frame after tapping the
+  icon is already the app's colour instead of a grey flash.
+- **The palette is chosen by looking at it.** Settings shows the six as six tiles,
+  each painted in the palette it offers and lit the way the app is lit right now:
+  its own background, the wordmark in its own ink, a bar of accent beside a bar of
+  muted. A row of names would have required switching to each one to find out what
+  it was.
+- **"Как в системе" lighting.** Dark, light, follow the phone, or your own four
+  colours. Following the phone is a mode rather than a fifth palette, so it costs
+  nothing to combine with any of the six. The wording is the same one the language
+  section already uses for the same promise.
+- **The warning colour belongs to the palette.** The single red used for "this
+  cannot be undone" measured 3.5:1 on every dark background this app has ever
+  shipped — the least readable colour in the product, on the one button with no
+  way back. Each lighting now has its own, and when the palette's accent is itself
+  a warm red the warning stops using colour at all and leans on the word and the
+  frame, because a red warning next to a red everything is not a warning. Held to
+  4.5:1 by a test, like every other pair.
+
+### Changed
+
+- **Reading aloud is marked beta and starts switched off.** The feature works, but
+  how good it sounds is decided by whichever speech engine is installed on the
+  phone, and nothing in this app can inspect that. A bad voice is worse than
+  silence, so it is now offered rather than assumed — and never speaks before
+  being asked to.
+
+### Fixed
+
+- **A deck could be switched on and still refuse to open.** Two separate causes,
+  one symptom. The plan for today is cached, and turning a deck on did not throw
+  that cache away, so the deck was active, its cards were due, and the number in
+  front of them stayed zero until the next day rolled over. On top of that, both
+  the day's block and each deck row were only clickable when they owed something:
+  a deck with nothing due today, or one whose count had not been recomputed yet,
+  was a dead row that swallowed the tap and said nothing. The plan is now
+  invalidated the moment a deck is toggled, and both are always openable — an
+  empty session says it is empty, which is an answer, unlike silence.
+
+## 0.5.0
+
+### Changed
+
+- **Two answers instead of four.** A card is thrown left when the chunk is not
+  known and right when it is; up and down no longer mean anything. The vertical
+  pair asked *how well* the answer went, which is a second decision stacked on
+  the first one, and it collided with the hand: a thumb travelling right also
+  travels up, the axis was chosen by whichever displacement was larger, and "I
+  knew it" regularly landed as "that was easy" with different scheduling and no
+  way to tell. Both grades stay in the data model and every review ever recorded
+  stays readable — the interface simply stopped asking a question it could not
+  ask well.
+- **One card, one look.** The variant that marked a card returning from the
+  amnesty pool is gone. It kept score of an absence on the material the user was
+  in the middle of remembering, which is the one place this app had promised not
+  to.
+- **The card can be answered with TalkBack on.** Both verbs are also exposed as
+  accessibility actions; an interface whose only verb is a swipe has none.
+
+### Fixed
+
+- **The words explaining the two sides slid off the screen.** They were drawn
+  inside the card, and the card is the object that travels: pulling it to the
+  right carried the label that explains the right side off the right edge,
+  exactly when it was being looked for. The label under the thumb was the first
+  thing to disappear. Both words now belong to the screen instead of the card,
+  in the bottom corners, and stay put while the card slides underneath them.
+  They fade out for good once the movement has been used enough times.
+- **The gesture stopped working halfway through a drag.** The touch area moved
+  with the card, so a long drag left the region that was listening to it.
+- **A card whose back had not been seen could not be pulled.** Dragging one now
+  turns it over — the same act as tapping, done with the hand that is already
+  moving — and that gesture can never grade it: the answer needs a second,
+  deliberate throw.
+- **The line that says how to turn a card over was computed and never drawn.**
+  The first card of a first session explained nothing at all.
+- **New material arrived once a week instead of every day.** The rule meant to
+  hold new chunks back after a *skipped* day compared "days since the last
+  session" against one — but the plan for a day is built before that day's first
+  answer exists, so studying yesterday evening and opening the app this morning
+  already counted as a gap. The gate fired on every ordinary day of use, the
+  allowance was zero, and the only new material that ever got through was the
+  safety valve's single chunk a week. A skipped day is now a day with no answers
+  in it, which is two calendar days.
+- **The day's new chunks could be crowded out of the session.** The plan
+  introduced new cards and then filled the same session from the due queue,
+  which on a busy day returned a full session before a single new card was
+  reached: they were introduced, counted, and not shown. New cards are now
+  reserved a place first, and the rest of the session is built around them.
+- **Coming back after a break lasted one session.** `returnModeDays` was
+  declared, documented and never read, so the softer capacity ended the moment
+  one session happened. It now covers the days after a return as well.
+- **An idle-time adjustment quietly rewrote card history.** Skipping days
+  shifted every schedule forward and falsified `lastReviewAt`, which is an input
+  to the scheduler, so the interval after a break was computed from a review
+  that never happened. Removed; the amnesty pool already handles absences, and
+  handles them without inventing data.
+- **The export could write a file it could not read back.** Lines were built by
+  string concatenation, so an imported deck whose ids contain a quote, a
+  backslash or a newline produced a log that no longer parsed — discovered, at
+  the earliest, on the day someone needed it. Export and restore now share one
+  serialised format, tested for both.
+- **Restoring on a phone that had already been used mixed two sets of row ids.**
+  Ids from the file were inserted verbatim, so they collided with existing rows
+  and could attach an old retraction to an unrelated answer. Rows are inserted
+  unnumbered and the undo trail is re-pointed at the ids assigned here; a file
+  imported twice is now a no-op.
+- **The word layer was rebuilt wrongly after a restore.** It replayed the raw
+  log, counting retractions — stored with rating 0 — as failures, so undoing an
+  answer damaged the words it contained instead of reverting them.
+- **Cloud backup is off.** Android was uploading `ikna.db` — every phrase
+  studied, every rating, every timestamp — to the user's Google account, which
+  contradicts PRIVACY.md. Direct transfer to a new phone still works.
+- **Accuracy was stored as a rounded average of averages**, drifting a little
+  further from the truth with every answer. Correct answers are counted as an
+  integer and the percentage is derived.
+- **"Plan completed" was recorded for any day above the one-card minimum**, which
+  is what feeds the acceleration rule, so the ceiling could rise off days that
+  were nowhere near the plan. It now compares against the plan actually built.
+- **The evening reminder drifted later every day.** A periodic worker repeats 24
+  hours after the previous run, and Doze delays runs, so the time slipped. Each
+  run now re-aims the next one at the chosen clock time.
+- **The widget showed yesterday's number until the app was opened**, on a widget
+  whose purpose is to be read instead of opening the app. The nightly job now
+  refreshes it.
+- **The nightly plan ran at whatever time the app was installed.** It is now
+  anchored just after the study day rolls over.
+- Restore no longer runs one database write per answer; a long history replays
+  in batches instead of tens of thousands of round trips.
+
+### Added
+
+- Tests for the two gates above: an ordinary morning is not a skipped day, a
+  real skipped day still has to be warmed up, and return mode outlives the
+  session that ended the gap. Plus a round trip of the export format through an
+  id full of quotes and newlines.
+- CI keeps the Room schemas as an artifact, so a migration can be checked
+  against the version it migrates from.
+
+### Added — earlier in this cycle
 
 - **Home screen widget.** One number — how much is left today — and a tap that
   opens the cards directly, skipping the deck list.

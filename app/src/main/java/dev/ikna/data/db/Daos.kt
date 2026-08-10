@@ -44,7 +44,7 @@ interface ChunkDao {
             "AND id NOT IN (SELECT DISTINCT chunkId FROM cards) " +
             "ORDER BY freqRank ASC LIMIT :limit"
     )
-    suspend fun uintroducedByFrequency(limit: Int): List<ChunkEntity>
+    suspend fun unintroducedByFrequency(limit: Int): List<ChunkEntity>
 
     @Query("SELECT COUNT(*) FROM chunks")
     suspend fun chunkCount(): Int
@@ -59,8 +59,12 @@ interface ChunkDao {
     )
     suspend fun untouchedCount(): Int
 
+    // Same question as untouchedCount(), asked about one deck. It has to apply
+    // the same isActive filter, or the deck list and the session screen disagree
+    // about whether a switched-off deck still has anything left in it.
     @Query(
         "SELECT COUNT(*) FROM chunks WHERE packId = :packId " +
+            "AND packId IN (SELECT id FROM packs WHERE isActive = 1) " +
             "AND id NOT IN (SELECT DISTINCT chunkId FROM cards)"
     )
     suspend fun untouchedCountFor(packId: String): Int
@@ -164,17 +168,14 @@ interface CardDao {
     @Query("UPDATE cards SET inAmnesty = 1 WHERE inAmnesty = 0 AND dueAt < :threshold")
     suspend fun moveOverdueToAmnesty(threshold: Long): Int
 
-    /**
-     * Moves every schedule forward. This is how an absence is absorbed: unused
-     * days are added to every due date, so on return the queue is exactly the
-     * queue that was left behind, not weeks of accumulated overdue. Nobody has
-     * to announce a break for this to happen — it is measured, not declared.
-     */
-    @Query(
-        "UPDATE cards SET dueAt = dueAt + :ms, " +
-            "lastReviewAt = CASE WHEN lastReviewAt IS NULL THEN NULL ELSE lastReviewAt + :ms END"
-    )
-    suspend fun shiftSchedules(ms: Long)
+    // There is deliberately no "shift every schedule forward" query here any
+    // more. An absence is absorbed by the amnesty pool instead: overdue cards
+    // leave the visible queue and are drip-fed back a fifth of a session at a
+    // time. Rewriting dueAt in bulk also rewrote lastReviewAt, which is the
+    // input FSRS uses to work out how much time really passed — so the
+    // scheduler was being told a lie about the one thing it measures, and the
+    // lie was nowhere in the review log, which meant a restore from that log
+    // produced different dates than the phone had.
 
     @Query("DELETE FROM cards WHERE chunkId = :chunkId AND level = :level")
     suspend fun delete(chunkId: String, level: Int)
@@ -193,8 +194,18 @@ interface ReviewDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(review: ReviewEntity): Long
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertAll(reviews: List<ReviewEntity>)
+    /**
+     * Bulk insert for restore, returning the id assigned to each row in order.
+     *
+     * Rows are passed in with `id = 0` and numbered by SQLite, because the ids
+     * in an export file belong to the phone that wrote it. The returned ids are
+     * what lets a retraction from that file be re-pointed at the right row here.
+     * ABORT rather than IGNORE: with generated ids there is nothing left to
+     * collide, and silently dropping rows from the one irreplaceable table is
+     * not an acceptable failure mode.
+     */
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insertAll(reviews: List<ReviewEntity>): List<Long>
 
     /** Raw log, retractions included. Used by the exporter only. */
     @Query("SELECT * FROM reviews ORDER BY ts ASC")
@@ -252,6 +263,16 @@ interface ReviewDao {
     @Query("SELECT chunkId || ':' || level || ':' || ts FROM reviews")
     suspend fun signatures(): List<String>
 
+    /**
+     * The same identity, with the id it belongs to here.
+     *
+     * A restore needs both: the signature to recognise an answer it already
+     * has, and this database's id so a retraction that arrives in the same file
+     * can be attached to it.
+     */
+    @Query("SELECT id, (chunkId || ':' || level || ':' || ts) AS signature FROM reviews")
+    suspend fun keys(): List<ReviewKey>
+
     @Query("SELECT * FROM reviews WHERE chunkId = :chunkId AND " + NOT_RETRACTED + " ORDER BY ts DESC")
     suspend fun forChunk(chunkId: String): List<ReviewEntity>
 }
@@ -273,9 +294,15 @@ interface ComponentDao {
     suspend fun clear()
 }
 
+/** One row's identity, for restore. See [ReviewDao.keys]. */
+data class ReviewKey(val id: Long, val signature: String)
+
 @Dao
 interface StatsDao {
     @Upsert suspend fun upsert(stat: DailyStatEntity)
+
+    /** Bulk form, for the replay that rebuilds this table from the log. */
+    @Upsert suspend fun upsertAll(stats: List<DailyStatEntity>)
 
     @Query("SELECT * FROM daily_stats WHERE day = :day")
     suspend fun day(day: String): DailyStatEntity?

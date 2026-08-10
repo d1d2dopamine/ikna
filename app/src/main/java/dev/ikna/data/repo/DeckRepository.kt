@@ -1,7 +1,5 @@
 package dev.ikna.data.repo
 
-import dev.ikna.ui.text.S
-
 import dev.ikna.data.db.ChunkDao
 import dev.ikna.data.pack.ImportResult
 import dev.ikna.data.pack.PackLoader
@@ -46,8 +44,20 @@ class DeckRepository(
 
     suspend fun setActive(id: String, active: Boolean) = chunkDao.setPackActive(id, active)
 
-    /** Imports a `.jsonl` pack picked in the system file browser. */
-    suspend fun importFile(fileName: String, text: String): ImportResult {
+    /**
+     * Imports a `.jsonl` pack picked in the system file browser.
+     *
+     * @param fallbackTitle what to call a deck whose file name is only an
+     *   extension. Passed in rather than read from the string catalogue here:
+     *   the catalogue is UI state, and a repository that reaches up into it
+     *   cannot be tested without it and quietly bakes the language into stored
+     *   data. The caller is on screen and already knows the language.
+     */
+    suspend fun importFile(
+        fileName: String,
+        text: String,
+        fallbackTitle: String
+    ): ImportResult {
         val stem = fileName.substringBeforeLast('.')
         val slug = stem.lowercase()
             .replace(Regex("[^a-z0-9]+"), "-")
@@ -55,7 +65,7 @@ class DeckRepository(
             .ifEmpty { "pack" }
         return packLoader.importJsonl(
             packId = "user-" + slug,
-            title = stem.ifEmpty { S.t("deckrepo.001") },
+            title = stem.ifEmpty { fallbackTitle },
             lang = "custom",
             text = text
         )

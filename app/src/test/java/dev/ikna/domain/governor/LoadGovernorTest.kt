@@ -25,7 +25,8 @@ class LoadGovernorTest {
         reviewsDoneToday: Int = 0,
         cleanDays: Int = 0,
         newIntroducedLastWeek: Int = 3,
-        totalReviews: Int = 500
+        totalReviews: Int = 500,
+        daysSinceReturn: Int? = null
     ) = GovernorSignals(
         dueToday = dueToday,
         forecastAvg3d = forecastAvg3d,
@@ -37,7 +38,8 @@ class LoadGovernorTest {
         reviewsDoneToday = reviewsDoneToday,
         cleanDays = cleanDays,
         newIntroducedLastWeek = newIntroducedLastWeek,
-        totalReviews = totalReviews
+        totalReviews = totalReviews,
+        daysSinceReturn = daysSinceReturn
     )
 
     @Test
@@ -76,12 +78,73 @@ class LoadGovernorTest {
         assertEquals(0, decision.allowedNew)
     }
 
+    /**
+     * The regression that mattered most: yesterday evening followed by this
+     * morning is one day apart, and the plan for today is built before today's
+     * first answer exists. The gate used to read `>= 1`, so it fired on every
+     * ordinary day of use, and the only new material that ever arrived came
+     * through the safety valve - one chunk a week, in an app whose whole promise
+     * is a steady handful a day.
+     */
+    @Test
+    fun `an ordinary morning is not treated as a skipped day`() {
+        val decision = governor.decide(
+            signals(daysSinceLastSession = 1, reviewsDoneToday = 0)
+        )
+        assertEquals(GovernorReason.OK, decision.reason)
+        assertEquals(config.maxNewPerDay, decision.allowedNew)
+    }
+
+    @Test
+    fun `a genuinely skipped day still has to be warmed up`() {
+        val decision = governor.decide(
+            signals(daysSinceLastSession = 2, reviewsDoneToday = 0)
+        )
+        assertEquals(GovernorReason.POST_SKIP_WARMUP, decision.reason)
+        assertEquals(0, decision.allowedNew)
+    }
+
+    @Test
+    fun `warming up after a skipped day earns new material back`() {
+        val decision = governor.decide(
+            signals(
+                daysSinceLastSession = 2,
+                reviewsDoneToday = config.warmupReviewsAfterSkip
+            )
+        )
+        assertEquals(GovernorReason.OK, decision.reason)
+        assertEquals(config.maxNewPerDay, decision.allowedNew)
+    }
+
     @Test
     fun `coming back after a long break puts the app in return mode`() {
         val decision = governor.decide(signals(daysSinceLastSession = config.returnModeGapDays))
         assertEquals(GovernorReason.RETURN_MODE, decision.reason)
         assertEquals(config.returnModeCapacity, decision.capacity)
         assertEquals(0, decision.allowedNew)
+    }
+
+    /**
+     * Return mode has to outlive the session that ended the absence. Otherwise
+     * the day after coming back is a full day again, which is where the second
+     * absence usually starts.
+     */
+    @Test
+    fun `return mode outlasts the session that ended the gap`() {
+        val decision = governor.decide(
+            signals(daysSinceLastSession = 0, daysSinceReturn = 1)
+        )
+        assertEquals(GovernorReason.RETURN_MODE, decision.reason)
+        assertEquals(config.returnModeCapacity, decision.capacity)
+    }
+
+    @Test
+    fun `return mode ends once the return has settled`() {
+        val decision = governor.decide(
+            signals(daysSinceLastSession = 0, daysSinceReturn = config.returnModeDays)
+        )
+        assertEquals(GovernorReason.OK, decision.reason)
+        assertEquals(config.targetDailyReviews, decision.capacity)
     }
 
     @Test

@@ -52,10 +52,10 @@ data class SessionUiState(
     val extraAdded: Int = 0,
     val noMoreExtra: Boolean = false,
     /**
-     * True once enough answers have been given by swiping. The two rare ratings
-     * then leave the button row and stay on the gesture. Read once per session
-     * on purpose: a row that rearranges itself mid-session would move a target
-     * under a thumb that is already moving.
+     * True once enough answers have been given by swiping. The two words at the
+     * bottom of the card then stop being drawn at rest and only appear under the
+     * thumb during a gesture. Read once per session on purpose: chrome that
+     * disappears mid-session changes the screen while it is being used.
      */
     val swipeFluent: Boolean = false,
     /**
@@ -290,9 +290,14 @@ class SessionViewModel(
     }
 
     /**
+     * Two outcomes, both of them from one horizontal axis: [Rating.AGAIN] for a
+     * chunk that is not known and [Rating.GOOD] for one that is. The other two
+     * grades stay in the model for the sake of the log, which holds years of
+     * answers given when the card could still be thrown up and down.
+     *
      * [viaSwipe] is counted, not just logged: it is the only evidence that the
-     * gesture has actually been found. Until there is enough of it the button
-     * row keeps teaching all four directions.
+     * gesture has actually been found. Until there is enough of it, the two
+     * words stay on screen.
      */
     fun rate(rating: Rating, viaSwipe: Boolean = false) {
         val s = _state.value

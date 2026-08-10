@@ -19,8 +19,8 @@ import dev.ikna.R
  * Two rules, both about not becoming another guilt machine: nothing is sent if
  * the minimum is already done, and the text asks for one card — never for a
  * streak, a queue size or a number of days missed. Nothing has to be muted for a
- * break either: the schedule absorbs unused days on its own, so a reminder after
- * an absence still points at a small day.
+ * break either: overdue cards move into the amnesty pool and come back a few at
+ * a time, so a reminder after an absence still points at a small day.
  */
 class ReminderWorker(context: Context, params: WorkerParameters) :
     CoroutineWorker(context, params) {
@@ -31,6 +31,18 @@ class ReminderWorker(context: Context, params: WorkerParameters) :
         val settings = container.settings.current()
 
         if (!settings.reminderEnabled) return Result.success()
+
+        // Re-aim tomorrow's run at the clock time the user chose. A periodic
+        // request repeats 24 hours after the previous run actually ran, and Doze
+        // can hold a run for hours, so without this an evening reminder walks
+        // later every day. Done before the early return below, so it keeps
+        // happening on days when there is nothing to say.
+        WorkScheduler.scheduleReminder(
+            applicationContext,
+            enabled = true,
+            hour = settings.reminderHour,
+            minute = settings.reminderMinute
+        )
 
         val repo = container.learningRepository
         if (repo.answeredToday() >= repo.dailyMinimum()) return Result.success()

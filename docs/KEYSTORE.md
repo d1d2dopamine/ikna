@@ -35,9 +35,17 @@ What the key does **not** protect:
 
 What it does mean:
 
-- Anyone can build an APK that Android treats as the same app as yours. That
-  only matters if you install an APK from somewhere other than your own
-  Actions artefacts. So install only from your own repository.
+- Anyone can build an APK that Android treats as the same app as yours. Be clear
+  about what that means: a stranger's build, signed with this key, will install
+  **over** yours as an update. It keeps the package name, inherits the app's
+  private storage — including `ikna.db`, your whole review history — and the
+  system shows no warning, because as far as Android is concerned it is the same
+  app. A signature is an identity check, and this identity is published.
+
+  The mitigation is the only one available: install exclusively from your own
+  Actions artefacts or your own releases, and never from a link someone sends
+  you. If you ever intend to distribute this app to other people, generate a
+  private key first — see below.
 - The key cannot be used to push anything to your phone. Android does not
   update apps by itself from an unknown source; installation is always a
   manual step you perform.

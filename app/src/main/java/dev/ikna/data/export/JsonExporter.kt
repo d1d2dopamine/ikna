@@ -42,38 +42,20 @@ class JsonExporter(
         val reviews = reviewDao.all()
         if (reviews.isEmpty()) return null
 
+        // Serialised, not concatenated. This used to be a StringBuilder that
+        // wrapped chunkId in quotes and hoped: a pack whose ids contain a quote,
+        // a backslash or a newline wrote a line that no longer parsed, and the
+        // first anyone would find out is the day they needed the file. Ids are
+        // well behaved in the bundled packs, but "importFile" takes any .jsonl
+        // the user has, so the guarantee has to come from the encoder.
         val name = "ikna-reviews-" + stamp(now) + ".jsonl"
         return write(name, "application/x-ndjson") { out ->
             for (r in reviews) {
                 out.write(
-                    buildString {
-                        append('{')
-                        append("\"id\":").append(r.id).append(',')
-                        append("\"chunkId\":\"").append(r.chunkId).append("\",")
-                        append("\"level\":").append(r.level).append(',')
-                        append("\"ts\":").append(r.ts).append(',')
-                        append("\"rating\":").append(r.rating).append(',')
-                        append("\"elapsedDays\":").append(r.elapsedDays).append(',')
-                        append("\"stabilityBefore\":").append(r.stabilityBefore).append(',')
-                        append("\"stabilityAfter\":").append(r.stabilityAfter).append(',')
-                        append("\"difficultyBefore\":").append(r.difficultyBefore).append(',')
-                        append("\"difficultyAfter\":").append(r.difficultyAfter).append(',')
-                        append("\"durationMs\":").append(r.durationMs).append(',')
-                        append("\"wasAmnesty\":").append(r.wasAmnesty)
-                        // v2: the undo trail. Exported so a restore replays the
-                        // history the user actually kept, retractions included,
-                        // instead of reviving answers they took back.
-                        r.prevStability?.let { append(",\"prevStability\":").append(it) }
-                        r.prevDifficulty?.let { append(",\"prevDifficulty\":").append(it) }
-                        r.prevDueAt?.let { append(",\"prevDueAt\":").append(it) }
-                        r.prevLastReviewAt?.let { append(",\"prevLastReviewAt\":").append(it) }
-                        r.prevReps?.let { append(",\"prevReps\":").append(it) }
-                        r.prevLapses?.let { append(",\"prevLapses\":").append(it) }
-                        r.prevIsNew?.let { append(",\"prevIsNew\":").append(it) }
-                        r.prevInAmnesty?.let { append(",\"prevInAmnesty\":").append(it) }
-                        r.undoOf?.let { append(",\"undoOf\":").append(it) }
-                        append('}')
-                    }
+                    ReviewRecord.json.encodeToString(
+                        ReviewRecord.serializer(),
+                        ReviewRecord.of(r)
+                    )
                 )
                 out.newLine()
             }

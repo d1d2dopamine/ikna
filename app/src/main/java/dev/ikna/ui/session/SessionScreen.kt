@@ -60,6 +60,11 @@ import java.time.temporal.ChronoUnit
  * One bar at the top instead of two rows. It carries the way out, the cost of
  * the session before it starts, and — when the session belongs to one deck —
  * which deck that is.
+ *
+ * Two answers, and both of them are written down where they cannot leave. See
+ * [SwipeableCard]: the words used to live on the card and travelled off screen
+ * with it, so the side you were pulling towards was the side whose meaning had
+ * just disappeared.
  */
 
 private val BAR_HEIGHT = 44.dp
@@ -105,7 +110,8 @@ fun SessionScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                // First contact: shown, not asked. Nothing to grade, nothing to fail.
+                // First contact: shown, not asked. Nothing to grade, nothing to fail,
+                // and so no words at the bottom offering to grade it.
                 card != null && state.encoding -> ChunkCard(
                     label = S.t("sess.002"),
                     prompt = card.chunk.text,
@@ -113,36 +119,38 @@ fun SessionScreen(
                     hint = card.chunk.contextSentence,
                     revealed = true,
                     showTapHint = false,
-                    fromAmnesty = false,
-                    progressX = 0f,
-                    progressY = 0f,
+                    progress = { 0f },
                     onTap = vm::acknowledgeEncoding,
                     tapEnabled = true,
-                    modifier = Modifier.fillMaxSize(),
-                    showSwipeLegend = false
+                    modifier = Modifier.fillMaxSize()
                 )
 
                 card != null -> SwipeableCard(
                     key = card.card.key + ":" + state.index,
-                    enabled = state.revealed,
+                    revealed = state.revealed,
                     animations = settings.animations,
                     haptics = settings.haptics,
+                    // The two words stay on screen until the movement is learned,
+                    // then leave it. Read once per session, so nothing appears or
+                    // disappears under a thumb that is already moving.
+                    railsAtRest = !state.swipeFluent,
+                    onReveal = vm::reveal,
                     onRate = { rating -> vm.rate(rating, viaSwipe = true) }
-                ) { progressX, progressY ->
+                ) { progress ->
                     ChunkCard(
                         label = levelLabel(card.level),
                         prompt = card.prompt,
                         answer = card.answer,
                         hint = if (card.level == Level.CLOZE) card.chunk.translation else null,
                         revealed = state.revealed,
-                        showTapHint = false,
-                        fromAmnesty = card.fromAmnesty,
-                        progressX = progressX,
-                        progressY = progressY,
+                        // The one line that says how to turn a card over. It was
+                        // computed for every session and then never drawn, so the
+                        // first card of a first session explained nothing at all.
+                        showTapHint = state.showRevealHint,
+                        progress = progress,
                         onTap = vm::reveal,
                         tapEnabled = !state.revealed,
-                        modifier = Modifier.fillMaxSize(),
-                        showSwipeLegend = false
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
 

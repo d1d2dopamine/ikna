@@ -28,6 +28,22 @@ it is written there deliberately: files inside the sandbox are deleted with the
 app, and the point of that export is to survive an uninstall and a new phone. It
 goes nowhere else. Copying it off the device — or not — is your decision.
 
+## Cloud backup
+
+Android can copy an app's data into your Google account automatically. Ikna turns
+that off (`android:allowBackup="false"`), and `res/xml/data_extraction_rules.xml`
+excludes `ikna.db` from cloud backup explicitly. Your review log — every phrase
+you studied, how you rated it and when — is not uploaded anywhere, including by
+the operating system on your behalf.
+
+Direct device-to-device transfer, the copy Android makes during setup when you
+move to a new phone, is still allowed: it goes straight to the new device with no
+server in between. Settings are also included in cloud backup, since they are
+preferences rather than a record of what you have been reading.
+
+The deliberate way to move your history is the export in `Documents/ikna/`, which
+you control.
+
 ## Speech
 
 Reading a chunk aloud uses a speech engine installed on your phone, through the

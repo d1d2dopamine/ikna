@@ -18,8 +18,14 @@ import androidx.room.RoomDatabase
         DailyPlanEntity::class
     ],
     // v2: undo snapshots on `reviews`, deck switches on `packs`, `daily_plan`.
-    version = 2,
-    // Schemas are committed under app/schemas so migrations stay reproducible.
+    // v3: `daily_stats.correctCount`, so the day's accuracy is a count rather
+    //     than a stored average edited in place.
+    version = 3,
+    // KSP writes the schema history into app/schemas (see the ksp block in
+    // app/build.gradle.kts). Commit whatever appears there after a build: it is
+    // the only way to diff two versions of this database, and
+    // fallbackToDestructiveMigration is banned below, so a migration that turns
+    // out to be wrong cannot be recovered from by deleting the data.
     exportSchema = true
 )
 abstract class IknaDatabase : RoomDatabase() {

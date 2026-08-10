@@ -11,8 +11,12 @@ import android.provider.OpenableColumns
 import android.speech.tts.TextToSpeech
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -61,15 +65,16 @@ import dev.ikna.data.prefs.SPEECH_TONE_STEP
 import dev.ikna.data.prefs.ThemeMode
 import dev.ikna.data.prefs.voiceFor
 import dev.ikna.ui.theme.IknaChip
-import dev.ikna.ui.theme.IknaDanger
 import dev.ikna.ui.theme.IknaDialog
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaHexField
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaSwatch
+import dev.ikna.ui.theme.IknaPalettes
 import dev.ikna.ui.theme.MIN_READABLE_CONTRAST
 import dev.ikna.ui.theme.contrastRatio
+import dev.ikna.ui.theme.isLight
 import dev.ikna.ui.theme.hexOf
 import dev.ikna.ui.theme.parseHexColor
 import dev.ikna.ui.theme.ratioText
@@ -346,13 +351,56 @@ fun SettingsScreen(
 
             Anchored(ID_LOOK, anchors) {
                 Section(S.t("set.019"), null) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        ThemeMode.entries.forEach { mode ->
-                            IknaChip(
-                                label = themeLabel(mode),
-                                selected = settings.theme == mode,
-                                onClick = { scope.launch { container.settings.setTheme(mode) } }
-                            )
+                    // Which palette, then how it is lit. In that order, because
+                    // the palette is the app's face and the mode is only the lamp
+                    // pointed at it — and because the tiles below are the answer to
+                    // "what do these look like", which no list of words is.
+                    Text(
+                        text = S.t("set.114"),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    PaletteTiles(
+                        selectedId = settings.paletteId,
+                        // The tiles are drawn in the lighting the app is in right
+                        // now, read off the background rather than asked of the
+                        // system: with a custom scheme the two can disagree, and
+                        // what matters is what the eye is currently adapted to.
+                        light = isLight(MaterialTheme.colorScheme.background),
+                        onPick = { id -> scope.launch { container.settings.setPalette(id) } }
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = S.t("set.115"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(20.dp))
+                    Text(
+                        text = S.t("set.122"),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    // Two rows of two rather than one row of four: "как в системе"
+                    // is three words long in every language the app speaks, and
+                    // four chips on one line either truncate it or run off the
+                    // edge on a narrow phone.
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        ThemeMode.entries.chunked(2).forEach { pair ->
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                pair.forEach { mode ->
+                                    IknaChip(
+                                        label = themeLabel(mode),
+                                        selected = settings.theme == mode,
+                                        modifier = Modifier.weight(1f),
+                                        onClick = {
+                                            scope.launch { container.settings.setTheme(mode) }
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
                     if (settings.theme == ThemeMode.CUSTOM) {
@@ -404,8 +452,12 @@ fun SettingsScreen(
 
             Anchored(ID_SPEECH, anchors) {
                 Section(
-                    S.t("set.026"),
-                    S.t("set.027")
+                    // Marked beta in the heading and off by default. The feature
+                    // works, but how good it sounds is decided by an engine this
+                    // app did not write and cannot inspect, so it is offered
+                    // rather than assumed.
+                    S.t("set.026") + " · " + S.t("set.123"),
+                    S.t("set.124") + " " + S.t("set.027")
                 ) {
                     ToggleRow(
                         title = S.t("set.028"),
@@ -855,7 +907,10 @@ fun SettingsScreen(
                         Text(
                             text = if (wipeArmed) S.t("set.076") else S.t("set.077"),
                             style = MaterialTheme.typography.bodySmall,
-                            color = IknaDanger
+                            // The palette decides what danger looks like, and on a
+                            // warm palette it is not a colour at all: see
+                            // dangerFor in Theme.kt.
+                            color = MaterialTheme.colorScheme.error
                         )
                     }
                 }
@@ -1098,7 +1153,7 @@ private fun CustomColors(
         Text(
             text = S.t("set.090"),
             style = MaterialTheme.typography.bodySmall,
-            color = IknaDanger
+            color = MaterialTheme.colorScheme.error
         )
     }
 }
@@ -1132,6 +1187,89 @@ private fun ColorRow(label: String, color: Color, onColor: (Int) -> Unit) {
         )
     }
 }
+
+/**
+ * The palettes, shown as themselves.
+ *
+ * A list of names is not a choice of colours — nobody knows what "Слива" is until
+ * they have already switched to it and switched back. Each tile is painted in the
+ * palette it offers: its own background, the wordmark in its ink, and a bar of
+ * accent next to a bar of muted, which is every colour the palette has.
+ *
+ * Selection is a heavier border rather than a tint or a tick, for the same reason
+ * everything else here is: a tick would have to be drawn in some colour, and on a
+ * tile whose whole point is its own colours there is no colour left to use.
+ */
+@Composable
+private fun PaletteTiles(
+    selectedId: String,
+    light: Boolean,
+    onPick: (String) -> Unit
+) {
+    val ink = MaterialTheme.colorScheme.onBackground
+    val line = MaterialTheme.colorScheme.outline
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        IknaPalettes.chunked(3).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                row.forEach { spec ->
+                    val p = spec.palette(light)
+                    val selected = spec.id == selectedId
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { onPick(spec.id) }
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(64.dp)
+                                .background(p.background)
+                                .border(if (selected) 2.dp else 1.dp, if (selected) ink else line)
+                                .padding(8.dp)
+                        ) {
+                            Text(
+                                text = WORDMARK,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = p.ink,
+                                maxLines = 1
+                            )
+                            Spacer(Modifier.weight(1f))
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(2f)
+                                        .height(8.dp)
+                                        .background(p.accent)
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(8.dp)
+                                        .background(p.muted)
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = S.t(spec.nameKey),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (selected) ink else muted,
+                            maxLines = 1
+                        )
+                    }
+                }
+                // A last row of two must not stretch its tiles to the width of
+                // three, or the grid stops being a grid.
+                repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+            }
+        }
+    }
+}
+
+/** The one word in the app that is never translated. */
+private const val WORDMARK = "ikna"
 
 private const val ID_LOAD = "load"
 private const val ID_LOOK = "look"
@@ -1184,6 +1322,10 @@ private val REMINDER_TIMES = listOf(9 to 0, 13 to 0, 20 to 0, 22 to 0)
 private fun themeLabel(mode: ThemeMode): String = when (mode) {
     ThemeMode.DARK -> S.t("set.101")
     ThemeMode.LIGHT -> S.t("set.102")
+    // Reuses the language section's "как в системе": it is the same promise about
+    // the same phone setting, and two different wordings for it would read as two
+    // different behaviours.
+    ThemeMode.SYSTEM -> S.t("set.099")
     ThemeMode.CUSTOM -> S.t("set.103")
 }
 

@@ -27,17 +27,15 @@ as "lkna". The logo, the label under the icon and this file all agree on that.
 
 ## What it looks like
 
-**[Watch the demo](docs/ikna.mp4)** — 45 seconds, no narration: decks, a card
-thrown four times, the end of a day, statistics, and the appearance settings.
+A card, thrown. Answering is a gesture, not a row of buttons: throw the card away
+from you when you knew it, towards you when you did not, and the direction is the
+answer. There is a deck list with one number on it, a session, and a statistics
+screen that counts days with a session rather than days in a row.
 
-The app records that video itself. Settings → РЕДКОЕ → *record a demo* drives the
-real interface with synthetic decks and writes an MP4 to `Documents/ikna/`. That
-is deliberate: a screenshot cannot show what this app is about, because the whole
-answer mechanism is a gesture, and a hand-held screen recording of a swipe looks
-like a stutter. The video is rendered frame by frame from a virtual clock, so
-every transition runs at its designed speed regardless of the phone.
-
-It is silent by design — sound and titles belong in an editor, not in a recorder.
+There is no video here yet. A screenshot is a poor description of an app whose
+whole answer mechanism is a movement, and a screen recording of a swipe looks
+like a stutter, so the honest options are to build it properly or to say nothing.
+Build it and see it; it takes one `gradle assembleDebug`.
 
 ## Core design decisions
 
@@ -51,8 +49,9 @@ It is silent by design — sound and titles belong in an editor, not in a record
 | Debt handling | amnesty pool, 20% of each session, never a visible backlog number |
 | Streaks | none. The metric is *days with a session in the last 30* |
 | Daily minimum | 1 card |
-| Answering | swipe: left *not yet*, right *got it*, up and down for the two in between |
-| Audio | the phone's own speech engine, offline, optional. No voice ships in the APK |
+| Answering | one axis: left *not known*, right *known*. Nothing else is an answer |
+| Audio | the phone's own speech engine, offline, beta, off by default. No voice ships in the APK |
+| Colour | six palettes, each in two lightings; Уголь by default. Every pair passes 4.5:1 |
 | Interface languages | Russian, English, Polish |
 | Content | pre-baked packs, generated offline in `tools/genpack` |
 | Network | none. The app has no internet permission |
@@ -90,8 +89,8 @@ Two packs ship in `app/src/main/assets/packs`:
 
 | Deck | Chunks | Shipped |
 | --- | --- | --- |
-| `en-ru-core` — English core chunks | 70 | on |
-| `pl-ru-core` — Polish core chunks | 110 | off |
+| `en-ru-core` — English core chunks | 121 | on |
+| `pl-ru-core` — Polish core chunks | 121 | off |
 
 A second language ships **off** on purpose: two active decks interleave two
 languages inside one session, and the switch lives on the deck screen. Everything
@@ -125,7 +124,7 @@ Once a week, and on demand, two files are written to `Documents/ikna/`:
 
 Deliberately outside the app sandbox, so they survive an uninstall, a factory
 reset and a new phone. *Restore* takes either file and works out which one it is
-from its contents. Recorded demos land in the same folder.
+from its contents.
 
 Restoring the log does not copy a database over the app — it **replays the
 history**. Every answer is fed back through the same scheduler, and the cards, the
@@ -139,8 +138,20 @@ Flat right angles, hand-drawn marks, no Material components anywhere — not a
 style preference but a requirement, since a Material button ignores the theme's
 shape scheme and rounds itself back at every opportunity.
 
-Light, dark, or four colours picked by hand (background, ink, muted, accent), with
-a contrast check that refuses combinations that cannot be read. Any `.ttf` or
+Colour is two choices, not one. **Which palette** — Уголь (warm near-black and
+ember, the default), Библиотека (dark green and brass), Чернила (navy and
+coral), Слива (aubergine and mint), Ноль (pure black and white, nothing else) or
+Нейтральная — and **how it is lit**: dark, light, as the phone is set, or four
+colours picked by hand (background, ink, muted, accent).
+
+A palette is not a theme: the same one exists in both lightings and keeps its hue
+in both, so the light version is tinted paper rather than white with the colour
+drained out. The six are chosen from tiles painted in themselves rather than from a
+list of names. Every pair of colours in every palette — including the warning red,
+which each lighting defines for itself and which steps aside entirely when the
+palette's accent is already a warm red — is held to 4.5:1 by a unit test, and the
+hand-picked scheme gets the same check live, refusing combinations that cannot be
+read. Any `.ttf` or
 `.otf` on the phone can be used, and it is applied to the entire interface —
 headings, body, section marks, button captions and counters alike. The file is
 validated before it is accepted, so a broken font cannot leave the app unreadable.
@@ -242,12 +253,11 @@ app/src/main/java/dev/ikna/
   domain/session  session assembly
   domain/time     the 04:00 day boundary
   audio           the phone's speech engine, wrapped
-  demo            the self-recording demo: script, virtual clock, encoder
   work            WorkManager jobs: daily plan, export, reminder
   widget          the home screen widget
   ui              Compose UI (decks, session, stats, settings, theme, text)
 tools/genpack     offline pack generator (Python)
-docs              architecture, governor spec, keystore setup, demo notes
+docs              architecture, governor spec, keystore setup
 ```
 
 ## Docs
@@ -255,7 +265,6 @@ docs              architecture, governor spec, keystore setup, demo notes
 - `docs/ARCHITECTURE.md`
 - `docs/GOVERNOR.md`
 - `docs/KEYSTORE.md`
-- `docs/DEMO.md`
 - [`CHANGELOG.md`](CHANGELOG.md)
 - [`PRIVACY.md`](PRIVACY.md)
 

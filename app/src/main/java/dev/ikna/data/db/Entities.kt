@@ -141,8 +141,25 @@ data class DailyStatEntity(
     val reviewsDone: Int,
     val newIntroduced: Int,
     val activeMs: Long,
+    /** Derived from [correctCount]. Kept as a column so older readers still work. */
     val accuracy: Double,
-    val planCompleted: Boolean
+    val planCompleted: Boolean,
+
+    // ---- schema v3 -------------------------------------------------------
+    /**
+     * Answers rated GOOD or better on this day, as a count.
+     *
+     * [accuracy] used to be the only record of this, and it was maintained by
+     * multiplying the stored average back out by the day's total, adding one and
+     * dividing again — with undo running the same arithmetic backwards. Float
+     * error accumulated in a number the load governor reads to decide whether
+     * the user is allowed new material, and it could drift away from the log it
+     * is supposed to summarise. An integer count cannot drift.
+     *
+     * Added last, with a default, so every positional construction of this row
+     * keeps compiling.
+     */
+    @ColumnInfo(defaultValue = "0") val correctCount: Int = 0
 )
 
 @Entity(tableName = "governor_log")

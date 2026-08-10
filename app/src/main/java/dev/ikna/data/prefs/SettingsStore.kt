@@ -13,19 +13,32 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 /**
- * Dark, light, or four colours of your own.
+ * How the chosen palette is lit: dark, light, whatever the phone is doing, or
+ * four colours of your own.
  *
- * SYSTEM is gone. Following the phone meant the app had no look of its own and
- * changed under the user at sunset, and with a custom scheme in the list the
- * setting has to mean "this is what the app looks like", not "ask Android".
+ * SYSTEM is back, and it no longer means what it used to. It was removed when a
+ * mode *was* the whole look of the app — following the phone then meant the app
+ * had no identity of its own and changed character at sunset. The identity now
+ * lives in the palette (see IknaPalettes), and the mode only says how that
+ * palette is lit, so following the phone keeps the brand and changes the light.
  *
  * Removing an entry from a stored enum is the kind of change that crashes an
- * app on launch: installs from the previous version still have the string
- * "SYSTEM" written in their preferences. The reader below resolves unknown names
- * to the default instead of throwing, which turns that upgrade into a theme
- * switch rather than a crash loop.
+ * app on launch: installs from a previous version still have their own string
+ * written in their preferences. The reader below resolves unknown names to the
+ * default instead of throwing, which turns that upgrade into a theme switch
+ * rather than a crash loop.
  */
-enum class ThemeMode { DARK, LIGHT, CUSTOM }
+enum class ThemeMode { DARK, LIGHT, SYSTEM, CUSTOM }
+
+/**
+ * The palette the app wears out of the box: "Уголь", the warm near-black of the
+ * launcher icon with the ember of the mark on it.
+ *
+ * Lives here rather than in the theme package because a stored preference has to
+ * have a default that the preferences layer can name without reaching up into the
+ * interface. The colours themselves are in ui/theme/Theme.kt.
+ */
+const val DEFAULT_PALETTE_ID = "ember"
 
 /**
  * The hand-set daily norm.
@@ -71,14 +84,24 @@ private fun legacyLoad(name: String?): Int? = when (name) {
     else -> null
 }
 
-/** Dark palette values, duplicated here as the starting point for a custom theme. */
-private const val DEFAULT_CUSTOM_BACKGROUND = 0xFF121110
-private const val DEFAULT_CUSTOM_INK = 0xFFEDE9E1
-private const val DEFAULT_CUSTOM_MUTED = 0xFF8F887A
-private const val DEFAULT_CUSTOM_ACCENT = 0xFF97A4D8
+/**
+ * The default palette's dark values, duplicated here as the starting point for a
+ * custom theme: whoever opens the hex fields starts from what they were already
+ * looking at, not from a scheme the app no longer uses.
+ */
+private const val DEFAULT_CUSTOM_BACKGROUND = 0xFF17100C
+private const val DEFAULT_CUSTOM_INK = 0xFFF2E6D9
+private const val DEFAULT_CUSTOM_MUTED = 0xFF9C8574
+private const val DEFAULT_CUSTOM_ACCENT = 0xFFF2683C
 
 data class IknaSettings(
     val theme: ThemeMode = ThemeMode.DARK,
+    /**
+     * Which built-in palette the app wears. Unknown ids — a palette dropped in a
+     * later version, or a hand-edited backup — resolve to the default instead of
+     * failing, the same way an unknown [ThemeMode] does.
+     */
+    val paletteId: String = DEFAULT_PALETTE_ID,
     /**
      * The four colours of the custom theme, as ARGB integers. Everything else in
      * the scheme — panels, rules, disabled states — is mixed from these, so there
@@ -109,11 +132,16 @@ data class IknaSettings(
     val animations: Boolean = true,
     val autoExport: Boolean = true,
     /**
-     * Speech, through the engine already installed on the phone. On by default
-     * because on a phone that has no engine it simply never appears — the mark
-     * is not drawn rather than drawn dead.
+     * Speech, through the engine already installed on the phone. **Off by
+     * default, and marked beta in settings.**
+     *
+     * It used to be on, on the theory that a phone without an engine simply never
+     * shows the mark. That was true and still wrong: what quality of voice the
+     * phone has is unknown, a bad one reading a card aloud is worse than silence,
+     * and a feature that speaks without being asked is not a default anyone chose.
+     * Whoever wants it turns it on.
      */
-    val speechEnabled: Boolean = true,
+    val speechEnabled: Boolean = false,
     /**
      * Chosen voice per language, stored as "pl=voice;ru=voice". A map is not a
      * preference type, and one string keeps every language's choice in a single
@@ -147,6 +175,7 @@ class SettingsStore(private val context: Context) {
 
     private object Keys {
         val theme = stringPreferencesKey("theme")
+        val paletteId = stringPreferencesKey("paletteId")
         val customBackground = intPreferencesKey("customBackground")
         val customInk = intPreferencesKey("customInk")
         val customMuted = intPreferencesKey("customMuted")
@@ -178,6 +207,9 @@ class SettingsStore(private val context: Context) {
             // default rather than throwing on the first frame after an update.
             theme = p[Keys.theme]?.let { name -> runCatching { ThemeMode.valueOf(name) }.getOrNull() }
                 ?: defaults.theme,
+            // An id no build knows is resolved by the theme, not here: this layer
+            // stores what it was given and the palette lookup falls back.
+            paletteId = p[Keys.paletteId] ?: defaults.paletteId,
             customBackground = p[Keys.customBackground] ?: defaults.customBackground,
             customInk = p[Keys.customInk] ?: defaults.customInk,
             customMuted = p[Keys.customMuted] ?: defaults.customMuted,
@@ -210,6 +242,13 @@ class SettingsStore(private val context: Context) {
     suspend fun current(): IknaSettings = flow.first()
 
     suspend fun setTheme(mode: ThemeMode) = put { it[Keys.theme] = mode.name }
+
+    /**
+     * Which palette to wear. Deliberately independent of [setTheme]: changing the
+     * colours must not silently move a user off "follow the phone", and picking a
+     * palette while on a custom scheme must not throw their four colours away.
+     */
+    suspend fun setPalette(id: String) = put { it[Keys.paletteId] = id }
 
     /**
      * All four at once, so the scheme can never be observed half-applied — a

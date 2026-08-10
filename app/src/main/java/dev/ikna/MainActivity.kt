@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,7 +49,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val settings by container.settings.flow.collectAsState(initial = IknaSettings())
-            val palette = paletteFor(settings)
+            // The phone's own light/dark switch is read here and nowhere else,
+            // and it decides one thing only: the lighting. Which palette the app
+            // wears is the user's choice and does not change at sunset.
+            val palette = paletteFor(settings, systemDark = isSystemInDarkTheme())
 
             // The interface language, resolved here and nowhere else. "system"
             // means whatever the phone is set to, so a person who never opens

@@ -60,5 +60,32 @@ object IknaMigrations {
         }
     }
 
-    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2)
+    /**
+     * v2 -> v3
+     *
+     * `daily_stats` gains `correctCount`. The day's accuracy used to be stored
+     * as an average and edited in place — multiplied back out by the day's
+     * total, incremented, divided again, and run backwards by undo. That is
+     * float arithmetic in a number the load governor reads, so it is now a
+     * count and the average is derived from it.
+     *
+     * The existing average is rounded back into a count instead of the table
+     * being dropped and rebuilt: `daily_stats` is derived and could be
+     * regenerated from `reviews`, but doing that during a migration means
+     * replaying the entire log on the first launch after an update, and the
+     * rounding is exact for every day whose average was still intact.
+     */
+    private val MIGRATION_2_3 = object : Migration(2, 3) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "ALTER TABLE daily_stats ADD COLUMN correctCount INTEGER NOT NULL DEFAULT 0"
+            )
+            db.execSQL(
+                "UPDATE daily_stats SET correctCount = " +
+                    "CAST(ROUND(accuracy * reviewsDone) AS INTEGER)"
+            )
+        }
+    }
+
+    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
 }

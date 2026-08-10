@@ -1,6 +1,7 @@
 package dev.ikna.data.repo
 
 import dev.ikna.data.db.CardDao
+import dev.ikna.data.db.CardEntity
 import dev.ikna.data.db.ChunkDao
 import dev.ikna.data.db.DailyPlanEntity
 import dev.ikna.data.db.DailyStatEntity
@@ -26,7 +27,6 @@ import dev.ikna.domain.time.DayBoundary
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import kotlin.math.max
 import kotlinx.coroutines.sync.Mutex
@@ -79,7 +79,6 @@ class LearningRepository(
     private fun governor() = LoadGovernor(config)
     private fun builder() = SessionBuilder(cardDao, chunkDao, config)
 
-    private val dayFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     // Rebuilt per call so a config change takes effect immediately.
     private val boundary: DayBoundary
@@ -115,9 +114,6 @@ class LearningRepository(
         // A stored plan is authoritative: today's questions are decided once.
         if (existing != null) return existing
 
-        // Every break is inferred here, and only here.
-        absorbIdleTime(now)
-
         // The measured norm is refreshed once a day, right here, so today's
         // capacity reflects the last two weeks of real behaviour.
         if (autoLoad) dailyTargetOverride = autoTarget()
@@ -147,12 +143,29 @@ class LearningRepository(
         )
 
         // New chunks are introduced exactly once per day, here and nowhere else.
-        if (decision.allowedNew > 0) introduce(decision.allowedNew, now)
+        val introduced =
+            if (decision.allowedNew > 0) introduce(decision.allowedNew, now) else emptyList()
+
+        // The introductions are handed to the builder rather than left for it to
+        // find. A fresh card is written with dueAt = now, so a "soonest first"
+        // query sorts it behind every overdue review and the capacity limit cut
+        // it first: the governor spent the day's new-material budget, the
+        // counter recorded that new material had arrived — which is what closes
+        // the safety valve for a week — and the user was shown none of it.
+        val picked = builder().pickForDay(decision, now, introduced)
+        val plannedKeys = picked.map { it.key }.toSet()
+
+        // Whatever still did not fit is deleted rather than left behind as a
+        // card nobody has ever seen but which counts as introduced, and only
+        // what actually reached the plan is counted.
+        val placed = introduced.count { it.key in plannedKeys }
+        for (card in introduced) {
+            if (card.key !in plannedKeys) cardDao.delete(card.chunkId, card.level)
+        }
+        countIntroduced(now, placed)
 
         val alreadyAnswered = reviewDao.answeredKeysSince(startOfDay(now)).toSet()
-        val ids = builder().pickForDay(decision, now)
-            .map { it.key }
-            .filterNot { it in alreadyAnswered }
+        val ids = picked.map { it.key }.filterNot { it in alreadyAnswered }
 
         return storePlan(
             day = day,
@@ -194,41 +207,24 @@ class LearningRepository(
         return plan
     }
 
-    /**
-     * Time nobody spent here does not count.
-     *
-     * There is no vacation switch in this app on purpose. A switch has to be
-     * flipped in advance by someone who can predict their own week, which is the
-     * one thing this app assumes its user cannot do — and a switch they forget to
-     * flip produces exactly the pile it was supposed to prevent. So every
-     * completed day is graded instead: a day with nothing done pushes every
-     * schedule forward by a full day, a day with a third of the norm pushes
-     * nothing, and a half-hearted day pushes a fraction of a day. Debt cannot
-     * accumulate while nobody is looking, and the front of the queue always lands
-     * on the day the user comes back — not behind it.
-     *
-     * The anchor is the last stored plan row, so days are accounted for exactly
-     * once, whether the nightly worker kept building plans through the absence or
-     * the phone was off the entire time.
-     */
-    private suspend fun absorbIdleTime(now: Long) {
-        val anchor = planDao.latest() ?: return
-        val today = LocalDate.parse(dayKey(now))
-        val anchorDay = runCatching { LocalDate.parse(anchor.day) }.getOrNull() ?: return
-
-        var day = maxOf(anchorDay, today.minusDays(MAX_CREDIT_DAYS))
-        if (!day.isBefore(today)) return
-
-        val expected = expectedForCredit()
-        var shiftMs = 0L
-        while (day.isBefore(today)) {
-            val done = statsDao.day(day.format(dayFormat))?.reviewsDone ?: 0
-            val used = (done / expected).coerceIn(0.0, 1.0)
-            shiftMs += ((1.0 - used) * DAY_MS).toLong()
-            day = day.plusDays(1)
-        }
-        if (shiftMs > 0L) cardDao.shiftSchedules(shiftMs)
-    }
+    // An absence used to be repaid here, by adding the unused part of every
+    // missed day to every due date in the table. That is gone, and deliberately:
+    //
+    //  - the same query also moved lastReviewAt, and lastReviewAt is how FSRS
+    //    knows how much time really passed. Shifting it tells the scheduler that
+    //    a card seen three weeks ago was seen yesterday, so stability is
+    //    recomputed from a number that never happened;
+    //  - nothing about the shift was written to the review log, so restoring
+    //    that log onto another phone produced different due dates than the phone
+    //    it came from — the log stopped being a full description of the state;
+    //  - the app already has a mechanism for exactly this, and it is the one the
+    //    documentation describes: overdue cards move into the amnesty pool and
+    //    come back a fifth of a session at a time, with return mode capping the
+    //    day after a long absence. Two mechanisms for one problem meant the
+    //    queue was being softened twice.
+    //
+    // expectedForCredit() stays: activityRatio still needs to know what a fully
+    // used day looks like.
 
     /**
      * How much work counts as a day fully used. Deliberately generous: a third
@@ -340,7 +336,9 @@ class LearningRepository(
 
         val today = statsDao.day(dayKey(now))
         val cleanDays = countCleanDays()
-        val weekAgo = dayKey(now - 7 * DAY_MS)
+        // The safety valve window, taken from the config instead of a 7
+        // hard-coded next to a setting called safetyValveDays.
+        val valveWindowStart = dayKey(now - config.safetyValveDays * DAY_MS)
 
         return GovernorSignals(
             dueToday = dueToday,
@@ -352,9 +350,37 @@ class LearningRepository(
             daysSinceStart = daysSinceStart(now),
             reviewsDoneToday = today?.reviewsDone ?: 0,
             cleanDays = cleanDays,
-            newIntroducedLastWeek = statsDao.newIntroducedSince(weekAgo) ?: 0,
-            totalReviews = reviewDao.total()
+            newIntroducedLastWeek = statsDao.newIntroducedSince(valveWindowStart) ?: 0,
+            totalReviews = reviewDao.total(),
+            daysSinceReturn = daysSinceReturn(now)
         )
+    }
+
+    /**
+     * Days since the first session after the last real absence, or null if the
+     * history has no gap that long in it.
+     *
+     * Return mode is supposed to last a few days, and the only way to know it is
+     * still running is to find where it started: the most recent gap in the
+     * activity history that was long enough to count as being away. Reading it
+     * from the history rather than storing a flag means it survives a restore
+     * and cannot be left switched on by a crash.
+     */
+    private suspend fun daysSinceReturn(now: Long): Int? {
+        // Newest first, and a yyyy-MM-dd key sorts the same way as the date.
+        val active = statsDao.lastDays(RETURN_SCAN_DAYS)
+            .filter { it.reviewsDone > 0 }
+            .mapNotNull { runCatching { LocalDate.parse(it.day) }.getOrNull() }
+        if (active.size < 2) return null
+
+        val today = runCatching { LocalDate.parse(dayKey(now)) }.getOrNull() ?: return null
+        for (i in 0 until active.size - 1) {
+            val gap = ChronoUnit.DAYS.between(active[i + 1], active[i]).toInt()
+            if (gap >= config.returnModeGapDays) {
+                return ChronoUnit.DAYS.between(active[i], today).toInt().coerceAtLeast(0)
+            }
+        }
+        return null
     }
 
     /**
@@ -390,15 +416,22 @@ class LearningRepository(
 
     private suspend fun countCleanDays(): Int {
         var n = 0
-        for (stat in statsDao.lastDays(30)) {
+        for (stat in statsDao.lastDays(CLEAN_DAY_SCAN)) {
             if (stat.planCompleted) n++ else break
         }
         return n
     }
 
-    private suspend fun introduce(count: Int, now: Long) {
-        val candidates = chunkDao.uintroducedByFrequency(count * 12)
-        if (candidates.isEmpty()) return
+    /**
+     * Creates the cards the governor authorised and returns them.
+     *
+     * Deliberately does not touch the daily counter any more: a chunk counts as
+     * introduced when it reaches the plan, not when a row is written. See
+     * [ensureDailyPlanLocked].
+     */
+    private suspend fun introduce(count: Int, now: Long): List<CardEntity> {
+        val candidates = chunkDao.unintroducedByFrequency(count * 12)
+        if (candidates.isEmpty()) return emptyList()
 
         val tokens = chunkDao.tokensFor(candidates.map { it.id }).groupBy { it.chunkId }
         val lemmas = tokens.values.flatten().map { it.lemma }
@@ -409,12 +442,17 @@ class LearningRepository(
             scheduler.introduce(sc.chunk.id, level = 0, componentPrior = sc.prior, now = now)
         }
         cardDao.upsertAll(cards)
+        return cards
+    }
 
+    /** Records chunks that actually reached today's plan. */
+    private suspend fun countIntroduced(now: Long, added: Int) {
+        if (added <= 0) return
         val day = dayKey(now)
         val stat = statsDao.day(day)
         statsDao.upsert(
             (stat ?: DailyStatEntity(day, 0, 0, 0L, 1.0, false))
-                .copy(newIntroduced = (stat?.newIntroduced ?: 0) + cards.size)
+                .copy(newIntroduced = (stat?.newIntroduced ?: 0) + added)
         )
     }
 
@@ -671,13 +709,14 @@ class LearningRepository(
         val day = dayKey(now)
         val prev = statsDao.day(day) ?: DailyStatEntity(day, 0, 0, 0L, 1.0, false)
         val done = prev.reviewsDone + 1
-        val correct = prev.accuracy * prev.reviewsDone + if (rating.value >= 3) 1.0 else 0.0
+        val correct = prev.correctCount + if (rating.value >= 3) 1 else 0
         statsDao.upsert(
             prev.copy(
                 reviewsDone = done,
+                correctCount = correct,
                 activeMs = prev.activeMs + durationMs,
-                accuracy = correct / done,
-                planCompleted = done >= config.dailyMinimumCards
+                accuracy = correct.toDouble() / done,
+                planCompleted = planCompleted(day, done)
             )
         )
     }
@@ -686,16 +725,37 @@ class LearningRepository(
         val day = dayKey(review.ts)
         val prev = statsDao.day(day) ?: return
         val done = (prev.reviewsDone - 1).coerceAtLeast(0)
-        val correct = (prev.accuracy * prev.reviewsDone - if (review.rating >= 3) 1.0 else 0.0)
-            .coerceAtLeast(0.0)
+        val correct = (prev.correctCount - if (review.rating >= 3) 1 else 0).coerceAtLeast(0)
         statsDao.upsert(
             prev.copy(
                 reviewsDone = done,
+                correctCount = correct,
                 activeMs = (prev.activeMs - review.durationMs).coerceAtLeast(0L),
-                accuracy = if (done == 0) 1.0 else (correct / done).coerceIn(0.0, 1.0),
-                planCompleted = done >= config.dailyMinimumCards
+                accuracy = if (done == 0) 1.0 else (correct.toDouble() / done).coerceIn(0.0, 1.0),
+                planCompleted = planCompleted(day, done)
             )
         )
+    }
+
+    /**
+     * Did this day's plan actually get finished?
+     *
+     * This flag is not cosmetic: [countCleanDays] counts consecutive days where
+     * it is true, and five of them make the governor raise the daily target. It
+     * used to be set by `done >= dailyMinimumCards`, and dailyMinimumCards is 1
+     * — so answering a single card, on a day the governor had planned forty,
+     * counted as a clean day, and a week of one card an evening was rewarded
+     * with a larger target. The plan the governor built is the obligation.
+     *
+     * Extras are subtracted out: "ещё немного" is voluntary, and pressing it
+     * must not move the finish line further away. If there is no plan row for
+     * the day (an old day whose row has been cleaned up, or a replay from the
+     * log) the old minimum is the fallback.
+     */
+    private suspend fun planCompleted(day: String, done: Int): Boolean {
+        val plan = planDao.plan(day)
+        val obligation = plan?.let { it.plannedTotal - it.extraRequested } ?: 0
+        return if (obligation > 0) done >= obligation else done >= config.dailyMinimumCards
     }
 
     private fun startOfDay(ts: Long): Long = boundary.startOfDay(ts)
@@ -825,8 +885,10 @@ class LearningRepository(
     }
 
     private companion object {
-        /** Upper bound on how far back an absence is repaid, in days. */
-        const val MAX_CREDIT_DAYS = 120L
+        /** How far back countCleanDays and daysSinceReturn look, in days. */
+        const val CLEAN_DAY_SCAN = 30
+        const val RETURN_SCAN_DAYS = 90
+
         const val AUTO_WINDOW_DAYS = 14
         const val AUTO_COLD_START = 25
         const val AUTO_MIN = 12

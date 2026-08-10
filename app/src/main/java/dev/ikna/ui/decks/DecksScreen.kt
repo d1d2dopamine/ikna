@@ -103,7 +103,11 @@ fun DecksScreen(
                 val name = displayName(context, uri)
                 val text = context.contentResolver.openInputStream(uri)
                     ?.bufferedReader()?.use { it.readText() } ?: ""
-                container.deckRepository.importFile(name, text)
+                container.deckRepository.importFile(
+                    fileName = name,
+                    text = text,
+                    fallbackTitle = S.t("deckrepo.001")
+                )
             }
             // The user just asked for this content, so let it into today's plan
             // instead of making them wait until tomorrow.
@@ -172,6 +176,14 @@ fun DecksScreen(
                     onToggle = { active ->
                         scope.launch {
                             container.deckRepository.setActive(deck.id, active)
+                            // Switching a deck on or off changes what a day is
+                            // made of, and the day has already been built and
+                            // stored. Without dropping it, a deck turned on now
+                            // owes nothing until tomorrow — which is how a deck
+                            // could be enabled and then refuse to open. Importing
+                            // a deck does exactly this, for exactly this reason;
+                            // the toggle was the path that forgot to.
+                            container.learningRepository.invalidatePlan()
                             reload()
                         }
                     }
@@ -239,9 +251,11 @@ fun DecksScreen(
  * in the accent colour and given room, and the frame is gone. The eye lands on
  * the number before it has read a single word, which is the whole job.
  *
- * On a finished day it drops to the muted colour and stops being clickable. No
- * congratulation, no badge, no streak: the reward for finishing is that the
- * screen goes quiet.
+ * On a finished day it drops to the muted colour and the arrow goes away — but it
+ * still opens. A dead control is not restraint, it is a screen that stopped
+ * answering: "ничего не ждёт" is an answer, and the session screen already knows
+ * how to hand a few extra cards to someone who asks anyway. No congratulation, no
+ * badge, no streak: the reward for finishing is that the screen goes quiet.
  */
 @Composable
 private fun TodayBlock(total: Int, onClick: () -> Unit) {
@@ -249,7 +263,7 @@ private fun TodayBlock(total: Int, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = enabled, onClick = onClick)
+            .clickable(onClick = onClick)
             .padding(vertical = Space.sm)
     ) {
         Text(
@@ -319,7 +333,16 @@ private fun DeckRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = owes, onClick = onOpen),
+            // Always openable, whatever the deck owes today.
+            //
+            // This row used to be clickable only when something was due, so a
+            // deck with an empty plan could not be opened at all — tap, nothing,
+            // no message, no reason given. Two ordinary situations landed there:
+            // a deck just switched on (the day was built before it existed) and a
+            // deck already finished today. Neither is a locked door. The session
+            // screen has the empty state and the "a few more" path for exactly
+            // this, and until now that path was unreachable.
+            .clickable(onClick = onOpen),
         verticalAlignment = Alignment.Top
     ) {
         DeckMark(deck = deck, owes = owes)

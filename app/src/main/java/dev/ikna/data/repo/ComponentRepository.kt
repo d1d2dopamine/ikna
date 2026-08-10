@@ -81,16 +81,66 @@ class ComponentRepository(
     fun retrievability(elapsedDays: Double, stability: Double): Double =
         (1.0 + (19.0 / 81.0) * elapsedDays / max(stability, 0.1)).pow(-0.5)
 
-    /** Replays the whole append-only review log to rebuild this table. */
+    /**
+     * Replays the whole append-only review log to rebuild this table.
+     *
+     * Two things changed here, both of which made the rebuilt table disagree
+     * with the one it replaced:
+     *
+     *  - it read `all()`, the raw log. That includes retractions, which carry
+     *    `rating = 0` and were therefore counted as failures — undoing an answer
+     *    damaged the word it contained instead of reverting it — and it includes
+     *    the retracted answers themselves. `allAnswers()` is the log with both
+     *    sides of every undo removed, which is what the live path counts;
+     *  - it ran two queries per answer. On a four-month log that is tens of
+     *    thousands of round trips through SQLite for a table that fits in
+     *    memory, and it runs at the end of every restore.
+     */
     suspend fun rebuildFromReviews() {
         componentDao.clear()
-        for (r in reviewDao.all()) {
-            recordAnswer(r.chunkId, r.rating, r.ts)
+        val answers = reviewDao.allAnswers()
+        if (answers.isEmpty()) return
+
+        val tokens = answers.asSequence()
+            .map { it.chunkId }
+            .distinct()
+            .chunked(TOKEN_QUERY_BATCH)
+            .flatMap { chunkDao.tokensFor(it).asSequence() }
+            .filter { it.weight > 0.0 }
+            .groupBy { it.chunkId }
+
+        val acc = HashMap<ComponentKey, ComponentEntity>()
+        for (r in answers) {
+            val success = if (r.rating >= 3) 1.0 else 0.0
+            for (t in tokens[r.chunkId].orEmpty()) {
+                val key = ComponentKey(t.lemma, t.pos)
+                val prev = acc[key]
+                val exposures = (prev?.exposures ?: 0.0) + t.weight
+                val successes = (prev?.successes ?: 0.0) + t.weight * success
+                acc[key] = ComponentEntity(
+                    lemma = t.lemma,
+                    pos = t.pos,
+                    exposures = exposures,
+                    successes = successes,
+                    stabilityEst =
+                        estimateStability(exposures, successes, prev?.stabilityEst, success),
+                    firstSeenAt = prev?.firstSeenAt ?: r.ts,
+                    lastSeenAt = r.ts
+                )
+            }
         }
+
+        acc.values.chunked(UPSERT_BATCH).forEach { componentDao.upsertAll(it) }
     }
 
     /** Danger zone: wipes the derived word layer. Rebuildable from `reviews`. */
     suspend fun clearAll() = componentDao.clear()
 
     suspend fun knownWordCount(): Int = componentDao.knownCount(minStability = 7.0)
+
+    private companion object {
+        /** SQLite refuses an IN list longer than 999 bound arguments. */
+        const val TOKEN_QUERY_BATCH = 400
+        const val UPSERT_BATCH = 500
+    }
 }

@@ -24,15 +24,23 @@ class SwipeDecisionTest {
     @Test
     fun a_short_slow_drag_springs_back() {
         assertNull(decideRating(SWIPE_THRESHOLD - 1f, 0f))
-        assertNull(decideRating(0f, SWIPE_THRESHOLD - 1f))
+        assertNull(decideRating(-(SWIPE_THRESHOLD - 1f), 0f))
     }
 
     @Test
-    fun four_directions_mean_four_answers() {
+    fun two_directions_mean_two_answers() {
         assertEquals(Rating.AGAIN, decideRating(-SWIPE_THRESHOLD, 0f))
         assertEquals(Rating.GOOD, decideRating(SWIPE_THRESHOLD, 0f))
-        assertEquals(Rating.EASY, decideRating(0f, -SWIPE_THRESHOLD))
-        assertEquals(Rating.HARD, decideRating(0f, SWIPE_THRESHOLD))
+    }
+
+    @Test
+    fun up_and_down_are_no_longer_answers() {
+        // They used to be "easy" and "hard". A thumb travelling to the corner of a
+        // phone moves diagonally, so the vertical pair mostly recorded grades
+        // nobody chose.
+        assertNull(decideRating(0f, -SWIPE_THRESHOLD))
+        assertNull(decideRating(0f, SWIPE_THRESHOLD))
+        assertNull(decideRating(0f, -400f, velocityX = 0f))
     }
 
     @Test
@@ -46,10 +54,6 @@ class SwipeDecisionTest {
         assertEquals(
             Rating.AGAIN,
             decideRating(-SWIPE_THRESHOLD / 3f, 0f, velocityX = -(FLING_SPEED + 10f))
-        )
-        assertEquals(
-            Rating.EASY,
-            decideRating(0f, -SWIPE_THRESHOLD / 3f, velocityY = -(FLING_SPEED + 10f))
         )
     }
 
@@ -66,9 +70,18 @@ class SwipeDecisionTest {
     }
 
     @Test
-    fun the_longer_axis_wins() {
+    fun a_mostly_vertical_drag_is_not_an_answer() {
         assertEquals(Rating.GOOD, decideRating(200f, 150f))
-        assertEquals(Rating.HARD, decideRating(100f, 200f))
+        assertNull(decideRating(100f, 200f))
+        assertNull(decideRating(-100f, -200f))
+    }
+
+    @Test
+    fun a_diagonal_flick_still_answers_on_its_own_axis() {
+        assertEquals(
+            Rating.GOOD,
+            decideRating(60f, 40f, velocityX = FLING_SPEED + 100f)
+        )
     }
 
     @Test

@@ -3,6 +3,7 @@ package dev.ikna.data.export
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.LANGUAGE_SYSTEM
 import dev.ikna.data.prefs.SettingsStore
+import dev.ikna.data.prefs.DEFAULT_PALETTE_ID
 import dev.ikna.data.prefs.ThemeMode
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -46,6 +47,10 @@ data class SettingsSnapshot(
     val kind: String,
     val version: Int = 1,
     val theme: String = ThemeMode.DARK.name,
+    // A file written before palettes existed has no id in it, and the default is
+    // the right answer for it: that build had exactly one dark scheme, and the
+    // palette that carries it forward is the default one.
+    val paletteId: String = DEFAULT_PALETTE_ID,
     val customBackground: Int = 0,
     val customInk: Int = 0,
     val customMuted: Int = 0,
@@ -59,7 +64,10 @@ data class SettingsSnapshot(
     val haptics: Boolean = true,
     val animations: Boolean = true,
     val autoExport: Boolean = true,
-    val speech: Boolean = true,
+    // Off, matching the setting's own default. A file from an older build has no
+    // such field, and a missing field must not be able to switch speech on for
+    // someone who never asked for it.
+    val speech: Boolean = false,
     val speechVoices: String = "",
     // 100 means the engine's own speed and pitch, matching SPEECH_TONE_DEFAULT. A
     // literal is used because a serializable default has to be a constant here,
@@ -80,6 +88,7 @@ object SettingsBackup {
     fun snapshotOf(settings: IknaSettings): SettingsSnapshot = SettingsSnapshot(
         kind = SETTINGS_BACKUP_KIND,
         theme = settings.theme.name,
+        paletteId = settings.paletteId,
         customBackground = settings.customBackground,
         customInk = settings.customInk,
         customMuted = settings.customMuted,
@@ -139,6 +148,7 @@ object SettingsBackup {
             muted = snapshot.customMuted,
             accent = snapshot.customAccent
         )
+        store.setPalette(snapshot.paletteId)
         store.setTheme(theme)
         if (snapshot.autoLoad) store.setAutoLoad(true) else store.setManualLoad(snapshot.manualLoad)
         store.setLanguage(snapshot.language)

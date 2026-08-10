@@ -22,9 +22,12 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.ikna.data.prefs.DEFAULT_PALETTE_ID
 import dev.ikna.data.prefs.FontStore
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.ThemeMode
+import kotlin.math.abs
+import kotlin.math.min
 
 /*
  * Paper and ink, one accent, right angles.
@@ -42,29 +45,66 @@ import dev.ikna.data.prefs.ThemeMode
  * brown smudge on paper, and it was the same value in both.
  */
 
-// ---- light: actually light -------------------------------------------------
+// ---- danger ----------------------------------------------------------------
 //
-// The previous "light" theme was #F1EFE9 paper with a #6A6454 brown for
-// secondary text — a beige scheme with a navy accent, which reads as an inverted
-// dark theme rather than as a light one. This is near-white and hue-neutral.
-private val LightBackground = Color(0xFFFBFAF8)
-private val LightInk = Color(0xFF2C2A27)
-private val LightMuted = Color(0xFF6B685F)
-private val LightAccent = Color(0xFF33469E)
+// Reserved for destructive controls only: wiping data, starting over.
+//
+// Deliberately not part of [IknaPalette] — "this one is dangerous" has to
+// survive any colour scheme, including one the user invented. But it cannot be a
+// single constant either, and the old one proved it twice over:
+//
+// #B44A34 measured 3.5:1 on every dark background the app ships, which is below
+// the line for text and was the least readable colour in the product — on the one
+// control where a misread is unrecoverable. So there are two, one per lighting.
+//
+// And a red warning stops being a warning next to a warm accent: on the default
+// palette the ember accent and any red are the same colour to a glance, so
+// "стереть всё" would look like an ordinary button. When the accent is that
+// close in hue, danger is carried by the word and the frame instead, and the
+// colour steps back to ink. Colour was never allowed to be the only carrier of
+// meaning anyway.
+private val DangerOnDark = Color(0xFFFF7A66)
+private val DangerOnLight = Color(0xFF962A17)
 
-// ---- dark ------------------------------------------------------------------
-private val DarkBackground = Color(0xFF121110)
-private val DarkInk = Color(0xFFEDE9E1)
-private val DarkMuted = Color(0xFF8F887A)
-private val DarkAccent = Color(0xFF97A4D8)
+private const val DANGER_HUE = 8f
+private const val DANGER_HUE_GUARD = 26f
+private const val DANGER_MIN_SATURATION = 0.35f
+
+/** The colour of a destructive control under this palette. */
+fun dangerFor(palette: IknaPalette): Color {
+    if (clashesWithDanger(palette.accent)) return palette.ink
+    return if (palette.light) DangerOnLight else DangerOnDark
+}
+
+/** True when the accent is close enough to the danger red to be mistaken for it. */
+fun clashesWithDanger(accent: Color): Boolean {
+    val (hue, saturation) = hueAndSaturation(accent)
+    if (saturation < DANGER_MIN_SATURATION) return false
+    val distance = abs(hue - DANGER_HUE)
+    return min(distance, 360f - distance) < DANGER_HUE_GUARD
+}
 
 /**
- * Reserved for destructive controls only: wiping data, starting over.
- *
- * Deliberately not part of [IknaPalette]. "This one is dangerous" has to survive
- * any colour scheme the user invents, including one where the accent is red.
+ * Hue in degrees and saturation, computed rather than taken from the platform:
+ * android.graphics.Color is not available in a unit test, and this rule is
+ * asserted by one.
  */
-val IknaDanger = Color(0xFFB44A34)
+fun hueAndSaturation(color: Color): Pair<Float, Float> {
+    val r = color.red
+    val g = color.green
+    val b = color.blue
+    val high = maxOf(r, g, b)
+    val low = minOf(r, g, b)
+    val span = high - low
+    if (span <= 0f || high <= 0f) return 0f to 0f
+    val raw = when (high) {
+        r -> 60f * ((g - b) / span)
+        g -> 60f * ((b - r) / span + 2f)
+        else -> 60f * ((r - g) / span + 4f)
+    }
+    val hue = ((raw % 360f) + 360f) % 360f
+    return hue to (span / high)
+}
 
 /**
  * A whole theme.
@@ -89,19 +129,161 @@ data class IknaPalette(
     val light: Boolean get() = isLight(background)
 }
 
-val DarkPalette = IknaPalette(
-    background = DarkBackground,
-    ink = DarkInk,
-    muted = DarkMuted,
-    accent = DarkAccent
+/**
+ * A palette and both of its lightings.
+ *
+ * The pair is authored by hand, not derived. A light theme computed by inverting
+ * a dark one is how the previous light theme came out brown: a warm muted grey
+ * that works on near-black is a smudge on paper, and a saturated accent that
+ * glows on a dark field is unreadable on a bright one — the ember accent measures
+ * 6.1:1 on its own dark background and would be about 2:1 on paper. Every light
+ * accent below is therefore a darker, deeper version of the same hue, not the
+ * same value reused.
+ *
+ * The name is a key in the string catalogue, so palettes are translated like
+ * everything else in the interface.
+ */
+data class IknaPaletteSpec(
+    val id: String,
+    val nameKey: String,
+    val dark: IknaPalette,
+    val light: IknaPalette
+) {
+    fun palette(light: Boolean): IknaPalette = if (light) this.light else this.dark
+}
+
+/**
+ * Every palette the app ships, in the order they are offered.
+ *
+ * Each one is a hue in the background with paper of the same hue as its light
+ * version — one brand in two lightings. "Ноль" is the exception on purpose: pure
+ * black and pure white, for sunlight and for OLED, where the recognisable part is
+ * the absence of colour.
+ *
+ * Every entry here is asserted readable, in both lightings, by PaletteTest.
+ */
+val IknaPalettes: List<IknaPaletteSpec> = listOf(
+    // Уголь. Burnt earth and an ember: the launcher field and the spark, finally
+    // also inside the app.
+    IknaPaletteSpec(
+        id = "ember",
+        nameKey = "set.116",
+        dark = IknaPalette(
+            background = Color(0xFF17100C),
+            ink = Color(0xFFF2E6D9),
+            muted = Color(0xFF9C8574),
+            accent = Color(0xFFF2683C)
+        ),
+        light = IknaPalette(
+            background = Color(0xFFF7EADC),
+            ink = Color(0xFF241610),
+            muted = Color(0xFF7A5B49),
+            accent = Color(0xFFB8431F)
+        )
+    ),
+    // Библиотека. Bottle green and brass: a reading room, nothing hurrying.
+    IknaPaletteSpec(
+        id = "library",
+        nameKey = "set.117",
+        dark = IknaPalette(
+            background = Color(0xFF0F1712),
+            ink = Color(0xFFE8EEE4),
+            muted = Color(0xFF7D9083),
+            accent = Color(0xFFE3B45E)
+        ),
+        light = IknaPalette(
+            background = Color(0xFFEFF2E8),
+            ink = Color(0xFF14201A),
+            muted = Color(0xFF5C6D61),
+            accent = Color(0xFF7E6413)
+        )
+    ),
+    // Чернила. Ink-blue paper with a warm accent on it.
+    IknaPaletteSpec(
+        id = "ink",
+        nameKey = "set.118",
+        dark = IknaPalette(
+            background = Color(0xFF0B1120),
+            ink = Color(0xFFE5EAF4),
+            muted = Color(0xFF78859C),
+            accent = Color(0xFFFF7A5C)
+        ),
+        light = IknaPalette(
+            background = Color(0xFFEDF1F8),
+            // Deeper than the coral of the dark version by two steps rather than
+            // one: #C9452B looked right next to it and measured 4.2:1 on this
+            // paper, which is under the line for the small mono labels the accent
+            // is also used for.
+            ink = Color(0xFF0E1526),
+            muted = Color(0xFF58637A),
+            accent = Color(0xFFB83A21)
+        )
+    ),
+    // Слива. The loudest one: aubergine and mint.
+    IknaPaletteSpec(
+        id = "plum",
+        nameKey = "set.119",
+        dark = IknaPalette(
+            background = Color(0xFF150F1C),
+            ink = Color(0xFFEDE6F1),
+            muted = Color(0xFF897D94),
+            accent = Color(0xFF45D6A6)
+        ),
+        light = IknaPalette(
+            background = Color(0xFFF4EFF7),
+            ink = Color(0xFF1D1324),
+            muted = Color(0xFF695B74),
+            accent = Color(0xFF0C7A59)
+        )
+    ),
+    // Ноль. No hue at all, in either direction.
+    IknaPaletteSpec(
+        id = "zero",
+        nameKey = "set.120",
+        dark = IknaPalette(
+            background = Color(0xFF000000),
+            ink = Color(0xFFFFFFFF),
+            muted = Color(0xFF8F8F8F),
+            accent = Color(0xFFFFFFFF)
+        ),
+        light = IknaPalette(
+            background = Color(0xFFFFFFFF),
+            ink = Color(0xFF000000),
+            muted = Color(0xFF6E6E6E),
+            accent = Color(0xFF000000)
+        )
+    ),
+    // What the app looked like before it had a palette. Kept, because someone
+    // updating into a new brand should be able to put the old one back.
+    IknaPaletteSpec(
+        id = "neutral",
+        nameKey = "set.121",
+        dark = IknaPalette(
+            background = Color(0xFF121110),
+            ink = Color(0xFFEDE9E1),
+            muted = Color(0xFF8F887A),
+            accent = Color(0xFF97A4D8)
+        ),
+        light = IknaPalette(
+            background = Color(0xFFFBFAF8),
+            ink = Color(0xFF2C2A27),
+            muted = Color(0xFF6B685F),
+            accent = Color(0xFF33469E)
+        )
+    )
 )
 
-val LightPalette = IknaPalette(
-    background = LightBackground,
-    ink = LightInk,
-    muted = LightMuted,
-    accent = LightAccent
-)
+/** The palette behind a stored id. Anything unknown resolves to the default. */
+fun paletteSpec(id: String): IknaPaletteSpec =
+    IknaPalettes.firstOrNull { it.id == id }
+        ?: IknaPalettes.first { it.id == DEFAULT_PALETTE_ID }
+
+/** The app's own palette. */
+val DefaultPaletteSpec: IknaPaletteSpec get() = paletteSpec(DEFAULT_PALETTE_ID)
+
+val DarkPalette: IknaPalette get() = DefaultPaletteSpec.dark
+
+val LightPalette: IknaPalette get() = DefaultPaletteSpec.light
 
 private fun mix(a: Color, b: Color, t: Float): Color = Color(
     red = a.red + (b.red - a.red) * t,
@@ -118,11 +300,24 @@ fun customPaletteOf(settings: IknaSettings): IknaPalette = IknaPalette(
     accent = Color(settings.customAccent)
 )
 
-/** Which palette a mode resolves to. Used by the theme and by the system bars. */
-fun paletteFor(settings: IknaSettings): IknaPalette = when (settings.theme) {
-    ThemeMode.DARK -> DarkPalette
-    ThemeMode.LIGHT -> LightPalette
-    ThemeMode.CUSTOM -> customPaletteOf(settings)
+/**
+ * The palette to paint with. Used by the theme and by the system bars.
+ *
+ * Two independent choices meet here: which palette (the app's identity, the
+ * user's to pick) and how it is lit (dark, light, or whatever the phone is doing
+ * right now). Only the second one is allowed to change by itself.
+ *
+ * systemDark defaults to true so that a caller with no window — a preview, a
+ * test — gets the dark lighting rather than a compile error.
+ */
+fun paletteFor(settings: IknaSettings, systemDark: Boolean = true): IknaPalette {
+    val spec = paletteSpec(settings.paletteId)
+    return when (settings.theme) {
+        ThemeMode.DARK -> spec.dark
+        ThemeMode.LIGHT -> spec.light
+        ThemeMode.SYSTEM -> spec.palette(light = !systemDark)
+        ThemeMode.CUSTOM -> customPaletteOf(settings)
+    }
 }
 
 /**
@@ -146,7 +341,7 @@ private fun schemeOf(p: IknaPalette) = if (p.light) {
         onSurfaceVariant = p.muted,
         outline = p.line,
         outlineVariant = p.line,
-        error = IknaDanger,
+        error = dangerFor(p),
         onError = p.background
     )
 } else {
@@ -163,7 +358,7 @@ private fun schemeOf(p: IknaPalette) = if (p.light) {
         onSurfaceVariant = p.muted,
         outline = p.line,
         outlineVariant = p.line,
-        error = IknaDanger,
+        error = dangerFor(p),
         onError = p.background
     )
 }

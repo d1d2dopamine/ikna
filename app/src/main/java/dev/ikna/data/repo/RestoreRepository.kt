@@ -7,37 +7,11 @@ import dev.ikna.data.db.PlanDao
 import dev.ikna.data.db.ReviewDao
 import dev.ikna.data.db.ReviewEntity
 import dev.ikna.data.db.StatsDao
+import dev.ikna.data.export.ReviewRecord
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.fsrs.Scheduler
 import dev.ikna.domain.governor.GovernorConfig
 import dev.ikna.domain.time.DayBoundary
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-
-@Serializable
-private data class ReviewRecord(
-    val id: Long = 0,
-    val chunkId: String,
-    val level: Int = 0,
-    val ts: Long,
-    val rating: Int,
-    val elapsedDays: Double = 0.0,
-    val stabilityBefore: Double = 0.0,
-    val stabilityAfter: Double = 0.0,
-    val difficultyBefore: Double = 5.0,
-    val difficultyAfter: Double = 5.0,
-    val durationMs: Long = 0L,
-    val wasAmnesty: Boolean = false,
-    val prevStability: Double? = null,
-    val prevDifficulty: Double? = null,
-    val prevDueAt: Long? = null,
-    val prevLastReviewAt: Long? = null,
-    val prevReps: Int? = null,
-    val prevLapses: Int? = null,
-    val prevIsNew: Boolean? = null,
-    val prevInAmnesty: Boolean? = null,
-    val undoOf: Long? = null
-)
 
 data class RestoreResult(val imported: Int, val skipped: Int, val replayed: Int)
 
@@ -50,6 +24,15 @@ data class RestoreResult(val imported: Int, val skipped: Int, val replayed: Int)
  * is not "copying a backup over the app", it is replaying a history — which
  * also means a future change to the algorithm can re-derive everything from the
  * same file.
+ *
+ * The one thing in the file that must NOT be taken literally is the row id. Ids
+ * belong to the database that issued them, and a restore is normally into a
+ * different one: a new phone, or an install that has been used for a week
+ * before the file arrived. Importing them verbatim either collides with a row
+ * that already exists or, worse, quietly attaches an old retraction to whatever
+ * unrelated answer happens to hold that number now. Rows are therefore inserted
+ * unnumbered, and the undo trail is re-pointed through the ids SQLite hands
+ * back.
  */
 class RestoreRepository(
     private val cardDao: CardDao,
@@ -61,59 +44,114 @@ class RestoreRepository(
     private val config: GovernorConfig
 ) {
 
-    private val json = Json { ignoreUnknownKeys = true }
-
     suspend fun restoreFromJsonl(text: String): RestoreResult {
-        val known = reviewDao.signatures().toHashSet()
-        val batch = ArrayList<ReviewEntity>()
         var skipped = 0
-
+        val records = ArrayList<ReviewRecord>()
         for (line in text.lineSequence()) {
             if (line.isBlank()) continue
-            val rec = runCatching { json.decodeFromString<ReviewRecord>(line) }.getOrNull()
+            val rec = runCatching {
+                ReviewRecord.json.decodeFromString(ReviewRecord.serializer(), line)
+            }.getOrNull()
             if (rec == null) {
                 skipped++
                 continue
             }
-            val signature = rec.chunkId + ":" + rec.level + ":" + rec.ts
-            if (!known.add(signature)) {
+            records += rec
+        }
+
+        // Signature -> the id that answer has *here*. Seeded with what is
+        // already stored, so importing the same file twice is a no-op.
+        val known = HashMap<String, Long>()
+        for (k in reviewDao.keys()) known[k.signature] = k.id
+
+        // Id in the file -> id here. This is what makes `undoOf` survive.
+        val remap = HashMap<Long, Long>()
+
+        val sorted = records.sortedBy { it.ts }
+
+        // Pass one: the answers. They have to land before the retractions,
+        // because a retraction is only meaningful once the row it points at
+        // exists and has a number.
+        val staged = HashSet<String>()
+        val answers = ArrayList<Pair<ReviewRecord, ReviewEntity>>()
+        for (rec in sorted) {
+            if (rec.undoOf != null) continue
+            val existing = known[rec.signature]
+            if (existing != null) {
+                // Already here. Still worth remembering, because a retraction
+                // later in the same file may point at it.
+                if (rec.id != 0L) remap[rec.id] = existing
                 skipped++
                 continue
             }
-            batch += ReviewEntity(
-                id = rec.id,
-                chunkId = rec.chunkId,
-                level = rec.level,
-                ts = rec.ts,
-                rating = rec.rating,
-                elapsedDays = rec.elapsedDays,
-                stabilityBefore = rec.stabilityBefore,
-                stabilityAfter = rec.stabilityAfter,
-                difficultyBefore = rec.difficultyBefore,
-                difficultyAfter = rec.difficultyAfter,
-                durationMs = rec.durationMs,
-                wasAmnesty = rec.wasAmnesty,
-                prevStability = rec.prevStability,
-                prevDifficulty = rec.prevDifficulty,
-                prevDueAt = rec.prevDueAt,
-                prevLastReviewAt = rec.prevLastReviewAt,
-                prevReps = rec.prevReps,
-                prevLapses = rec.prevLapses,
-                prevIsNew = rec.prevIsNew,
-                prevInAmnesty = rec.prevInAmnesty,
-                undoOf = rec.undoOf
-            )
+            if (!staged.add(rec.signature)) {
+                skipped++
+                continue
+            }
+            answers += rec to rec.toEntity()
         }
+        var imported = insertRecords(answers, known, remap)
 
-        if (batch.isNotEmpty()) reviewDao.insertAll(batch)
+        // Pass two: the retractions, each re-pointed at the local id of the
+        // answer it undoes. One whose target cannot be resolved is dropped
+        // rather than imported dangling: a retraction of nothing would sit in
+        // the log forever and hide a row that no longer exists.
+        val stagedUndo = HashSet<String>()
+        val retractions = ArrayList<Pair<ReviewRecord, ReviewEntity>>()
+        for (rec in sorted) {
+            val target = rec.undoOf ?: continue
+            if (known.containsKey(rec.signature) || !stagedUndo.add(rec.signature)) {
+                skipped++
+                continue
+            }
+            val here = remap[target]
+            if (here == null) {
+                skipped++
+                continue
+            }
+            retractions += rec to rec.toEntity(undoOf = here)
+        }
+        imported += insertRecords(retractions, known, remap)
+
         val replayed = replayFromLog()
-        return RestoreResult(imported = batch.size, skipped = skipped, replayed = replayed)
+        return RestoreResult(imported = imported, skipped = skipped, replayed = replayed)
+    }
+
+    /**
+     * Inserts a batch and records the ids SQLite assigned, in order.
+     *
+     * Batched because a per-row insert is a transaction per row, and a log with
+     * four months in it makes that the slowest thing the app ever does.
+     */
+    private suspend fun insertRecords(
+        pending: List<Pair<ReviewRecord, ReviewEntity>>,
+        known: MutableMap<String, Long>,
+        remap: MutableMap<Long, Long>
+    ): Int {
+        var imported = 0
+        for (part in pending.chunked(INSERT_BATCH)) {
+            val ids = reviewDao.insertAll(part.map { it.second })
+            for ((i, pair) in part.withIndex()) {
+                val newId = ids.getOrNull(i) ?: continue
+                if (newId <= 0L) continue
+                val rec = pair.first
+                known[rec.signature] = newId
+                if (rec.id != 0L) remap[rec.id] = newId
+                imported++
+            }
+        }
+        return imported
     }
 
     /**
      * Rebuilds every derived table by replaying the log through the scheduler.
      * Retracted answers are already filtered out by the DAO, so an undo made
      * months ago stays undone.
+     *
+     * Everything is accumulated in memory and written once at the end. The old
+     * version read and wrote one card per answer, which on a real log is two
+     * SQLite round trips per row for a table small enough to hold whole — and
+     * this runs on the main path of every restore.
      */
     suspend fun replayFromLog(): Int {
         cardDao.clear()
@@ -121,12 +159,13 @@ class RestoreRepository(
         planDao.clear()
 
         val answers = reviewDao.allAnswers()
-        val seen = HashSet<String>()
+        val boundary = DayBoundary(config.dayStartHour)
+        val cards = LinkedHashMap<String, CardEntity>()
         val days = LinkedHashMap<String, DailyStatEntity>()
 
         for (r in answers) {
-            val existing = cardDao.card(r.chunkId, r.level)
-            val card = existing ?: CardEntity(
+            val key = r.chunkId + ":" + r.level
+            val card = cards[key] ?: CardEntity(
                 chunkId = r.chunkId,
                 level = r.level,
                 stability = r.prevStability ?: r.stabilityBefore,
@@ -139,25 +178,35 @@ class RestoreRepository(
                 inAmnesty = false,
                 isNew = r.prevIsNew ?: true
             )
-            cardDao.upsert(scheduler.apply(card, ratingOf(r.rating), r.ts).card)
+            val firstTime = !cards.containsKey(key)
+            cards[key] = scheduler.apply(card, ratingOf(r.rating), r.ts).card
 
             // Same boundary as the live counters, or a restore would rebuild
             // stats that disagree with the app that wrote them.
-            val day = DayBoundary(config.dayStartHour).key(r.ts)
+            val day = boundary.key(r.ts)
             val stat = days[day] ?: DailyStatEntity(day, 0, 0, 0L, 1.0, false)
             val done = stat.reviewsDone + 1
-            val correct = stat.accuracy * stat.reviewsDone + if (r.rating >= 3) 1.0 else 0.0
-            val firstTime = seen.add(r.chunkId + ":" + r.level)
+            val correct = stat.correctCount + if (r.rating >= 3) 1 else 0
             days[day] = stat.copy(
                 reviewsDone = done,
+                correctCount = correct,
                 newIntroduced = stat.newIntroduced + if (firstTime) 1 else 0,
                 activeMs = stat.activeMs + r.durationMs,
-                accuracy = correct / done,
-                planCompleted = done >= config.dailyMinimumCards
+                accuracy = correct.toDouble() / done,
+                // Deliberately false, and deliberately not guessed.
+                //
+                // planCompleted means "the plan the governor built that day was
+                // finished", and the plan is nowhere in the log — it is not an
+                // answer, so it is not exported. Setting it from a card count
+                // would invent five clean days out of a restore and hand the
+                // user a larger daily target on their first evening back. The
+                // accelerator restarts instead, and earns its way up again.
+                planCompleted = false
             )
         }
 
-        for (stat in days.values) statsDao.upsert(stat)
+        cards.values.chunked(WRITE_BATCH).forEach { cardDao.upsertAll(it) }
+        days.values.chunked(WRITE_BATCH).forEach { statsDao.upsertAll(it) }
         components.rebuildFromReviews()
         return answers.size
     }
@@ -167,5 +216,10 @@ class RestoreRepository(
         2 -> Rating.HARD
         3 -> Rating.GOOD
         else -> Rating.EASY
+    }
+
+    private companion object {
+        const val INSERT_BATCH = 500
+        const val WRITE_BATCH = 500
     }
 }

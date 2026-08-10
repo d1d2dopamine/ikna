@@ -56,6 +56,20 @@ jobs:
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: warn
 
+      # Room writes the schema of every version to app/schemas during the build,
+      # and those files are what make a migration testable: without the old
+      # schema there is nothing to migrate from, and an upgrade that drops user
+      # data looks exactly like one that does not. They are meant to be
+      # committed; uploading them here means a build always makes the current
+      # one available, even if someone forgets.
+      - name: Room schemas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ikna-room-schemas
+          path: app/schemas
+          if-no-files-found: warn
+
       - name: Unit tests
         run: gradle --no-daemon --stacktrace testReleaseUnitTest
 

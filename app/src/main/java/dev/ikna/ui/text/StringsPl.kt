@@ -320,6 +320,28 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"set.111" to "SZYBKOŚĆ",
 	"set.112" to "WYSOKOŚĆ",
 	"set.113" to "100 to tyle, ile ustawiono w samym telefonie. Karty już wypowiedziane zostaną wypowiedziane ponownie.",
+	// ПАЛИТРА
+	"set.114" to "PALETA",
+	// Цвет самого приложения. Светлая и тёмная версии — это одна палитра при разном освещении, а не две разные темы.
+	"set.115" to "Kolor samej aplikacji. Wersja jasna i ciemna to jedna paleta w dwóch oświetleniach, a nie dwa różne motywy.",
+	// УГОЛЬ
+	"set.116" to "WĘGIEL",
+	// БИБЛИОТЕКА
+	"set.117" to "BIBLIOTEKA",
+	// ЧЕРНИЛА
+	"set.118" to "ATRAMENT",
+	// СЛИВА
+	"set.119" to "ŚLIWKA",
+	// НОЛЬ
+	"set.120" to "ZERO",
+	// НЕЙТРАЛЬНАЯ
+	"set.121" to "NEUTRALNA",
+	// ОСВЕЩЕНИЕ
+	"set.122" to "OŚWIETLENIE",
+	// БЕТА
+	"set.123" to "BETA",
+	// Пока в бете и по умолчанию выключено: как звучит голос, решает движок на телефоне, а плохой голос хуже тишины.
+	"set.124" to "Na razie w wersji beta i domyślnie wyłączone: jak brzmi głos, decyduje silnik w telefonie, a zły głos jest gorszy od ciszy.",
 	// ← НАЗАД
 	"dbg.001" to "← WSTECZ",
 	// ВЫГРУЗИТЬ ЖУРНАЛ ОТВЕТОВ
@@ -381,18 +403,12 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"deck.016" to "karty",
 	// карточек
 	"deck.017" to "kart",
-	//  · ВЕРНУЛАСЬ
-	"card.001" to " · WRÓCIŁA",
 	// тап в любом месте
 	"card.002" to "dotknij gdziekolwiek",
-	// ↑ ЛЕГКО
-	"card.003" to "↑ ŁATWE",
-	// ↓ ТРУДНО
-	"card.004" to "↓ TRUDNE",
-	// ← НЕ ПОМНЮ
-	"card.005" to "← NIE PAMIĘTAM",
-	// ПОМНЮ →
-	"card.006" to "PAMIĘTAM →",
+	// ← НЕ ЗНАЮ
+	"card.003" to "← NIE ZNAM",
+	// ЗНАЮ →
+	"card.004" to "ZNAM →",
 	// секунду…
 	"sess.001" to "chwilka…",
 	// знакомство
@@ -522,4 +538,8 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// Колода в работе
 	"a11y.006" to "Talia w użyciu",
 	"a11y.007" to "Wyjaśnij liczbę",
+	// Не знаю
+	"a11y.008" to "Nie znam",
+	// Знаю
+	"a11y.009" to "Znam",
 )

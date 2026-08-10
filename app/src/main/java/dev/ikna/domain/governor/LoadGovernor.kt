@@ -25,7 +25,17 @@ data class GovernorSignals(
     val reviewsDoneToday: Int,
     val cleanDays: Int,
     val newIntroducedLastWeek: Int,
-    val totalReviews: Int
+    val totalReviews: Int,
+    /**
+     * Days since the first session after the last real absence, or null when
+     * the history has no such gap.
+     *
+     * Coming back is not one day. Being handed a full day of new material on
+     * the second evening after two weeks away is how a return turns into the
+     * next absence, so the softer capacity has to outlive the single session
+     * that ended the gap.
+     */
+    val daysSinceReturn: Int? = null
 )
 
 enum class GovernorReason {
@@ -72,7 +82,12 @@ data class GovernorDecision(
 class LoadGovernor(private val config: GovernorConfig) {
 
     fun decide(s: GovernorSignals): GovernorDecision {
-        val inReturnMode = s.daysSinceLastSession >= config.returnModeGapDays
+        // Both halves of return mode: the day the user comes back, and the few
+        // days after it. `returnModeDays` was declared, documented and never
+        // read, so the softer capacity used to disappear the moment a single
+        // session happened.
+        val settlingBackIn = s.daysSinceReturn?.let { it < config.returnModeDays } ?: false
+        val inReturnMode = s.daysSinceLastSession >= config.returnModeGapDays || settlingBackIn
         val capacity = if (inReturnMode) config.returnModeCapacity else config.targetDailyReviews
         val amnestyQuota = (capacity * config.amnestyQuotaRatio).roundToInt()
 
@@ -112,7 +127,16 @@ class LoadGovernor(private val config: GovernorConfig) {
             s.activityRatio < config.minActivityRatio -> GovernorReason.LOW_ACTIVITY
             // New material is earned by attention after a skipped day, never
             // handed out to help the user "catch up".
-            s.daysSinceLastSession >= 1 &&
+            //
+            // Two days, not one. The plan for a day is built once, before the
+            // first answer of that day exists, so `daysSinceLastSession >= 1`
+            // was true every ordinary morning that followed an ordinary
+            // evening: the gate fired on every single day the app was used
+            // normally, `allowedNew` was zero, and the safety valve — one chunk
+            // a week, meant as the last resort — became the only way new
+            // material ever arrived. A skipped day is a day with no answers in
+            // it, which is two calendar days since the last one.
+            s.daysSinceLastSession >= 2 &&
                 s.reviewsDoneToday < config.warmupReviewsAfterSkip -> GovernorReason.POST_SKIP_WARMUP
             s.accuracyRecent < config.minAccuracy -> GovernorReason.LOW_ACCURACY
             else -> null
@@ -153,7 +177,11 @@ class LoadGovernor(private val config: GovernorConfig) {
     /**
      * Without this the governor can latch at zero forever: novelty disappears,
      * the app becomes the treadmill it was built to avoid, and the user leaves.
-     * One chunk a week, no matter what.
+     * One chunk per `safetyValveDays`, no matter what.
+     *
+     * The window itself lives in the caller: `newIntroducedLastWeek` is counted
+     * over `config.safetyValveDays`. This is a last resort and nothing else — if
+     * it is opening every week, a gate above is wrong.
      */
     private fun safetyValveOpen(s: GovernorSignals): Boolean =
         s.newIntroducedLastWeek == 0

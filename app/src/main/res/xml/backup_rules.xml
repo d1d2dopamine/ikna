@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android 11 and below. Kept only because fullBackupContent is still read
+    there; allowBackup="false" in the manifest means none of this runs.
+
+    The database is excluded rather than included: on these versions there is no
+    separate device-transfer channel, so "backup" means upload to Google, and
+    the review log does not go there. See data_extraction_rules.xml and
+    PRIVACY.md.
+-->
 <full-backup-content>
-    <include domain="database" path="ikna.db" />
     <include domain="sharedpref" path="." />
+    <exclude domain="database" path="ikna.db" />
 </full-backup-content>
