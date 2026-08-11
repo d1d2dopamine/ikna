@@ -448,6 +448,18 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"share.002" to "Send deck",
 	"share.003" to "could not share",
 	"share.004" to "this deck has nothing to send yet",
+	// Экран одной колоды
+	"dp.001" to "In use",
+	"dp.002" to "Switched off",
+	"dp.003" to "Deck language",
+	"dp.004" to "Used for the voice only. A deck imported from a file starts with no language, which is why it cannot be read aloud until one is chosen.",
+	"dp.005" to "no voice",
+	"dp.006" to "Send deck",
+	"dp.007" to "Delete deck",
+	"dp.008" to "Tap again if you really mean it",
+	"dp.009" to "The cards of this deck and their schedule go. The answers stay in the statistics — that log is never rewritten.",
+	"add.036" to "how this works",
+	"add.037" to "hide",
 	// тап в любом месте
 	"card.002" to "tap anywhere",
 	// ← НЕ ЗНАЮ

@@ -62,6 +62,46 @@ class DeckRepository(
 
     suspend fun setActive(id: String, active: Boolean) = chunkDao.setPackActive(id, active)
 
+    /** One deck, for its own screen. Null once it has been deleted. */
+    suspend fun deck(id: String): DeckSummary? = chunkDao.pack(id)?.let { pack ->
+        DeckSummary(
+            id = pack.id,
+            title = pack.title ?: pack.id,
+            lang = pack.lang,
+            total = chunkDao.chunkCountFor(pack.id),
+            introduced = chunkDao.introducedCountFor(pack.id),
+            known = chunkDao.knownCountFor(pack.id, KNOWN_STABILITY_DAYS),
+            isActive = pack.isActive
+        )
+    }
+
+    /**
+     * Which language a deck is in.
+     *
+     * An imported deck starts as "custom", because a file says nothing about the
+     * language inside it and guessing from the alphabet gets English and Polish
+     * wrong in opposite directions. The consequence used to be silent: no
+     * language means no voice, so a deck made by the user could not be read
+     * aloud at all and nothing on screen said why.
+     */
+    suspend fun setLang(id: String, lang: String) = chunkDao.setPackLang(id, lang)
+
+    /**
+     * Deletes a deck: its cards, its tokens, its chunks, and the pack row.
+     *
+     * The answers in `reviews` stay. That table is append-only and it is the one
+     * irreplaceable thing in the database - the statistics are computed from it -
+     * so tidying up a deck must not cost months of history. Chunk ids are derived
+     * from the deck id and the line number, so re-importing the same file later
+     * lines the old answers back up with it.
+     */
+    suspend fun delete(id: String) {
+        chunkDao.deleteCardsForPack(id)
+        chunkDao.deleteTokensForPack(id)
+        chunkDao.deleteChunksForPack(id)
+        chunkDao.deletePack(id)
+    }
+
     /**
      * Imports a `.jsonl` pack picked in the system file browser.
      *

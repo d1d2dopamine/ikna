@@ -102,19 +102,32 @@ class SessionBuilder(
      * at the first two, which meant the button did nothing precisely when the day
      * was finished, which is the only time anyone presses it.
      */
-    suspend fun pickExtra(exclude: List<String>, count: Int, now: Long): List<CardEntity> {
+    suspend fun pickExtra(
+        exclude: List<String>,
+        count: Int,
+        now: Long,
+        packId: String? = null
+    ): List<CardEntity> {
         if (count <= 0) return emptyList()
         val safeExclude = if (exclude.isEmpty()) listOf("") else exclude
 
-        val due = cardDao.dueCardsExcluding(now, safeExclude, count)
+        val due =
+            if (packId == null) cardDao.dueCardsExcluding(now, safeExclude, count)
+            else cardDao.dueCardsForPackExcluding(packId, now, safeExclude, count)
         if (due.size >= count) return due
 
-        val amnesty = cardDao.amnestyCardsExcluding(safeExclude, count - due.size)
+        val room = count - due.size
+        val amnesty =
+            if (packId == null) cardDao.amnestyCardsExcluding(safeExclude, room)
+            else cardDao.amnestyCardsForPackExcluding(packId, safeExclude, room)
         val repeats = due + amnesty
         if (repeats.size >= count) return repeats
 
         val taken = safeExclude + repeats.map { it.key }
-        val ahead = cardDao.upcomingCardsExcluding(now, taken, count - repeats.size)
+        val left = count - repeats.size
+        val ahead =
+            if (packId == null) cardDao.upcomingCardsExcluding(now, taken, left)
+            else cardDao.upcomingCardsForPackExcluding(packId, now, taken, left)
         return repeats + ahead
     }
 

@@ -448,6 +448,18 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"share.002" to "Wyślij talię",
 	"share.003" to "nie udało się udostępnić",
 	"share.004" to "w tej talii nie ma jeszcze czego wysłać",
+	// Экран одной колоды
+	"dp.001" to "W użyciu",
+	"dp.002" to "Wyłączona",
+	"dp.003" to "Język talii",
+	"dp.004" to "Potrzebny tylko do lektora. Talia z pliku zaczyna bez języka, więc nie da się jej przeczytać na głos, dopóki go nie wybierzesz.",
+	"dp.005" to "bez lektora",
+	"dp.006" to "Wyślij talię",
+	"dp.007" to "Usuń talię",
+	"dp.008" to "Naciśnij jeszcze raz, jeśli na pewno",
+	"dp.009" to "Znikną karty tej talii i ich terminy. Odpowiedzi zostaną w statystykach — ten dziennik nigdy nie jest nadpisywany.",
+	"add.036" to "jak to działa",
+	"add.037" to "ukryj",
 	// тап в любом месте
 	"card.002" to "dotknij gdziekolwiek",
 	// ← НЕ ЗНАЮ

@@ -20,7 +20,10 @@ HARD RULES — a line that breaks any of these is thrown away by the app:
 1. The sentence must contain the phrase EXACTLY as written in the first field,
    character for character. Do not inflect it, do not reorder it, do not split
    it. Only the first letter may differ in case.
-2. The third field translates THE PHRASE, not the sentence.
+2. The third field translates THE PHRASE -- all of its words -- and only the
+   phrase. Not the sentence. A four-word phrase gets a full four-word
+   translation; the sentence around it stays untranslated on purpose, because it
+   is the context the learner reads in order to guess, not a pair to memorise.
 3. Exactly three fields per line. Never use | inside a field.
 4. One line per card. No numbering, no bullets, no table, no code block, no
    header row, no quotes around fields, no blank lines between cards.
@@ -32,6 +35,15 @@ HARD RULES — a line that breaks any of these is thrown away by the app:
 WHAT MAKES A GOOD CARD
 - Phrases are what people actually say: 1 to 4 words. Chunks, collocations,
   common verb phrases, fixed expressions. Not single nouns, not grammar terms.
+- Only phrases the learner will meet again. Stay inside the common core of the
+  language, judged by the level given at the bottom of this file: roughly the
+  2000 most frequent words for a beginner, the 5000 most frequent for someone
+  who can hold a conversation, no ceiling for advanced. A rare phrase costs
+  exactly as much to learn as a common one and pays back almost nothing. The
+  app cannot check this, so it is on you.
+- One unknown thing per card. Everything in the sentence except the phrase
+  should already be easy for the learner, so that failing a card can only mean
+  the phrase was forgotten -- never that some other word got in the way.
 - The sentence is short, 6 to 12 words, and sounds like speech, not like a
   textbook. It should make the phrase obvious even to someone who has never seen
   it, so the learner can guess before being told.

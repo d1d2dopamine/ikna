@@ -429,8 +429,14 @@ class LearningRepository(
      * introduced when it reaches the plan, not when a row is written. See
      * [ensureDailyPlanLocked].
      */
-    private suspend fun introduce(count: Int, now: Long): List<CardEntity> {
-        val candidates = chunkDao.unintroducedByFrequency(count * 12)
+    private suspend fun introduce(
+        count: Int,
+        now: Long,
+        packId: String? = null
+    ): List<CardEntity> {
+        val candidates =
+            if (packId == null) chunkDao.unintroducedByFrequency(count * 12)
+            else chunkDao.unintroducedByFrequencyFor(packId, count * 12)
         if (candidates.isEmpty()) return emptyList()
 
         val tokens = chunkDao.tokensFor(candidates.map { it.id }).groupBy { it.chunkId }
@@ -546,16 +552,29 @@ class LearningRepository(
         val answered = reviewDao.answeredKeysSince(startOfDay(now))
         val exclude = (plan.ids + answered).distinct()
 
-        // Inside a deck session the extra cards have to come from that deck. The
-        // card table has no deck column, so we over-ask and filter by chunk
-        // rather than teaching the DAO to join. Without this the button appeared
-        // to do nothing whenever the extra cards happened to be from elsewhere.
-        val candidates = builder().pickExtra(exclude, if (deckId == null) count else count * 10, now)
-        val extra = if (deckId == null) candidates else {
-            val packOf = chunkDao.chunks(candidates.map { it.chunkId }.distinct())
-                .associate { it.id to it.packId }
-            candidates.filter { packOf[it.chunkId] == deckId }.take(count)
-        }
+        // Inside a deck session the extra cards come from that deck, asked for
+        // by the query itself. This used to over-ask by ten and filter the result
+        // in Kotlin, which returned nothing whenever those candidates happened to
+        // belong to other decks.
+        val repeats = builder().pickExtra(exclude, count, now, deckId)
+
+        // A deck nothing has been learned from yet has no cards at all, so there
+        // is nothing to repeat and this used to answer "nothing is due" - true,
+        // and useless, because what such a deck has is new material and only the
+        // governor could hand that out, once a day. A deck switched on this
+        // evening was therefore switched on and empty, and the one button on the
+        // screen could not help.
+        //
+        // So here, and nowhere else, new chunks are introduced outside the daily
+        // budget: this is a deliberate press, not the app deciding. They are
+        // still counted against the day, so tomorrow's measured capacity knows
+        // what happened and the safety valve still sees it.
+        val fresh =
+            if (repeats.isNotEmpty()) emptyList()
+            else introduce(count, now, deckId)
+        if (fresh.isNotEmpty()) countIntroduced(now, fresh.size)
+
+        val extra = (repeats + fresh).take(count)
         if (extra.isEmpty()) return 0
 
         planDao.upsert(

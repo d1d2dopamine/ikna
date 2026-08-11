@@ -21,6 +21,7 @@ import dev.ikna.AppContainer
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.ui.debug.DebugHooks
 import dev.ikna.ui.decks.AddDeckScreen
+import dev.ikna.ui.decks.DeckScreen
 import dev.ikna.ui.decks.DecksScreen
 import dev.ikna.ui.onboarding.OnboardingScreen
 import dev.ikna.ui.session.SessionScreen
@@ -43,11 +44,14 @@ object Routes {
     const val STATS = "stats"
     const val SETTINGS = "settings"
     const val ADD_DECK = "add-deck"
+    const val DECK = "deck/{deck}"
     const val DEBUG = "debug"
 
     const val ALL_DECKS = "all"
 
     fun session(deckId: String?): String = "session/" + (deckId ?: ALL_DECKS)
+
+    fun deck(deckId: String): String = "deck/" + deckId
 }
 
 /**
@@ -125,6 +129,7 @@ fun IknaNavHost(
                 DecksScreen(
                     container = container,
                     onOpenSession = { deckId -> navController.navigate(Routes.session(deckId)) },
+                    onOpenDeck = { deckId -> navController.navigate(Routes.deck(deckId)) },
                     onOpenStats = { navController.navigate(Routes.STATS) },
                     onOpenSettings = { navController.navigate(Routes.SETTINGS) },
                     onAddDeck = { navController.navigate(Routes.ADD_DECK) }
@@ -140,6 +145,22 @@ fun IknaNavHost(
                     container = container,
                     onBack = { navController.popBackStack() }
                 )
+            }
+
+            // One deck on its own: its language, sending it to someone, deleting
+            // it. The switch that turns a deck on and off stays on the list,
+            // where all of them can be compared at once.
+            composable(
+                route = Routes.DECK,
+                arguments = listOf(navArgument("deck") { type = NavType.StringType })
+            ) { entry ->
+                entry.arguments?.getString("deck")?.let { deckId ->
+                    DeckScreen(
+                        container = container,
+                        deckId = deckId,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
             }
 
             composable(

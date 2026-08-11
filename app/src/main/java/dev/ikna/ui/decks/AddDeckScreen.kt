@@ -89,6 +89,7 @@ fun AddDeckScreen(
 	var note by remember { mutableStateOf<String?>(null) }
 	var busy by remember { mutableStateOf(false) }
 	var prompt by remember { mutableStateOf("") }
+	var guide by remember { mutableStateOf(false) }
 
 	// The prompt is an asset rather than a string in the catalogue: it is three
 	// kilobytes of English addressed to a model, not interface text, and it has to
@@ -209,11 +210,23 @@ fun AddDeckScreen(
 				style = MaterialTheme.typography.bodyMedium
 			)
 
-			Spacer(Modifier.height(Space.lg))
-			Step(S.t("add.003"))
-			Step(S.t("add.004"))
-			Step(S.t("add.005"))
-			Step(S.t("add.006"))
+			Spacer(Modifier.height(Space.md))
+			// The four steps are this screen explaining itself, and they were
+			// printed in full above the two buttons that do the same thing. Read
+			// once, they are never read again, and every later visit had to scroll
+			// past them. So they fold away and the buttons come first.
+			IknaTextButton(
+				label = if (guide) S.t("add.037") else S.t("add.036"),
+				onClick = { guide = !guide },
+				color = MaterialTheme.colorScheme.onSurfaceVariant
+			)
+			if (guide) {
+				Spacer(Modifier.height(Space.md))
+				Step(S.t("add.003"))
+				Step(S.t("add.004"))
+				Step(S.t("add.005"))
+				Step(S.t("add.006"))
+			}
 
 			Spacer(Modifier.height(Space.lg))
 			IknaWideButton(

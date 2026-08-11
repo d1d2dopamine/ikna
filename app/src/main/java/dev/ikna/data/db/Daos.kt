@@ -28,6 +28,32 @@ interface ChunkDao {
     @Query("UPDATE packs SET isActive = :active WHERE id = :id")
     suspend fun setPackActive(id: String, active: Boolean)
 
+    @Query("UPDATE packs SET lang = :lang WHERE id = :id")
+    suspend fun setPackLang(id: String, lang: String)
+
+    // Deleting a deck, in the order the rows depend on each other: cards, then
+    // tokens, then chunks, then the pack itself. The `reviews` table is never
+    // touched by any of this - it is append-only and it is what the statistics
+    // are computed from, so a deck deleted in a tidying mood must not take
+    // months of history with it.
+    @Query(
+        "DELETE FROM cards WHERE chunkId IN " +
+            "(SELECT id FROM chunks WHERE packId = :packId)"
+    )
+    suspend fun deleteCardsForPack(packId: String)
+
+    @Query(
+        "DELETE FROM chunk_tokens WHERE chunkId IN " +
+            "(SELECT id FROM chunks WHERE packId = :packId)"
+    )
+    suspend fun deleteTokensForPack(packId: String)
+
+    @Query("DELETE FROM chunks WHERE packId = :packId")
+    suspend fun deleteChunksForPack(packId: String)
+
+    @Query("DELETE FROM packs WHERE id = :id")
+    suspend fun deletePack(id: String)
+
     @Query("SELECT * FROM chunks WHERE id = :id")
     suspend fun chunk(id: String): ChunkEntity?
 
@@ -45,6 +71,17 @@ interface ChunkDao {
             "ORDER BY freqRank ASC LIMIT :limit"
     )
     suspend fun unintroducedByFrequency(limit: Int): List<ChunkEntity>
+
+    // The same pool inside one deck, and deliberately without the isActive
+    // filter. This is only ever asked because the user opened that deck and
+    // asked it for more, which is a plainer statement of intent than the switch
+    // on the list is.
+    @Query(
+        "SELECT * FROM chunks WHERE packId = :packId " +
+            "AND id NOT IN (SELECT DISTINCT chunkId FROM cards) " +
+            "ORDER BY freqRank ASC LIMIT :limit"
+    )
+    suspend fun unintroducedByFrequencyFor(packId: String, limit: Int): List<ChunkEntity>
 
     @Query("SELECT COUNT(*) FROM chunks")
     suspend fun chunkCount(): Int
@@ -157,6 +194,51 @@ interface CardDao {
             "AND (chunkId || ':' || level) NOT IN (:exclude) ORDER BY dueAt ASC LIMIT :limit"
     )
     suspend fun upcomingCardsExcluding(
+        after: Long,
+        exclude: List<String>,
+        limit: Int
+    ): List<CardEntity>
+
+    // The same three questions, asked inside one deck.
+    //
+    // Pressed inside a deck, "a few more" used to take fifty candidates from the
+    // whole collection and then throw away everything belonging to another deck.
+    // Whenever those fifty came from elsewhere the button returned nothing and
+    // reported that nothing was due - in a deck that was full of it.
+    @Query(
+        "SELECT c.* FROM cards c JOIN chunks ch ON ch.id = c.chunkId " +
+            "WHERE ch.packId = :packId AND c.inAmnesty = 0 AND c.dueAt <= :until " +
+            "AND (c.chunkId || ':' || c.level) NOT IN (:exclude) " +
+            "ORDER BY c.dueAt ASC LIMIT :limit"
+    )
+    suspend fun dueCardsForPackExcluding(
+        packId: String,
+        until: Long,
+        exclude: List<String>,
+        limit: Int
+    ): List<CardEntity>
+
+    @Query(
+        "SELECT c.* FROM cards c JOIN chunks ch ON ch.id = c.chunkId " +
+            "WHERE ch.packId = :packId AND c.inAmnesty = 1 " +
+            "AND (c.chunkId || ':' || c.level) NOT IN (:exclude) " +
+            "ORDER BY c.dueAt ASC LIMIT :limit"
+    )
+    suspend fun amnestyCardsForPackExcluding(
+        packId: String,
+        exclude: List<String>,
+        limit: Int
+    ): List<CardEntity>
+
+    @Query(
+        "SELECT c.* FROM cards c JOIN chunks ch ON ch.id = c.chunkId " +
+            "WHERE ch.packId = :packId AND c.inAmnesty = 0 AND c.isNew = 0 " +
+            "AND c.dueAt > :after " +
+            "AND (c.chunkId || ':' || c.level) NOT IN (:exclude) " +
+            "ORDER BY c.dueAt ASC LIMIT :limit"
+    )
+    suspend fun upcomingCardsForPackExcluding(
+        packId: String,
         after: Long,
         exclude: List<String>,
         limit: Int

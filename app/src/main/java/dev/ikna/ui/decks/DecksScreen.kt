@@ -40,7 +40,6 @@ import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
-import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Space
@@ -68,6 +67,7 @@ import kotlinx.coroutines.launch
 fun DecksScreen(
     container: AppContainer,
     onOpenSession: (String?) -> Unit,
+    onOpenDeck: (String) -> Unit,
     onOpenStats: () -> Unit,
     onOpenSettings: () -> Unit,
     onAddDeck: () -> Unit
@@ -149,6 +149,7 @@ fun DecksScreen(
                     deck = deck,
                     dueToday = today[deck.id] ?: 0,
                     onOpen = { onOpenSession(deck.id) },
+                    onOpenDeck = { onOpenDeck(deck.id) },
                     onToggle = { active ->
                         scope.launch {
                             container.deckRepository.setActive(deck.id, active)
@@ -161,21 +162,6 @@ fun DecksScreen(
                             // the toggle was the path that forgot to.
                             container.learningRepository.invalidatePlan()
                             reload()
-                        }
-                    },
-                    onShare = {
-                        scope.launch {
-                            val body = container.deckRepository.exportText(deck.id)
-                            note = when {
-                                body.isBlank() -> S.t("share.004")
-                                !DeckShare.shareText(
-                                    context = context,
-                                    fileName = DeckShare.fileNameFor(deck.title),
-                                    body = body,
-                                    chooserTitle = S.t("share.002")
-                                ) -> S.t("share.003")
-                                else -> null
-                            }
                         }
                     }
                 )
@@ -323,8 +309,8 @@ private fun DeckRow(
     deck: DeckSummary,
     dueToday: Int,
     onOpen: () -> Unit,
-    onToggle: (Boolean) -> Unit,
-    onShare: () -> Unit
+    onOpenDeck: () -> Unit,
+    onToggle: (Boolean) -> Unit
 ) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val accent = MaterialTheme.colorScheme.primary
@@ -350,13 +336,19 @@ private fun DeckRow(
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
+                    // The name opens the deck itself; the rest of the row
+                    // starts a session. Two destinations in one row is a risk
+                    // worth taking only in this direction: the big target does
+                    // the thing done daily, and the small one leads to the
+                    // settings, sharing and deletion that happen once.
                     Text(
                         text = deck.title,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onBackground.copy(
                             alpha = if (deck.isActive) 1f else 0.55f
-                        )
+                        ),
+                        modifier = Modifier.clickable(onClick = onOpenDeck)
                     )
                     Spacer(Modifier.height(Space.xs))
                     Text(
@@ -396,15 +388,10 @@ private fun DeckRow(
                     color = muted
                 )
             }
-            // Written out rather than hidden behind a long press. A gesture
-            // nobody is told about is a feature nobody has, and this is the
-            // only way a deck made here ever reaches another person.
-            Spacer(Modifier.height(Space.sm))
-            IknaTextButton(
-                label = S.t("share.001"),
-                onClick = onShare,
-                color = muted
-            )
+            // Sharing used to be written out on every row, which put a
+            // second button under a card that already had one and repeated the
+            // same word down the whole list. It now lives on the deck's own
+            // screen, where the deck is the subject and the word is needed once.
         }
     }
 }
