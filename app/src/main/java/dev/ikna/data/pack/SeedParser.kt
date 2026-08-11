@@ -218,10 +218,25 @@ object SeedFormat {
         if (line.isEmpty()) return ""
         // A fence, or a comment line in a file written by hand.
         if (line.startsWith("```") || line.startsWith("#")) return ""
-        line = LIST_MARKER.replace(line, "")
         // A Markdown table row: | a | b | c |
-        if (line.startsWith("|")) line = line.removePrefix("|").trim()
-        if (line.endsWith("|")) line = line.removeSuffix("|").trim()
+        //
+        // Both ends at once, deliberately. A trailing pipe on its own is not
+        // decoration: "phrase | sentence |" is a line whose third field is empty,
+        // and stripping that pipe reported a missing translation as "this line
+        // has not got three fields" - a different mistake, with a different fix
+        // printed under it. A row that really came out of a table has the leading
+        // pipe too, so that is what identifies one.
+        if (line.startsWith("|")) {
+            line = line.removePrefix("|").trim()
+            if (line.endsWith("|")) line = line.removeSuffix("|").trim()
+        }
+        // After the pipes, not before. A model that answers with a numbered table
+        // puts the number inside the first cell - "| 1. hang on | ..." - where a
+        // pattern anchored to the start of the line cannot see it. The number
+        // stayed glued to the phrase, the phrase was then not found in its own
+        // sentence, and a correct row was refused for a reason that read like
+        // nonsense to the person who wrote it.
+        line = LIST_MARKER.replace(line, "")
         // The rule under a table header: |---|:---:|---|
         if (line.isNotEmpty() && line.all { it == '-' || it == ':' || it == '|' || it == ' ' }) return ""
         return line
