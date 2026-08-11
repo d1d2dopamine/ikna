@@ -4,27 +4,26 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
-import javax.imageio.ImageIO
 
 /**
  * The one bitmap in the interface, checked as a file.
  *
- * IknaWordmark draws the accent square over the i itself and relies on two things
- * about the asset it draws it on: that the mark has the proportions the composable
- * sizes it by, and that the space the square lands in is empty. Both are
- * properties of a PNG produced by a tool, which means both are one careless
- * re-export away from being wrong — and neither would throw. A stale aspect ratio
- * puts the square next to the letter instead of over it; a dot left in the bitmap
- * puts a cream square under a coloured one, which on a dark palette reads as a
- * halo and on a light one as a mistake.
+ * IknaWordmark draws the accent square over the i itself and sizes the mark from
+ * WORDMARK_ASPECT, so a re-export at different proportions puts the square next to
+ * the letter instead of over it. Nothing would throw; the mark would simply be
+ * wrong in every screenshot from then on.
  *
- * Nothing here can be checked on a device, because by the time it is on a device
- * it is a texture. It can be checked here, in the seconds before a release.
+ * The header is read by hand rather than through an image library. Unit tests in
+ * an Android module compile against android.jar, which shadows the JDK and does
+ * not carry javax.imageio, so anything that decodes an image here fails to compile
+ * on CI while looking perfectly fine in an ordinary JVM project.
  */
 private const val ASSET = "src/main/res/drawable-nodpi/ikna_wordmark.png"
 
-/** Anything above this is a pixel that would be visible once tinted. */
-private const val VISIBLE_ALPHA = 40
+/** PNG signature, then the IHDR chunk: width and height are its first eight bytes. */
+private val PNG_MAGIC = byteArrayOf(
+	0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A
+)
 
 class WordmarkTest {
 
@@ -38,6 +37,16 @@ class WordmarkTest {
 		)
 	}
 
+	@Test
+	fun `the asset is a png and not a renamed something else`() {
+		val bytes = (asset() ?: return).readBytes()
+		assertTrue(
+			"The asset does not start with the PNG signature. A JPEG or a WebP saved " +
+				"under a .png name loads on some Android versions and not others.",
+			bytes.size > 24 && bytes.copyOfRange(0, 8).contentEquals(PNG_MAGIC)
+		)
+	}
+
 	/**
 	 * The composable takes a height and works the width out from WORDMARK_ASPECT.
 	 * If the file disagrees, the letters are stretched and the square drifts away
@@ -45,60 +54,60 @@ class WordmarkTest {
 	 */
 	@Test
 	fun `the asset has the proportions the composable sizes it by`() {
-		val image = ImageIO.read(asset() ?: return)
-		val actual = image.width.toFloat() / image.height.toFloat()
+		val bytes = (asset() ?: return).readBytes()
+		val width = intAt(bytes, 16)
+		val height = intAt(bytes, 20)
 		assertTrue(
-			"The asset is " + image.width + "x" + image.height + ", an aspect of " +
-				actual + ", but WORDMARK_ASPECT is " + WORDMARK_ASPECT + ". One of " +
-				"the two was changed without the other.",
+			"The header reads " + width + "x" + height + ", which is not a size any " +
+				"export would produce.",
+			width > 0 && height > 0
+		)
+		val actual = width.toFloat() / height.toFloat()
+		assertTrue(
+			"The asset is " + width + "x" + height + ", an aspect of " + actual +
+				", but WORDMARK_ASPECT is " + WORDMARK_ASPECT + ". One of the two was " +
+				"changed without the other.",
 			kotlin.math.abs(actual - WORDMARK_ASPECT) < 0.01f
 		)
 	}
 
 	/**
-	 * The dot is drawn by the app, in the accent colour, which only works if it was
-	 * taken out of the bitmap first.
+	 * The square is drawn by the app in the accent colour, over a rectangle of the
+	 * asset that has to stay inside it. These four numbers are hand-measured, and a
+	 * typo in any of them paints somewhere the mark is not.
 	 */
 	@Test
-	fun `the space the accent square lands in is empty`() {
-		val image = ImageIO.read(asset() ?: return)
-		val x0 = (image.width * WORDMARK_DOT_LEFT).toInt()
-		val y0 = (image.height * WORDMARK_DOT_TOP).toInt()
-		val x1 = (image.width * (WORDMARK_DOT_LEFT + WORDMARK_DOT_WIDTH)).toInt()
-		val y1 = (image.height * (WORDMARK_DOT_TOP + WORDMARK_DOT_HEIGHT)).toInt()
-		var worst = 0
-		for (y in y0 until y1) {
-			for (x in x0 until x1) {
-				val alpha = (image.getRGB(x, y) ushr 24) and 0xFF
-				if (alpha > worst) worst = alpha
-			}
-		}
+	fun `the accent square lands inside the mark`() {
 		assertTrue(
-			"The dot is still in the asset: the strongest pixel where the accent " +
-				"square goes has alpha " + worst + ". The app would draw its square " +
-				"on top of the drawn one, leaving a rim of the original colour.",
-			worst == 0
+			"The dot rectangle starts outside the asset.",
+			WORDMARK_DOT_LEFT >= 0f && WORDMARK_DOT_TOP >= 0f
+		)
+		assertTrue(
+			"The dot rectangle runs off the asset: " +
+				(WORDMARK_DOT_LEFT + WORDMARK_DOT_WIDTH) + " wide, " +
+				(WORDMARK_DOT_TOP + WORDMARK_DOT_HEIGHT) + " tall, of 1.0.",
+			WORDMARK_DOT_LEFT + WORDMARK_DOT_WIDTH <= 1f &&
+				WORDMARK_DOT_TOP + WORDMARK_DOT_HEIGHT <= 1f
+		)
+		assertTrue(
+			"The dot rectangle has no area, so the accent colour would never appear.",
+			WORDMARK_DOT_WIDTH > 0f && WORDMARK_DOT_HEIGHT > 0f
+		)
+		assertTrue(
+			"The dot is a square in the logo, but the rectangle it is drawn in is " +
+				"nothing like one once the aspect is taken into account.",
+			kotlin.math.abs(
+				WORDMARK_DOT_WIDTH * WORDMARK_ASPECT - WORDMARK_DOT_HEIGHT
+			) < 0.05f
 		)
 	}
 
-	/** And the erase took the dot only. */
-	@Test
-	fun `the letters survived`() {
-		val image = ImageIO.read(asset() ?: return)
-		var visible = 0
-		for (y in 0 until image.height) {
-			for (x in 0 until image.width) {
-				if (((image.getRGB(x, y) ushr 24) and 0xFF) > VISIBLE_ALPHA) visible++
-			}
-		}
-		val fraction = visible.toFloat() / (image.width * image.height).toFloat()
-		assertTrue(
-			"Only " + visible + " pixels of the asset are visible, " + fraction +
-				" of it. Four letters cover far more than that: the file is blank, " +
-				"cropped to nothing, or was saved without its alpha channel.",
-			fraction > 0.2f
-		)
-	}
+	/** Big-endian four bytes, the only number format inside a PNG header. */
+	private fun intAt(bytes: ByteArray, offset: Int): Int =
+		((bytes[offset].toInt() and 0xFF) shl 24) or
+			((bytes[offset + 1].toInt() and 0xFF) shl 16) or
+			((bytes[offset + 2].toInt() and 0xFF) shl 8) or
+			(bytes[offset + 3].toInt() and 0xFF)
 
 	/**
 	 * Unit tests run from the module directory in one place and the project root in

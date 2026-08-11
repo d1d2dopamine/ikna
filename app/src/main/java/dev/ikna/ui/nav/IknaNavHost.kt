@@ -20,6 +20,7 @@ import androidx.navigation.navArgument
 import dev.ikna.AppContainer
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.ui.debug.DebugHooks
+import dev.ikna.ui.decks.AddDeckScreen
 import dev.ikna.ui.decks.DecksScreen
 import dev.ikna.ui.onboarding.OnboardingScreen
 import dev.ikna.ui.session.SessionScreen
@@ -41,6 +42,7 @@ object Routes {
     const val SESSION = "session/{deck}"
     const val STATS = "stats"
     const val SETTINGS = "settings"
+    const val ADD_DECK = "add-deck"
     const val DEBUG = "debug"
 
     const val ALL_DECKS = "all"
@@ -124,7 +126,19 @@ fun IknaNavHost(
                     container = container,
                     onOpenSession = { deckId -> navController.navigate(Routes.session(deckId)) },
                     onOpenStats = { navController.navigate(Routes.STATS) },
-                    onOpenSettings = { navController.navigate(Routes.SETTINGS) }
+                    onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+                    onAddDeck = { navController.navigate(Routes.ADD_DECK) }
+                )
+            }
+
+            // Adding a deck is a place, not a file dialog. It used to be the
+            // system file browser opening straight out of the plus, which meant
+            // the app never got to say what a deck file is — and there is no
+            // room in a file browser to say it.
+            composable(Routes.ADD_DECK) {
+                AddDeckScreen(
+                    container = container,
+                    onBack = { navController.popBackStack() }
                 )
             }
 

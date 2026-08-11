@@ -122,7 +122,44 @@ android {
         }
     }
 
+    // -----------------------------------------------------------------------
+    // Two downloads, one app.
+    //
+    // lite is the app as it has always been: the phone's own speech engine,
+    // every language the user already has installed, and an APK measured in
+    // single megabytes. It is the default and it is what CI builds.
+    //
+    // voice is the same app with a neural synthesiser and its model packed
+    // inside, for phones whose own engine has nothing worth listening to. Same
+    // applicationId, same database, same review history: one installs over the
+    // other and the user loses nothing by switching.
+    //
+    // The fork is two source sets holding one file each -- app/src/lite and
+    // app/src/voice -- plus this block. No code outside them knows which build
+    // it is in, and the lite build cannot accidentally pull the runtime in:
+    // the dependency is flavour-scoped, so it does not exist for lite at all.
+    // -----------------------------------------------------------------------
+    flavorDimensions += "speech"
+
+    productFlavors {
+        create("lite") {
+            dimension = "speech"
+        }
+        create("voice") {
+            dimension = "speech"
+            // So a screenshot or a bug report says which of the two is running.
+            versionNameSuffix = " voice"
+        }
+    }
+
     buildFeatures { compose = true }
+
+    // An .onnx model is already compressed. Deflating it again costs build time,
+    // saves nothing, and forces the packager's copy to be inflated in full
+    // before the runtime can read a byte of it.
+    androidResources {
+        noCompress += listOf("onnx", "bin")
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -170,4 +207,18 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
     testImplementation("junit:junit:4.13.2")
+
+    // The neural speech runtime -- voice build only.
+    //
+    // A local .aar, not a coordinate: it carries native libraries for four
+    // architectures, it is tens of megabytes, and it is not committed.
+    // tools/voice/fetch-voice.sh puts it in app/libs together with the model,
+    // and the release workflow runs that script before building the voice APK.
+    //
+    // Being flavour-scoped is what keeps a fresh clone buildable: the lite
+    // build never looks in app/libs, so an empty or missing directory is not an
+    // error for anyone who only wants the normal app.
+    "voiceImplementation"(
+        fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar")))
+    )
 }

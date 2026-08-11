@@ -57,6 +57,25 @@
             APPWIDGET_UPDATE that matters is the system, which delivers to the
             component directly, and nothing else has any business poking it.
         -->
+        <!--
+            How a deck leaves the phone.
+
+            Sharing needs a URI another app can read, and the alternative to a
+            provider is world-readable storage, which is worse. This one is not
+            exported, grants permission per-intent, and is pointed at a single
+            cache directory (see file_paths.xml) that holds nothing but the file
+            being shared right now. The review log is not reachable through it.
+        -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
         <receiver
             android:name=".widget.TodayWidget"
             android:exported="false">

@@ -45,6 +45,28 @@ now on.
 
 ### Added
 
+- **A screen behind the plus, and a prompt that writes the deck for you.** The
+  plus used to open the system file browser with no filter on it, so the first
+  thing anyone saw after deciding to add a deck was their camera roll — and the
+  only format the app accepted was one JSON object per line with character
+  offsets in it, which nobody writes by hand. Adding a deck was the hardest thing
+  in an app built for people who lose the thread during setup. Now the plus opens
+  a screen with a four-line explanation, a **Copy the prompt** button, a **Save
+  the prompt as a file** button, a field to paste an answer into, and a file
+  picker as the last option rather than the only one. The prompt is three
+  kilobytes of English addressed to a model: it states the format, the rules and
+  the failure modes, and leaves the language and the topic to the person sending
+  it. The routine goes to the machine; the choice stays with the human.
+- **A deck format a person can read.** Three columns separated by a bar — phrase,
+  a sentence containing that phrase, translation. Token splitting, character
+  offsets and frequency order are worked out on import, so the file carries only
+  what a person could plausibly write. `.jsonl` packs still import; which of the
+  two shapes a text is in is decided by reading it, not by its file name.
+- **An import report that says what went wrong.** Bad lines are skipped and
+  counted as before, but the first one is now named with its line number and the
+  reason — not three columns, empty field, phrase missing from the sentence, too
+  long, duplicate. "0 imported" with no explanation was a dead end.
+
 - **The logo, in the app, wearing the palette.** The wordmark now sits at the
   left end of the bottom row on the deck screen, which until now was the only
   product in the world that never said its own name anywhere inside itself. The
@@ -78,6 +100,19 @@ now on.
   any of it ships. Nothing in it is implemented in this release.
 
 ### Fixed
+
+- **The release build failed on a test that could not compile.** `WordmarkTest`
+  read the wordmark PNG through `javax.imageio`, which exists in an ordinary JVM
+  and not in an Android unit test: those compile against `android.jar`, which
+  shadows the JDK. The test now reads the PNG header itself — signature, width,
+  height — and checks the accent square's rectangle against the constants the
+  composable draws with. Less is verified than before; all of it compiles.
+- **The file picker offered files that were not decks.** It asked for `*/*`, so
+  it listed photos, music and video, and picking a video read the whole file into
+  a string and took the process down with it. It now asks for text, JSON and
+  unnamed binary only, and refuses anything over four megabytes before opening it.
+- **The empty deck list pointed at the wrong corner of the screen.** It had said
+  the plus was at the top since the day the bar moved to the bottom.
 
 - **Six broken characters in the Russian strings.** `StringsRu.kt` carried six
   U+FFFD replacement characters, left over from an encoding round-trip, inside two

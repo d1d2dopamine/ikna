@@ -16,11 +16,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.1.0-proof"><img alt="release" src="https://img.shields.io/badge/release-0.1.0%20proof-crimson"></a>
-  <a href="https://github.com/d1d2dopamine/ikna/releases"><img alt="downloads" src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?logo=github&label=downloads&color=blueviolet"></a>
-  <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img alt="build" src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build"></a>
-  <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-GPL--3.0-blue"></a>
-  <a href="https://kotlinlang.org"><img alt="made with" src="https://img.shields.io/badge/made%20with-Kotlin-7F52FF?logo=kotlin&logoColor=white"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.1.0-proof"><img src="https://img.shields.io/badge/release-0.1.0%20proof-crimson?style=flat-square" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases"><img src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?label=downloads&style=flat-square&logo=github&color=blueviolet" alt="downloads"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
+  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/made%20with-Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="kotlin"></a>
+  <img src="https://img.shields.io/badge/Android-10%2B-3DDC84?style=flat-square&logo=android&logoColor=white" alt="android">
+  <img src="https://img.shields.io/badge/offline-no%20network%20permission-4b4b4b?style=flat-square" alt="offline">
 </p>
 
 <p align="center">
@@ -188,6 +190,35 @@ Turning a deck off only stops **new** chunks coming from it. Everything already
 started keeps its schedule and its history, so switching decks is never a decision
 with consequences — and a decision with consequences is a decision that gets
 avoided.
+
+### Making your own deck
+
+The plus in the bottom bar opens a screen, not a file browser. On it:
+
+| Button | What it does |
+| --- | --- |
+| **Copy the prompt** | Puts a written brief on the clipboard. Send it to any AI, tell it the language and the topic, and it answers with deck lines. |
+| **Save the prompt as a file** | The same brief as `ikna-deck-prompt.txt`, for models that take an attachment. |
+| **Add from text** | Paste the answer straight into the field and import it. No file involved. |
+| **Pick a file** | For an answer that was saved instead of copied. |
+
+A deck is plain text. One line is one card, three parts separated by a bar:
+
+```
+get used to|It takes a while to get used to the noise.|to grow accustomed
+```
+
+The phrase has to appear inside the sentence, because the sentence *is* the card
+and the phrase is the part of it being learned. Everything else — the token
+split, the character offsets, the frequency order — is worked out on import.
+Lines that do not fit are skipped and counted, and the first one is quoted back
+with the reason, so a file that produced nothing says why instead of failing
+silently. `.jsonl` packs from `tools/genpack` still import unchanged; the format
+is recognised from the text rather than from the file name.
+
+The file picker no longer offers photos and video. It used to ask for `*/*`,
+which meant the app would happily read a two-gigabyte video into a string and
+die; anything above four megabytes is now refused before it is opened.
 
 Both packs are built offline by the same generator, from a three-column TSV
 (`phrase`, `carrier sentence`, `translation`):
@@ -430,11 +461,13 @@ For tools that ask: `SPDX-License-Identifier: GPL-3.0-or-later`.
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.1.0-proof"><img alt="release" src="https://img.shields.io/badge/release-0.1.0%20proof-crimson"></a>
-  <a href="https://github.com/d1d2dopamine/ikna/releases"><img alt="downloads" src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?logo=github&label=downloads&color=blueviolet"></a>
-  <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img alt="build" src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build"></a>
-  <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-GPL--3.0-blue"></a>
-  <a href="https://kotlinlang.org"><img alt="made with" src="https://img.shields.io/badge/made%20with-Kotlin-7F52FF?logo=kotlin&logoColor=white"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.1.0-proof"><img src="https://img.shields.io/badge/release-0.1.0%20proof-crimson?style=flat-square" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases"><img src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?label=downloads&style=flat-square&logo=github&color=blueviolet" alt="downloads"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
+  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/made%20with-Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="kotlin"></a>
+  <img src="https://img.shields.io/badge/Android-10%2B-3DDC84?style=flat-square&logo=android&logoColor=white" alt="android">
+  <img src="https://img.shields.io/badge/offline-no%20network%20permission-4b4b4b?style=flat-square" alt="offline">
 </p>
 
 <p align="center">
@@ -606,6 +639,34 @@ ikna учит язык **чанками**: короткая фраза, одно
 сохраняет свой график и свою историю, поэтому переключение колод никогда не
 является решением с последствиями — а решение с последствиями это решение,
 которое откладывают.
+
+### Как сделать свою колоду
+
+Плюс в нижней панели открывает экран, а не файловый менеджер. На нём:
+
+| Кнопка | Что делает |
+| --- | --- |
+| **Скопировать промпт** | Кладёт в буфер готовое задание. Отправьте его любому ИИ, скажите язык и тему — он ответит строками колоды. |
+| **Сохранить промпт файлом** | То же самое файлом `ikna-deck-prompt.txt` — если удобнее приложить вложением. |
+| **Добавить из текста** | Вставьте ответ прямо в поле и импортируйте. Файл не нужен вообще. |
+| **Выбрать файл** | Если ответ был сохранён, а не скопирован. |
+
+Колода — это обычный текст. Одна строка — одна карточка, три части через вертикальную черту:
+
+```
+get used to|It takes a while to get used to the noise.|привыкнуть
+```
+
+Фраза обязана встречаться внутри предложения: карточка — это предложение, а фраза —
+та его часть, которая учится. Всё остальное — разбиение на слова, границы фразы,
+порядок — считается при импорте. Неподходящие строки пропускаются и считаются, а
+первая из них показывается с причиной — чтобы файл, из которого ничего не
+получилось, говорил почему. Паки `.jsonl` из `tools/genpack` импортируются как и раньше:
+формат определяется по содержимому, а не по имени файла.
+
+Выбор файла больше не показывает фото и видео. Раньше он просил `*/*`, и приложение
+честно пыталось прочитать двухгигабайтное видео в одну строку и падало; всё, что
+больше четырёх мегабайт, теперь отклоняется до открытия.
 
 Оба пака собраны офлайн одним генератором из трёх колонок TSV (`фраза`,
 `несущее предложение`, `перевод`):

@@ -2,11 +2,6 @@ package dev.ikna.ui.decks
 
 import dev.ikna.ui.text.S
 
-import android.content.Context
-import android.net.Uri
-import android.provider.OpenableColumns
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -45,13 +40,12 @@ import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
+import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Space
 import dev.ikna.widget.TodayWidget
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * The first screen: decks, and how much each of them owes today.
@@ -75,14 +69,13 @@ fun DecksScreen(
     container: AppContainer,
     onOpenSession: (String?) -> Unit,
     onOpenStats: () -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenSettings: () -> Unit,
+    onAddDeck: () -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var decks by remember { mutableStateOf<List<DeckSummary>>(emptyList()) }
     var today by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
-    var message by remember { mutableStateOf<String?>(null) }
-    var busy by remember { mutableStateOf(false) }
 
     suspend fun reload() {
         decks = container.deckRepository.decks()
@@ -93,33 +86,10 @@ fun DecksScreen(
     }
 
     // Re-runs whenever this screen comes back to the front, so the counts are
-    // right after a session instead of a minute stale.
+    // right after a session instead of a minute stale. Coming back from the
+    // add-deck screen lands here too, which is how a deck imported a moment ago
+    // is already in the list and already counted.
     LaunchedEffect(Unit) { reload() }
-
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
-        if (uri == null) return@rememberLauncherForActivityResult
-        scope.launch {
-            busy = true
-            val result = withContext(Dispatchers.IO) {
-                val name = displayName(context, uri)
-                val text = context.contentResolver.openInputStream(uri)
-                    ?.bufferedReader()?.use { it.readText() } ?: ""
-                container.deckRepository.importFile(
-                    fileName = name,
-                    text = text,
-                    fallbackTitle = S.t("deckrepo.001")
-                )
-            }
-            // The user just asked for this content, so let it into today's plan
-            // instead of making them wait until tomorrow.
-            container.learningRepository.invalidatePlan()
-            reload()
-            busy = false
-            message = if (result.installed == 0) S.t("deck.001")
-            else S.t("deck.002") + result.installed +
-                (if (result.skipped > 0) S.t("deck.003") + result.skipped else "")
-        }
-    }
 
     val todayTotal = today.values.sum()
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
@@ -136,6 +106,11 @@ fun DecksScreen(
             label = cardWord(todayTotal)
         )
     }
+
+    // Only ever says that something did not work. A share that worked is
+    // announced by the share sheet itself, and a line congratulating the user
+    // for a thing they watched happen is noise.
+    var note by remember { mutableStateOf<String?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         // The name of the app, and nothing else up here. The marks that used to
@@ -187,6 +162,21 @@ fun DecksScreen(
                             container.learningRepository.invalidatePlan()
                             reload()
                         }
+                    },
+                    onShare = {
+                        scope.launch {
+                            val body = container.deckRepository.exportText(deck.id)
+                            note = when {
+                                body.isBlank() -> S.t("share.004")
+                                !DeckShare.shareText(
+                                    context = context,
+                                    fileName = DeckShare.fileNameFor(deck.title),
+                                    body = body,
+                                    chooserTitle = S.t("share.002")
+                                ) -> S.t("share.003")
+                                else -> null
+                            }
+                        }
                     }
                 )
             }
@@ -201,22 +191,16 @@ fun DecksScreen(
             }
         }
 
-        Column(modifier = Modifier.padding(horizontal = Edge)) {
-            val note = when {
-                busy -> S.t("deck.006")
-                message != null -> message
-                else -> null
-            }
-            if (note != null) {
-                Spacer(Modifier.height(Space.sm))
-                Text(
-                    text = note,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = muted
-                )
-            }
-            Spacer(Modifier.height(Space.md))
+        note?.let { text ->
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodySmall,
+                color = muted,
+                modifier = Modifier.padding(horizontal = Edge, vertical = Space.sm)
+            )
         }
+
+        Spacer(Modifier.height(Space.md))
 
         // Everything that is not learning, as marks rather than as a slab of
         // words, in the corner the hand already rests in. Adding a deck is the
@@ -250,8 +234,7 @@ fun DecksScreen(
             Spacer(Modifier.weight(1f))
             IknaIconButton(
                 glyph = IknaGlyph.PLUS,
-                onClick = { picker.launch(arrayOf("*/*")) },
-                enabled = !busy,
+                onClick = onAddDeck,
                 label = S.t("a11y.004")
             )
         }
@@ -340,7 +323,8 @@ private fun DeckRow(
     deck: DeckSummary,
     dueToday: Int,
     onOpen: () -> Unit,
-    onToggle: (Boolean) -> Unit
+    onToggle: (Boolean) -> Unit,
+    onShare: () -> Unit
 ) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val accent = MaterialTheme.colorScheme.primary
@@ -412,6 +396,15 @@ private fun DeckRow(
                     color = muted
                 )
             }
+            // Written out rather than hidden behind a long press. A gesture
+            // nobody is told about is a feature nobody has, and this is the
+            // only way a deck made here ever reaches another person.
+            Spacer(Modifier.height(Space.sm))
+            IknaTextButton(
+                label = S.t("share.001"),
+                onClick = onShare,
+                color = muted
+            )
         }
     }
 }
@@ -477,12 +470,3 @@ private fun cardWord(count: Int): String {
     }
 }
 
-private fun displayName(context: Context, uri: Uri): String {
-    context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-        val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        if (index >= 0 && cursor.moveToFirst()) {
-            cursor.getString(index)?.let { return it }
-        }
-    }
-    return uri.lastPathSegment ?: "pack.jsonl"
-}

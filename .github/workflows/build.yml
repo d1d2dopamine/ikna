@@ -37,14 +37,17 @@ jobs:
       # over — but a failing test used to mean no artifact at all, so a run that
       # was meant to produce something installable produced a red cross instead.
       # Now the run still goes red, and the APK is still there.
+      # lite, explicitly. With two flavours there is no such task as
+      # assembleDebug that means one thing, and the voice build needs a model
+      # this runner has no business downloading on every push.
       - name: Build APK
-        run: gradle --no-daemon --stacktrace assembleDebug
+        run: gradle --no-daemon --stacktrace assembleLiteDebug
 
       # Prints the signing certificate so a failed "install over the old app"
       # can be diagnosed from the log instead of the phone.
       - name: Signer
         run: |
-          apk=$(find app/build/outputs/apk/debug -name '*.apk' | head -1)
+          apk=$(find app/build/outputs/apk/lite/debug -name '*.apk' | head -1)
           echo "APK: $apk"
           keytool -printcert -jarfile "$apk" | grep -E 'Owner|SHA256' || true
 
@@ -53,7 +56,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ikna-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/apk/lite/debug/*.apk
           if-no-files-found: warn
 
       # Room writes the schema of every version to app/schemas during the build,
@@ -89,12 +92,12 @@ jobs:
           fi
 
       - name: Unit tests
-        run: gradle --no-daemon --stacktrace testReleaseUnitTest
+        run: gradle --no-daemon --stacktrace testLiteReleaseUnitTest
 
       - name: Test report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ikna-test-report
-          path: app/build/reports/tests/testReleaseUnitTest
+          path: app/build/reports/tests/testLiteReleaseUnitTest
           if-no-files-found: ignore

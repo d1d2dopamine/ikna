@@ -10,3 +10,10 @@ captures/
 release.keystore
 *.jks
 *.apk
+
+# Inputs for the voice build. Fetched by tools/voice/fetch-voice.sh, never
+# committed: the runtime carries native code for four architectures and the
+# model is hundreds of megabytes. Both are reproducible from the two URLs in
+# that script, and the normal (lite) build needs neither.
+app/libs/
+app/src/voice/assets/kokoro/

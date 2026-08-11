@@ -3,6 +3,24 @@ package dev.ikna.data.repo
 import dev.ikna.data.db.ChunkDao
 import dev.ikna.data.pack.ImportResult
 import dev.ikna.data.pack.PackLoader
+import dev.ikna.data.pack.SeedFormat
+import dev.ikna.data.pack.SeedLineProblem
+
+/**
+ * What an import did, in enough detail to say it out loud.
+ *
+ * The old import reported two numbers and nothing else, so a file that produced
+ * nothing produced no explanation either — and a file written by hand, or by a
+ * model that wandered off the format, is exactly the file that produces nothing.
+ * [firstProblem] is the first line that did not make it and why, which is the
+ * one piece of information that lets someone fix their file.
+ */
+data class DeckImport(
+    val packId: String,
+    val installed: Int,
+    val skipped: Int,
+    val firstProblem: SeedLineProblem?
+)
 
 data class DeckSummary(
     val id: String,
@@ -59,16 +77,89 @@ class DeckRepository(
         fallbackTitle: String
     ): ImportResult {
         val stem = fileName.substringBeforeLast('.')
-        val slug = stem.lowercase()
-            .replace(Regex("[^a-z0-9]+"), "-")
-            .trim('-')
-            .ifEmpty { "pack" }
         return packLoader.importJsonl(
-            packId = "user-" + slug,
+            packId = packIdFor(stem),
             title = stem.ifEmpty { fallbackTitle },
             lang = "custom",
             text = text
         )
+    }
+
+    /**
+     * Imports whatever the user brought, in whichever of the two shapes it is in.
+     *
+     * A deck used to have to be `.jsonl`: one JSON object per line, with token
+     * arrays and character offsets in it. That is a format for a generator, not
+     * for a person, and it made adding a deck the hardest thing in the app —
+     * which for an app aimed at people who struggle to start is the worst
+     * possible place to put the difficulty. The three-column format is the one
+     * a model can be asked for and a person can read; `.jsonl` still imports so
+     * that packs made with the tool in `tools/genpack` keep working.
+     *
+     * The shape is decided by looking at the text, not at the file name, because
+     * a file arrives named anything at all and text pasted into the field has no
+     * name in the first place.
+     */
+    suspend fun importText(
+        fileName: String,
+        text: String,
+        fallbackTitle: String
+    ): DeckImport {
+        val stem = fileName.substringBeforeLast('.')
+        val packId = packIdFor(stem)
+        val title = stem.ifEmpty { fallbackTitle }
+
+        if (SeedFormat.looksLikeJsonl(text)) {
+            val result = packLoader.importJsonl(packId, title, "custom", text)
+            return DeckImport(packId, result.installed, result.skipped, null)
+        }
+
+        val parse = SeedFormat.parse(text)
+        val result = packLoader.importChunks(
+            packId = packId,
+            title = title,
+            lang = "custom",
+            source = SeedFormat.chunks(packId, parse.rows),
+            skipped = parse.problems.size
+        )
+        return DeckImport(
+            packId = packId,
+            installed = result.installed,
+            skipped = parse.problems.size,
+            firstProblem = parse.problems.firstOrNull()
+        )
+    }
+
+    /**
+     * One deck per name. Importing the same file twice replaces the deck rather
+     * than growing a second copy of it beside the first, and because cards are
+     * keyed by chunk id, everything already learned in it survives the replacement.
+     */
+    /**
+     * A deck as text, in the same three columns the importer accepts.
+     *
+     * Sharing a deck is the only way content moves between two people here:
+     * there is no account, no server and no permission to reach one. What comes
+     * out is what a person could have typed, so the person receiving it can read
+     * it, edit it, or feed it to a model, instead of trusting an opaque blob.
+     *
+     * A bar inside a field would split a column that is not meant to split, so
+     * it is replaced by a slash rather than the line being dropped.
+     */
+    suspend fun exportText(packId: String): String =
+        chunkDao.chunksForPack(packId).joinToString("\n") { c ->
+            listOf(c.text, c.contextSentence, c.translation)
+                .joinToString("|") { field ->
+                    field.replace('|', '/').replace('\n', ' ').trim()
+                }
+        }
+
+    private fun packIdFor(stem: String): String {
+        val slug = stem.lowercase()
+            .replace(Regex("[^a-z0-9]+"), "-")
+            .trim('-')
+            .ifEmpty { "pack" }
+        return "user-" + slug
     }
 
     companion object {

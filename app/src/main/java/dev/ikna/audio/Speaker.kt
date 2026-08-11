@@ -22,9 +22,10 @@ import java.util.concurrent.ConcurrentHashMap
 /*
  * Speech, and where it deliberately does not come from.
  *
- * Nothing here synthesises anything itself and nothing here downloads a model.
- * The app talks to whatever speech engine is installed on the phone through the
- * platform API, which is the one decision that makes the rest of this cheap:
+ * Nothing here downloads a model, ever. By default nothing here synthesises
+ * anything either: the app talks to whatever speech engine is installed on the
+ * phone through the platform API, which is the one decision that makes the rest
+ * of this cheap:
  *
  *  - a user on a normal phone already has an engine with Polish, Russian and
  *    English and pays nothing;
@@ -32,7 +33,14 @@ import java.util.concurrent.ConcurrentHashMap
  *    Piper models, or RHVoice — picks whatever voices they like inside it, and
  *    this app speaks with them without knowing they exist;
  *  - the APK does not grow by a byte, where bundling a neural runtime would add
- *    15-25MB per architecture before a single voice.
+ *    a runtime and a model before a single voice.
+ *
+ * The voice build is the exception, and it is an addition rather than a change:
+ * NeuralSpeech, when this flavour has one, renders into the same cache that the
+ * platform engine writes to, and is consulted first for the languages it knows.
+ * Everything below -- the cache, the player, speed, prefetching, the trimming --
+ * is shared, and a bundled model that is missing or fails to load leaves the
+ * behaviour exactly as it was.
  *
  * Nothing may leave the phone. Several engines expose cloud voices next to local
  * ones, so every voice whose own descriptor admits it needs a network is dropped
@@ -81,6 +89,24 @@ class Speaker(context: Context) {
     private val inFlight = ConcurrentHashMap<String, Pair<File, File>>()
 
     private var player: MediaPlayer? = null
+
+    /**
+     * The voice shipped inside the app, in the build that ships one.
+     *
+     * Resolved lazily and exactly once. In the plain build the factory returns
+     * null and every branch below simply does not run; nothing else in this
+     * class knows which build it is in.
+     */
+    private val neural: NeuralSpeech? by lazy { NeuralSpeechFactory.create(app) }
+
+    /**
+     * The bundled voice for a language, or null when there is none, when this
+     * build has none, or when the model does not speak it. Cheap and not
+     * suspending: whether the model actually loads is discovered by rendering,
+     * and a failure there falls through to the platform engine.
+     */
+    private fun neuralFor(lang: String): NeuralSpeech? =
+        neural?.takeIf { it.supports(lang) }
 
     /**
      * Speed and pitch in the form the platform wants, where 1.0 is the engine's
@@ -195,6 +221,9 @@ class Speaker(context: Context) {
 
     /** Whether this language can be spoken at all, and if not, why. */
     suspend fun status(lang: String): SpeakerStatus {
+        // A bundled voice that loads answers the question on its own: this build
+        // can speak the language whatever the phone does or does not have.
+        if (neuralFor(lang)?.isReady() == true) return SpeakerStatus.READY
         engine() ?: return SpeakerStatus.NO_ENGINE
         return if (voices(lang).isEmpty()) SpeakerStatus.NO_VOICE else SpeakerStatus.READY
     }
@@ -206,12 +235,27 @@ class Speaker(context: Context) {
      */
     suspend fun speak(text: String, lang: String, voiceName: String?) {
         if (text.isBlank()) return
-        val tts = engine() ?: return
         val cached = cacheFile(text, lang, voiceName)
         if (cached.exists() && cached.length() > 0) {
             play(cached)
             return
         }
+
+        // The bundled voice renders into the cache and is played from there, so
+        // the second time a card comes up nothing is synthesised at all. A model
+        // that is absent, unsupported here or broken returns false and the
+        // platform engine below takes the card instead.
+        val bundled = neuralFor(lang)
+        if (bundled != null) {
+            dir.mkdirs()
+            trim()
+            if (bundled.render(text, lang, rate, cached)) {
+                play(cached)
+                return
+            }
+        }
+
+        val tts = engine() ?: return
         withContext(Dispatchers.IO) {
             applyVoice(tts, lang, voiceName)
             runCatching {
@@ -234,7 +278,6 @@ class Speaker(context: Context) {
         if (text.isBlank()) return false
         val cached = cacheFile(text, lang, voiceName)
         if (!cached.exists() || cached.length() <= 0) return false
-        engine() ?: return false
         play(cached)
         return true
     }
@@ -247,6 +290,14 @@ class Speaker(context: Context) {
         if (text.isBlank()) return
         val target = cacheFile(text, lang, voiceName)
         if (target.exists() && target.length() > 0) return
+
+        val bundled = neuralFor(lang)
+        if (bundled != null) {
+            dir.mkdirs()
+            trim()
+            if (bundled.render(text, lang, rate, target)) return
+        }
+
         val tts = engine() ?: return
 
         withContext(Dispatchers.IO) {
@@ -277,6 +328,7 @@ class Speaker(context: Context) {
 
     fun shutdown() {
         stop()
+        runCatching { neural?.shutdown() }
         runCatching { engine?.shutdown() }
         engine = null
         startAttempted = false
@@ -337,7 +389,8 @@ class Speaker(context: Context) {
      * from disk.
      */
     private fun cacheFile(text: String, lang: String, voiceName: String?): File {
-        val key = lang + "|" + (voiceName ?: "") + "|" + rate + "|" + pitch + "|" + text
+        val speaker = neuralFor(lang)?.id ?: voiceName ?: ""
+        val key = lang + "|" + speaker + "|" + rate + "|" + pitch + "|" + text
         val name = Integer.toHexString(key.hashCode()) + "-" + text.length + ".wav"
         return File(dir, name)
     }

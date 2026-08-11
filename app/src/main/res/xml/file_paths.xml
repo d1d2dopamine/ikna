@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The only directory the app ever hands to another app.
+
+    A shared deck is written into cache/share and nowhere else: the review log,
+    the database and the backups stay unreachable through this provider no
+    matter what URI is guessed at, because they are not under this path.
+-->
+<paths>
+    <cache-path name="shared-decks" path="share/" />
+</paths>

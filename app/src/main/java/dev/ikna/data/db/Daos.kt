@@ -71,6 +71,14 @@ interface ChunkDao {
 
     // ---- per deck counters, for the Decks screen -------------------------
 
+    /**
+     * Every chunk of one deck, in the order the deck itself is in. Used by the
+     * share sheet: a deck leaves this phone as the same three columns it
+     * arrived as, so what one person sends another person can import.
+     */
+    @Query("SELECT * FROM chunks WHERE packId = :packId ORDER BY freqRank ASC")
+    suspend fun chunksForPack(packId: String): List<ChunkEntity>
+
     @Query("SELECT COUNT(*) FROM chunks WHERE packId = :packId")
     suspend fun chunkCountFor(packId: String): Int
 

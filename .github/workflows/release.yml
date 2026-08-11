@@ -43,7 +43,7 @@ jobs:
       # A red release is worse than a late one: the APK is attached to a page
       # people download from, so the tests run before it is built, not after.
       - name: Unit tests
-        run: gradle --no-daemon --stacktrace testReleaseUnitTest
+        run: gradle --no-daemon --stacktrace testLiteReleaseUnitTest
 
       # The version lives in app/build.gradle.kts, not in the tag, because
       # F-Droid builds this repository on a machine that knows nothing about
@@ -67,15 +67,33 @@ jobs:
           fi
 
       - name: Build release APK
-        run: gradle --no-daemon --stacktrace assembleRelease
+        run: gradle --no-daemon --stacktrace assembleLiteRelease
 
       - name: Name the file after the tag
         run: |
           mkdir -p out
-          cp app/build/outputs/apk/release/*.apk "out/ikna-${GITHUB_REF_NAME}.apk"
+          cp app/build/outputs/apk/lite/release/*.apk "out/ikna-${GITHUB_REF_NAME}.apk"
+
+      # The second APK: the same app with the neural voice and its model
+      # inside, published next to the normal one under a -voice name.
+      #
+      # It is allowed to fail. The model and the runtime are fetched from other
+      # people's servers, and a release that cannot happen because someone
+      # else's download is down is a worse outcome than a release with one file
+      # instead of two. The step is marked accordingly and the run stays green.
+      - name: Voice APK
+        continue-on-error: true
+        run: |
+          bash tools/voice/fetch-voice.sh
+          gradle --no-daemon --stacktrace assembleVoiceRelease
+          cp app/build/outputs/apk/voice/release/*.apk "out/ikna-${GITHUB_REF_NAME}-voice.apk"
 
       - name: Signer
-        run: keytool -printcert -jarfile out/*.apk | head -20
+        run: |
+          for apk in out/*.apk; do
+            echo "== $apk"
+            keytool -printcert -jarfile "$apk" | grep -E 'Owner|SHA256' || true
+          done
 
       - name: Publish
         uses: softprops/action-gh-release@v2

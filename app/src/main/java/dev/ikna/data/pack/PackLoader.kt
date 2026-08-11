@@ -90,6 +90,43 @@ class PackLoader(
         return ImportResult(packId, chunks.size, skipped)
     }
 
+    /**
+     * Installs chunks that were built in memory rather than read from a file.
+     *
+     * The three-column format the add-deck screen accepts is turned into the
+     * same [PackChunk] objects a `.jsonl` line decodes into, so from here down
+     * there is one import path and one set of bugs. Lines that did not survive
+     * parsing were already counted by the parser; this only reports what landed.
+     */
+    suspend fun importChunks(
+        packId: String,
+        title: String,
+        lang: String,
+        source: List<PackChunk>,
+        skipped: Int = 0
+    ): ImportResult {
+        val chunks = ArrayList<ChunkEntity>(source.size)
+        val tokens = ArrayList<ChunkTokenEntity>(source.size * 8)
+        for (c in source) collect(packId, lang, c, chunks, tokens)
+
+        if (chunks.isNotEmpty()) chunkDao.upsertChunks(chunks)
+        if (tokens.isNotEmpty()) chunkDao.upsertTokens(tokens)
+
+        val existing = chunkDao.pack(packId)
+        chunkDao.upsertPack(
+            PackEntity(
+                id = packId,
+                version = (existing?.version ?: 0) + 1,
+                lang = lang,
+                chunkCount = chunks.size,
+                installedAt = System.currentTimeMillis(),
+                title = title,
+                isActive = existing?.isActive ?: true
+            )
+        )
+        return ImportResult(packId, chunks.size, skipped)
+    }
+
     private suspend fun insertChunks(
         packId: String,
         lang: String,
