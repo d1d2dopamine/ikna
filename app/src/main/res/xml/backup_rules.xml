@@ -3,12 +3,16 @@
     Android 11 and below. Kept only because fullBackupContent is still read
     there; allowBackup="false" in the manifest means none of this runs.
 
-    The database is excluded rather than included: on these versions there is no
-    separate device-transfer channel, so "backup" means upload to Google, and
-    the review log does not go there. See data_extraction_rules.xml and
+    Only sharedpref is listed, and whatever is not listed is left behind, so
+    the review log never leaves the phone through this channel. On these
+    versions there is no separate device-transfer channel, so "backup" means
+    upload to Google, and the log does not go there.
+
+    There is deliberately no <exclude> for the database. Once a single <include>
+    is present everything else is already out, and lint refuses an <exclude>
+    that points outside the included paths. See data_extraction_rules.xml and
     PRIVACY.md.
 -->
 <full-backup-content>
     <include domain="sharedpref" path="." />
-    <exclude domain="database" path="ikna.db" />
 </full-backup-content>

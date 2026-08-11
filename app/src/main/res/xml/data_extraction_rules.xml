@@ -5,8 +5,8 @@
 
     cloud-backup uploads to the user's Google account. The database is the
     review log: every phrase studied, every rating, every timestamp. PRIVACY.md
-    says that stays on the phone, so it is excluded here and allowBackup is off
-    in the manifest. The supported way to move it is the export, which the user
+    says that stays on the phone, so cloud-backup lists nothing but the
+    settings, and allowBackup is off in the manifest. The supported way to move it is the export, which the user
     triggers and places themselves.
 
     device-transfer is a direct copy to a new phone during setup, with no server
@@ -15,9 +15,14 @@
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- Settings only: theme, font size, reminder time. Nothing studied. -->
+        <!--
+            Settings only: theme, font size, reminder time. Nothing studied.
+
+            The database is missing on purpose rather than excluded by name:
+            inside cloud-backup only what is listed is uploaded, and lint
+            refuses an <exclude> that points outside the included paths.
+        -->
         <include domain="sharedpref" path="." />
-        <exclude domain="database" path="ikna.db" />
     </cloud-backup>
     <device-transfer>
         <include domain="database" path="ikna.db" />

@@ -101,3 +101,10 @@ jobs:
           name: ikna-test-report
           path: app/build/reports/tests/testLiteReleaseUnitTest
           if-no-files-found: ignore
+
+      # The APK above is a debug build, which does not run lint. A release
+      # build does, and lint can fail it on things a debug build never sees
+      # (manifest and resource rules, for one). Run that check here so a tag
+      # is never pushed onto a commit the release workflow cannot build.
+      - name: Release lint
+        run: gradle --no-daemon --stacktrace lintVitalLiteRelease
