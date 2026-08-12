@@ -409,6 +409,8 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"deck.016" to "karty",
 	// карточек
 	"deck.017" to "kart",
+	"deck.018" to " · <1 min",
+	"deck.019" to " min",
 	"add.001" to "Nowa talia",
 	"add.002" to "Talia to zwykły tekst. Jedna linia to jedna karta: fraza, zdanie z tą frazą i tłumaczenie, oddzielone |.",
 	"add.003" to "Skopiuj prompt i wyślij go dowolnej AI.",
@@ -460,6 +462,8 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"dp.009" to "Znikną karty tej talii i ich terminy. Odpowiedzi zostaną w statystykach — ten dziennik nigdy nie jest nadpisywany.",
 	"add.036" to "jak to działa",
 	"add.037" to "ukryj",
+	"add.038" to "W jakim języku są karty",
+	"add.039" to "Potrzebny tylko do czytania na głos. Można to zmienić później na stronie talii.",
 	// тап в любом месте
 	"card.002" to "dotknij gdziekolwiek",
 	// ← НЕ ЗНАЮ
@@ -660,10 +664,12 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"voice.029" to "Dodaj model",
 	// Оформление
 	"look.001" to "Wygląd",
-	// Значок и цвет квадрата в списке колод. Видно только вам: тому, кому отправите колоду, придут только карточки.
-	"look.002" to "Ikona i kolor kwadratu na liście talii. Widzisz tylko ty: ten, komu wyślesz talię, dostanie same karty.",
+	// Буквы и цвет квадрата в списке колод. Видно только вам: тому, кому отправите колоду, придут только карточки.
+	"look.002" to "Litery i kolor kwadratu na liście talii. Widzisz tylko ty: ten, komu wyślesz talię, dostanie same karty.",
 	// Цвет квадрата
 	"look.003" to "Kolor kwadratu",
+	// 1-2 символа. Оставьте пустым - буквы подберутся сами.
+	"look.004" to "Jeden lub dwa znaki. Puste - kwadrat wybierze sam.",
 	// Логотип ikna
 	"bar.001" to "Znak ikna",
 	// Слева в нижнем баре. Выключите — место уйдёт кнопкам

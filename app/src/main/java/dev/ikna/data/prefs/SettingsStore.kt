@@ -174,8 +174,8 @@ data class IknaSettings(
      */
     val leftHanded: Boolean = false,
     /**
-     * How each deck's square looks: an icon and a colour, stored as
-     * "packId=emoji|tint" pairs joined by semicolons.
+     * How each deck's square looks: a label and a colour, stored as
+     * "packId=label|tint" pairs joined by semicolons.
      *
      * A preference rather than a column on the deck, and deliberately so. This
      * is how one person likes their own list to look; it is not part of the
@@ -191,7 +191,19 @@ data class IknaSettings(
      * button. Once there are enough of them the two rare ratings drop off the
      * screen and stay on the gesture, which is where they belong.
      */
-    val swipesDone: Int = 0
+    val swipesDone: Int = 0,
+    /**
+     * How long one answer took, last time there was enough history to measure
+     * it, in milliseconds. Zero means never measured.
+     *
+     * Kept here rather than recomputed each time because the measurement needs
+     * a handful of recent answers and there is not always a handful: a short
+     * evening, or a run of instant recognitions, and the median goes back to
+     * null. The figure used to vanish with it, so the one line that says what a
+     * session costs came and went for no reason the user could see. A slightly
+     * stale number is worth far more than no number.
+     */
+    val answerMs: Int = 0
 )
 
 private val Context.iknaDataStore: DataStore<Preferences> by preferencesDataStore(name = "ikna-settings")
@@ -226,6 +238,7 @@ class SettingsStore(private val context: Context) {
         val onboardingDone = booleanPreferencesKey("onboardingDone")
         val revealHintsShown = intPreferencesKey("revealHintsShown")
         val swipesDone = intPreferencesKey("swipesDone")
+        val answerMs = intPreferencesKey("answerMs")
     }
 
     val flow: Flow<IknaSettings> = context.iknaDataStore.data.map { p ->
@@ -266,7 +279,8 @@ class SettingsStore(private val context: Context) {
             deckLooks = p[Keys.deckLooks] ?: defaults.deckLooks,
             onboardingDone = p[Keys.onboardingDone] ?: defaults.onboardingDone,
             revealHintsShown = p[Keys.revealHintsShown] ?: defaults.revealHintsShown,
-            swipesDone = p[Keys.swipesDone] ?: defaults.swipesDone
+            swipesDone = p[Keys.swipesDone] ?: defaults.swipesDone,
+            answerMs = p[Keys.answerMs] ?: defaults.answerMs
         )
     }
 
@@ -348,9 +362,9 @@ class SettingsStore(private val context: Context) {
      * than stored as empty, so the preference does not grow a line for every
      * deck that was ever looked at.
      */
-    suspend fun setDeckLook(packId: String, emoji: String?, tint: Int?) = put { prefs ->
+    suspend fun setDeckLook(packId: String, label: String?, tint: Int?) = put { prefs ->
         val map = parseDeckLooks(prefs[Keys.deckLooks] ?: "").toMutableMap()
-        val look = DeckLook(emoji = emoji?.trim().orEmpty(), tint = tint ?: NO_TINT)
+        val look = DeckLook(label = deckLabelOf(label), tint = tint ?: NO_TINT)
         if (look.isPlain) map.remove(packId) else map[packId] = look
         prefs[Keys.deckLooks] = encodeDeckLooks(map)
     }
@@ -368,6 +382,9 @@ class SettingsStore(private val context: Context) {
     suspend fun bumpSwipe() = put {
         it[Keys.swipesDone] = (it[Keys.swipesDone] ?: 0) + 1
     }
+
+    /** The latest measured length of one answer, so the estimate outlives a session. */
+    suspend fun setAnswerMs(ms: Int) = put { it[Keys.answerMs] = ms }
 
     /**
      * Back to first-run defaults, including the onboarding flag.
@@ -431,12 +448,44 @@ fun IknaSettings.voiceFor(lang: String): String? {
 const val NO_TINT = -1
 
 /**
- * How one deck's square is drawn. Both halves are optional: an icon without a
- * colour and a colour without an icon are both ordinary choices.
+ * How one deck's square is drawn: up to two characters, and a colour. Both
+ * halves are optional; a label without a colour and a colour without a label are
+ * both ordinary choices.
+ *
+ * It held an emoji until 0.2.0. Emoji are drawn by the phone, in full colour,
+ * with their own shading and their own idea of a corner radius -- next to this
+ * app's flat single-colour marks they look like a sticker on a blueprint. Two
+ * characters of the app's own typeface do the same job (tell two decks apart at
+ * a glance) and cannot be out of place, because they are the same letters the
+ * square already drew by itself.
  */
-data class DeckLook(val emoji: String = "", val tint: Int = NO_TINT) {
+data class DeckLook(val label: String = "", val tint: Int = NO_TINT) {
     /** Nothing chosen at all, which is what the app does by default. */
-    val isPlain: Boolean get() = emoji.isEmpty() && tint == NO_TINT
+    val isPlain: Boolean get() = label.isEmpty() && tint == NO_TINT
+}
+
+/**
+ * A typed label, made safe to store and to draw.
+ *
+ * Two characters, because three do not fit the square at a legible size. The
+ * three separator characters are stripped rather than escaped: this string is
+ * stored in a hand-rolled "id=label|tint;..." format, and one semicolon typed
+ * into a deck label would otherwise silently delete the decoration of every
+ * deck after it.
+ *
+ * Line breaks and control characters go too. They arrive by paste, they are
+ * invisible in the field, and they would push the square's own layout around.
+ */
+fun deckLabelOf(raw: String?): String {
+    val cleaned = raw.orEmpty()
+        .filter { it != ';' && it != '=' && it != '|' && !it.isISOControl() }
+        .trim()
+    if (cleaned.isEmpty()) return ""
+    // Counted in code points, not in chars: a two-char label that is one letter
+    // plus its combining accent must not be cut in half.
+    val points = cleaned.codePointCount(0, cleaned.length)
+    if (points <= 2) return cleaned
+    return cleaned.substring(0, cleaned.offsetByCodePoints(0, 2))
 }
 
 fun parseDeckLooks(value: String): Map<String, DeckLook> =
@@ -448,10 +497,10 @@ fun parseDeckLooks(value: String): Map<String, DeckLook> =
             val id = pair.substring(0, at).trim()
             val body = pair.substring(at + 1)
             val bar = body.indexOf('|')
-            val emoji = (if (bar < 0) body else body.substring(0, bar)).trim()
+            val label = deckLabelOf(if (bar < 0) body else body.substring(0, bar))
             val tint = if (bar < 0) NO_TINT
             else body.substring(bar + 1).trim().toIntOrNull() ?: NO_TINT
-            val look = DeckLook(emoji = emoji, tint = tint)
+            val look = DeckLook(label = label, tint = tint)
             if (id.isEmpty() || look.isPlain) null else id to look
         }
         .toMap()
@@ -459,7 +508,7 @@ fun parseDeckLooks(value: String): Map<String, DeckLook> =
 fun encodeDeckLooks(map: Map<String, DeckLook>): String =
     map.entries
         .filter { it.key.isNotBlank() && !it.value.isPlain }
-        .joinToString(";") { it.key + "=" + it.value.emoji + "|" + it.value.tint }
+        .joinToString(";") { it.key + "=" + it.value.label + "|" + it.value.tint }
 
 /** What this deck should look like. Never null: an undecorated deck is plain. */
 fun IknaSettings.lookFor(packId: String): DeckLook =

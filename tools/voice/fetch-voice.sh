@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 #
-# Fetches the one thing the voice build needs, and puts it where Gradle looks.
+# Fetches the one thing this project does not carry itself, and puts it where
+# Gradle looks. Run once per clone, before the first build:
 #
 #   bash tools/voice/fetch-voice.sh
-#   gradle assembleVoiceRelease
+#   gradle assembleRelease
 #
 # One file is downloaded and it is not committed to this repository:
 #
@@ -22,12 +23,14 @@
 #
 #   SHERPA_VERSION=1.11.0 bash tools/voice/fetch-voice.sh
 #
-# The lite build needs none of this and builds on a checkout that has never run
-# this script.
+# There is one build now, and it contains the speech engine, so this is no
+# longer optional: a checkout that has never run this script does not compile.
+# The runtime is still not committed - ten megabytes of native code per
+# version, in a repository whose whole point is that it is small and readable.
 #
 set -euo pipefail
 
-# Pinned deliberately. The Kotlin in app/src/voice is written against this API,
+# Pinned deliberately. The Kotlin in SherpaSpeech.kt is written against this API,
 # and a newer runtime is a compile error at best -- so it moves only when
 # somebody has read the release notes.
 SHERPA_VERSION="${SHERPA_VERSION:-1.10.46}"
@@ -61,17 +64,17 @@ else
   get "$aar_url" "$aar"
 fi
 
-# An old checkout may still have the model that used to be packed into the APK.
-# Left in place it would add a hundred and fifty megabytes to the build for
-# nothing, so it goes.
-old="$root/app/src/voice/assets/kokoro"
+# An old checkout may still have the model that used to be packed into the APK,
+# in a source set that no longer exists. Left in place it would add a hundred
+# and fifty megabytes to the build for nothing, so it goes.
+old="$root/app/src/voice"
 if [ -d "$old" ]; then
-  say "removing the model that used to be bundled: app/src/voice/assets/kokoro"
+  say "removing the source set that used to hold the bundled model: app/src/voice"
   rm -rf "$old"
 fi
 
 say "done"
 du -sh "$aar" 2>/dev/null || true
 echo
-echo "now: gradle assembleVoiceRelease"
+echo "now: gradle assembleRelease"
 echo "the model is added inside the app: Settings -> Voice -> Add a model"

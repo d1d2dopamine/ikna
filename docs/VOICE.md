@@ -5,17 +5,24 @@ when nothing is speaking.
 
 ---
 
-## Two builds
+## One build
 
-There are two APKs in every release, from the same source:
+One APK per release, about **31 MB**, with the speech engine inside and **no
+model**:
 
-| Build | Size | What speaks |
+| What | Size | What speaks |
 | --- | --- | --- |
-| `lite` (`ikna-<tag>.apk`) | ~21 MB | whatever text-to-speech the phone already has |
-| `voice` (`ikna-<tag>-voice.apk`) | ~31 MB | the same, plus a neural engine for a model you add |
+| `ikna-<tag>.apk` | ~31 MB | the phone's own text-to-speech, or a model you add |
 
-Neither one contains a model. The `voice` build carries the sherpa-onnx runtime,
-which is about ten megabytes of native code and no weights at all.
+There were two APKs until 0.3.0: a plain one and a `-voice` one. The split was
+worth its cost while the second carried a 300 MB model. Once the model moved out
+to the file picker, all it carried was ten megabytes of runtime -- and in exchange
+the release page asked everybody to choose between two files whose names explain
+nothing, while CI had to build both and one of them broke without anybody
+noticing. Ten megabytes is the cheaper mistake.
+
+The engine is inert until reading aloud is switched on, and there is no model in
+it at all: about ten megabytes of native code and no weights.
 
 ---
 
@@ -143,8 +150,8 @@ who is speaking right now, and **Test the voice** proves it out loud.
 - **"A model is installed but did not load"** -- the folder is a model but this
   phone would not run it: usually memory. Take an `int8` folder, or a `low`
   quality Piper voice instead of `medium`.
-- **"This build carries no model engine"** -- this is the `lite` APK. Take the
-  `-voice` one.
+- **"This build carries no model engine"** -- from a build older than 0.3.0,
+  when the engine was in a separate APK. Any current build has it.
 
 A model that renders too slowly three times over is dropped on purpose, and the
 phone's own voice takes over: twenty seconds a card is not a working feature, it
@@ -160,10 +167,10 @@ is a frozen app.
 | `app/src/main/java/dev/ikna/audio/NeuralSpeech.kt` | the interface a model engine implements |
 | `app/src/main/java/dev/ikna/audio/VoiceModel.kt` | judging a picked folder, no Android involved |
 | `app/src/main/java/dev/ikna/audio/VoiceModelStore.kt` | copying it in, and the one model on disk |
-| `app/src/voice/java/dev/ikna/audio/SherpaSpeech.kt` | the engine itself, `voice` build only |
-| `app/src/lite/java/dev/ikna/audio/NeuralSpeechFactory.kt` | returns null: the plain build has no engine |
+| `app/src/main/java/dev/ikna/audio/SherpaSpeech.kt` | the engine itself |
+| `app/src/main/java/dev/ikna/audio/NeuralSpeechFactory.kt` | hands out the engine, or null until a model is added |
 | `app/src/main/java/dev/ikna/ui/settings/VoiceScreen.kt` | the screen that says who is speaking |
-| `tools/voice/fetch-voice.sh` | downloads the runtime `.aar` before a `voice` build |
+| `tools/voice/fetch-voice.sh` | downloads the runtime `.aar`; run once per clone |
 
 The model is copied to `files/voice-model/` inside the app, with a small
 `ikna-model.txt` beside it recording what it is. Removing the model, or
@@ -175,13 +182,15 @@ back in yesterday's voice.
 
 ---
 
-## Building the voice APK
+## Building it
 
 ```bash
 bash tools/voice/fetch-voice.sh
-gradle assembleVoiceRelease
+gradle assembleRelease
 ```
 
-The script downloads one `.aar` into `app/libs/` and nothing else. The `lite`
-build ignores all of it and builds on a checkout that has never run the script,
-which is why CI builds `lite` and attaches `voice` separately.
+The script downloads one `.aar` into `app/libs/` and nothing else. It is not
+optional any more: the runtime is part of the one build, so a fresh clone that
+has never run it does not compile. Both workflows run it themselves before
+anything is built, which is also what makes a failed download impossible to
+miss -- it used to fail quietly and cost a release its second APK.

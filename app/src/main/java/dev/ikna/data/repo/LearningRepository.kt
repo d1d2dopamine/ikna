@@ -825,6 +825,14 @@ class LearningRepository(
      * Null until there is enough history: an invented number is worse than
      * no number, because the whole point is that the estimate can be
      * trusted.
+     *
+     * The bounds started at 0.8s and one minute and threw away almost
+     * everything: a phrase that is recognised on sight is answered faster than
+     * that, and a phrase that is being thought about takes longer, so a real
+     * session often left fewer than the eight samples the estimate needed and no
+     * minutes were shown at all. What the bounds are for is discarding a
+     * mis-swipe and a phone put face-down, and 0.4s to two minutes does that
+     * without discarding the session.
      */
     suspend fun medianAnswerMs(): Long? {
         val samples = reviewDao.recentDurations(DURATION_SAMPLE)
@@ -916,9 +924,9 @@ class LearningRepository(
 
         /** Sample size and sanity bounds for the time estimate. */
         const val DURATION_SAMPLE = 100
-        const val DURATION_MIN_SAMPLES = 8
-        const val MIN_SANE_ANSWER_MS = 800L
-        const val MAX_SANE_ANSWER_MS = 60_000L
+        const val DURATION_MIN_SAMPLES = 4
+        const val MIN_SANE_ANSWER_MS = 400L
+        const val MAX_SANE_ANSWER_MS = 120_000L
 
         /**
          * Sizes for the statistics screen.

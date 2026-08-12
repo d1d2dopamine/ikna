@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.2.0-proof"><img src="https://img.shields.io/badge/release-0.2.0%20proof-crimson?style=flat-square" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.3.0-proof"><img src="https://img.shields.io/badge/release-0.3.0%20proof-crimson?style=flat-square" alt="release"></a>
   <a href="https://github.com/d1d2dopamine/ikna/releases"><img src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?label=downloads&style=flat-square&logo=github&color=blueviolet" alt="downloads"></a>
   <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.2.0-proof/ikna-v0.2.0-proof.apk"><strong>Download</strong></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.3.0-proof/ikna-v0.3.0-proof.apk"><strong>Download</strong></a>
   &nbsp;·&nbsp;
   <a href="CHANGELOG.md">Changelog</a>
   &nbsp;·&nbsp;
@@ -65,22 +65,22 @@ sans-serif faces and reads as a lower case L, so "Ikna" invites being read as
 
 | Platform | File in the release |
 | --- | --- |
-| **Android** 10+ (`minSdk 29`) | `ikna-v0.2.0-proof.apk` |
-| the same, with the speech engine inside, model not included (~31 MB) | `ikna-v0.2.0-proof-voice.apk` |
+| **Android** 10+ (`minSdk 29`) | `ikna-v0.3.0-proof.apk` (~31 MB) |
 
-**[Download ikna-v0.2.0-proof.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.2.0-proof/ikna-v0.2.0-proof.apk)** ·
-[all files](https://github.com/d1d2dopamine/ikna/releases/tag/v0.2.0-proof)
+**[Download ikna-v0.3.0-proof.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.3.0-proof/ikna-v0.3.0-proof.apk)** ·
+[all files](https://github.com/d1d2dopamine/ikna/releases/tag/v0.3.0-proof)
 
 Download it and open it; Android asks once whether to allow installing from this
 source. There is no store listing. Every release is signed with the key committed to
 this repository, so a new APK installs over the old one and **your answers survive
 the update**.
 
-The `-voice` file is the same app with an on-device speech engine inside and **no
-model**: about **31 MB instead of 21**. The model is yours to add — a Kokoro or
-Piper folder from your own phone, in the language you are actually learning. The app
-downloads nothing; it holds no internet permission at all. The plain file speaks with
-the voice your phone already has, and either file tells you on screen which of the two
+One file, not two. There used to be a second `-voice` APK; the choice was never a
+real one, so the speech engine is simply inside now and switched off until you turn
+it on. It ships with **no model** — that part is yours to add, a Kokoro or Piper
+folder from your own phone, in the language you are actually learning. The app
+downloads nothing; it holds no internet permission at all. Until you add a model it
+speaks with the voice your phone already has, and the voice screen always names who
 is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
 
 ---
@@ -173,7 +173,7 @@ expect from the next one.
 | **press** | The next generation, once `proof` has nothing left to correct. |
 
 Both words are lower case, and git tags replace the space with a dash:
-`v0.2.0-proof`. Why the count restarted while `appVersionCode` did not:
+`v0.3.0-proof`. Why the count restarted while `appVersionCode` did not:
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
 ---
@@ -184,14 +184,16 @@ Push to `main`, or run the `build` workflow by hand, and download the `ikna-apk`
 artifact. No Gradle wrapper jar is committed; CI provisions Gradle itself.
 
 ```
-./gradlew assembleLiteDebug                        # the app
-./gradlew assembleLiteRelease -Pikna.unsigned=true # unsigned, without the committed key
-./gradlew testLiteReleaseUnitTest                  # the tests CI runs
+bash tools/voice/fetch-voice.sh                # once per clone: the speech runtime
+./gradlew assembleDebug                        # the app
+./gradlew assembleRelease -Pikna.unsigned=true # unsigned, without the committed key
+./gradlew testReleaseUnitTest                  # the tests CI runs
 ```
 
-`lite` is the normal build; `voice` is the same app with the speech runtime, which
-`tools/voice/fetch-voice.sh` fetches rather than this repository storing it. No model
-is fetched and none is shipped — that part comes from whoever uses the app.
+There is one build. The speech runtime is a ten-megabyte `.aar` that this repository
+does not store, so `tools/voice/fetch-voice.sh` has to run once before the first
+build; both workflows run it themselves. No model is fetched and none is shipped —
+that part comes from whoever uses the app.
 
 Both debug and release are signed with one keystore committed to this repository, on
 purpose: in CI every machine would otherwise generate its own signature, a new APK
@@ -204,8 +206,8 @@ Bump the two version lines in `app/build.gradle.kts`, then tag the commit with t
 same string, space replaced by a dash:
 
 ```
-git tag v0.2.0-proof
-git push origin v0.2.0-proof
+git tag v0.3.0-proof
+git push origin v0.3.0-proof
 ```
 
 The `release` workflow refuses to continue if the tag and the build file disagree,
@@ -257,7 +259,7 @@ release, the ones published before this notice as well as every future one.
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.2.0-proof"><img src="https://img.shields.io/badge/release-0.2.0%20proof-crimson?style=flat-square" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.3.0-proof"><img src="https://img.shields.io/badge/release-0.3.0%20proof-crimson?style=flat-square" alt="release"></a>
   <a href="https://github.com/d1d2dopamine/ikna/releases"><img src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?label=downloads&style=flat-square&logo=github&color=blueviolet" alt="downloads"></a>
   <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
@@ -267,7 +269,7 @@ release, the ones published before this notice as well as every future one.
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.2.0-proof/ikna-v0.2.0-proof.apk"><strong>Скачать</strong></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.3.0-proof/ikna-v0.3.0-proof.apk"><strong>Скачать</strong></a>
   &nbsp;·&nbsp;
   <a href="CHANGELOG.md">Изменения</a>
   &nbsp;·&nbsp;
@@ -307,22 +309,22 @@ ikna учит язык **кусками**: короткая фраза, живо
 
 | Платформа | Файл в релизе |
 | --- | --- |
-| **Android** 10+ (`minSdk 29`) | `ikna-v0.2.0-proof.apk` |
-| то же самое, с движком озвучки внутри, модель добавляешь сам (~31 МБ) | `ikna-v0.2.0-proof-voice.apk` |
+| **Android** 10+ (`minSdk 29`) | `ikna-v0.3.0-proof.apk` (~31 МБ) |
 
-**[Скачать ikna-v0.2.0-proof.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.2.0-proof/ikna-v0.2.0-proof.apk)** ·
-[все файлы](https://github.com/d1d2dopamine/ikna/releases/tag/v0.2.0-proof)
+**[Скачать ikna-v0.3.0-proof.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.3.0-proof/ikna-v0.3.0-proof.apk)** ·
+[все файлы](https://github.com/d1d2dopamine/ikna/releases/tag/v0.3.0-proof)
 
 Скачать и открыть; андроид один раз спросит, разрешить ли установку из этого
 источника. Никакого магазина нет. Все релизы подписаны ключом из этого же
 репозитория, так что новый apk ставится поверх старого и **твои ответы переживают
 обновление**.
 
-Файл с `-voice` — то же приложение с движком озвучки внутри и **без модели**:
-**~31 МБ вместо ~21**. Модель добавляешь ты сам — папка Kokoro или Piper с твоего
-же телефона, на том языке, который реально учишь. Приложение ничего не скачивает: у
-него вообще нет доступа в интернет. Обычный файл озвучивает голосом, который уже есть
-в телефоне, и оба файла показывают на экране, кто именно сейчас говорит. Подробности в
+Файл один, не два. Раньше был второй, `-voice`, но выбор был ненастоящий, так что
+движок озвучки теперь просто внутри и выключен, пока его не включишь. **Модели
+внутри нет** — её добавляешь ты сам: папка Kokoro или Piper с твоего же телефона, на
+том языке, который реально учишь. Приложение ничего не скачивает: у него вообще
+нет доступа в интернет. Пока модели нет, читает голосом, который уже есть в
+телефоне, а экран озвучки всегда говорит, кто именно сейчас говорит. Подробности в
 [`docs/VOICE.md`](docs/VOICE.md).
 
 ---
@@ -415,7 +417,7 @@ get used to | It takes a while to get used to the noise. | привыкать
 | **proof** | Тесты, исправления, уточнения, полировка. Никаких новых основ. |
 | **press** | Следующее поколение, когда в `proof` больше нечего исправлять. |
 
-Оба слова со строчной, а в тегах git пробел заменяется дефисом: `v0.2.0-proof`.
+Оба слова со строчной, а в тегах git пробел заменяется дефисом: `v0.3.0-proof`.
 Почему счёт начался заново, а `appVersionCode` — нет:
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
@@ -427,14 +429,16 @@ get used to | It takes a while to get used to the noise. | привыкать
 `ikna-apk`. Jar грейдл-раппера в репозитории нет — CI ставит грейдл сам.
 
 ```
-./gradlew assembleLiteDebug                        # приложение
-./gradlew assembleLiteRelease -Pikna.unsigned=true # без коммитнутого ключа
-./gradlew testLiteReleaseUnitTest                  # тесты, которые гоняет CI
+bash tools/voice/fetch-voice.sh                # один раз на клон: движок озвучки
+./gradlew assembleDebug                        # приложение
+./gradlew assembleRelease -Pikna.unsigned=true # без коммитнутого ключа
+./gradlew testReleaseUnitTest                  # тесты, которые гоняет CI
 ```
 
-`lite` — обычная сборка, `voice` — та же с движком озвучки, который
-скачивает `tools/voice/fetch-voice.sh`, а не хранит репозиторий. Модель не скачивается
-и не кладётся внутрь: её добавляет тот, кто пользуется приложением.
+Сборка одна. Движок озвучки — это `.aar` на десять мегабайт, репозиторий его не
+хранит, так что `tools/voice/fetch-voice.sh` надо один раз запустить перед первой
+сборкой; оба воркфлоу делают это сами. Модель не скачивается и не кладётся внутрь:
+её добавляет тот, кто пользуется приложением.
 
 И debug, и release подписаны одним ключом, лежащим в репозитории, и это сделано
 намеренно: иначе каждая машина в CI сгенерировала бы свою подпись, новый apk не
@@ -447,8 +451,8 @@ get used to | It takes a while to get used to the noise. | привыкать
 же строкой, где пробел заменён дефисом:
 
 ```
-git tag v0.2.0-proof
-git push origin v0.2.0-proof
+git tag v0.3.0-proof
+git push origin v0.3.0-proof
 ```
 
 Воркфлоу `release` откажется работать, если тег и файл сборки расходятся, а затем

@@ -154,6 +154,7 @@ fun DecksScreen(
                     deck = deck,
                     look = settings.lookFor(deck.id),
                     dueToday = today[deck.id] ?: 0,
+                    perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
                     onOpen = { onOpenSession(deck.id) },
                     onOpenDeck = { onOpenDeck(deck.id) },
                     onToggle = { active ->
@@ -348,6 +349,7 @@ private fun DeckRow(
     deck: DeckSummary,
     look: DeckLook,
     dueToday: Int,
+    perCardMs: Long?,
     onOpen: () -> Unit,
     onOpenDeck: () -> Unit,
     onToggle: (Boolean) -> Unit
@@ -392,7 +394,9 @@ private fun DeckRow(
                     )
                     Spacer(Modifier.height(Space.xs))
                     Text(
-                        text = if (owes) S.t("deck.009") + dueToday else S.t("deck.010"),
+                        text = if (owes) S.t("deck.009") + dueToday +
+                            minutesTail(dueToday, perCardMs)
+                        else S.t("deck.010"),
                         style = MaterialTheme.typography.labelMedium,
                         color = if (owes) accent else muted
                     )
@@ -474,25 +478,17 @@ private fun DeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
             .border(Space.hair, edge),
         contentAlignment = Alignment.Center
     ) {
-        if (look.emoji.isEmpty()) {
-            Text(
-                text = monogramOf(deck.lang, deck.title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = ink,
-                maxLines = 1
-            )
-        } else {
-            // An icon carries its own colours, so it is not tinted, not faded
-            // and not inverted the way the letters are. The square around it
-            // still does all three, which is where the state was always read
-            // from anyway.
-            Text(
-                text = look.emoji,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1
-            )
-        }
+        // The typed label if there is one, otherwise the two letters the app
+        // works out by itself. One Text either way: a label is not a different
+        // kind of mark, it is the same mark with better letters in it, so it
+        // inherits the tint, the fade and the inversion without asking.
+        Text(
+            text = look.label.ifEmpty { monogramOf(deck.lang, deck.title) },
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = ink,
+            maxLines = 1
+        )
     }
 }
 
@@ -500,6 +496,26 @@ private fun DeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
 private fun percentDone(introduced: Int, total: Int): String {
     if (total <= 0) return "0%"
     return (introduced * 100 / total).toString() + "%"
+}
+
+/**
+ * "~4 мин" beside what a deck owes today, when there is a measurement to say
+ * it with.
+ *
+ * A count of cards does not answer the question being asked while looking at
+ * this list, which is whether this fits into the time there is. The figure is
+ * the same one shown above the first card of a session, from the same
+ * measurement: two phrasings of one number read as two numbers.
+ *
+ * Empty when nothing has been measured yet. Nothing is better than a guess here
+ * -- an estimate that turns out to be a lie is not used again.
+ */
+private fun minutesTail(count: Int, perCardMs: Long?): String {
+    if (perCardMs == null || count <= 0) return ""
+    val totalMs = count * perCardMs
+    if (totalMs < 45_000L) return S.t("deck.018")
+    val minutes = ((totalMs + 30_000L) / 60_000L).toInt().coerceAtLeast(1)
+    return " · ~" + minutes + S.t("deck.019")
 }
 
 private fun cardWord(count: Int): String {

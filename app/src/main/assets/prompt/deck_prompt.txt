@@ -32,6 +32,17 @@ HARD RULES — a line that breaks any of these is thrown away by the app:
 6. Each phrase appears once in the whole file. Duplicates are dropped.
 7. Plain text only. No audio, no images, no formatting.
 
+THE THIRD FIELD, EXACTLY
+- One wording. Not "tired, worn out", not "tired / worn out", not "tired
+  (informal)". Three wordings on the back of a card turn every recall into a
+  multiple-choice question, and the learner grades themselves. Choose the one
+  they will meet most often. The app keeps the first wording and drops the rest,
+  so a list costs you the choice rather than making it.
+- It ends the way the phrase ends. "how are you?" keeps its question mark,
+  "watch out!" keeps its exclamation mark: the mark is half of what the phrase
+  means, and a learner is meant to notice it. The app copies the mark over if
+  you forget, which is not the same as writing it.
+
 WHAT MAKES A GOOD CARD
 - Phrases are what people actually say: 1 to 4 words. Chunks, collocations,
   common verb phrases, fixed expressions. Not single nouns, not grammar terms.
@@ -53,7 +64,8 @@ WHAT MAKES A GOOD CARD
 
 RIGHT
 hang on | Just hang on, I'll grab my keys. | погоди
-make it | Sorry, I don't think I can make it tonight. | добраться, прийти
+make it | Sorry, I don't think I can make it tonight. | добраться
+how are you? | So, how are you? | как дела?
 give up | Don't give up on the first try. | сдаваться
 
 WRONG, AND WHY
@@ -62,6 +74,9 @@ hang on | Wait for me here. | погоди          <- sentence lacks the phrase
 hang on | He hung on for a while. | погоди     <- "hung on" is not "hang on"
 hang on | Just hang on. | just wait a moment, hold on for a second, be patient
                                               <- translating the sentence, too long
+make it | I can't make it tonight. | успеть, прийти, добраться
+                                              <- three wordings; only the first survives
+how are you? | So, how are you? | как дела    <- the phrase asks, the answer states
 
 BEFORE YOU ANSWER
 Check every line yourself: copy the first field and find it inside the second

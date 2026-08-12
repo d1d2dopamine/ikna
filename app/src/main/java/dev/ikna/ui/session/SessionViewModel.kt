@@ -226,6 +226,13 @@ class SessionViewModel(
             val prefs = settings.current()
             hintsShown = prefs.revealHintsShown
             swipesDone = prefs.swipesDone
+
+            // Measured if there is enough history, remembered otherwise. The
+            // fresh measurement is also written down, so the next session that
+            // cannot measure anything still knows what an answer costs.
+            val measured = repo.medianAnswerMs()
+            if (measured != null) settings.setAnswerMs(measured.toInt())
+            val remembered = prefs.answerMs.takeIf { it > 0 }?.toLong()
             _state.value = SessionUiState(
                 loading = false,
                 queue = plan.cards,
@@ -237,7 +244,7 @@ class SessionViewModel(
                 sessionTotal = plan.sessionTotal,
                 deckTitle = plan.deckTitle,
                 dailyMinimum = repo.dailyMinimum(),
-                perCardMs = repo.medianAnswerMs(),
+                perCardMs = measured ?: remembered,
                 reason = plan.reason,
                 nextDueAt = plan.nextDueAt,
                 canUndo = plan.answeredToday > 0,

@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
 import dev.ikna.data.pack.SeedProblem
 import dev.ikna.data.repo.DeckImport
+import dev.ikna.data.repo.NO_LANG
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaGlyph
@@ -90,6 +91,7 @@ fun AddDeckScreen(
 	var busy by remember { mutableStateOf(false) }
 	var prompt by remember { mutableStateOf("") }
 	var guide by remember { mutableStateOf(false) }
+	var lang by remember { mutableStateOf(NO_LANG) }
 
 	// The prompt is an asset rather than a string in the catalogue: it is three
 	// kilobytes of English addressed to a model, not interface text, and it has to
@@ -109,7 +111,8 @@ fun AddDeckScreen(
 				container.deckRepository.importText(
 					fileName = name,
 					text = text,
-					fallbackTitle = S.t("deckrepo.001")
+					fallbackTitle = S.t("deckrepo.001"),
+					lang = lang
 				)
 			}.getOrNull()
 		}
@@ -246,6 +249,29 @@ fun AddDeckScreen(
 			)
 
 			Spacer(Modifier.height(Space.xl))
+			IknaRule()
+			Spacer(Modifier.height(Space.lg))
+
+			// Asked here rather than left to the deck page. A deck without a
+			// language cannot be read aloud, and the only screen that could fix
+			// that sat behind a deck nobody had opened yet -- so the deck was
+			// silent and nothing said why. Here the answer is one tap, on the
+			// screen where the deck is being made, and it defaults to the honest
+			// one: no language claimed, no voice offered.
+			Text(
+				text = S.t("add.038"),
+				style = MaterialTheme.typography.labelMedium,
+				color = muted
+			)
+			Spacer(Modifier.height(Space.sm))
+			LangChips(current = lang, onPick = { lang = it })
+			Text(
+				text = S.t("add.039"),
+				style = MaterialTheme.typography.bodySmall,
+				color = muted
+			)
+
+			Spacer(Modifier.height(Space.lg))
 			IknaRule()
 			Spacer(Modifier.height(Space.lg))
 

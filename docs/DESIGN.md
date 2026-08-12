@@ -13,7 +13,7 @@ the speak mark — lives in a thin row above, never on the card itself.
 
 No screenshots, on purpose: a still frame is a poor description of an app whose
 whole answer mechanism is a movement, and a recording of a swipe looks like a
-stutter. Build it and see it; it takes one `gradlew assembleLiteDebug`.
+stutter. Build it and see it; it takes one `gradlew assembleDebug`.
 
 ## Core decisions
 
@@ -28,7 +28,7 @@ stutter. Build it and see it; it takes one `gradlew assembleLiteDebug`.
 | Streaks | none. The metric is *days with a session in the last 30* |
 | Daily minimum | 1 card |
 | Answering | one axis: left *not known*, right *known*. Nothing else is an answer |
-| Audio | the phone's own engine by default; an optional build carries a neural voice |
+| Audio | the phone's own engine by default; a neural engine inside, for a model you add |
 | Colour | nine palettes, each in two lightings. Every pair passes 4.5:1, enforced by a test |
 | Interface languages | Russian, English, Polish |
 | Network | none. The app has no internet permission |

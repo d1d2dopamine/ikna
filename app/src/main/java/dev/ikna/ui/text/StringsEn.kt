@@ -409,6 +409,8 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"deck.016" to "cards",
 	// карточек
 	"deck.017" to "cards",
+	"deck.018" to " · <1 min",
+	"deck.019" to " min",
 	"add.001" to "New deck",
 	"add.002" to "A deck is plain text. One line is one card: a phrase, a sentence containing it, and the translation, separated by |.",
 	"add.003" to "Copy the prompt and send it to any AI.",
@@ -460,6 +462,8 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"dp.009" to "The cards of this deck and their schedule go. The answers stay in the statistics — that log is never rewritten.",
 	"add.036" to "how this works",
 	"add.037" to "hide",
+	"add.038" to "Which language the cards are in",
+	"add.039" to "Used for the voice only. It can be changed later on the deck's own page.",
 	// тап в любом месте
 	"card.002" to "tap anywhere",
 	// ← НЕ ЗНАЮ
@@ -660,10 +664,12 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"voice.029" to "Add a model",
 	// Оформление
 	"look.001" to "Appearance",
-	// Значок и цвет квадрата в списке колод. Видно только вам: тому, кому отправите колоду, придут только карточки.
-	"look.002" to "The icon and the colour of the square on the deck list. Yours only: whoever you send the deck to gets the cards and nothing else.",
+	// Буквы и цвет квадрата в списке колод. Видно только вам: тому, кому отправите колоду, придут только карточки.
+	"look.002" to "The letters and the colour of the square on the deck list. Yours only: whoever you send the deck to gets the cards and nothing else.",
 	// Цвет квадрата
 	"look.003" to "Colour of the square",
+	// 1-2 символа. Оставьте пустым - буквы подберутся сами.
+	"look.004" to "One or two characters. Left empty, the square works out its own.",
 	// Логотип ikna
 	"bar.001" to "The ikna mark",
 	// Слева в нижнем баре. Выключите — место уйдёт кнопкам

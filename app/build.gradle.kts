@@ -73,8 +73,8 @@ val hasFixedKey = keystoreFile.exists()
 // so the counter keeps climbing across the reset and the formula above applies
 // per epoch, offset past everything the pre-epoch line ever shipped.
 // ---------------------------------------------------------------------------
-val appVersionName = "0.2.0 proof"
-val appVersionCode = 100020000        // proof epoch: 100000000 + 0.2.0
+val appVersionName = "0.3.0 proof"
+val appVersionCode = 100030000        // proof epoch: 100000000 + 0.3.0
 
 // A build from a clone has to be able to come out unsigned: the key committed
 // here is this project's, and nobody else should be shipping APKs under it.
@@ -123,43 +123,22 @@ android {
     }
 
     // -----------------------------------------------------------------------
-    // Two downloads, one app.
+    // One download.
     //
-    // lite is the app as it has always been: the phone's own speech engine,
-    // every language the user already has installed, and an APK measured in
-    // single megabytes. It is the default and it is what CI builds.
+    // There used to be two: a plain build, and a "voice" one. The split was
+    // worth its cost while the second carried a speech model of three hundred
+    // megabytes. It stopped being worth anything the moment the model moved out
+    // to the file picker: what was left was ten megabytes of runtime, two files
+    // on the release page, and the question "which one do I want" asked of
+    // somebody who came here to learn a language.
     //
-    // voice is the same app with a neural synthesiser and its model packed
-    // inside, for phones whose own engine has nothing worth listening to. Same
-    // applicationId, same database, same review history: one installs over the
-    // other and the user loses nothing by switching.
-    //
-    // The fork is two source sets holding one file each -- app/src/lite and
-    // app/src/voice -- plus this block. No code outside them knows which build
-    // it is in, and the lite build cannot accidentally pull the runtime in:
-    // the dependency is flavour-scoped, so it does not exist for lite at all.
+    // So the runtime is in the app, and speech stays off until it is switched
+    // on. Ten megabytes are carried by people who never switch it on; in return
+    // there is one file to download, one build to keep working, and no way to
+    // install the wrong one.
     // -----------------------------------------------------------------------
-    flavorDimensions += "speech"
-
-    productFlavors {
-        create("lite") {
-            dimension = "speech"
-        }
-        create("voice") {
-            dimension = "speech"
-            // So a screenshot or a bug report says which of the two is running.
-            versionNameSuffix = " voice"
-        }
-    }
 
     buildFeatures { compose = true }
-
-    // An .onnx model is already compressed. Deflating it again costs build time,
-    // saves nothing, and forces the packager's copy to be inflated in full
-    // before the runtime can read a byte of it.
-    androidResources {
-        noCompress += listOf("onnx", "bin")
-    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -213,17 +192,22 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
 
-    // The neural speech runtime -- voice build only.
+    // The neural speech runtime.
     //
-    // A local .aar, not a coordinate: it carries native libraries for four
-    // architectures, it is tens of megabytes, and it is not committed.
-    // tools/voice/fetch-voice.sh puts it in app/libs together with the model,
-    // and the release workflow runs that script before building the voice APK.
+    // A local .aar rather than a coordinate: it carries native libraries for
+    // four architectures, it is about ten megabytes, and it is not committed.
+    // tools/voice/fetch-voice.sh downloads it into app/libs, and both workflows
+    // run that script before anything is compiled.
     //
-    // Being flavour-scoped is what keeps a fresh clone buildable: the lite
-    // build never looks in app/libs, so an empty or missing directory is not an
-    // error for anyone who only wants the normal app.
-    "voiceImplementation"(
+    // A fresh clone therefore needs one command before its first build:
+    //
+    //     bash tools/voice/fetch-voice.sh
+    //
+    // That is the price of one APK instead of two. The dependency used to be
+    // flavour-scoped so a clone with an empty app/libs still built; now an empty
+    // app/libs fails immediately and says why, instead of producing an app whose
+    // speech screen is quietly dead.
+    implementation(
         fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar")))
     )
 }

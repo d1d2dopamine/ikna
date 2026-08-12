@@ -15,6 +15,99 @@ the word says which epoch the build belongs to. Both words come from printing:
 nothing left to correct. Tags replace the space with a dash, so `0.1.0 proof` is
 tagged `v0.1.0-proof`.
 
+## 0.3.0 proof
+
+Still the proof epoch. The largest one so far, and all of it is the same kind of
+work: places where the app knew something useful and did not say it, or asked for
+something it could have worked out itself.
+
+### A new deck is asked which language it is in
+
+Every imported deck used to arrive with no language at all, which meant no voice:
+the engine has nothing to read with until it knows what it is reading. The one
+screen that could fix that was the deck's own page, behind a deck nobody had
+opened yet -- so a new deck was silent, and nothing on it said why.
+
+The question is now asked where the deck is made, as a row of taps under the
+prompt, and it defaults to *no voice*: no language claimed, nothing promised.
+The answer is used for the voice and for nothing else, and it can still be
+changed later on the deck's page, which is where it always was.
+
+### The minutes stay on the screen
+
+A session has always been able to say what it will cost -- "24 cards, ~6 min"
+above the first card -- and almost never did. Two reasons, both fixed here.
+
+The measurement threw away nearly every answer it was given. Anything faster
+than 0.8s or slower than a minute was treated as a mis-swipe or a phone put
+face-down, and a real answer is often both: a phrase recognised on sight goes
+faster than that, a phrase being thought about takes longer. The bounds are now
+0.4s to two minutes, which still drops the accidents and keeps the session, and
+four measured answers are enough where eight were required.
+
+The figure is also written down now. It used to be recomputed from recent history
+every time, so a short evening pushed the history below the threshold and the
+minutes vanished for no reason the reader could see. The last real measurement is
+kept and used until a better one exists.
+
+And it is shown where the decision is actually made: on the deck list, beside
+what each deck owes today -- "today 24 · ~6 min". The question at that moment is
+not how many cards there are, it is whether this fits in the time there is.
+Nothing is shown until something has been measured; a guess that turns out to be
+a lie would not be trusted twice.
+
+### One download instead of two
+
+Every release carried two APKs: the app, and the same app with the speech engine
+inside. That split made sense while the engine came with a 300 MB model welded
+to it. Once the model moved out to the file picker, the second file was ten
+megabytes of runtime and a question -- "which one do I want?" -- asked of
+somebody who came here to learn a language.
+
+It was also broken. The script that downloads the runtime had a corrupted
+address in it, so the second APK failed to build on every release, quietly,
+because that step was allowed to fail. The release page kept a download button
+pointing at a file that was never produced: a 404 with a green tick beside it.
+
+So there is one file now, about 31 MB, with the engine inside and switched off
+until it is turned on. The address is fixed, the runtime is fetched before
+anything is compiled in both workflows, and a failed download now fails the run
+instead of losing half the release.
+
+### Deck squares carry letters, not emoji
+
+The square could be given one of twenty-four emoji. On this app's flat
+single-colour surfaces a full-colour emoji, drawn by the phone in its own style
+with its own shading, looked like a sticker on a blueprint -- and it could not be
+fixed by choosing better emoji, because the problem was that they are pictures.
+
+The square now takes **one or two characters of your own**: initials, a language
+pair, a number. Left empty it keeps working out its own letters, exactly as
+before, so there is nothing to undo. The letters take the square's own colours,
+which the emoji never could, so a deck that owes you cards still inverts
+properly. The eight colours are unchanged.
+
+### The translation arrives as one translation
+
+Two habits of the models that write these decks, both repaired at import:
+
+- **The punctuation of the phrase is copied onto its translation.** "how are
+  you?" was coming back without the question mark, "watch out!" without the
+  exclamation mark -- and the mark is half of what those phrases mean. A mark
+  the phrase has not got is removed too.
+- **A list of wordings becomes the first wording.** "tired, worn out", "tired /
+  worn out", "tired (informal)": three answers on the back of a card turn every
+  recall into multiple choice, because the person grades themselves and one of
+  the three always matches what they thought. Brackets, slashes and semicolons
+  go without question; a comma only counts as a list when the phrase itself has
+  no comma and every piece is a word or two.
+
+A translation that is simply long, or that contains a comma because the phrase
+does, is left exactly as written -- an import step that edits correct lines
+would be worse than none. The prompt behind the plus button now asks for both
+things directly, and one of its own examples, which offered two wordings, has
+been corrected.
+
 ## 0.2.0 proof
 
 Still the proof epoch: the app is being proven, not polished. This one is about
@@ -43,7 +136,7 @@ own page under *Appearance*. The square on the list takes them, and keeps doing
 everything it already did: the fill still means the deck is on, the fading still
 means it is off, the dot still means it owes cards.
 
-This is stored beside the theme, not inside the deck. An icon is how one person
+This is stored beside the theme, not inside the deck. A mark is how one person
 tells their own decks apart; a deck sent to somebody else arrives as cards and
 nothing else. It also means no database migration for a decoration, and a deck
 file that stays a list of phrases.

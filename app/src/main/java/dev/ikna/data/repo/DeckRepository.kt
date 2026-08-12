@@ -7,6 +7,16 @@ import dev.ikna.data.pack.SeedFormat
 import dev.ikna.data.pack.SeedLineProblem
 
 /**
+ * What a deck starts as when nobody has said which language it is in.
+ *
+ * A file says nothing about the language inside it, and guessing from the
+ * alphabet gets English and Polish wrong in opposite directions. No language
+ * means no voice, so this value is why a deck made by the user used to be silent
+ * -- which is the reason the import now asks.
+ */
+internal const val NO_LANG = "custom"
+
+/**
  * What an import did, in enough detail to say it out loud.
  *
  * The old import reported two numbers and nothing else, so a file that produced
@@ -78,11 +88,10 @@ class DeckRepository(
     /**
      * Which language a deck is in.
      *
-     * An imported deck starts as "custom", because a file says nothing about the
-     * language inside it and guessing from the alphabet gets English and Polish
-     * wrong in opposite directions. The consequence used to be silent: no
-     * language means no voice, so a deck made by the user could not be read
-     * aloud at all and nothing on screen said why.
+     * Asked once while the deck is being imported, and changeable here for as
+     * long as the deck exists. A deck that arrived before the import asked
+     * carries [NO_LANG] and cannot be read aloud, so this row is not only for
+     * people who changed their mind.
      */
     suspend fun setLang(id: String, lang: String) = chunkDao.setPackLang(id, lang)
 
@@ -110,17 +119,21 @@ class DeckRepository(
      *   the catalogue is UI state, and a repository that reaches up into it
      *   cannot be tested without it and quietly bakes the language into stored
      *   data. The caller is on screen and already knows the language.
+     * @param lang which language the cards are in, used by the voice and nothing
+     *   else. Defaults to [NO_LANG]: a file cannot be asked, but the screen that
+     *   imported it can, and does.
      */
     suspend fun importFile(
         fileName: String,
         text: String,
-        fallbackTitle: String
+        fallbackTitle: String,
+        lang: String = NO_LANG
     ): ImportResult {
         val stem = fileName.substringBeforeLast('.')
         return packLoader.importJsonl(
             packId = packIdFor(stem),
             title = stem.ifEmpty { fallbackTitle },
-            lang = "custom",
+            lang = lang,
             text = text
         )
     }
@@ -143,14 +156,15 @@ class DeckRepository(
     suspend fun importText(
         fileName: String,
         text: String,
-        fallbackTitle: String
+        fallbackTitle: String,
+        lang: String = NO_LANG
     ): DeckImport {
         val stem = fileName.substringBeforeLast('.')
         val packId = packIdFor(stem)
         val title = stem.ifEmpty { fallbackTitle }
 
         if (SeedFormat.looksLikeJsonl(text)) {
-            val result = packLoader.importJsonl(packId, title, "custom", text)
+            val result = packLoader.importJsonl(packId, title, lang, text)
             return DeckImport(packId, result.installed, result.skipped, null)
         }
 
@@ -158,7 +172,7 @@ class DeckRepository(
         val result = packLoader.importChunks(
             packId = packId,
             title = title,
-            lang = "custom",
+            lang = lang,
             source = SeedFormat.chunks(packId, parse.rows),
             skipped = parse.problems.size
         )

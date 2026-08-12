@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,8 +29,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
 import dev.ikna.data.prefs.IknaSettings
@@ -37,10 +40,8 @@ import dev.ikna.data.prefs.NO_TINT
 import dev.ikna.data.prefs.lookFor
 import dev.ikna.data.repo.DeckSummary
 import dev.ikna.ui.theme.BarHeight
-import dev.ikna.ui.theme.DeckIcons
 import dev.ikna.ui.theme.DeckTints
 import dev.ikna.ui.theme.Edge
-import dev.ikna.ui.theme.IknaChip
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
@@ -151,29 +152,15 @@ fun DeckScreen(
                 )
                 Spacer(Modifier.height(Space.md))
 
-                // Four to a row instead of one strip that scrolls sideways: a
-                // sideways strip hides half of its options behind a gesture
-                // nobody is told about, and there are only eleven of them.
-                LANGS.chunked(4).forEach { group ->
-                    Row(
-                        modifier = Modifier.padding(bottom = Space.sm),
-                        horizontalArrangement = Arrangement.spacedBy(Space.sm)
-                    ) {
-                        group.forEach { code ->
-                            IknaChip(
-                                label = if (code == NO_LANG) S.t("dp.005")
-                                else code.uppercase(),
-                                selected = current.lang == code,
-                                onClick = {
-                                    scope.launch {
-                                        container.deckRepository.setLang(deckId, code)
-                                        reload()
-                                    }
-                                }
-                            )
+                LangChips(
+                    current = current.lang,
+                    onPick = { code ->
+                        scope.launch {
+                            container.deckRepository.setLang(deckId, code)
+                            reload()
                         }
                     }
-                }
+                )
 
                 Spacer(Modifier.height(Space.lg))
                 IknaRule()
@@ -201,35 +188,53 @@ fun DeckScreen(
                 )
                 Spacer(Modifier.height(Space.md))
 
-                // Twenty-four icons in a grid rather than the system emoji
-                // keyboard: the keyboard offers thousands of pictures, most of
-                // them unreadable at the size of the square, and it sends someone
-                // who came to decorate one deck shopping first.
-                DeckIcons.chunked(6).forEach { group ->
-                    Row(
-                        modifier = Modifier.padding(bottom = Space.sm),
-                        horizontalArrangement = Arrangement.spacedBy(Space.sm)
+                // Two characters, typed, rather than a grid of emoji.
+                //
+                // The grid was here until 0.2.0 and it was the wrong offer: the
+                // phone draws emoji in its own full-colour style, which sits on
+                // this app's flat marks like a sticker on a blueprint. A field
+                // is also smaller than the grid it replaces, and it accepts the
+                // things people actually want in that square -- initials, a
+                // language pair, a number -- none of which a fixed set of
+                // pictures could have guessed.
+                //
+                // Left empty, the square keeps working out its own letters, so
+                // there is nothing to undo and no third state to explain.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Space.md)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(52.dp)
+                            .border(Space.hair, MaterialTheme.colorScheme.outline),
+                        contentAlignment = Alignment.Center
                     ) {
-                        group.forEach { icon ->
-                            IknaChip(
-                                label = icon,
-                                selected = look.emoji == icon,
-                                onClick = {
-                                    scope.launch {
-                                        container.settings.setDeckLook(
-                                            packId = deckId,
-                                            // Tapping the icon that is already on
-                                            // takes it off. Two taps in the same
-                                            // place, instead of a separate control
-                                            // that exists only to undo this one.
-                                            emoji = if (look.emoji == icon) "" else icon,
-                                            tint = look.tint
-                                        )
-                                    }
+                        BasicTextField(
+                            value = look.label,
+                            onValueChange = { typed ->
+                                scope.launch {
+                                    container.settings.setDeckLook(
+                                        packId = deckId,
+                                        label = typed,
+                                        tint = look.tint
+                                    )
                                 }
-                            )
-                        }
+                            },
+                            textStyle = MaterialTheme.typography.titleMedium.copy(
+                                color = MaterialTheme.colorScheme.onBackground,
+                                textAlign = TextAlign.Center
+                            ),
+                            singleLine = true,
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
+                    Text(
+                        text = S.t("look.004"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted
+                    )
                 }
 
                 Spacer(Modifier.height(Space.sm))
@@ -259,7 +264,7 @@ fun DeckScreen(
                                     scope.launch {
                                         container.settings.setDeckLook(
                                             packId = deckId,
-                                            emoji = look.emoji,
+                                            label = look.label,
                                             tint = if (picked) NO_TINT else index
                                         )
                                     }
@@ -345,15 +350,3 @@ private fun stateLine(deck: DeckSummary): String {
     val percent = if (deck.total <= 0) 0 else deck.introduced * 100 / deck.total
     return state + " · " + deck.introduced + " / " + deck.total + " · " + percent + "%"
 }
-
-/**
- * What an imported deck starts as: no language claimed, so no voice is offered
- * rather than the wrong voice reading the phrase in someone else's accent.
- */
-private const val NO_LANG = "custom"
-
-private val LANGS = listOf(
-    "en", "pl", "ru", "es",
-    "fr", "de", "it", "pt",
-    "zh", "ja", NO_LANG
-)

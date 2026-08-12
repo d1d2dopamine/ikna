@@ -97,7 +97,9 @@ object SeedFormat {
 
             val phrase = parts[0].trim()
             val sentence = parts[1].trim()
-            val translation = parts[2].trim()
+            // Tidied before it is measured or stored: what arrives in this column
+            // is a translation with the model's habits attached to it.
+            val translation = tidyTranslation(phrase, parts[2].trim())
 
             if (phrase.isEmpty() || sentence.isEmpty() || translation.isEmpty()) {
                 problems += SeedLineProblem(number, line, SeedProblem.EMPTY_FIELD)
@@ -240,6 +242,114 @@ object SeedFormat {
         // The rule under a table header: |---|:---:|---|
         if (line.isNotEmpty() && line.all { it == '-' || it == ':' || it == '|' || it == ' ' }) return ""
         return line
+    }
+
+    /**
+     * The translation column as it should have arrived.
+     *
+     * Two habits are corrected, both of them a model's and neither of them the
+     * writer's fault:
+     *
+     * The phrase asks something and the translation states it. "how are you?"
+     * comes back without its question mark, or "watch out!" without the one that
+     * carries the whole tone of it, and the card then teaches a question or a
+     * warning that does not look like one. The phrase's own ending is copied
+     * over, and only the mark: nothing else about the wording is touched.
+     *
+     * The translation brings friends: "tired, weary, worn out", or "tired / worn
+     * out", or "tired (colloquial)". Three wordings on the back of a card is
+     * three things to check an answer against, and the answer is graded by the
+     * person reading it, so a list quietly turns every recall into a
+     * multiple-choice question. The first wording is kept.
+     *
+     * Deliberately conservative: it never invents words, and when a line does
+     * not clearly show one of these two habits it is left exactly as written.
+     * A wrong translation is the writer's to fix; a mangled one would be ours.
+     */
+    fun tidyTranslation(phrase: String, translation: String): String {
+        val cut = oneWording(phrase, translation)
+        return mirrorEnding(phrase, cut).trim()
+    }
+
+    /** Closing quotes and brackets, which sit outside the punctuation we read. */
+    private val CLOSERS = charArrayOf('"', '\'', '\u00bb', '\u201d', '\u2019', ')', ']')
+
+    private val ENDINGS = charArrayOf('?', '!', '.', '\u2026', '\u061f')
+
+    /** What a line ends with: "?", "?!", "..." or nothing. */
+    private fun endingOf(text: String): String {
+        var end = text.trimEnd().trimEnd(*CLOSERS).length
+        val body = text.trimEnd().trimEnd(*CLOSERS)
+        var start = end
+        while (start > 0 && body[start - 1] in ENDINGS) start--
+        return body.substring(start, end)
+    }
+
+    /**
+     * The sentence's ending, on the translation.
+     *
+     * Only the mark is copied, and only when the two differ. A translation that
+     * already ends the right way is untouched, which is the common case and must
+     * stay free.
+     */
+    private fun mirrorEnding(phrase: String, translation: String): String {
+        val want = endingOf(phrase)
+        val have = endingOf(translation)
+        if (want == have) return translation
+        val closers = translation.trimEnd().takeLastWhile { it in CLOSERS }
+        val bare = translation.trimEnd().dropLast(closers.length)
+        val body = bare.trimEnd().dropLast(have.length).trimEnd()
+        if (body.isEmpty()) return translation
+        return body + want + closers
+    }
+
+    /**
+     * One wording, not a list of them.
+     *
+     * Brackets and slashes are cut without hesitation: nothing that belongs in a
+     * translation is written that way. A comma is different - a phrase can
+     * legitimately contain one - so a comma is only treated as a synonym list
+     * when the phrase being translated has no comma of its own and every piece
+     * after the split is short enough to be a single word or two.
+     */
+    private fun oneWording(phrase: String, translation: String): String {
+        var out = translation
+
+        // "tired (colloquial)" -> "tired". Only a tail, never a bracket that
+        // opens the line: that one is somebody's deliberate note.
+        val open = out.lastIndexOf('(')
+        if (open > 0 && out.trimEnd().trimEnd(*CLOSERS).length <= out.length) {
+            val closed = out.indexOf(')', open)
+            if (closed > open && out.substring(closed + 1).isBlank()) {
+                out = out.substring(0, open).trimEnd()
+            }
+        }
+
+        // A slash separates wordings and nothing else here. Guarded against
+        // dates and fractions, which are digits on both sides.
+        val slash = out.indexOf('/')
+        if (slash > 0 && slash < out.length - 1) {
+            val before = out[slash - 1]
+            val after = out[slash + 1]
+            if (!(before.isDigit() && after.isDigit())) {
+                out = out.substring(0, slash).trimEnd()
+            }
+        }
+
+        // A semicolon in a one-line translation is a list separator.
+        val semi = out.indexOf(';')
+        if (semi > 0) out = out.substring(0, semi).trimEnd()
+
+        // The careful one.
+        if (!phrase.contains(',') && out.contains(',')) {
+            val parts = out.split(',').map { it.trim() }
+            val shortEnough = parts.all { part ->
+                part.isNotEmpty() && WORD.findAll(part).count() <= 3
+            }
+            if (shortEnough && parts.size >= 2) out = parts.first()
+        }
+
+        return out.trim().ifEmpty { translation }
     }
 
     private fun columns(line: String): List<String> = when {
