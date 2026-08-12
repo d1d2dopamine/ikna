@@ -1,84 +1,179 @@
 # Voice
 
-How the app speaks, why there are two downloads, and what the second one costs.
+How ikna reads a card out loud, why the model is not in the APK, and what to do
+when nothing is speaking.
 
-## The default: the phone's own engine
+---
 
-Every build talks to the speech engine installed on the phone through the
-platform API. On a normal Android phone that engine already has English, Polish
-and Russian and the user paid for it with the phone. On a de-googled phone the
-user installs one from F-Droid -- RHVoice, or one built on Piper models -- picks
-voices inside it, and this app speaks with them without knowing they exist.
+## Two builds
 
-This costs the APK nothing, works in every language the user has, and needs no
-network. Voices whose own descriptor admits they need a network are filtered out
-rather than merely discouraged, so nothing can leave the phone by accident.
+There are two APKs in every release, from the same source:
 
-It has one weakness: on a phone whose engine is poor, speech sounds poor, and
-there is nothing the app can do about it from inside.
+| Build | Size | What speaks |
+| --- | --- | --- |
+| `lite` (`ikna-<tag>.apk`) | ~21 MB | whatever text-to-speech the phone already has |
+| `voice` (`ikna-<tag>-voice.apk`) | ~31 MB | the same, plus a neural engine for a model you add |
 
-## The second download: `voice`
+Neither one contains a model. The `voice` build carries the sherpa-onnx runtime,
+which is about ten megabytes of native code and no weights at all.
 
-The `voice` build is the same app with a neural synthesiser and its model packed
-inside. Same applicationId, same database, same review history -- one installs
-over the other, and switching loses nothing.
+---
 
-- Model: **Kokoro-82M**, multi-language release, run by **sherpa-onnx**
-  (ONNX Runtime).
-- Languages: **English and Chinese**. The weights know more, but this is what
-  the sherpa-onnx release documents and ships dictionaries for, so it is what
-  the app claims.
-- **No Russian and no Polish.** The model does not have them. A deck in a
-  language the model cannot speak falls back to the platform engine, silently
-  and per card, because a model reading Polish with an English mouth is worse
-  than the voice the phone already offers.
-- Still no network permission. The model ships in the APK; nothing is
-  downloaded at runtime, ever.
+## Why the model is not inside
 
-### What it costs
+The first version of this feature shipped Kokoro in the APK. It went badly, in a
+way worth writing down.
 
-| | |
-|---|---|
-| Runtime in the APK | ~7 MB per architecture, most of it `libonnxruntime.so` |
-| Model in the APK | ~330 MB at full precision, ~90 MB for the int8 release |
-| Unpacked on first use | the same again in the app's own storage |
+Full precision made the download **466 MB** against 21. Quantised to int8 it came
+down to about 150 MB, which is still seven times the app. And what all those
+megabytes bought was **English**: Kokoro in sherpa-onnx speaks English and
+Chinese, while every deck imported into this app is created by the person using
+it, in whatever language they are learning.
 
-The second row is the one people are surprised by. Kokoro is 82 million
-parameters -- small as models go -- but a parameter is not a byte, and the file
-is the size above. The third row is worse than it looks and is not avoidable:
-espeak-ng turns letters into phonemes and opens its data by path through libc,
-which cannot see inside an APK, so the model directory is copied out to storage
-the first time speech is used and loaded from there.
+Worse, imported decks are stored with no language of their own, so the bundled
+model was never even offered for them. The engine fell back to the phone's voice
+without saying so, and if the phone had no voice for that language the result was
+silence. Nothing on screen ever named the engine that was speaking, so a 450 MB
+install and a 21 MB install looked and behaved identically. That is the whole
+failure: **an invisible feature that quietly did nothing.**
 
-That is the entire reason the plain build exists, and why it stays the default.
+So the model now comes from the person using the app, in the language they are
+actually learning, at the size their phone can carry -- and the app says at all
+times which voice is speaking.
 
-## Why this is not the browser demo
+---
 
-Kokoro in a browser tab on a phone is slow, and often garbled -- a squeak, a
-mangled first word, a frozen page. Four reasons, none of which apply here.
+## Adding a model
 
-| In the browser | Here |
-|---|---|
-| WebAssembly, one thread, no SIMD | native ARM code, two threads |
-| q8 weights, the quantisation known to garble the start of a clip | the full-precision release |
-| audio streamed to the speaker while it is still being computed | the whole phrase is written to a file, then played |
-| synthesis competing with the page for the main thread | rendered on a background thread, never on the UI one |
+**Settings -> Voice -> Add a model.**
 
-The squeaking in particular is a streaming artefact: playback starts, the next
-chunk does not arrive in time, and the buffer runs dry. Nothing here starts
-playing until the file is complete, so there is no buffer to starve.
+The file picker opens on a folder, not a file. Point it at an unpacked model
+folder; everything in it is copied into the app's own storage, which takes from a
+few seconds to about a minute and shows a running count of files.
 
-What does carry over is speed. Kokoro on a slow ARM CPU can take longer to
-synthesise a phrase than the phrase lasts, and no amount of engineering makes an
-82M model free. Two things hide it: the next card is rendered while the current
-one is still on screen, and every rendering is cached, so a chunk met a second
-time is instant. Automatic speech never waits -- if the file is not ready, the
-card is simply silent rather than late.
+The app has **no internet permission**, so it cannot download a model and never
+will. The download happens in a browser, once.
 
-And if the phone cannot keep up at all, the model stops. Three renders in a row
-over four seconds and `KokoroSpeech` gives up for the rest of the run, releases
-the model, and lets the platform engine take over. A plainer voice is a better
-outcome than a session that stutters.
+### Where to get one
+
+The sherpa-onnx release page, section `tts-models`:
+<https://github.com/k2-fsa/sherpa-onnx/releases/tag/tts-models>
+
+The full list with samples: <https://k2-fsa.github.io/sherpa/onnx/tts/all/>
+
+| You are learning | Take |
+| --- | --- |
+| English | `kokoro-int8-en-v0_19` (~92 MB, 11 voices) |
+| Russian | `vits-piper-ru_RU-dmitri-medium` or `-irina-medium` (~65 MB) |
+| Polish | `vits-piper-pl_PL-gosia-medium` (~65 MB) |
+| anything else | any `vits-piper-*` folder for that language |
+
+Prefer a folder with `int8` in its name where there is one: about a quarter of
+the size, and on a phone that is the difference between a model that loads and
+one the system kills for memory.
+
+### What a usable folder looks like
+
+Kokoro:
+
+```
+kokoro-int8-en-v0_19/
+  model.int8.onnx
+  voices.bin
+  tokens.txt
+  espeak-ng-data/
+```
+
+Piper / VITS:
+
+```
+vits-piper-ru_RU-dmitri-medium/
+  ru_RU-dmitri-medium.onnx
+  tokens.txt
+  espeak-ng-data/
+```
+
+Unpack the archive and pick **the folder that holds these files**, not the folder
+it was unpacked into. Picking one level too high is the commonest mistake there
+is, and the app says so in those words when it happens.
+
+---
+
+## What the app refuses, and why
+
+Every refusal is a sentence on screen rather than silence:
+
+| On screen | What happened |
+| --- | --- |
+| no `.onnx` file in the folder | not a model folder at all |
+| the folder is one level too high | pick the folder inside it |
+| several models in one folder | two unrelated nets, and guessing between them would be wrong |
+| no `tokens.txt` | a raw Piper download; take the sherpa-onnx build of the same voice |
+| no `voices.bin` | a Kokoro folder whose download stopped early |
+| no `espeak-ng-data` and no `lexicon` | nothing to turn letters into sounds |
+
+When several nets sit in one folder at different precisions -- `model.onnx`,
+`model.int8.onnx`, `model.fp16.onnx` -- the quantised one is chosen without
+asking. This is the one place the app guesses, and it guesses towards the phone
+surviving it.
+
+---
+
+## Language
+
+Most folder names say which language they are: `ru_RU`, `pl_PL`, `-en-`. The app
+reads it from the name and shows it on the voice screen, where it can be changed.
+
+A multi-language release names no language at all. Those are marked **Any** and
+offered for every deck, because refusing every deck would be the one certainly
+wrong answer.
+
+---
+
+## When it still does not speak
+
+The voice screen answers this without guessing. The line at the top always names
+who is speaking right now, and **Test the voice** proves it out loud.
+
+- **"Reading aloud is switched off in settings"** -- speech is off by default;
+  turn it on one screen up.
+- **"No model. The phone's own voice reads"** -- nothing was added yet. If the
+  phone has no voice for that language, install one from the system's own speech
+  settings, or add a model here.
+- **"A model is installed but did not load"** -- the folder is a model but this
+  phone would not run it: usually memory. Take an `int8` folder, or a `low`
+  quality Piper voice instead of `medium`.
+- **"This build carries no model engine"** -- this is the `lite` APK. Take the
+  `-voice` one.
+
+A model that renders too slowly three times over is dropped on purpose, and the
+phone's own voice takes over: twenty seconds a card is not a working feature, it
+is a frozen app.
+
+---
+
+## Where it lives
+
+| Path | What it is |
+| --- | --- |
+| `app/src/main/java/dev/ikna/audio/Speaker.kt` | everything speech; picks the engine per card |
+| `app/src/main/java/dev/ikna/audio/NeuralSpeech.kt` | the interface a model engine implements |
+| `app/src/main/java/dev/ikna/audio/VoiceModel.kt` | judging a picked folder, no Android involved |
+| `app/src/main/java/dev/ikna/audio/VoiceModelStore.kt` | copying it in, and the one model on disk |
+| `app/src/voice/java/dev/ikna/audio/SherpaSpeech.kt` | the engine itself, `voice` build only |
+| `app/src/lite/java/dev/ikna/audio/NeuralSpeechFactory.kt` | returns null: the plain build has no engine |
+| `app/src/main/java/dev/ikna/ui/settings/VoiceScreen.kt` | the screen that says who is speaking |
+| `tools/voice/fetch-voice.sh` | downloads the runtime `.aar` before a `voice` build |
+
+The model is copied to `files/voice-model/` inside the app, with a small
+`ikna-model.txt` beside it recording what it is. Removing the model, or
+uninstalling the app, removes all of it.
+
+Rendered audio is cached in `cache/speech/` and capped at 240 files. Changing the
+model, its language or its speaker clears that cache, so a card is never read
+back in yesterday's voice.
+
+---
 
 ## Building the voice APK
 
@@ -87,51 +182,6 @@ bash tools/voice/fetch-voice.sh
 gradle assembleVoiceRelease
 ```
 
-The script downloads the runtime into `app/libs` and the model into
-`app/src/voice/assets/kokoro`. Neither is committed: both are large, both belong
-to other projects, and both are reproducible from two URLs. Both paths are in
-`.gitignore`.
-
-Versions are pinned at the top of the script and can be overridden:
-
-```bash
-SHERPA_VERSION=1.11.0 MODEL_NAME=kokoro-int8-multi-lang-v1_1 bash tools/voice/fetch-voice.sh
-```
-
-The release workflow runs the script and attaches the result as
-`ikna-<tag>-voice.apk` next to the normal one. That step is allowed to fail: the
-downloads come from servers this project does not control, and a release should
-not wait on someone else's outage.
-
-## Where it lives in the code
-
-| Path | |
-|---|---|
-| `audio/Speaker.kt` | cache, playback, speed, prefetch, fallback. Shared. |
-| `audio/NeuralSpeech.kt` | the seam. Five members. Present in every build. |
-| `app/src/lite/.../NeuralSpeechFactory.kt` | returns `null`. |
-| `app/src/voice/.../NeuralSpeechFactory.kt` | returns `KokoroSpeech`. |
-| `app/src/voice/.../KokoroSpeech.kt` | unpacking, loading, synthesis. |
-
-Both engines render into the same cache, keyed by language, voice, speed and
-pitch, so a card met a second time never waits for either of them. A bundled
-model that is missing, truncated or built against a different runtime version
-makes every call return `false`, and the platform engine takes the card as if
-none of this had been compiled in. The user hears a different voice, not an
-error.
-
-`speakers.txt` in the model directory maps a language to a numbered voice inside
-`voices.bin`. It is data, not code: correcting a voice choice does not need a
-Kotlin change.
-
-## Replacing the model
-
-Anything sherpa-onnx can run will do. A different model means: change the two
-variables in the fetch script, change `MODEL_ID` in `KokoroSpeech` (which
-invalidates unpacked copies and cached audio), and change `SUPPORTED` to the
-languages it really has.
-
-Per-language Piper models are the way to get Russian or Polish. They are around
-60 MB each and one model speaks one language, which is why they are not bundled
-here: three languages would be three models and the same argument as above,
-three times over.
+The script downloads one `.aar` into `app/libs/` and nothing else. The `lite`
+build ignores all of it and builds on a checkout that has never run the script,
+which is why CI builds `lite` and attaches `voice` separately.

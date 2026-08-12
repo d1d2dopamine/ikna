@@ -73,8 +73,8 @@ val hasFixedKey = keystoreFile.exists()
 // so the counter keeps climbing across the reset and the formula above applies
 // per epoch, offset past everything the pre-epoch line ever shipped.
 // ---------------------------------------------------------------------------
-val appVersionName = "0.1.0 proof"
-val appVersionCode = 100010000        // proof epoch: 100000000 + 0.1.0
+val appVersionName = "0.2.0 proof"
+val appVersionCode = 100020000        // proof epoch: 100000000 + 0.2.0
 
 // A build from a clone has to be able to come out unsigned: the key committed
 // here is this project's, and nobody else should be shipping APKs under it.
@@ -186,6 +186,11 @@ ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
+
+    // Walking the folder somebody picked in the file browser. A picked tree is a
+    // pile of content:// documents rather than a path, and this is the supported
+    // way to read one. Tens of kilobytes.
+    implementation("androidx.documentfile:documentfile:1.0.1")
     implementation("androidx.activity:activity-compose:1.9.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")

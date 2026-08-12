@@ -33,6 +33,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
+import dev.ikna.data.prefs.DeckLook
+import dev.ikna.data.prefs.IknaSettings
+import dev.ikna.data.prefs.lookFor
 import dev.ikna.data.repo.DeckSummary
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
@@ -43,6 +46,7 @@ import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Space
+import dev.ikna.ui.theme.deckTintColor
 import dev.ikna.widget.TodayWidget
 import kotlinx.coroutines.launch
 
@@ -66,6 +70,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun DecksScreen(
     container: AppContainer,
+    settings: IknaSettings,
     onOpenSession: (String?) -> Unit,
     onOpenDeck: (String) -> Unit,
     onOpenStats: () -> Unit,
@@ -147,6 +152,7 @@ fun DecksScreen(
             items(decks, key = { it.id }) { deck ->
                 DeckRow(
                     deck = deck,
+                    look = settings.lookFor(deck.id),
                     dueToday = today[deck.id] ?: 0,
                     onOpen = { onOpenSession(deck.id) },
                     onOpenDeck = { onOpenDeck(deck.id) },
@@ -206,23 +212,56 @@ fun DecksScreen(
             //
             // The square over the i is drawn in the accent, so the mark belongs to
             // whichever palette is on rather than to the one it was drawn in.
-            IknaWordmark(modifier = Modifier.padding(start = Space.md))
-            IknaIconButton(
-                glyph = IknaGlyph.BARS,
-                onClick = onOpenStats,
-                label = S.t("a11y.003")
-            )
-            IknaIconButton(
-                glyph = IknaGlyph.GEAR,
-                onClick = onOpenSettings,
-                label = S.t("a11y.002")
-            )
-            Spacer(Modifier.weight(1f))
-            IknaIconButton(
-                glyph = IknaGlyph.PLUS,
-                onClick = onAddDeck,
-                label = S.t("a11y.004")
-            )
+            //
+            // Both of those are now a choice. The mark can be switched off in
+            // settings, and the whole row can be mirrored for a left hand: the
+            // marks are the only controls on this screen, a phone is held in
+            // one hand, and until now every one of them sat on the far side of
+            // it for half the people holding it. Mirrored, the rarest action
+            // takes the corner the thumb rests in and the two everyday ones
+            // stay together at the other end, which is the same layout read in
+            // the other direction rather than a second design to maintain.
+            if (settings.leftHanded) {
+                IknaIconButton(
+                    glyph = IknaGlyph.PLUS,
+                    onClick = onAddDeck,
+                    label = S.t("a11y.004")
+                )
+                Spacer(Modifier.weight(1f))
+                IknaIconButton(
+                    glyph = IknaGlyph.GEAR,
+                    onClick = onOpenSettings,
+                    label = S.t("a11y.002")
+                )
+                IknaIconButton(
+                    glyph = IknaGlyph.BARS,
+                    onClick = onOpenStats,
+                    label = S.t("a11y.003")
+                )
+                if (settings.showWordmark) {
+                    IknaWordmark(modifier = Modifier.padding(end = Space.md))
+                }
+            } else {
+                if (settings.showWordmark) {
+                    IknaWordmark(modifier = Modifier.padding(start = Space.md))
+                }
+                IknaIconButton(
+                    glyph = IknaGlyph.BARS,
+                    onClick = onOpenStats,
+                    label = S.t("a11y.003")
+                )
+                IknaIconButton(
+                    glyph = IknaGlyph.GEAR,
+                    onClick = onOpenSettings,
+                    label = S.t("a11y.002")
+                )
+                Spacer(Modifier.weight(1f))
+                IknaIconButton(
+                    glyph = IknaGlyph.PLUS,
+                    onClick = onAddDeck,
+                    label = S.t("a11y.004")
+                )
+            }
         }
     }
 }
@@ -307,6 +346,7 @@ private fun TodayBlock(total: Int, onClick: () -> Unit) {
 @Composable
 private fun DeckRow(
     deck: DeckSummary,
+    look: DeckLook,
     dueToday: Int,
     onOpen: () -> Unit,
     onOpenDeck: () -> Unit,
@@ -331,7 +371,7 @@ private fun DeckRow(
             .clickable(onClick = onOpen),
         verticalAlignment = Alignment.Top
     ) {
-        DeckMark(deck = deck, owes = owes)
+        DeckMark(deck = deck, owes = owes, look = look)
         Spacer(Modifier.width(Space.md))
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -406,8 +446,12 @@ private fun DeckRow(
  * labels.
  */
 @Composable
-private fun DeckMark(deck: DeckSummary, owes: Boolean) {
-    val accent = MaterialTheme.colorScheme.primary
+private fun DeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
+    // The deck's own colour when it was given one, the palette's accent when
+    // it was not. It is the same variable either way on purpose: a coloured
+    // deck is not a new kind of square, it is this square in another colour,
+    // and the three states below keep working without knowing the difference.
+    val accent = deckTintColor(look.tint, MaterialTheme.colorScheme.primary)
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val background = MaterialTheme.colorScheme.background
 
@@ -430,13 +474,25 @@ private fun DeckMark(deck: DeckSummary, owes: Boolean) {
             .border(Space.hair, edge),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = monogramOf(deck.lang, deck.title),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = ink,
-            maxLines = 1
-        )
+        if (look.emoji.isEmpty()) {
+            Text(
+                text = monogramOf(deck.lang, deck.title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = ink,
+                maxLines = 1
+            )
+        } else {
+            // An icon carries its own colours, so it is not tinted, not faded
+            // and not inverted the way the letters are. The square around it
+            // still does all three, which is where the state was always read
+            // from anyway.
+            Text(
+                text = look.emoji,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1
+            )
+        }
     }
 }
 

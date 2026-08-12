@@ -15,11 +15,92 @@ the word says which epoch the build belongs to. Both words come from printing:
 nothing left to correct. Tags replace the space with a dash, so `0.1.0 proof` is
 tagged `v0.1.0-proof`.
 
+## 0.2.0 proof
+
+Still the proof epoch: the app is being proven, not polished. This one is about
+the two places where it was asking more of the reader than it meant to.
+
+### The phrase is marked inside the sentence
+
+A recognition card shows a whole sentence and asks about one phrase in it. The
+phrase was stored with its exact position from the very first import, and no
+screen ever drew it, so the card was quietly asking two questions: which words
+are being tested, and do you know them. Only the second one was ever meant to
+be asked, and only the second one belongs in the schedule -- a card missed
+because the eye was on the wrong word was recorded as a phrase forgotten, and
+every interval after that was computed from it.
+
+The phrase now carries a rule under it, in the colour of the palette, on the
+front of a recognition card and on the back of a production one. Not bold --
+bold changes the shape of the word being learned. Not a highlight -- a block of
+colour in the middle of a line is harder to read, not easier. The sentence
+around it stays untranslated, which was never the bug.
+
+### Decks can be told apart
+
+A deck can be given one of twenty-four icons and one of eight colours, on its
+own page under *Appearance*. The square on the list takes them, and keeps doing
+everything it already did: the fill still means the deck is on, the fading still
+means it is off, the dot still means it owes cards.
+
+This is stored beside the theme, not inside the deck. An icon is how one person
+tells their own decks apart; a deck sent to somebody else arrives as cards and
+nothing else. It also means no database migration for a decoration, and a deck
+file that stays a list of phrases.
+
+### The bottom bar can be moved to the other hand
+
+Two switches in *Settings -> Appearance*:
+
+- **The ikna mark** -- the one place the app says its own name. It earns its
+  room on the first day and stops earning it later; switched off, the row goes
+  to the controls.
+- **For the left hand** -- the bar is mirrored. The plus takes the corner the
+  left thumb rests in and the two everyday marks stay together at the other
+  end. It is the same layout read the other way, not a second one to maintain.
+
+What was asked for and deliberately not built: dragging the marks into cells
+like a game's controls. There are three of them. A saved arrangement would also
+have to survive every button added after it, and it would break on each one.
+
 ## 0.1.0 proof
 
-The same app as 0.6.1, renumbered. Nothing about the scheduler, the governor, the
-packs or the database changed here; what changed is how versions are named from
-now on.
+The same app as 0.6.1, renumbered, plus everything done while this proof was
+being brought to a state worth releasing. Nothing about the scheduler, the
+governor, the packs or the database changed here.
+
+### Added
+
+- **The neural voice now reads with a model you add, and no model ships inside.**
+  The `-voice` APK went from 466 MB at full precision, then 150 MB quantised, to
+  about 31 MB: the sherpa-onnx runtime and nothing else. All those megabytes had
+  bought exactly one language, and not one that any deck in this app is written
+  in. A Kokoro or Piper folder is now added from the file picker, in whatever
+  language is actually being learned. The app still holds no internet permission
+  and downloads nothing.
+- **A screen that says who is speaking.** Settings -> Voice names the engine
+  reading the cards right now, proves it out loud with a test button, and shows
+  the model's name, type, size and language. Before this, a 450 MB install and a
+  21 MB install looked and behaved identically, which is how a voice that never
+  worked went unnoticed.
+- **Every refusal is a sentence.** A picked folder is judged before a byte is
+  copied, and each of the six ways it can be wrong -- not a model, one level too
+  high, several models at once, no `tokens.txt`, no `voices.bin`, nothing to
+  pronounce with -- says so in those words instead of failing silently.
+- **Adding, replacing and removing a model**, with a running count of files while
+  it copies. The copy lands in a staging folder and is swapped in only once it is
+  whole, so a dead battery cannot leave half a model looking installed.
+
+### Fixed
+
+- **Decks you made yourself are read aloud.** The importer stores them with the
+  language `custom`, because a file of phrases does not declare one. The engine
+  was asked whether it spoke `custom`, answered no, and every deck anybody
+  actually created fell through to the phone's voice -- or to silence, where the
+  phone had no voice for that language. An undeclared language is now answered
+  with the model that is installed.
+- **A model that is too slow for the phone gives way to the phone's own voice**
+  after three long renders, rather than freezing the card each time.
 
 ### Changed
 

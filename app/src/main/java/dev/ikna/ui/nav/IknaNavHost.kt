@@ -26,6 +26,7 @@ import dev.ikna.ui.decks.DecksScreen
 import dev.ikna.ui.onboarding.OnboardingScreen
 import dev.ikna.ui.session.SessionScreen
 import dev.ikna.ui.settings.SettingsScreen
+import dev.ikna.ui.settings.VoiceScreen
 import dev.ikna.ui.stats.StatsScreen
 
 /**
@@ -44,6 +45,7 @@ object Routes {
     const val STATS = "stats"
     const val SETTINGS = "settings"
     const val ADD_DECK = "add-deck"
+    const val VOICE = "voice"
     const val DECK = "deck/{deck}"
     const val DEBUG = "debug"
 
@@ -128,6 +130,7 @@ fun IknaNavHost(
             composable(Routes.HOME) {
                 DecksScreen(
                     container = container,
+                    settings = settings,
                     onOpenSession = { deckId -> navController.navigate(Routes.session(deckId)) },
                     onOpenDeck = { deckId -> navController.navigate(Routes.deck(deckId)) },
                     onOpenStats = { navController.navigate(Routes.STATS) },
@@ -157,6 +160,7 @@ fun IknaNavHost(
                 entry.arguments?.getString("deck")?.let { deckId ->
                     DeckScreen(
                         container = container,
+                        settings = settings,
                         deckId = deckId,
                         onBack = { navController.popBackStack() }
                     )
@@ -187,6 +191,18 @@ fun IknaNavHost(
                     container = container,
                     settings = settings,
                     onOpenDebug = { navController.navigate(Routes.DEBUG) },
+                    onOpenVoice = { navController.navigate(Routes.VOICE) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            // Which voice speaks, and where it came from. Reached from settings
+            // and nowhere else: it is read once, when somebody is deciding what
+            // should be reading the cards out.
+            composable(Routes.VOICE) {
+                VoiceScreen(
+                    container = container,
+                    speechEnabled = settings.speechEnabled,
                     onBack = { navController.popBackStack() }
                 )
             }

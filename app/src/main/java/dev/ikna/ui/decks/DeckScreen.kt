@@ -2,7 +2,11 @@ package dev.ikna.ui.decks
 
 import dev.ikna.ui.text.S
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -27,8 +32,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
+import dev.ikna.data.prefs.IknaSettings
+import dev.ikna.data.prefs.NO_TINT
+import dev.ikna.data.prefs.lookFor
 import dev.ikna.data.repo.DeckSummary
 import dev.ikna.ui.theme.BarHeight
+import dev.ikna.ui.theme.DeckIcons
+import dev.ikna.ui.theme.DeckTints
 import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaChip
 import dev.ikna.ui.theme.IknaGlyph
@@ -38,6 +48,7 @@ import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.Space
+import dev.ikna.ui.theme.deckTintColor
 import kotlinx.coroutines.launch
 
 /**
@@ -56,6 +67,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun DeckScreen(
     container: AppContainer,
+    settings: IknaSettings,
     deckId: String,
     onBack: () -> Unit
 ) {
@@ -160,6 +172,99 @@ fun DeckScreen(
                                 }
                             )
                         }
+                    }
+                }
+
+                Spacer(Modifier.height(Space.lg))
+                IknaRule()
+                Spacer(Modifier.height(Space.lg))
+
+                // What the deck looks like on the list.
+                //
+                // Kept out of the deck file on purpose. An icon and a colour are
+                // how one person tells their own decks apart at a glance; they
+                // are not part of what the deck teaches, and a deck sent to
+                // somebody else should arrive as cards rather than as somebody
+                // else's taste. So this is stored in settings, beside the theme.
+                val look = settings.lookFor(deckId)
+
+                Text(
+                    text = S.t("look.001"),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(Modifier.height(Space.xs))
+                Text(
+                    text = S.t("look.002"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = muted
+                )
+                Spacer(Modifier.height(Space.md))
+
+                // Twenty-four icons in a grid rather than the system emoji
+                // keyboard: the keyboard offers thousands of pictures, most of
+                // them unreadable at the size of the square, and it sends someone
+                // who came to decorate one deck shopping first.
+                DeckIcons.chunked(6).forEach { group ->
+                    Row(
+                        modifier = Modifier.padding(bottom = Space.sm),
+                        horizontalArrangement = Arrangement.spacedBy(Space.sm)
+                    ) {
+                        group.forEach { icon ->
+                            IknaChip(
+                                label = icon,
+                                selected = look.emoji == icon,
+                                onClick = {
+                                    scope.launch {
+                                        container.settings.setDeckLook(
+                                            packId = deckId,
+                                            // Tapping the icon that is already on
+                                            // takes it off. Two taps in the same
+                                            // place, instead of a separate control
+                                            // that exists only to undo this one.
+                                            emoji = if (look.emoji == icon) "" else icon,
+                                            tint = look.tint
+                                        )
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(Space.sm))
+                Text(
+                    text = S.t("look.003"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = muted
+                )
+                Spacer(Modifier.height(Space.sm))
+
+                // Eight fixed colours, no colour picker. The square has to stay
+                // legible against nine palettes in two lighting modes, and a
+                // free hex field is one slider away from a deck nobody can see.
+                Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+                    DeckTints.forEachIndexed { index, colour ->
+                        val picked = look.tint == index
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .background(colour)
+                                .border(
+                                    if (picked) 2.dp else Space.hair,
+                                    if (picked) MaterialTheme.colorScheme.onBackground
+                                    else MaterialTheme.colorScheme.outline
+                                )
+                                .clickable {
+                                    scope.launch {
+                                        container.settings.setDeckLook(
+                                            packId = deckId,
+                                            emoji = look.emoji,
+                                            tint = if (picked) NO_TINT else index
+                                        )
+                                    }
+                                }
+                        )
                     }
                 }
 

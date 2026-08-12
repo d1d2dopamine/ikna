@@ -158,6 +158,31 @@ data class IknaSettings(
     val speechPitch: Int = SPEECH_TONE_DEFAULT,
     /** File name of the installed content font. Empty means the built-in one. */
     val fontName: String = "",
+    /**
+     * The ikna mark in the bottom bar. On by default and off by choice: it is
+     * the one place the app says its own name, which is worth having on the
+     * first day and worth nothing on the four hundredth. Whoever is tired of it
+     * gets the room back.
+     */
+    val showWordmark: Boolean = true,
+    /**
+     * The bottom bar mirrored, so the marks sit under a left thumb.
+     *
+     * Not a theme and not decoration: a phone is held in one hand, the bar is
+     * the only row of controls on the home screen, and for a left-handed user
+     * every one of those marks is currently on the far side of the screen.
+     */
+    val leftHanded: Boolean = false,
+    /**
+     * How each deck's square looks: an icon and a colour, stored as
+     * "packId=emoji|tint" pairs joined by semicolons.
+     *
+     * A preference rather than a column on the deck, and deliberately so. This
+     * is how one person likes their own list to look; it is not part of the
+     * deck's content, it must not travel to whoever the deck is shared with, and
+     * putting it in the database would mean a schema migration for a decoration.
+     */
+    val deckLooks: String = "",
     val onboardingDone: Boolean = false,
     /** How many times the tap-to-reveal hint has been shown. Stops at 5. */
     val revealHintsShown: Int = 0,
@@ -195,6 +220,9 @@ class SettingsStore(private val context: Context) {
         val speechRate = intPreferencesKey("speechRate")
         val speechPitch = intPreferencesKey("speechPitch")
         val fontName = stringPreferencesKey("fontName")
+        val showWordmark = booleanPreferencesKey("showWordmark")
+        val leftHanded = booleanPreferencesKey("leftHanded")
+        val deckLooks = stringPreferencesKey("deckLooks")
         val onboardingDone = booleanPreferencesKey("onboardingDone")
         val revealHintsShown = intPreferencesKey("revealHintsShown")
         val swipesDone = intPreferencesKey("swipesDone")
@@ -233,6 +261,9 @@ class SettingsStore(private val context: Context) {
             speechPitch = (p[Keys.speechPitch] ?: defaults.speechPitch)
                 .coerceIn(SPEECH_TONE_MIN, SPEECH_TONE_MAX),
             fontName = p[Keys.fontName] ?: defaults.fontName,
+            showWordmark = p[Keys.showWordmark] ?: defaults.showWordmark,
+            leftHanded = p[Keys.leftHanded] ?: defaults.leftHanded,
+            deckLooks = p[Keys.deckLooks] ?: defaults.deckLooks,
             onboardingDone = p[Keys.onboardingDone] ?: defaults.onboardingDone,
             revealHintsShown = p[Keys.revealHintsShown] ?: defaults.revealHintsShown,
             swipesDone = p[Keys.swipesDone] ?: defaults.swipesDone
@@ -302,6 +333,28 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setFontName(name: String) = put { it[Keys.fontName] = name }
 
+    suspend fun setShowWordmark(on: Boolean) = put { it[Keys.showWordmark] = on }
+    suspend fun setLeftHanded(on: Boolean) = put { it[Keys.leftHanded] = on }
+
+    /** Every deck's look at once. Used by a restore. */
+    suspend fun setDeckLooks(value: String) = put { it[Keys.deckLooks] = value }
+
+    /**
+     * One deck's look, read-modify-write inside a single edit for the same
+     * reason a voice is: two decks decorated a second apart must not be able to
+     * drop each other.
+     *
+     * A deck set back to no icon and no colour is removed from the string rather
+     * than stored as empty, so the preference does not grow a line for every
+     * deck that was ever looked at.
+     */
+    suspend fun setDeckLook(packId: String, emoji: String?, tint: Int?) = put { prefs ->
+        val map = parseDeckLooks(prefs[Keys.deckLooks] ?: "").toMutableMap()
+        val look = DeckLook(emoji = emoji?.trim().orEmpty(), tint = tint ?: NO_TINT)
+        if (look.isPlain) map.remove(packId) else map[packId] = look
+        prefs[Keys.deckLooks] = encodeDeckLooks(map)
+    }
+
     suspend fun setReminder(enabled: Boolean, hour: Int, minute: Int) = put {
         it[Keys.reminderEnabled] = enabled
         it[Keys.reminderHour] = hour.coerceIn(0, 23)
@@ -366,3 +419,48 @@ fun IknaSettings.voiceFor(lang: String): String? {
     val head = lang.substringBefore('-').lowercase()
     return map.entries.firstOrNull { it.key.substringBefore('-').lowercase() == head }?.value
 }
+
+// ---- deck looks ------------------------------------------------------------
+//
+// Same shape as the voice map above, and hand-rolled for the same reasons: a
+// handful of pairs, read by builds that may be older than the feature, and a
+// malformed entry must lose one deck's colour rather than take the home screen
+// down. Anything that does not parse is skipped.
+
+/** No colour chosen: the deck's square uses the palette, the way it always did. */
+const val NO_TINT = -1
+
+/**
+ * How one deck's square is drawn. Both halves are optional: an icon without a
+ * colour and a colour without an icon are both ordinary choices.
+ */
+data class DeckLook(val emoji: String = "", val tint: Int = NO_TINT) {
+    /** Nothing chosen at all, which is what the app does by default. */
+    val isPlain: Boolean get() = emoji.isEmpty() && tint == NO_TINT
+}
+
+fun parseDeckLooks(value: String): Map<String, DeckLook> =
+    value.split(';')
+        .asSequence()
+        .mapNotNull { pair ->
+            val at = pair.indexOf('=')
+            if (at <= 0 || at == pair.lastIndex) return@mapNotNull null
+            val id = pair.substring(0, at).trim()
+            val body = pair.substring(at + 1)
+            val bar = body.indexOf('|')
+            val emoji = (if (bar < 0) body else body.substring(0, bar)).trim()
+            val tint = if (bar < 0) NO_TINT
+            else body.substring(bar + 1).trim().toIntOrNull() ?: NO_TINT
+            val look = DeckLook(emoji = emoji, tint = tint)
+            if (id.isEmpty() || look.isPlain) null else id to look
+        }
+        .toMap()
+
+fun encodeDeckLooks(map: Map<String, DeckLook>): String =
+    map.entries
+        .filter { it.key.isNotBlank() && !it.value.isPlain }
+        .joinToString(";") { it.key + "=" + it.value.emoji + "|" + it.value.tint }
+
+/** What this deck should look like. Never null: an undecorated deck is plain. */
+fun IknaSettings.lookFor(packId: String): DeckLook =
+    parseDeckLooks(deckLooks)[packId] ?: DeckLook()

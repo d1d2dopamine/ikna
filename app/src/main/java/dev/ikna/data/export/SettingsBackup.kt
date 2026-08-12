@@ -74,7 +74,16 @@ data class SettingsSnapshot(
     // and a file written by an older build simply has neither field.
     val speechRate: Int = 100,
     val speechPitch: Int = 100,
-    val fontName: String = ""
+    val fontName: String = "",
+    // The bar's look, defaulting to what a fresh install does. A file written
+    // before these existed must not be able to hide the wordmark or move the
+    // controls of whoever restores it.
+    val showWordmark: Boolean = true,
+    val leftHanded: Boolean = false,
+    // Deck icons and colours. They name decks by id, so a restore onto an install
+    // without those decks simply carries a line nothing reads -- which is right:
+    // importing the deck again gives it its square back.
+    val deckLooks: String = ""
 )
 
 object SettingsBackup {
@@ -106,7 +115,10 @@ object SettingsBackup {
         speechVoices = settings.speechVoices,
         speechRate = settings.speechRate,
         speechPitch = settings.speechPitch,
-        fontName = settings.fontName
+        fontName = settings.fontName,
+        showWordmark = settings.showWordmark,
+        leftHanded = settings.leftHanded,
+        deckLooks = settings.deckLooks
     )
 
     fun encode(settings: IknaSettings): String = json.encodeToString(
@@ -159,5 +171,8 @@ object SettingsBackup {
         store.setSpeechEnabled(snapshot.speech)
         store.setSpeechVoices(snapshot.speechVoices)
         store.setSpeechTone(snapshot.speechRate, snapshot.speechPitch)
+        store.setShowWordmark(snapshot.showWordmark)
+        store.setLeftHanded(snapshot.leftHanded)
+        store.setDeckLooks(snapshot.deckLooks)
     }
 }

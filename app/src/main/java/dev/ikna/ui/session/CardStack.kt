@@ -37,7 +37,11 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import dev.ikna.domain.fsrs.Rating
@@ -270,6 +274,10 @@ fun ChunkCard(
     label: String,
     prompt: String,
     answer: String,
+    /** Where the phrase sits inside [prompt], when the prompt is a sentence. */
+    promptTarget: IntRange? = null,
+    /** The same, for the sentence shown as the answer of a production card. */
+    answerTarget: IntRange? = null,
     hint: String?,
     revealed: Boolean,
     showTapHint: Boolean,
@@ -319,7 +327,7 @@ fun ChunkCard(
             Spacer(Modifier.weight(1f))
 
             Text(
-                text = prompt,
+                text = marked(prompt, promptTarget, MaterialTheme.colorScheme.primary),
                 style = promptStyle(prompt),
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -334,7 +342,7 @@ fun ChunkCard(
                 )
                 Spacer(Modifier.height(Space.lg))
                 Text(
-                    text = answer,
+                    text = marked(answer, answerTarget, MaterialTheme.colorScheme.primary),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -457,4 +465,33 @@ private fun promptStyle(prompt: String): TextStyle = when {
     prompt.length <= 20 -> MaterialTheme.typography.displayMedium
     prompt.length <= 42 -> MaterialTheme.typography.displaySmall
     else -> MaterialTheme.typography.headlineMedium
+}
+
+/**
+ * The phrase being learned, marked inside the sentence around it.
+ *
+ * Underlined and set in the accent rather than emboldened: bold changes the
+ * shape of a word, which is the shape the reader is trying to remember, and a
+ * filled highlight puts a block of colour in the middle of a line that has to
+ * stay readable. A rule under the words and the palette's own colour say "this
+ * part" without altering the letters.
+ *
+ * The range is clamped here as well as where it is computed. This function is
+ * handed a string and a pair of numbers from the database, and an out-of-range
+ * span throws inside the text layer -- in the middle of a session, on a card
+ * that would then be unopenable forever.
+ */
+private fun marked(text: String, target: IntRange?, color: Color): AnnotatedString {
+    if (target == null) return AnnotatedString(text)
+    val start = target.first.coerceIn(0, text.length)
+    val end = (target.last + 1).coerceIn(start, text.length)
+    if (end <= start) return AnnotatedString(text)
+    return buildAnnotatedString {
+        append(text)
+        addStyle(
+            SpanStyle(color = color, textDecoration = TextDecoration.Underline),
+            start,
+            end
+        )
+    }
 }

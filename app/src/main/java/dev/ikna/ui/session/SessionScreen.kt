@@ -126,6 +126,11 @@ fun SessionScreen(
                         label = levelLabel(card.level),
                         prompt = card.prompt,
                         answer = card.answer,
+                        // Which part of the sentence the card is actually
+                        // asking about. Null at the levels where the front
+                        // is not a sentence, which the card handles.
+                        promptTarget = card.promptTarget,
+                        answerTarget = card.answerTarget,
                         hint = if (card.level == Level.CLOZE) card.chunk.translation else null,
                         revealed = state.revealed,
                         // The one line that says how to turn a card over. It was

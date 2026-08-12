@@ -42,6 +42,41 @@ data class SessionCard(
         }
 
     /**
+     * Where the phrase being learned sits inside the sentence on the front of
+     * the card, so the screen can mark it.
+     *
+     * The sentence is deliberately never translated -- it is the context to
+     * guess from -- but the card only asks one question, and that question is
+     * about one phrase inside it. Leaving the phrase unmarked adds a second,
+     * accidental question: which of these six words am I being asked about. That
+     * is not desirable difficulty, it is noise, and it lands in the grading: a
+     * card failed because the eye was on the wrong word is still recorded as the
+     * phrase forgotten, and the whole schedule is built out of those records.
+     *
+     * Null at the other two levels, and for different reasons: the cloze already
+     * shows the position as a gap, and the production prompt is the translation,
+     * which contains no sentence to mark.
+     */
+    val promptTarget: IntRange?
+        get() = if (level == Level.RECOGNITION) targetRange() else null
+
+    /** The same mark on the back of a production card, which is the sentence. */
+    val answerTarget: IntRange?
+        get() = if (level == Level.PRODUCTION) targetRange() else null
+
+    /**
+     * Clamped rather than trusted. The offsets are written by the importer and
+     * an off-by-one in a hand-edited deck file must not be able to crash a
+     * session in the middle of it.
+     */
+    private fun targetRange(): IntRange? {
+        val s = chunk.contextSentence
+        val a = chunk.targetStart.coerceIn(0, s.length)
+        val b = chunk.targetEnd.coerceIn(a, s.length)
+        return if (b > a) a until b else null
+    }
+
+    /**
      * Never answered before: level zero, no repetitions yet.
      *
      * There is no separate introduction card. A chunk met for the first time

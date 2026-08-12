@@ -2,16 +2,15 @@ package dev.ikna.audio
 
 import android.content.Context
 
-/*
- * The build that carries a voice.
+/**
+ * The voice build: the sherpa-onnx runtime, and no weights at all.
  *
- * Nothing decides here whether the model is usable -- that costs seconds and
- * happens on a background thread the first time something is spoken. This only
- * hands back the implementation; KokoroSpeech.isReady is where the model is
- * actually looked for, and a missing or broken one simply falls back to the
- * phone's engine.
+ * An earlier version of this build shipped Kokoro inside the APK. That was a
+ * mistake twice over -- half a gigabyte for one language, and a model that never
+ * matched an imported deck, so the extra weight bought most people silence. The
+ * runtime stays, the model comes from the person using the app, and the voice
+ * screen says at all times which of the two is speaking.
  */
 object NeuralSpeechFactory {
-
-    fun create(context: Context): NeuralSpeech? = KokoroSpeech(context)
+    fun create(context: Context): NeuralSpeech? = SherpaSpeech(context)
 }

@@ -11,9 +11,13 @@ release.keystore
 *.jks
 *.apk
 
-# Inputs for the voice build. Fetched by tools/voice/fetch-voice.sh, never
-# committed: the runtime carries native code for four architectures and the
-# model is hundreds of megabytes. Both are reproducible from the two URLs in
-# that script, and the normal (lite) build needs neither.
+# The runtime for the voice build. Fetched by tools/voice/fetch-voice.sh and
+# never committed: it carries native code for four architectures and is
+# reproducible from the one URL in that script. The lite build needs none of it.
+#
+# No model is fetched or stored here any more. The model is added on the phone,
+# from the file picker -- see docs/VOICE.md.
 app/libs/
+
+# Left behind by the version that packed a model into the APK.
 app/src/voice/assets/kokoro/

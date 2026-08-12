@@ -109,6 +109,23 @@ class Speaker(context: Context) {
         neural?.takeIf { it.supports(lang) }
 
     /**
+     * Whether this build can run a model of its own at all.
+     *
+     * False in the plain build, where the voice screen says so plainly instead
+     * of offering a file picker that leads nowhere.
+     */
+    val canLoadModels: Boolean get() = neural != null
+
+    /**
+     * Whether the added model loads and speaks this language.
+     *
+     * Slow the first time, because this is where the net is read in -- and it is
+     * the only honest answer to the question "is the voice working", which is
+     * why the voice screen waits for it instead of showing a hopeful label.
+     */
+    suspend fun modelSpeaks(lang: String): Boolean = neuralFor(lang)?.isReady() == true
+
+    /**
      * Speed and pitch in the form the platform wants, where 1.0 is the engine's
      * own voice. Volatile because they are written from the settings screen and
      * read on the thread that synthesises.

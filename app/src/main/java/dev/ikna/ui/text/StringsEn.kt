@@ -602,4 +602,74 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"a11y.008" to "Don't know",
 	// Знаю
 	"a11y.009" to "Know",
+	// Озвучка
+	"voice.001" to "Voice",
+	// Сейчас читает
+	"voice.002" to "Reading now",
+	// Системный голос телефона
+	"voice.003" to "The phone's own voice",
+	// В этой сборке нет движка моделей — читает только системный голос
+	"voice.004" to "This build carries no model engine — only the phone's voice reads",
+	// Модель добавлена, но не загрузилась. Читает системный голос
+	"voice.005" to "A model is installed but did not load. The phone's voice reads",
+	// Модели нет. Читает системный голос телефона
+	"voice.006" to "No model. The phone's own voice reads",
+	// Проверяю модель…
+	"voice.007" to "Checking the model…",
+	// Модель загружена и готова
+	"voice.008" to "The model is loaded and ready",
+	// Проверить голос
+	"voice.010" to "Test the voice",
+	// Своя модель
+	"voice.011" to "Your own model",
+	// Модель приносите вы: папка Kokoro или Piper с телефона. Ничего не скачивается — у приложения нет доступа в интернет.
+	"voice.012" to "You bring the model: a Kokoro or Piper folder from the phone. Nothing is downloaded — the app has no internet access.",
+	// Убрать модель
+	"voice.013" to "Remove the model",
+	// Язык модели
+	"voice.014" to "Model language",
+	// Любой
+	"voice.015" to "Any",
+	// Это сборка без движка. Своя модель здесь не заработает — нужна сборка с пометкой voice.
+	"voice.016" to "This build has no engine. Your own model will not work here — take the build marked voice.",
+	// Заменить модель
+	"voice.017" to "Replace the model",
+	// Копирую файлы: 
+	"voice.018" to "Files copied: ",
+	// Это не похоже на модель: в папке нет файла .onnx
+	"voice.019" to "This does not look like a model: no .onnx file in the folder",
+	// Выбрана папка уровнем выше. Откройте её и выберите папку с моделью
+	"voice.020" to "The folder picked is one level too high. Open it and pick the folder with the model",
+	// В папке несколько моделей. Оставьте одну
+	"voice.021" to "Several models in one folder. Leave one",
+	// Нет файла tokens.txt. Нужна сборка модели для sherpa-onnx, а не файлы Piper как есть
+	"voice.022" to "No tokens.txt. Take the sherpa-onnx build of the model, not the raw Piper files",
+	// Не удалось скопировать: 
+	"voice.023" to "Could not copy: ",
+	// Модель добавлена
+	"voice.024" to "Model added",
+	// Озвучка выключена в настройках
+	"voice.025" to "Reading aloud is switched off in settings",
+	// Модели лежат на странице релизов sherpa-onnx, раздел tts-models. Kokoro — английский, Piper — почти любой язык, включая русский и польский.
+	"voice.026" to "Models live on the sherpa-onnx releases page, under tts-models. Kokoro speaks English; Piper covers almost any language, Russian and Polish included.",
+	// Нет файла voices.bin. Скачивание Kokoro оборвалось
+	"voice.027" to "No voices.bin. The Kokoro download stopped early",
+	// Нет данных для произношения: ни espeak-ng-data, ни lexicon
+	"voice.028" to "Nothing to pronounce with: no espeak-ng-data and no lexicon",
+	// Добавить модель
+	"voice.029" to "Add a model",
+	// Оформление
+	"look.001" to "Appearance",
+	// Значок и цвет квадрата в списке колод. Видно только вам: тому, кому отправите колоду, придут только карточки.
+	"look.002" to "The icon and the colour of the square on the deck list. Yours only: whoever you send the deck to gets the cards and nothing else.",
+	// Цвет квадрата
+	"look.003" to "Colour of the square",
+	// Логотип ikna
+	"bar.001" to "The ikna mark",
+	// Слева в нижнем баре. Выключите — место уйдёт кнопкам
+	"bar.002" to "On the left of the bottom bar. Switch it off and the room goes to the buttons",
+	// Под левую руку
+	"bar.003" to "For the left hand",
+	// Нижний бар зеркалится: плюс уходит в левый угол, остальные кнопки — вправо
+	"bar.004" to "The bottom bar is mirrored: the plus moves to the left corner, the rest to the right",
 )

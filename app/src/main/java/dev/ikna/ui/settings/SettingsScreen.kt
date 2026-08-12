@@ -120,6 +120,7 @@ fun SettingsScreen(
     container: AppContainer,
     settings: IknaSettings,
     onOpenDebug: () -> Unit,
+    onOpenVoice: () -> Unit,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -428,6 +429,23 @@ fun SettingsScreen(
                         checked = settings.haptics,
                         onCheckedChange = { scope.launch { container.settings.setHaptics(it) } }
                     )
+
+                    // The bottom bar is the only row of controls in the app, and
+                    // until now it was the same row for everybody. Both of these
+                    // are one boolean each and neither touches anything but this
+                    // screen's own drawing.
+                    ToggleRow(
+                        title = S.t("bar.001"),
+                        subtitle = S.t("bar.002"),
+                        checked = settings.showWordmark,
+                        onCheckedChange = { scope.launch { container.settings.setShowWordmark(it) } }
+                    )
+                    ToggleRow(
+                        title = S.t("bar.003"),
+                        subtitle = S.t("bar.004"),
+                        checked = settings.leftHanded,
+                        onCheckedChange = { scope.launch { container.settings.setLeftHanded(it) } }
+                    )
                 }
             }
 
@@ -470,6 +488,16 @@ fun SettingsScreen(
                                 if (!on) container.speaker.stop()
                             }
                         }
+                    )
+
+                    // Which voice actually speaks -- the phone's own engine or a
+                    // model somebody added -- has a screen of its own now. It used
+                    // to have nowhere at all, which is how an APK with a model
+                    // inside came to look exactly like one without.
+                    Spacer(Modifier.height(12.dp))
+                    IknaWideButton(
+                        label = S.t("voice.001"),
+                        onClick = onOpenVoice
                     )
 
                     if (settings.speechEnabled) {
