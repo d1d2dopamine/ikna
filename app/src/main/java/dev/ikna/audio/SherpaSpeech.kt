@@ -89,7 +89,9 @@ class SherpaSpeech(context: Context) : NeuralSpeech {
                 // never leaves a truncated wav to be played back forever after.
                 val tmp = File(target.parentFile, target.name + ".part")
                 val saved = runCatching { audio.save(tmp.absolutePath) }.isSuccess
-                runCatching { audio.release() }
+                // Nothing to free here: what generate() returns is a plain array
+                // of samples, collected like any other object. The engine itself
+                // holds the native memory, and shutdown() is what releases that.
                 saved && tmp.isFile && tmp.length() > 0L && tmp.renameTo(target)
             }.getOrDefault(false)
 
