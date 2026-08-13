@@ -75,6 +75,18 @@ enum class SpeakerStatus {
     NO_VOICE
 }
 
+/** Who would read a card in a given language out loud, if anyone. */
+enum class SpeechSource {
+    /** The model the user added. */
+    MODEL,
+
+    /** The phone's own engine, because the model does not speak this language. */
+    PHONE,
+
+    /** Nobody: no model for it, and no voice on the phone either. */
+    NOBODY
+}
+
 class Speaker(context: Context) {
 
     private val app = context.applicationContext
@@ -156,7 +168,14 @@ class Speaker(context: Context) {
      * Start the engine ahead of time. Called when a session opens, because this
      * is the part that can take seconds; everything after it is fast.
      */
-    suspend fun warmUp(): Boolean = engine() != null
+    suspend fun warmUp(): Boolean {
+        // A model the user added answers this on its own. This used to ask the
+        // platform engine and nothing else, so a phone whose engine is missing
+        // or slow to start hid the speaker mark and skipped every prefetch --
+        // with a working model sitting right there, added by hand a minute ago.
+        if (neural?.isReady() == true) return true
+        return engine() != null
+    }
 
     private suspend fun engine(): TextToSpeech? = lock.withLock {
         if (startAttempted) {
@@ -246,11 +265,25 @@ class Speaker(context: Context) {
     }
 
     /**
+     * Who would read a card in this language out loud.
+     *
+     * The voice screen shows one line per deck language, because "the test
+     * button speaks but my cards are silent" has exactly two causes -- the
+     * model does not speak that language, or nothing does -- and neither of them
+     * was visible anywhere.
+     */
+    suspend fun sourceFor(lang: String): SpeechSource = when {
+        neuralFor(lang)?.isReady() == true -> SpeechSource.MODEL
+        status(lang) == SpeakerStatus.READY -> SpeechSource.PHONE
+        else -> SpeechSource.NOBODY
+    }
+
+    /**
      * Say it now. Uses the cached file when there is one, which is the whole
      * point of [prefetch]; otherwise asks the engine directly rather than making
      * the user wait for a file to be written first.
      */
-    suspend fun speak(text: String, lang: String, voiceName: String?) {
+    suspend fun speak(text: String, lang: String, voiceName: String? = null) {
         if (text.isBlank()) return
         val cached = cacheFile(text, lang, voiceName)
         if (cached.exists() && cached.length() > 0) {
@@ -291,7 +324,7 @@ class Speaker(context: Context) {
      *
      * @return true if something was played.
      */
-    suspend fun speakIfReady(text: String, lang: String, voiceName: String?): Boolean {
+    suspend fun speakIfReady(text: String, lang: String, voiceName: String? = null): Boolean {
         if (text.isBlank()) return false
         val cached = cacheFile(text, lang, voiceName)
         if (!cached.exists() || cached.length() <= 0) return false
@@ -303,7 +336,7 @@ class Speaker(context: Context) {
      * Synthesise in the background so the next card is instant. Does nothing when
      * the file is already there or already being written.
      */
-    suspend fun prefetch(text: String, lang: String, voiceName: String?) {
+    suspend fun prefetch(text: String, lang: String, voiceName: String? = null) {
         if (text.isBlank()) return
         val target = cacheFile(text, lang, voiceName)
         if (target.exists() && target.length() > 0) return

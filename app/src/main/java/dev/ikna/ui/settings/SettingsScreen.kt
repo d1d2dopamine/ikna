@@ -52,7 +52,6 @@ import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
 import dev.ikna.MainActivity
 import dev.ikna.audio.SpeakerStatus
-import dev.ikna.audio.SpeakerVoice
 import dev.ikna.data.export.SettingsBackup
 import dev.ikna.data.prefs.FontStore
 import dev.ikna.data.prefs.IknaSettings
@@ -64,7 +63,6 @@ import dev.ikna.data.prefs.SPEECH_TONE_MAX
 import dev.ikna.data.prefs.SPEECH_TONE_MIN
 import dev.ikna.data.prefs.SPEECH_TONE_STEP
 import dev.ikna.data.prefs.ThemeMode
-import dev.ikna.data.prefs.voiceFor
 import dev.ikna.ui.theme.IknaChip
 import dev.ikna.ui.theme.IknaDialog
 import dev.ikna.ui.theme.IknaGlyph
@@ -154,33 +152,16 @@ fun SettingsScreen(
         normMeasured = container.learningRepository.normIsMeasured()
     }
 
-    // Voices are asked for when the screen opens and again if speech is switched
-    // on. Answering means starting the engine, which takes seconds, so it never
-    // happens while drawing.
+    // Whether anything can speak at all. Which voice reads which deck is a
+    // question about languages, and it is answered on the voice screen, one line
+    // per deck. It used to be answered here, as a list of the engine's own voice
+    // names -- "RU . ORDINARY" next to "default" -- which said nothing about who
+    // would read a card and changed nothing anybody could hear.
     var speechStatus by remember { mutableStateOf(SpeakerStatus.UNKNOWN) }
-    var speechLangs by remember { mutableStateOf<List<String>>(emptyList()) }
-    var speechVoices by remember { mutableStateOf<Map<String, List<SpeakerVoice>>>(emptyMap()) }
     LaunchedEffect(settings.speechEnabled) {
         if (!settings.speechEnabled) return@LaunchedEffect
-        val langs = withContext(Dispatchers.IO) {
-            container.deckRepository.decks()
-                .map { it.lang }
-                .filter { it.isNotBlank() && it != "custom" }
-                .distinct()
-        }
-        speechLangs = langs
-        if (!container.speaker.warmUp()) {
-            speechStatus = SpeakerStatus.NO_ENGINE
-            return@LaunchedEffect
-        }
-        if (langs.isEmpty()) {
-            speechStatus = SpeakerStatus.READY
-            return@LaunchedEffect
-        }
-        val found = langs.associateWith { container.speaker.voices(it) }
-        speechVoices = found
-        speechStatus = if (found.values.all { it.isEmpty() }) SpeakerStatus.NO_VOICE
-        else SpeakerStatus.READY
+        speechStatus = if (container.speaker.warmUp()) SpeakerStatus.READY
+        else SpeakerStatus.NO_ENGINE
     }
 
     // A font file is validated before it is stored, not after: Compose parses a
@@ -548,59 +529,6 @@ fun SettingsScreen(
                             }
 
                             SpeakerStatus.READY -> {
-                                speechLangs.forEach { lang ->
-                                    val list = speechVoices[lang].orEmpty()
-                                    Spacer(Modifier.height(16.dp))
-                                    Text(
-                                        text = langLabel(lang),
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Spacer(Modifier.height(8.dp))
-                                    if (list.isEmpty()) {
-                                        Text(
-                                            text = S.t("set.037"),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    } else {
-                                        val chosen = settings.voiceFor(lang)
-                                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                            IknaChip(
-                                                label = S.t("set.038"),
-                                                selected = chosen == null,
-                                                modifier = Modifier.fillMaxWidth(),
-                                                onClick = {
-                                                    scope.launch {
-                                                        container.settings.setVoiceFor(lang, null)
-                                                        container.speaker.clearCache()
-                                                    }
-                                                }
-                                            )
-                                            list.take(6).forEach { voice ->
-                                                IknaChip(
-                                                    label = voice.label,
-                                                    selected = voice.name == chosen,
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    onClick = {
-                                                        scope.launch {
-                                                            container.settings.setVoiceFor(
-                                                                lang,
-                                                                voice.name
-                                                            )
-                                                            // Cached audio was made
-                                                            // with the old voice;
-                                                            // keeping it would play
-                                                            // the previous one back
-                                                            // for weeks.
-                                                            container.speaker.clearCache()
-                                                        }
-                                                    }
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
                                 Spacer(Modifier.height(20.dp))
                                 Text(
                                     text = S.t("set.111"),

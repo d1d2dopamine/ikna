@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import dev.ikna.audio.Speaker
+import dev.ikna.audio.SpeakerStatus
 import dev.ikna.data.prefs.SettingsStore
-import dev.ikna.data.prefs.voiceFor
 import dev.ikna.data.repo.LearningRepository
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.governor.GovernorReason
@@ -123,6 +123,12 @@ class SessionViewModel(
     private val drilled = HashSet<String>()
 
     private var shownAt = 0L
+
+    /**
+     * Which languages can be spoken at all. Asked once each: the first answer is
+     * where the model is read into memory, and it is needed on every card.
+     */
+    private val langReady = HashMap<String, Boolean>()
     private var undoToken = 0
     private var hintsShown = 0
     private var swipesDone = 0
@@ -144,9 +150,11 @@ class SessionViewModel(
             // Speed and pitch belong to the engine rather than to a single call, so
             // they are set once here, before the first word of the session.
             speaker.setTone(prefs.speechRate, prefs.speechPitch)
-            val ready = speaker.warmUp()
-            _state.value = _state.value.copy(speechReady = ready)
-            if (ready) onCardShown()
+            // Whether the mark is drawn is decided per card, by the language in
+            // front of the user; this call only pays the cost of starting an
+            // engine while there is still time to spare.
+            speaker.warmUp()
+            onCardShown()
         }
     }
 
@@ -165,7 +173,7 @@ class SessionViewModel(
             // Cheap when nothing changed, and it is what makes a speed changed in
             // settings audible on the very next press without leaving the session.
             speaker.setTone(prefs.speechRate, prefs.speechPitch)
-            speaker.speak(spokenText(card), card.chunk.lang, prefs.voiceFor(card.chunk.lang))
+            speaker.speak(spokenText(card), card.chunk.lang)
         }
     }
 
@@ -181,27 +189,41 @@ class SessionViewModel(
     private fun onCardShown() {
         viewModelScope.launch {
             val s = _state.value
-            if (!s.speechReady) return@launch
+            val card = s.current ?: return@launch
             val prefs = settings.current()
             if (!prefs.speechEnabled) return@launch
 
-            val card = s.current
-            if (card != null && card.isFirstContact) {
-                speaker.speakIfReady(
-                    spokenText(card),
-                    card.chunk.lang,
-                    prefs.voiceFor(card.chunk.lang)
-                )
+            // Whether this card can be spoken is a question about its language.
+            // It used to be asked once, about the phone's engine, and never
+            // about the model -- so a deck in the model's language stayed silent
+            // whenever the phone had no voice for it, and a deck the model does
+            // not speak showed a mark that did nothing when pressed.
+            val lang = card.chunk.lang
+            val ready = canSpeak(lang)
+            if (ready != _state.value.speechReady) {
+                _state.value = _state.value.copy(speechReady = ready)
+            }
+            if (!ready) return@launch
+
+            val key = card.card.key
+            // Rendered first, played second. The old order asked for audio that
+            // nothing had written yet, so the one card meant to speak by itself
+            // -- a phrase met for the first time -- was the one that never did.
+            speaker.prefetch(spokenText(card), lang)
+            if (card.isFirstContact && _state.value.current?.card?.key == key) {
+                speaker.speakIfReady(spokenText(card), lang)
             }
 
-            listOfNotNull(card, s.nextCard).forEach { ahead ->
-                speaker.prefetch(
-                    spokenText(ahead),
-                    ahead.chunk.lang,
-                    prefs.voiceFor(ahead.chunk.lang)
-                )
-            }
+            s.nextCard?.let { ahead -> speaker.prefetch(spokenText(ahead), ahead.chunk.lang) }
         }
+    }
+
+    /** Remembered per language, because the first answer loads the model. */
+    private suspend fun canSpeak(lang: String): Boolean {
+        langReady[lang]?.let { return it }
+        val ok = speaker.status(lang) == SpeakerStatus.READY
+        langReady[lang] = ok
+        return ok
     }
 
     /**

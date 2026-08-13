@@ -653,7 +653,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Модель добавлена
 	"voice.024" to "Model added",
 	// Озвучка выключена в настройках
-	"voice.025" to "Reading aloud is switched off in settings",
+	"voice.025" to "Reading aloud is off - the switch above turns it on",
 	// Модели лежат на странице релизов sherpa-onnx, раздел tts-models. Kokoro — английский, Piper — почти любой язык, включая русский и польский.
 	"voice.026" to "Models live on the sherpa-onnx releases page, under tts-models. Kokoro speaks English; Piper covers almost any language, Russian and Polish included.",
 	// Нет файла voices.bin. Скачивание Kokoro оборвалось
@@ -662,6 +662,14 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"voice.028" to "Nothing to pronounce with: no espeak-ng-data and no lexicon",
 	// Добавить модель
 	"voice.029" to "Add a model",
+	"voice.030" to "Read the cards aloud",
+	"voice.031" to "While this is off the cards stay silent, model or no model",
+	"voice.032" to "Who reads which deck",
+	"voice.033" to "the model reads it",
+	"voice.034" to "the phone's voice reads it",
+	"voice.035" to "nobody: the model does not know this language and the phone has no voice for it",
+	"voice.036" to "A model speaks one language. A deck's language is asked at import and can be changed in the deck.",
+	"voice.037" to "NO LANGUAGE",
 	// Оформление
 	"look.001" to "Appearance",
 	// Буквы и цвет квадрата в списке колод. Видно только вам: тому, кому отправите колоду, придут только карточки.

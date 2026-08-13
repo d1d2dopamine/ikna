@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import dev.ikna.AppContainer
+import dev.ikna.audio.SpeechSource
 import dev.ikna.audio.VoiceModelInstall
 import dev.ikna.audio.VoiceModelKind
 import dev.ikna.audio.VoiceModelProblem
@@ -39,6 +41,7 @@ import dev.ikna.ui.theme.IknaChip
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaRule
+import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.Space
 import kotlinx.coroutines.launch
@@ -72,6 +75,9 @@ fun VoiceScreen(
     var copied by remember { mutableStateOf(0) }
     var note by remember { mutableStateOf<String?>(null) }
 
+    /** Deck language -> who would read it. Filled by refresh(), never guessed. */
+    var voices by remember { mutableStateOf<List<Pair<String, SpeechSource>>>(emptyList()) }
+
     val runtime = container.speaker.canLoadModels
 
     // Asking whether the model loads costs seconds, and it is the answer somebody
@@ -81,6 +87,15 @@ fun VoiceScreen(
         install = current
         ready = if (current == null || !runtime) false
         else container.speaker.modelSpeaks(current.lang ?: "en")
+
+        // Asked per deck language rather than once: this is the difference
+        // between a model that works and a model that works on your decks.
+        voices = runCatching { container.deckRepository.decks() }
+            .getOrDefault(emptyList())
+            .map { it.lang }
+            .filter { it.isNotBlank() }
+            .distinct()
+            .map { lang -> lang to container.speaker.sourceFor(lang) }
     }
 
     LaunchedEffect(Unit) { refresh() }
@@ -137,6 +152,46 @@ fun VoiceScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = Edge)
         ) {
+            // ---- switched on at all ---------------------------------------
+            //
+            // The switch used to live one screen back, in settings, and the test
+            // button below does not go through it. So a model could be added,
+            // proved out loud on this very screen, and every card still stayed
+            // silent -- with nothing anywhere connecting the two facts.
+            Spacer(Modifier.height(Space.md))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = S.t("voice.030"),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(Modifier.height(Space.hair))
+                    Text(
+                        text = S.t("voice.031"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted
+                    )
+                }
+                Spacer(Modifier.width(Space.sm))
+                IknaToggle(
+                    checked = speechEnabled,
+                    onCheckedChange = { on ->
+                        scope.launch {
+                            container.settings.setSpeechEnabled(on)
+                            if (!on) container.speaker.stop()
+                        }
+                    },
+                    label = S.t("voice.030")
+                )
+            }
+
+            Spacer(Modifier.height(Space.lg))
+            IknaRule()
+
             // ---- who is speaking ------------------------------------------
             Spacer(Modifier.height(Space.md))
             Text(
@@ -171,7 +226,7 @@ fun VoiceScreen(
                 onClick = {
                     scope.launch {
                         val lang = model?.lang ?: "en"
-                        container.speaker.speak(sampleFor(lang), lang, null)
+                        container.speaker.speak(sampleFor(lang), lang)
                     }
                 }
             )
@@ -277,6 +332,48 @@ fun VoiceScreen(
                 )
             }
 
+            // ---- who reads which deck -------------------------------------
+            //
+            // One line per deck language. A model speaks one language; a deck in
+            // another falls through to the phone, and a deck in a language the
+            // phone has no voice for is silence. All three used to look the same
+            // from here, which is why "the test button works and my cards do not"
+            // had nowhere to be answered.
+            if (voices.isNotEmpty()) {
+                Spacer(Modifier.height(Space.xl))
+                IknaRule()
+                Spacer(Modifier.height(Space.lg))
+                Text(
+                    text = S.t("voice.032"),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(Modifier.height(Space.xs))
+                Text(
+                    text = S.t("voice.036"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = muted
+                )
+                voices.forEach { (lang, source) ->
+                    Spacer(Modifier.height(Space.md))
+                    Text(
+                        text = if (lang == CUSTOM_LANG) S.t("voice.037")
+                        else lang.uppercase(),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = muted
+                    )
+                    Spacer(Modifier.height(Space.hair))
+                    Text(
+                        text = when (source) {
+                            SpeechSource.MODEL -> S.t("voice.033")
+                            SpeechSource.PHONE -> S.t("voice.034")
+                            SpeechSource.NOBODY -> S.t("voice.035")
+                        },
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
             Spacer(Modifier.height(Space.xl))
             IknaRule()
             Spacer(Modifier.height(Space.lg))
@@ -289,6 +386,9 @@ fun VoiceScreen(
         }
     }
 }
+
+/** What a deck with no language of its own is stored as. See DeckRepository. */
+private const val CUSTOM_LANG = "custom"
 
 /** RU, EN, PL, and "any" -- the honest setting for a multi-language model. */
 private val LANGS = listOf("ru", "en", "pl", null)

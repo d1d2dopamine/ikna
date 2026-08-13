@@ -80,6 +80,17 @@ jobs:
           mkdir -p out
           cp app/build/outputs/apk/release/*.apk "out/ikna-${GITHUB_REF_NAME}.apk"
 
+      # Phones older than about 2017 are 32-bit and cannot install the file
+      # above. Same code, one architecture down, published beside it under a
+      # name that says who needs it. Built second and copied straight after,
+      # because both builds write to the same folder under the same name.
+      - name: Build release APK for 32-bit phones
+        run: gradle --no-daemon --stacktrace assembleRelease -Pikna.abi=legacy32
+
+      - name: Name the 32-bit file after the tag
+        run: |
+          cp app/build/outputs/apk/release/*.apk "out/ikna-${GITHUB_REF_NAME}-legacy32.apk"
+
       - name: Signer
         run: |
           for apk in out/*.apk; do

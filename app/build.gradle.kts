@@ -73,8 +73,8 @@ val hasFixedKey = keystoreFile.exists()
 // so the counter keeps climbing across the reset and the formula above applies
 // per epoch, offset past everything the pre-epoch line ever shipped.
 // ---------------------------------------------------------------------------
-val appVersionName = "0.3.0 proof"
-val appVersionCode = 100030000        // proof epoch: 100000000 + 0.3.0
+val appVersionName = "0.4.0 proof"
+val appVersionCode = 100040000        // proof epoch: 100000000 + 0.4.0
 
 // A build from a clone has to be able to come out unsigned: the key committed
 // here is this project's, and nobody else should be shipping APKs under it.
@@ -83,6 +83,12 @@ val appVersionCode = 100030000        // proof epoch: 100000000 + 0.3.0
 val unsignedBuild =
     (project.findProperty("ikna.unsigned") as String?)?.toBoolean() == true
 val signWithFixedKey = hasFixedKey && !unsignedBuild
+
+// Which architecture this build is for. Default is the one almost every phone
+// in use has; -Pikna.abi=legacy32 is the older 32-bit file, built second in CI
+// and published beside it. The ndk block below says why there are two files
+// instead of one that fits everything.
+val legacyAbi = (project.findProperty("ikna.abi") as String?) == "legacy32"
 
 android {
     namespace = "dev.ikna"
@@ -96,6 +102,23 @@ android {
         targetSdk = 35
         versionCode = appVersionCode
         versionName = appVersionName
+
+        // -------------------------------------------------------------------
+        // One architecture per file.
+        //
+        // The speech runtime is native code, shipped for four architectures,
+        // and 0.3.0 packed all four into one APK: 114 MB, of which any given
+        // phone could run a quarter and carried the rest as dead weight.
+        //
+        // arm64-v8a is every Android phone sold since roughly 2017, so that is
+        // the download. armeabi-v7a covers what is older than that and is built
+        // by passing -Pikna.abi=legacy32. The two x86 variants are emulators
+        // only and are not built at all.
+        // -------------------------------------------------------------------
+        ndk {
+            abiFilters.clear()
+            abiFilters += if (legacyAbi) "armeabi-v7a" else "arm64-v8a"
+        }
     }
 
     signingConfigs {

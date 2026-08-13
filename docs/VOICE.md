@@ -7,12 +7,19 @@ when nothing is speaking.
 
 ## One build
 
-One APK per release, about **31 MB**, with the speech engine inside and **no
-model**:
+One app per release, with the speech engine inside and **no model**. Two files,
+differing in one thing only -- which processor they are built for:
 
-| What | Size | What speaks |
+| What | Size | Who it is for |
 | --- | --- | --- |
-| `ikna-<tag>.apk` | ~31 MB | the phone's own text-to-speech, or a model you add |
+| `ikna-<tag>.apk` | ~40 MB | every phone sold since roughly 2017 (arm64) |
+| `ikna-<tag>-legacy32.apk` | ~35 MB | older 32-bit phones (armeabi-v7a) |
+
+0.3.0 shipped one file with four architectures inside it: **114 MB**, of which
+any given phone could run a quarter and carried the other three as dead weight.
+The engine is native code, so there is no single small file that fits everything;
+there is a file for the phones people have and a file for the ones they had. The
+emulator architectures are not built at all.
 
 There were two APKs until 0.3.0: a plain one and a `-voice` one. The split was
 worth its cost while the second carried a 300 MB model. Once the model moved out
@@ -79,6 +86,21 @@ Prefer a folder with `int8` in its name where there is one: about a quarter of
 the size, and on a phone that is the difference between a model that loads and
 one the system kills for memory.
 
+### The download is a `.tar.bz2`
+
+There is no zip. Every model on that page is a `.tar.bz2`, and Android's built-in
+file manager does not open one, which is where most attempts stop.
+
+On a phone: install **ZArchiver** (free), open the downloaded file, extract, then
+open the `.tar` it produced and extract that too. Two steps, because the format
+is a compressed archive wrapping an archive. What comes out is the folder to
+choose in the app.
+
+On a computer it is one right-click, and the folder is then copied to the phone.
+
+Do not unpack anything into the app's own folders and do not rename the files
+inside: the app looks for `tokens.txt` and `espeak-ng-data` by name.
+
 ### What a usable folder looks like
 
 Kokoro:
@@ -142,8 +164,15 @@ wrong answer.
 The voice screen answers this without guessing. The line at the top always names
 who is speaking right now, and **Test the voice** proves it out loud.
 
-- **"Reading aloud is switched off in settings"** -- speech is off by default;
-  turn it on one screen up.
+- **"Reading aloud is off - the switch above turns it on"** -- the switch is on
+  the voice screen itself now. It used to live one screen up, in settings, and
+  **Test the voice** does not go through it: the test could speak while every
+  card stayed silent, which is exactly what happened before 0.4.0.
+- **A deck in a language your model does not speak** -- a model speaks one
+  language. **Who reads which deck** lists every deck language with who would
+  read it: the model, the phone's voice, or nobody. A deck the model does not
+  cover falls through to the phone, and if the phone has no voice for it either,
+  the speaker mark is not drawn at all rather than drawn and dead.
 - **"No model. The phone's own voice reads"** -- nothing was added yet. If the
   phone has no voice for that language, install one from the system's own speech
   settings, or add a model here.

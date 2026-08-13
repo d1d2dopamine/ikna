@@ -15,6 +15,57 @@ the word says which epoch the build belongs to. Both words come from printing:
 nothing left to correct. Tags replace the space with a dash, so `0.1.0 proof` is
 tagged `v0.1.0-proof`.
 
+## 0.4.0 proof
+
+### The cards speak
+
+A model could be added, proved out loud on the voice screen, and every card would
+still be silent. Three separate reasons, all of them in the app:
+
+- Readiness was decided by asking the phone's own engine, and nothing else. A
+  phone whose engine is missing, disabled or slow to start answered no -- and the
+  answer hid the speaker mark and skipped every prefetch, with a working model
+  sitting right there. A model that loads is now an answer on its own.
+- A phrase met for the first time is meant to read itself out. It asked for audio
+  before anything had rendered it, so it played nothing, and the file it had just
+  finished writing sat unplayed. Rendered first, played second, and only if the
+  same card is still on screen.
+- Readiness was one global yes or no, while a model speaks one language. A deck
+  in another language showed a mark that did nothing when pressed. It is now
+  asked per card language, remembered per language, and the mark appears only
+  when something can actually say the words.
+
+### The voice screen says who reads what
+
+**Who reads which deck** lists every deck language and who would read it: the
+model, the phone's voice, or nobody. The master switch moved onto this screen,
+beside the test button that does not obey it -- the two facts that used to be one
+screen apart and never connected.
+
+### The per-language voice pickers are gone
+
+Settings offered, for each deck language, a list reading `default`, `RU .
+ORDINARY`, `RU . GOOD`. Those were the phone engine's own voice names, they said
+nothing about who would read a card, and with a model installed they changed
+nothing anybody could hear. Removed. Speed and pitch stay where they were.
+
+Saved settings files are unchanged and still restore: the stored voice map is
+kept in the format, simply no longer chosen by hand.
+
+### 114 MB, and why it now is not
+
+The speech engine is native code and 0.3.0 packed it for four architectures in
+one file. A phone could run one of them. The release now carries
+`ikna-<tag>.apk` for arm64 -- every phone sold since roughly 2017 -- and
+`ikna-<tag>-legacy32.apk` for older 32-bit ones. Around 40 MB each instead of
+114, with no feature removed. Emulator architectures are not built.
+
+### Documentation
+
+`docs/VOICE.md` says that model downloads are `.tar.bz2`, that Android's own file
+manager will not open one, and how to unpack it on the phone. The app still
+accepts folders only; unpacking inside the app is not built yet.
+
 ## 0.3.0 proof
 
 Still the proof epoch. The largest one so far, and all of it is the same kind of
