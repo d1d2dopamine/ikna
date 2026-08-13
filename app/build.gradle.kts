@@ -73,8 +73,8 @@ val hasFixedKey = keystoreFile.exists()
 // so the counter keeps climbing across the reset and the formula above applies
 // per epoch, offset past everything the pre-epoch line ever shipped.
 // ---------------------------------------------------------------------------
-val appVersionName = "0.4.0 proof"
-val appVersionCode = 100040000        // proof epoch: 100000000 + 0.4.0
+val appVersionName = "0.5.0 proof"
+val appVersionCode = 100050000        // proof epoch: 100000000 + 0.5.0
 
 // A build from a clone has to be able to come out unsigned: the key committed
 // here is this project's, and nobody else should be shipping APKs under it.
@@ -212,6 +212,11 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.9.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+
+    // tar and bzip2, which Android has neither of. About 700 KB, and it is what
+    // lets a model be added from the archive it was downloaded as instead of
+    // sending the user off to find a file manager that can open one.
+    implementation("org.apache.commons:commons-compress:1.27.1")
 
     testImplementation("junit:junit:4.13.2")
 

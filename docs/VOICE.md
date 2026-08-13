@@ -88,15 +88,22 @@ one the system kills for memory.
 
 ### The download is a `.tar.bz2`
 
-There is no zip. Every model on that page is a `.tar.bz2`, and Android's built-in
-file manager does not open one, which is where most attempts stop.
+There is no zip. Every model on that page is a `.tar.bz2`, and Android opens
+neither half of that -- not the bzip2 wrapper, not the archive inside it. Which is
+where most attempts used to stop.
 
-On a phone: install **ZArchiver** (free), open the downloaded file, extract, then
-open the `.tar` it produced and extract that too. Two steps, because the format
-is a compressed archive wrapping an archive. What comes out is the folder to
-choose in the app.
+Since `0.5.0 proof` the app opens it itself. Download the file, then on the voice
+screen press **Add a .tar.bz2 archive** and pick it. Unpacking a sixty-megabyte
+model takes a minute or so, and the screen counts the files as they land.
 
-On a computer it is one right-click, and the folder is then copied to the phone.
+The picker is opened for any file rather than for bzip2 specifically, on purpose:
+phones disagree about what a `.tar.bz2` is called and several answer "nothing at
+all", which is how a picker ends up greying out the very file it was opened to
+choose. The app checks the contents, not the label.
+
+An already-unpacked folder still works -- **Add a model** takes one, from a
+computer or from ZArchiver -- and it is the faster route when the archive is
+already open in front of you.
 
 Do not unpack anything into the app's own folders and do not rename the files
 inside: the app looks for `tokens.txt` and `espeak-ng-data` by name.
@@ -128,6 +135,32 @@ is, and the app says so in those words when it happens.
 
 ---
 
+## Several models
+
+A model speaks one language. Somebody learning two needs two, and until `0.5.0
+proof` there was a single slot: adding the second destroyed the first, and the
+only way back was to copy sixty megabytes again.
+
+Now every model is a row on the voice screen, with:
+
+- a switch -- off keeps the files and stops the model being used, which is the
+  honest answer to "this voice is worse than my phone's" without paying to find
+  out again later;
+- the language it reads, changeable, because multi-language releases name none;
+- **Kokoro only:** which of its voices speaks, by number. That file holds around a
+  hundred of them and they have no names, so a number and the test button are the
+  whole interface there is to have;
+- delete, for that model alone.
+
+One model per language is on at a time. Switching one on switches off whichever
+model held that language before, because two voices with an equal claim to a deck
+is a coin toss the app would otherwise have to hide from you.
+
+Only the model being used is held in memory -- one at a time, loaded when a card
+in its language comes up. Ten installed models cost storage and nothing else.
+
+---
+
 ## What the app refuses, and why
 
 Every refusal is a sentence on screen rather than silence:
@@ -140,6 +173,8 @@ Every refusal is a sentence on screen rather than silence:
 | no `tokens.txt` | a raw Piper download; take the sherpa-onnx build of the same voice |
 | no `voices.bin` | a Kokoro folder whose download stopped early |
 | no `espeak-ng-data` and no `lexicon` | nothing to turn letters into sounds |
+| not an archive this app can open | the picked file is not a `.tar.bz2`, `.tbz2` or `.tar` |
+| not enough free space | an unpacked model is about three times the archive, and this is checked before unpacking rather than during |
 
 When several nets sit in one folder at different precisions -- `model.onnx`,
 `model.int8.onnx`, `model.fp16.onnx` -- the quantised one is chosen without

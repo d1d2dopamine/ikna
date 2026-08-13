@@ -625,7 +625,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Проверить голос
 	"voice.010" to "Test the voice",
 	// Своя модель
-	"voice.011" to "Your own model",
+	"voice.011" to "Your models",
 	// Модель приносите вы: папка Kokoro или Piper с телефона. Ничего не скачивается — у приложения нет доступа в интернет.
 	"voice.012" to "You bring the model: a Kokoro or Piper folder from the phone. Nothing is downloaded — the app has no internet access.",
 	// Убрать модель
@@ -637,7 +637,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Это сборка без движка. Своя модель здесь не заработает — нужна сборка с пометкой voice.
 	"voice.016" to "This build has no engine. Your own model will not work here — take the build marked voice.",
 	// Заменить модель
-	"voice.017" to "Replace the model",
+	"voice.017" to "Add another model",
 	// Копирую файлы: 
 	"voice.018" to "Files copied: ",
 	// Это не похоже на модель: в папке нет файла .onnx
@@ -670,6 +670,13 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"voice.035" to "nobody: the model does not know this language and the phone has no voice for it",
 	"voice.036" to "A model speaks one language. A deck's language is asked at import and can be changed in the deck.",
 	"voice.037" to "NO LANGUAGE",
+	"voice.038" to "switched off",
+	"voice.039" to "Voice number",
+	"voice.040" to "One model speaks each language",
+	"voice.041" to "Add a .tar.bz2 archive",
+	"voice.042" to "This is not a model archive",
+	"voice.043" to "Not enough space: an unpacked model is about three times the archive",
+	"voice.044" to "The app unpacks the archive itself",
 	// Оформление
 	"look.001" to "Appearance",
 	// Буквы и цвет квадрата в списке колод. Видно только вам: тому, кому отправите колоду, придут только карточки.

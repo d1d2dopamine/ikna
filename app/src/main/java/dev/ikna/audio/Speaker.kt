@@ -135,7 +135,7 @@ class Speaker(context: Context) {
      * the only honest answer to the question "is the voice working", which is
      * why the voice screen waits for it instead of showing a hopeful label.
      */
-    suspend fun modelSpeaks(lang: String): Boolean = neuralFor(lang)?.isReady() == true
+    suspend fun modelSpeaks(lang: String): Boolean = neuralFor(lang)?.isReady(lang) == true
 
     /**
      * Speed and pitch in the form the platform wants, where 1.0 is the engine's
@@ -173,7 +173,7 @@ class Speaker(context: Context) {
         // platform engine and nothing else, so a phone whose engine is missing
         // or slow to start hid the speaker mark and skipped every prefetch --
         // with a working model sitting right there, added by hand a minute ago.
-        if (neural?.isReady() == true) return true
+        if (neural?.hasAnyModel() == true) return true
         return engine() != null
     }
 
@@ -259,7 +259,7 @@ class Speaker(context: Context) {
     suspend fun status(lang: String): SpeakerStatus {
         // A bundled voice that loads answers the question on its own: this build
         // can speak the language whatever the phone does or does not have.
-        if (neuralFor(lang)?.isReady() == true) return SpeakerStatus.READY
+        if (neuralFor(lang)?.isReady(lang) == true) return SpeakerStatus.READY
         engine() ?: return SpeakerStatus.NO_ENGINE
         return if (voices(lang).isEmpty()) SpeakerStatus.NO_VOICE else SpeakerStatus.READY
     }
@@ -273,7 +273,7 @@ class Speaker(context: Context) {
      * was visible anywhere.
      */
     suspend fun sourceFor(lang: String): SpeechSource = when {
-        neuralFor(lang)?.isReady() == true -> SpeechSource.MODEL
+        neuralFor(lang)?.isReady(lang) == true -> SpeechSource.MODEL
         status(lang) == SpeakerStatus.READY -> SpeechSource.PHONE
         else -> SpeechSource.NOBODY
     }
@@ -439,7 +439,7 @@ class Speaker(context: Context) {
      * from disk.
      */
     private fun cacheFile(text: String, lang: String, voiceName: String?): File {
-        val speaker = neuralFor(lang)?.id ?: voiceName ?: ""
+        val speaker = neuralFor(lang)?.idFor(lang) ?: voiceName ?: ""
         val key = lang + "|" + speaker + "|" + rate + "|" + pitch + "|" + text
         val name = Integer.toHexString(key.hashCode()) + "-" + text.length + ".wav"
         return File(dir, name)

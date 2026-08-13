@@ -41,23 +41,26 @@ import dev.ikna.ui.theme.IknaChip
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaRule
+import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.Space
 import kotlinx.coroutines.launch
 
 /**
- * Which voice speaks, and where it came from.
+ * Which voices speak, and where they came from.
  *
- * This screen exists because the previous version of the feature was a switch and
- * two sliders, and nothing anywhere said whether a card was being read by the
- * phone's own engine, by a model inside the app, or by nothing at all. An APK
- * half a gigabyte larger looked exactly like one without it. That is not a
- * missing detail, that is the whole feature being invisible.
+ * This screen exists because the feature used to be a switch and two sliders, and
+ * nothing anywhere said whether a card was being read by the phone's own engine,
+ * by a model the user added, or by nothing at all. So the top line is a sentence:
+ * this is who is speaking. Everything under it is there to change that sentence,
+ * and the button that proves it is a button that talks.
  *
- * So the top line is a sentence: this is who is speaking. Everything under it is
- * there to change that sentence, and the button that proves it is a button that
- * talks.
+ * From 0.5.0 the middle of the screen is a list rather than a slot. Somebody
+ * learning two languages needs two models, and before this the second one
+ * destroyed the first. Each row carries the three things that were impossible to
+ * say with one slot: whether this model is used, which language it reads, and
+ * whether it can go away without taking the others with it.
  */
 @Composable
 fun VoiceScreen(
@@ -69,7 +72,7 @@ fun VoiceScreen(
     val scope = rememberCoroutineScope()
     val store = remember { VoiceModelStore(context) }
 
-    var install by remember { mutableStateOf<VoiceModelInstall?>(null) }
+    var models by remember { mutableStateOf<List<VoiceModelInstall>>(emptyList()) }
     var ready by remember { mutableStateOf<Boolean?>(null) }
     var busy by remember { mutableStateOf(false) }
     var copied by remember { mutableStateOf(0) }
@@ -80,13 +83,14 @@ fun VoiceScreen(
 
     val runtime = container.speaker.canLoadModels
 
-    // Asking whether the model loads costs seconds, and it is the answer somebody
+    // Asking whether a model loads costs seconds, and it is the answer somebody
     // opened this screen for, so it is asked on arrival and after every change.
     suspend fun refresh() {
-        val current = store.installed()
-        install = current
-        ready = if (current == null || !runtime) false
-        else container.speaker.modelSpeaks(current.lang ?: "en")
+        val all = store.installed()
+        models = all
+        val active = all.firstOrNull { it.enabled }
+        ready = if (active == null || !runtime) false
+        else container.speaker.modelSpeaks(active.lang ?: "en")
 
         // Asked per deck language rather than once: this is the difference
         // between a model that works and a model that works on your decks.
@@ -99,6 +103,20 @@ fun VoiceScreen(
     }
 
     LaunchedEffect(Unit) { refresh() }
+
+    /**
+     * Every change to a model goes through here, because every one of them has the
+     * same two consequences: audio already rendered was rendered by whoever spoke
+     * before, and what the screen says about readiness is now a guess.
+     */
+    fun change(work: suspend () -> Unit) {
+        scope.launch {
+            work()
+            container.speaker.clearCache()
+            ready = null
+            refresh()
+        }
+    }
 
     val picker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocumentTree()
@@ -116,14 +134,38 @@ fun VoiceScreen(
                 is VoiceModelResult.Refused -> explain(result.problem)
                 is VoiceModelResult.Failed -> S.t("voice.023") + (result.message ?: "")
             }
-            // Whatever is already cached was spoken by whoever spoke before.
+            container.speaker.clearCache()
+            refresh()
+        }
+    }
+
+    // One file rather than a folder, and "*/*" rather than a bzip2 mime type:
+    // phones disagree about what a .tar.bz2 is called and several of them answer
+    // "nothing at all", which is how a picker ends up greying out the very file it
+    // was opened to choose.
+    val archivePicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            busy = true
+            copied = 0
+            note = null
+            ready = null
+            val result = store.installArchive(uri) { done -> copied = done }
+            busy = false
+            note = when (result) {
+                is VoiceModelResult.Installed -> S.t("voice.024")
+                is VoiceModelResult.Refused -> explain(result.problem)
+                is VoiceModelResult.Failed -> S.t("voice.023") + (result.message ?: "")
+            }
             container.speaker.clearCache()
             refresh()
         }
     }
 
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    val model = install
+    val active = models.firstOrNull { it.enabled }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -201,7 +243,7 @@ fun VoiceScreen(
             )
             Spacer(Modifier.height(Space.xs))
             Text(
-                text = if (ready == true && model != null) model.name else S.t("voice.003"),
+                text = if (ready == true && active != null) active.name else S.t("voice.003"),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Medium
             )
@@ -211,7 +253,7 @@ fun VoiceScreen(
                     !speechEnabled -> S.t("voice.025")
                     ready == null -> S.t("voice.007")
                     ready == true -> S.t("voice.008")
-                    model != null -> S.t("voice.005")
+                    active != null -> S.t("voice.005")
                     runtime -> S.t("voice.006")
                     else -> S.t("voice.004")
                 },
@@ -225,7 +267,7 @@ fun VoiceScreen(
                 enabled = !busy,
                 onClick = {
                     scope.launch {
-                        val lang = model?.lang ?: "en"
+                        val lang = active?.lang ?: "en"
                         container.speaker.speak(sampleFor(lang), lang)
                     }
                 }
@@ -235,7 +277,7 @@ fun VoiceScreen(
             IknaRule()
             Spacer(Modifier.height(Space.lg))
 
-            // ---- the model ------------------------------------------------
+            // ---- the models -----------------------------------------------
             Text(
                 text = S.t("voice.011"),
                 style = MaterialTheme.typography.titleSmall,
@@ -248,24 +290,64 @@ fun VoiceScreen(
                 color = muted
             )
 
-            if (model != null) {
-                Spacer(Modifier.height(Space.md))
+            if (runtime) {
+                Spacer(Modifier.height(Space.xs))
                 Text(
-                    text = model.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(Modifier.height(Space.hair))
-                Text(
-                    text = kindOf(model.kind) + " \u00b7 " + megabytes(model.bytes) +
-                        " \u00b7 " + model.model,
+                    text = S.t("voice.044"),
                     style = MaterialTheme.typography.bodySmall,
                     color = muted
                 )
+            }
+
+            // Said once there is something to say it about: with two models
+            // installed, "one per language" stops being trivia and starts being
+            // the reason one of them just switched itself off.
+            if (models.size > 1) {
+                Spacer(Modifier.height(Space.xs))
+                Text(
+                    text = S.t("voice.040"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = muted
+                )
+            }
+
+            models.forEach { model ->
+                Spacer(Modifier.height(Space.lg))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = model.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(Modifier.height(Space.hair))
+                        Text(
+                            text = kindOf(model.kind) + " \u00b7 " + megabytes(model.bytes) +
+                                if (model.enabled) "" else " \u00b7 " + S.t("voice.038"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = muted
+                        )
+                    }
+                    Spacer(Modifier.width(Space.sm))
+                    // Off keeps the files. "This voice is worse than my phone's"
+                    // should cost one tap to act on and one to take back, not
+                    // sixty megabytes of copying.
+                    IknaToggle(
+                        checked = model.enabled,
+                        onCheckedChange = { on ->
+                            change { store.setEnabled(model.slug, on) }
+                        },
+                        enabled = !busy,
+                        label = model.name
+                    )
+                }
 
                 // A release that names no language -- every multi-language one --
                 // has to be told, or it either speaks everything or nothing.
-                Spacer(Modifier.height(Space.md))
+                Spacer(Modifier.height(Space.sm))
                 Text(
                     text = S.t("voice.014"),
                     style = MaterialTheme.typography.labelMedium,
@@ -278,41 +360,64 @@ fun VoiceScreen(
                             label = code?.uppercase() ?: S.t("voice.015"),
                             selected = model.lang == code,
                             modifier = Modifier.weight(1f),
-                            onClick = {
-                                scope.launch {
-                                    store.setLanguage(code)
-                                    container.speaker.clearCache()
-                                    refresh()
-                                }
-                            }
+                            onClick = { change { store.setLanguage(model.slug, code) } }
                         )
                     }
                 }
-            }
 
-            Spacer(Modifier.height(Space.lg))
-            IknaWideButton(
-                label = if (model == null) S.t("voice.029") else S.t("voice.017"),
-                enabled = !busy && runtime,
-                onClick = { picker.launch(null) }
-            )
+                // Kokoro holds around a hundred voices addressed by number and by
+                // nothing else -- they have no names to list. A number and the
+                // test button are the whole interface there is to have.
+                if (model.kind == VoiceModelKind.KOKORO) {
+                    Spacer(Modifier.height(Space.sm))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = S.t("voice.039") + " " + model.speaker,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = muted,
+                            modifier = Modifier.weight(1f)
+                        )
+                        IknaTextButton(
+                            label = "\u2212",
+                            enabled = !busy && model.speaker > 0,
+                            onClick = { change { store.setSpeaker(model.slug, model.speaker - 1) } }
+                        )
+                        Spacer(Modifier.width(Space.sm))
+                        IknaTextButton(
+                            label = "+",
+                            enabled = !busy,
+                            onClick = { change { store.setSpeaker(model.slug, model.speaker + 1) } }
+                        )
+                    }
+                }
 
-            if (model != null) {
                 Spacer(Modifier.height(Space.xs))
-                IknaWideButton(
+                IknaTextButton(
                     label = S.t("voice.013"),
                     enabled = !busy,
-                    quiet = true,
                     onClick = {
-                        scope.launch {
-                            store.remove()
-                            container.speaker.clearCache()
+                        change {
+                            store.remove(model.slug)
                             note = null
-                            refresh()
                         }
                     }
                 )
             }
+
+            Spacer(Modifier.height(Space.lg))
+            IknaWideButton(
+                label = if (models.isEmpty()) S.t("voice.029") else S.t("voice.017"),
+                enabled = !busy && runtime,
+                onClick = { picker.launch(null) }
+            )
+
+            Spacer(Modifier.height(Space.sm))
+            IknaWideButton(
+                label = S.t("voice.041"),
+                enabled = !busy && runtime,
+                quiet = true,
+                onClick = { archivePicker.launch(arrayOf("*/*")) }
+            )
 
             if (busy) {
                 Spacer(Modifier.height(Space.md))
@@ -420,4 +525,6 @@ private fun explain(problem: VoiceModelProblem): String = when (problem) {
     VoiceModelProblem.NO_TOKENS -> S.t("voice.022")
     VoiceModelProblem.NO_VOICES -> S.t("voice.027")
     VoiceModelProblem.NO_PHONEMES -> S.t("voice.028")
+    VoiceModelProblem.NOT_AN_ARCHIVE -> S.t("voice.042")
+    VoiceModelProblem.NO_SPACE -> S.t("voice.043")
 }

@@ -15,6 +15,66 @@ the word says which epoch the build belongs to. Both words come from printing:
 nothing left to correct. Tags replace the space with a dash, so `0.1.0 proof` is
 tagged `v0.1.0-proof`.
 
+## 0.5.0 proof
+
+### More than one voice
+
+The voice screen held one model. Adding a second destroyed the first, which for
+anybody learning two languages meant copying sixty megabytes every time they
+switched -- and there is no reason a phone with room for ten should be asked to
+keep one.
+
+Models are now a list. Each row has a switch, the language it reads, and its own
+delete button. Switching a model off keeps its files: "this voice is worse than my
+phone's" no longer costs a re-install to undo.
+
+One model per language speaks at a time. Switching one on switches off whichever
+held that language before, because two models with an equal claim to a deck is a
+coin toss, and a coin toss is not something an app should hide from you.
+
+Only the model in use is held in memory, loaded when a card in its language comes
+up and dropped when another language needs the room. Ten installed models cost
+storage and nothing else.
+
+### The archive unpacks itself
+
+Every model on the sherpa-onnx page is a `.tar.bz2`. Android opens neither half of
+that, so the instructions read "install ZArchiver, extract twice, come back" --
+three apps deep into a language app that had not shown a card yet, and where most
+attempts ended.
+
+The app now takes the archive. Download it, press **Add a .tar.bz2 archive**, pick
+the file; it is unpacked, checked, and installed, counting files as it goes. An
+already-unpacked folder is still accepted, and is still the faster route when one
+is already open.
+
+The picker opens for any file rather than for bzip2 specifically. Phones disagree
+about what a `.tar.bz2` is called and several answer nothing at all -- which is
+exactly how a file picker greys out the file it was opened to choose. The contents
+are what get checked.
+
+Two refusals were added, both said in words on screen: a picked file that is not
+an archive, and not enough free space -- an unpacked model is about three times
+the download, and that is checked before unpacking rather than discovered on the
+last file of sixty.
+
+Nothing is trusted about the names inside an archive. An entry called
+`../../databases/ikna.db` would, unpacked naively, overwrite the review log; every
+path is resolved and anything landing outside the destination is skipped. The
+archive is unpacked to one side and moved into place only once it turns out to be
+a model, so a wrong pick or a dead battery leaves the installed models alone.
+
+### Kokoro's voices are reachable
+
+A Kokoro file holds around a hundred voices addressed by number and by nothing
+else -- they have no names to list. The app always used the first. Kokoro rows now
+carry that number, and the test button is how it is judged.
+
+### The review log
+
+Untouched. No migration, no schema change. Voice models live in the app's own
+files directory and are not part of the database or of a backup.
+
 ## 0.4.0 proof
 
 ### The cards speak

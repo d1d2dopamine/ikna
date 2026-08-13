@@ -625,7 +625,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// Проверить голос
 	"voice.010" to "Sprawdź głos",
 	// Своя модель
-	"voice.011" to "Własny model",
+	"voice.011" to "Twoje modele",
 	// Модель приносите вы: папка Kokoro или Piper с телефона. Ничего не скачивается — у приложения нет доступа в интернет.
 	"voice.012" to "Model wybierasz sam: folder Kokoro albo Piper z telefonu. Nic się nie pobiera — aplikacja nie ma dostępu do internetu.",
 	// Убрать модель
@@ -637,7 +637,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// Это сборка без движка. Своя модель здесь не заработает — нужна сборка с пометкой voice.
 	"voice.016" to "To wersja bez silnika. Własny model tu nie zadziała — potrzebna wersja z oznaczeniem voice.",
 	// Заменить модель
-	"voice.017" to "Zmień model",
+	"voice.017" to "Dodaj kolejny model",
 	// Копирую файлы: 
 	"voice.018" to "Skopiowane pliki: ",
 	// Это не похоже на модель: в папке нет файла .onnx
@@ -670,6 +670,13 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"voice.035" to "nikt: model nie zna tego języka, a telefon nie ma dla niego głosu",
 	"voice.036" to "Model mówi jednym językiem. Język talii jest pytany przy imporcie i można go zmienić w talii.",
 	"voice.037" to "BEZ JĘZYKA",
+	"voice.038" to "wyłączony",
+	"voice.039" to "Numer głosu",
+	"voice.040" to "Każdy język czyta jeden model",
+	"voice.041" to "Dodaj archiwum .tar.bz2",
+	"voice.042" to "To nie jest archiwum z modelem",
+	"voice.043" to "Za mało miejsca: rozpakowany model jest około trzy razy większy",
+	"voice.044" to "Aplikacja sama rozpakuje archiwum",
 	// Оформление
 	"look.001" to "Wygląd",
 	// Буквы и цвет квадрата в списке колод. Видно только вам: тому, кому отправите колоду, придут только карточки.

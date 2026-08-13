@@ -13,17 +13,25 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
- * Speech from the model the user added.
+ * Speech from the models the user added.
  *
  * This build carries the runtime and no weights -- about ten megabytes of
  * sherpa-onnx and nothing else. Whatever speaks here was copied in from the
  * phone by hand, which means everything about it is unknown until it is loaded:
  * its shape, its language, whether it fits in memory on this particular phone.
  *
- * So the rules are: load late, hold on to what worked, and give up loudly. The
- * previous version of this file failed silently and left people staring at a
- * card that was supposed to talk, which is worse than a voice that never claimed
- * to exist.
+ * So the rules are: load late, hold on to what worked, and give up loudly. An
+ * earlier version of this file failed silently and left people staring at a card
+ * that was supposed to talk, which is worse than a voice that never claimed to
+ * exist.
+ *
+ * From 0.5.0 there can be several models installed at once, and this class holds
+ * exactly one of them in memory: the one whose language came up last. Two nets
+ * resident at the same time is how a mid-range phone runs out of memory, and
+ * loading is fast enough that swapping on a language change costs less than
+ * being killed. Which model reads which language is not decided here -- see
+ * VoiceModelStore.forLanguage, where "switched on", "declared this language" and
+ * "declared nothing" are weighed against each other in one place.
  */
 class SherpaSpeech(context: Context) : NeuralSpeech {
 
@@ -36,8 +44,12 @@ class SherpaSpeech(context: Context) : NeuralSpeech {
     /** Which model the loaded engine belongs to, so a swap is noticed. */
     private var loadedId: String? = null
 
-    /** A model that already failed to load. Retried on the next swap, not before. */
-    private var failedId: String? = null
+    /**
+     * Models that already failed to load, or were too slow to be worth waiting
+     * for. Remembered per model rather than as one flag: with several installed,
+     * one net being too big for the phone says nothing about the next one.
+     */
+    private val failed = mutableSetOf<String>()
 
     /**
      * How many renderings took long enough to be useless. Three and the model is
@@ -46,25 +58,16 @@ class SherpaSpeech(context: Context) : NeuralSpeech {
      */
     private var slowRenders = 0
 
-    override val id: String
-        get() = store.installed()?.id ?: NONE
+    override fun supports(lang: String): Boolean = installFor(lang) != null
 
-    /**
-     * A model whose name never said which language it speaks -- every
-     * multi-language release -- is offered for anything, because refusing is the
-     * one answer that is certainly wrong. A model that did say is held to it.
-     */
-    override fun supports(lang: String): Boolean {
-        val install = store.installed() ?: return false
-        val declared = install.lang ?: return true
-        // Decks made by the user are stored as "custom": no language was ever
-        // declared for them. There is one model on this phone and it was put
-        // there deliberately, so an unknown language is answered with it.
-        if (lang.isEmpty() || lang.equals(UNKNOWN, ignoreCase = true)) return true
-        return lang.take(2).equals(declared.take(2), ignoreCase = true)
+    override fun idFor(lang: String): String = installFor(lang)?.id ?: NONE
+
+    override fun hasAnyModel(): Boolean = store.enabled().isNotEmpty()
+
+    override suspend fun isReady(lang: String): Boolean {
+        val install = installFor(lang) ?: return false
+        return engine(install) != null
     }
-
-    override suspend fun isReady(): Boolean = engine() != null
 
     override suspend fun render(
         text: String,
@@ -72,8 +75,8 @@ class SherpaSpeech(context: Context) : NeuralSpeech {
         speed: Float,
         target: File,
     ): Boolean {
-        val install = store.installed() ?: return false
-        val engine = engine() ?: return false
+        val install = installFor(lang) ?: return false
+        val engine = engine(install) ?: return false
         val trimmed = text.trim()
         if (trimmed.isEmpty()) return false
 
@@ -100,8 +103,9 @@ class SherpaSpeech(context: Context) : NeuralSpeech {
                 slowRenders += 1
                 if (slowRenders >= MAX_SLOW_RENDERS) {
                     // Too slow to be worth waiting for on this phone. The phone's
-                    // own voice takes over and the voice screen says so.
-                    failedId = install.id
+                    // own voice takes over and the voice screen says so. Only this
+                    // model is written off; another one may be small enough.
+                    failed.add(install.id)
                     shutdown()
                 }
             } else if (ok) {
@@ -120,13 +124,11 @@ class SherpaSpeech(context: Context) : NeuralSpeech {
 
     // ---- loading -----------------------------------------------------------
 
-    private suspend fun engine(): OfflineTts? = lock.withLock {
-        val install = store.installed()
-        if (install == null) {
-            if (tts != null) shutdown()
-            return@withLock null
-        }
-        if (install.id == failedId) return@withLock null
+    /** Whichever switched-on model claims this language, or none. */
+    private fun installFor(lang: String): VoiceModelInstall? = store.forLanguage(lang)
+
+    private suspend fun engine(install: VoiceModelInstall): OfflineTts? = lock.withLock {
+        if (install.id in failed) return@withLock null
 
         val loaded = tts
         if (loaded != null && install.id == loadedId) return@withLock loaded
@@ -134,12 +136,11 @@ class SherpaSpeech(context: Context) : NeuralSpeech {
         // A different model than the one in memory: the old one goes first, or
         // both nets sit in memory at once and neither survives it.
         if (loaded != null) shutdown()
-        failedId = null
         slowRenders = 0
 
         withContext(Dispatchers.IO) {
             runCatching { build(install) }
-                .onFailure { failedId = install.id }
+                .onFailure { failed.add(install.id) }
                 .getOrNull()
         }?.also {
             tts = it
@@ -214,8 +215,5 @@ class SherpaSpeech(context: Context) : NeuralSpeech {
         const val MAX_SLOW_RENDERS = 3
 
         const val NONE = "no-model"
-
-        /** What the importer writes when a deck never said what language it is. */
-        const val UNKNOWN = "custom"
     }
 }

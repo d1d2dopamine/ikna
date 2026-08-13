@@ -51,6 +51,19 @@ enum class VoiceModelProblem {
 
     /** Nothing to turn letters into sounds: no espeak-ng-data, no lexicon. */
     NO_PHONEMES,
+
+    /**
+     * The picked file is not an archive this app can open. Said about the file
+     * rather than about the user: the picker is opened for anything, because
+     * phones cannot agree on what a .tar.bz2 is called.
+     */
+    NOT_AN_ARCHIVE,
+
+    /**
+     * Not enough room to unpack. Checked before unpacking starts, since filling
+     * the phone and failing on the last file of sixty is a worse way to find out.
+     */
+    NO_SPACE,
 }
 
 /**
