@@ -106,6 +106,25 @@ material is now blocked from `nightCutoffHour` until `dayStartHour`; reviews are
 The arithmetic lives in `dev.ikna.domain.time.DayBoundary`, which has no Android dependency and is
 covered by `DayBoundaryTest` — date maths is easy to get subtly wrong and cheap to test.
 
+It is also where intervals land. A due time is the start of the study day the interval falls in, not
+the clock time of the answer plus the interval: otherwise a card answered at 23:00 comes back at
+23:00 the next night, an evening session misses it, and the interval FSRS chose is stretched by up to
+a day on every review. Snapping only ever moves a due time earlier, so nothing is hidden longer than
+intended, and intervals are floored at one full day so it can never move one into the past
+(`Scheduler.dueAt`, `SchedulerDueDayTest`).
+
+## Everything new goes through `allowedNew`
+
+`allowedNew` is the only authorisation for new material, and it covers every kind. Introducing a
+fresh chunk is the obvious one; promoting an item to its next level — recognition to cloze to
+production, when stability passes three weeks — is the one that is easy to miss, because it happens
+in the answer path rather than in the daily plan. A promoted level is a question the user has never
+been asked, so it spends the same budget and is written into `daily_stats.newIntroduced` the same
+way; undo returns it. Otherwise a night session could mint new cards on a day the governor had
+allowed none, and the measured norm would size the next day from a day that never happened. The rule
+itself is `dev.ikna.domain.session.LevelPromotion`, kept separate and pure so it can be read in one
+sitting and tested without a database.
+
 ## Serialised writes
 
 Answering is a read-modify-write on one `daily_stats` row. Two fast swipes used to overlap and the

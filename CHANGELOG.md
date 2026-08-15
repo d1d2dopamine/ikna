@@ -15,6 +15,138 @@ the word says which epoch the build belongs to. Both words come from printing:
 nothing left to correct. Tags replace the space with a dash, so `0.1.0 proof` is
 tagged `v0.1.0-proof`.
 
+## 0.1.0 press
+
+The first build of the press epoch. Nothing new was added: this release is every
+way the app could lose, delay or misreport work, closed, plus the tests that had
+to exist before any of them could be called closed. Two of the fixes reach into
+the scheduler and the governor, which is why they are described at length rather
+than listed.
+
+### The migrations are tested against a real old database
+
+The schema history in `app/schemas` starts at version 3. Versions 1 and 2 were
+never committed while they were current, which meant the two migrations every
+existing install still has to run had never been executed against anything but a
+developer's own phone. `fallbackToDestructiveMigration` is banned here, so a
+wrong migration does not silently wipe the review log -- it makes the app refuse
+to open at all, on a phone, after the update is installed. That is the one
+failure this project cannot ship.
+
+The old schemas were not faked into `app/schemas`: those files are Room's output,
+and a hand-written one carries a hand-written identity hash that nobody can
+check. Both migrations only ever add, so version 1 and version 2 were reversed
+out of the committed version 3 exactly, and they now live as SQL in
+`MigrationTest`, which upgrades a real version 1 and a real version 2 database
+with rows in them and checks that the answers, the undo trail and the derived
+`correctCount` all come out right. It runs on a device: `connectedDebugAndroidTest`.
+
+A second test runs on every build without a device. It compares the schema of
+version 1 plus everything the migrations add against the committed schema, column
+for column, so a field added to an entity without a migration fails the build
+instead of failing a user's install.
+
+### "Ещё немного" no longer brings back a card you just answered
+
+Adding cards to the day read the plan, appended to that copy, and wrote the whole
+row back -- without holding the write lock the rest of the repository holds. The
+button sits on the session screen, so there is always an answer in flight: the
+answer wrote the plan, this copy overwrote it a moment later with a version read
+before it, and the card that had just been answered reappeared with the counter
+back up.
+
+### One action at a time on the session screen
+
+Swipe, undo and "ещё немного" each ran on their own coroutine. The database was
+never corrupted -- the repository serialises its writes -- but the read that
+decides what to write happened before the lock was taken, so undo pressed while
+an answer was still being written retracted the answer before it. The three
+actions now queue behind one another. Nothing slow is held: the six-second undo
+window, speech and prefetching stay where they were.
+
+### The progress band counts questions, not answers
+
+It counted answers given. A card rated "again" comes back in the same session and
+so does a first contact, so the band ran ahead of the work and a session of ten
+could read ten out of ten with three still to come. It now counts distinct
+questions of the session that are done, which is the number the label always
+claimed to be.
+
+### A streak is days, not rows
+
+The clean-day streak the load governor uses to decide whether the daily ceiling
+may rise was counted by walking the last thirty rows of `daily_stats`. A day with
+no session writes no row, so the walk stepped over an absence and joined two
+streaks together: a week off could still read as five clean days and buy a heavier
+plan on the evening the user came back. And the first row is today, whose plan is
+unfinished until it is finished, so every streak collapsed to zero each morning.
+It now walks calendar days, a gap ends the streak, and today is allowed to be in
+progress.
+
+### A restored backup does not arrive as an avalanche
+
+Replaying the log wrote every card visible, because the log records when an answer
+happened and never records what was hidden at the time. A file two weeks old
+therefore landed as a queue with two weeks of overdue cards in it -- exactly the
+pile the amnesty pool exists to prevent, on the first screen after a restore. The
+amnesty rule is now applied once at the end of the replay, before anything reads
+the cards.
+
+### The amnesty threshold is in the config
+
+It was a `2` written next to the line that decides what a returning user sees.
+Every load-bearing number in this app lives in `governor.json`; this one now does
+too, as `amnestyAfterDays`. The value is unchanged.
+
+### An interval of one day now means the next day, not the next night
+
+A due time was the moment of the answer plus the interval: answer at 23:00 with a
+one-day interval and the card came back at 23:00 the following night. Anybody who
+studies in the evening met that card the day after that -- the interval FSRS had
+chosen was stretched by up to a full day, on every review, compounding across a
+card's whole history, always in the direction of forgetting. The daily plan is
+keyed by a study day that begins at 04:00, so a due time now lands on the start of
+the day the interval falls in.
+
+This can only ever bring a card forward, never push it back, so nothing is hidden
+for longer than the scheduler intended, and it cannot move a card into the past
+because intervals are floored at one full day. The floor is now documented as
+load-bearing rather than looking like a rounding convenience: a card being learned
+is re-asked inside the same session anyway. Nothing in the review log changes; the
+log stores what happened, and what happened is unaffected.
+
+### A promotion is new material, and the governor gets to say when
+
+When an item reaches three weeks of stability, the next way of asking it opens --
+recognition to cloze to production. That new level is a card the user has never
+been asked, written `isNew`, due tomorrow. It was created inside the answer path
+without consulting the day's new-material budget and without being counted
+anywhere. So on a day the governor had allowed nothing new -- after midnight, low
+accuracy, backlog over the limit, the first days back after a break -- a long
+session could still mint a pile of level-1 cards for tomorrow, and
+`daily_stats.newIntroduced` never saw them, so the measured norm and the safety
+valve both read the day as lighter than it had been and sized tomorrow from a day
+that had not happened.
+
+The rule now lives on its own in `LevelPromotion`, takes the day's remaining
+budget as an argument, and a promotion is counted like the introduction it is.
+Undo gives the budget back with the card it removes. Nothing is lost by waiting:
+an item at three weeks of stability is still there tomorrow, and if it lapses in
+the meantime it was not ready to be promoted.
+
+### A chunk's score no longer depends on which chunks it was batched with
+
+The selector's frequency term was `1 - rank / maxRank`, where `maxRank` was the
+largest rank in the day's candidate batch -- and the batch is whatever the
+frequency query happened to return. The same chunk therefore scored differently on
+different days for reasons that had nothing to do with it: batched with rare words
+its frequency bonus sat near 1, batched with common ones it collapsed towards 0,
+and the component layer -- the one thing that makes this app more than a word list
+-- was being outvoted by an accident of pagination. Frequency is now measured
+against an absolute scale (`frequencyHalfRank`, 2000), so the score says something
+about the chunk. Common phrases still come first; i+1 still comes before
+frequency.
+
 ## 0.5.0 proof
 
 ### More than one voice

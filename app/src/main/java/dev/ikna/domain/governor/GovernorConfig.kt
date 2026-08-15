@@ -56,7 +56,18 @@ data class GovernorConfig(
     val returnModeDays: Int = 3,
     val returnModeCapacity: Int = 10,
     val dailyMinimumCards: Int = 1,
-    val desiredRetention: Double = 0.9
+    val desiredRetention: Double = 0.9,
+    /**
+     * How overdue a card has to be before it leaves the visible queue for the
+     * amnesty pool.
+     *
+     * This was a `2` written into the repository, next to the one line that
+     * decides what a returning user sees: every load-bearing number in this app
+     * is in this file, and one of them was not. Two days is unchanged -- it is
+     * long enough that an ordinary evening off does not hide anything, and short
+     * enough that a real absence never comes back as a wall of cards.
+     */
+    val amnestyAfterDays: Int = 2
 ) {
     companion object {
         // Built once. A Json instance compiles its configuration on creation, so

@@ -24,5 +24,6 @@
   "returnModeDays": 3,
   "returnModeCapacity": 10,
   "dailyMinimumCards": 1,
-  "desiredRetention": 0.9
+  "desiredRetention": 0.9,
+  "amnestyAfterDays": 2
 }

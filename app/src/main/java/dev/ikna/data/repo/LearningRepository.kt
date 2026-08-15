@@ -15,6 +15,7 @@ import dev.ikna.domain.fsrs.DAY_MS
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.fsrs.Scheduler
 import dev.ikna.domain.governor.ChunkSelector
+import dev.ikna.domain.governor.CleanStreak
 import dev.ikna.domain.governor.GovernorConfig
 import dev.ikna.domain.governor.GovernorDecision
 import dev.ikna.domain.governor.GovernorReason
@@ -120,7 +121,7 @@ class LearningRepository(
 
         // Overdue cards leave the visible queue. They are not forgiven, only
         // hidden: FSRS still recomputes their stability from real elapsed time.
-        cardDao.moveOverdueToAmnesty(now - 2 * DAY_MS)
+        cardDao.moveOverdueToAmnesty(now - config.amnestyAfterDays * DAY_MS)
 
         val signals = collectSignals(now)
         val decision = withNightRule(governor().decide(signals), now)
@@ -335,7 +336,7 @@ class LearningRepository(
         else ((startOfDay(now) - startOfDay(lastTs)) / DAY_MS).toInt()
 
         val today = statsDao.day(dayKey(now))
-        val cleanDays = countCleanDays()
+        val cleanDays = countCleanDays(now)
         // The safety valve window, taken from the config instead of a 7
         // hard-coded next to a setting called safetyValveDays.
         val valveWindowStart = dayKey(now - config.safetyValveDays * DAY_MS)
@@ -414,12 +415,15 @@ class LearningRepository(
         return decision.copy(allowedNew = 0, reason = GovernorReason.LATE_NIGHT)
     }
 
-    private suspend fun countCleanDays(): Int {
-        var n = 0
-        for (stat in statsDao.lastDays(CLEAN_DAY_SCAN)) {
-            if (stat.planCompleted) n++ else break
-        }
-        return n
+    /**
+     * Consecutive days whose plan was finished. Days, not rows: see
+     * [CleanStreak], which is where the counting lives and is tested.
+     */
+    private suspend fun countCleanDays(now: Long): Int {
+        val finished = statsDao.lastDays(CLEAN_DAY_SCAN)
+            .associate { it.day to it.planCompleted }
+        val days = (0 until CLEAN_DAY_SCAN).map { d -> dayKey(now - d * DAY_MS) }
+        return CleanStreak.count(days, finished)
     }
 
     /**
@@ -449,6 +453,29 @@ class LearningRepository(
         }
         cardDao.upsertAll(cards)
         return cards
+    }
+
+    /**
+     * What is left of today's new-material budget.
+     *
+     * The governor decides `allowedNew` once a day and the plan stores it, so
+     * this is that number minus everything already introduced today -- whether
+     * it arrived as a fresh chunk this morning or as a promotion five minutes
+     * ago. No plan row means no authorisation, which is zero rather than
+     * "unlimited": that direction of doubt is the one that cannot hurt anyone.
+     */
+    private suspend fun newRoomToday(now: Long): Int {
+        val day = dayKey(now)
+        val allowed = planDao.plan(day)?.allowedNew ?: return 0
+        val used = statsDao.day(day)?.newIntroduced ?: 0
+        return (allowed - used).coerceAtLeast(0)
+    }
+
+    /** Returns the new-material budget a retracted promotion had spent. */
+    private suspend fun uncountIntroduced(ts: Long) {
+        val day = dayKey(ts)
+        val stat = statsDao.day(day) ?: return
+        statsDao.upsert(stat.copy(newIntroduced = (stat.newIntroduced - 1).coerceAtLeast(0)))
     }
 
     /** Records chunks that actually reached today's plan. */
@@ -547,8 +574,26 @@ class LearningRepository(
         count: Int = 5,
         deckId: String? = null,
         now: Long = System.currentTimeMillis()
-    ): Int {
-        val plan = ensureDailyPlan(now)
+    ): Int = writeLock.withLock { addExtraLocked(count, deckId, now) }
+
+    /**
+     * Held under [writeLock] from the first read of the plan to the write that
+     * replaces it.
+     *
+     * It used to run outside the lock, and it is a read-modify-write on the one
+     * row that defines what the day owes: it reads `plannedIds`, appends to that
+     * copy and writes the whole row back. An answer landing in between — the
+     * button is on the session screen, so there is always one in flight — was
+     * written to the same row by [answerLocked] and then overwritten by this
+     * copy, which had been read before it. The day's plan silently reverted, the
+     * counter went back up, and the card the user had just answered came back.
+     *
+     * [ensureDailyPlanLocked] rather than [ensureDailyPlan] because the lock is
+     * not reentrant: asking for it twice on the same coroutine is a deadlock,
+     * and a session screen that stops responding is worse than the bug above.
+     */
+    private suspend fun addExtraLocked(count: Int, deckId: String?, now: Long): Int {
+        val plan = ensureDailyPlanLocked(now)
         val answered = reviewDao.answeredKeysSince(startOfDay(now))
         val exclude = (plan.ids + answered).distinct()
 
@@ -632,8 +677,11 @@ class LearningRepository(
         components.recordAnswer(sessionCard.chunk.id, rating.value, now)
 
         // Promote to the next presentation level once the item is solid, which
-        // gives novelty without growing the queue.
-        builder().nextLevelFor(result.card)?.let { nextLevel ->
+        // gives novelty without growing the queue -- but only inside the day's
+        // new-material budget. A promoted level is a question the user has never
+        // been asked, and the governor is the only thing allowed to decide how
+        // many of those arrive in a day. See LevelPromotion.
+        builder().nextLevelFor(result.card, newRoomToday(now))?.let { nextLevel ->
             if (cardDao.card(result.card.chunkId, nextLevel) == null) {
                 cardDao.upsert(
                     result.card.copy(
@@ -647,6 +695,11 @@ class LearningRepository(
                         introducedAt = now
                     )
                 )
+                // Counted like the introduction it is. Otherwise the measured
+                // norm and the safety valve both read the day as lighter than it
+                // was, and tomorrow's capacity is computed from a day that did
+                // not happen.
+                countIntroduced(now, 1)
             }
         }
 
@@ -700,6 +753,9 @@ class LearningRepository(
         cardDao.card(last.chunkId, promotedLevel)?.let { promoted ->
             if (promoted.isNew && promoted.reps == 0 && promoted.introducedAt == last.ts) {
                 cardDao.delete(last.chunkId, promotedLevel)
+                // Give the budget back with it, or a session of undone answers
+                // would spend the day's new material without introducing any.
+                uncountIntroduced(last.ts)
             }
         }
 

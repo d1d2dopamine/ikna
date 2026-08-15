@@ -44,7 +44,13 @@ class AppContainer(context: Context) {
         reviewDao = db.reviewDao()
     )
 
-    private val scheduler = Scheduler(FsrsParams(desiredRetention = config.desiredRetention))
+    // The day start hour is passed in so that intervals land on study days
+    // rather than on the clock time an answer happened to be given -- see
+    // Scheduler.dueAt.
+    private val scheduler = Scheduler(
+        FsrsParams(desiredRetention = config.desiredRetention),
+        dayStartHour = config.dayStartHour
+    )
 
     val learningRepository = LearningRepository(
         cardDao = db.cardDao(),

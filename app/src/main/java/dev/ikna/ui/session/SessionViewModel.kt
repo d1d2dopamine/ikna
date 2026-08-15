@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 data class SessionUiState(
     val loading: Boolean = true,
@@ -133,6 +135,37 @@ class SessionViewModel(
     private var hintsShown = 0
     private var swipesDone = 0
 
+    /**
+     * Everything this screen asks the repository to do happens alone, and in the
+     * order the user asked for it.
+     *
+     * Each of the four actions below used to be its own `launch`, so a swipe, a
+     * press on "ещё немного" and a press on undo could all be inside the
+     * repository at the same time. The repository serialises its own writes, so
+     * the database never corrupted — but the read that decides WHAT to write
+     * happened before the lock was taken. Undo pressed while an answer was still
+     * in flight retracted the answer before it; "ещё немного" pressed on the same
+     * beat rebuilt the queue from a plan that was one answer out of date, and the
+     * card that had just been answered came back.
+     *
+     * A mutex rather than a flag: the point is not to drop the second action, it
+     * is to run it after the first one has finished. Nothing slow is ever held
+     * under it — the undo countdown, speech and prefetching stay on their own
+     * coroutines below, or a six second timer would freeze the screen.
+     */
+    private val work = Mutex()
+
+    /**
+     * Cards of this session's scope that were already answered when it was last
+     * loaded. The progress band is this plus what has been answered since, which
+     * is why it never counts the same question twice.
+     */
+    private var doneAtLoad = 0
+
+    private fun serially(block: suspend () -> Unit) {
+        viewModelScope.launch { work.withLock { block() } }
+    }
+
     init {
         load()
         warmUpSpeech()
@@ -240,11 +273,12 @@ class SessionViewModel(
     }
 
     fun load(showLoading: Boolean = true) {
-        viewModelScope.launch {
+        serially {
             if (showLoading) _state.value = _state.value.copy(loading = true)
             val plan = repo.buildSession(deckId)
             planned = plan.cards
             answeredKeys.clear()
+            doneAtLoad = plan.sessionDone
             val prefs = settings.current()
             hintsShown = prefs.revealHintsShown
             swipesDone = prefs.swipesDone
@@ -332,7 +366,13 @@ class SessionViewModel(
             revealed = false,
             remaining = planned.count { it.card.key !in answeredKeys },
             answeredToday = s.answeredToday + 1,
-            sessionDone = (s.sessionDone + 1).coerceAtMost(s.sessionTotal),
+            // Distinct questions of this session that are done, never "answers
+            // given". A card rated "again" and a first contact both come back in
+            // the same session, and counting those as progress used to fill the
+            // band ahead of the work: a session of ten questions could show ten
+            // out of ten with three of them still to come.
+            sessionDone = (doneAtLoad + planned.count { it.card.key in answeredKeys })
+                .coerceAtMost(s.sessionTotal),
             canUndo = true,
             undoVisible = true,
             undoFailed = false,
@@ -343,7 +383,7 @@ class SessionViewModel(
         shownAt = now
         onCardShown()
 
-        viewModelScope.launch { repo.answer(card, rating, duration, now) }
+        serially { repo.answer(card, rating, duration, now) }
         viewModelScope.launch {
             delay(UNDO_WINDOW_MS)
             if (token == undoToken) _state.value = _state.value.copy(undoVisible = false)
@@ -356,16 +396,17 @@ class SessionViewModel(
      * has to be reversible without thinking.
      */
     fun undo() {
-        viewModelScope.launch {
+        serially {
             val key = repo.undoLast()
             if (key == null) {
                 _state.value = _state.value.copy(undoVisible = false, canUndo = false, undoFailed = true)
-                return@launch
+                return@serially
             }
             undoToken++
             val plan = repo.buildSession(deckId)
             planned = plan.cards
             answeredKeys.clear()
+            doneAtLoad = plan.sessionDone
             val ordered = plan.cards.sortedBy { if (it.card.key == key) 0 else 1 }
             _state.value = _state.value.copy(
                 loading = false,
@@ -400,15 +441,16 @@ class SessionViewModel(
      * heavier queue tomorrow.
      */
     fun addExtra() {
-        viewModelScope.launch {
+        serially {
             val added = repo.addExtra(EXTRA_BATCH, deckId)
             if (added == 0) {
                 _state.value = _state.value.copy(noMoreExtra = true)
-                return@launch
+                return@serially
             }
             val plan = repo.buildSession(deckId)
             planned = plan.cards
             answeredKeys.clear()
+            doneAtLoad = plan.sessionDone
             _state.value = _state.value.copy(
                 queue = plan.cards,
                 index = 0,

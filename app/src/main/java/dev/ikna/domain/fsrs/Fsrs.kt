@@ -9,7 +9,23 @@ enum class Rating(val value: Int) {
     AGAIN(1), HARD(2), GOOD(3), EASY(4);
 
     companion object {
-        fun of(v: Int): Rating = entries.first { it.value == v }
+        /**
+         * The grade a stored number means, or null when it is not a grade.
+         *
+         * `reviews.rating` is 0 on a retraction row -- deliberately not a valid
+         * FSRS grade, so a reader unaware of undo cannot mistake one for an
+         * answer. Every query in the app filters those out, and anything that
+         * reads the log row by row has to keep doing so: [of] throws on 0, and
+         * this is the version to reach for when the rows have not been filtered
+         * yet.
+         */
+        fun ofOrNull(v: Int): Rating? = entries.firstOrNull { it.value == v }
+
+        fun of(v: Int): Rating = ofOrNull(v)
+            ?: throw IllegalArgumentException(
+                "$v is not a rating. 1..4 are grades; 0 is a retraction row and " +
+                    "belongs to a query that filters retracted answers out."
+            )
     }
 }
 
@@ -42,6 +58,17 @@ object Fsrs {
     fun retrievability(elapsedDays: Double, stability: Double): Double =
         (1.0 + FACTOR * elapsedDays / max(stability, MIN_STABILITY)).pow(DECAY)
 
+    /**
+     * Days until the card should come back, at the desired retention.
+     *
+     * The floor of one full day is load-bearing, not cosmetic. A card being
+     * learned is already shown again inside the same session -- anything rated
+     * "again" goes back into the queue -- so a sub-day interval would add a
+     * second appearance the same evening that the session provides anyway, and
+     * would put a card into tomorrow's due query for a lapse that has already
+     * been dealt with. It is also what makes day-boundary snapping in
+     * [Scheduler] unable to move a due time into the past.
+     */
     fun intervalDays(stability: Double, desiredRetention: Double): Double =
         max(1.0, stability / FACTOR * (desiredRetention.pow(1.0 / DECAY) - 1.0))
 

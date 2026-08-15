@@ -175,9 +175,12 @@ class SessionBuilder(
     /** The whole daily obligation. One card. Streaks cannot break. */
     fun dailyMinimum(): Int = config.dailyMinimumCards
 
-    fun nextLevelFor(card: CardEntity): Int? = when {
-        card.level < Level.PRODUCTION.value && card.stability >= 21.0 -> card.level + 1
-        else -> null
-    }
+    /**
+     * The level this card has earned, if any, given what is left of the day's
+     * new-material budget. The rule itself lives in [LevelPromotion], which
+     * explains why a budget is involved at all.
+     */
+    fun nextLevelFor(card: CardEntity, newRoomToday: Int): Int? =
+        LevelPromotion.nextLevel(card.level, card.stability, newRoomToday)
 
 }

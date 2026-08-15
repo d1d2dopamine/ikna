@@ -4,7 +4,6 @@ import dev.ikna.data.db.ChunkEntity
 import dev.ikna.data.db.ChunkTokenEntity
 import dev.ikna.data.db.ComponentEntity
 import dev.ikna.domain.fsrs.ComponentPrior
-import kotlin.math.max
 
 data class ScoredChunk(
     val chunk: ChunkEntity,
@@ -22,7 +21,23 @@ data class ScoredChunk(
  */
 class ChunkSelector(
     private val knownStabilityThreshold: Double = 7.0,
-    private val weakRetrievabilityThreshold: Double = 0.8
+    private val weakRetrievabilityThreshold: Double = 0.8,
+    /**
+     * Rank at which a chunk's frequency bonus has fallen to half.
+     *
+     * The bonus used to be `1 - rank / maxRank`, where `maxRank` was the largest
+     * rank in the candidate batch -- and the batch is just whatever the frequency
+     * query returned that day. So the same chunk scored differently on different
+     * days for reasons that had nothing to do with it: batched with rare words
+     * its bonus was near 1, batched with common ones it collapsed towards 0. The
+     * component layer, which is the entire reason this selector exists, was being
+     * outvoted by an accident of pagination.
+     *
+     * An absolute scale instead. Rank 0 scores 1, rank 2000 scores 0.5, and
+     * nothing depends on what else was in the batch. The number is a soft
+     * preference for common language, not a cutoff.
+     */
+    private val frequencyHalfRank: Double = 2000.0
 ) {
 
     fun select(
@@ -33,7 +48,6 @@ class ChunkSelector(
         count: Int
     ): List<ScoredChunk> {
         if (count <= 0) return emptyList()
-        val maxRank = max(1, candidates.maxOfOrNull { it.freqRank } ?: 1)
 
         return candidates.mapNotNull { chunk ->
             val tokens = tokensByChunk[chunk.id]?.filter { it.isContent } ?: return@mapNotNull null
@@ -67,8 +81,9 @@ class ChunkSelector(
             }
             // Repairing decaying components is free value.
             val repair = (weak.size.coerceAtMost(4)) * 0.18
-            // Frequency still matters: common phrases first.
-            val frequency = 1.0 - (chunk.freqRank.toDouble() / maxRank)
+            // Frequency still matters: common phrases first. Measured against an
+            // absolute scale, so a chunk's score says something about the chunk.
+            val frequency = frequencyHalfRank / (frequencyHalfRank + chunk.freqRank)
 
             val score = novelty * 1.0 + repair + frequency * 0.5
             ScoredChunk(chunk, prior, score)

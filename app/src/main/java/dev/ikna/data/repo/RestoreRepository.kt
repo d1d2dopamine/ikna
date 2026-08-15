@@ -8,6 +8,7 @@ import dev.ikna.data.db.ReviewDao
 import dev.ikna.data.db.ReviewEntity
 import dev.ikna.data.db.StatsDao
 import dev.ikna.data.export.ReviewRecord
+import dev.ikna.domain.fsrs.DAY_MS
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.fsrs.Scheduler
 import dev.ikna.domain.governor.GovernorConfig
@@ -207,6 +208,21 @@ class RestoreRepository(
 
         cards.values.chunked(WRITE_BATCH).forEach { cardDao.upsertAll(it) }
         days.values.chunked(WRITE_BATCH).forEach { statsDao.upsertAll(it) }
+
+        // Every card above was written visible, because the log records when an
+        // answer happened and never records what was hidden at the time. A file
+        // that is two weeks old therefore lands as a queue with two weeks of
+        // overdue cards in it at once — the avalanche the amnesty pool exists to
+        // prevent, arriving on the first screen after a restore.
+        //
+        // The daily plan applies the same rule and would eventually apply it
+        // here too, but "eventually" is whichever screen opens first, and the
+        // deck list and the statistics screen both read cards. So the restored
+        // database is made consistent here, once, before anything reads it.
+        cardDao.moveOverdueToAmnesty(
+            System.currentTimeMillis() - config.amnestyAfterDays * DAY_MS
+        )
+
         components.rebuildFromReviews()
         return answers.size
     }

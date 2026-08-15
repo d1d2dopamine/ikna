@@ -62,8 +62,9 @@ val hasFixedKey = keystoreFile.exists()
 // build belongs to. proof is the one where the app is feature-complete and
 // what is left is testing, small corrections and polish; press is the next
 // one, and it starts when proof has nothing left to correct. Both words are
-// spelled in capitals, and they are part of the version people read, not a
-// build flavour: there is one artifact and one number, as before.
+// spelled in lower case, like the app's own name, and they are part of the
+// version people read, not a build flavour: there is one artifact and one
+// number, as before.
 //
 // The numbering restarted at 0.1.0 with proof, because the pre-epoch 0.x line
 // counted something else and carrying 0.6.1 forward would have implied the two
@@ -73,8 +74,8 @@ val hasFixedKey = keystoreFile.exists()
 // so the counter keeps climbing across the reset and the formula above applies
 // per epoch, offset past everything the pre-epoch line ever shipped.
 // ---------------------------------------------------------------------------
-val appVersionName = "0.5.0 proof"
-val appVersionCode = 100050000        // proof epoch: 100000000 + 0.5.0
+val appVersionName = "0.1.0 press"
+val appVersionCode = 200010000        // press epoch: 200000000 + 0.1.0
 
 // A build from a clone has to be able to come out unsigned: the key committed
 // here is this project's, and nobody else should be shipping APKs under it.
@@ -102,6 +103,12 @@ android {
         targetSdk = 35
         versionCode = appVersionCode
         versionName = appVersionName
+
+        // Needed by the migration test, which has to run on a real Android
+        // SQLite rather than on the JVM: ./gradlew connectedDebugAndroidTest.
+        // Nothing in assembleDebug or testReleaseUnitTest compiles or runs it,
+        // so the ordinary build is unaffected by this line.
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // -------------------------------------------------------------------
         // One architecture per file.
@@ -219,6 +226,16 @@ dependencies {
     implementation("org.apache.commons:commons-compress:1.27.1")
 
     testImplementation("junit:junit:4.13.2")
+
+    // On-device tests. Only app/src/androidTest uses these, and only
+    // connectedDebugAndroidTest builds that source set -- the APK does not
+    // grow and the release build never sees them. Room's MigrationTestHelper is
+    // deliberately not among them: it needs the exported schema of every old
+    // version, and versions 1 and 2 were never committed, so the migration test
+    // carries the old schema as SQL instead.
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test:core:1.6.1")
 
     // The neural speech runtime.
     //
