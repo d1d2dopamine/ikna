@@ -344,6 +344,8 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"set.127" to "PHOSPHOR",
 	// ОСВЕЩЕНИЕ
 	"set.122" to "LIGHTING",
+	"set.128" to "ALL LANGUAGES",
+	"set.129" to "This is the speed and pitch of the phone's own voice. A model of your own has a speed of its own, set per model on the voice screen; its pitch is the only one it has.",
 	// БЕТА
 	"set.123" to "BETA",
 	// Пока в бете и по умолчанию выключено: как звучит голос, решает движок на телефоне, а плохой голос хуже тишины.
@@ -677,6 +679,10 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"voice.042" to "This is not a model archive",
 	"voice.043" to "Not enough space: an unpacked model is about three times the archive",
 	"voice.044" to "The app unpacks the archive itself",
+	"voice.045" to "Language read off the model's name:",
+	"voice.046" to "OTHER LANGUAGE",
+	"voice.047" to "How many voices this model has is something only the model can say: press the test button and the number appears here.",
+	"voice.048" to "Speed",
 	// Оформление
 	"look.001" to "Appearance",
 	// Буквы и цвет квадрата в списке колод. Видно только вам: тому, кому отправите колоду, придут только карточки.

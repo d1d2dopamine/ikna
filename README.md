@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.5.0-proof"><img src="https://img.shields.io/badge/release-0.5.0%20proof-crimson?style=flat-square" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.1.1-press"><img src="https://img.shields.io/badge/release-0.1.1%20press-crimson?style=flat-square" alt="release"></a>
   <a href="https://github.com/d1d2dopamine/ikna/releases"><img src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?label=downloads&style=flat-square&logo=github&color=blueviolet" alt="downloads"></a>
   <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.5.0-proof/ikna-v0.5.0-proof.apk"><strong>Download</strong></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.1.1-press/ikna-v0.1.1-press.apk"><strong>Download</strong></a>
   &nbsp;·&nbsp;
   <a href="CHANGELOG.md">Changelog</a>
   &nbsp;·&nbsp;
@@ -65,13 +65,13 @@ sans-serif faces and reads as a lower case L, so "Ikna" invites being read as
 
 | Platform | File in the release |
 | --- | --- |
-| **Android** 10+ (`minSdk 29`) | `ikna-v0.5.0-proof.apk` (~40 MB) |
+| **Android** 10+ (`minSdk 29`) | `ikna-v0.1.1-press.apk` (~40 MB) |
 
-**[Download ikna-v0.5.0-proof.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.5.0-proof/ikna-v0.5.0-proof.apk)** ·
-[all files](https://github.com/d1d2dopamine/ikna/releases/tag/v0.5.0-proof)
+**[Download ikna-v0.1.1-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.1.1-press/ikna-v0.1.1-press.apk)** ·
+[all files](https://github.com/d1d2dopamine/ikna/releases/tag/v0.1.1-press)
 
 The file above is for every phone sold since roughly 2017. Older 32-bit ones
-take `ikna-v0.5.0-proof-legacy32.apk` from the same page: the same app, built
+take `ikna-v0.1.1-press-legacy32.apk` from the same page: the same app, built
 for the one architecture they can run.
 
 Download it and open it; Android asks once whether to allow installing from this
@@ -167,17 +167,11 @@ Format, refusals, the deck screen and the offline generator:
 
 ## 🏷️ Versions
 
-A version here is a number **and a word**: `0.1.0 proof`. The number counts releases
-inside an epoch; the word says which epoch a build belongs to, and therefore what to
-expect from the next one.
+A version here is a number **and a word**: `0.1.1 press`. The word names the epoch
+the build belongs to, the number counts releases inside it, and git tags replace the
+space with a dash: `v0.1.1-press`.
 
-| Epoch | What lands in it |
-| --- | --- |
-| **proof** | Testing, bug fixes, corrections, polish. No new pillars. |
-| **press** | The next generation, once `proof` has nothing left to correct. |
-
-Both words are lower case, and git tags replace the space with a dash:
-`v0.5.0-proof`. Why the count restarted while `appVersionCode` did not:
+What the words mean, what the numbers promise and how `appVersionCode` is built:
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
 ---
@@ -210,8 +204,8 @@ Bump the two version lines in `app/build.gradle.kts`, then tag the commit with t
 same string, space replaced by a dash:
 
 ```
-git tag v0.5.0-proof
-git push origin v0.5.0-proof
+git tag v0.1.1-press
+git push origin v0.1.1-press
 ```
 
 The `release` workflow refuses to continue if the tag and the build file disagree,
@@ -263,7 +257,7 @@ release, the ones published before this notice as well as every future one.
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.5.0-proof"><img src="https://img.shields.io/badge/release-0.5.0%20proof-crimson?style=flat-square" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.1.1-press"><img src="https://img.shields.io/badge/release-0.1.1%20press-crimson?style=flat-square" alt="release"></a>
   <a href="https://github.com/d1d2dopamine/ikna/releases"><img src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?label=downloads&style=flat-square&logo=github&color=blueviolet" alt="downloads"></a>
   <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
@@ -273,7 +267,7 @@ release, the ones published before this notice as well as every future one.
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.5.0-proof/ikna-v0.5.0-proof.apk"><strong>Скачать</strong></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.1.1-press/ikna-v0.1.1-press.apk"><strong>Скачать</strong></a>
   &nbsp;·&nbsp;
   <a href="CHANGELOG.md">Изменения</a>
   &nbsp;·&nbsp;
@@ -313,13 +307,13 @@ ikna учит язык **кусками**: короткая фраза, живо
 
 | Платформа | Файл в релизе |
 | --- | --- |
-| **Android** 10+ (`minSdk 29`) | `ikna-v0.5.0-proof.apk` (~40 МБ) |
+| **Android** 10+ (`minSdk 29`) | `ikna-v0.1.1-press.apk` (~40 МБ) |
 
-**[Скачать ikna-v0.5.0-proof.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.5.0-proof/ikna-v0.5.0-proof.apk)** ·
-[все файлы](https://github.com/d1d2dopamine/ikna/releases/tag/v0.5.0-proof)
+**[Скачать ikna-v0.1.1-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.1.1-press/ikna-v0.1.1-press.apk)** ·
+[все файлы](https://github.com/d1d2dopamine/ikna/releases/tag/v0.1.1-press)
 
 Файл выше — для любого телефона примерно с 2017 года. Для более старых
-32-битных рядом лежит `ikna-v0.5.0-proof-legacy32.apk`: то же самое
+32-битных рядом лежит `ikna-v0.1.1-press-legacy32.apk`: то же самое
 приложение, одна архитектура, которую они умеют.
 
 Скачать и открыть; андроид один раз спросит, разрешить ли установку из этого
@@ -416,17 +410,11 @@ get used to | It takes a while to get used to the noise. | привыкать
 
 ## 🏷️ Версии
 
-Версия здесь — это номер **и слово**: `0.1.0 proof`. Номер считает релизы внутри
-эпохи, слово говорит, к какой эпохе сборка относится — а значит, чего ждать от
-следующей.
+Версия здесь — это номер **и слово**: `0.1.1 press`. Слово называет эпоху, к которой
+относится сборка, номер считает релизы внутри неё, а в тегах git пробел заменяется
+дефисом: `v0.1.1-press`.
 
-| Эпоха | Что в неё попадает |
-| --- | --- |
-| **proof** | Тесты, исправления, уточнения, полировка. Никаких новых основ. |
-| **press** | Следующее поколение, когда в `proof` больше нечего исправлять. |
-
-Оба слова со строчной, а в тегах git пробел заменяется дефисом: `v0.5.0-proof`.
-Почему счёт начался заново, а `appVersionCode` — нет:
+Что значат слова, что обещают номера и как собирается `appVersionCode` — в
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
 ---
@@ -459,8 +447,8 @@ bash tools/voice/fetch-voice.sh                # один раз на клон: 
 же строкой, где пробел заменён дефисом:
 
 ```
-git tag v0.5.0-proof
-git push origin v0.5.0-proof
+git tag v0.1.1-press
+git push origin v0.1.1-press
 ```
 
 Воркфлоу `release` откажется работать, если тег и файл сборки расходятся, а затем

@@ -53,29 +53,18 @@ val hasFixedKey = keystoreFile.exists()
 // same number. The release workflow refuses to publish when the tag and
 // appVersionName disagree.
 //
-// appVersionCode is major * 100000 + minor * 10000 + patch * 100. It only ever goes up,
-// which is what Android requires to install an update over an older build. It
-// also sits far above every CI build number this project ever produced, so a
-// release always installs over a CI build and never the other way round.
+// appVersionCode is the epoch offset plus major * 100000 + minor * 10000 +
+// patch * 100. It only ever goes up, which is what Android requires to install
+// an update over an older build. It also sits far above every CI build number
+// this project ever produced, so a release always installs over a CI build and
+// never the other way round.
 //
-// Epochs. The version name carries a word after the number: the epoch the
-// build belongs to. proof is the one where the app is feature-complete and
-// what is left is testing, small corrections and polish; press is the next
-// one, and it starts when proof has nothing left to correct. Both words are
-// spelled in lower case, like the app's own name, and they are part of the
-// version people read, not a build flavour: there is one artifact and one
-// number, as before.
-//
-// The numbering restarted at 0.1.0 with proof, because the pre-epoch 0.x line
-// counted something else and carrying 0.6.1 forward would have implied the two
-// scales are comparable. appVersionCode does NOT restart with it. Android
-// refuses to install an APK whose code is lower than the installed one, and the
-// only irreplaceable thing in this app is the review log inside that install --
-// so the counter keeps climbing across the reset and the formula above applies
-// per epoch, offset past everything the pre-epoch line ever shipped.
+// What the word after the number means, what a patch inside an epoch promises,
+// why the count restarted with the epoch and the code did not: docs/VERSIONS.md.
+// It is written down once, there, and not repeated here.
 // ---------------------------------------------------------------------------
-val appVersionName = "0.1.0 press"
-val appVersionCode = 200010000        // press epoch: 200000000 + 0.1.0
+val appVersionName = "0.1.1 press"
+val appVersionCode = 200010100        // press epoch: 200000000 + 0.1.1
 
 // A build from a clone has to be able to come out unsigned: the key committed
 // here is this project's, and nobody else should be shipping APKs under it.

@@ -7,13 +7,83 @@ CI run that produced the file.
 This project keeps one rule above all others: **the review log is never rewritten
 and never dropped.** Any change that would touch it is listed here explicitly.
 
-From `0.1.0 proof` onward a version is a number **and an epoch word**, written in
-lower case like the app's own name. The number counts releases inside the epoch;
-the word says which epoch the build belongs to. Both words come from printing:
-`proof` is the copy that is read back and corrected before the press runs, and
-`press` is the run itself — the next era, which opens only when `proof` has
-nothing left to correct. Tags replace the space with a dash, so `0.1.0 proof` is
-tagged `v0.1.0-proof`.
+From `0.1.0 proof` onward a version is a number **and an epoch word**, and tags
+replace the space with a dash: `0.1.1 press` is tagged `v0.1.1-press`. What the
+words mean and what a number promises inside an epoch is written down once, in
+[`docs/VERSIONS.md`](docs/VERSIONS.md).
+
+## 0.1.1 press
+
+Speech, and the six things about it that were either wrong or in the way. One of
+them was a crash, and it is why this release exists.
+
+### Choosing a Kokoro voice could kill the app
+
+Kokoro addresses its voices by number, and the screen let the number climb with
+no end: "+" was always enabled, and the store clamped at zero and at nothing
+else. Past the last voice a number is not a wrong voice -- sherpa-onnx validates
+the index down in C++ and calls `exit`, so there is no Kotlin frame anywhere to
+catch and nothing in a log to find afterwards. The app was simply gone.
+
+The number of voices is now asked of the loaded net itself, written into the
+model's manifest, and it is the only thing that bounds the buttons. A number
+nothing has confirmed is never handed to the runtime: until a net has answered,
+voice 0 is offered, the one voice every model has. A number left behind by an
+older version is pulled back into range the first time the model loads.
+
+Two smaller things in the same file were the other half of it. The net in memory
+was keyed by the model's cache id, which carries the voice number -- so every tap
+on "+" freed a hundred megabytes of model and read it straight back in, for a
+number that is an argument to one rendering and not a property of the net at all.
+And loading did not share a lock with rendering, so that reload could free a net
+that a rendering already in flight was still reading from: a second crash, with
+the same absence of a stack trace. The net is now keyed by the file it came from,
+and a load can no longer happen underneath a rendering.
+
+### The first word of a session no longer waits
+
+Warm-up existed to pay for the slow part -- reading a net in -- while the first
+card was still being read. It did not: it asked whether any model was installed,
+which is a folder listing, answered in a millisecond and loaded nothing. The cost
+moved to the first card instead, where it was audible as a couple of seconds of
+silence. Warm-up now loads the model, and a model that fails to load falls
+through to starting the phone's engine rather than leaving that cold too.
+
+### Speed belongs to a model, not to all of them
+
+There was one speed and one pitch for every voice installed. Each model now
+carries its own speed, in its own manifest, next to its language, and the cached
+audio is keyed by it -- so moving a model's speed re-renders instead of playing
+the old pace back from disk.
+
+Pitch stayed in Settings, and that is not an oversight: a neural voice has one
+pitch, its own, and the runtime has no parameter for it. The pair in Settings is
+now labelled as what it always was -- the phone's own voice, where both numbers
+do something.
+
+### A model's language is only asked about when it is not known
+
+Every model had four language chips under it, including the ones whose language
+the app had already read off their own name. That is an invitation to overrule a
+correct answer, and the price of overruling it is a deck that goes silent. A
+detected language is now a line of text; the chips appear for a release that
+names no language at all -- every multi-language one, Kokoro included, where the
+question is real -- and behind one tap for the rest, since a folder can always be
+renamed by hand.
+
+### Two things removed from Settings
+
+"Перерывы" was a heading, a rule and an empty room: a section that promised
+settings and had none to make, because a break is measured rather than
+configured. The sentence that explained it moved into "Нагрузка", beside the
+number it is about. The section is gone.
+
+The language section listed every interface language as a full-width chip, one
+per row. Four is a section; a couple more is a wall. Chips now sit two to a row,
+and past six languages the rest go behind one tap -- so adding a language no
+longer adds a row to the screen.
+
+---
 
 ## 0.1.0 press
 

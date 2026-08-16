@@ -28,6 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import dev.ikna.AppContainer
+import dev.ikna.audio.MAX_RATE
+import dev.ikna.audio.MIN_RATE
+import dev.ikna.audio.RATE_STEP
 import dev.ikna.audio.SpeechSource
 import dev.ikna.audio.VoiceModelInstall
 import dev.ikna.audio.VoiceModelKind
@@ -77,6 +80,15 @@ fun VoiceScreen(
     var busy by remember { mutableStateOf(false) }
     var copied by remember { mutableStateOf(0) }
     var note by remember { mutableStateOf<String?>(null) }
+
+    /**
+     * Which model's language chips are open, if any.
+     *
+     * Null nearly always, which is the point: a language the app read off the
+     * model's own name is stated rather than asked about, and the chips are there
+     * for the case where it read it wrongly.
+     */
+    var openLang by remember { mutableStateOf<String?>(null) }
 
     /** Deck language -> who would read it. Filled by refresh(), never guessed. */
     var voices by remember { mutableStateOf<List<Pair<String, SpeechSource>>>(emptyList()) }
@@ -345,34 +357,62 @@ fun VoiceScreen(
                     )
                 }
 
-                // A release that names no language -- every multi-language one --
-                // has to be told, or it either speaks everything or nothing.
+                // The language used to be four chips under every model, always.
+                // It is a question worth asking about exactly one kind of release
+                // -- the multi-language ones, which name no language at all --
+                // and asking it about a folder called vits-piper-ru_RU-dmitri is
+                // an invitation to answer it wrongly and silence a deck for it.
+                // So a language read off the model's own name is a statement, and
+                // the chips sit behind the line that admits it can be wrong.
                 Spacer(Modifier.height(Space.sm))
-                Text(
-                    text = S.t("voice.014"),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = muted
-                )
-                Spacer(Modifier.height(Space.xs))
-                Row(horizontalArrangement = Arrangement.spacedBy(Space.xs)) {
-                    LANGS.forEach { code ->
-                        IknaChip(
-                            label = code?.uppercase() ?: S.t("voice.015"),
-                            selected = model.lang == code,
-                            modifier = Modifier.weight(1f),
-                            onClick = { change { store.setLanguage(model.slug, code) } }
+                val declared = model.lang
+                if (declared == null) {
+                    Text(
+                        text = S.t("voice.014"),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = muted
+                    )
+                    Spacer(Modifier.height(Space.xs))
+                    LanguageChips(model, busy) { code ->
+                        change { store.setLanguage(model.slug, code) }
+                    }
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = S.t("voice.045") + " " + declared.uppercase(),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = muted,
+                            modifier = Modifier.weight(1f)
                         )
+                        IknaTextButton(
+                            label = S.t("voice.046"),
+                            enabled = !busy,
+                            color = muted,
+                            onClick = {
+                                openLang = if (openLang == model.slug) null else model.slug
+                            }
+                        )
+                    }
+                    if (openLang == model.slug) {
+                        Spacer(Modifier.height(Space.xs))
+                        LanguageChips(model, busy) { code ->
+                            change { store.setLanguage(model.slug, code) }
+                        }
                     }
                 }
 
-                // Kokoro holds around a hundred voices addressed by number and by
-                // nothing else -- they have no names to list. A number and the
-                // test button are the whole interface there is to have.
-                if (model.kind == VoiceModelKind.KOKORO) {
+                // Kokoro holds a voice per number and by nothing else -- they
+                // have no names to list. The top of the range is the number of
+                // voices the net reported when it was read in: one past the last
+                // one is not a wrong voice, it is the end of the process, because
+                // sherpa-onnx checks the index in C++ and exits. Until a load has
+                // answered, one voice is offered, since voice 0 always exists.
+                if (model.kind == VoiceModelKind.KOKORO || model.speakers > 1) {
                     Spacer(Modifier.height(Space.sm))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = S.t("voice.039") + " " + model.speaker,
+                            text = S.t("voice.039") + " " + model.speaker +
+                                if (model.speakers > 0) " / " + (model.speakers - 1) else "",
                             style = MaterialTheme.typography.bodySmall,
                             color = muted,
                             modifier = Modifier.weight(1f)
@@ -385,10 +425,45 @@ fun VoiceScreen(
                         Spacer(Modifier.width(Space.sm))
                         IknaTextButton(
                             label = "+",
-                            enabled = !busy,
+                            enabled = !busy && model.speaker + 1 < model.speakers,
                             onClick = { change { store.setSpeaker(model.slug, model.speaker + 1) } }
                         )
                     }
+                    if (model.speakers <= 0) {
+                        Spacer(Modifier.height(Space.hair))
+                        Text(
+                            text = S.t("voice.047"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = muted
+                        )
+                    }
+                }
+
+                // Speed, per model. One number for every voice installed suited
+                // none of them: a Piper voice recorded slowly and a Kokoro voice
+                // that hurries do not agree on what 100% is. Tone is not here and
+                // that is not an omission -- a neural voice has one pitch, its
+                // own, and the phone's voice keeps both numbers in settings,
+                // where both of them do something.
+                Spacer(Modifier.height(Space.sm))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = S.t("voice.048") + " " + model.rate + "%",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted,
+                        modifier = Modifier.weight(1f)
+                    )
+                    IknaTextButton(
+                        label = "\u2212",
+                        enabled = !busy && model.rate > MIN_RATE,
+                        onClick = { change { store.setRate(model.slug, model.rate - RATE_STEP) } }
+                    )
+                    Spacer(Modifier.width(Space.sm))
+                    IknaTextButton(
+                        label = "+",
+                        enabled = !busy && model.rate < MAX_RATE,
+                        onClick = { change { store.setRate(model.slug, model.rate + RATE_STEP) } }
+                    )
                 }
 
                 Spacer(Modifier.height(Space.xs))
@@ -497,6 +572,33 @@ private const val CUSTOM_LANG = "custom"
 
 /** RU, EN, PL, and "any" -- the honest setting for a multi-language model. */
 private val LANGS = listOf("ru", "en", "pl", null)
+
+/**
+ * The language of one model, as a row of chips.
+ *
+ * Its own function because it is now shown in two places: always, under a
+ * release that names no language, and on request under one whose name was read
+ * successfully. IknaChip has no disabled state, so a copy in progress is refused
+ * at the tap rather than drawn differently -- nothing here is worth a second
+ * appearance of a chip.
+ */
+@Composable
+private fun LanguageChips(
+    model: VoiceModelInstall,
+    busy: Boolean,
+    onPick: (String?) -> Unit
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(Space.xs)) {
+        LANGS.forEach { code ->
+            IknaChip(
+                label = code?.uppercase() ?: S.t("voice.015"),
+                selected = model.lang == code,
+                modifier = Modifier.weight(1f),
+                onClick = { if (!busy) onPick(code) }
+            )
+        }
+    }
+}
 
 private fun kindOf(kind: VoiceModelKind): String = when (kind) {
     VoiceModelKind.KOKORO -> "Kokoro"

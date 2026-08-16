@@ -136,6 +136,10 @@ fun SettingsScreen(
     // so nothing here can be hit while scrolling past it.
     var advancedOpen by remember { mutableStateOf(false) }
 
+    // Every interface language at once, for when there are more of them than the
+    // section can show without turning into a wall. See LANGUAGE_FOLD.
+    var languagesOpen by remember { mutableStateOf(false) }
+
     val scroll = rememberScrollState()
     // Filled in as the sections are laid out, so the pinned row can jump to a
     // real offset instead of a guessed one.
@@ -329,6 +333,25 @@ fun SettingsScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+
+                    // This used to be a section of its own, called "Перерывы",
+                    // with a heading, a rule and nothing at all inside it: a
+                    // promise of settings that had none to make, because a break
+                    // is measured rather than configured. The sentence was worth
+                    // keeping and the empty room was not, so it sits here, beside
+                    // the number it is actually about.
+                    Spacer(Modifier.height(20.dp))
+                    Text(
+                        text = S.t("set.061"),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = S.t("set.062"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
@@ -435,17 +458,43 @@ fun SettingsScreen(
                     S.t("set.024"),
                     S.t("set.025")
                 ) {
+                    // Two chips to a row rather than one full-width chip per
+                    // language. A section that grows by a row of forty-four
+                    // points for every language added is a section that becomes a
+                    // wall the moment the app speaks six languages instead of
+                    // three -- and past the fold it stops growing at all: what is
+                    // shown then is the phone's own setting and whatever is
+                    // chosen, with the rest one tap away.
+                    val folded = LANGUAGES.size > LANGUAGE_FOLD && !languagesOpen
+                    val shown = if (!folded) LANGUAGES else LANGUAGES.filter {
+                        it == LANGUAGE_SYSTEM || it == settings.language
+                    }
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        LANGUAGES.forEach { code ->
-                            IknaChip(
-                                label = languageLabel(code),
-                                selected = settings.language == code,
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = {
-                                    scope.launch { container.settings.setLanguage(code) }
+                        shown.chunked(2).forEach { pair ->
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                pair.forEach { code ->
+                                    IknaChip(
+                                        label = languageLabel(code),
+                                        selected = settings.language == code,
+                                        modifier = Modifier.weight(1f),
+                                        onClick = {
+                                            scope.launch { container.settings.setLanguage(code) }
+                                        }
+                                    )
                                 }
-                            )
+                                // A last row of one must not stretch to the width
+                                // of two, or the grid stops being a grid.
+                                repeat(2 - pair.size) { Spacer(Modifier.weight(1f)) }
+                            }
                         }
+                    }
+                    if (LANGUAGES.size > LANGUAGE_FOLD) {
+                        Spacer(Modifier.height(8.dp))
+                        IknaTextButton(
+                            label = if (languagesOpen) S.t("set.065") else S.t("set.128"),
+                            onClick = { languagesOpen = !languagesOpen },
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
@@ -588,6 +637,16 @@ fun SettingsScreen(
                                 Spacer(Modifier.height(8.dp))
                                 Text(
                                     text = S.t("set.113"),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+
+                                // Whose speed and pitch these are, said where the
+                                // controls are: a model of one's own carries its
+                                // own speed, and the only pitch it has is its own.
+                                Spacer(Modifier.height(8.dp))
+                                Text(
+                                    text = S.t("set.129"),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -765,11 +824,6 @@ fun SettingsScreen(
                     }
                 }
             }
-
-            Section(
-                S.t("set.061"),
-                S.t("set.062")
-            ) {}
 
             Anchored(ID_ADVANCED, anchors) {
                 Section(
@@ -1269,6 +1323,15 @@ private val JUMPS = listOf(
  * other deck into homework in translation.
  */
 private val LANGUAGES = listOf(LANGUAGE_SYSTEM, "ru", "en", "pl")
+
+/**
+ * How many language chips are shown before the rest go behind one tap.
+ *
+ * Six is three rows of two, which is the most this section can hold and still
+ * read as a setting rather than as a list of everything the app was ever
+ * translated into.
+ */
+private const val LANGUAGE_FOLD = 6
 
 /**
  * Language names stay in their own language: a person looking for Polish looks

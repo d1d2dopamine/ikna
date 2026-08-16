@@ -344,6 +344,8 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"set.127" to "FOSFOR",
 	// ОСВЕЩЕНИЕ
 	"set.122" to "OŚWIETLENIE",
+	"set.128" to "WSZYSTKIE JĘZYKI",
+	"set.129" to "To prędkość i ton głosu telefonu. Własny model ma własną prędkość — ustawia się ją na ekranie mowy, osobno dla każdego modelu. Ton ma tylko jeden: swój.",
 	// БЕТА
 	"set.123" to "BETA",
 	// Пока в бете и по умолчанию выключено: как звучит голос, решает движок на телефоне, а плохой голос хуже тишины.
@@ -677,6 +679,10 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"voice.042" to "To nie jest archiwum z modelem",
 	"voice.043" to "Za mało miejsca: rozpakowany model jest około trzy razy większy",
 	"voice.044" to "Aplikacja sama rozpakuje archiwum",
+	"voice.045" to "Język rozpoznany z nazwy modelu:",
+	"voice.046" to "INNY JĘZYK",
+	"voice.047" to "Ile głosów ma model, wie tylko sam model: naciśnij próbę głosu, a liczba pojawi się tutaj.",
+	"voice.048" to "Prędkość",
 	// Оформление
 	"look.001" to "Wygląd",
 	// Буквы и цвет квадрата в списке колод. Видно только вам: тому, кому отправите колоду, придут только карточки.

@@ -40,20 +40,74 @@ data class VoiceModelInstall(
     val bytes: Long,
     val dir: File,
     val enabled: Boolean = true,
+    /**
+     * How many voices the net holds, as the runtime reported it, or 0 before it
+     * has ever been loaded.
+     *
+     * Kokoro addresses its voices by number and by nothing else, and a number
+     * past the last one does not come back as an error: sherpa-onnx checks the
+     * index down in C++ and ends the process, which is a crash with no Kotlin
+     * frame anywhere to catch. So the count is written down the first time a net
+     * is read in, and it is the only thing allowed to bound the buttons that
+     * change the number. Zero means "never asked", and zero permits voice 0
+     * alone -- the one voice every model has.
+     */
+    val speakers: Int = 0,
+    /**
+     * This model's own speed, as a percent of its natural pace.
+     *
+     * Per model rather than one number for all of them: a Piper voice recorded
+     * slowly and a Kokoro voice that already hurries are not the same voice at
+     * 100%, and a single setting for both is a compromise that suits neither.
+     * The phone's own engine keeps its own pair in settings, where pitch works
+     * too -- here there is no pitch to keep, because a neural voice has one, its
+     * own.
+     */
+    val rate: Int = DEFAULT_RATE,
 ) {
     /** The folder name. Stable, unique, and what the screen passes back to change things. */
     val slug: String get() = dir.name
 
     /**
-     * Identifies this model in the audio cache. The speaker number is part of it:
-     * changing which of Kokoro's voices speaks must not keep playing yesterday's
-     * rendering back from disk. So is the folder, so that two models never share
-     * a cache entry.
+     * Identifies this model in the audio cache. The voice number and the speed
+     * are part of it: changing which of Kokoro's voices speaks, or how fast it
+     * speaks, must not keep playing yesterday's rendering back from disk. So is
+     * the folder, so that two models never share a cache entry.
      */
-    val id: String get() = slug + "|" + model + "|" + speaker
+    val id: String get() = slug + "|" + model + "|" + speaker + "|" + rate
+
+    /**
+     * Identifies the net in memory, which is a different question from [id]: the
+     * voice number and the speed are arguments to one rendering, not properties
+     * of the net. Keying the resident engine by [id] meant every tap on "+"
+     * released a hundred megabytes of model and read it straight back in --
+     * slow, and the window in which a rendering already running was holding
+     * memory that had just been freed.
+     */
+    val engineKey: String get() = slug + "|" + model
+
+    /**
+     * The voice number that is safe to hand to the runtime: the chosen one when
+     * the count is known and it fits, and voice 0 in every other case.
+     */
+    val voice: Int get() = if (speakers <= 0) 0 else speaker.coerceIn(0, speakers - 1)
+
+    /** This model's speed as the runtime wants it, inside the range it accepts. */
+    val speed: Float get() = (rate / 100f).coerceIn(MIN_RATE / 100f, MAX_RATE / 100f)
 
     val file: File get() = File(dir, model)
 }
+
+/**
+ * The speed range of a model of one's own, in percent.
+ *
+ * The same range the phone's own voice offers in settings, so the two controls
+ * behave alike; the step is the same too. Past this speech stops being speech.
+ */
+const val MIN_RATE = 50
+const val MAX_RATE = 150
+const val RATE_STEP = 10
+const val DEFAULT_RATE = 100
 
 /** What came of an attempt to add one. */
 sealed interface VoiceModelResult {
@@ -266,10 +320,52 @@ class VoiceModelStore(context: Context) {
         if (next.enabled) demoteOthers(next)
     }
 
-    /** Which of a model's own voices speaks, for the ones that have several. */
+    /**
+     * Which of a model's own voices speaks, for the ones that have several.
+     *
+     * Clamped to the voices the net actually has, and to voice 0 while that
+     * number is unknown. Not tidiness: sherpa-onnx validates the voice number
+     * inside C++, and its answer to one past the end is to end the process, so a
+     * number nothing has confirmed never reaches it.
+     */
     fun setSpeaker(slug: String, speaker: Int) {
         val current = find(slug) ?: return
-        write(current.copy(speaker = speaker.coerceAtLeast(0)))
+        val top = if (current.speakers > 0) current.speakers - 1 else 0
+        write(current.copy(speaker = speaker.coerceIn(0, top)))
+    }
+
+    /**
+     * Writes down how many voices a net turned out to have.
+     *
+     * Called once, by whoever loaded it, because the runtime is the only honest
+     * source there is for this: the folder name does not say, the file size does
+     * not say, and guessing is what let the voice number kill the app. Kept in
+     * the manifest so the screen can bound its own buttons without loading
+     * anything, and a number chosen by an older version is pulled back into
+     * range here, once, rather than crashing the next time it is used.
+     */
+    fun setSpeakerCount(slug: String, speakers: Int) {
+        if (speakers <= 0) return
+        val current = find(slug) ?: return
+        if (current.speakers == speakers && current.speaker < speakers) return
+        write(
+            current.copy(
+                speakers = speakers,
+                speaker = current.speaker.coerceIn(0, speakers - 1),
+            )
+        )
+    }
+
+    /**
+     * How fast this model speaks, in percent of its own natural pace.
+     *
+     * Stored beside the model rather than in settings, because it belongs to this
+     * voice the way its language does. The phone's own engine keeps its pair of
+     * numbers in settings, where pitch means something as well.
+     */
+    fun setRate(slug: String, rate: Int) {
+        val current = find(slug) ?: return
+        write(current.copy(rate = rate.coerceIn(MIN_RATE, MAX_RATE)))
     }
 
     /**
@@ -408,6 +504,12 @@ class VoiceModelStore(context: Context) {
             speaker = map["speaker"]?.toIntOrNull() ?: 0,
             bytes = map["bytes"]?.toLongOrNull() ?: 0L,
             dir = dir,
+            // Neither line exists in a manifest written before this version, so
+            // both fall back instead of refusing the folder: an unknown count
+            // reads as "voice 0 until a load says otherwise", and an unknown
+            // speed as the model's own pace.
+            speakers = map["speakers"]?.toIntOrNull()?.coerceAtLeast(0) ?: 0,
+            rate = map["rate"]?.toIntOrNull()?.coerceIn(MIN_RATE, MAX_RATE) ?: DEFAULT_RATE,
             // Anything but "no" is on, so a manifest written by 0.4.0 -- which had
             // no such line -- reads as switched on rather than as silence.
             enabled = map["enabled"] != "no",
@@ -498,6 +600,8 @@ class VoiceModelStore(context: Context) {
                     append("lang=").append(install.lang.orEmpty()).append('\n')
                     append("model=").append(install.model).append('\n')
                     append("speaker=").append(install.speaker).append('\n')
+                    append("speakers=").append(install.speakers).append('\n')
+                    append("rate=").append(install.rate).append('\n')
                     append("bytes=").append(install.bytes).append('\n')
                     append("enabled=").append(if (install.enabled) "yes" else "no").append('\n')
                 }

@@ -194,6 +194,32 @@ wrong answer.
 
 ---
 
+## The voice number, and the speed
+
+Kokoro holds many voices in one file and addresses them by index. There are no
+names to list, so the screen offers a number -- and that number is the one thing
+in the app that can end the process rather than fail. sherpa-onnx validates the
+index down in C++: one past the last voice is not an error to catch, it is
+`exit`, with no stack trace and nothing in a log afterwards.
+
+So the count comes from the loaded net itself, is written into the manifest, and
+is the only thing that bounds the buttons. Nothing unconfirmed reaches the
+runtime: until a net has answered, voice 0 is offered, which is the one voice
+every model has. A number left over from an older version, where the button had
+no end, is pulled back into range the first time that model loads.
+
+Speed belongs to a model, not to all of them: it lives in the manifest beside the
+language, and each model is set on its own. A Piper voice recorded slowly and a
+Kokoro voice that hurries do not agree on what 100% means, and one control for
+both was a compromise that suited neither.
+
+Pitch is not offered for a model of one's own, and that is not an omission. A
+neural voice has exactly one pitch, its own, and the runtime has no parameter for
+it. The speed and pitch in Settings are the phone's own voice, where both numbers
+do something.
+
+---
+
 ## When it still does not speak
 
 The voice screen answers this without guessing. The line at the top always names
@@ -236,13 +262,18 @@ is a frozen app.
 | `app/src/main/java/dev/ikna/ui/settings/VoiceScreen.kt` | the screen that says who is speaking |
 | `tools/voice/fetch-voice.sh` | downloads the runtime `.aar`; run once per clone |
 
-The model is copied to `files/voice-model/` inside the app, with a small
-`ikna-model.txt` beside it recording what it is. Removing the model, or
-uninstalling the app, removes all of it.
+Each model is copied to its own folder under `files/voice-models/`, with a small
+`ikna-model.txt` beside it recording what it is: its kind, its name, its
+language, its voice number, how many voices it turned out to have, and its own
+speed. Removing a model, or uninstalling the app, removes all of it.
 
-Rendered audio is cached in `cache/speech/` and capped at 240 files. Changing the
-model, its language or its speaker clears that cache, so a card is never read
-back in yesterday's voice.
+A manifest written by an older version has no `speakers=` and no `rate=` line,
+and is read anyway: an unknown number of voices means voice 0 only until a load
+says otherwise, and an unknown speed means the model's own pace.
+
+Rendered audio is cached in `cache/speech/` and capped at 240 files. The cache
+key carries the model, its voice number and its speed, so changing any of them
+means a new rendering rather than yesterday's voice played back.
 
 ---
 

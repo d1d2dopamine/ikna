@@ -149,7 +149,13 @@ class Speaker(context: Context) {
     private var pitch = 1.0f
 
     /**
-     * Sets speed and pitch from stored percents.
+     * Sets speed and pitch of the phone's own voice, from stored percents.
+     *
+     * The phone's engine only, from this version. A model of one's own carries
+     * its own speed in its own manifest: one pair of numbers for every voice
+     * installed meant a compromise that suited none of them, and pitch has no
+     * meaning for a neural voice at all -- it has one, its own. A control that
+     * silently does nothing is worse than no control.
      *
      * Audio already on disk was synthesised at the old values, so it is dropped
      * when they change: otherwise a card met yesterday keeps playing back at the
@@ -173,7 +179,20 @@ class Speaker(context: Context) {
         // platform engine and nothing else, so a phone whose engine is missing
         // or slow to start hid the speaker mark and skipped every prefetch --
         // with a working model sitting right there, added by hand a minute ago.
-        if (neural?.hasAnyModel() == true) return true
+        //
+        // Then it went too far the other way. hasAnyModel() reads a folder
+        // listing, so warm-up said "ready" in a millisecond and loaded nothing:
+        // the first card of the session paid for reading the net in and for
+        // rendering, while it was already on screen. That is the couple of
+        // seconds before the first word. The net is read in here now, where
+        // there is still time to spare.
+        val model = neural
+        if (model != null && model.hasAnyModel()) {
+            if (model.warmUp()) return true
+            // There is a model and it did not load. The phone's engine is about
+            // to be asked for every card, so it is started here rather than
+            // cold, on the first one.
+        }
         return engine() != null
     }
 
@@ -299,7 +318,7 @@ class Speaker(context: Context) {
         if (bundled != null) {
             dir.mkdirs()
             trim()
-            if (bundled.render(text, lang, rate, cached)) {
+            if (bundled.render(text, lang, cached)) {
                 play(cached)
                 return
             }
@@ -345,7 +364,7 @@ class Speaker(context: Context) {
         if (bundled != null) {
             dir.mkdirs()
             trim()
-            if (bundled.render(text, lang, rate, target)) return
+            if (bundled.render(text, lang, target)) return
         }
 
         val tts = engine() ?: return
@@ -437,6 +456,10 @@ class Speaker(context: Context) {
      * Name of the cached file. The voice, the speed and the pitch are all part of
      * the key: changing any of them must not keep playing the old rendering back
      * from disk.
+     *
+     * A model of one's own puts its speed in the key through idFor(), because its
+     * id carries its own speed and voice number -- so moving a model's speed does
+     * not silently keep playing the pace it was rendered at.
      */
     private fun cacheFile(text: String, lang: String, voiceName: String?): File {
         val speaker = neuralFor(lang)?.idFor(lang) ?: voiceName ?: ""

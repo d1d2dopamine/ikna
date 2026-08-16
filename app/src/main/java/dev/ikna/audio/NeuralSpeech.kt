@@ -51,6 +51,21 @@ interface NeuralSpeech {
     fun hasAnyModel(): Boolean
 
     /**
+     * Load whichever model is switched on, before anybody asks it to speak.
+     *
+     * This is the call that pays for reading a net in -- seconds on a mid-range
+     * phone -- and it exists because [hasAnyModel] was standing in for it:
+     * warm-up answered "there is a model" in a millisecond, loaded nothing, and
+     * the first card of a session paid for the load and the rendering while it
+     * was already on screen. That was the couple of seconds before the first
+     * word. Takes no language on purpose: one net is resident at a time, and the
+     * point is to have it resident, not to guess which deck comes first.
+     *
+     * @return true if a model is now loaded and able to render.
+     */
+    suspend fun warmUp(): Boolean
+
+    /**
      * Whether the model for this language is present and loadable. Called off the
      * main thread and slow the first time, because that is when the model is read
      * in. Returning false has to leave the app working: the platform engine takes
@@ -61,16 +76,19 @@ interface NeuralSpeech {
     /**
      * Synthesise [text] into [target] as a playable file.
      *
-     * [speed] is the same number the speed setting gives the platform engine,
-     * where 1.0 is the model's own pace. Pitch has no equivalent here and is
-     * ignored: a neural voice has one pitch, its own.
+     * Speed is not passed in. From this version every model carries its own, in
+     * its own manifest, because a Piper voice recorded slowly and a Kokoro voice
+     * that already hurries do not want the same number -- and one control for
+     * all of them was a compromise that suited none. Pitch has no equivalent
+     * here at all, so there is none to pass: a neural voice has one pitch, its
+     * own. The phone's engine keeps both numbers in settings, where both work.
      *
      * Implementations write to a temporary name and rename into place, so a
      * player looking in the cache directory can never open a half-written file.
      *
      * @return true only if [target] now exists and holds audio.
      */
-    suspend fun render(text: String, lang: String, speed: Float, target: File): Boolean
+    suspend fun render(text: String, lang: String, target: File): Boolean
 
     /** Release the model. Called when speech is shut down. */
     fun shutdown()
