@@ -31,7 +31,8 @@ class SettingsBackupTest {
             reminderMinute = 30,
             animations = false,
             speechEnabled = false,
-            speechVoices = "pl=oda;ru=dfc",
+            phoneVoice = false,
+            autoSpeakEvery = true,
             fontName = "Atkinson.ttf"
         )
 
@@ -48,7 +49,25 @@ class SettingsBackupTest {
         assertEquals(false, decoded?.autoLoad)
         assertEquals(7, decoded?.reminderHour)
         assertEquals(false, decoded?.animations)
-        assertEquals("pl=oda;ru=dfc", decoded?.speechVoices)
+        assertEquals(false, decoded?.phoneVoice)
+        assertEquals(true, decoded?.autoSpeakEvery)
+        assertEquals("Atkinson.ttf", decoded?.fontName)
+    }
+
+    @Test
+    fun `a file from before the voice settings were cut still restores`() {
+        // A backup written by 0.1.1 carries a speed, a pitch and a voice per
+        // language. Those settings no longer exist. Dropping a field must never
+        // cost somebody the rest of their file, and a missing phoneVoice must
+        // not arrive as "off" -- that would restore an install that cannot speak
+        // and say nothing about why.
+        val old = """{"kind":"ikna-settings","speech":true,"speechRate":140,"speechPitch":80,"speechVoices":"pl=x-local","fontName":"Atkinson.ttf"}"""
+
+        val decoded = SettingsBackup.decode(old)
+
+        assertEquals(true, decoded?.speech)
+        assertEquals(true, decoded?.phoneVoice)
+        assertEquals(false, decoded?.autoSpeakEvery)
         assertEquals("Atkinson.ttf", decoded?.fontName)
     }
 

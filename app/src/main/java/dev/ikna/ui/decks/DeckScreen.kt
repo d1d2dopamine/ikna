@@ -2,6 +2,9 @@ package dev.ikna.ui.decks
 
 import dev.ikna.ui.text.S
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -50,7 +53,9 @@ import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.Space
 import dev.ikna.ui.theme.deckTintColor
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * One deck, and the things that are done to it once rather than every day.
@@ -84,6 +89,47 @@ fun DeckScreen(
 
     suspend fun reload() {
         deck = container.deckRepository.deck(deckId)
+    }
+
+    // Adding cards to a deck that already exists: this button, then the file.
+    // There was no way to do it at all -- every import made a deck, so a course
+    // arriving in portions turned into five decks with the same name.
+    var adding by remember { mutableStateOf(false) }
+    val more = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val size = sizeOf(context, uri)
+            if (size != null && size > MAX_FILE_BYTES) {
+                note = S.t("add.018")
+                return@launch
+            }
+            adding = true
+            val read = withContext(Dispatchers.IO) {
+                runCatching {
+                    context.contentResolver.openInputStream(uri)
+                        ?.bufferedReader()?.use { it.readText() }
+                }.getOrNull()
+            }
+            val report = if (read == null) null else withContext(Dispatchers.IO) {
+                runCatching {
+                    container.deckRepository.importText(
+                        fileName = displayName(context, uri),
+                        text = read,
+                        fallbackTitle = S.t("deckrepo.001"),
+                        appendTo = deckId
+                    )
+                }.getOrNull()
+            }
+            adding = false
+            if (report != null && report.installed > 0) {
+                // The day was planned before these cards existed.
+                container.learningRepository.invalidatePlan()
+                reload()
+            }
+            note = if (report == null) S.t("add.019") else describe(report)
+        }
     }
 
     LaunchedEffect(deckId) { reload() }
@@ -277,6 +323,19 @@ fun DeckScreen(
                 IknaRule()
                 Spacer(Modifier.height(Space.lg))
 
+                IknaWideButton(
+                    label = if (adding) S.t("dp.011") else S.t("dp.010"),
+                    enabled = !adding,
+                    onClick = { more.launch(ACCEPTED_TYPES) }
+                )
+                Spacer(Modifier.height(Space.sm))
+                Text(
+                    text = S.t("dp.012"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = muted
+                )
+
+                Spacer(Modifier.height(Space.lg))
                 IknaWideButton(
                     label = S.t("dp.006"),
                     onClick = {

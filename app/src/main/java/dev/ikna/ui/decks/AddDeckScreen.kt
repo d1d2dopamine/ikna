@@ -45,6 +45,7 @@ import dev.ikna.data.repo.DeckImport
 import dev.ikna.data.repo.NO_LANG
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
+import dev.ikna.ui.theme.IknaChip
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaRule
@@ -93,6 +94,14 @@ fun AddDeckScreen(
 	var guide by remember { mutableStateOf(false) }
 	var lang by remember { mutableStateOf(NO_LANG) }
 
+	// What the prompt used to leave blank for the person to type into a chat
+	// window by hand. Answered here instead, with the app's own language as the
+	// obvious guess for the meanings.
+	var meanings by remember { mutableStateOf(S.lang) }
+	var count by remember { mutableStateOf(PROMPT_COUNTS[1]) }
+	var level by remember { mutableStateOf(LEVEL_BEGINNER) }
+	var topic by remember { mutableStateOf("") }
+
 	// The prompt is an asset rather than a string in the catalogue: it is three
 	// kilobytes of English addressed to a model, not interface text, and it has to
 	// stay the same in all three languages of the app.
@@ -102,6 +111,11 @@ fun AddDeckScreen(
 				context.assets.open(PROMPT_ASSET).bufferedReader().use { it.readText() }
 			}.getOrDefault("")
 		}
+	}
+
+	// The prompt as it will actually be sent: the asset with the answers in it.
+	val filled = remember(prompt, lang, meanings, count, topic, level) {
+		fillPrompt(prompt, lang, meanings, count, topic, level)
 	}
 
 	suspend fun install(name: String, text: String) {
@@ -167,7 +181,7 @@ fun AddDeckScreen(
 			val ok = withContext(Dispatchers.IO) {
 				runCatching {
 					context.contentResolver.openOutputStream(uri)?.use { out ->
-						out.write(prompt.toByteArray())
+						out.write(filled.toByteArray())
 					}
 					true
 				}.getOrDefault(false)
@@ -231,22 +245,6 @@ fun AddDeckScreen(
 				Step(S.t("add.006"))
 			}
 
-			Spacer(Modifier.height(Space.lg))
-			IknaWideButton(
-				label = S.t("add.007"),
-				filled = true,
-				enabled = prompt.isNotEmpty() && !busy,
-				onClick = {
-					clipboard.setText(AnnotatedString(prompt))
-					note = S.t("add.009")
-				}
-			)
-			Spacer(Modifier.height(Space.sm))
-			IknaWideButton(
-				label = S.t("add.008"),
-				enabled = prompt.isNotEmpty() && !busy,
-				onClick = { saver.launch(PROMPT_FILE) }
-			)
 
 			Spacer(Modifier.height(Space.xl))
 			IknaRule()
@@ -269,6 +267,112 @@ fun AddDeckScreen(
 				text = S.t("add.039"),
 				style = MaterialTheme.typography.bodySmall,
 				color = muted
+			)
+
+			Spacer(Modifier.height(Space.lg))
+			IknaRule()
+			Spacer(Modifier.height(Space.lg))
+
+			Text(
+				text = S.t("add.040"),
+				style = MaterialTheme.typography.labelMedium,
+				color = muted
+			)
+			Spacer(Modifier.height(Space.sm))
+			Text(
+				text = S.t("add.049"),
+				style = MaterialTheme.typography.bodySmall,
+				color = muted
+			)
+
+			Spacer(Modifier.height(Space.md))
+			Text(
+				text = S.t("add.042"),
+				style = MaterialTheme.typography.bodySmall
+			)
+			Spacer(Modifier.height(Space.sm))
+			PromptChoice(
+				options = MEANING_LANGS,
+				label = { it.uppercase() },
+				current = meanings,
+				onPick = { meanings = it }
+			)
+
+			Text(
+				text = S.t("add.041"),
+				style = MaterialTheme.typography.bodySmall
+			)
+			Spacer(Modifier.height(Space.sm))
+			PromptChoice(
+				options = PROMPT_COUNTS.map { it.toString() },
+				label = { it },
+				current = count.toString(),
+				onPick = { picked -> count = picked.toIntOrNull() ?: count }
+			)
+
+			Text(
+				text = S.t("add.046"),
+				style = MaterialTheme.typography.bodySmall
+			)
+			Spacer(Modifier.height(Space.sm))
+			PromptChoice(
+				options = PROMPT_LEVELS,
+				label = { option ->
+					when (option) {
+						LEVEL_BEGINNER -> S.t("add.043")
+						LEVEL_TALKING -> S.t("add.044")
+						else -> S.t("add.045")
+					}
+				},
+				current = level,
+				onPick = { level = it }
+			)
+
+			Text(
+				text = S.t("add.047"),
+				style = MaterialTheme.typography.bodySmall
+			)
+			Spacer(Modifier.height(Space.sm))
+			Box(
+				modifier = Modifier
+					.fillMaxWidth()
+					.border(Space.hair, line)
+					.padding(Space.md)
+			) {
+				if (topic.isEmpty()) {
+					Text(
+						text = S.t("add.048"),
+						style = MaterialTheme.typography.bodyMedium,
+						color = muted
+					)
+				}
+				BasicTextField(
+					value = topic,
+					onValueChange = { topic = it.take(MAX_TOPIC_CHARS) },
+					singleLine = true,
+					textStyle = MaterialTheme.typography.bodyMedium.copy(
+						color = MaterialTheme.colorScheme.onBackground
+					),
+					cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+					modifier = Modifier.fillMaxWidth()
+				)
+			}
+
+			Spacer(Modifier.height(Space.md))
+			IknaWideButton(
+				label = S.t("add.007"),
+				filled = true,
+				enabled = prompt.isNotEmpty() && !busy,
+				onClick = {
+					clipboard.setText(AnnotatedString(filled))
+					note = S.t("add.009")
+				}
+			)
+			Spacer(Modifier.height(Space.sm))
+			IknaWideButton(
+				label = S.t("add.008"),
+				enabled = prompt.isNotEmpty() && !busy,
+				onClick = { saver.launch(PROMPT_FILE) }
 			)
 
 			Spacer(Modifier.height(Space.lg))
@@ -374,6 +478,36 @@ fun AddDeckScreen(
 	}
 }
 
+/**
+ * A row of answers, four to a line.
+ *
+ * The same shape as the deck language chips, for the same reason: a strip that
+ * scrolls sideways hides half of its options behind a gesture nobody is told
+ * about.
+ */
+@Composable
+private fun PromptChoice(
+	options: List<String>,
+	label: (String) -> String,
+	current: String,
+	onPick: (String) -> Unit
+) {
+	options.chunked(4).forEach { group ->
+		Row(
+			modifier = Modifier.padding(bottom = Space.sm),
+			horizontalArrangement = Arrangement.spacedBy(Space.sm)
+		) {
+			group.forEach { option ->
+				IknaChip(
+					label = label(option),
+					selected = current == option,
+					onClick = { onPick(option) }
+				)
+			}
+		}
+	}
+}
+
 /** One line of the four-line instruction, with the bar the rest of the app uses. */
 @Composable
 private fun Step(text: String) {
@@ -400,7 +534,7 @@ private fun Step(text: String) {
  * it now names the line and what was wrong with it, which is usually enough to
  * see that a model added a heading row or answered in two columns.
  */
-private fun describe(report: DeckImport): String {
+internal fun describe(report: DeckImport): String {
 	if (report.installed == 0) {
 		val problem = report.firstProblem
 			?: return S.t("add.025")
@@ -422,7 +556,7 @@ private fun reason(problem: SeedProblem): String = when (problem) {
 	SeedProblem.DUPLICATE -> S.t("add.035")
 }
 
-private fun displayName(context: Context, uri: Uri): String {
+internal fun displayName(context: Context, uri: Uri): String {
 	context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
 		val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
 		if (index >= 0 && cursor.moveToFirst()) {
@@ -440,7 +574,7 @@ private fun displayName(context: Context, uri: Uri): String {
  * handed to the app by a file manager, and a phone with 200MB of headroom does
  * not survive being asked to hold a 2GB string.
  */
-private fun sizeOf(context: Context, uri: Uri): Long? {
+internal fun sizeOf(context: Context, uri: Uri): Long? {
 	context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
 		val index = cursor.getColumnIndex(OpenableColumns.SIZE)
 		if (index >= 0 && cursor.moveToFirst() && !cursor.isNull(index)) {
@@ -454,12 +588,15 @@ private const val PROMPT_ASSET = "prompt/deck_prompt.txt"
 private const val PROMPT_FILE = "ikna-deck-prompt.txt"
 
 /** Four megabytes is around forty thousand cards: far more than a deck ever is. */
-private const val MAX_FILE_BYTES = 4L * 1024L * 1024L
+internal const val MAX_FILE_BYTES = 4L * 1024L * 1024L
 
 /** The same ceiling for the field, in characters rather than bytes. */
 private const val MAX_PASTED_CHARS = 400_000
 
-private val ACCEPTED_TYPES = arrayOf(
+/** A topic is a phrase, not an essay. The rest of the prompt is already long. */
+private const val MAX_TOPIC_CHARS = 120
+
+internal val ACCEPTED_TYPES = arrayOf(
 	"text/*",
 	"application/json",
 	"application/octet-stream"

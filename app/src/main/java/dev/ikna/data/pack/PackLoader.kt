@@ -103,7 +103,8 @@ class PackLoader(
         title: String,
         lang: String,
         source: List<PackChunk>,
-        skipped: Int = 0
+        skipped: Int = 0,
+        append: Boolean = false
     ): ImportResult {
         val chunks = ArrayList<ChunkEntity>(source.size)
         val tokens = ArrayList<ChunkTokenEntity>(source.size * 8)
@@ -118,7 +119,11 @@ class PackLoader(
                 id = packId,
                 version = (existing?.version ?: 0) + 1,
                 lang = lang,
-                chunkCount = chunks.size,
+                // What the deck holds now, not what this file brought.
+                // Adding a second portion to a deck used to leave the count
+                // showing the portion instead of the deck.
+                chunkCount = if (append) (existing?.chunkCount ?: 0) + chunks.size
+                else chunks.size,
                 installedAt = System.currentTimeMillis(),
                 title = title,
                 isActive = existing?.isActive ?: true

@@ -157,29 +157,49 @@ class DeckRepository(
         fileName: String,
         text: String,
         fallbackTitle: String,
-        lang: String = NO_LANG
+        lang: String = NO_LANG,
+        appendTo: String? = null
     ): DeckImport {
+        // Adding to a deck that already exists, rather than making another one.
+        // Until now every import made a deck: a course arriving in portions
+        // became five decks with the same name, and nothing in the app could
+        // put them back together.
+        val into = appendTo?.let { chunkDao.pack(it) }
         val stem = fileName.substringBeforeLast('.')
-        val packId = packIdFor(stem)
-        val title = stem.ifEmpty { fallbackTitle }
+        val packId = into?.id ?: packIdFor(stem)
+        // A deck being added to keeps its own name and its own language. The
+        // name of the file a second portion happened to arrive in is not a
+        // reason to rename a deck somebody is halfway through.
+        val title = into?.title ?: stem.ifEmpty { fallbackTitle }
+        val deckLang = into?.lang ?: lang
 
         if (SeedFormat.looksLikeJsonl(text)) {
-            val result = packLoader.importJsonl(packId, title, lang, text)
+            val result = packLoader.importJsonl(packId, title, deckLang, text)
             return DeckImport(packId, result.installed, result.skipped, null)
         }
 
         val parse = SeedFormat.parse(text)
+        // Portions overlap. A row whose phrase is already in the deck is skipped
+        // rather than added again under a new id, because a duplicate card is a
+        // card whose history is split in two.
+        val rows = if (into == null) parse.rows else {
+            val known = chunkDao.chunksForPack(packId).mapTo(HashSet()) { it.text }
+            parse.rows.filterNot { known.contains(it.phrase) }
+        }
+        val skipped = parse.problems.size + (parse.rows.size - rows.size)
         val result = packLoader.importChunks(
             packId = packId,
             title = title,
-            lang = lang,
-            source = SeedFormat.chunks(packId, parse.rows),
-            skipped = parse.problems.size
+            lang = deckLang,
+            // Numbering continues from what the deck already holds.
+            source = SeedFormat.chunks(packId, rows, into?.chunkCount ?: 0),
+            skipped = skipped,
+            append = into != null
         )
         return DeckImport(
             packId = packId,
             installed = result.installed,
-            skipped = parse.problems.size,
+            skipped = skipped,
             firstProblem = parse.problems.firstOrNull()
         )
     }

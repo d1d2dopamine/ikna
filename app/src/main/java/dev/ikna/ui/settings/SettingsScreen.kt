@@ -59,9 +59,6 @@ import dev.ikna.data.prefs.LANGUAGE_SYSTEM
 import dev.ikna.data.prefs.MANUAL_LOAD_MAX
 import dev.ikna.data.prefs.MANUAL_LOAD_MIN
 import dev.ikna.data.prefs.MANUAL_LOAD_STEP
-import dev.ikna.data.prefs.SPEECH_TONE_MAX
-import dev.ikna.data.prefs.SPEECH_TONE_MIN
-import dev.ikna.data.prefs.SPEECH_TONE_STEP
 import dev.ikna.data.prefs.ThemeMode
 import dev.ikna.ui.theme.IknaChip
 import dev.ikna.ui.theme.IknaDialog
@@ -531,6 +528,38 @@ fun SettingsScreen(
                     )
 
                     if (settings.speechEnabled) {
+                        // The phone's engine, as one switch. Speed, pitch and a
+                        // voice per language were three controls over an engine
+                        // this app did not write: pitch did nothing on most of
+                        // them, and both numbers were part of the name of every
+                        // cached rendering, which is what left the first card of
+                        // a session silent. A model of one's own keeps its own
+                        // speed, on the voice screen, where it belongs.
+                        Spacer(Modifier.height(12.dp))
+                        ToggleRow(
+                            title = S.t("set.130"),
+                            subtitle = S.t("set.131"),
+                            checked = settings.phoneVoice,
+                            onCheckedChange = { on ->
+                                scope.launch {
+                                    container.settings.setPhoneVoice(on)
+                                    // Told directly as well as through settings,
+                                    // so an open session obeys it on the next card.
+                                    container.speaker.setPhoneVoice(on)
+                                    if (!on) container.speaker.stop()
+                                }
+                            }
+                        )
+                        ToggleRow(
+                            title = S.t("set.132"),
+                            subtitle = if (settings.autoSpeakEvery) S.t("set.133")
+                            else S.t("set.134"),
+                            checked = settings.autoSpeakEvery,
+                            onCheckedChange = { on ->
+                                scope.launch { container.settings.setAutoSpeakEvery(on) }
+                            }
+                        )
+
                         when (speechStatus) {
                             SpeakerStatus.UNKNOWN -> {
                                 Spacer(Modifier.height(12.dp))
@@ -578,79 +607,6 @@ fun SettingsScreen(
                             }
 
                             SpeakerStatus.READY -> {
-                                Spacer(Modifier.height(20.dp))
-                                Text(
-                                    text = S.t("set.111"),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Spacer(Modifier.height(8.dp))
-                                Stepper(
-                                    value = settings.speechRate,
-                                    enabled = !busy,
-                                    min = SPEECH_TONE_MIN,
-                                    max = SPEECH_TONE_MAX,
-                                    step = SPEECH_TONE_STEP,
-                                    onChange = { next ->
-                                        scope.launch {
-                                            container.settings.setSpeechTone(
-                                                next,
-                                                settings.speechPitch
-                                            )
-                                            // The engine is told directly as well as
-                                            // through settings, so the next press in
-                                            // an open session already sounds new.
-                                            container.speaker.setTone(
-                                                next,
-                                                settings.speechPitch
-                                            )
-                                        }
-                                    }
-                                )
-
-                                Spacer(Modifier.height(16.dp))
-                                Text(
-                                    text = S.t("set.112"),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Spacer(Modifier.height(8.dp))
-                                Stepper(
-                                    value = settings.speechPitch,
-                                    enabled = !busy,
-                                    min = SPEECH_TONE_MIN,
-                                    max = SPEECH_TONE_MAX,
-                                    step = SPEECH_TONE_STEP,
-                                    onChange = { next ->
-                                        scope.launch {
-                                            container.settings.setSpeechTone(
-                                                settings.speechRate,
-                                                next
-                                            )
-                                            container.speaker.setTone(
-                                                settings.speechRate,
-                                                next
-                                            )
-                                        }
-                                    }
-                                )
-                                Spacer(Modifier.height(8.dp))
-                                Text(
-                                    text = S.t("set.113"),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-
-                                // Whose speed and pitch these are, said where the
-                                // controls are: a model of one's own carries its
-                                // own speed, and the only pitch it has is its own.
-                                Spacer(Modifier.height(8.dp))
-                                Text(
-                                    text = S.t("set.129"),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-
                                 Spacer(Modifier.height(16.dp))
                                 IknaTextButton(
                                     label = S.t("set.032"),

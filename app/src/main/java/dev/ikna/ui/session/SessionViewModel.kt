@@ -180,9 +180,12 @@ class SessionViewModel(
         viewModelScope.launch {
             val prefs = settings.current()
             if (!prefs.speechEnabled) return@launch
-            // Speed and pitch belong to the engine rather than to a single call, so
-            // they are set once here, before the first word of the session.
-            speaker.setTone(prefs.speechRate, prefs.speechPitch)
+            // Who is allowed to speak is settled before a single card is
+            // rendered, and never changes for the rest of the session. Speed
+            // and pitch used to be written here instead, and they were part of
+            // the name of every cached file -- which is what made the first
+            // card of a session silent until its mark was pressed.
+            speaker.setPhoneVoice(prefs.phoneVoice)
             // Whether the mark is drawn is decided per card, by the language in
             // front of the user; this call only pays the cost of starting an
             // engine while there is still time to spare.
@@ -203,9 +206,10 @@ class SessionViewModel(
         viewModelScope.launch {
             val prefs = settings.current()
             if (!prefs.speechEnabled) return@launch
-            // Cheap when nothing changed, and it is what makes a speed changed in
-            // settings audible on the very next press without leaving the session.
-            speaker.setTone(prefs.speechRate, prefs.speechPitch)
+            // Cheap when nothing changed, and it is what makes the switch in
+            // settings take effect on the very next press, without leaving the
+            // session to do it.
+            speaker.setPhoneVoice(prefs.phoneVoice)
             speaker.speak(spokenText(card), card.chunk.lang)
         }
     }
@@ -243,7 +247,12 @@ class SessionViewModel(
             // nothing had written yet, so the one card meant to speak by itself
             // -- a phrase met for the first time -- was the one that never did.
             speaker.prefetch(spokenText(card), lang)
-            if (card.isFirstContact && _state.value.current?.card?.key == key) {
+            // Every card, or only a phrase being met for the first time. Either
+            // way the card has to still be the card in front: rendering can take
+            // a moment, and sound that arrives over the next card is worse than
+            // no sound at all.
+            val speaks = prefs.autoSpeakEvery || card.isFirstContact
+            if (speaks && _state.value.current?.card?.key == key) {
                 speaker.speakIfReady(spokenText(card), lang)
             }
 
@@ -251,11 +260,18 @@ class SessionViewModel(
         }
     }
 
-    /** Remembered per language, because the first answer loads the model. */
+    /**
+     * Remembered per language, because the first answer loads the model.
+     *
+     * Only a yes is kept. A no is often the answer of a model that had not
+     * finished loading yet, and remembering it meant one unlucky first card
+     * silenced that language for the whole session -- with a working voice
+     * sitting right there.
+     */
     private suspend fun canSpeak(lang: String): Boolean {
         langReady[lang]?.let { return it }
         val ok = speaker.status(lang) == SpeakerStatus.READY
-        langReady[lang] = ok
+        if (ok) langReady[lang] = true
         return ok
     }
 

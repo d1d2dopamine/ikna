@@ -317,9 +317,6 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"set.109" to "FRENCH",
 	// шрифт
 	"set.110" to "font",
-	"set.111" to "SPEED",
-	"set.112" to "PITCH",
-	"set.113" to "100 is whatever the phone itself is set to. Cards already spoken are spoken again at the new values.",
 	// ПАЛИТРА
 	"set.114" to "PALETTE",
 	// Цвет самого приложения. Светлая и тёмная версии — это одна палитра при разном освещении, а не две разные темы.
@@ -345,7 +342,11 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// ОСВЕЩЕНИЕ
 	"set.122" to "LIGHTING",
 	"set.128" to "ALL LANGUAGES",
-	"set.129" to "This is the speed and pitch of the phone's own voice. A model of your own has a speed of its own, set per model on the voice screen; its pitch is the only one it has.",
+	"set.130" to "Phone voice",
+	"set.131" to "Reads the languages no model of yours reads",
+	"set.132" to "Speak every time",
+	"set.133" to "A card reads itself every time it comes up",
+	"set.134" to "A card reads itself only at first contact",
 	// БЕТА
 	"set.123" to "BETA",
 	// Пока в бете и по умолчанию выключено: как звучит голос, решает движок на телефоне, а плохой голос хуже тишины.
@@ -462,10 +463,23 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"dp.007" to "Delete deck",
 	"dp.008" to "Tap again if you really mean it",
 	"dp.009" to "The cards of this deck and their schedule go. The answers stay in the statistics — that log is never rewritten.",
+	"dp.010" to "Add cards",
+	"dp.011" to "Adding…",
+	"dp.012" to "A file in the same three columns. The cards join this deck instead of making a new one, and rows already in it are skipped.",
 	"add.036" to "how this works",
 	"add.037" to "hide",
 	"add.038" to "Which language the cards are in",
 	"add.039" to "Used for the voice only. It can be changed later on the deck's own page.",
+	"add.040" to "What to ask the model for",
+	"add.041" to "How many cards",
+	"add.042" to "Language of the meanings",
+	"add.043" to "starting out",
+	"add.044" to "can hold a conversation",
+	"add.045" to "fluent",
+	"add.046" to "Level",
+	"add.047" to "Topic or situation",
+	"add.048" to "for example, cafés and ordering food",
+	"add.049" to "The answers go into the prompt itself, so there is nothing left to type into the chat.",
 	// тап в любом месте
 	"card.002" to "tap anywhere",
 	// ← НЕ ЗНАЮ

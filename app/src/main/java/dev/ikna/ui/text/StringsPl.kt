@@ -317,9 +317,6 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"set.109" to "FRANCUSKI",
 	// шрифт
 	"set.110" to "czcionka",
-	"set.111" to "SZYBKOŚĆ",
-	"set.112" to "WYSOKOŚĆ",
-	"set.113" to "100 to tyle, ile ustawiono w samym telefonie. Karty już wypowiedziane zostaną wypowiedziane ponownie.",
 	// ПАЛИТРА
 	"set.114" to "PALETA",
 	// Цвет самого приложения. Светлая и тёмная версии — это одна палитра при разном освещении, а не две разные темы.
@@ -345,7 +342,11 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// ОСВЕЩЕНИЕ
 	"set.122" to "OŚWIETLENIE",
 	"set.128" to "WSZYSTKIE JĘZYKI",
-	"set.129" to "To prędkość i ton głosu telefonu. Własny model ma własną prędkość — ustawia się ją na ekranie mowy, osobno dla każdego modelu. Ton ma tylko jeden: swój.",
+	"set.130" to "Głos telefonu",
+	"set.131" to "Czyta języki, których nie czyta żaden twój model",
+	"set.132" to "Czytaj za każdym razem",
+	"set.133" to "Karta czyta się sama przy każdym pokazaniu",
+	"set.134" to "Karta czyta się sama tylko przy pierwszym spotkaniu",
 	// БЕТА
 	"set.123" to "BETA",
 	// Пока в бете и по умолчанию выключено: как звучит голос, решает движок на телефоне, а плохой голос хуже тишины.
@@ -462,10 +463,23 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"dp.007" to "Usuń talię",
 	"dp.008" to "Naciśnij jeszcze raz, jeśli na pewno",
 	"dp.009" to "Znikną karty tej talii i ich terminy. Odpowiedzi zostaną w statystykach — ten dziennik nigdy nie jest nadpisywany.",
+	"dp.010" to "Dodaj karty",
+	"dp.011" to "Dodaję…",
+	"dp.012" to "Plik w tych samych trzech kolumnach. Karty dołączą do tej talii, nie powstanie nowa. Wiersze, które już w niej są, zostaną pominięte.",
 	"add.036" to "jak to działa",
 	"add.037" to "ukryj",
 	"add.038" to "W jakim języku są karty",
 	"add.039" to "Potrzebny tylko do czytania na głos. Można to zmienić później na stronie talii.",
+	"add.040" to "O co poprosić model",
+	"add.041" to "Ile kart",
+	"add.042" to "Język znaczeń",
+	"add.043" to "zaczynam",
+	"add.044" to "potrafię rozmawiać",
+	"add.045" to "swobodnie",
+	"add.046" to "Poziom",
+	"add.047" to "Temat lub sytuacja",
+	"add.048" to "na przykład kawiarnie i zamawianie jedzenia",
+	"add.049" to "Odpowiedzi trafią do samego promptu, w czacie nie trzeba już nic dopisywać.",
 	// тап в любом месте
 	"card.002" to "dotknij gdziekolwiek",
 	// ← НЕ ЗНАЮ

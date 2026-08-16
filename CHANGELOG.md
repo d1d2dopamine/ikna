@@ -12,6 +12,107 @@ replace the space with a dash: `0.1.1 press` is tagged `v0.1.1-press`. What the
 words mean and what a number promises inside an epoch is written down once, in
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
+## 0.2.0 press
+
+Speech again, from the other end: what it does by itself, and how much of it was
+ever worth showing. One regression of my own making is fixed here, and three
+controls are gone for good.
+
+### Cards read themselves again
+
+A phrase met for the first time is supposed to speak the moment it appears. From
+`0.1.1 press` it did not: the mark had to be pressed by hand, every time.
+
+The cause was the cache key. Rendered audio is filed under the voice that made
+it, and that name used to include the speed and the pitch this app applied to the
+phone's engine. Both are read from storage, and storage answers a moment after a
+session has already opened -- so the first card was rendered under one name and,
+an instant later, looked for under another. Pressing the mark always worked,
+because by then the numbers had arrived.
+
+The key now names only who would actually say the words: a model with its voice
+number and its own speed, or a constant standing in for the phone. Nothing in it
+can change while a card is on screen.
+
+Two smaller things went with it. A card only speaks by itself if it is still the
+card in front when the audio is ready, so sound never arrives over the next
+phrase. And a language that answered "not ready" once is asked again: that answer
+usually came from a model still loading, and remembering it silenced the language
+for the rest of the session with a working voice sitting right there.
+
+### Speak every time, or only at first contact
+
+A new switch. Reading itself belongs to the meeting that needs it -- the first
+one -- and that stays the default. Whoever learns by ear turns this on and every
+card speaks when it appears.
+
+### Speed, pitch and a voice per language are gone
+
+Three controls over an engine this app did not write, replaced by one switch:
+**the phone's voice**, on or off.
+
+- **Pitch** did nothing on most engines. It took the number and ignored it.
+- **Speed** belongs to whoever set that engine up, in the phone's own speech
+  settings, for every app that uses it. A model of your own keeps its speed,
+  per model, on the voice screen -- where a Piper voice and a Kokoro voice can
+  disagree about what 100% means.
+- **A voice per language** was a list of engine voice names, phone by phone,
+  that nobody could tell apart before hearing them.
+
+The switch that remains means something: off, a language no model of yours covers
+has no voice at all, and the speaker mark is not drawn for it rather than drawn
+and dead. On, the phone reads exactly as the phone was set up to read.
+
+A settings file written by an older build still carries the three old values.
+They are read and dropped -- nothing to migrate them into -- and everything else
+in the file is restored as before. No settings are lost by updating.
+### The prompt comes out already answered
+
+The prompt ended with six blank lines to fill in by hand -- which language is
+being learned, which language the meanings should be in, how many cards, the
+topic, the level. They were filled in inside a chat window, on a phone, before
+anything had been learned, and a prompt sent with those lines still blank came
+back as a deck in the wrong language, or as a question instead of a deck.
+
+The add-deck screen now asks those questions itself, in chips: the language of
+the meanings (the app's own language to begin with), how many cards, the level,
+and one short line for the topic. **Copy prompt** hands over the text with the
+answers already in it, and the two prompt buttons moved down, below the
+questions they now carry answers to.
+
+A question left alone stays blank rather than filled in with "none": a model
+reads "none" as an instruction and a blank line as silence.
+
+### Cards can be added to a deck that already exists
+
+There was no way to do this at all. Every import made a deck, so a course
+arriving in portions became five decks with the same name, and nothing in the
+app could put them back together.
+
+A deck's own screen now has **Add cards**: that button, then the file. Two taps,
+no name to type and no choice to make. The deck keeps its name and its language
+-- the name of the file a second portion happened to arrive in is not a reason to
+rename a deck somebody is halfway through.
+
+Underneath, three things had to stop depending on the file:
+
+- **Card ids continue** from what the deck already holds instead of restarting
+  at one, so a second portion cannot overwrite the first card by card.
+- **The deck's count** is what the deck holds now, not what the last file
+  brought.
+- **Rows already in the deck are skipped.** Portions overlap, and a duplicate
+  card is a card whose history is split in two.
+
+### A deck may hold ten thousand rows
+
+Was five thousand. Not a target and not a suggestion: the governor still lets in
+a few new cards a day and cannot be hurried by a bigger deck. The old cap only
+punished the opposite habit -- bringing a whole book once and being fed from it
+for a year. A deck is storage; the day is what is rationed.
+
+A file that large imports in seconds. Pasting it into the field is another
+matter, and the field still has its own limit: bring it as a file.
+
 ## 0.1.1 press
 
 Speech, and the six things about it that were either wrong or in the way. One of

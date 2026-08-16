@@ -55,19 +55,6 @@ const val MANUAL_LOAD_MAX = 120
 const val MANUAL_LOAD_STEP = 5
 const val MANUAL_LOAD_DEFAULT = 40
 
-/**
- * Speech speed and pitch, as a percent of whatever the engine does on its own.
- *
- * Percent rather than the float the platform wants, because an integer is the
- * only form that reads back identically forever: a stored 1.0f that returns as
- * 0.99999f prints a different number on the screen every time it is shown, and
- * the same value also has to survive a settings backup unchanged.
- */
-const val SPEECH_TONE_MIN = 50
-const val SPEECH_TONE_MAX = 150
-const val SPEECH_TONE_STEP = 10
-const val SPEECH_TONE_DEFAULT = 100
-
 /** Interface language: "system" follows the phone, or "ru" / "en" / "pl". */
 const val LANGUAGE_SYSTEM = "system"
 
@@ -143,19 +130,29 @@ data class IknaSettings(
      */
     val speechEnabled: Boolean = false,
     /**
-     * Chosen voice per language, stored as "pl=voice;ru=voice". A map is not a
-     * preference type, and one string keeps every language's choice in a single
-     * write — which matters, because a half-written pair is a voice that silently
-     * falls back to the engine default.
+     * Whether the phone's own engine may read a card.
+     *
+     * On by default, and it decides nothing for a language an added model
+     * speaks: a model of one's own is always preferred where it has a voice.
+     * Off means a card nothing else can read stays silent and says so by not
+     * drawing the mark — the honest answer for whoever finds the built-in
+     * voices of their phone unbearable.
+     *
+     * One switch replaces three controls: speed, pitch, and a chosen voice per
+     * language. Speed and pitch belonged to an engine this app did not write,
+     * pitch did nothing at all on most of them, and both were part of the name
+     * of every cached rendering — so a card rendered before the stored values
+     * arrived was looked for under a different name and never played.
      */
-    val speechVoices: String = "",
+    val phoneVoice: Boolean = true,
     /**
-     * Speed and pitch of the voice, in percent. 100 means untouched, so a phone
-     * with a good engine sounds exactly as its own settings say until the user
-     * decides otherwise here.
+     * Whether a card reads itself every time it appears, or only the first time
+     * that phrase is ever met.
+     *
+     * First contact is the meeting that needs a voice, so that is the default.
+     * Whoever learns by ear turns this on and every card speaks by itself.
      */
-    val speechRate: Int = SPEECH_TONE_DEFAULT,
-    val speechPitch: Int = SPEECH_TONE_DEFAULT,
+    val autoSpeakEvery: Boolean = false,
     /** File name of the installed content font. Empty means the built-in one. */
     val fontName: String = "",
     /**
@@ -228,9 +225,8 @@ class SettingsStore(private val context: Context) {
         val animations = booleanPreferencesKey("animations")
         val autoExport = booleanPreferencesKey("autoExport")
         val speechEnabled = booleanPreferencesKey("speechEnabled")
-        val speechVoices = stringPreferencesKey("speechVoices")
-        val speechRate = intPreferencesKey("speechRate")
-        val speechPitch = intPreferencesKey("speechPitch")
+        val phoneVoice = booleanPreferencesKey("phoneVoice")
+        val autoSpeakEvery = booleanPreferencesKey("autoSpeakEvery")
         val fontName = stringPreferencesKey("fontName")
         val showWordmark = booleanPreferencesKey("showWordmark")
         val leftHanded = booleanPreferencesKey("leftHanded")
@@ -265,14 +261,12 @@ class SettingsStore(private val context: Context) {
             animations = p[Keys.animations] ?: defaults.animations,
             autoExport = p[Keys.autoExport] ?: defaults.autoExport,
             speechEnabled = p[Keys.speechEnabled] ?: defaults.speechEnabled,
-            speechVoices = p[Keys.speechVoices] ?: defaults.speechVoices,
-            // Clamped on the way out as well as on the way in: a value written by
-            // a restore from a hand-edited file must not be able to produce a
-            // voice too fast to understand.
-            speechRate = (p[Keys.speechRate] ?: defaults.speechRate)
-                .coerceIn(SPEECH_TONE_MIN, SPEECH_TONE_MAX),
-            speechPitch = (p[Keys.speechPitch] ?: defaults.speechPitch)
-                .coerceIn(SPEECH_TONE_MIN, SPEECH_TONE_MAX),
+            // A file written by an older build still carries a speed, a pitch
+            // and a voice per language. They are not read and not migrated:
+            // there is nowhere left to put them, and an update has to survive
+            // finding them rather than fail on them.
+            phoneVoice = p[Keys.phoneVoice] ?: defaults.phoneVoice,
+            autoSpeakEvery = p[Keys.autoSpeakEvery] ?: defaults.autoSpeakEvery,
             fontName = p[Keys.fontName] ?: defaults.fontName,
             showWordmark = p[Keys.showWordmark] ?: defaults.showWordmark,
             leftHanded = p[Keys.leftHanded] ?: defaults.leftHanded,
@@ -322,28 +316,9 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setSpeechEnabled(on: Boolean) = put { it[Keys.speechEnabled] = on }
 
-    /** Whole map at once. Used by a restore, which brings every language back. */
-    suspend fun setSpeechVoices(value: String) = put { it[Keys.speechVoices] = value }
+    suspend fun setPhoneVoice(on: Boolean) = put { it[Keys.phoneVoice] = on }
 
-    /**
-     * One language's voice, read-modify-write inside the same edit so choosing a
-     * Polish voice cannot drop the Russian one picked a second earlier.
-     */
-    suspend fun setVoiceFor(lang: String, voiceName: String?) = put { prefs ->
-        val map = parseVoiceMap(prefs[Keys.speechVoices] ?: "").toMutableMap()
-        if (voiceName.isNullOrBlank()) map.remove(lang) else map[lang] = voiceName
-        prefs[Keys.speechVoices] = encodeVoiceMap(map)
-    }
-
-    /**
-     * Both at once, for the same reason the four colours are written together:
-     * one write means the speaker can never be observed with tomorrow's speed and
-     * yesterday's pitch.
-     */
-    suspend fun setSpeechTone(rate: Int, pitch: Int) = put {
-        it[Keys.speechRate] = rate.coerceIn(SPEECH_TONE_MIN, SPEECH_TONE_MAX)
-        it[Keys.speechPitch] = pitch.coerceIn(SPEECH_TONE_MIN, SPEECH_TONE_MAX)
-    }
+    suspend fun setAutoSpeakEvery(on: Boolean) = put { it[Keys.autoSpeakEvery] = on }
 
     suspend fun setFontName(name: String) = put { it[Keys.fontName] = name }
 
@@ -397,44 +372,6 @@ class SettingsStore(private val context: Context) {
     private suspend fun put(block: (androidx.datastore.preferences.core.MutablePreferences) -> Unit) {
         context.iknaDataStore.edit { block(it) }
     }
-}
-
-// ---- voice map -------------------------------------------------------------
-//
-// Deliberately hand-rolled rather than JSON: it is two or three pairs, it has to
-// survive being read by an older build, and a parse failure here must never be
-// able to take the settings screen down. Anything malformed is skipped and the
-// engine default is used for that language.
-
-fun parseVoiceMap(value: String): Map<String, String> =
-    value.split(';')
-        .asSequence()
-        .mapNotNull { pair ->
-            val at = pair.indexOf('=')
-            if (at <= 0 || at == pair.lastIndex) return@mapNotNull null
-            val lang = pair.substring(0, at).trim()
-            val voice = pair.substring(at + 1).trim()
-            if (lang.isEmpty() || voice.isEmpty()) null else lang to voice
-        }
-        .toMap()
-
-fun encodeVoiceMap(map: Map<String, String>): String =
-    map.entries
-        .filter { it.key.isNotBlank() && it.value.isNotBlank() }
-        .joinToString(";") { it.key + "=" + it.value }
-
-/**
- * The voice chosen for a language, or null to let the engine decide.
- *
- * Matching is by the language part alone: a deck tagged "pl" and a voice stored
- * for "pl-PL" are the same choice to everyone except a string comparison.
- */
-fun IknaSettings.voiceFor(lang: String): String? {
-    if (lang.isBlank()) return null
-    val map = parseVoiceMap(speechVoices)
-    map[lang]?.let { return it }
-    val head = lang.substringBefore('-').lowercase()
-    return map.entries.firstOrNull { it.key.substringBefore('-').lowercase() == head }?.value
 }
 
 // ---- deck looks ------------------------------------------------------------

@@ -34,6 +34,24 @@ The prompt is the point of that screen. Writing a deck by hand is the same
 homework that makes Anki expensive to start; the app hands the routine to a model
 and keeps the reading for the person.
 
+## The prompt is filled in here, not in the chat
+
+The prompt ends with the questions a deck depends on: the language being learned,
+the language of the meanings, how many cards, the topic, the level. Those lines
+used to be blank, and were meant to be typed into a chat window by hand -- which
+is setup, on a phone, before a single card has been learned. Sent blank, they
+come back as a deck in the wrong language or as a question instead of a deck.
+
+The add-deck screen asks them in chips and writes the answers into the prompt
+before it reaches the clipboard: the meanings default to the language the app is
+in, the count to a hundred, the level to beginner, and the topic is one short
+line. A question left alone stays blank rather than filled in with "none" -- a
+model reads "none" as an instruction and a blank line as silence.
+
+The prompt itself is an asset, in English, addressed to a model rather than to a
+person, and nothing else in it is rewritten. If a question is ever renamed there,
+the answer with nowhere to go is dropped and the prompt still goes out whole.
+
 ## The format
 
 A deck is plain text. One line is one card, three parts separated by a bar:
@@ -59,6 +77,10 @@ sentence, a phrase over 80 characters, a sentence over 300, a translation over
 160, and a phrase that already appeared earlier in the same file. A file that
 produced nothing says why instead of failing silently.
 
+A deck may hold up to ten thousand rows. The limit is a ceiling, not a target:
+the governor still lets only a handful of new cards out per day, so a deck of ten
+thousand is a supply that lasts years rather than a backlog that has to be faced.
+
 `.jsonl` packs from `tools/genpack` still import unchanged; the format is
 recognised from the text rather than from the file name. The file picker no longer
 offers photos and video — it used to ask for `*/*`, which meant the app would
@@ -81,6 +103,12 @@ Tapping a deck's name opens it. Tapping the rest of the row starts a session.
 
 - **Language.** A deck you imported has no language until you set one here, and
   without a language there is no speech.
+- **Add cards.** A second portion of the same course joins this deck instead of
+  becoming another deck with the same name: the button, then the file. The deck
+  keeps its own name and its own language, card ids continue from what it already
+  holds rather than restarting, and rows whose phrase is already in the deck are
+  skipped -- portions overlap, and a duplicate card is a card whose history is
+  split in two.
 - **Send.** Writes the deck back out as the same three-column text and hands it to
   the share sheet, so a deck made on one phone imports on another.
 - **Delete.** Two taps on one button. The cards and the schedule go; the answers

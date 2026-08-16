@@ -138,35 +138,32 @@ class Speaker(context: Context) {
     suspend fun modelSpeaks(lang: String): Boolean = neuralFor(lang)?.isReady(lang) == true
 
     /**
-     * Speed and pitch in the form the platform wants, where 1.0 is the engine's
-     * own voice. Volatile because they are written from the settings screen and
-     * read on the thread that synthesises.
+     * Whether the phone's own engine is allowed to read a card.
+     *
+     * Volatile because it is written from the settings screen and read on the
+     * thread that synthesises.
+     *
+     * This is all that is left of the phone voice's configuration. Speed and
+     * pitch went with it: they were applied to an engine this app did not
+     * write, pitch was ignored by most of them, and -- worse -- both were part
+     * of the name of every cached rendering. They arrived from storage a moment
+     * after a session opened, so the first card was rendered under one name and
+     * played back from another, which is exactly how a card that should read
+     * itself ended up silent.
      */
     @Volatile
-    private var rate = 1.0f
-
-    @Volatile
-    private var pitch = 1.0f
+    private var usePhone = true
 
     /**
-     * Sets speed and pitch of the phone's own voice, from stored percents.
+     * Allows or forbids the phone's engine as a source of speech.
      *
-     * The phone's engine only, from this version. A model of one's own carries
-     * its own speed in its own manifest: one pair of numbers for every voice
-     * installed meant a compromise that suited none of them, and pitch has no
-     * meaning for a neural voice at all -- it has one, its own. A control that
-     * silently does nothing is worse than no control.
-     *
-     * Audio already on disk was synthesised at the old values, so it is dropped
-     * when they change: otherwise a card met yesterday keeps playing back at the
-     * speed the user has just moved away from, and only new cards obey.
+     * Audio already on disk was rendered by whoever was allowed to speak then,
+     * so it is dropped: a card kept playing back in a voice that has just been
+     * turned off is the same bug as a card kept playing at an old speed.
      */
-    fun setTone(ratePercent: Int, pitchPercent: Int) {
-        val nextRate = (ratePercent / 100f).coerceIn(MIN_TONE, MAX_TONE)
-        val nextPitch = (pitchPercent / 100f).coerceIn(MIN_TONE, MAX_TONE)
-        if (nextRate == rate && nextPitch == pitch) return
-        rate = nextRate
-        pitch = nextPitch
+    fun setPhoneVoice(on: Boolean) {
+        if (on == usePhone) return
+        usePhone = on
         clearCache()
     }
 
@@ -193,7 +190,10 @@ class Speaker(context: Context) {
             // to be asked for every card, so it is started here rather than
             // cold, on the first one.
         }
-        return engine() != null
+        // Nothing to start when the phone is not allowed to speak: in that
+        // case a language no model reads has no voice at all, which is what the
+        // switch means.
+        return usePhone && engine() != null
     }
 
     private suspend fun engine(): TextToSpeech? = lock.withLock {
@@ -279,6 +279,9 @@ class Speaker(context: Context) {
         // A bundled voice that loads answers the question on its own: this build
         // can speak the language whatever the phone does or does not have.
         if (neuralFor(lang)?.isReady(lang) == true) return SpeakerStatus.READY
+        // Switched off by hand. Reported as no voice rather than no engine,
+        // because what fixes it is a switch in settings, not an install.
+        if (!usePhone) return SpeakerStatus.NO_VOICE
         engine() ?: return SpeakerStatus.NO_ENGINE
         return if (voices(lang).isEmpty()) SpeakerStatus.NO_VOICE else SpeakerStatus.READY
     }
@@ -324,6 +327,8 @@ class Speaker(context: Context) {
             }
         }
 
+        // The phone reads only when it is allowed to.
+        if (!usePhone) return
         val tts = engine() ?: return
         withContext(Dispatchers.IO) {
             applyVoice(tts, lang, voiceName)
@@ -367,6 +372,7 @@ class Speaker(context: Context) {
             if (bundled.render(text, lang, target)) return
         }
 
+        if (!usePhone) return
         val tts = engine() ?: return
 
         withContext(Dispatchers.IO) {
@@ -412,12 +418,9 @@ class Speaker(context: Context) {
     // ---- internals ---------------------------------------------------------
 
     private fun applyVoice(tts: TextToSpeech, lang: String, voiceName: String?) {
-        // Both are set before every utterance rather than once at start-up: an
-        // engine that was restarted by the system comes back at its own defaults,
-        // and a silently ignored setting is worse than one that does not exist.
-        runCatching { tts.setSpeechRate(rate) }
-        runCatching { tts.setPitch(pitch) }
-
+        // Speed and pitch are no longer touched here. They are the engine's own,
+        // set where the engine is set up -- in the phone's settings, by whoever
+        // chose that engine, for every app that uses it.
         val locale = Locale.forLanguageTag(lang)
         val chosen: Voice? = if (voiceName.isNullOrBlank()) null else
             runCatching { tts.voices }.getOrNull()
@@ -453,17 +456,22 @@ class Speaker(context: Context) {
     }
 
     /**
-     * Name of the cached file. The voice, the speed and the pitch are all part of
-     * the key: changing any of them must not keep playing the old rendering back
-     * from disk.
+     * Name of the cached file, keyed by whoever would actually say the words.
      *
-     * A model of one's own puts its speed in the key through idFor(), because its
-     * id carries its own speed and voice number -- so moving a model's speed does
-     * not silently keep playing the pace it was rendered at.
+     * A model of one's own puts its voice number and its own speed into the key
+     * through idFor(), so moving a model's speed does not keep playing back the
+     * pace it was rendered at. The phone contributes a constant, because its
+     * speed and pitch belong to the phone now and this app never changes them.
+     *
+     * Nothing in this key is allowed to change while a card is on screen. It
+     * used to hold the speed and pitch this app applied, and those were read
+     * from storage a moment after a session opened: the card was rendered under
+     * one name and looked for under another, so the first card of every session
+     * stayed silent until its mark was pressed by hand.
      */
     private fun cacheFile(text: String, lang: String, voiceName: String?): File {
-        val speaker = neuralFor(lang)?.idFor(lang) ?: voiceName ?: ""
-        val key = lang + "|" + speaker + "|" + rate + "|" + pitch + "|" + text
+        val speaker = neuralFor(lang)?.idFor(lang) ?: voiceName ?: PHONE_VOICE
+        val key = lang + "|" + speaker + "|" + text
         val name = Integer.toHexString(key.hashCode()) + "-" + text.length + ".wav"
         return File(dir, name)
     }
@@ -505,8 +513,7 @@ class Speaker(context: Context) {
         const val INIT_TIMEOUT_MS = 8_000L
         const val CACHE_LIMIT = 240
 
-        /** Half speed to one and a half. Past this, speech stops being speech. */
-        const val MIN_TONE = 0.5f
-        const val MAX_TONE = 1.5f
+        /** Stands in for the phone's engine in a cache key. */
+        const val PHONE_VOICE = "phone"
     }
 }

@@ -213,10 +213,16 @@ language, and each model is set on its own. A Piper voice recorded slowly and a
 Kokoro voice that hurries do not agree on what 100% means, and one control for
 both was a compromise that suited neither.
 
-Pitch is not offered for a model of one's own, and that is not an omission. A
+Pitch is not offered at all any more -- not for a model, not for the phone. A
 neural voice has exactly one pitch, its own, and the runtime has no parameter for
-it. The speed and pitch in Settings are the phone's own voice, where both numbers
-do something.
+it; the phone's engine accepted the number and, on most engines, did nothing with
+it. A control that silently does nothing is worse than no control.
+
+The phone's speed went the same way, for a plainer reason: it belongs to whoever
+set that engine up, in the phone's own speech settings, for every app that uses
+it. What is left in Settings is one switch -- whether the phone may read at all.
+It exists for the languages no model of yours covers. Off, such a card is silent
+and says so by not drawing the mark.
 
 ---
 
@@ -237,6 +243,9 @@ who is speaking right now, and **Test the voice** proves it out loud.
 - **"No model. The phone's own voice reads"** -- nothing was added yet. If the
   phone has no voice for that language, install one from the system's own speech
   settings, or add a model here.
+- **The phone's voice is switched off** -- Settings has one switch for it. Off,
+  a language no model of yours reads has no voice at all, on purpose: the mark is
+  not drawn rather than drawn and dead.
 - **"A model is installed but did not load"** -- the folder is a model but this
   phone would not run it: usually memory. Take an `int8` folder, or a `low`
   quality Piper voice instead of `medium`.
@@ -272,8 +281,16 @@ and is read anyway: an unknown number of voices means voice 0 only until a load
 says otherwise, and an unknown speed means the model's own pace.
 
 Rendered audio is cached in `cache/speech/` and capped at 240 files. The cache
-key carries the model, its voice number and its speed, so changing any of them
-means a new rendering rather than yesterday's voice played back.
+key carries whoever would actually say the words: a model, its voice number and
+its speed, or a constant standing in for the phone. Changing any of them means a
+new rendering rather than yesterday's voice played back.
+
+Nothing in that key may change while a card is on screen, and that is not a
+detail. Until `0.2.0 press` the key also held the speed and the pitch this app
+applied to the phone's engine, and those two numbers arrived from storage a
+moment after a session opened: the card was rendered under one key and looked for
+under another. The one card meant to read itself -- a phrase met for the first
+time -- was the one that stayed silent until its mark was pressed by hand.
 
 ---
 

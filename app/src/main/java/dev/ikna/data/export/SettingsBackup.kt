@@ -68,12 +68,15 @@ data class SettingsSnapshot(
     // such field, and a missing field must not be able to switch speech on for
     // someone who never asked for it.
     val speech: Boolean = false,
-    val speechVoices: String = "",
-    // 100 means the engine's own speed and pitch, matching SPEECH_TONE_DEFAULT. A
-    // literal is used because a serializable default has to be a constant here,
-    // and a file written by an older build simply has neither field.
-    val speechRate: Int = 100,
-    val speechPitch: Int = 100,
+    // On, matching the setting's own default: a file written before the phone
+    // voice could be switched off must not silence the install that reads it.
+    //
+    // A speed, a pitch and a voice per language written by an older build are
+    // still in such a file. They are ignored rather than converted, which is
+    // what ignoreUnknownKeys is for: dropping a field must never cost somebody
+    // the rest of their settings.
+    val phoneVoice: Boolean = true,
+    val autoSpeakEvery: Boolean = false,
     val fontName: String = "",
     // The bar's look, defaulting to what a fresh install does. A file written
     // before these existed must not be able to hide the wordmark or move the
@@ -112,9 +115,8 @@ object SettingsBackup {
         animations = settings.animations,
         autoExport = settings.autoExport,
         speech = settings.speechEnabled,
-        speechVoices = settings.speechVoices,
-        speechRate = settings.speechRate,
-        speechPitch = settings.speechPitch,
+        phoneVoice = settings.phoneVoice,
+        autoSpeakEvery = settings.autoSpeakEvery,
         fontName = settings.fontName,
         showWordmark = settings.showWordmark,
         leftHanded = settings.leftHanded,
@@ -169,8 +171,8 @@ object SettingsBackup {
         store.setAnimations(snapshot.animations)
         store.setAutoExport(snapshot.autoExport)
         store.setSpeechEnabled(snapshot.speech)
-        store.setSpeechVoices(snapshot.speechVoices)
-        store.setSpeechTone(snapshot.speechRate, snapshot.speechPitch)
+        store.setPhoneVoice(snapshot.phoneVoice)
+        store.setAutoSpeakEvery(snapshot.autoSpeakEvery)
         store.setShowWordmark(snapshot.showWordmark)
         store.setLeftHanded(snapshot.leftHanded)
         store.setDeckLooks(snapshot.deckLooks)

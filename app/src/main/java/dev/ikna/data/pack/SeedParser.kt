@@ -62,15 +62,24 @@ data class SeedParse(val rows: List<SeedRow>, val problems: List<SeedLineProblem
 object SeedFormat {
 
     /**
-     * Caps, not preferences. A phrase longer than this is a sentence, a sentence
-     * longer than this does not fit a card at display size, and a paste larger
-     * than MAX_ROWS is a mistake rather than a deck — the whole shipped English
-     * pack is 121 lines.
+     * Caps, not preferences. A phrase longer than this is a sentence, and a
+     * sentence longer than this does not fit a card at display size.
+     *
+     * MAX_ROWS is the one that grew: 5000 to 10000. It is not a target. Nobody
+     * learns ten thousand cards, and nothing in this app asks them to — the
+     * governor still lets in a handful of new cards a day and refuses to be
+     * hurried. What the old cap did was punish the opposite habit: bringing a
+     * whole book, or a year of a course, once, and then being fed from it for
+     * as long as it lasts. A deck is storage; the day is what is rationed.
+     *
+     * Ten thousand rows is roughly a megabyte and a half of text and thirty
+     * thousand cards' worth of rows, which imports in seconds from a file and
+     * is well past what anyone will paste by hand.
      */
     const val MAX_PHRASE = 80
     const val MAX_SENTENCE = 300
     const val MAX_TRANSLATION = 160
-    const val MAX_ROWS = 5000
+    const val MAX_ROWS = 10000
 
     /**
      * Splits a paste into rows and problems. Never throws: a bad line is data
@@ -151,12 +160,21 @@ object SeedFormat {
      * upserted by id, and a person fixing line 12 of their own deck should not
      * lose the history of the other 200.
      */
-    fun chunks(packId: String, rows: List<SeedRow>): List<PackChunk> =
+    fun chunks(
+        packId: String,
+        rows: List<SeedRow>,
+        startIndex: Int = 0
+    ): List<PackChunk> =
         rows.mapIndexed { index, row ->
+            // Where this batch begins. Zero when a deck is imported whole, and
+            // the size of the deck when cards are added to one that exists: ids
+            // continue instead of restarting, so a second portion cannot
+            // overwrite the first card by card.
+            val position = startIndex + index + 1
             val start = spanOf(row.sentence, row.phrase) ?: 0
             val end = start + row.phrase.length
             PackChunk(
-                id = packId + "-" + (index + 1).toString().padStart(4, '0'),
+                id = packId + "-" + position.toString().padStart(4, '0'),
                 text = row.phrase,
                 context = row.sentence,
                 translation = row.translation,
@@ -166,7 +184,7 @@ object SeedFormat {
                 // person writing their own deck puts what they care about first,
                 // and a list from a language model comes out roughly in frequency
                 // order anyway.
-                freqRank = index + 1,
+                freqRank = position,
                 tokens = tokens(row.sentence, start, end),
                 audioRef = null
             )

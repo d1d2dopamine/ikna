@@ -94,6 +94,22 @@ The wordmark in the bottom bar is the real artwork, tinted at runtime: the lette
 take the ink of the current palette and the square dot over the `i` takes its
 accent. The letterforms are never redrawn in code.
 
+## What is deliberately not customisable
+
+A background of your own was designed and then dropped, and the reason is worth
+keeping written down: **the app feeds you, you do not feed the app.**
+
+Every hour spent choosing a wallpaper, a mascot or a badge is an hour that feels
+like studying and is not. Apps that let you decorate them end up being decorated,
+and the decoration becomes the thing the user comes back for. So the palette
+chooses the whole screen at once, decks get one square of colour each, and there
+is nothing here to arrange.
+
+What is adjustable is what makes the text readable or the day workable: the
+palette, four colours of your own, the font, the size of the day, the hour of the
+reminder, which hand the controls sit under. Nothing that turns the app into a
+project.
+
 ## Getting to a card
 
 - **The widget.** One number on the home screen and a tap that opens the cards
