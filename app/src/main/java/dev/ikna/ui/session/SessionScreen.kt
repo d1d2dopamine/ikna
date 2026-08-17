@@ -139,7 +139,7 @@ fun SessionScreen(
                             card.chunk.translation
                         } else {
                             null
-                        },,
+                        },
                         revealed = state.revealed,
                         // The one line that says how to turn a card over. It was
                         // computed for every session and then never drawn, so the
