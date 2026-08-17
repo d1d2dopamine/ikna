@@ -60,6 +60,16 @@ half a minute, the other half of this release is about not trusting it blindly.
 - Marked cards are **not deleted**. Settings -> Data says how many there are and
   puts them all back with one button; the day is then planned again with them in it.
 
+### The deck row
+
+- The three dots moved to the **left** of the switch. They had been put on the
+  right, which took the outer edge the switch has held since the first version --
+  the one control on that row people already knew how to find, moved -- and made
+  the pair look unintended.
+- They are also the same height as the switch now. At 44dp against its 32dp they
+  had made every row in the list twelve points taller, which pushed the progress
+  bar and the percentage under it out of proportion.
+
 ### Notes
 
 - No database migration: the schema stays at version 3. The list of marked cards is

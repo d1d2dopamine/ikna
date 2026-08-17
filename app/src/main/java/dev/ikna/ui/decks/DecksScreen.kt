@@ -404,17 +404,33 @@ private fun DeckRow(
                         color = if (owes) accent else muted
                     )
                 }
+                // Settings on the left of the switch, and the same height as it.
+                //
+                // Arriving on the right, the dots took the outer edge the switch
+                // had held since the first version -- so the one control on this
+                // row that people already know how to find had moved, which is
+                // why the pair read as an accident. And at 44dp against the
+                // switch's 32dp they made the whole line twelve points taller,
+                // dragging the progress bar and the percentage down with them.
+                //
+                // 32dp is under the 48dp a touch target is supposed to be, and it
+                // is deliberate here: the switch beside it is 32dp for the same
+                // reason, the two sit at the end of a row that is itself one big
+                // target, and a control that silently changes the height of every
+                // row in the list is the worse of the two problems.
+                IknaIconButton(
+                    glyph = IknaGlyph.DOTS,
+                    onClick = onOpenDeck,
+                    size = 32.dp,
+                    glyphSize = 18.dp,
+                    color = muted,
+                    label = S.t("a11y.010")
+                )
+                Spacer(Modifier.width(Space.sm))
                 IknaToggle(
                     checked = deck.isActive,
                     onCheckedChange = onToggle,
                     label = S.t("a11y.006")
-                )
-                // Beside the switch, because that is where the eye already is
-                // when the answer to "what else can I do to this deck" is wanted.
-                IknaIconButton(
-                    glyph = IknaGlyph.DOTS,
-                    onClick = onOpenDeck,
-                    label = S.t("a11y.010")
                 )
             }
             if (deck.isActive) {
