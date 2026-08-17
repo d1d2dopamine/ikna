@@ -3,6 +3,8 @@ package dev.ikna
 import android.content.Context
 import dev.ikna.data.db.IknaDatabase
 import dev.ikna.audio.Speaker
+import dev.ikna.audio.VoiceInstaller
+import dev.ikna.audio.VoiceModelStore
 import dev.ikna.data.export.JsonExporter
 import dev.ikna.data.pack.PackLoader
 import dev.ikna.data.prefs.SettingsStore
@@ -18,6 +20,8 @@ import dev.ikna.work.WorkScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import dev.ikna.data.prefs.suppressedOf
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
@@ -103,9 +107,43 @@ class AppContainer(context: Context) {
      */
     val speaker = Speaker(context)
 
+    /** The models on disk. One instance, shared by the screen and the installer. */
+    val voiceModels = VoiceModelStore(context)
+
+    /**
+     * Adding a model, held here rather than by the screen that started it.
+     *
+     * Unpacking a Kokoro release takes minutes, and until this existed those
+     * minutes belonged to the voice screen's composition: a back press
+     * cancelled the copy, deleted what had been written, and reported
+     * nothing.
+     */
+    val voiceInstaller = VoiceInstaller(voiceModels)
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     init {
+        // The load switch, readable on demand instead of waited for. The mirror
+        // below still exists, because a switch flipped while a session is open
+        // should reach the next plan without anyone asking; this is what makes a
+        // plan built before any screen is alive -- the nightly worker, a cold
+        // start -- use the user's own norm rather than the file default.
+        // The learner's own corrections, read straight from storage for the same
+        // reason the load switch is: a plan can be built in a process where no
+        // screen has collected anything yet.
+        learningRepository.suppressedChunks = {
+            suppressedOf(settings.flow.first().suppressed).toSet()
+        }
+        learningRepository.onSuppress = { chunkId -> settings.suppressChunk(chunkId) }
+
+        learningRepository.loadSettings = {
+            val stored = settings.flow.first()
+            LearningRepository.LoadSetting(
+                auto = stored.autoLoad,
+                manual = stored.manualLoad
+            )
+        }
+
         // Settings mirror into the repository, so a switch takes effect on the
         // next plan without any screen having to wire anything up. Breaks are
         // deliberately absent from here: the algorithm infers them from the

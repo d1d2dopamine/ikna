@@ -378,19 +378,22 @@ private fun DeckRow(
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
-                    // The name opens the deck itself; the rest of the row
-                    // starts a session. Two destinations in one row is a risk
-                    // worth taking only in this direction: the big target does
-                    // the thing done daily, and the small one leads to the
-                    // settings, sharing and deletion that happen once.
+                    // The title is a title again.
+                    //
+                    // It used to be the only door to the deck's own screen, which
+                    // meant the two destinations in this row were told apart by
+                    // aiming at a word rather than at a control: nothing said the
+                    // name was pressable, and the square on the left -- the one
+                    // thing that looks like a button -- opened a session. Now the
+                    // whole row starts the session, and the three dots below open
+                    // the deck. Both are visible before they are touched.
                     Text(
                         text = deck.title,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onBackground.copy(
                             alpha = if (deck.isActive) 1f else 0.55f
-                        ),
-                        modifier = Modifier.clickable(onClick = onOpenDeck)
+                        )
                     )
                     Spacer(Modifier.height(Space.xs))
                     Text(
@@ -405,6 +408,13 @@ private fun DeckRow(
                     checked = deck.isActive,
                     onCheckedChange = onToggle,
                     label = S.t("a11y.006")
+                )
+                // Beside the switch, because that is where the eye already is
+                // when the answer to "what else can I do to this deck" is wanted.
+                IknaIconButton(
+                    glyph = IknaGlyph.DOTS,
+                    onClick = onOpenDeck,
+                    label = S.t("a11y.010")
                 )
             }
             if (deck.isActive) {

@@ -63,8 +63,8 @@ val hasFixedKey = keystoreFile.exists()
 // why the count restarted with the epoch and the code did not: docs/VERSIONS.md.
 // It is written down once, there, and not repeated here.
 // ---------------------------------------------------------------------------
-val appVersionName = "0.2.0 press"
-val appVersionCode = 200020000        // press epoch: 200000000 + 0.2.0
+val appVersionName = "0.3.0 press"
+val appVersionCode = 200030000        // press epoch: 200000000 + 0.3.0
 
 // A build from a clone has to be able to come out unsigned: the key committed
 // here is this project's, and nobody else should be shipping APKs under it.

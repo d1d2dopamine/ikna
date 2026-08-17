@@ -86,7 +86,10 @@ data class SettingsSnapshot(
     // Deck icons and colours. They name decks by id, so a restore onto an install
     // without those decks simply carries a line nothing reads -- which is right:
     // importing the deck again gives it its square back.
-    val deckLooks: String = ""
+    val deckLooks: String = "",
+    // The learner's own corrections. Restoring a backup without them would
+    // put every card they threw away back into circulation.
+    val suppressed: String = ""
 )
 
 object SettingsBackup {
@@ -120,7 +123,8 @@ object SettingsBackup {
         fontName = settings.fontName,
         showWordmark = settings.showWordmark,
         leftHanded = settings.leftHanded,
-        deckLooks = settings.deckLooks
+        deckLooks = settings.deckLooks,
+        suppressed = settings.suppressed
     )
 
     fun encode(settings: IknaSettings): String = json.encodeToString(
@@ -176,5 +180,6 @@ object SettingsBackup {
         store.setShowWordmark(snapshot.showWordmark)
         store.setLeftHanded(snapshot.leftHanded)
         store.setDeckLooks(snapshot.deckLooks)
+        store.setSuppressed(snapshot.suppressed)
     }
 }

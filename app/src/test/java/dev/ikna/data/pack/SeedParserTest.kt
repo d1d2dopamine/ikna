@@ -160,6 +160,101 @@ class SeedParserTest {
 	}
 
 	@Test
+	fun fourthColumnCarriesTheSource() {
+		// A source is the only defence this app can offer against a card a model
+		// invented: it cannot check the claim, but it can hand the person somewhere
+		// to go and look. A fourth column used to fail the whole line.
+		val parse = SeedFormat.parse(
+			"long-term potentiation | Repeated stimulation produced long-term " +
+				"potentiation in the slice. | a lasting rise in synaptic strength | " +
+				"Kandel ch. 67"
+		)
+		assertEquals(0, parse.problems.size)
+		assertEquals(1, parse.rows.size)
+		assertEquals("Kandel ch. 67", parse.rows[0].source)
+
+		// It travels on the card itself, because there is no column for it in the
+		// database yet and a citation nobody can see is not a citation.
+		val chunk = SeedFormat.chunks("neuro", parse.rows).first()
+		assertTrue(chunk.translation.startsWith("a lasting rise in synaptic strength"))
+		assertTrue(chunk.translation.endsWith("Kandel ch. 67"))
+	}
+
+	@Test
+	fun threeColumnsStillMeanNoSource() {
+		val parse = SeedFormat.parse("hang on | Just hang on. | погоди")
+		assertEquals("", parse.rows[0].source)
+		val chunk = SeedFormat.chunks("en-ru", parse.rows).first()
+		assertFalse(chunk.translation.contains(SeedFormat.SOURCE_MARK))
+	}
+
+	@Test
+	fun fiveColumnsAreStillRefused() {
+		// Four is the format. Five means the text has bars in it that were never
+		// meant as separators, and guessing which one is real is how a deck ends up
+		// with half a sentence as a meaning.
+		val parse = SeedFormat.parse("a | b contains a | c | d | e")
+		assertEquals(0, parse.rows.size)
+		assertEquals(SeedProblem.NOT_THREE_COLUMNS, parse.problems[0].problem)
+	}
+
+	@Test
+	fun aDefinitionThatRepeatsTheTermIsFlagged() {
+		// Accepted, not refused: it is a real line and may still be useful. But it
+		// is also the commonest way a model fills a quota, and an import that says
+		// 200 cards without mentioning it is lying by omission.
+		val parse = SeedFormat.parse(
+			"mitochondria | Mitochondria sit in the cytoplasm. | mitochondria in a cell"
+		)
+		assertEquals(1, parse.rows.size)
+		assertEquals(1, parse.warnings.size)
+		assertEquals(SeedWarning.DEFINITION_REPEATS_TERM, parse.warnings[0].warning)
+		assertEquals(1, parse.warnings[0].line)
+	}
+
+	@Test
+	fun hedgingIsFlagged() {
+		val parse = SeedFormat.parse(
+			"citric acid cycle | The citric acid cycle runs in the matrix. | " +
+				"probably the main oxidative pathway"
+		)
+		assertEquals(SeedWarning.HEDGED, parse.warnings[0].warning)
+	}
+
+	@Test
+	fun aNumberIsWorthChecking() {
+		// Three digits or more. Two arms is not a claim; 1040 is.
+		val parse = SeedFormat.parse(
+			"action potential | An action potential crosses the axon. | peaks near 1040 mV"
+		)
+		assertEquals(SeedWarning.HAS_NUMBERS, parse.warnings[0].warning)
+	}
+
+	@Test
+	fun theSameMeaningTwiceIsFlagged() {
+		val parse = SeedFormat.parse(
+			"make it | I can't make it tonight. | добраться\n" +
+				"get there | I can't get there tonight. | Добраться!"
+		)
+		assertEquals(2, parse.rows.size)
+		assertEquals(1, parse.warnings.size)
+		assertEquals(SeedWarning.SAME_MEANING, parse.warnings[0].warning)
+		assertEquals(2, parse.warnings[0].line)
+	}
+
+	@Test
+	fun anOrdinaryDeckIsNotFlaggedAtAll() {
+		// The whole point of a hint is that it is rare. One that fires on a clean
+		// deck is noise, and noise is ignored, which costs the hint its meaning.
+		val parse = SeedFormat.parse(
+			"hang on | Just hang on, I'll grab my keys. | погоди\n" +
+				"give up | Don't give up yet. | сдаваться"
+		)
+		assertEquals(2, parse.rows.size)
+		assertEquals(0, parse.warnings.size)
+	}
+
+	@Test
 	fun theTwoFormatsAreToldApartByContent() {
 		// Not by file name: a file picked out of a chat app is called "document".
 		val jsonl = "{\"id\":\"a\",\"text\":\"hang on\"}"

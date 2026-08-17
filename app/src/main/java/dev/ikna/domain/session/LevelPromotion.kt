@@ -40,10 +40,21 @@ object LevelPromotion {
     /**
      * @param newRoomToday what is left of the day's new-material budget: what
      *   the governor allowed minus what has already been introduced today.
+     * @param maxLevel the last level this deck uses. Production -- being shown
+     *   the meaning and having to produce the phrase -- is a language exercise.
+     *   On a subject deck (neuroscience, a programming language, mathematics) it
+     *   asks for the exact wording of a definition, which is memorising a
+     *   sentence rather than holding a concept, and it grows the queue by half to
+     *   do it. Such decks stop at cloze.
      * @return the level to open, or null when nothing should be created.
      */
-    fun nextLevel(level: Int, stability: Double, newRoomToday: Int): Int? = when {
-        level >= Level.PRODUCTION.value -> null
+    fun nextLevel(
+        level: Int,
+        stability: Double,
+        newRoomToday: Int,
+        maxLevel: Int = Level.PRODUCTION.value
+    ): Int? = when {
+        level >= maxLevel -> null
         stability < STABILITY_DAYS -> null
         newRoomToday <= 0 -> null
         else -> level + 1

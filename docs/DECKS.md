@@ -52,6 +52,45 @@ The prompt itself is an asset, in English, addressed to a model rather than to a
 person, and nothing else in it is rewritten. If a question is ever renamed there,
 the answer with nowhere to go is dropped and the prompt still goes out whole.
 
+## Languages and subjects
+
+A deck is either about a **language** or about a **subject**, and the add-deck
+screen asks which before it asks anything else. The answer changes three things
+and nothing more:
+
+| | Language deck | Subject deck |
+| --- | --- | --- |
+| Prompt | `prompt/deck_prompt.txt` | `prompt/subject_prompt.txt` |
+| Voice | the deck's language, and speech if a model is installed | none; nothing in it is meant to be pronounced |
+| Levels | recognise, complete, **say it out loud** | recognise, complete |
+| Order of new cards | frequency first, so common words come first | the order written in the file |
+
+The core never needed to know. A card has always been a unit, one sentence that
+carries it, and what it means -- which describes a definition in neuroscience as
+well as a phrase in Polish. Only four things were language-shaped, and all four
+are now decided by the deck: the prompt, the voice, the third level, and the
+order.
+
+The third level is the one that matters. It asks the person to produce the phrase
+from its meaning, out loud, which is a question about a language. A definition has
+no pronunciation to produce, so a subject deck stops at the second level and the
+day's budget is not spent on a question that cannot be answered.
+
+The order matters almost as much. In a language deck new chunks arrive by
+frequency, because the commonest words are the ones worth knowing first. A subject
+is a curriculum: line 40 may be meaningless before line 39, so a subject deck
+introduces its cards in the order the file was written and the prompt says so in
+plain words. When both kinds of deck are active, new cards are split between them
+rather than taken from whichever happens to sort first, so switching to a subject
+does not quietly stop a language.
+
+What is deliberately **not** here: images, formulas that need rendering, LaTeX,
+diagrams. A card is one line of plain text. Half of mathematics and a good part of
+anatomy live in pictures, and pretending otherwise with ASCII art would make cards
+that are wrong in a way that is hard to notice. The prompt says the same thing to
+the model: if a concept only makes sense with a figure, write the definition it
+rests on and point at the figure in the source column.
+
 ## The format
 
 A deck is plain text. One line is one card, three parts separated by a bar:
@@ -86,6 +125,61 @@ recognised from the text rather than from the file name. The file picker no long
 offers photos and video — it used to ask for `*/*`, which meant the app would
 happily read a two-gigabyte video into a string and die. Anything above four
 megabytes is refused before it is opened.
+
+## The fourth column: where the card came from
+
+A line may carry a fourth field:
+
+```
+term | a sentence that uses it | what it means | where it comes from
+```
+
+It is optional, it is capped at 60 characters, and it is the cheapest defence this
+app has against a card that is simply wrong. ikna has no `INTERNET` permission and
+never will, so nothing inside it can check a claim. A source cannot make a card
+true either -- but it turns "is this right?" into somewhere to go and look, which is
+the most an offline app can honestly offer.
+
+Until the schema gains a column of its own, the source travels at the end of the
+meaning, after a dash on its own line. That is a compromise and it is written down
+as one: the alternative was to hold the whole idea back for a release that can
+migrate the database.
+
+## Lines worth reading twice
+
+A deck can now be written by a model in half a minute, and a model pads. Four
+things are counted on import and reported next to the number of cards added:
+
+| Flag | What it means |
+| --- | --- |
+| the meaning repeats the term | "mitochondrion -- a mitochondrion in a cell". Teaches nothing. |
+| a hedged wording | "probably", "I think". The model saying it does not know, in a card that will be learned as a fact. |
+| this meaning already appeared | two terms, one definition. The commonest way a quota gets filled. |
+| has numbers | three digits or more: a year, a constant, a dose. What models invent most confidently. |
+
+None of them refuses a line -- the deck installs, all of it. They are the
+difference between an import that says "200 cards" and one that says "200 cards,
+and seven of them are worth reading before you learn them".
+
+## When a card turns out to be wrong
+
+Under a revealed card there is **this card is wrong**. One tap, no dialog, and:
+
+- the card leaves the rotation -- today's session, the plan, and every future one;
+- **nothing is written to the review log**, so the mistake does not count as a
+  lapse, does not drag the accuracy the governor reads, and cannot cost you
+  tomorrow's new cards;
+- if it was introduced today, the day's count of new material is given back.
+
+That last part is the reason the button exists at all. Before it, the only way to
+say "this card is nonsense" was to answer *forgot* -- which told FSRS to show the
+nonsense more often, pushed the day's accuracy down, and could close new material
+for a week over a card the deck got wrong.
+
+The rows themselves are not deleted. The list of marked cards lives in settings
+under **Data**, it says how many there are, and one button puts them all back. A
+one-tap action with no way back would be data loss in an app whose whole promise
+is that nothing is lost.
 
 ## What a pasted deck does not get
 

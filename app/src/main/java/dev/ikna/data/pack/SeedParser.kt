@@ -51,13 +51,60 @@ enum class SeedProblem {
     DUPLICATE
 }
 
-/** One accepted line. */
-data class SeedRow(val phrase: String, val sentence: String, val translation: String)
+/**
+ * Why an accepted line is worth a second look.
+ *
+ * A deck can now be written by a model in half a minute, and nothing inside this
+ * app can check whether what it wrote is true -- there is no network permission
+ * and there never will be, and a second model would only be a second guess. What
+ * can be checked is whether a line carries the marks of text that was produced to
+ * fill a quota rather than to teach something:
+ *
+ *  - a definition that just repeats the term it defines teaches nothing;
+ *  - a hedge ("probably", "кажется") is the model saying it does not know;
+ *  - the same meaning under two different terms is padding;
+ *  - numbers and dates are what a model invents most confidently and most often.
+ *
+ * None of these refuses a line. They are the difference between an import that
+ * says "200 cards" and one that says "200 cards, and these seven are worth
+ * reading before you learn them" -- which is the only honest thing an offline app
+ * can say about generated material.
+ */
+enum class SeedWarning {
+    DEFINITION_REPEATS_TERM,
+    HEDGED,
+    SAME_MEANING,
+    HAS_NUMBERS
+}
+
+/**
+ * One accepted line.
+ *
+ * [source] is the optional fourth column: where the card came from -- a chapter, a
+ * paper, a lecture. It is the cheapest defence there is against a wrong card,
+ * because it turns "is this true?" into a place to go and look, and it is the one
+ * thing a model can be asked for that it cannot fake without becoming obviously
+ * wrong. Empty for every deck that does not use it, which is every deck written
+ * before this version.
+ */
+data class SeedRow(
+    val phrase: String,
+    val sentence: String,
+    val translation: String,
+    val source: String = ""
+)
 
 /** One refused line, kept with its number so the screen can quote it back. */
 data class SeedLineProblem(val line: Int, val text: String, val problem: SeedProblem)
 
-data class SeedParse(val rows: List<SeedRow>, val problems: List<SeedLineProblem>)
+/** One accepted but suspicious line, kept the same way. */
+data class SeedLineWarning(val line: Int, val text: String, val warning: SeedWarning)
+
+data class SeedParse(
+    val rows: List<SeedRow>,
+    val problems: List<SeedLineProblem>,
+    val warnings: List<SeedLineWarning> = emptyList()
+)
 
 object SeedFormat {
 
@@ -82,6 +129,21 @@ object SeedFormat {
     const val MAX_ROWS = 10000
 
     /**
+     * The optional fourth column: a pointer, not a paragraph. Sixty characters
+     * hold "Kandel ch. 65" or "arXiv:2103.00020" and refuse an essay.
+     */
+    const val MAX_SOURCE = 60
+
+    /** How a source is joined to the meaning on the card itself. */
+    const val SOURCE_MARK = "\n\u2014 "
+
+    /**
+     * How many suspicious lines are remembered. The count is what the screen
+     * shows; the list only has to be long enough to name the first one.
+     */
+    const val MAX_WARNINGS = 500
+
+    /**
      * Splits a paste into rows and problems. Never throws: a bad line is data
      * about a bad line, and an import that aborts on line 40 of 300 wastes the
      * other 299.
@@ -89,7 +151,11 @@ object SeedFormat {
     fun parse(text: String): SeedParse {
         val rows = ArrayList<SeedRow>()
         val problems = ArrayList<SeedLineProblem>()
+        val warnings = ArrayList<SeedLineWarning>()
         val seen = HashSet<String>()
+        // Meaning -> the line that said it first. Two terms with one definition is
+        // padding, and it can only be seen by remembering what came before.
+        val meanings = HashMap<String, Int>()
         var number = 0
 
         for (raw in text.lineSequence()) {
@@ -99,7 +165,11 @@ object SeedFormat {
             if (line.isEmpty()) continue
 
             val parts = columns(line)
-            if (parts.size != 3) {
+            // Three columns, or four when the deck names where each card came
+            // from. A fourth column used to fail the whole line, which meant the
+            // one habit worth encouraging -- citing a source -- was the one thing
+            // the importer punished.
+            if (parts.size != 3 && parts.size != 4) {
                 problems += SeedLineProblem(number, line, SeedProblem.NOT_THREE_COLUMNS)
                 continue
             }
@@ -109,6 +179,7 @@ object SeedFormat {
             // Tidied before it is measured or stored: what arrives in this column
             // is a translation with the model's habits attached to it.
             val translation = tidyTranslation(phrase, parts[2].trim())
+            val source = if (parts.size == 4) parts[3].trim().take(MAX_SOURCE) else ""
 
             if (phrase.isEmpty() || sentence.isEmpty() || translation.isEmpty()) {
                 problems += SeedLineProblem(number, line, SeedProblem.EMPTY_FIELD)
@@ -132,11 +203,68 @@ object SeedFormat {
                 continue
             }
 
-            rows += SeedRow(phrase = phrase, sentence = sentence, translation = translation)
+            rows += SeedRow(
+                phrase = phrase,
+                sentence = sentence,
+                translation = translation,
+                source = source
+            )
+
+            // Accepted, and still worth reading before it is learned.
+            if (warnings.size < MAX_WARNINGS) {
+                val key = normalisedMeaning(translation)
+                val repeated = key.isNotEmpty() && meanings.containsKey(key)
+                if (key.isNotEmpty()) meanings.putIfAbsent(key, number)
+                val warning =
+                    if (repeated) SeedWarning.SAME_MEANING else suspicion(phrase, translation)
+                if (warning != null) warnings += SeedLineWarning(number, line, warning)
+            }
         }
 
-        return SeedParse(rows = rows, problems = problems)
+        return SeedParse(rows = rows, problems = problems, warnings = warnings)
     }
+
+    /**
+     * Words a model reaches for when it is guessing. Kept short and literal on
+     * purpose: this is a hint, and a hint that fires on every second card is
+     * noise that gets ignored, which is worse than no hint at all.
+     */
+    private val HEDGES = listOf(
+        "maybe", "perhaps", "probably", "i think", "as far as i know", "not sure",
+        "возможно", "вероятно", "кажется", "по-видимому", "наверное",
+        "chyba", "prawdopodobnie", "byc moze"
+    )
+
+    /** Three digits or more: a year, a constant, a dose. Not "two" or "5%". */
+    private val LONG_NUMBER = Regex("[0-9]{3,}")
+
+    /**
+     * The first thing wrong with an otherwise valid line, or null.
+     *
+     * One warning per line, in order of how much it matters. A line can be all
+     * three at once, and a screen that says three things about one line says
+     * nothing about the other 199.
+     */
+    private fun suspicion(phrase: String, translation: String): SeedWarning? {
+        val meaning = translation.lowercase()
+        val term = phrase.lowercase()
+        if (term.length >= 3 && meaning.contains(term)) {
+            return SeedWarning.DEFINITION_REPEATS_TERM
+        }
+        if (HEDGES.any { meaning.contains(it) }) return SeedWarning.HEDGED
+        if (LONG_NUMBER.containsMatchIn(meaning)) return SeedWarning.HAS_NUMBERS
+        return null
+    }
+
+    /** Case, punctuation and spacing removed, so two paddings match. */
+    private fun normalisedMeaning(translation: String): String =
+        translation.lowercase()
+            .map { if (it.isLetterOrDigit()) it else ' ' }
+            .joinToString("")
+            .trim()
+            .replace(WHITESPACE, " ")
+
+    private val WHITESPACE = Regex("\\s+")
 
     /**
      * Which of the two formats a paste or a file is, decided on its first real
@@ -177,7 +305,15 @@ object SeedFormat {
                 id = packId + "-" + position.toString().padStart(4, '0'),
                 text = row.phrase,
                 context = row.sentence,
-                translation = row.translation,
+                // The source travels with the meaning, because there is
+                // nowhere else to put it without a schema migration -- and a
+                // citation the learner can see while doubting a card is worth
+                // far more than a tidy column would be.
+                translation = if (row.source.isEmpty()) {
+                    row.translation
+                } else {
+                    row.translation + SOURCE_MARK + row.source
+                },
                 targetStart = start,
                 targetEnd = end,
                 // Order is the only ranking available here. It is not nothing: a

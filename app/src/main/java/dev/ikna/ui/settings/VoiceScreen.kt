@@ -17,7 +17,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,18 +27,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import dev.ikna.AppContainer
 import dev.ikna.audio.MAX_RATE
 import dev.ikna.audio.MIN_RATE
 import dev.ikna.audio.RATE_STEP
 import dev.ikna.audio.SpeechSource
+import dev.ikna.audio.VoiceInstallState
 import dev.ikna.audio.VoiceModelInstall
 import dev.ikna.audio.VoiceModelKind
 import dev.ikna.audio.VoiceModelProblem
 import dev.ikna.audio.VoiceModelResult
-import dev.ikna.audio.VoiceModelStore
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
@@ -71,14 +73,20 @@ fun VoiceScreen(
     speechEnabled: Boolean,
     onBack: () -> Unit
 ) {
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val store = remember { VoiceModelStore(context) }
+    val store = container.voiceModels
+
+    // An installation is not this screen's to own. It used to be: it ran in the
+    // composition's scope, and walking back out of a ten-minute unpacking
+    // cancelled it and deleted what had been written, silently. Now the screen
+    // only watches, and what it watches outlives it.
+    val installer = container.voiceInstaller
+    val install by installer.state.collectAsState()
+    val running = install as? VoiceInstallState.Running
+    val busy = running != null
 
     var models by remember { mutableStateOf<List<VoiceModelInstall>>(emptyList()) }
     var ready by remember { mutableStateOf<Boolean?>(null) }
-    var busy by remember { mutableStateOf(false) }
-    var copied by remember { mutableStateOf(0) }
     var note by remember { mutableStateOf<String?>(null) }
 
     /**
@@ -116,6 +124,30 @@ fun VoiceScreen(
 
     LaunchedEffect(Unit) { refresh() }
 
+    // The result of an install that may well have finished while this screen was
+    // closed. The installer holds it until it has been shown once, so leaving
+    // during a copy no longer means never hearing how it went.
+    LaunchedEffect(install) {
+        val done = install as? VoiceInstallState.Done ?: return@LaunchedEffect
+        note = when (val result = done.result) {
+            is VoiceModelResult.Installed -> S.t("voice.024")
+            is VoiceModelResult.Refused -> explain(result.problem)
+            is VoiceModelResult.Failed -> S.t("voice.023") + (result.message ?: "")
+        }
+        installer.acknowledge()
+        container.speaker.clearCache()
+        refresh()
+    }
+
+    // Unpacking a large model runs for minutes with no touches in it, and a
+    // phone that dims and locks is a phone whose process the system is free to
+    // take -- which it did, halfway, with nothing to show for it afterwards.
+    val view = LocalView.current
+    DisposableEffect(busy) {
+        view.keepScreenOn = busy
+        onDispose { view.keepScreenOn = false }
+    }
+
     /**
      * Every change to a model goes through here, because every one of them has the
      * same two consequences: audio already rendered was rendered by whoever spoke
@@ -134,21 +166,9 @@ fun VoiceScreen(
         ActivityResultContracts.OpenDocumentTree()
     ) { uri: Uri? ->
         if (uri == null) return@rememberLauncherForActivityResult
-        scope.launch {
-            busy = true
-            copied = 0
-            note = null
-            ready = null
-            val result = store.install(uri) { done -> copied = done }
-            busy = false
-            note = when (result) {
-                is VoiceModelResult.Installed -> S.t("voice.024")
-                is VoiceModelResult.Refused -> explain(result.problem)
-                is VoiceModelResult.Failed -> S.t("voice.023") + (result.message ?: "")
-            }
-            container.speaker.clearCache()
-            refresh()
-        }
+        note = null
+        ready = null
+        installer.installFolder(uri)
     }
 
     // One file rather than a folder, and "*/*" rather than a bzip2 mime type:
@@ -159,21 +179,9 @@ fun VoiceScreen(
         ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         if (uri == null) return@rememberLauncherForActivityResult
-        scope.launch {
-            busy = true
-            copied = 0
-            note = null
-            ready = null
-            val result = store.installArchive(uri) { done -> copied = done }
-            busy = false
-            note = when (result) {
-                is VoiceModelResult.Installed -> S.t("voice.024")
-                is VoiceModelResult.Refused -> explain(result.problem)
-                is VoiceModelResult.Failed -> S.t("voice.023") + (result.message ?: "")
-            }
-            container.speaker.clearCache()
-            refresh()
-        }
+        note = null
+        ready = null
+        installer.installArchive(uri)
     }
 
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
@@ -494,10 +502,32 @@ fun VoiceScreen(
                 onClick = { archivePicker.launch(arrayOf("*/*")) }
             )
 
+            // What a copy in progress says about itself.
+            //
+            // A percentage of the picked file, because the old line -- files
+            // copied so far -- was true and useless: a Kokoro release is one file
+            // of a few hundred megabytes and some crumbs, so it read "1" from the
+            // first second to the last and every user who saw it decided the app
+            // had hung. The two lines under it answer the two questions that
+            // followed: why is this slow, and may I leave.
             if (busy) {
+                val percent = running?.progress?.percent ?: -1
                 Spacer(Modifier.height(Space.md))
                 Text(
-                    text = S.t("voice.018") + copied,
+                    text = if (percent >= 0) S.t("voice.049") + " " + percent + "%"
+                    else S.t("voice.018") + (running?.progress?.files ?: 0),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(Modifier.height(Space.hair))
+                Text(
+                    text = S.t("voice.050"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = muted
+                )
+                Spacer(Modifier.height(Space.hair))
+                Text(
+                    text = S.t("voice.051"),
                     style = MaterialTheme.typography.bodySmall,
                     color = muted
                 )

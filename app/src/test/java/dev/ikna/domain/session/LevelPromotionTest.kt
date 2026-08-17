@@ -44,6 +44,47 @@ class LevelPromotionTest {
     }
 
     @Test
+    fun `a subject deck stops one level early`() {
+        // The third level asks the person to produce the phrase out loud, which
+        // is a question about a language. A deck of definitions has no
+        // pronunciation to produce, and asking for one turns a correct answer
+        // into a failure. The cap is passed in rather than read off the card,
+        // because it belongs to the deck and promotion happens in the answer path.
+        assertEquals(
+            1,
+            LevelPromotion.nextLevel(
+                level = 0,
+                stability = 21.0,
+                newRoomToday = 3,
+                maxLevel = Level.CLOZE.value
+            )
+        )
+        assertNull(
+            "A subject card solid at the second level has nowhere left to " +
+                "go, and must not spend the day's budget pretending otherwise.",
+            LevelPromotion.nextLevel(
+                level = Level.CLOZE.value,
+                stability = 500.0,
+                newRoomToday = 10,
+                maxLevel = Level.CLOZE.value
+            )
+        )
+    }
+
+    @Test
+    fun `a language deck still reaches production`() {
+        assertEquals(
+            2,
+            LevelPromotion.nextLevel(
+                level = 1,
+                stability = 40.0,
+                newRoomToday = 1,
+                maxLevel = Level.PRODUCTION.value
+            )
+        )
+    }
+
+    @Test
     fun `waiting for room costs nothing`() {
         // The same item, one day later, with the budget available again.
         val today = LevelPromotion.nextLevel(level = 0, stability = 30.0, newRoomToday = 0)

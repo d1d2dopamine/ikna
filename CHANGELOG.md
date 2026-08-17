@@ -12,6 +12,192 @@ replace the space with a dash: `0.1.1 press` is tagged `v0.1.1-press`. What the
 words mean and what a number promises inside an epoch is written down once, in
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
+## 0.3.0 press
+
+What you can learn here, and what happens when a deck is wrong about it.
+
+The app was built for languages, and its core turned out not to care -- a card is a
+unit, a sentence that carries it and what it means, which is a definition in
+neuroscience as well as a phrase in Polish. Four things were language-shaped;
+all four now belong to the deck. And because a deck can be written by a model in
+half a minute, the other half of this release is about not trusting it blindly.
+
+### Subject decks
+
+- The add-deck screen asks **what is being learned** -- a language or a subject --
+  before anything else, and everything after that follows from the answer.
+- A subject deck gets its own prompt (`assets/prompt/subject_prompt.txt`): four
+  columns, no images, no hedging, order as curriculum, and a rule against padding.
+- A subject deck stops at the **second** level. The third level asks the person to
+  say the phrase out loud from its meaning, which is a question about a language; a
+  definition has no pronunciation to produce, and the day's budget is no longer
+  spent on a question that cannot be answered.
+- New cards from a subject deck arrive **in the order the file was written**, not
+  by frequency: line 40 can be meaningless before line 39. When a language deck and
+  a subject deck are both active, new material is split between them instead of
+  coming from whichever sorted first.
+- A subject deck claims no language and is not read aloud. A voice guessing at
+  Latin anatomy is worse than silence.
+
+### Not trusting a generated deck
+
+- A deck line may carry a **fourth column**: where the card came from. Optional,
+  60 characters, and the only defence an app with no network can offer -- it cannot
+  check a claim, but it can hand you somewhere to look. Four columns used to fail
+  the whole line.
+- Import now **counts what it accepted but doubts** and says so next to the number
+  of cards added: definitions that repeat their own term, hedged wordings
+  ("probably", "I think"), the same meaning under two different terms, and numbers
+  of three digits or more. Nothing is refused; the deck installs in full.
+- New in the session: **this card is wrong**. One tap under a revealed card. It
+  leaves the rotation, and -- this is the point -- **nothing is written to the
+  review log**: no lapse, no dent in the accuracy the governor reads, no week
+  without new material because of a card the deck got wrong. If the card was
+  introduced today, the day's new-material room is given back.
+- Before this, the only way to say "this card is nonsense" was to answer *forgot*,
+  which told the scheduler to show the nonsense more often and told the governor the
+  learner was struggling. That was the single worst-behaved thing left in the app.
+- Marked cards are **not deleted**. Settings -> Data says how many there are and
+  puts them all back with one button; the day is then planned again with them in it.
+
+### Notes
+
+- No database migration: the schema stays at version 3. The list of marked cards is
+  a preference, and a card's source travels at the end of its meaning. Both are
+  compromises, both are written down in `docs/DECKS.md`, and both get a column of
+  their own in the release that migrates the database.
+- The review log is untouched, as always -- and this release exists partly to keep
+  a bad deck from writing to it.
+
+## 0.2.2 press
+
+The day itself. Three things in settings behaved as if nobody used them, deck
+names could not be changed at all, and the governor -- the part of this app that
+is supposed to be the reason it works -- was quietly making decisions from
+numbers it could not see.
+
+### The day can be earned
+
+The governor rules once, before the day's first answer. On a day whose queue
+already fills the capacity it correctly finds no room for new material, and then
+the user answers everything faster than the forecast expected -- and the app has
+nothing unfamiliar left to show. Finishing changed nothing, which is the exact
+treadmill this app was written against.
+
+New material is now earned inside the session: every four reviews past the day's
+obligation open one more chunk. Four, because that is what a chunk costs over the
+following week, so it is paid for rather than borrowed from tomorrow. Gates are
+not overridden -- a pile, a quiet week, poor accuracy, a return, an overheated day
+still mean nothing new, however much work is done.
+
+And there is now a hard daily ceiling on new material, a quarter of the day's
+capacity, separate from the headroom arithmetic. Headroom answers "is there room
+today"; this answers "should there be anything left for tomorrow". It is never
+zero: a day with nothing unfamiliar in it is the day this becomes a chore.
+
+### A day that ran hot is not repeated
+
+Everything in the governor protected the queue from growing too fast. Nothing
+protected the user from being spent, and one heroic evening is how the next four
+days get skipped.
+
+A day counts as overheated when it was far above the median day **and** either
+its accuracy fell away from the usual or its plan was abandoned -- three
+agreements, because any one alone is an ordinary day. A big, accurate, finished
+day is a good day and is left alone. When it fires, new material stops and the
+following day shrinks to three quarters of the norm. Reviews still arrive, and
+the session says why.
+
+### The norm survives a restart
+
+The daily target was held in a field that only a live settings collector ever
+filled in. A plan built by the nightly worker, or by the first screen of a freshly
+started process, could therefore use the 40 from `governor.json` while the user's
+own norm said 15 -- a day a third larger than the one that was asked for, with
+nothing on any screen that could explain it. The stored value is now read at the
+moment the plan is built.
+
+### The log keeps the reason
+
+The safety valve wrote its own name over the gate it was overriding, so the one
+event most worth investigating -- something is wrong, and a chunk is being handed
+out anyway -- recorded nothing about itself. It now logs both
+(`SAFETY_VALVE/LOW_ACCURACY`). The accelerator's accuracy threshold moved into
+the config too; it was a literal two lines from the three configured numbers that
+mean the same thing, so tuning could not reach it.
+
+### Renaming a deck
+
+Possible at last, and where it should have been from the start. Deck settings
+used to open by tapping the deck's title, which is not a place anyone looks for
+settings -- and it took the title's place as the way into a session. There is now
+a three-dot button beside the switch: settings there, the whole row opens the
+session, and the title is a field you can edit.
+
+### Settings that behave
+
+The palette no longer changes when a tap lands in the empty space beside a tile;
+only the tile itself and its caption are clickable. The row of section names at
+the top follows the scroll and keeps the current section centred, so it is a
+position indicator rather than a static list. The paragraph under the palettes,
+the captions under four switches, the section subtitles that restated their own
+headings and the leftover sentence about breaks are gone: explanations are kept
+where an action cannot be undone, and nowhere else.
+
+## 0.2.1 press
+
+Adding a voice model that is large. Every part of that path was built for the
+other kind -- a dozen small files that land in a second -- and the release people
+actually want, Kokoro, is one file of a few hundred megabytes. It did not fail.
+It sat there saying `1`, for as long as anyone was willing to watch, and there
+was no way to tell from the outside that anything was happening at all.
+
+### Progress that moves
+
+The line under the button counted finished files. For a Piper voice that is a
+count from one to twelve; for a Kokoro release there is one file to finish, so
+the number was `1` from the first second until the last and then the model
+appeared, minutes later, if the user had not given up.
+
+It now counts bytes of the file that was picked, reported from inside the writing
+of a single file, and shows a percentage. Two lines under it answer the two
+questions that always followed: bzip2 is unpacked by the phone's own processor,
+which is why this takes minutes, and leaving the screen is allowed.
+
+### An install that outlives the screen
+
+The copy used to run in the voice screen's own coroutine scope, which ends when
+the screen does. A back press in the middle of a ten-minute unpacking cancelled
+the work, deleted everything already written, and said nothing about either --
+the user came back to a list with no new model in it and no reason given.
+
+Installing is now owned by the app rather than by the screen, and the screen only
+watches it. Come back later and the percentage is still climbing; come back after
+it finished and the result is still there waiting to be read. It is deliberately
+not a foreground service, so the system may still take the process while the app
+is in the background -- which is why the screen asks not to put it away, instead
+of promising something it cannot keep.
+
+### A megabyte at a time
+
+Both import paths copied in the standard library's default eight-kilobyte pieces.
+Against three hundred megabytes that is forty thousand round trips through the
+document provider and as many writes, and it is a large part of the wait that was
+being reported as a freeze. Both now move a megabyte at a time.
+
+### The screen stays awake while it copies
+
+A long job with no touches in it lets the phone dim and lock, and a locked phone
+is one whose process the system is free to reclaim. It did, halfway, leaving
+nothing behind. The screen is now held awake for the length of a copy and
+released the moment it ends.
+
+### Unchanged
+
+The review log, as always. Nothing here reads it, writes it, or migrates it, and
+no database version moved. A model that is already installed is untouched: this
+release changes how one arrives, not what one is.
+
 ## 0.2.0 press
 
 Speech again, from the other end: what it does by itself, and how much of it was

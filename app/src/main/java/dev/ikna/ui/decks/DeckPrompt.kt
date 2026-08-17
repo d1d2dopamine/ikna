@@ -42,6 +42,36 @@ internal fun fillPrompt(
 	}
 }
 
+/**
+ * The same job for a deck that is not about a language.
+ *
+ * A subject deck answers different questions: there is no language being learned
+ * and no language being translated into, there is a field and a level in it. So
+ * it has its own asset and its own four answers, and the two prompts never share
+ * a line -- a language prompt with the language questions blanked out reads like a
+ * form somebody forgot to fill in, which is exactly the state that makes a model
+ * ask a question back instead of writing a deck.
+ */
+internal fun fillSubjectPrompt(
+	base: String,
+	cardsLang: String,
+	count: Int,
+	subject: String,
+	level: String
+): String {
+	if (base.isEmpty()) return base
+	val answers = listOf(
+		PROMPT_SUBJECT to subject.trim().replace("\n", " "),
+		PROMPT_CARDS_LANG to languageName(cardsLang),
+		PROMPT_COUNT to count.toString(),
+		PROMPT_LEVEL to level
+	)
+	return base.lines().joinToString("\n") { line ->
+		val answer = answers.firstOrNull { line.startsWith(it.first) }?.second
+		if (answer.isNullOrEmpty()) line else line + " " + answer
+	}
+}
+
 /** English names, because the prompt is in English and the model reads it. */
 internal fun languageName(code: String): String = when (code) {
 	"en" -> "English"
@@ -74,11 +104,22 @@ internal const val LEVEL_ADVANCED = "advanced"
 
 internal val PROMPT_LEVELS = listOf(LEVEL_BEGINNER, LEVEL_TALKING, LEVEL_ADVANCED)
 
+/**
+ * The middle level of a subject deck. "Can hold a conversation" is a sentence
+ * about a language and says nothing about someone halfway through a course.
+ */
+internal const val LEVEL_SOME_BACKGROUND = "some background"
+
+internal val SUBJECT_LEVELS =
+	listOf(LEVEL_BEGINNER, LEVEL_SOME_BACKGROUND, LEVEL_ADVANCED)
+
 internal const val PROMPT_LEARNING = "Language I am learning:"
 internal const val PROMPT_MEANINGS = "Language of the translations:"
 internal const val PROMPT_COUNT = "Number of cards:"
 internal const val PROMPT_TOPIC = "Topic or situation:"
 internal const val PROMPT_LEVEL = "My level ("
+internal const val PROMPT_SUBJECT = "Subject:"
+internal const val PROMPT_CARDS_LANG = "Language of the cards:"
 
 /** The deck languages minus the honest "no voice", which is not a language. */
 internal val MEANING_LANGS = DECK_LANGS.filter { it != NO_LANG }

@@ -1,6 +1,7 @@
 package dev.ikna.domain.governor
 
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 data class GovernorSignals(
@@ -35,7 +36,19 @@ data class GovernorSignals(
      * next absence, so the softer capacity has to outlive the single session
      * that ended the gap.
      */
-    val daysSinceReturn: Int? = null
+    val daysSinceReturn: Int? = null,
+    /**
+     * Whether the recent history looks like a day that cost more than it
+     * gave: well above the usual size, and either sloppier than usual or
+     * abandoned before the plan ended.
+     *
+     * This is the signal the app was missing. Everything else here protects
+     * against a queue growing too fast; nothing protected against the user
+     * being spent. One heroic evening is how the following four days get
+     * skipped, and the median cannot see it because a median is exactly what
+     * one outlier does not move.
+     */
+    val overheated: Boolean = false
 )
 
 enum class GovernorReason {
@@ -53,6 +66,12 @@ enum class GovernorReason {
     SAFETY_VALVE,
 
     /**
+     * The last day ran hot. Today is deliberately smaller, and nothing new
+     * arrives in it.
+     */
+    OVERHEATED,
+
+    /**
      * Nothing left in the deck to meet for the first time.
      *
      * Not a governor decision — the governor rules on how much new material is
@@ -68,7 +87,23 @@ data class GovernorDecision(
     val projected: Double,
     val headroom: Double,
     val amnestyQuota: Int,
-    val reason: GovernorReason
+    val reason: GovernorReason,
+    /**
+     * The hard daily ceiling on new material, whatever the headroom said. Stored
+     * on the decision so the session can tell "nothing fits today" apart from
+     * "nothing more is coming today", which are different sentences.
+     */
+    val newCeiling: Int = 0,
+    /**
+     * What actually stopped the new material, when [reason] is [GovernorReason.SAFETY_VALVE].
+     *
+     * The valve used to overwrite the reason it was overriding, so the one
+     * situation that most needs explaining -- something is wrong, and one chunk
+     * is being handed out anyway -- was recorded as "safety valve" and nothing
+     * else. The log then had no way of showing that the valve opens every week
+     * because accuracy is low, which is the whole point of watching it.
+     */
+    val gate: GovernorReason? = null
 )
 
 /**
@@ -88,8 +123,19 @@ class LoadGovernor(private val config: GovernorConfig) {
         // session happened.
         val settlingBackIn = s.daysSinceReturn?.let { it < config.returnModeDays } ?: false
         val inReturnMode = s.daysSinceLastSession >= config.returnModeGapDays || settlingBackIn
-        val capacity = if (inReturnMode) config.returnModeCapacity else config.targetDailyReviews
+        val normal = if (inReturnMode) config.returnModeCapacity else config.targetDailyReviews
+
+        // A day after an overheated one is shorter, and the shortening is the
+        // point: the queue is not the thing at risk here, the person is.
+        val capacity = if (s.overheated) {
+            (normal * config.overheatCapacityShare)
+                .roundToInt()
+                .coerceAtLeast(config.dailyMinimumCards)
+        } else {
+            normal
+        }
         val amnestyQuota = (capacity * config.amnestyQuotaRatio).roundToInt()
+        val newCeiling = dailyNewCeiling(capacity)
 
         val projected = max(s.dueToday.toDouble(), s.forecastAvg3d) +
             config.backlogWeight * s.backlog
@@ -101,7 +147,8 @@ class LoadGovernor(private val config: GovernorConfig) {
             projected = projected,
             headroom = headroom,
             amnestyQuota = amnestyQuota,
-            reason = reason
+            reason = reason,
+            newCeiling = newCeiling
         )
 
         // Cold start: nothing learned yet, hand out a first batch unconditionally.
@@ -112,7 +159,8 @@ class LoadGovernor(private val config: GovernorConfig) {
                 projected = projected,
                 headroom = headroom,
                 amnestyQuota = amnestyQuota,
-                reason = GovernorReason.FIRST_RUN
+                reason = GovernorReason.FIRST_RUN,
+                newCeiling = newCeiling
             )
         }
 
@@ -120,6 +168,9 @@ class LoadGovernor(private val config: GovernorConfig) {
         // Each of these can be overridden only by the safety valve below.
         val gate: GovernorReason? = when {
             inReturnMode -> GovernorReason.RETURN_MODE
+            // Nothing new the day after a day that ran hot. Reviews still
+            // arrive, in a smaller plan.
+            s.overheated -> GovernorReason.OVERHEATED
             s.backlog > config.backlogHardLimit -> GovernorReason.BACKLOG_LIMIT
             // Barely being here counts as being away. Adding chunks to a week
             // that is already going badly is how the pile that ends the habit
@@ -144,21 +195,26 @@ class LoadGovernor(private val config: GovernorConfig) {
 
         if (gate != null) {
             return if (safetyValveOpen(s)) {
-                blocked(GovernorReason.SAFETY_VALVE).copy(allowedNew = 1)
+                blocked(GovernorReason.SAFETY_VALVE).copy(allowedNew = 1, gate = gate)
             } else {
                 blocked(gate)
             }
         }
 
         // ---- normal path ----------------------------------------------------
-        val ceiling = effectiveMaxNew(s)
+        // Two ceilings, and the lower one wins: what current form deserves, and
+        // what a single day is allowed to spend at all.
+        val ceiling = min(effectiveMaxNew(s), newCeiling)
         val allowed = (headroom / config.costPerNew)
             .toInt()
             .coerceIn(0, ceiling)
 
         if (allowed == 0) {
             return if (safetyValveOpen(s)) {
-                blocked(GovernorReason.SAFETY_VALVE).copy(allowedNew = 1)
+                blocked(GovernorReason.SAFETY_VALVE).copy(
+                    allowedNew = 1,
+                    gate = GovernorReason.NO_HEADROOM
+                )
             } else {
                 blocked(GovernorReason.NO_HEADROOM)
             }
@@ -170,9 +226,41 @@ class LoadGovernor(private val config: GovernorConfig) {
             projected = projected,
             headroom = headroom,
             amnestyQuota = amnestyQuota,
-            reason = GovernorReason.OK
+            reason = GovernorReason.OK,
+            newCeiling = newCeiling
         )
     }
+
+    /**
+     * The hard daily ceiling on new material.
+     *
+     * Scaled to the day's capacity rather than fixed, and never zero: a day with
+     * nothing new in it at all is the day the app becomes a chore, and the whole
+     * argument for this app is that one unfamiliar thing is what makes tomorrow
+     * worth opening.
+     */
+    fun dailyNewCeiling(capacity: Int): Int =
+        (capacity * config.newCeilingShare)
+            .roundToInt()
+            .coerceIn(1, config.maxNewCeiling)
+
+    /**
+     * How much new material a session has earned by going past the day's
+     * obligation.
+     *
+     * The old arithmetic ran once, before the first answer of the day: with the
+     * queue already filling the capacity there was no headroom, so `allowedNew`
+     * was zero and stayed zero however much work the user actually did. A day
+     * that turns out lighter than predicted could not be spent, and "finish the
+     * plan and get nothing new" is the treadmill this app exists to avoid.
+     *
+     * The price is [GovernorConfig.earnedNewPerReviews] reviews per chunk, which
+     * is what the chunk will cost over the coming week -- so it is paid, not
+     * borrowed. The daily ceiling still applies on top of it.
+     */
+    fun earnedNew(reviewsPastObligation: Int): Int =
+        if (reviewsPastObligation <= 0) 0
+        else reviewsPastObligation / config.earnedNewPerReviews
 
     /**
      * Without this the governor can latch at zero forever: novelty disappears,
@@ -192,7 +280,9 @@ class LoadGovernor(private val config: GovernorConfig) {
         // routine takes to stop needing willpower, and the acceleration below
         // is exactly what turns one good week into a week nobody can repeat.
         if (s.daysSinceStart < config.settlingDays) return config.maxNewPerDay
-        if (s.cleanDays < config.accelerateAfterCleanDays || s.accuracyRecent < 0.9) {
+        if (s.cleanDays < config.accelerateAfterCleanDays ||
+            s.accuracyRecent < config.accelerateMinAccuracy
+        ) {
             return config.maxNewPerDay
         }
         val steps = s.cleanDays / config.accelerateAfterCleanDays

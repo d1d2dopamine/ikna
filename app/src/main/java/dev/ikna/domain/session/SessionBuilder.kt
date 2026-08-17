@@ -180,7 +180,11 @@ class SessionBuilder(
      * new-material budget. The rule itself lives in [LevelPromotion], which
      * explains why a budget is involved at all.
      */
-    fun nextLevelFor(card: CardEntity, newRoomToday: Int): Int? =
-        LevelPromotion.nextLevel(card.level, card.stability, newRoomToday)
+    fun nextLevelFor(
+        card: CardEntity,
+        newRoomToday: Int,
+        maxLevel: Int = Level.PRODUCTION.value
+    ): Int? =
+        LevelPromotion.nextLevel(card.level, card.stability, newRoomToday, maxLevel)
 
 }

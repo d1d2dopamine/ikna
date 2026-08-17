@@ -11,6 +11,7 @@ import dev.ikna.data.db.PlanDao
 import dev.ikna.data.db.ReviewDao
 import dev.ikna.data.db.ReviewEntity
 import dev.ikna.data.db.StatsDao
+import dev.ikna.domain.fsrs.ComponentPrior
 import dev.ikna.domain.fsrs.DAY_MS
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.fsrs.Scheduler
@@ -21,6 +22,7 @@ import dev.ikna.domain.governor.GovernorDecision
 import dev.ikna.domain.governor.GovernorReason
 import dev.ikna.domain.governor.GovernorSignals
 import dev.ikna.domain.governor.LoadGovernor
+import dev.ikna.domain.session.Level
 import dev.ikna.domain.session.SessionBuilder
 import dev.ikna.domain.session.SessionCard
 import dev.ikna.domain.session.SessionPlan
@@ -45,6 +47,39 @@ class LearningRepository(
     private val selector: ChunkSelector,
     private val baseConfig: GovernorConfig
 ) {
+
+    /** The load switch as stored, read on demand. See [loadSettings]. */
+    data class LoadSetting(val auto: Boolean, val manual: Int)
+
+    /**
+     * Where the size of a day really comes from.
+     *
+     * [dailyTargetOverride] lives in the process, and it was only ever filled
+     * in by a settings flow that a screen had to be alive to collect. So a
+     * plan built by the nightly worker, or by the first screen of a freshly
+     * started process, could use the 40 from `governor.json` while the user's
+     * own norm said 15 -- and the day arrived a third too big, with nothing on
+     * any screen to explain it. Reading the stored value at the moment the
+     * plan is built removes the race instead of narrowing it.
+     */
+    @Volatile var loadSettings: (suspend () -> LoadSetting)? = null
+
+    /**
+     * The chunks the learner has marked as wrong, read on demand.
+     *
+     * A deck written by a model can contain a card that is false, and this
+     * scheduler is very good at teaching whatever it is handed. So there is a
+     * third answer beside "knew it" and "did not", and everything it names is
+     * filtered out of introductions, plans and sessions alike.
+     *
+     * A function rather than a stored set, for the same reason [loadSettings] is
+     * one: the plan can be built by a background worker in a process where no
+     * screen has ever collected a flow.
+     */
+    @Volatile var suppressedChunks: (suspend () -> Set<String>)? = null
+
+    /** Writes one chunk into that set. Wired to the settings store. */
+    @Volatile var onSuppress: (suspend (String) -> Unit)? = null
 
     /** Set from the load switch in settings: calm / normal / dense. */
     @Volatile var dailyTargetOverride: Int? = null
@@ -71,6 +106,16 @@ class LearningRepository(
      */
     private val writeLock = Mutex()
 
+    /**
+     * The mornings whose verdict was about room rather than about the user.
+     * Only these can be reopened by work done later in the day.
+     */
+    private val EARNABLE_REASONS = setOf(
+        GovernorReason.OK,
+        GovernorReason.NO_HEADROOM,
+        GovernorReason.FIRST_RUN
+    )
+
     private val config: GovernorConfig
         get() = baseConfig.copy(
             targetDailyReviews = dailyTargetOverride ?: baseConfig.targetDailyReviews
@@ -79,6 +124,14 @@ class LearningRepository(
     // Cheap objects, rebuilt per call so a settings change takes effect at once.
     private fun governor() = LoadGovernor(config)
     private fun builder() = SessionBuilder(cardDao, chunkDao, config)
+
+    /**
+     * What must never be asked again. Empty when nothing is wired, which is the
+     * safe direction: a missing correction shows a card, a missing card cannot be
+     * corrected.
+     */
+    private suspend fun suppressedNow(): Set<String> =
+        suppressedChunks?.invoke() ?: emptySet()
 
 
     // Rebuilt per call so a config change takes effect immediately.
@@ -115,6 +168,13 @@ class LearningRepository(
         // A stored plan is authoritative: today's questions are decided once.
         if (existing != null) return existing
 
+        // What the user actually set, straight from storage. Without this the
+        // switch only reached the plan if some screen had already collected it.
+        loadSettings?.invoke()?.let { stored ->
+            autoLoad = stored.auto
+            if (!stored.auto) dailyTargetOverride = stored.manual
+        }
+
         // The measured norm is refreshed once a day, right here, so today's
         // capacity reflects the last two weeks of real behaviour.
         if (autoLoad) dailyTargetOverride = autoTarget()
@@ -139,7 +199,12 @@ class LearningRepository(
                 capacity = decision.capacity,
                 headroom = decision.headroom,
                 allowedNew = decision.allowedNew,
-                reason = decision.reason.name
+                // The valve's own name plus what it overrode. A log saying
+                // only SAFETY_VALVE cannot answer the one question worth
+                // asking about the valve: why it had to open again.
+                reason = decision.gate
+                    ?.let { decision.reason.name + "/" + it.name }
+                    ?: decision.reason.name
             )
         )
 
@@ -153,7 +218,9 @@ class LearningRepository(
         // it first: the governor spent the day's new-material budget, the
         // counter recorded that new material had arrived — which is what closes
         // the safety valve for a week — and the user was shown none of it.
+        // A card marked wrong never reaches a plan again, on any day.
         val picked = builder().pickForDay(decision, now, introduced)
+            .filterNot { it.chunkId in suppressedNow() }
         val plannedKeys = picked.map { it.key }.toSet()
 
         // Whatever still did not fit is deleted rather than left behind as a
@@ -353,8 +420,45 @@ class LearningRepository(
             cleanDays = cleanDays,
             newIntroducedLastWeek = statsDao.newIntroducedSince(valveWindowStart) ?: 0,
             totalReviews = reviewDao.total(),
-            daysSinceReturn = daysSinceReturn(now)
+            daysSinceReturn = daysSinceReturn(now),
+            overheated = overheating(now)
         )
+    }
+
+    /**
+     * Whether the last day of work looks like one that cost more than it gave.
+     *
+     * Three things have to agree, because any one of them alone is an ordinary
+     * day: the day was well above the median size, and either its accuracy fell
+     * away from the usual or its plan was abandoned. A big accurate day that
+     * was finished is a good day and is left alone.
+     *
+     * The median is what makes this readable at all: one outlier is exactly
+     * what a median does not move, so "far above the median" means the day
+     * stood out rather than the habit having grown.
+     *
+     * This is deliberately blunt. The sharper signals -- where in the session
+     * accuracy fell, how long the gaps between answers grew -- need a
+     * per-answer record that does not exist yet, and inventing one badly is
+     * worse than reading the three columns that are already trustworthy.
+     */
+    private suspend fun overheating(now: Long): Boolean {
+        val days = statsDao.lastDays(config.activityWindowDays * 2)
+            .filter { it.reviewsDone > 0 }
+        if (days.size < 4) return false
+
+        val counts = days.map { it.reviewsDone }.sorted()
+        val median = counts[counts.size / 2]
+        if (median <= 0) return false
+
+        // Today is still being lived in, so it is not the day being judged.
+        val today = dayKey(now)
+        val last = days.firstOrNull { it.day != today } ?: return false
+        if (last.reviewsDone <= median * config.overheatRatio) return false
+
+        val usual = days.map { it.accuracy }.average()
+        val sloppy = last.accuracy < usual - config.overheatAccuracyDrop
+        return sloppy || !last.planCompleted
     }
 
     /**
@@ -438,17 +542,47 @@ class LearningRepository(
         now: Long,
         packId: String? = null
     ): List<CardEntity> {
-        val candidates =
+        val hidden = suppressedNow()
+        val candidates = (
             if (packId == null) chunkDao.unintroducedByFrequency(count * 12)
             else chunkDao.unintroducedByFrequencyFor(packId, count * 12)
+            ).filterNot { it.id in hidden }
         if (candidates.isEmpty()) return emptyList()
 
         val tokens = chunkDao.tokensFor(candidates.map { it.id }).groupBy { it.chunkId }
         val lemmas = tokens.values.flatten().map { it.lemma }
         val comps = components.componentsFor(lemmas)
 
-        val chosen = selector.select(candidates, tokens, comps, now, count)
-        val cards = chosen.map { sc ->
+        // A subject deck is taken strictly in the order it was written.
+        //
+        // Everything the selector does is a statement about language: how new the
+        // words are, which weak components a phrase would repair, how common the
+        // phrase is. None of that holds for a deck about neuroscience or a
+        // programming language, where line forty may be meaningless before line
+        // thirty-nine. There the author's order IS the curriculum, and it is
+        // already recorded -- the importer writes each line's position into
+        // freqRank.
+        //
+        // When both kinds of deck are active the day's new material is split, so
+        // switching a subject deck on never silences a language deck or the
+        // other way round.
+        val subject = candidates.filter { it.lang == NO_LANG }.sortedBy { it.freqRank }
+        val language = candidates.filterNot { it.lang == NO_LANG }
+        val share = if (subject.isEmpty() || language.isEmpty()) count else (count + 1) / 2
+        val fromSubject = subject.take(share.coerceAtMost(count))
+
+        // A subject card carries no lexical prior: its sentence is a definition,
+        // and "how many of these words are already known" says nothing useful
+        // about how hard the concept will be. One unknown component, no head start.
+        val subjectPrior = ComponentPrior(
+            knownRatio = 0.0,
+            unknownContentTokens = 1,
+            weakLemmas = emptyList()
+        )
+        val chosen = selector.select(language, tokens, comps, now, count - fromSubject.size)
+        val cards = fromSubject.map { chunk ->
+            scheduler.introduce(chunk.id, level = 0, componentPrior = subjectPrior, now = now)
+        } + chosen.map { sc ->
             scheduler.introduce(sc.chunk.id, level = 0, componentPrior = sc.prior, now = now)
         }
         cardDao.upsertAll(cards)
@@ -507,7 +641,13 @@ class LearningRepository(
         // a deck session has to know how much of its own share is already done —
         // and the deck of a card is only reachable through its chunk. The plan is
         // a few dozen keys at most, so this costs one query and no joins.
+        // A plan decided this morning still names a card marked wrong this
+        // evening. It is dropped while the session is being read rather than
+        // by rewriting the day's row, so a correction can never collide with
+        // an answer being written.
+        val hiddenNow = suppressedNow()
         val all = builder().materialize(plan.ids)
+            .filterNot { it.chunk.id in hiddenNow }
         val scope = if (deckId == null) all else all.filter { it.chunk.packId == deckId }
         val pending = scope.filterNot { it.card.key in answered }
 
@@ -601,7 +741,9 @@ class LearningRepository(
         // by the query itself. This used to over-ask by ten and filter the result
         // in Kotlin, which returned nothing whenever those candidates happened to
         // belong to other decks.
+        val hidden = suppressedNow()
         val repeats = builder().pickExtra(exclude, count, now, deckId)
+            .filterNot { it.chunkId in hidden }
 
         // A deck nothing has been learned from yet has no cards at all, so there
         // is nothing to repeat and this used to answer "nothing is due" - true,
@@ -630,6 +772,67 @@ class LearningRepository(
             )
         )
         return extra.size
+    }
+
+    /**
+     * The third answer: this card is wrong.
+     *
+     * Until now the only way to react to a false card was to rate it "did not
+     * know", which is the worst possible outcome twice over. FSRS reads that as
+     * a lapse and starts showing the card MORE often, so a hallucination earns
+     * more of the learner's time than a true card does; and the day's accuracy
+     * falls, which is a number the governor reads before deciding whether any new
+     * material is allowed. One bad line in an imported deck could shut the door
+     * on new cards for a week.
+     *
+     * So this writes no review, no rating and no statistic. Nothing about the day
+     * changes except that the card leaves it: the log stays honest, the accuracy
+     * stays untouched, and the schedule never sees the card again at any level,
+     * because being false is a property of the fact and not of how it was asked.
+     *
+     * The rows in `cards` are deliberately left alone. Deleting them would throw
+     * away the history of a card that may simply have been mistyped, and the
+     * filter costs nothing; a chunk taken back out of the list becomes askable
+     * again with its schedule intact.
+     */
+    /**
+     * How many ways a chunk of this deck can be asked.
+     *
+     * Two on a subject deck: recognise the term, then recall it inside its own
+     * definition. The third level asks for the phrase from its meaning, which is
+     * a language exercise -- see [LevelPromotion].
+     */
+    private fun maxLevelFor(lang: String): Int =
+        if (lang == NO_LANG) Level.CLOZE.value else Level.PRODUCTION.value
+
+    suspend fun markWrong(sessionCard: SessionCard, now: Long = System.currentTimeMillis()) =
+        writeLock.withLock { markWrongLocked(sessionCard, now) }
+
+    private suspend fun markWrongLocked(sessionCard: SessionCard, now: Long) {
+        val chunkId = sessionCard.chunk.id
+        onSuppress?.invoke(chunkId)
+
+        val plan = planDao.plan(dayKey(now)) ?: return
+        // Every level of the chunk leaves the plan, not just the one on screen.
+        val kept = plan.ids.filterNot { it.substringBeforeLast(':') == chunkId }
+        val removed = plan.ids.size - kept.size
+        if (removed > 0) {
+            planDao.upsert(
+                plan.copy(
+                    plannedIds = kept.joinToString(","),
+                    plannedTotal = (plan.plannedTotal - removed).coerceAtLeast(0)
+                )
+            )
+        }
+
+        // A chunk met for the first time today and thrown away was never learned,
+        // so the day's new-material budget is handed back and a real card can take
+        // its place. A chunk from an earlier day keeps its history: those answers
+        // happened, whatever the card turned out to be.
+        val card = cardDao.card(chunkId, sessionCard.level.value)
+        if (card != null && card.isNew && dayKey(card.introducedAt) == dayKey(now)) {
+            uncountIntroduced(now)
+        }
     }
 
     suspend fun answer(sessionCard: SessionCard, rating: Rating, durationMs: Long, now: Long) =
@@ -681,7 +884,9 @@ class LearningRepository(
         // new-material budget. A promoted level is a question the user has never
         // been asked, and the governor is the only thing allowed to decide how
         // many of those arrive in a day. See LevelPromotion.
-        builder().nextLevelFor(result.card, newRoomToday(now))?.let { nextLevel ->
+        builder()
+            .nextLevelFor(result.card, newRoomToday(now), maxLevelFor(sessionCard.chunk.lang))
+            ?.let { nextLevel ->
             if (cardDao.card(result.card.chunkId, nextLevel) == null) {
                 cardDao.upsert(
                     result.card.copy(
@@ -704,6 +909,63 @@ class LearningRepository(
         }
 
         bumpDailyStat(now, rating, durationMs)
+
+        // Work past the day's obligation buys new material now rather than
+        // tomorrow. See [earnNewIfDue].
+        earnNewIfDue(now)
+    }
+
+    /**
+     * Opens one more new chunk once the day's obligation has been paid for.
+     *
+     * The governor rules once, before the day's first answer, and on a day
+     * whose queue already fills the capacity it correctly rules that there is
+     * no room -- and then the user answers everything, faster than predicted,
+     * and the app has nothing unfamiliar left to show them. That is the exact
+     * shape of the treadmill this app was written against: the reward for
+     * finishing was that finishing changed nothing.
+     *
+     * So the budget is re-read as the session goes: every
+     * [GovernorConfig.earnedNewPerReviews] reviews past the obligation open one
+     * chunk, up to the day's hard ceiling. The price is what the chunk will
+     * cost over the coming week, so nothing is borrowed from tomorrow, and the
+     * ceiling is what keeps a good evening from emptying the deck.
+     *
+     * Gates are not overridden. If the morning's reason was a state of the user
+     * rather than a shortage of room -- a pile, a quiet week, poor accuracy, a
+     * return, an overheated day -- nothing is earned, however much work is
+     * done. Counted as extra rather than as plan, so finishing the day still
+     * means what it meant when the day started.
+     */
+    private suspend fun earnNewIfDue(now: Long) {
+        if (boundary.isNight(now, config.nightCutoffHour)) return
+
+        val day = dayKey(now)
+        val plan = planDao.plan(day) ?: return
+        val reason = runCatching { GovernorReason.valueOf(plan.reason) }.getOrNull() ?: return
+        if (reason !in EARNABLE_REASONS) return
+
+        val stat = statsDao.day(day) ?: return
+        val obligation = (plan.plannedTotal - plan.extraRequested)
+            .coerceAtLeast(config.dailyMinimumCards)
+        val beyond = stat.reviewsDone - obligation
+        if (beyond <= 0) return
+
+        val gov = governor()
+        val ceiling = gov.dailyNewCeiling(plan.capacity)
+        val target = (plan.allowedNew + gov.earnedNew(beyond)).coerceAtMost(ceiling)
+        if (stat.newIntroduced >= target) return
+
+        val fresh = introduce(1, now)
+        if (fresh.isEmpty()) return
+        countIntroduced(now, fresh.size)
+        planDao.upsert(
+            plan.copy(
+                plannedIds = (plan.ids + fresh.map { it.key }).joinToString(","),
+                plannedTotal = plan.plannedTotal + fresh.size,
+                extraRequested = plan.extraRequested + fresh.size
+            )
+        )
     }
 
     /**

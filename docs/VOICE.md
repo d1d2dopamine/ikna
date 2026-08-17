@@ -294,6 +294,43 @@ time -- was the one that stayed silent until its mark was pressed by hand.
 
 ---
 
+## Adding a large one
+
+A Piper voice is a dozen files and sixty megabytes: it lands in a second or two,
+and nothing about the copying is worth a word. A Kokoro release is a single
+`model.onnx` of a few hundred megabytes with a handful of crumbs beside it, and
+until `0.2.1 press` adding one was, in practice, impossible. Four separate
+reasons, none of them the bytes:
+
+- **Progress was counted in files.** One file is the whole archive, so the line
+  read `1` from the first second to the last. Everybody who tried it concluded
+  the app had hung, and everybody was being reasonable.
+- **The copy belonged to the screen.** It ran in the voice screen's composition
+  scope. A back press during the unpacking cancelled it, deleted the staging
+  folder, and reported neither.
+- **Eight kilobytes at a time.** The standard library's default buffer, against
+  three hundred megabytes through a content provider, is forty thousand round
+  trips in and as many out.
+- **The screen was allowed to sleep.** A dark screen over a long silent job is an
+  invitation for the system to take the process, and it took it.
+
+What replaced them, in the same order: bytes of the picked file, reported from
+inside the writing of a single file; a `VoiceInstaller` held by the container,
+which the screen watches rather than owns; a megabyte of buffer in both
+directions; and `keepScreenOn` for as long as a copy is running.
+
+None of that makes bzip2 fast. Android has no native one, so a `.tar.bz2` is
+decompressed in Java on the phone's own processor at a few megabytes a second,
+and a large model is minutes of that. The screen now says the percentage while it
+happens, says why it is slow, and says that leaving is allowed. Being killed is
+still fatal: this is not a foreground service, and the app does not pretend
+otherwise -- it says not to put it away for long, which is the truth.
+
+Unpacking the archive on a computer and adding the folder instead is still the
+faster route, and still supported. It is no longer the only one that finishes.
+
+---
+
 ## Building it
 
 ```bash

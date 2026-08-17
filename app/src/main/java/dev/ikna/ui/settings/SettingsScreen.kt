@@ -1,5 +1,6 @@
 package dev.ikna.ui.settings
 
+import dev.ikna.data.prefs.suppressedOf
 import dev.ikna.ui.text.S
 import dev.ikna.ui.debug.DebugHooks
 
@@ -33,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +48,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -270,7 +274,28 @@ fun SettingsScreen(
             )
         }
         Spacer(Modifier.height(16.dp))
-        JumpRow { id ->
+
+        // Which section the page is actually showing.
+        //
+        // The row above used to be a one-way remote control: it could send
+        // the page somewhere, and then stood still while the page moved under
+        // it. So the name of the section you were reading could be anywhere,
+        // including scrolled off the edge, and nothing on screen agreed with
+        // anything else. The anchors were already being measured for the jump;
+        // reading them the other way costs one comparison per frame.
+        //
+        // The bias is what makes it feel right rather than merely correct: a
+        // section counts as the current one once its heading has passed the
+        // top by a finger's width, not the instant its first pixel appears.
+        val bias = with(LocalDensity.current) { 120.dp.toPx() }
+        val activeSection by remember(bias) {
+            derivedStateOf {
+                val y = scroll.value + bias
+                JUMPS.lastOrNull { (anchors[it.first] ?: Int.MAX_VALUE) <= y }?.first
+                    ?: JUMPS.first().first
+            }
+        }
+        JumpRow(activeId = activeSection) { id ->
             val target = anchors[id] ?: return@JumpRow
             scope.launch { scroll.animateScrollTo(target) }
         }
@@ -285,10 +310,7 @@ fun SettingsScreen(
                 .padding(horizontal = 20.dp)
         ) {
             Anchored(ID_LOAD, anchors) {
-                Section(
-                    S.t("set.013"),
-                    S.t("set.014")
-                ) {
+                Section(S.t("set.013"), null) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         IknaChip(
                             label = S.t("set.015"),
@@ -331,24 +353,6 @@ fun SettingsScreen(
                         )
                     }
 
-                    // This used to be a section of its own, called "Перерывы",
-                    // with a heading, a rule and nothing at all inside it: a
-                    // promise of settings that had none to make, because a break
-                    // is measured rather than configured. The sentence was worth
-                    // keeping and the empty room was not, so it sits here, beside
-                    // the number it is actually about.
-                    Spacer(Modifier.height(20.dp))
-                    Text(
-                        text = S.t("set.061"),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = S.t("set.062"),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
             }
 
@@ -372,12 +376,6 @@ fun SettingsScreen(
                         // what matters is what the eye is currently adapted to.
                         light = isLight(MaterialTheme.colorScheme.background),
                         onPick = { id -> scope.launch { container.settings.setPalette(id) } }
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = S.t("set.115"),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(20.dp))
                     Text(
@@ -420,30 +418,26 @@ fun SettingsScreen(
                     Spacer(Modifier.height(12.dp))
                     ToggleRow(
                         title = S.t("set.020"),
-                        subtitle = S.t("set.021"),
+                        subtitle = null,
                         checked = settings.animations,
                         onCheckedChange = { scope.launch { container.settings.setAnimations(it) } }
                     )
                     ToggleRow(
                         title = S.t("set.022"),
-                        subtitle = S.t("set.023"),
+                        subtitle = null,
                         checked = settings.haptics,
                         onCheckedChange = { scope.launch { container.settings.setHaptics(it) } }
                     )
 
-                    // The bottom bar is the only row of controls in the app, and
-                    // until now it was the same row for everybody. Both of these
-                    // are one boolean each and neither touches anything but this
-                    // screen's own drawing.
                     ToggleRow(
                         title = S.t("bar.001"),
-                        subtitle = S.t("bar.002"),
+                        subtitle = null,
                         checked = settings.showWordmark,
                         onCheckedChange = { scope.launch { container.settings.setShowWordmark(it) } }
                     )
                     ToggleRow(
                         title = S.t("bar.003"),
-                        subtitle = S.t("bar.004"),
+                        subtitle = null,
                         checked = settings.leftHanded,
                         onCheckedChange = { scope.launch { container.settings.setLeftHanded(it) } }
                     )
@@ -451,10 +445,7 @@ fun SettingsScreen(
             }
 
             Anchored(ID_LANGUAGE, anchors) {
-                Section(
-                    S.t("set.024"),
-                    S.t("set.025")
-                ) {
+                Section(S.t("set.024"), null) {
                     // Two chips to a row rather than one full-width chip per
                     // language. A section that grows by a row of forty-four
                     // points for every language added is a section that becomes a
@@ -669,10 +660,7 @@ fun SettingsScreen(
             }
 
             Anchored(ID_REMINDER, anchors) {
-                Section(
-                    S.t("set.047"),
-                    S.t("set.048")
-                ) {
+                Section(S.t("set.047"), null) {
                     ToggleRow(
                         title = S.t("set.049"),
                         subtitle = if (settings.reminderEnabled)
@@ -778,14 +766,42 @@ fun SettingsScreen(
                             onClick = { restorePicker.launch(arrayOf("*/*")) }
                         )
                     }
+
+                    // Cards taken out of rotation by "this card is wrong".
+                    //
+                    // Marking a card wrong has to be one tap and no dialog, or it
+                    // will not be used and a bad card stays in the rotation. The
+                    // price of that is that it can be tapped by accident, and a
+                    // card removed by accident with no way back would be data loss
+                    // in an app whose whole promise is that nothing is lost. So the
+                    // door is here, it only appears when there is something behind
+                    // it, and it says how many.
+                    val quarantined = suppressedOf(settings.suppressed).size
+                    if (quarantined > 0) {
+                        Spacer(Modifier.height(20.dp))
+                        Text(
+                            text = S.t("set.135") + quarantined,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        IknaTextButton(
+                            label = S.t("set.136"),
+                            onClick = {
+                                scope.launch {
+                                    container.settings.clearSuppressed()
+                                    // The day was planned without them in it.
+                                    container.learningRepository.invalidatePlan()
+                                    message = S.t("set.137")
+                                }
+                            }
+                        )
+                    }
                 }
             }
 
             Anchored(ID_ADVANCED, anchors) {
-                Section(
-                    S.t("set.063"),
-                    S.t("set.064")
-                ) {
+                Section(S.t("set.063"), null) {
                     IknaTextButton(
                         label = if (advancedOpen) S.t("set.065") else S.t("set.066"),
                         onClick = { advancedOpen = !advancedOpen },
@@ -932,19 +948,49 @@ fun SettingsScreen(
  * so scrolling still works for anyone who would rather scroll.
  */
 @Composable
-private fun JumpRow(onJump: (String) -> Unit) {
+private fun JumpRow(activeId: String, onJump: (String) -> Unit) {
+    val row = rememberScrollState()
+
+    // Where each label sits inside the row, measured the way the sections below
+    // measure themselves. Centring needs the width of the label as well as its
+    // position, so this stores the span rather than the left edge.
+    val spots = remember { mutableStateMapOf<String, IntRange>() }
+    var rowWidth by remember { mutableStateOf(0) }
+
+    // The turn. Not a jump to the edge: the label of the section being read ends
+    // up in the middle, which is the only position that reads as "you are here"
+    // rather than "here is a list".
+    LaunchedEffect(activeId, rowWidth) {
+        if (rowWidth == 0) return@LaunchedEffect
+        val spot = spots[activeId] ?: return@LaunchedEffect
+        val middle = spot.first + (spot.last - spot.first) / 2
+        val target = (middle - rowWidth / 2).coerceIn(0, row.maxValue)
+        row.animateScrollTo(target)
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
+            .onGloballyPositioned { rowWidth = it.size.width }
+            .horizontalScroll(row)
             .padding(horizontal = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         JUMPS.forEach { jump ->
+            val here = jump.first == activeId
             IknaTextButton(
                 label = S.t(jump.second),
                 onClick = { onJump(jump.first) },
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (here) MaterialTheme.colorScheme.onBackground
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.onGloballyPositioned { coords ->
+                    val x = coords.parentLayoutCoordinates
+                        ?.localPositionOf(coords, Offset.Zero)
+                        ?.x
+                        ?: 0f
+                    val left = x.roundToInt()
+                    spots[jump.first] = left..(left + coords.size.width)
+                }
             )
         }
     }
@@ -1192,13 +1238,20 @@ private fun PaletteTiles(
                 row.forEach { spec ->
                     val p = spec.palette(light)
                     val selected = spec.id == selectedId
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { onPick(spec.id) }
-                    ) {
+                    // The tap zone used to be this whole column: a third of
+                    // the row wide, tile plus gap plus name, including all the
+                    // empty space to the right of a name as short as "НОЛЬ". A
+                    // tap aimed at nothing repainted the entire app, which is
+                    // the one change here nobody asks for by accident. Only the
+                    // tile and its own name answer now.
+                    Column(modifier = Modifier.weight(1f)) {
                         Column(
                             modifier = Modifier
+                                .clickable(
+                                    role = Role.RadioButton,
+                                    onClickLabel = S.t(spec.nameKey),
+                                    onClick = { onPick(spec.id) }
+                                )
                                 .fillMaxWidth()
                                 .height(64.dp)
                                 .background(p.background)
@@ -1232,7 +1285,10 @@ private fun PaletteTiles(
                             text = S.t(spec.nameKey),
                             style = MaterialTheme.typography.labelSmall,
                             color = if (selected) ink else muted,
-                            maxLines = 1
+                            maxLines = 1,
+                            // The name is part of the target, the space beside it
+                            // is not. A Text is exactly as wide as its text.
+                            modifier = Modifier.clickable { onPick(spec.id) }
                         )
                     }
                 }

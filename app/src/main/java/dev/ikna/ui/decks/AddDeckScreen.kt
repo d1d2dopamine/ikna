@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
 import dev.ikna.data.pack.SeedProblem
+import dev.ikna.data.pack.SeedWarning
 import dev.ikna.data.repo.DeckImport
 import dev.ikna.data.repo.NO_LANG
 import dev.ikna.ui.theme.BarHeight
@@ -91,6 +92,11 @@ fun AddDeckScreen(
 	var note by remember { mutableStateOf<String?>(null) }
 	var busy by remember { mutableStateOf(false) }
 	var prompt by remember { mutableStateOf("") }
+	var subjectPrompt by remember { mutableStateOf("") }
+	// Language deck or subject deck. Everything else on this screen follows
+	// from it: which prompt is copied, which questions are worth asking, and
+	// whether the deck claims a language at all.
+	var subject by remember { mutableStateOf(false) }
 	var guide by remember { mutableStateOf(false) }
 	var lang by remember { mutableStateOf(NO_LANG) }
 
@@ -106,16 +112,23 @@ fun AddDeckScreen(
 	// kilobytes of English addressed to a model, not interface text, and it has to
 	// stay the same in all three languages of the app.
 	LaunchedEffect(Unit) {
-		prompt = withContext(Dispatchers.IO) {
-			runCatching {
+		withContext(Dispatchers.IO) {
+			prompt = runCatching {
 				context.assets.open(PROMPT_ASSET).bufferedReader().use { it.readText() }
+			}.getOrDefault("")
+			subjectPrompt = runCatching {
+				context.assets.open(SUBJECT_ASSET).bufferedReader().use { it.readText() }
 			}.getOrDefault("")
 		}
 	}
 
 	// The prompt as it will actually be sent: the asset with the answers in it.
-	val filled = remember(prompt, lang, meanings, count, topic, level) {
-		fillPrompt(prompt, lang, meanings, count, topic, level)
+	val filled = remember(prompt, subjectPrompt, subject, lang, meanings, count, topic, level) {
+		if (subject) {
+			fillSubjectPrompt(subjectPrompt, meanings, count, topic, level)
+		} else {
+			fillPrompt(prompt, lang, meanings, count, topic, level)
+		}
 	}
 
 	suspend fun install(name: String, text: String) {
@@ -256,15 +269,47 @@ fun AddDeckScreen(
 			// silent and nothing said why. Here the answer is one tap, on the
 			// screen where the deck is being made, and it defaults to the honest
 			// one: no language claimed, no voice offered.
+			// What kind of deck this is, asked before anything else, because it
+			// decides what the rest of the screen is even asking about.
+			//
+			// The app was built for languages and its core turned out not to care:
+			// a card is a unit, a sentence that carries it and what it means, and
+			// that describes a definition in neuroscience as well as a phrase in
+			// Polish. Only three things were language-specific, and all three are
+			// now decided here -- which prompt the model gets, whether the deck
+			// claims a language it can be read aloud in, and whether the third way
+			// of asking (produce the phrase from its meaning) is used at all.
 			Text(
-				text = S.t("add.038"),
+				text = S.t("add.055"),
 				style = MaterialTheme.typography.labelMedium,
 				color = muted
 			)
 			Spacer(Modifier.height(Space.sm))
-			LangChips(current = lang, onPick = { lang = it })
+			Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+				IknaChip(
+					label = S.t("add.056"),
+					selected = !subject,
+					onClick = {
+						subject = false
+						level = LEVEL_BEGINNER
+					}
+				)
+				IknaChip(
+					label = S.t("add.057"),
+					selected = subject,
+					onClick = {
+						subject = true
+						// A subject deck claims no language: nothing in it is meant
+						// to be pronounced, and a voice reading definitions aloud in
+						// a guessed accent is worse than silence.
+						lang = NO_LANG
+						level = LEVEL_BEGINNER
+					}
+				)
+			}
+			Spacer(Modifier.height(Space.sm))
 			Text(
-				text = S.t("add.039"),
+				text = if (subject) S.t("add.058") else S.t("add.039"),
 				style = MaterialTheme.typography.bodySmall,
 				color = muted
 			)
@@ -272,6 +317,20 @@ fun AddDeckScreen(
 			Spacer(Modifier.height(Space.lg))
 			IknaRule()
 			Spacer(Modifier.height(Space.lg))
+
+			if (!subject) {
+				Text(
+					text = S.t("add.038"),
+					style = MaterialTheme.typography.labelMedium,
+					color = muted
+				)
+				Spacer(Modifier.height(Space.sm))
+				LangChips(current = lang, onPick = { lang = it })
+
+				Spacer(Modifier.height(Space.lg))
+				IknaRule()
+				Spacer(Modifier.height(Space.lg))
+			}
 
 			Text(
 				text = S.t("add.040"),
@@ -287,7 +346,9 @@ fun AddDeckScreen(
 
 			Spacer(Modifier.height(Space.md))
 			Text(
-				text = S.t("add.042"),
+				// On a subject deck this is the language the cards themselves are
+				// written in, not the language the meanings are translated into.
+				text = if (subject) S.t("add.062") else S.t("add.042"),
 				style = MaterialTheme.typography.bodySmall
 			)
 			Spacer(Modifier.height(Space.sm))
@@ -316,11 +377,12 @@ fun AddDeckScreen(
 			)
 			Spacer(Modifier.height(Space.sm))
 			PromptChoice(
-				options = PROMPT_LEVELS,
+				options = if (subject) SUBJECT_LEVELS else PROMPT_LEVELS,
 				label = { option ->
 					when (option) {
 						LEVEL_BEGINNER -> S.t("add.043")
 						LEVEL_TALKING -> S.t("add.044")
+						LEVEL_SOME_BACKGROUND -> S.t("add.059")
 						else -> S.t("add.045")
 					}
 				},
@@ -329,7 +391,7 @@ fun AddDeckScreen(
 			)
 
 			Text(
-				text = S.t("add.047"),
+				text = if (subject) S.t("add.060") else S.t("add.047"),
 				style = MaterialTheme.typography.bodySmall
 			)
 			Spacer(Modifier.height(Space.sm))
@@ -341,7 +403,7 @@ fun AddDeckScreen(
 			) {
 				if (topic.isEmpty()) {
 					Text(
-						text = S.t("add.048"),
+						text = if (subject) S.t("add.061") else S.t("add.048"),
 						style = MaterialTheme.typography.bodyMedium,
 						color = muted
 					)
@@ -362,7 +424,7 @@ fun AddDeckScreen(
 			IknaWideButton(
 				label = S.t("add.007"),
 				filled = true,
-				enabled = prompt.isNotEmpty() && !busy,
+				enabled = filled.isNotEmpty() && !busy,
 				onClick = {
 					clipboard.setText(AnnotatedString(filled))
 					note = S.t("add.009")
@@ -371,7 +433,7 @@ fun AddDeckScreen(
 			Spacer(Modifier.height(Space.sm))
 			IknaWideButton(
 				label = S.t("add.008"),
-				enabled = prompt.isNotEmpty() && !busy,
+				enabled = filled.isNotEmpty() && !busy,
 				onClick = { saver.launch(PROMPT_FILE) }
 			)
 
@@ -542,10 +604,32 @@ internal fun describe(report: DeckImport): String {
 			S.t("add.024") + reason(problem.problem)
 	}
 	val head = S.t("add.021") + report.installed
-	if (report.skipped == 0) return head
-	val problem = report.firstProblem ?: return head + S.t("add.022") + report.skipped
+	val flagged = flagged(report)
+	if (report.skipped == 0) return head + flagged
+	val problem = report.firstProblem
+		?: return head + S.t("add.022") + report.skipped + flagged
 	return head + S.t("add.022") + report.skipped + "\n" +
-		S.t("add.023") + problem.line + S.t("add.024") + reason(problem.problem)
+		S.t("add.023") + problem.line + S.t("add.024") + reason(problem.problem) + flagged
+}
+
+/**
+ * What landed and is still worth reading before it is learned.
+ *
+ * Not an error and not a refusal: the deck is installed. It is the only honest
+ * thing an app with no network can say about a deck a model wrote in thirty
+ * seconds -- these lines look like they were written to reach a number.
+ */
+private fun flagged(report: DeckImport): String {
+	val warning = report.firstWarning ?: return ""
+	return "\n" + S.t("add.050") + report.flagged + "\n" +
+		S.t("add.023") + warning.line + S.t("add.024") + warningReason(warning.warning)
+}
+
+private fun warningReason(warning: SeedWarning): String = when (warning) {
+	SeedWarning.DEFINITION_REPEATS_TERM -> S.t("add.051")
+	SeedWarning.HEDGED -> S.t("add.052")
+	SeedWarning.SAME_MEANING -> S.t("add.053")
+	SeedWarning.HAS_NUMBERS -> S.t("add.054")
 }
 
 private fun reason(problem: SeedProblem): String = when (problem) {
@@ -585,6 +669,9 @@ internal fun sizeOf(context: Context, uri: Uri): Long? {
 }
 
 private const val PROMPT_ASSET = "prompt/deck_prompt.txt"
+
+/** The same thing for a deck that is not about a language. */
+private const val SUBJECT_ASSET = "prompt/subject_prompt.txt"
 private const val PROMPT_FILE = "ikna-deck-prompt.txt"
 
 /** Four megabytes is around forty thousand cards: far more than a deck ever is. */

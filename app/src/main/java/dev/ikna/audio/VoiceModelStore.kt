@@ -5,7 +5,9 @@ import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.BufferedOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import java.util.Locale
 
 /*
@@ -179,13 +181,15 @@ class VoiceModelStore(context: Context) {
      * interrupted by a dead battery must not leave half a model looking
      * installed.
      *
-     * @param onProgress called with the number of files copied so far, for a
-     *   screen that would otherwise look frozen for a minute.
+     * @param onProgress called with the bytes copied so far out of the size of
+     *   the folder, and not merely with the files finished: one file of a
+     *   Kokoro release is the entire copy, and a count of finished files sits
+     *   at zero throughout it.
      */
     suspend fun install(
         tree: Uri,
         lang: String? = null,
-        onProgress: (Int) -> Unit = {},
+        onProgress: (VoiceInstallProgress) -> Unit = {},
     ): VoiceModelResult = withContext(Dispatchers.IO) {
         val doc = folderOf(tree) ?: return@withContext VoiceModelResult.Failed(null)
 
@@ -205,10 +209,13 @@ class VoiceModelStore(context: Context) {
             root.mkdirs()
             staging.deleteRecursively()
             staging.mkdirs()
-            var copied = 0
-            copyTree(doc, staging) {
-                copied += 1
-                onProgress(copied)
+            val total = sizeOfDoc(doc)
+            var files = 0
+            var copied = 0L
+            copyTree(doc, staging) { delta, finished ->
+                copied += delta
+                if (finished) files += 1
+                onProgress(VoiceInstallProgress(files, copied, total))
             }
 
             val home = File(root, slugFor(name))
@@ -239,7 +246,7 @@ class VoiceModelStore(context: Context) {
     suspend fun installArchive(
         source: Uri,
         lang: String? = null,
-        onProgress: (Int) -> Unit = {},
+        onProgress: (VoiceInstallProgress) -> Unit = {},
     ): VoiceModelResult = withContext(Dispatchers.IO) {
         val doc = runCatching { DocumentFile.fromSingleUri(app, source) }.getOrNull()
         val archiveName = doc?.name.orEmpty().ifEmpty { "model.tar.bz2" }
@@ -269,7 +276,7 @@ class VoiceModelStore(context: Context) {
                     source = input,
                     dest = staging,
                     compressed = VoiceArchive.isCompressed(archiveName),
-                ) { done -> onProgress(done) }
+                ) { done, read -> onProgress(VoiceInstallProgress(done, read, packed)) }
             } ?: error("could not read " + archiveName)
             if (files == 0) error("the archive held no files")
 
@@ -570,7 +577,15 @@ class VoiceModelStore(context: Context) {
         return VoiceModelLayout.inspect(name, entries)
     }
 
-    private fun copyTree(doc: DocumentFile, dest: File, onFile: () -> Unit) {
+    /**
+     * Copies a picked folder in, a megabyte at a time and a word after each one.
+     *
+     * @param onProgress bytes just written, and whether that finished a file.
+     *   Both, because neither alone is enough: a Piper voice is many small files
+     *   and a Kokoro release is one enormous one, and a screen has to keep moving
+     *   through either.
+     */
+    private fun copyTree(doc: DocumentFile, dest: File, onProgress: (Long, Boolean) -> Unit) {
         dest.mkdirs()
         val children = runCatching { doc.listFiles() }.getOrNull().orEmpty()
         for (child in children) {
@@ -580,15 +595,39 @@ class VoiceModelStore(context: Context) {
             if (name == "." || name == ".." || name.contains('/')) continue
             val target = File(dest, name)
             if (child.isDirectory) {
-                copyTree(child, target, onFile)
+                copyTree(child, target, onProgress)
             } else {
                 app.contentResolver.openInputStream(child.uri)?.use { input ->
-                    target.outputStream().use { output -> input.copyTo(output) }
+                    BufferedOutputStream(FileOutputStream(target), BUFFER).use { output ->
+                        val buffer = ByteArray(BUFFER)
+                        while (true) {
+                            val read = input.read(buffer)
+                            if (read < 0) break
+                            output.write(buffer, 0, read)
+                            onProgress(read.toLong(), false)
+                        }
+                    }
                 } ?: error("could not read " + name)
-                onFile()
+                onProgress(0L, true)
             }
         }
     }
+
+    /**
+     * What a picked folder weighs, so its copy can be shown as a fraction.
+     *
+     * One pass over the listing before anything is written. It costs a moment on
+     * a folder of a dozen files, which is every model there is, and it buys the
+     * difference between a percentage and a number nobody can judge.
+     */
+    private fun sizeOfDoc(doc: DocumentFile): Long = runCatching {
+        var total = 0L
+        val children = runCatching { doc.listFiles() }.getOrNull().orEmpty()
+        for (child in children) {
+            total += if (child.isDirectory) sizeOfDoc(child) else child.length()
+        }
+        total
+    }.getOrDefault(0L)
 
     private fun write(install: VoiceModelInstall) {
         runCatching {
@@ -614,6 +653,16 @@ class VoiceModelStore(context: Context) {
             .getOrDefault(0L)
 
     private companion object {
+        /**
+         * How much is copied at a time.
+         *
+         * The standard library's default is eight kilobytes, which is fine for
+         * a settings file and absurd for a model: three hundred megabytes
+         * through a content provider in eight-kilobyte pieces is most of the
+         * wait people reported as the app hanging.
+         */
+        const val BUFFER = 1 shl 20
+
         const val DIR = "voice-models"
         const val LEGACY_DIR = "voice-model"
         const val MANIFEST = "ikna-model.txt"

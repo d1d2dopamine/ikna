@@ -26,7 +26,8 @@ class LoadGovernorTest {
         cleanDays: Int = 0,
         newIntroducedLastWeek: Int = 3,
         totalReviews: Int = 500,
-        daysSinceReturn: Int? = null
+        daysSinceReturn: Int? = null,
+        overheated: Boolean = false
     ) = GovernorSignals(
         dueToday = dueToday,
         forecastAvg3d = forecastAvg3d,
@@ -39,7 +40,8 @@ class LoadGovernorTest {
         cleanDays = cleanDays,
         newIntroducedLastWeek = newIntroducedLastWeek,
         totalReviews = totalReviews,
-        daysSinceReturn = daysSinceReturn
+        daysSinceReturn = daysSinceReturn,
+        overheated = overheated
     )
 
     @Test
@@ -174,5 +176,140 @@ class LoadGovernorTest {
         val decision = governor.decide(signals())
         assertTrue(decision.amnestyQuota > 0)
         assertTrue(decision.amnestyQuota < decision.capacity)
+    }
+
+    /**
+     * The ceiling that exists so that tomorrow is not a wall. Headroom alone
+     * would happily spend a whole quiet day on new material, and the bill for
+     * that day arrives on the next four.
+     */
+    @Test
+    fun `a day may spend only its share on new material`() {
+        assertEquals(10, governor.dailyNewCeiling(40))
+        assertEquals(config.maxNewCeiling, governor.dailyNewCeiling(200))
+    }
+
+    /**
+     * Never zero. A day with nothing unfamiliar in it is the day the app becomes
+     * a chore, and that is the failure this project cares about most.
+     */
+    @Test
+    fun `even the smallest day keeps room for one new thing`() {
+        assertEquals(1, governor.dailyNewCeiling(1))
+        assertEquals(1, governor.dailyNewCeiling(2))
+    }
+
+    /**
+     * The regression this was written for: a queue that exactly fills the day
+     * leaves no headroom, the morning verdict is therefore zero, and it used to
+     * stay zero however much work the user actually did. Reviews past the
+     * obligation now buy chunks at what a chunk costs.
+     */
+    @Test
+    fun `work past the plan earns new material at the price it will cost`() {
+        assertEquals(0, governor.earnedNew(0))
+        assertEquals(0, governor.earnedNew(config.earnedNewPerReviews - 1))
+        assertEquals(1, governor.earnedNew(config.earnedNewPerReviews))
+        assertEquals(3, governor.earnedNew(config.earnedNewPerReviews * 3 + 1))
+    }
+
+    @Test
+    fun `nothing is earned by answering less than the day asked for`() {
+        assertEquals(0, governor.earnedNew(-5))
+    }
+
+    /**
+     * A day well above the median, finished badly, is not rewarded with another
+     * one like it. The queue is not what is at risk in that situation.
+     */
+    @Test
+    fun `the day after an overheated one is smaller and has nothing new`() {
+        val decision = governor.decide(signals(overheated = true))
+        assertEquals(GovernorReason.OVERHEATED, decision.reason)
+        assertEquals(0, decision.allowedNew)
+        assertTrue(decision.capacity < config.targetDailyReviews)
+        assertTrue(decision.capacity >= config.dailyMinimumCards)
+    }
+
+    /**
+     * The valve keeps its weekly chunk, and the log keeps the reason the valve
+     * had to open. It used to overwrite it, so the one event worth investigating
+     * recorded nothing about itself.
+     */
+    @Test
+    fun `the valve remembers what it overrode`() {
+        val decision = governor.decide(
+            signals(
+                backlog = config.backlogHardLimit + 1,
+                newIntroducedLastWeek = 0
+            )
+        )
+        assertEquals(GovernorReason.SAFETY_VALVE, decision.reason)
+        assertEquals(GovernorReason.BACKLOG_LIMIT, decision.gate)
+        assertEquals(1, decision.allowedNew)
+    }
+
+    @Test
+    fun `a valve that opened for lack of room says so too`() {
+        val decision = governor.decide(
+            signals(
+                dueToday = config.targetDailyReviews,
+                newIntroducedLastWeek = 0
+            )
+        )
+        assertEquals(GovernorReason.SAFETY_VALVE, decision.reason)
+        assertEquals(GovernorReason.NO_HEADROOM, decision.gate)
+    }
+
+    /**
+     * A long clean streak still raises the allowance -- the accelerator is the
+     * only part of this that ever says "more" -- but never past the day's share.
+     */
+    @Test
+    fun `a long clean streak raises the allowance within the day's share`() {
+        val decision = governor.decide(
+            signals(daysSinceStart = config.settlingDays + 1, cleanDays = 100)
+        )
+        assertTrue(decision.allowedNew > config.maxNewPerDay)
+        assertEquals(governor.dailyNewCeiling(config.targetDailyReviews), decision.allowedNew)
+    }
+
+    /**
+     * The threshold the accelerator reads used to be a literal inside the
+     * governor, two lines from the three configured numbers that mean the same
+     * thing, so tuning the config could not reach it.
+     */
+    @Test
+    fun `the accelerator reads its accuracy threshold from the config`() {
+        val sloppy = governor.decide(
+            signals(
+                daysSinceStart = config.settlingDays + 1,
+                cleanDays = 100,
+                accuracyRecent = config.accelerateMinAccuracy - 0.05
+            )
+        )
+        assertEquals(config.maxNewPerDay, sloppy.allowedNew)
+
+        val lenient = LoadGovernor(config.copy(accelerateMinAccuracy = 0.5))
+        val raised = lenient.decide(
+            signals(
+                daysSinceStart = config.settlingDays + 1,
+                cleanDays = 100,
+                accuracyRecent = config.accelerateMinAccuracy - 0.05
+            )
+        )
+        assertTrue(raised.allowedNew > config.maxNewPerDay)
+    }
+
+    @Test
+    fun `every decision carries the ceiling it was made under`() {
+        assertEquals(
+            governor.dailyNewCeiling(config.targetDailyReviews),
+            governor.decide(signals()).newCeiling
+        )
+        assertEquals(
+            governor.dailyNewCeiling(config.returnModeCapacity),
+            governor.decide(signals(daysSinceLastSession = config.returnModeGapDays)).newCeiling
+        )
     }
 }

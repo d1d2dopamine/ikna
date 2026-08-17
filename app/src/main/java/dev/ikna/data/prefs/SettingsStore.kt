@@ -180,6 +180,25 @@ data class IknaSettings(
      * putting it in the database would mean a schema migration for a decoration.
      */
     val deckLooks: String = "",
+    /**
+     * Chunks the learner has marked as wrong, separated by semicolons.
+     *
+     * A deck written by a language model can contain a card that is simply
+     * false, and spaced repetition is extremely good at teaching whatever it is
+     * handed. The only judge available is the person reading the card, so there
+     * is now a third answer beside "knew it" and "did not": this card is broken.
+     *
+     * A chunk named here is never scheduled and never asked again, at any level.
+     * Crucially it is not an error either: marking it costs no accuracy, so one
+     * hallucination cannot close the governor's gate on new material for a week.
+     *
+     * Kept in preferences rather than in the database because it is a judgement
+     * about content rather than content itself, and because putting a set of ids
+     * in `chunks` would mean a schema migration for a list of mistakes. It rides
+     * along with the settings backup, which is where a person's own corrections
+     * belong.
+     */
+    val suppressed: String = "",
     val onboardingDone: Boolean = false,
     /** How many times the tap-to-reveal hint has been shown. Stops at 5. */
     val revealHintsShown: Int = 0,
@@ -231,6 +250,7 @@ class SettingsStore(private val context: Context) {
         val showWordmark = booleanPreferencesKey("showWordmark")
         val leftHanded = booleanPreferencesKey("leftHanded")
         val deckLooks = stringPreferencesKey("deckLooks")
+        val suppressed = stringPreferencesKey("suppressed")
         val onboardingDone = booleanPreferencesKey("onboardingDone")
         val revealHintsShown = intPreferencesKey("revealHintsShown")
         val swipesDone = intPreferencesKey("swipesDone")
@@ -271,6 +291,7 @@ class SettingsStore(private val context: Context) {
             showWordmark = p[Keys.showWordmark] ?: defaults.showWordmark,
             leftHanded = p[Keys.leftHanded] ?: defaults.leftHanded,
             deckLooks = p[Keys.deckLooks] ?: defaults.deckLooks,
+            suppressed = p[Keys.suppressed] ?: defaults.suppressed,
             onboardingDone = p[Keys.onboardingDone] ?: defaults.onboardingDone,
             revealHintsShown = p[Keys.revealHintsShown] ?: defaults.revealHintsShown,
             swipesDone = p[Keys.swipesDone] ?: defaults.swipesDone,
@@ -343,6 +364,29 @@ class SettingsStore(private val context: Context) {
         if (look.isPlain) map.remove(packId) else map[packId] = look
         prefs[Keys.deckLooks] = encodeDeckLooks(map)
     }
+
+    /**
+     * Marks one chunk as wrong, read-modify-write inside a single edit.
+     *
+     * Newest first, and capped: the list is a handful of corrections, not a
+     * second copy of the deck. Past the cap the oldest entry falls off, which is
+     * safe -- a chunk that dropped out simply becomes askable again, and if it is
+     * still wrong it can be marked again in one tap.
+     */
+    suspend fun suppressChunk(chunkId: String) = put { prefs ->
+        val id = chunkId.filter { it != ';' && !it.isISOControl() }.trim()
+        if (id.isNotEmpty()) {
+            val kept = suppressedOf(prefs[Keys.suppressed] ?: "").filter { it != id }
+            prefs[Keys.suppressed] = (listOf(id) + kept)
+                .take(SUPPRESS_LIMIT)
+                .joinToString(";")
+        }
+    }
+
+    /** Puts every marked chunk back into circulation. */
+    suspend fun clearSuppressed() = put { it[Keys.suppressed] = "" }
+
+    suspend fun setSuppressed(value: String) = put { it[Keys.suppressed] = value }
 
     suspend fun setReminder(enabled: Boolean, hour: Int, minute: Int) = put {
         it[Keys.reminderEnabled] = enabled
@@ -450,3 +494,21 @@ fun encodeDeckLooks(map: Map<String, DeckLook>): String =
 /** What this deck should look like. Never null: an undecorated deck is plain. */
 fun IknaSettings.lookFor(packId: String): DeckLook =
     parseDeckLooks(deckLooks)[packId] ?: DeckLook()
+
+// ---- suppressed chunks -----------------------------------------------------
+//
+// A set of ids in one string, in the same hand-rolled shape as the deck looks
+// above and for the same reasons: a handful of entries, read by builds that may
+// predate the feature, and a format a person can read in an exported backup.
+
+/**
+ * How many corrections are remembered. Four hundred is far more than any deck
+ * has wrong cards, and small enough that the preference stays a preference.
+ */
+const val SUPPRESS_LIMIT = 400
+
+fun suppressedOf(value: String): List<String> =
+    value.split(';')
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .distinct()

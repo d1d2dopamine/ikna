@@ -50,6 +50,11 @@ data class SessionUiState(
     val undoFailed: Boolean = false,
     val showRevealHint: Boolean = false,
     val extraAdded: Int = 0,
+    /**
+     * A card was just thrown away as wrong. Worth one quiet line, because a
+     * card disappearing without a word looks like the app losing work.
+     */
+    val wrongMarked: Boolean = false,
     val noMoreExtra: Boolean = false,
     /**
      * True once enough answers have been given by swiping. The two words at the
@@ -350,6 +355,56 @@ class SessionViewModel(
      * gesture has actually been found. Until there is enough of it, the two
      * words stay on screen.
      */
+    /**
+     * "This card is wrong."
+     *
+     * The answer that was missing. A deck can be written by a model in thirty
+     * seconds, and some of what it writes is false -- and the only two answers on
+     * offer were "knew it" and "did not", the second of which asks the scheduler
+     * to show the false card more often and costs the day some accuracy on the
+     * way. So the honest reaction gets its own action: the chunk leaves this
+     * session and every future one, nothing is logged as an error, and the day is
+     * not made to look worse than it was. See [LearningRepository.markWrong].
+     *
+     * Every level of the chunk goes at once, including the copies queued for a
+     * second pass: what is wrong is the fact, not the way it was asked.
+     */
+    fun markWrong() {
+        val s = _state.value
+        val card = s.current ?: return
+        val chunkId = card.chunk.id
+
+        val queue = s.queue.filterNot { it.chunk.id == chunkId }
+        // Cards of the same chunk sitting behind the cursor were already answered
+        // in this session, and dropping them shifts everything after them.
+        val removedBefore = s.queue.take(s.index).count { it.chunk.id == chunkId }
+        val index = (s.index - removedBefore).coerceIn(0, queue.size)
+
+        val owedGone = planned.count { it.chunk.id == chunkId && it.card.key !in answeredKeys }
+        planned = planned.filterNot { it.chunk.id == chunkId }
+        answeredKeys.removeAll { it.substringBeforeLast(':') == chunkId }
+
+        // Undo belongs to answers. There is nothing to take back here, and
+        // leaving the offer up would suggest the card came back.
+        undoToken++
+
+        _state.value = s.copy(
+            queue = queue,
+            index = index,
+            revealed = false,
+            remaining = planned.count { it.card.key !in answeredKeys },
+            sessionTotal = (s.sessionTotal - owedGone).coerceAtLeast(s.sessionDone),
+            undoVisible = false,
+            undoFailed = false,
+            wrongMarked = true,
+            finished = index >= queue.size
+        )
+        shownAt = System.currentTimeMillis()
+        onCardShown()
+
+        serially { repo.markWrong(card) }
+    }
+
     fun rate(rating: Rating, viaSwipe: Boolean = false) {
         val s = _state.value
         val card = s.current ?: return
@@ -392,6 +447,7 @@ class SessionViewModel(
             canUndo = true,
             undoVisible = true,
             undoFailed = false,
+            wrongMarked = false,
             showRevealHint = hintsShown < HINT_LIMIT,
             extraAdded = 0,
             finished = nextIndex >= queue.size

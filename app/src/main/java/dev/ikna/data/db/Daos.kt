@@ -31,6 +31,13 @@ interface ChunkDao {
     @Query("UPDATE packs SET lang = :lang WHERE id = :id")
     suspend fun setPackLang(id: String, lang: String)
 
+    // Renaming touches the title column and nothing else. The id was derived
+    // from the file name once, at import, and every chunk, card and review row
+    // hangs off it -- a rename that regenerated the id would look like a
+    // rename and behave like deleting the deck and importing an empty copy.
+    @Query("UPDATE packs SET title = :title WHERE id = :id")
+    suspend fun setPackTitle(id: String, title: String)
+
     // Deleting a deck, in the order the rows depend on each other: cards, then
     // tokens, then chunks, then the pack itself. The `reviews` table is never
     // touched by any of this - it is append-only and it is what the statistics

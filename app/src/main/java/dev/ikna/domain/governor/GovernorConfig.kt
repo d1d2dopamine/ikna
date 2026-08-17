@@ -58,6 +58,45 @@ data class GovernorConfig(
     val dailyMinimumCards: Int = 1,
     val desiredRetention: Double = 0.9,
     /**
+     * How accurate the recent answers have to be before the ceiling is
+     * allowed to rise.
+     *
+     * This was a `0.9` written inside the governor, two lines away from
+     * [minAccuracy] and [desiredRetention], which are both in this file. Three
+     * numbers with the same meaning and one of them unreachable is how a
+     * tuning session ends up changing nothing.
+     */
+    val accelerateMinAccuracy: Double = 0.9,
+    /**
+     * The share of a day's capacity that may be spent on new material, as a
+     * hard daily ceiling.
+     *
+     * Separate from the headroom arithmetic on purpose. Headroom answers "is
+     * there room today"; this answers "should there be anything left for
+     * tomorrow", and the second question is the one that keeps the day after a
+     * good day from being a wall. A quarter, scaled to the norm rather than a
+     * fixed count: on a fifteen-card norm four new chunks is a different day
+     * than it is on sixty.
+     */
+    val newCeilingShare: Double = 0.25,
+    /**
+     * Reviews past the day's obligation that open one more new chunk inside
+     * the session.
+     *
+     * Deliberately equal to [costPerNew]: a chunk met today costs roughly this
+     * many reviews over the following week, so paying that price up front is
+     * the one way to hand out more today without borrowing from tomorrow.
+     */
+    val earnedNewPerReviews: Int = 4,
+    /**
+     * How far above the median a day has to go before it counts as overheating.
+     */
+    val overheatRatio: Double = 1.6,
+    /** How far accuracy has to fall on such a day for it to count. */
+    val overheatAccuracyDrop: Double = 0.15,
+    /** What is left of the norm on the day after an overheated one. */
+    val overheatCapacityShare: Double = 0.75,
+    /**
      * How overdue a card has to be before it leaves the visible queue for the
      * amnesty pool.
      *

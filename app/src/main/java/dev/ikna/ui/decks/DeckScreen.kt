@@ -41,6 +41,7 @@ import dev.ikna.AppContainer
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.NO_TINT
 import dev.ikna.data.prefs.lookFor
+import dev.ikna.data.repo.DeckRepository
 import dev.ikna.data.repo.DeckSummary
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.DeckTints
@@ -182,6 +183,50 @@ fun DeckScreen(
                 )
 
                 Spacer(Modifier.height(Space.xl))
+                IknaRule()
+                Spacer(Modifier.height(Space.lg))
+
+                // The name.
+                //
+                // Typed straight into the row that shows it, with no save button
+                // and no dialog: a dialog would ask a question the field answers
+                // by itself, and a save button would be a second chance to lose
+                // the edit. Left blank the old name stays -- the repository
+                // refuses an empty title, and the list has no other handle.
+                Text(
+                    text = S.t("dp.013"),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(Modifier.height(Space.md))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(Space.hair, MaterialTheme.colorScheme.outline)
+                        .padding(horizontal = Space.md, vertical = Space.sm)
+                ) {
+                    BasicTextField(
+                        value = current.title,
+                        onValueChange = { raw ->
+                            val value = raw.take(DeckRepository.MAX_TITLE)
+                            // Shown at once, stored in the same breath. The copy
+                            // is what keeps the bar at the top of this screen and
+                            // the field in step while the letters are arriving.
+                            deck = deck?.copy(title = value)
+                            scope.launch {
+                                container.deckRepository.rename(deckId, value)
+                            }
+                        },
+                        textStyle = MaterialTheme.typography.titleMedium.copy(
+                            color = MaterialTheme.colorScheme.onBackground
+                        ),
+                        singleLine = true,
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                Spacer(Modifier.height(Space.lg))
                 IknaRule()
                 Spacer(Modifier.height(Space.lg))
 
@@ -327,12 +372,6 @@ fun DeckScreen(
                     label = if (adding) S.t("dp.011") else S.t("dp.010"),
                     enabled = !adding,
                     onClick = { more.launch(ACCEPTED_TYPES) }
-                )
-                Spacer(Modifier.height(Space.sm))
-                Text(
-                    text = S.t("dp.012"),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = muted
                 )
 
                 Spacer(Modifier.height(Space.lg))

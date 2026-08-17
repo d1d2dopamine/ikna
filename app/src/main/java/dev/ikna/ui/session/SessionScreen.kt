@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.ikna.AppContainer
 import dev.ikna.data.prefs.IknaSettings
+import dev.ikna.data.repo.NO_LANG
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.governor.GovernorReason
 import dev.ikna.domain.session.Level
@@ -123,7 +124,7 @@ fun SessionScreen(
                     onRate = { rating -> vm.rate(rating, viaSwipe = true) }
                 ) { progress ->
                     ChunkCard(
-                        label = levelLabel(card.level),
+                        label = levelLabel(card.level, card.chunk.lang == NO_LANG),
                         prompt = card.prompt,
                         answer = card.answer,
                         // Which part of the sentence the card is actually
@@ -131,7 +132,14 @@ fun SessionScreen(
                         // is not a sentence, which the card handles.
                         promptTarget = card.promptTarget,
                         answerTarget = card.answerTarget,
-                        hint = if (card.level == Level.CLOZE) card.chunk.translation else null,
+                        // On a subject deck the third field IS the meaning of the term, so
+                        // showing it beside a definition with the term blanked out
+                        // would simply print the answer.
+                        hint = if (card.level == Level.CLOZE && card.chunk.lang != NO_LANG) {
+                            card.chunk.translation
+                        } else {
+                            null
+                        },,
                         revealed = state.revealed,
                         // The one line that says how to turn a card over. It was
                         // computed for every session and then never drawn, so the
@@ -155,6 +163,7 @@ fun SessionScreen(
         UndoBar(
             visible = state.undoVisible,
             failed = state.undoFailed,
+            wrong = state.wrongMarked,
             onUndo = vm::undo,
             onDismiss = vm::dismissUndo
         )
@@ -166,6 +175,19 @@ fun SessionScreen(
         IknaBottomBar {
             IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
             Spacer(Modifier.weight(1f))
+            // Only on a turned card, and never as a third rating button: the two
+            // words under the thumb are about memory, this is about the deck
+            // being wrong. Hidden before the reveal because a card nobody has
+            // read yet cannot be judged, and because a mistap here would throw
+            // away material instead of grading it.
+            if (state.current != null && state.revealed) {
+                IknaTextButton(
+                    label = S.t("sess.044"),
+                    onClick = vm::markWrong,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.width(8.dp))
+            }
             // Sound is a control, not part of the card. The card is the one thing on
             // this screen that must never grow a control, and the mark is only drawn
             // when pressing it would not give the answer away.
@@ -330,6 +352,7 @@ private fun EmptyState(
 private fun UndoBar(
     visible: Boolean,
     failed: Boolean,
+    wrong: Boolean,
     onUndo: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -343,6 +366,16 @@ private fun UndoBar(
         when {
             failed -> Text(
                 text = S.t("sess.011"),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            // Said once, without an undo beside it: the card is gone on
+            // purpose, and it can be brought back in settings if that was a
+            // mistake, which is the right amount of friction for a decision
+            // about the deck rather than about an answer.
+            wrong -> Text(
+                text = S.t("sess.045"),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -365,9 +398,17 @@ private fun UndoBar(
     }
 }
 
-private fun levelLabel(level: Level): String = when (level) {
-    Level.RECOGNITION -> S.t("sess.015")
-    Level.CLOZE -> S.t("sess.016")
+/**
+ * What the question is asking for.
+ *
+ * A subject deck says it differently at the same two levels: a neuroscience card
+ * shows a term and then its definition with the term missing, and calling that
+ * "recognition" and "a gap in a sentence" describes a phrasebook instead. The
+ * third level never appears there at all -- see [dev.ikna.domain.session.LevelPromotion].
+ */
+private fun levelLabel(level: Level, subject: Boolean): String = when (level) {
+    Level.RECOGNITION -> if (subject) S.t("sess.046") else S.t("sess.015")
+    Level.CLOZE -> if (subject) S.t("sess.047") else S.t("sess.016")
     Level.PRODUCTION -> S.t("sess.017")
 }
 
@@ -395,6 +436,7 @@ private fun reasonText(reason: GovernorReason): String = when (reason) {
     GovernorReason.LOW_ACCURACY -> S.t("sess.026")
     GovernorReason.RETURN_MODE -> S.t("sess.027")
     GovernorReason.SAFETY_VALVE -> S.t("sess.028")
+    GovernorReason.OVERHEATED -> S.t("sess.043")
     GovernorReason.PACK_EXHAUSTED ->
         S.t("sess.029")
 }

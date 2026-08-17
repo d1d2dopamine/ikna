@@ -63,7 +63,7 @@ import androidx.compose.ui.window.Dialog
  * clip-art, and a pulled-in icon font would bring Material's rounded geometry
  * back through the side door.
  */
-enum class IknaGlyph { SPARK, STACK, BARS, SLIDERS, GEAR, PLUS, BACK, SOUND }
+enum class IknaGlyph { SPARK, STACK, BARS, SLIDERS, GEAR, PLUS, BACK, SOUND, DOTS }
 
 @Composable
 fun IknaGlyphIcon(
@@ -170,6 +170,17 @@ fun IknaGlyphIcon(
                 drawPath(cone, color)
                 drawRect(color, Offset(s * 0.60f, s * 0.34f), Size(s * 0.09f, s * 0.32f))
                 drawRect(color, Offset(s * 0.78f, s * 0.22f), Size(s * 0.09f, s * 0.56f))
+            }
+            // Everything done to one deck rarely. Three marks in a column is
+            // the one shape a phone reader takes as "more about this row"
+            // without a word beside it, which is why it is not a gear: a gear
+            // in a list row reads as the settings of the app, not of the row.
+            IknaGlyph.DOTS -> {
+                val d = s * 0.16f
+                val x = (s - d) / 2f
+                drawRect(color, Offset(x, s * 0.10f), Size(d, d))
+                drawRect(color, Offset(x, (s - d) / 2f), Size(d, d))
+                drawRect(color, Offset(x, s * 0.90f - d), Size(d, d))
             }
             // Back out of a screen.
             IknaGlyph.BACK -> {

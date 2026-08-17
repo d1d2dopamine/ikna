@@ -124,7 +124,6 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Нагрузка
 	"set.013" to "Load",
 	// Сколько повторений в день считать нормой. От этого зависит, сколько новых чанков придёт за
-	"set.014" to "How many reviews a day count as the norm. It decides how many new chunks arrive tomorrow. By default the norm counts itself — from how much you actually answered over the past two weeks.",
 	// АВТО
 	"set.015" to "AUTO",
 	// РУЧНОЙ
@@ -138,15 +137,12 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Анимации
 	"set.020" to "Animations",
 	// Карточки улетают, конец дня с анимацией
-	"set.021" to "Cards fly away, the day ends with an animation",
 	// Вибрация
 	"set.022" to "Vibration",
 	// Короткий отклик на свайп
-	"set.023" to "A short response to a swipe",
 	// Язык
 	"set.024" to "Language",
 	// Язык самого приложения. На колоды он не влияет: переводы в карточках остаются такими, каки
-	"set.025" to "The language of the app itself. It does not touch the decks: translations inside the cards stay as they are in the deck.",
 	// Озвучка
 	"set.026" to "Speech",
 	// Говорит движок синтеза речи, который уже стоит на телефоне. Ничего не скачивается и ничего
@@ -192,7 +188,6 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Напоминание
 	"set.047" to "Reminder",
 	// Одно в день, и только если минимум ещё не сделан. Никаких серий и укоров.
-	"set.048" to "One a day, and only if the minimum is not done yet. No streaks and no reproaches.",
 	// Напоминать
 	"set.049" to "Remind me",
 	// в 
@@ -218,13 +213,10 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// ВОССТАНОВИТЬ
 	"set.060" to "RESTORE",
 	// Перерывы
-	"set.061" to "Breaks",
 	// Настраивать нечего и включать нечего. Приложение смотрит, сколько ты реально занимался, и 
-	"set.062" to "Nothing to set up and nothing to switch on. The app looks at how much you actually studied and shifts the dates by itself: a day with no sessions moves things by a day, a half-hearted day by half a day. New chunks are not added until the pace returns. No debt piles up.",
 	// Редкое
 	"set.063" to "Rare",
 	// То, что нужно раз в год или ни разу. Спрятано не потому, что сложно, а чтобы не нажать слу
-	"set.064" to "The things needed once a year or never. Hidden not because they are hard, but so they are not hit by accident.",
 	// СКРЫТЬ
 	"set.065" to "HIDE",
 	// ПОКАЗАТЬ
@@ -320,7 +312,6 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// ПАЛИТРА
 	"set.114" to "PALETTE",
 	// Цвет самого приложения. Светлая и тёмная версии — это одна палитра при разном освещении, а не две разные темы.
-	"set.115" to "The colour of the app itself. Light and dark are one palette in two lightings, not two different themes.",
 	// УГОЛЬ
 	"set.116" to "EMBER",
 	// БИБЛИОТЕКА
@@ -347,6 +338,9 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"set.132" to "Speak every time",
 	"set.133" to "A card reads itself every time it comes up",
 	"set.134" to "A card reads itself only at first contact",
+	"set.135" to "Cards taken out of rotation: ",
+	"set.136" to "Put them back",
+	"set.137" to "The cards are back",
 	// БЕТА
 	"set.123" to "BETA",
 	// Пока в бете и по умолчанию выключено: как звучит голос, решает движок на телефоне, а плохой голос хуже тишины.
@@ -465,7 +459,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"dp.009" to "The cards of this deck and their schedule go. The answers stay in the statistics — that log is never rewritten.",
 	"dp.010" to "Add cards",
 	"dp.011" to "Adding…",
-	"dp.012" to "A file in the same three columns. The cards join this deck instead of making a new one, and rows already in it are skipped.",
+	"dp.013" to "Deck name",
 	"add.036" to "how this works",
 	"add.037" to "hide",
 	"add.038" to "Which language the cards are in",
@@ -480,6 +474,19 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"add.047" to "Topic or situation",
 	"add.048" to "for example, cafés and ordering food",
 	"add.049" to "The answers go into the prompt itself, so there is nothing left to type into the chat.",
+	"add.050" to "Worth checking, lines: ",
+	"add.051" to "the meaning repeats the term itself",
+	"add.052" to "a hedged wording",
+	"add.053" to "this meaning already appeared above",
+	"add.054" to "has numbers — check them against the source",
+	"add.055" to "What is being learned",
+	"add.056" to "a language",
+	"add.057" to "a subject",
+	"add.058" to "A subject deck is not read aloud and never asks you to speak — only to recognise and to recall.",
+	"add.059" to "some background",
+	"add.060" to "Subject and section",
+	"add.061" to "for example, neuroscience, synaptic plasticity",
+	"add.062" to "Language of the cards",
 	// тап в любом месте
 	"card.002" to "tap anywhere",
 	// ← НЕ ЗНАЮ
@@ -569,6 +576,11 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"sess.041" to "cards",
 	// карточек
 	"sess.042" to "cards",
+	"sess.043" to "Yesterday ran long — today is a lighter day, with nothing new in it.",
+	"sess.044" to "this card is wrong",
+	"sess.045" to "Taken out of rotation. The mistake was not written into your statistics.",
+	"sess.046" to "the term",
+	"sess.047" to "from memory",
 	// Фразами, а не словами
 	"onb.001" to "In phrases, not in words",
 	// Внутри — готовые чанки: короткие живые куски речи. Новые добавляются сами — ничего не надо
@@ -622,6 +634,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"a11y.008" to "Don't know",
 	// Знаю
 	"a11y.009" to "Know",
+	"a11y.010" to "Deck settings",
 	// Озвучка
 	"voice.001" to "Voice",
 	// Сейчас читает
@@ -697,6 +710,9 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"voice.046" to "OTHER LANGUAGE",
 	"voice.047" to "How many voices this model has is something only the model can say: press the test button and the number appears here.",
 	"voice.048" to "Speed",
+	"voice.049" to "Unpacking:",
+	"voice.050" to "A large model takes minutes to unpack: bzip2 is undone by the phone's own processor.",
+	"voice.051" to "You can leave this screen — the install carries on. Do not put the app away for long.",
 	// Оформление
 	"look.001" to "Appearance",
 	// Буквы и цвет квадрата в списке колод. Видно только вам: тому, кому отправите колоду, придут только карточки.
@@ -708,9 +724,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Логотип ikna
 	"bar.001" to "The ikna mark",
 	// Слева в нижнем баре. Выключите — место уйдёт кнопкам
-	"bar.002" to "On the left of the bottom bar. Switch it off and the room goes to the buttons",
 	// Под левую руку
 	"bar.003" to "For the left hand",
 	// Нижний бар зеркалится: плюс уходит в левый угол, остальные кнопки — вправо
-	"bar.004" to "The bottom bar is mirrored: the plus moves to the left corner, the rest to the right",
 )

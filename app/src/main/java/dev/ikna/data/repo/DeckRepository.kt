@@ -5,6 +5,7 @@ import dev.ikna.data.pack.ImportResult
 import dev.ikna.data.pack.PackLoader
 import dev.ikna.data.pack.SeedFormat
 import dev.ikna.data.pack.SeedLineProblem
+import dev.ikna.data.pack.SeedLineWarning
 
 /**
  * What a deck starts as when nobody has said which language it is in.
@@ -29,7 +30,15 @@ data class DeckImport(
     val packId: String,
     val installed: Int,
     val skipped: Int,
-    val firstProblem: SeedLineProblem?
+    val firstProblem: SeedLineProblem?,
+    /**
+     * Cards that were accepted and are still worth reading first. Nothing in
+     * this app can tell whether an imported card is true, so the next best thing
+     * is to say which ones look like they were written to fill a quota. See
+     * [dev.ikna.data.pack.SeedWarning].
+     */
+    val flagged: Int = 0,
+    val firstWarning: SeedLineWarning? = null
 )
 
 data class DeckSummary(
@@ -94,6 +103,27 @@ class DeckRepository(
      * people who changed their mind.
      */
     suspend fun setLang(id: String, lang: String) = chunkDao.setPackLang(id, lang)
+
+    /**
+     * Renames a deck.
+     *
+     * Until now there was no way to. A deck pasted from a chat arrived as
+     * whatever the template called it and a deck from a file arrived as the
+     * file name, and both were final -- so the only way to fix a name was to
+     * delete the deck and import it again, which costs the schedule.
+     *
+     * Only the title moves. [packIdFor] built the id from the file name at
+     * import, and cards, chunks and the review log all point at that id, so it
+     * is deliberately no longer related to what the deck is called.
+     *
+     * A blank name is ignored rather than stored: an empty row in the list is
+     * unopenable in practice, because there is nothing left to aim at.
+     */
+    suspend fun rename(id: String, title: String) {
+        val trimmed = title.trim().take(MAX_TITLE)
+        if (trimmed.isEmpty()) return
+        chunkDao.setPackTitle(id, trimmed)
+    }
 
     /**
      * Deletes a deck: its cards, its tokens, its chunks, and the pack row.
@@ -196,11 +226,20 @@ class DeckRepository(
             skipped = skipped,
             append = into != null
         )
+        // Only warnings about rows that actually landed. A portion added to an
+        // existing deck drops the rows it already has, and quoting a line the
+        // import skipped anyway would send someone to fix a card that is not there.
+        val kept = rows.mapTo(HashSet()) { it.phrase }
+        val flagged = parse.warnings.filter { warning ->
+            parse.rows.any { it.phrase in kept && warning.text.contains(it.phrase) }
+        }
         return DeckImport(
             packId = packId,
             installed = result.installed,
             skipped = skipped,
-            firstProblem = parse.problems.firstOrNull()
+            firstProblem = parse.problems.firstOrNull(),
+            flagged = flagged.size,
+            firstWarning = flagged.firstOrNull()
         )
     }
 
@@ -239,5 +278,14 @@ class DeckRepository(
     companion object {
         /** "Known" for the deck counter: three weeks of predicted stability. */
         const val KNOWN_STABILITY_DAYS = 21.0
+
+        /**
+         * The longest a deck name may be.
+         *
+         * Not a database limit -- SQLite does not care -- but a list limit: the
+         * row shows one line, so anything past this is a name the user cannot
+         * read back and would have no way of knowing was truncated.
+         */
+        const val MAX_TITLE = 60
     }
 }
