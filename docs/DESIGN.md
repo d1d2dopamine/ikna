@@ -31,7 +31,33 @@ stutter. Build it and see it; it takes one `gradlew assembleDebug`.
 | Audio | the phone's own engine by default; a neural engine inside, for a model you add |
 | Colour | nine palettes, each in two lightings. Every pair passes 4.5:1, enforced by a test |
 | Interface languages | Russian, English, Polish, Spanish, French, German |
-| Network | one request, switchable off: is there a newer release. Nothing is uploaded, ever |
+| Network | static release, catalogue and optional voice files only. Nothing is uploaded, ever |
+| Motion | a 220 ms directional signal rewrites the field; no blur, bounce or looping |
+
+## Memory lattice
+
+The visual system has three pieces: a square cell, an interrupted route and the
+field left around them. They are not a pixel-art skin. They are the same grammar
+at different scales: language seals identify decks, segmented tracks show
+progress, activity cells show time and unfinished lattices say that a chart or a
+search does not have enough material yet.
+
+Every language owns a deterministic mirrored 7×7 seal. A deck adds four brighter
+cells from its stable id, so two English decks belong to the same family without
+becoming identical. The letters stay over the seal for accessibility and instant
+recognition; no flag or cultural stereotype is used.
+
+Navigation is a field rewrite rather than a stock sheet slide. The old screen
+closes from one edge, the next opens from that edge, and a two-pixel accent signal
+marks the boundary. Forward and back travel in opposite directions. The whole
+motion lasts 220 ms, contains no blur or spring, never loops, and becomes an
+instant replacement when animations are disabled.
+
+Empty space is divided deliberately. The card keeps a completely silent field
+because the phrase is the only object to read. The deck list may carry a barely
+visible lattice in unused space, while empty search, catalogue and statistics
+states show a compact unfinished structure instead of looking unloaded. Texture
+is never painted behind reading content and never becomes wallpaper.
 
 ## A session
 
@@ -102,7 +128,7 @@ keeping written down: **the app feeds you, you do not feed the app.**
 Every hour spent choosing a wallpaper, a mascot or a badge is an hour that feels
 like studying and is not. Apps that let you decorate them end up being decorated,
 and the decoration becomes the thing the user comes back for. So the palette
-chooses the whole screen at once, decks get one square of colour each, and there
+chooses the whole screen at once, decks get one fixed language seal each, and there
 is nothing here to arrange.
 
 What is adjustable is what makes the text readable or the day workable: the

@@ -6,6 +6,7 @@ import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.theme.ReadableWidth
 import dev.ikna.ui.theme.Space
 import dev.ikna.ui.theme.TouchTarget
+import dev.ikna.ui.theme.segmentFill
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -97,5 +98,27 @@ class GridTest {
                 assertTrue("$speed/$haste", ms in 90..340)
             }
         }
+    }
+
+    @Test
+    fun the_navigation_signal_is_short_and_closes_before_it_opens() {
+        assertEquals(220, Motion.signalDurationMillis)
+        assertTrue(Motion.signalExitDurationMillis < Motion.signalDurationMillis)
+        assertTrue(Motion.signalExitDurationMillis >= 150)
+    }
+
+    @Test
+    fun segmented_progress_keeps_full_and_partial_memory_cells() {
+        assertEquals(0, segmentFill(0f, 18).complete)
+        assertEquals(9, segmentFill(0.5f, 18).complete)
+        assertEquals(18, segmentFill(1f, 18).complete)
+        assertEquals(0f, segmentFill(1f, 18).partial, 0.0001f)
+
+        val partial = segmentFill(0.51f, 18)
+        assertEquals(9, partial.complete)
+        assertTrue(partial.partial > 0f)
+        assertTrue(partial.partial < 1f)
+
+        assertEquals(0, segmentFill(Float.NaN, 18).complete)
     }
 }

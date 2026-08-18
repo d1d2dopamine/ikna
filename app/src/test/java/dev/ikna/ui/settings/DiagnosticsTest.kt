@@ -9,8 +9,8 @@ class DiagnosticsTest {
     fun `report contains support facts and no private content`() {
         val text = diagnosticsText(
             DiagnosticsSnapshot(
-                versionName = "0.7.0 press",
-                versionCode = 200070000,
+                versionName = "0.8.0 press",
+                versionCode = 200080000,
                 androidRelease = "15",
                 androidSdk = 35,
                 abi = "arm64-v8a",
@@ -24,7 +24,7 @@ class DiagnosticsTest {
                 knownCount = 25
             )
         )
-        assertTrue(text.contains("version=0.7.0 press"))
+        assertTrue(text.contains("version=0.8.0 press"))
         assertTrue(text.contains("scheduler=FSRS-6"))
         assertTrue(text.contains("chunks=1200"))
         assertFalse(text.contains("deckName"))

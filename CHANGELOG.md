@@ -12,6 +12,40 @@ replace the space with a dash: `0.1.1 press` is tagged `v0.1.1-press`. What the
 words mean and what a number promises inside an epoch is written down once, in
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
+## 0.8.0 press
+
+The field now remembers its own shape.
+
+### Memory lattice
+
+- Deck marks are mirrored 7×7 language seals generated deterministically from the
+  language code. Four brighter cells vary by deck id, so decks from one language
+  remain related without becoming identical. The letters remain readable above
+  the pattern and no flag imagery is used.
+- The same cells now form progress tracks in deck lists, deck details, sessions,
+  catalogue downloads and app updates. A partial cell preserves exact progress;
+  tracks still draw nothing where zero progress is intentionally silent.
+- Unused space on the home screen is a very faint interrupted field rather than
+  missing content. Empty search, catalogue, retention and first-deck states use a
+  compact unfinished lattice, while the learning card remains completely clear.
+
+### Signal motion
+
+- A forward navigation closes and opens from left to right; back runs the same
+  grammar in reverse. A two-pixel accent boundary crosses the screen in 220 ms,
+  with no stock slide, blur, bounce, particle effect or looping decoration.
+- The Settings jump row uses the same duration, centres its active section and
+  marks it with three signal cells.
+- Turning Animations off removes both navigation and section motion immediately;
+  card gestures and every existing accessibility behaviour remain intact.
+
+### Invariants
+
+- Unit tests pin language-seal uniqueness, mirroring, density and deck variation,
+  as well as segmented progress arithmetic and the signal timing bounds.
+- This release changes no database schema, scheduler, card content, answer log,
+  catalogue format or network permission. No migration is required.
+
 ## 0.7.0 press
 
 A wider interface, a smaller language picker, and support facts that stay private.

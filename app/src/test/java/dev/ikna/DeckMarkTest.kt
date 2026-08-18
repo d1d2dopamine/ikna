@@ -1,8 +1,13 @@
 package dev.ikna
 
 import dev.ikna.ui.decks.DECK_MARK_FALLBACK
+import dev.ikna.ui.decks.LANGUAGE_SEAL_SIDE
+import dev.ikna.ui.decks.deckSealHighlights
+import dev.ikna.ui.decks.languageSealCells
 import dev.ikna.ui.decks.monogramOf
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -57,5 +62,43 @@ class DeckMarkTest {
             val mark = monogramOf("custom", title)
             assertEquals(title, true, mark.length in 1..2)
         }
+    }
+
+    @Test
+    fun popular_languages_have_distinct_stable_pixel_seals() {
+        val languages = listOf(
+            "en", "ru", "pl", "de", "es", "fr", "it",
+            "pt", "zh", "ja", "ko", "uk", "tr"
+        )
+        val seals = languages.map(::languageSealCells)
+        assertEquals(languages.size, seals.toSet().size)
+        assertEquals(languageSealCells("EN"), languageSealCells("en"))
+        seals.forEach { seal ->
+            assertTrue(seal.size in 12..32)
+            assertTrue(seal.all { it in 0 until LANGUAGE_SEAL_SIDE * LANGUAGE_SEAL_SIDE })
+        }
+    }
+
+    @Test
+    fun a_language_seal_is_mirrored_around_its_middle() {
+        listOf("en", "ru", "pl", "de", "es", "fr", "zh", "ja").forEach { language ->
+            val seal = languageSealCells(language)
+            seal.forEach { index ->
+                val row = index / LANGUAGE_SEAL_SIDE
+                val column = index % LANGUAGE_SEAL_SIDE
+                val mirror = row * LANGUAGE_SEAL_SIDE + LANGUAGE_SEAL_SIDE - 1 - column
+                assertTrue("$language/$index", mirror in seal)
+            }
+        }
+    }
+
+    @Test
+    fun deck_highlights_vary_without_changing_the_language_seal() {
+        val first = deckSealHighlights("catalog-en-ru-beginner")
+        val second = deckSealHighlights("catalog-en-ru-middle")
+        assertEquals(4, first.size)
+        assertEquals(4, second.size)
+        assertNotEquals(first, second)
+        assertEquals(languageSealCells("en"), languageSealCells("en"))
     }
 }

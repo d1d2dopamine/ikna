@@ -81,6 +81,12 @@ fun Modifier.readable(): Modifier = this.widthIn(max = ReadableWidth)
  * feedback that repeats itself is decoration.
  */
 object Motion {
+    /** One screen being rewritten into another by the navigation signal. */
+    const val signalDurationMillis = 220
+
+    /** The old field closes slightly before the new one finishes opening. */
+    const val signalExitDurationMillis = 180
+
     /** Back to rest, under the finger. Slightly underdamped: it has weight. */
     val settle: AnimationSpec<Float> =
         spring(dampingRatio = 0.62f, stiffness = Spring.StiffnessMediumLow, visibilityThreshold = 0.5f)

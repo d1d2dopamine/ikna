@@ -38,6 +38,7 @@ import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
+import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaTextField
@@ -146,8 +147,8 @@ fun DeckSearchScreen(
         when {
             failed -> SearchMessage(S.t("search.009"))
             loading -> SearchMessage(S.t("search.005"))
-            !searched -> SearchMessage(S.t("search.006"))
-            results.isEmpty() -> SearchMessage(S.t("search.007"))
+            !searched -> SearchMessage(S.t("search.006"), lattice = true)
+            results.isEmpty() -> SearchMessage(S.t("search.007"), lattice = true)
             else -> LazyColumn(
                 modifier = Modifier
                     .weight(1f)
@@ -179,13 +180,18 @@ fun DeckSearchScreen(
 }
 
 @Composable
-private fun SearchMessage(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(horizontal = Edge, vertical = Space.md)
-    )
+private fun SearchMessage(text: String, lattice: Boolean = false) {
+    Column(modifier = Modifier.padding(horizontal = Edge, vertical = Space.md)) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        if (lattice) {
+            Spacer(Modifier.height(Space.xl))
+            IknaLatticePlaceholder()
+        }
+    }
 }
 
 @Composable

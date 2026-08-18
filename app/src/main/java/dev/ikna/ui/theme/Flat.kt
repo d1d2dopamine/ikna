@@ -39,6 +39,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import kotlin.math.floor
 
 /*
  * The parts Material would otherwise decide for us.
@@ -596,12 +597,12 @@ fun IknaRule(
 }
 
 /**
- * Progress: one filled band, no rounding, no animation.
+ * Progress as a row of memory cells, no rounding and no animation.
  *
- * No track by default. An empty track is a full-width grey strip pinned to the
- * top of the screen for the whole of the first card, which reads as a piece of
- * chrome rather than as progress, and it was the first thing anyone noticed
- * about the session screen. With the track gone, zero progress draws nothing.
+ * The gaps are the important part. A solid strip looks like a download widget
+ * wherever it appears; a sequence of cells reads as material being introduced
+ * one part at a time and agrees with the activity map and the language seals.
+ * No track by default, so zero session progress still draws nothing.
  *
  * Deliberately unlabelled. A number that counts up invites arithmetic about how
  * much is left, and that arithmetic is where the wanting-to-stop starts.
@@ -612,21 +613,49 @@ fun IknaProgress(
     modifier: Modifier = Modifier,
     height: Dp = 3.dp,
     color: Color = MaterialTheme.colorScheme.primary,
-    track: Boolean = false
+    track: Boolean = false,
+    segments: Int = 24
 ) {
     val safe = fraction.coerceIn(0f, 1f)
     val trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.45f)
-    Box(
+    val count = segments.coerceIn(1, 64)
+    val fill = segmentFill(safe, count)
+    Canvas(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
-            .background(if (track) trackColor else Color.Transparent)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(safe)
-                .height(height)
-                .background(color)
-        )
+        val gap = minOf(2.dp.toPx(), size.width / (count * 3f))
+        val cell = ((size.width - gap * (count - 1)) / count).coerceAtLeast(0f)
+        repeat(count) { index ->
+            val left = index * (cell + gap)
+            if (track) {
+                drawRect(trackColor, Offset(left, 0f), Size(cell, size.height))
+            }
+            when {
+                index < fill.complete ->
+                    drawRect(color, Offset(left, 0f), Size(cell, size.height))
+
+                index == fill.complete && fill.partial > 0f ->
+                    drawRect(
+                        color,
+                        Offset(left, 0f),
+                        Size(cell * fill.partial, size.height)
+                    )
+            }
+        }
     }
+}
+
+/** The exact full and partial cells represented by a progress fraction. */
+data class SegmentFill(val complete: Int, val partial: Float)
+
+/** Pure counterpart of [IknaProgress], kept public so the visual rule is tested. */
+fun segmentFill(fraction: Float, segments: Int): SegmentFill {
+    val count = segments.coerceAtLeast(1)
+    val safe = if (fraction.isFinite()) fraction.coerceIn(0f, 1f) else 0f
+    val scaled = safe * count
+    val complete = floor(scaled.toDouble()).toInt().coerceIn(0, count)
+    val partial = if (complete >= count) 0f else (scaled - complete).coerceIn(0f, 1f)
+    return SegmentFill(complete, partial)
 }

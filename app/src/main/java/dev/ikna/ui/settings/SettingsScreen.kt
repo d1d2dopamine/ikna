@@ -15,6 +15,8 @@ import android.provider.OpenableColumns
 import android.speech.tts.TextToSpeech
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -84,6 +86,7 @@ import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaSwatch
 import dev.ikna.ui.theme.IknaPalettes
 import dev.ikna.ui.theme.MIN_READABLE_CONTRAST
+import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.theme.contrastRatio
 import dev.ikna.ui.theme.isLight
 import dev.ikna.ui.theme.hexOf
@@ -323,9 +326,21 @@ fun SettingsScreen(
                     ?: JUMPS.first().first
             }
         }
-        JumpRow(activeId = activeSection) { id ->
+        JumpRow(activeId = activeSection, animations = settings.animations) { id ->
             val target = anchors[id] ?: return@JumpRow
-            scope.launch { scroll.animateScrollTo(target) }
+            scope.launch {
+                if (settings.animations) {
+                    scroll.animateScrollTo(
+                        target,
+                        animationSpec = tween(
+                            durationMillis = Motion.signalDurationMillis,
+                            easing = LinearOutSlowInEasing
+                        )
+                    )
+                } else {
+                    scroll.scrollTo(target)
+                }
+            }
         }
         Spacer(Modifier.height(12.dp))
         IknaRule(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.18f))
@@ -1141,7 +1156,11 @@ fun SettingsScreen(
  * so scrolling still works for anyone who would rather scroll.
  */
 @Composable
-private fun JumpRow(activeId: String, onJump: (String) -> Unit) {
+private fun JumpRow(
+    activeId: String,
+    animations: Boolean,
+    onJump: (String) -> Unit
+) {
     val row = rememberScrollState()
 
     // Where each label sits inside the row, measured the way the sections below
@@ -1153,12 +1172,22 @@ private fun JumpRow(activeId: String, onJump: (String) -> Unit) {
     // The turn. Not a jump to the edge: the label of the section being read ends
     // up in the middle, which is the only position that reads as "you are here"
     // rather than "here is a list".
-    LaunchedEffect(activeId, rowWidth) {
+    LaunchedEffect(activeId, rowWidth, animations) {
         if (rowWidth == 0) return@LaunchedEffect
         val spot = spots[activeId] ?: return@LaunchedEffect
         val middle = spot.first + (spot.last - spot.first) / 2
         val target = (middle - rowWidth / 2).coerceIn(0, row.maxValue)
-        row.animateScrollTo(target)
+        if (animations) {
+            row.animateScrollTo(
+                target,
+                animationSpec = tween(
+                    durationMillis = Motion.signalDurationMillis,
+                    easing = LinearOutSlowInEasing
+                )
+            )
+        } else {
+            row.scrollTo(target)
+        }
     }
 
     Row(
@@ -1171,11 +1200,8 @@ private fun JumpRow(activeId: String, onJump: (String) -> Unit) {
     ) {
         JUMPS.forEach { jump ->
             val here = jump.first == activeId
-            IknaTextButton(
-                label = S.t(jump.second),
-                onClick = { onJump(jump.first) },
-                color = if (here) MaterialTheme.colorScheme.onBackground
-                else MaterialTheme.colorScheme.onSurfaceVariant,
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.onGloballyPositioned { coords ->
                     val x = coords.parentLayoutCoordinates
                         ?.localPositionOf(coords, Offset.Zero)
@@ -1184,7 +1210,28 @@ private fun JumpRow(activeId: String, onJump: (String) -> Unit) {
                     val left = x.roundToInt()
                     spots[jump.first] = left..(left + coords.size.width)
                 }
-            )
+            ) {
+                IknaTextButton(
+                    label = S.t(jump.second),
+                    onClick = { onJump(jump.first) },
+                    color = if (here) MaterialTheme.colorScheme.onBackground
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                    repeat(3) { index ->
+                        Box(
+                            modifier = Modifier
+                                .width(6.dp)
+                                .height(2.dp)
+                                .background(
+                                    if (here) MaterialTheme.colorScheme.primary.copy(
+                                        alpha = if (index == 1) 1f else 0.52f
+                                    ) else Color.Transparent
+                                )
+                        )
+                    }
+                }
+            }
         }
     }
 }

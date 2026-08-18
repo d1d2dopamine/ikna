@@ -36,6 +36,7 @@ import dev.ikna.data.repo.StatsDigest
 import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
+import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaRule
 import java.util.Locale
 
@@ -241,11 +242,10 @@ private fun Retention(digest: StatsDigest) {
             label = S.t("stats.012"),
             note = S.t("stats.013") + digest.retentionSample + "."
         ) {
-            Text(
-                text = "—",
-                style = MaterialTheme.typography.displayLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            // An unfinished piece of the same lattice used by real charts. A
+            // dash looked like a value that failed to load; this says that the
+            // structure exists and does not have enough observations yet.
+            IknaLatticePlaceholder()
         }
         return
     }

@@ -2,6 +2,7 @@ package dev.ikna.ui.decks
 
 import dev.ikna.ui.text.S
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,6 +31,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,6 +47,8 @@ import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
+import dev.ikna.ui.theme.IknaLatticePlaceholder
+import dev.ikna.ui.theme.IknaMemoryField
 import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.IknaWordmark
@@ -119,7 +125,11 @@ fun DecksScreen(
     // for a thing they watched happen is noise.
     var note by remember { mutableStateOf<String?>(null) }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Only the unused field carries the lattice. Content remains on plain
+        // paper, and the bottom bar paints its own background above it.
+        IknaMemoryField(seed = 0x1A4B_7C2D, modifier = Modifier.matchParentSize())
+        Column(modifier = Modifier.fillMaxSize()) {
         // The name of the app, and nothing else up here. The marks that used to
         // share this row now live in the bar at the bottom of the screen: a phone
         // is held low in one hand, and the top of the screen is the one place a
@@ -177,11 +187,15 @@ fun DecksScreen(
             }
             if (decks.isEmpty()) {
                 item {
-                    Text(
-                        text = S.t("deck.005"),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = muted
-                    )
+                    Column {
+                        Text(
+                            text = S.t("deck.005"),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = muted
+                        )
+                        Spacer(Modifier.height(Space.lg))
+                        IknaLatticePlaceholder()
+                    }
                 }
             }
         }
@@ -275,6 +289,7 @@ fun DecksScreen(
                     label = S.t("a11y.004")
                 )
             }
+        }
         }
     }
 }
@@ -458,10 +473,11 @@ private fun DeckRow(
                 Spacer(Modifier.height(Space.md))
                 IknaProgress(
                     fraction = if (deck.total == 0) 0f else deck.introduced.toFloat() / deck.total,
-                    height = 2.dp,
+                    height = 4.dp,
                     color = if (owes) accent else muted,
                     // Here the empty part means something — it is the rest of the deck.
-                    track = true
+                    track = true,
+                    segments = 18
                 )
                 Spacer(Modifier.height(Space.sm))
                 // One number under the bar, not three.
@@ -517,6 +533,18 @@ private fun DeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
         deck.isActive -> MaterialTheme.colorScheme.outline
         else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
     }
+    val patternCells = remember(deck.lang) { languageSealCells(deck.lang) }
+    val highlightCells = remember(deck.id) { deckSealHighlights(deck.id) }
+    val pattern = when {
+        owes -> background.copy(alpha = 0.22f)
+        deck.isActive -> accent.copy(alpha = 0.24f)
+        else -> muted.copy(alpha = 0.12f)
+    }
+    val highlight = when {
+        owes -> background.copy(alpha = 0.48f)
+        deck.isActive -> accent.copy(alpha = 0.62f)
+        else -> muted.copy(alpha = 0.24f)
+    }
 
     Box(
         modifier = Modifier
@@ -525,6 +553,20 @@ private fun DeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
             .border(Space.hair, edge),
         contentAlignment = Alignment.Center
     ) {
+        Canvas(modifier = Modifier.matchParentSize()) {
+            val inset = 4.dp.toPx()
+            val step = (size.minDimension - inset * 2f) / LANGUAGE_SEAL_SIDE
+            val cell = step * 0.56f
+            fun drawCell(index: Int, color: androidx.compose.ui.graphics.Color) {
+                val column = index % LANGUAGE_SEAL_SIDE
+                val row = index / LANGUAGE_SEAL_SIDE
+                val x = inset + column * step + (step - cell) / 2f
+                val y = inset + row * step + (step - cell) / 2f
+                drawRect(color, Offset(x, y), Size(cell, cell))
+            }
+            patternCells.forEach { index -> drawCell(index, pattern) }
+            highlightCells.forEach { index -> drawCell(index, highlight) }
+        }
         // The typed label if there is one, otherwise the two letters the app
         // works out by itself. One Text either way: a label is not a different
         // kind of mark, it is the same mark with better letters in it, so it

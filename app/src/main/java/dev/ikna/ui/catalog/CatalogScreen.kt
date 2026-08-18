@@ -60,6 +60,7 @@ import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaChip
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
+import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaTextButton
@@ -387,11 +388,15 @@ fun CatalogScreen(
 
 				val decks = decksFor(list, filter)
 				if (decks.isEmpty()) {
-					Text(
-						text = S.t("cat.030"),
-						style = MaterialTheme.typography.bodyMedium,
-						color = muted
-					)
+					Column {
+						Text(
+							text = S.t("cat.030"),
+							style = MaterialTheme.typography.bodyMedium,
+							color = muted
+						)
+						Spacer(Modifier.height(Space.lg))
+						IknaLatticePlaceholder()
+					}
 				} else {
 					decks.forEach { deck ->
 						DeckRow(

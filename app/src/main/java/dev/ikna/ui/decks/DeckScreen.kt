@@ -177,9 +177,10 @@ fun DeckScreen(
                 IknaProgress(
                     fraction = if (current.total == 0) 0f
                     else current.introduced.toFloat() / current.total,
-                    height = 2.dp,
+                    height = 4.dp,
                     color = MaterialTheme.colorScheme.primary,
-                    track = true
+                    track = true,
+                    segments = 18
                 )
 
                 Spacer(Modifier.height(Space.xl))

@@ -1,5 +1,6 @@
 package dev.ikna.ui.nav
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dev.ikna.AppContainer
@@ -83,6 +85,26 @@ fun IknaNavHost(
     startSession: Boolean = false
 ) {
     val navController = rememberNavController()
+    var signalDirection by remember { mutableStateOf(1) }
+    val currentEntry by navController.currentBackStackEntryAsState()
+
+    fun forward(route: String) {
+        signalDirection = 1
+        navController.navigate(route)
+    }
+
+    fun back() {
+        signalDirection = -1
+        navController.popBackStack()
+    }
+
+    // The system back gesture has to speak the same visual grammar as the
+    // on-screen arrow. Without this handler Navigation would pop correctly but
+    // would reuse the last forward direction, so the one gesture Android owns
+    // would make the signal travel the wrong way.
+    BackHandler(enabled = navController.previousBackStackEntry != null) {
+        back()
+    }
 
     // The stored flag arrives a frame or two after the first composition, and a
     // NavHost reads its start destination exactly once. Deciding from the value
@@ -113,18 +135,24 @@ fun IknaNavHost(
         LaunchedEffect(known, startSession) {
             if (known && startSession && !jumped) {
                 jumped = true
+                signalDirection = 1
                 navController.navigate(Routes.session(null))
             }
         }
 
         NavHost(
             navController = navController,
-            startDestination = if (known) Routes.HOME else Routes.ONBOARDING
+            startDestination = if (known) Routes.HOME else Routes.ONBOARDING,
+            enterTransition = { signalEnter(signalDirection, settings.animations) },
+            exitTransition = { signalExit(signalDirection, settings.animations) },
+            popEnterTransition = { signalEnter(signalDirection, settings.animations) },
+            popExitTransition = { signalExit(signalDirection, settings.animations) }
         ) {
             composable(Routes.ONBOARDING) {
                 OnboardingScreen(
                     container = container,
                     onDone = {
+                        signalDirection = 1
                         navController.navigate(Routes.HOME) {
                             popUpTo(Routes.ONBOARDING) { inclusive = true }
                         }
@@ -136,20 +164,20 @@ fun IknaNavHost(
                 DecksScreen(
                     container = container,
                     settings = settings,
-                    onOpenSession = { deckId -> navController.navigate(Routes.session(deckId)) },
-                    onOpenDeck = { deckId -> navController.navigate(Routes.deck(deckId)) },
-                    onOpenStats = { navController.navigate(Routes.STATS) },
-                    onOpenSettings = { navController.navigate(Routes.SETTINGS) },
-                    onOpenSearch = { navController.navigate(Routes.SEARCH) },
-                    onAddDeck = { navController.navigate(Routes.ADD_DECK) }
+                    onOpenSession = { deckId -> forward(Routes.session(deckId)) },
+                    onOpenDeck = { deckId -> forward(Routes.deck(deckId)) },
+                    onOpenStats = { forward(Routes.STATS) },
+                    onOpenSettings = { forward(Routes.SETTINGS) },
+                    onOpenSearch = { forward(Routes.SEARCH) },
+                    onAddDeck = { forward(Routes.ADD_DECK) }
                 )
             }
 
             composable(Routes.SEARCH) {
                 DeckSearchScreen(
                     container = container,
-                    onBack = { navController.popBackStack() },
-                    onOpenDeck = { deckId -> navController.navigate(Routes.deck(deckId)) }
+                    onBack = { back() },
+                    onOpenDeck = { deckId -> forward(Routes.deck(deckId)) }
                 )
             }
 
@@ -160,8 +188,8 @@ fun IknaNavHost(
             composable(Routes.ADD_DECK) {
                 AddDeckScreen(
                     container = container,
-                    onOpenCatalog = { navController.navigate(Routes.CATALOG) },
-                    onBack = { navController.popBackStack() }
+                    onOpenCatalog = { forward(Routes.CATALOG) },
+                    onBack = { back() }
                 )
             }
 
@@ -172,7 +200,7 @@ fun IknaNavHost(
             composable(Routes.CATALOG) {
                 CatalogScreen(
                     container = container,
-                    onBack = { navController.popBackStack() }
+                    onBack = { back() }
                 )
             }
 
@@ -188,7 +216,7 @@ fun IknaNavHost(
                         container = container,
                         settings = settings,
                         deckId = deckId,
-                        onBack = { navController.popBackStack() }
+                        onBack = { back() }
                     )
                 }
             }
@@ -201,14 +229,14 @@ fun IknaNavHost(
                 SessionScreen(
                     container = container,
                     deckId = if (raw == null || raw == Routes.ALL_DECKS) null else raw,
-                    onBack = { navController.popBackStack() }
+                    onBack = { back() }
                 )
             }
 
             composable(Routes.STATS) {
                 StatsScreen(
                     container = container,
-                    onBack = { navController.popBackStack() }
+                    onBack = { back() }
                 )
             }
 
@@ -216,9 +244,9 @@ fun IknaNavHost(
                 SettingsScreen(
                     container = container,
                     settings = settings,
-                    onOpenDebug = { navController.navigate(Routes.DEBUG) },
-                    onOpenVoice = { navController.navigate(Routes.VOICE) },
-                    onBack = { navController.popBackStack() }
+                    onOpenDebug = { forward(Routes.DEBUG) },
+                    onOpenVoice = { forward(Routes.VOICE) },
+                    onBack = { back() }
                 )
             }
 
@@ -229,7 +257,7 @@ fun IknaNavHost(
                 VoiceScreen(
                     container = container,
                     speechEnabled = settings.speechEnabled,
-                    onBack = { navController.popBackStack() }
+                    onBack = { back() }
                 )
             }
 
@@ -239,10 +267,16 @@ fun IknaNavHost(
             composable(Routes.DEBUG) {
                 DebugHooks.Screen(
                     container = container,
-                    onBack = { navController.popBackStack() }
+                    onBack = { back() }
                 )
             }
         }
+
+        SignalSweep(
+            routeKey = currentEntry?.destination?.route,
+            direction = signalDirection,
+            enabled = settings.animations
+        )
 
         // Above the graph rather than inside it, so it is asked once per
         // launch and cannot be re-asked by walking between screens. It draws
