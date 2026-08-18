@@ -48,7 +48,14 @@ enum class SeedProblem {
     EMPTY_FIELD,
     PHRASE_NOT_IN_SENTENCE,
     TOO_LONG,
-    DUPLICATE
+    DUPLICATE,
+    /**
+     * The whole text arrived as one line carrying hundreds of separators: a
+     * paste whose line breaks were eaten on the way in, which [unglue] could
+     * not put back. A different thing from a line with a stray pipe in it, and
+     * it needs a different sentence printed under it.
+     */
+    ONE_LONG_LINE
 }
 
 /**
@@ -158,7 +165,7 @@ object SeedFormat {
         val meanings = HashMap<String, Int>()
         var number = 0
 
-        for (raw in text.lineSequence()) {
+        for (raw in unglue(text).lineSequence()) {
             number++
             if (rows.size >= MAX_ROWS) break
             val line = undecorate(raw)
@@ -170,7 +177,17 @@ object SeedFormat {
             // one habit worth encouraging -- citing a source -- was the one thing
             // the importer punished.
             if (parts.size != 3 && parts.size != 4) {
-                problems += SeedLineProblem(number, line, SeedProblem.NOT_THREE_COLUMNS)
+                // Seven fields or more, and it is the only line there is: that is
+                // a deck that lost its line breaks, not a row with a stray pipe.
+                // Reporting it as "line 1 has not got three fields" was true and
+                // useless, said about three hundred rows that were all correct.
+                val flattened = parts.size >= 7 && realLines(text) == 1
+                problems += SeedLineProblem(
+                    number,
+                    line,
+                    if (flattened) SeedProblem.ONE_LONG_LINE
+                    else SeedProblem.NOT_THREE_COLUMNS
+                )
                 continue
             }
 
@@ -369,6 +386,58 @@ object SeedFormat {
      * Markdown table are all decoration around a correct row. Making the person
      * delete them by hand, on a phone, is the moment they close the app.
      */
+    /**
+     * Puts back the line breaks a paste can lose on the way in.
+     *
+     * A phone keyboard handed a hundred kilobytes of table sometimes delivers
+     * it as one line, every break flattened away. The importer then read the
+     * whole deck as row one with six hundred columns and said "line 1 has not
+     * got three fields" -- the most confusing thing it could possibly say about
+     * a paste that was, field for field, perfectly correct.
+     *
+     * Only a text with a single real line is touched, and only when it holds
+     * enough fields to be several rows. One row stays one row.
+     */
+    /** Lines with something on them, decoration already taken off. */
+    private fun realLines(text: String): Int =
+        text.lineSequence().count { undecorate(it).isNotEmpty() }
+
+    private fun unglue(text: String): String {
+        if (realLines(text) != 1) return text
+        val separator = when {
+            text.contains('|') -> '|'
+            text.contains('\t') -> '\t'
+            else -> return text
+        }
+        val fields = text.split(separator).map { it.trim() }.filter { it.isNotEmpty() }
+        if (fields.size < 6) return text
+        // Three columns, or four when the deck cites its sources -- and when the
+        // count divides by both, which twelve fields and twenty-four do, the
+        // count cannot answer it. Guessing wrong there does not cost a line: it
+        // shifts every field by one place and every card in the deck becomes
+        // false in the same quiet way -- a source read as a phrase, a phrase as a
+        // sentence, a sentence as a meaning. The deck itself settles it instead.
+        // A card's phrase appears inside its own sentence, always, and that is
+        // the rule this parser already refuses lines over; so the width that
+        // satisfies it on more rows is the width the text was written in.
+        val width = when {
+            fields.size % 3 != 0 && fields.size % 4 == 0 -> 4
+            fields.size % 4 != 0 && fields.size % 3 == 0 -> 3
+            fields.size % 3 == 0 -> if (reads(fields, 4) > reads(fields, 3)) 4 else 3
+            else -> 3
+        }
+        return fields.chunked(width).joinToString("\n") { it.joinToString(" | ") }
+    }
+
+    /**
+     * How many rows of this width read like cards rather than like an accident:
+     * the first field found inside the second, which is the one thing every
+     * line of every deck in this app has in common.
+     */
+    private fun reads(fields: List<String>, width: Int): Int =
+        fields.chunked(width)
+            .count { it.size == width && spanOf(it[1], it[0]) != null }
+
     private fun undecorate(raw: String): String {
         var line = raw.trim()
         if (line.isEmpty()) return ""

@@ -341,6 +341,9 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"set.135" to "Kart wyjętych z obiegu: ",
 	"set.136" to "Przywróć je",
 	"set.137" to "Karty wróciły",
+	"set.138" to "Aktualizacje",
+	"set.139" to "Aplikacja instaluje się z pliku, więc o nowej wersji nie powie nic poza nią samą.",
+	"set.140" to "AKTUALIZACJA",
 	// БЕТА
 	"set.123" to "BETA",
 	// Пока в бете и по умолчанию выключено: как звучит голос, решает движок на телефоне, а плохой голос хуже тишины.
@@ -487,6 +490,15 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"add.060" to "Przedmiot i dział",
 	"add.061" to "na przykład neurobiologia, plastyczność synaptyczna",
 	"add.062" to "Język kart",
+	"add.063" to "Wklej ze schowka",
+	"add.064" to "Schowek nie ma tekstu",
+	"add.065" to "wierszy",
+	"add.066" to "znaków",
+	"add.067" to "POKAŻ TEKST",
+	"add.068" to "UKRYJ TEKST",
+	"add.069" to "i jeszcze wierszy: ",
+	"add.070" to "cały tekst przyszedł jako jeden wiersz. Naciśnij „wklej ze schowka”: klawiatura ucina duże wklejenia",
+	"add.071" to "Tekst był dłuższy niż limit i został ucięty. Podziel talię na dwie części.",
 	// тап в любом месте
 	"card.002" to "dotknij gdziekolwiek",
 	// ← НЕ ЗНАЮ
@@ -577,7 +589,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// карточек
 	"sess.042" to "kart",
 	"sess.043" to "Wczoraj wyszło dużo — dziś dzień lżejszy, bez nowego.",
-	"sess.044" to "karta jest błędna",
+	"sess.044" to "OZNACZ JAKO BŁĘDNĄ",
 	"sess.045" to "Karta wyjęta z obiegu. Błąd nie trafił do statystyk.",
 	"sess.046" to "termin",
 	"sess.047" to "z pamięci",
@@ -727,4 +739,31 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// Под левую руку
 	"bar.003" to "Pod lewą rękę",
 	// Нижний бар зеркалится: плюс уходит в левый угол, остальные кнопки — вправо
+
+	// The update window and the update section in settings.
+	"upd.001" to "DOSTĘPNA AKTUALIZACJA",
+	"upd.002" to "Rozmiar: ",
+	"upd.003" to "MB",
+	"upd.004" to "Co nowego:",
+	"upd.005" to "AKTUALIZUJ",
+	"upd.006" to "POMIŃ",
+	"upd.007" to "Plik pobiera sama aplikacja — pasek i procenty widzisz tutaj. Instalator Androida nałoży nową wersję na starą, karty i postępy zostają.",
+	"upd.008" to "Sprawdzaj aktualizacje",
+	"upd.009" to "Jedno zapytanie do strony wydań, nie częściej niż raz na dobę. Nic nie jest wysyłane. Wyłączone — żadnego połączenia.",
+	"upd.010" to "SPRAWDŹ TERAZ",
+	"upd.011" to "Zainstalowana: ",
+	"upd.012" to "Nic nowszego. Jeśli nie ma sieci, sprawdzenie się nie udało — aplikacja tego nie rozróżni.",
+	"upd.013" to "STRONA WYDAŃ",
+	"upd.014" to "SPRAWDZAM…",
+	"upd.015" to "Odłożone: ",
+	"upd.016" to "Aktualizacja do ",
+	"upd.017" to "POBIERANIE",
+	"upd.018" to "Plik jest pobrany. Instalator Androida nałoży nową wersję na starą — karty, postępy i ustawienia zostają.",
+	"upd.019" to "ANULUJ",
+	"upd.020" to "ZAINSTALUJ",
+	"upd.021" to "Android poprosi o zgodę na instalowanie aplikacji z tego źródła; bez niej instalator się nie otworzy. Plik jest już pobrany i nie znika.",
+	"upd.022" to "POZWÓL",
+	"upd.023" to "Pobieranie się nie udało — połączenie zerwane albo plik przyszedł niecały. Można powtórzyć lub wziąć plik w przeglądarce.",
+	"upd.024" to "POWTÓRZ",
+	"upd.025" to "W PRZEGLĄDARCE",
 )

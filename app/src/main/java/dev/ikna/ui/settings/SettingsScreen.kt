@@ -57,6 +57,15 @@ import dev.ikna.AppContainer
 import dev.ikna.MainActivity
 import dev.ikna.audio.SpeakerStatus
 import dev.ikna.data.export.SettingsBackup
+import dev.ikna.data.update.UpdateCheck
+import dev.ikna.data.update.UpdateRelease
+import dev.ikna.data.update.megabytes
+import dev.ikna.ui.update.UpdateDownloadPanel
+import dev.ikna.ui.update.UpdatePhase
+import dev.ikna.ui.update.has64Bit
+import dev.ikna.ui.update.installedVersion
+import dev.ikna.ui.update.openInBrowser
+import dev.ikna.ui.update.rememberUpdateDownload
 import dev.ikna.data.prefs.FontStore
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.LANGUAGE_SYSTEM
@@ -136,6 +145,17 @@ fun SettingsScreen(
     // The rare and the irreversible live behind one expander. Closed by default,
     // so nothing here can be hit while scrolling past it.
     var advancedOpen by remember { mutableStateOf(false) }
+
+    // The update section keeps its own answer rather than reading a stored one:
+    // a check made here is a question asked on purpose, and its result belongs to
+    // this visit to the screen. Nothing about it survives leaving.
+    var updateBusy by remember { mutableStateOf(false) }
+    var updateFound by remember { mutableStateOf<UpdateRelease?>(null) }
+    var updateNote by remember { mutableStateOf<String?>(null) }
+
+    // The same download the update window runs, with the same band and the same
+    // percentage. Two ways in, one thing happening.
+    val updateDownload = rememberUpdateDownload()
 
     // Every interface language at once, for when there are more of them than the
     // section can show without turning into a wall. See LANGUAGE_FOLD.
@@ -706,6 +726,111 @@ fun SettingsScreen(
                             }
                         }
                     }
+                }
+            }
+
+            // Updates.
+            //
+            // The window that offers a new version can be waved away, and a
+            // person who waved it away and then changed their mind had nowhere
+            // to go: the offer was gone until the release after it. So the same
+            // check lives here, on demand, and here the skipped version is
+            // ignored -- pressing the button is the change of mind.
+            Anchored(ID_UPDATE, anchors) {
+                Section(S.t("set.138"), S.t("set.139")) {
+                    Text(
+                        text = S.t("upd.011") + installedVersion(context),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (settings.updateSkipped.isNotEmpty()) {
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = S.t("upd.015") + settings.updateSkipped,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    ToggleRow(
+                        title = S.t("upd.008"),
+                        subtitle = S.t("upd.009"),
+                        checked = settings.updateCheck,
+                        onCheckedChange = { on ->
+                            scope.launch { container.settings.setUpdateCheck(on) }
+                        }
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    IknaWideButton(
+                        label = if (updateBusy) S.t("upd.014") else S.t("upd.010"),
+                        height = 52.dp,
+                        enabled = !updateBusy,
+                        onClick = {
+                            scope.launch {
+                                updateBusy = true
+                                updateNote = null
+                                val now = System.currentTimeMillis()
+                                val release = UpdateCheck(
+                                    installedVersion(context),
+                                    has64Bit()
+                                ).latest()
+                                container.settings.markUpdateChecked(now)
+                                updateBusy = false
+                                updateFound = release
+                                // A failed request and an up-to-date install both
+                                // arrive as nothing, and the app cannot honestly
+                                // tell them apart from here, so the line says both.
+                                updateNote = if (release == null) S.t("upd.012") else null
+                            }
+                        }
+                    )
+                    val offered = updateFound
+                    if (offered != null) {
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            text = S.t("upd.016") + offered.version,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = S.t("upd.002") + megabytes(offered.sizeBytes) +
+                                " " + S.t("upd.003"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        if (updateDownload.phase == UpdatePhase.IDLE) {
+                            IknaWideButton(
+                                label = S.t("upd.005"),
+                                height = 52.dp,
+                                onClick = { updateDownload.start(offered) }
+                            )
+                        } else {
+                            UpdateDownloadPanel(
+                                state = updateDownload,
+                                release = offered,
+                                onBrowser = { openInBrowser(context, offered.apkUrl) }
+                            )
+                        }
+                    }
+                    val note = updateNote
+                    if (note != null) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = note,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    // The way out when the check itself cannot work: no network
+                    // here, a rate limit there, or simply wanting to read the
+                    // whole release rather than its first paragraphs.
+                    IknaTextButton(
+                        label = S.t("upd.013"),
+                        onClick = { openInBrowser(context, UpdateCheck.RELEASES_PAGE) },
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
@@ -1310,6 +1435,7 @@ private const val ID_SPEECH = "speech"
 private const val ID_FONT = "font"
 private const val ID_REMINDER = "reminder"
 private const val ID_DATA = "data"
+private const val ID_UPDATE = "update"
 private const val ID_ADVANCED = "advanced"
 
 /**
@@ -1325,6 +1451,7 @@ private val JUMPS = listOf(
     ID_FONT to "set.095",
     ID_REMINDER to "set.096",
     ID_DATA to "set.097",
+    ID_UPDATE to "set.140",
     ID_ADVANCED to "set.098"
 )
 

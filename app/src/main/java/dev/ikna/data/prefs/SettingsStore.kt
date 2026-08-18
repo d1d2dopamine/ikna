@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -219,7 +220,27 @@ data class IknaSettings(
      * session costs came and went for no reason the user could see. A slightly
      * stale number is worth far more than no number.
      */
-    val answerMs: Int = 0
+    val answerMs: Int = 0,
+    /**
+     * Whether the app may ask the releases page about a newer build.
+     *
+     * On, because an app that is installed by hand from a file cannot be
+     * updated by anything else, and a bug fixed in a release nobody hears about
+     * is a bug that is still shipping. Off, it opens no socket at all: the
+     * switch is not a preference about notifications, it is the network.
+     */
+    val updateCheck: Boolean = true,
+    /**
+     * A version the user has pressed "skip" on, e.g. "0.5.0 press".
+     *
+     * Skipping silences that one version and nothing else -- the next release
+     * asks again. Kept as the version rather than as a flag so that the record
+     * cannot outlive what it was about, and so Settings can still offer the
+     * update to somebody who changed their mind an hour later.
+     */
+    val updateSkipped: String = "",
+    /** When the last check happened, epoch millis. Zero means never. */
+    val updateCheckedAt: Long = 0L
 )
 
 private val Context.iknaDataStore: DataStore<Preferences> by preferencesDataStore(name = "ikna-settings")
@@ -255,6 +276,9 @@ class SettingsStore(private val context: Context) {
         val revealHintsShown = intPreferencesKey("revealHintsShown")
         val swipesDone = intPreferencesKey("swipesDone")
         val answerMs = intPreferencesKey("answerMs")
+        val updateCheck = booleanPreferencesKey("updateCheck")
+        val updateSkipped = stringPreferencesKey("updateSkipped")
+        val updateCheckedAt = longPreferencesKey("updateCheckedAt")
     }
 
     val flow: Flow<IknaSettings> = context.iknaDataStore.data.map { p ->
@@ -295,7 +319,10 @@ class SettingsStore(private val context: Context) {
             onboardingDone = p[Keys.onboardingDone] ?: defaults.onboardingDone,
             revealHintsShown = p[Keys.revealHintsShown] ?: defaults.revealHintsShown,
             swipesDone = p[Keys.swipesDone] ?: defaults.swipesDone,
-            answerMs = p[Keys.answerMs] ?: defaults.answerMs
+            answerMs = p[Keys.answerMs] ?: defaults.answerMs,
+            updateCheck = p[Keys.updateCheck] ?: defaults.updateCheck,
+            updateSkipped = p[Keys.updateSkipped] ?: defaults.updateSkipped,
+            updateCheckedAt = p[Keys.updateCheckedAt] ?: defaults.updateCheckedAt
         )
     }
 
@@ -387,6 +414,22 @@ class SettingsStore(private val context: Context) {
     suspend fun clearSuppressed() = put { it[Keys.suppressed] = "" }
 
     suspend fun setSuppressed(value: String) = put { it[Keys.suppressed] = value }
+
+    suspend fun setUpdateCheck(on: Boolean) = put { it[Keys.updateCheck] = on }
+
+    /**
+     * Remembers that this version was waved away, and when the asking happened.
+     *
+     * Both in one edit: a skip that recorded the version but not the time would
+     * be asked again tomorrow, and one that recorded the time but not the
+     * version would come back the moment the day rolled over.
+     */
+    suspend fun skipUpdate(version: String, now: Long) = put {
+        it[Keys.updateSkipped] = version
+        it[Keys.updateCheckedAt] = now
+    }
+
+    suspend fun markUpdateChecked(now: Long) = put { it[Keys.updateCheckedAt] = now }
 
     suspend fun setReminder(enabled: Boolean, hour: Int, minute: Int) = put {
         it[Keys.reminderEnabled] = enabled

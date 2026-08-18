@@ -31,7 +31,7 @@ stutter. Build it and see it; it takes one `gradlew assembleDebug`.
 | Audio | the phone's own engine by default; a neural engine inside, for a model you add |
 | Colour | nine palettes, each in two lightings. Every pair passes 4.5:1, enforced by a test |
 | Interface languages | Russian, English, Polish |
-| Network | none. The app has no internet permission |
+| Network | one request, switchable off: is there a newer release. Nothing is uploaded, ever |
 
 ## A session
 

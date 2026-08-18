@@ -12,21 +12,21 @@
 
 <p align="center">
   Anki, but reversed. The system feeds you; you never feed the system.<br>
-  Android · offline · no accounts · no internet permission
+  Android · no accounts · no telemetry · one request: is there a new version
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.3.0-press"><img src="https://img.shields.io/badge/release-0.3.0%20press-crimson?style=flat-square" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.4.0-press"><img src="https://img.shields.io/badge/release-0.4.0%20press-crimson?style=flat-square" alt="release"></a>
   <a href="https://github.com/d1d2dopamine/ikna/releases"><img src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?label=downloads&style=flat-square&logo=github&color=blueviolet" alt="downloads"></a>
   <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
   <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/made%20with-Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="kotlin"></a>
   <img src="https://img.shields.io/badge/Android-10%2B-3DDC84?style=flat-square&logo=android&logoColor=white" alt="android">
-  <img src="https://img.shields.io/badge/offline-no%20network%20permission-4b4b4b?style=flat-square" alt="offline">
+  <img src="https://img.shields.io/badge/network-update%20check%20only-4b4b4b?style=flat-square" alt="network">
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.3.0-press/ikna-v0.3.0-press.apk"><strong>Download</strong></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.4.0-press/ikna-v0.4.0-press.apk"><strong>Download</strong></a>
   &nbsp;·&nbsp;
   <a href="CHANGELOG.md">Changelog</a>
   &nbsp;·&nbsp;
@@ -65,13 +65,13 @@ sans-serif faces and reads as a lower case L, so "Ikna" invites being read as
 
 | Platform | File in the release |
 | --- | --- |
-| **Android** 10+ (`minSdk 29`) | `ikna-v0.3.0-press.apk` (~40 MB) |
+| **Android** 10+ (`minSdk 29`) | `ikna-v0.4.0-press.apk` (~40 MB) |
 
-**[Download ikna-v0.3.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.3.0-press/ikna-v0.3.0-press.apk)** ·
-[all files](https://github.com/d1d2dopamine/ikna/releases/tag/v0.3.0-press)
+**[Download ikna-v0.4.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.4.0-press/ikna-v0.4.0-press.apk)** ·
+[all files](https://github.com/d1d2dopamine/ikna/releases/tag/v0.4.0-press)
 
 The file above is for every phone sold since roughly 2017. Older 32-bit ones
-take `ikna-v0.3.0-press-legacy32.apk` from the same page: the same app, built
+take `ikna-v0.4.0-press-legacy32.apk` from the same page: the same app, built
 for the one architecture they can run.
 
 Download it and open it; Android asks once whether to allow installing from this
@@ -82,8 +82,9 @@ the update**.
 One file, not two. There used to be a second `-voice` APK; the choice was never a
 real one, so the speech engine is simply inside now and switched off until you turn
 it on. It ships with **no model** — that part is yours to add, a Kokoro or Piper
-folder from your own phone, in the language you are actually learning. The app
-downloads nothing; it holds no internet permission at all. Until you add a model it
+folder from your own phone, in the language you are actually learning. The app never
+downloads a model itself, and there is nowhere inside it to ask for one. Until you
+add a model it
 speaks with the voice your phone already has, and the voice screen always names who
 is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
 
@@ -109,8 +110,12 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
 - **Russian, English and Polish** interface, switchable from the system too.
 - **Your answers are append-only** and exported to `Documents/ikna/`, outside the
   app sandbox, so they survive an uninstall.
-- **No internet permission at all.** Not a privacy policy — the app cannot open a
-  socket.
+- **One network request, and it can be switched off.** The app is installed from a
+  file, so nothing but the app itself can tell you that a version with a fix in it
+  exists: once a day it asks the releases page for the latest tag and shows what
+  changed. Nothing is sent — no account, no identifier, no statistics, no card, no
+  answer. The APK is downloaded by your browser, not by the app. See
+  [`docs/UPDATES.md`](docs/UPDATES.md).
 
 ---
 
@@ -167,9 +172,9 @@ Format, refusals, the deck screen and the offline generator:
 
 ## 🏷️ Versions
 
-A version here is a number **and a word**: `0.3.0 press`. The word names the epoch
+A version here is a number **and a word**: `0.4.0 press`. The word names the epoch
 the build belongs to, the number counts releases inside it, and git tags replace the
-space with a dash: `v0.3.0-press`.
+space with a dash: `v0.4.0-press`.
 
 What the words mean, what the numbers promise and how `appVersionCode` is built:
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
@@ -204,8 +209,8 @@ Bump the two version lines in `app/build.gradle.kts`, then tag the commit with t
 same string, space replaced by a dash:
 
 ```
-git tag v0.3.0-press
-git push origin v0.3.0-press
+git tag v0.4.0-press
+git push origin v0.4.0-press
 ```
 
 The `release` workflow refuses to continue if the tag and the build file disagree,
@@ -221,6 +226,7 @@ the GitHub release.
 [`GOVERNOR.md`](docs/GOVERNOR.md) ·
 [`GRADING.md`](docs/GRADING.md) ·
 [`DECKS.md`](docs/DECKS.md) ·
+[`UPDATES.md`](docs/UPDATES.md) ·
 [`VERSIONS.md`](docs/VERSIONS.md) ·
 [`VOICE.md`](docs/VOICE.md) ·
 [`KEYSTORE.md`](docs/KEYSTORE.md) ·
@@ -253,21 +259,21 @@ release, the ones published before this notice as well as every future one.
 
 <p align="center">
   Анки наизнанку. Система кормит тебя, а не ты её.<br>
-  Android · без сети · без аккаунтов · без разрешения на интернет
+  Android · без аккаунтов · без телеметрии · один запрос: есть ли новая версия
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.3.0-press"><img src="https://img.shields.io/badge/release-0.3.0%20press-crimson?style=flat-square" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.4.0-press"><img src="https://img.shields.io/badge/release-0.4.0%20press-crimson?style=flat-square" alt="release"></a>
   <a href="https://github.com/d1d2dopamine/ikna/releases"><img src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?label=downloads&style=flat-square&logo=github&color=blueviolet" alt="downloads"></a>
   <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
   <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/made%20with-Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="kotlin"></a>
   <img src="https://img.shields.io/badge/Android-10%2B-3DDC84?style=flat-square&logo=android&logoColor=white" alt="android">
-  <img src="https://img.shields.io/badge/offline-no%20network%20permission-4b4b4b?style=flat-square" alt="offline">
+  <img src="https://img.shields.io/badge/network-update%20check%20only-4b4b4b?style=flat-square" alt="network">
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.3.0-press/ikna-v0.3.0-press.apk"><strong>Скачать</strong></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.4.0-press/ikna-v0.4.0-press.apk"><strong>Скачать</strong></a>
   &nbsp;·&nbsp;
   <a href="CHANGELOG.md">Изменения</a>
   &nbsp;·&nbsp;
@@ -307,13 +313,13 @@ ikna учит язык **кусками**: короткая фраза, живо
 
 | Платформа | Файл в релизе |
 | --- | --- |
-| **Android** 10+ (`minSdk 29`) | `ikna-v0.3.0-press.apk` (~40 МБ) |
+| **Android** 10+ (`minSdk 29`) | `ikna-v0.4.0-press.apk` (~40 МБ) |
 
-**[Скачать ikna-v0.3.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.3.0-press/ikna-v0.3.0-press.apk)** ·
-[все файлы](https://github.com/d1d2dopamine/ikna/releases/tag/v0.3.0-press)
+**[Скачать ikna-v0.4.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.4.0-press/ikna-v0.4.0-press.apk)** ·
+[все файлы](https://github.com/d1d2dopamine/ikna/releases/tag/v0.4.0-press)
 
 Файл выше — для любого телефона примерно с 2017 года. Для более старых
-32-битных рядом лежит `ikna-v0.3.0-press-legacy32.apk`: то же самое
+32-битных рядом лежит `ikna-v0.4.0-press-legacy32.apk`: то же самое
 приложение, одна архитектура, которую они умеют.
 
 Скачать и открыть; андроид один раз спросит, разрешить ли установку из этого
@@ -324,8 +330,8 @@ ikna учит язык **кусками**: короткая фраза, живо
 Файл один, не два. Раньше был второй, `-voice`, но выбор был ненастоящий, так что
 движок озвучки теперь просто внутри и выключен, пока его не включишь. **Модели
 внутри нет** — её добавляешь ты сам: папка Kokoro или Piper с твоего же телефона, на
-том языке, который реально учишь. Приложение ничего не скачивает: у него вообще
-нет доступа в интернет. Пока модели нет, читает голосом, который уже есть в
+том языке, который реально учишь. Модель приложение не скачивает само и попросить
+её внутри негде. Пока модели нет, читает голосом, который уже есть в
 телефоне, а экран озвучки всегда говорит, кто именно сейчас говорит. Подробности в
 [`docs/VOICE.md`](docs/VOICE.md).
 
@@ -352,8 +358,12 @@ ikna учит язык **кусками**: короткая фраза, живо
 - **Русский, английский и польский** интерфейс, переключается и из системы.
 - **Ответы только дописываются** и выгружаются в `Documents/ikna/` — вне песочницы
   приложения, чтобы пережить удаление.
-- **Разрешения на интернет нет вовсе.** Это не политика приватности — приложение
-  физически не может открыть соединение.
+- **Один запрос в сеть, и его можно выключить.** Приложение ставится файлом, и
+  о версии с исправлением ему некому сказать — кроме самого себя. Раз в сутки
+  оно спрашивает страницу релизов про последний тег и показывает, что
+  изменилось. Ничего не отправляется: ни аккаунта, ни идентификатора, ни
+  статистики, ни карточек, ни ответов. APK скачивает браузер, а не
+  приложение. Подробности в [`docs/UPDATES.md`](docs/UPDATES.md).
 
 ---
 
@@ -410,9 +420,9 @@ get used to | It takes a while to get used to the noise. | привыкать
 
 ## 🏷️ Версии
 
-Версия здесь — это номер **и слово**: `0.3.0 press`. Слово называет эпоху, к которой
+Версия здесь — это номер **и слово**: `0.4.0 press`. Слово называет эпоху, к которой
 относится сборка, номер считает релизы внутри неё, а в тегах git пробел заменяется
-дефисом: `v0.3.0-press`.
+дефисом: `v0.4.0-press`.
 
 Что значат слова, что обещают номера и как собирается `appVersionCode` — в
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
@@ -447,8 +457,8 @@ bash tools/voice/fetch-voice.sh                # один раз на клон: 
 же строкой, где пробел заменён дефисом:
 
 ```
-git tag v0.3.0-press
-git push origin v0.3.0-press
+git tag v0.4.0-press
+git push origin v0.4.0-press
 ```
 
 Воркфлоу `release` откажется работать, если тег и файл сборки расходятся, а затем
@@ -464,6 +474,7 @@ git push origin v0.3.0-press
 [`GOVERNOR.md`](docs/GOVERNOR.md) ·
 [`GRADING.md`](docs/GRADING.md) ·
 [`DECKS.md`](docs/DECKS.md) ·
+[`UPDATES.md`](docs/UPDATES.md) ·
 [`VERSIONS.md`](docs/VERSIONS.md) ·
 [`VOICE.md`](docs/VOICE.md) ·
 [`KEYSTORE.md`](docs/KEYSTORE.md) ·

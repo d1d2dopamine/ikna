@@ -80,9 +80,9 @@ thresholds track a person who is getting faster at the language, or who is
 tired, instead of averaging over a person who no longer exists.
 
 This is why the feature needs **no server, no upload, no accounts, and no other
-users.** The app has no internet permission and must not acquire one. Any design
-that needs to collect answers centrally is the wrong design, not a missing
-feature.
+users.** The app opens exactly one connection, to ask whether a newer release
+exists, and no answer, rating or timing may ever travel on it. Any design that
+needs to collect answers centrally is the wrong design, not a missing feature.
 
 ## Dirty data
 

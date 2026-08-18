@@ -65,8 +65,9 @@ The file picker opens on a folder, not a file. Point it at an unpacked model
 folder; everything in it is copied into the app's own storage, which takes from a
 few seconds to about a minute and shows a running count of files.
 
-The app has **no internet permission**, so it cannot download a model and never
-will. The download happens in a browser, once.
+The app **never downloads a model**, and there is nowhere in it to ask for one:
+its only network request asks the releases page about a new version. The model
+download happens in a browser, once.
 
 ### Where to get one
 

@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    The only directory the app ever hands to another app.
+    The only directories the app ever hands to another app.
 
-    A shared deck is written into cache/share and nowhere else: the review log,
-    the database and the backups stay unreachable through this provider no
-    matter what URI is guessed at, because they are not under this path.
+    A shared deck is written into cache/share, and an update into cache/updates,
+    and nowhere else: the review log, the database and the backups stay
+    unreachable through this provider no matter what URI is guessed at, because
+    they are not under either path.
+
+    Both are cache. The system may empty them whenever it needs the space, which
+    is the right arrangement for a file that matters for one minute -- the length
+    of a share, or the length of an install.
 -->
 <paths>
     <cache-path name="shared-decks" path="share/" />
+
+    <!--
+        The APK the update window downloaded, on its way to the installer. One
+        file at a time; the next attempt clears whatever is here first.
+    -->
+    <cache-path name="updates" path="updates/" />
 </paths>

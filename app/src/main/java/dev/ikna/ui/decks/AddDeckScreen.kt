@@ -90,6 +90,10 @@ fun AddDeckScreen(
 
 	var pasted by remember { mutableStateOf("") }
 	var note by remember { mutableStateOf<String?>(null) }
+	// A pasted deck is folded away by default and opened on request. Kept here
+	// rather than inside the block so it survives the recomposition that
+	// arrives with the text itself.
+	var previewOpen by remember { mutableStateOf(false) }
 	var busy by remember { mutableStateOf(false) }
 	var prompt by remember { mutableStateOf("") }
 	var subjectPrompt by remember { mutableStateOf("") }
@@ -448,35 +452,128 @@ fun AddDeckScreen(
 			)
 			Spacer(Modifier.height(Space.sm))
 
-			// The field is deliberately the same shape as the hex field in settings:
-			// a rectangle with a line around it and nothing else in it.
-			Box(
-				modifier = Modifier
-					.fillMaxWidth()
-					.heightIn(min = 140.dp)
-					.border(Space.hair, line)
-					.padding(Space.md)
-			) {
-				if (pasted.isEmpty()) {
+			// Two different things, decided by size: a field for a deck small enough
+			// to be typed by hand, and a folded summary for one that was pasted.
+			val pastedLines = remember(pasted) {
+				pasted.lineSequence().count { it.isNotBlank() }
+			}
+			val bulky = pasted.length > PREVIEW_CHARS
+			val pasteScroll = rememberScrollState()
+			if (bulky) {
+				// A pasted deck is a file that happened to arrive through the
+				// clipboard, so it is treated as one: named by its size, folded
+				// away, opened only if asked for. It used to be laid out in full
+				// inside an editable field -- ten thousand rows of it, on the main
+				// thread -- which is what turned this screen into a wall of text
+				// with a create button somewhere past the bottom of it. Nobody
+				// corrects a generated deck with a thumb; what is wanted here is
+				// proof that the text arrived whole.
+				Row(verticalAlignment = Alignment.CenterVertically) {
 					Text(
-						text = S.t("add.012"),
+						text = pastedLines.toString() + " " + S.t("add.065") +
+							", " + pasted.length + " " + S.t("add.066"),
 						style = MaterialTheme.typography.bodyMedium,
+						color = MaterialTheme.colorScheme.onBackground,
+						modifier = Modifier.weight(1f)
+					)
+					IknaTextButton(
+						label = if (previewOpen) S.t("add.068") else S.t("add.067"),
+						onClick = { previewOpen = !previewOpen },
 						color = muted
 					)
 				}
-				BasicTextField(
-					value = pasted,
-					onValueChange = { pasted = it.take(MAX_PASTED_CHARS) },
-					textStyle = MaterialTheme.typography.bodyMedium.copy(
-						color = MaterialTheme.colorScheme.onBackground
-					),
-					cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-					modifier = Modifier.fillMaxWidth()
-				)
+				if (previewOpen) {
+					Spacer(Modifier.height(Space.sm))
+					// The head of it and never all of it. Forty rows is enough to
+					// see that the columns line up, and it is a fixed cost: opening
+					// the preview on a deck of ten thousand rows costs the same as
+					// opening it on forty.
+					val head = remember(pasted) {
+						pasted.lineSequence()
+							.filter { it.isNotBlank() }
+							.take(PREVIEW_LINES)
+							.joinToString("\n")
+					}
+					Box(
+						modifier = Modifier
+							.fillMaxWidth()
+							.heightIn(max = 220.dp)
+							.border(Space.hair, line)
+							.padding(Space.md)
+							.verticalScroll(pasteScroll)
+					) {
+						Text(
+							text = head,
+							style = MaterialTheme.typography.bodySmall,
+							color = MaterialTheme.colorScheme.onBackground
+						)
+					}
+					if (pastedLines > PREVIEW_LINES) {
+						Spacer(Modifier.height(Space.xs))
+						Text(
+							text = S.t("add.069") + (pastedLines - PREVIEW_LINES),
+							style = MaterialTheme.typography.labelMedium,
+							color = muted
+						)
+					}
+				}
+			} else {
+				// Small enough to be typed and corrected by hand, which is the only
+				// case in which this has any business being a text field. The field
+				// is deliberately the same shape as the hex field in settings: a
+				// rectangle with a line around it and nothing else in it.
+				Box(
+					modifier = Modifier
+						.fillMaxWidth()
+						.heightIn(min = 140.dp, max = 220.dp)
+						.border(Space.hair, line)
+						.padding(Space.md)
+						.verticalScroll(pasteScroll)
+				) {
+					if (pasted.isEmpty()) {
+						Text(
+							text = S.t("add.012"),
+							style = MaterialTheme.typography.bodyMedium,
+							color = muted
+						)
+					}
+					BasicTextField(
+						value = pasted,
+						onValueChange = { pasted = it.take(MAX_PASTED_CHARS) },
+						textStyle = MaterialTheme.typography.bodyMedium.copy(
+							color = MaterialTheme.colorScheme.onBackground
+						),
+						cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+						modifier = Modifier.fillMaxWidth()
+					)
+				}
 			}
 
 			Spacer(Modifier.height(Space.sm))
 			Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+				// Straight out of the clipboard, not through the keyboard. Handing a
+				// hundred kilobytes of table to an IME is where the text was being cut
+				// short and its line breaks flattened into one line, which the importer
+				// then read as a single row with six hundred columns.
+				IknaTextButton(
+					label = S.t("add.063"),
+					onClick = {
+						val text = clipboard.getText()?.text.orEmpty()
+						if (text.isBlank()) {
+							note = S.t("add.064")
+						} else {
+							pasted = text.take(MAX_PASTED_CHARS)
+							previewOpen = false
+							// Said out loud rather than found out later as a deck
+							// missing its last two hundred cards.
+							note = if (text.length > MAX_PASTED_CHARS) {
+								S.t("add.071")
+							} else {
+								null
+							}
+						}
+					}
+				)
 				IknaTextButton(
 					label = S.t("add.013"),
 					onClick = {
@@ -502,7 +599,19 @@ fun AddDeckScreen(
 					if (pasted.isBlank()) {
 						note = S.t("add.020")
 					} else {
-						scope.launch { install(S.t("add.030"), pasted) }
+						// One last rescue before the importer sees it. A keyboard that
+						// flattened the paste hands over a single line no parser can
+						// split back with certainty, while the clipboard almost always
+						// still holds the same deck with its line breaks intact. When it
+						// does, that is what gets imported -- silently, because the
+						// person did nothing wrong and has nothing to fix.
+						val fromClip = clipboard.getText()?.text.orEmpty()
+						val text = if (glued(pasted) && fromClip.isNotBlank() && !glued(fromClip)) {
+							fromClip.take(MAX_PASTED_CHARS)
+						} else {
+							pasted
+						}
+						scope.launch { install(S.t("add.030"), text) }
 					}
 				}
 			)
@@ -632,12 +741,23 @@ private fun warningReason(warning: SeedWarning): String = when (warning) {
 	SeedWarning.HAS_NUMBERS -> S.t("add.054")
 }
 
+/**
+ * A paste that lost its line breaks: one line carrying a whole deck's worth of
+ * separators. A statement about the shape of the text, never about its content.
+ */
+private fun glued(text: String): Boolean {
+	if (text.isBlank()) return false
+	if (text.lineSequence().count { it.isNotBlank() } > 1) return false
+	return text.count { it == '|' } >= 6 || text.count { it == '\t' } >= 6
+}
+
 private fun reason(problem: SeedProblem): String = when (problem) {
 	SeedProblem.NOT_THREE_COLUMNS -> S.t("add.031")
 	SeedProblem.EMPTY_FIELD -> S.t("add.032")
 	SeedProblem.PHRASE_NOT_IN_SENTENCE -> S.t("add.033")
 	SeedProblem.TOO_LONG -> S.t("add.034")
 	SeedProblem.DUPLICATE -> S.t("add.035")
+	SeedProblem.ONE_LONG_LINE -> S.t("add.070")
 }
 
 internal fun displayName(context: Context, uri: Uri): String {
@@ -677,8 +797,23 @@ private const val PROMPT_FILE = "ikna-deck-prompt.txt"
 /** Four megabytes is around forty thousand cards: far more than a deck ever is. */
 internal const val MAX_FILE_BYTES = 4L * 1024L * 1024L
 
-/** The same ceiling for the field, in characters rather than bytes. */
-private const val MAX_PASTED_CHARS = 400_000
+/**
+ * The same ceiling for the field, in characters rather than bytes -- which it
+ * was not: four megabytes from a file against four hundred thousand characters
+ * from a paste. Ten thousand rows is around a megabyte and a half, so a big
+ * paste was cut a quarter of the way through and nothing said so.
+ */
+private const val MAX_PASTED_CHARS = 1_600_000
+
+/**
+ * Past this, the box shows how much is in it instead of showing it. A deck is
+ * written by a model and read by the importer; the only reason to render it
+ * here is to check something short by eye.
+ */
+private const val PREVIEW_CHARS = 1_200
+
+/** How much of a folded-open deck is drawn. A fixed cost, whatever its size. */
+private const val PREVIEW_LINES = 40
 
 /** A topic is a phrase, not an essay. The rest of the prompt is already long. */
 private const val MAX_TOPIC_CHARS = 120

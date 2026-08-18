@@ -4,6 +4,57 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!--
+        The one permission this app did not have, and the reason it now does.
+
+        There is no store listing. A build reaches a phone as an APK from the
+        releases page, which means the app cannot be updated by the platform
+        and a person running a version with a known bug in it has no way of
+        finding out. That is what this is for and it is all it is for.
+
+        What it does: one HTTPS GET to the releases API, on opening the app and
+        at most once a day, or when the update button in Settings is pressed.
+        Nothing is sent -- no identifier, no statistics, no card, no answer;
+        the request has no body and carries nothing but a version number in
+        the user agent. The reply is a few kilobytes of JSON: a tag, a file
+        size and the release notes.
+
+        The same socket now also fetches the APK, once the update button is
+        pressed and never before: a second HTTPS GET, to the file the release
+        listed, straight into the app's own cache with a band and a percentage
+        in front of it. Still nothing sent, still nothing read from the phone.
+
+        It can be switched off in Settings, and switched off it opens no socket
+        at all.
+
+        The review log still never leaves the phone. See docs/UPDATES.md.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+        Asking to install the file that was just downloaded.
+
+        Until 0.4.0 press this permission was deliberately absent and the link
+        was handed to the browser instead. What that argument left out is the
+        person on the other end: an app that leaves, a file that lands in a
+        folder they then have to find, and a notification that looks like every
+        other one they ignore. The update was available and nobody installed it.
+
+        What this permission is: the right to ask. It does not install anything
+        and it cannot. The file is handed to the system installer through the
+        provider below, and the platform's own prompt -- the one that names the
+        app, says it is an update and checks the signature -- is what decides.
+        Android also requires the user to switch this on per app, on a settings
+        screen; the app opens that screen at the moment it is needed and never
+        on first launch.
+
+        What it is not: a way to install anything else. The only URL fetched is
+        the asset the releases API named, the only file written is in the app's
+        cache under updates/, and a build signed with a different key is refused
+        by the platform, not by this code.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <!--
         Android 11 and later hide other installed packages by default, and a
         speech engine is another package. Without this the platform answers
         "no engine" on a phone that has one, and the speaker mark would never
@@ -62,9 +113,14 @@
 
             Sharing needs a URI another app can read, and the alternative to a
             provider is world-readable storage, which is worse. This one is not
-            exported, grants permission per-intent, and is pointed at a single
-            cache directory (see file_paths.xml) that holds nothing but the file
-            being shared right now. The review log is not reachable through it.
+            exported, grants permission per-intent, and is pointed at two cache
+            directories (see file_paths.xml): the deck being shared right now,
+            and the update being installed right now. Nothing else is reachable
+            through it, and the review log is not under either path.
+
+            The installer is handed a URI from here for the same reason another
+            app is: a file:// URI would have to be world-readable, and the grant
+            this makes lasts for one intent and one file.
         -->
         <provider
             android:name="androidx.core.content.FileProvider"

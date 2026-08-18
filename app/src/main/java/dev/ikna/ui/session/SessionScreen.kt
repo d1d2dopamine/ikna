@@ -181,6 +181,15 @@ fun SessionScreen(
             // read yet cannot be judged, and because a mistap here would throw
             // away material instead of grading it.
             if (state.current != null && state.revealed) {
+                // An order, not a verdict.
+                //
+                // This read "this card is wrong" in the muted grey every caption
+                // on this screen uses, in a bar under every card that had been
+                // turned over -- so it looked like something the app was saying
+                // about the card rather than something to press, and a person
+                // reading it card after card concludes the app has condemned the
+                // whole deck. Upper case and an imperative is how an action is
+                // written here already: see sess.013 beside an answer.
                 IknaTextButton(
                     label = S.t("sess.044"),
                     onClick = vm::markWrong,

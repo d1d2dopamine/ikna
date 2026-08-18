@@ -255,6 +255,57 @@ class SeedParserTest {
 	}
 
 	@Test
+	fun aPasteThatLostItsLineBreaksIsPutBackTogether() {
+		val parse = SeedFormat.parse(
+			"hang on | Hang on a second. | подожди | " +
+				"make it | I can't make it tonight. | добраться"
+		)
+		assertEquals(2, parse.rows.size)
+		assertEquals(0, parse.problems.size)
+		assertEquals("hang on", parse.rows[0].phrase)
+		assertEquals("make it", parse.rows[1].phrase)
+	}
+
+	@Test
+	fun aGluedPasteKeepsItsFourthColumn() {
+		val parse = SeedFormat.parse(
+			"axon | The axon carries the signal. | отросток нейрона | Kandel ch. 4 | " +
+				"synapse | The synapse is a contact. | контакт нейронов | Kandel ch. 8"
+		)
+		assertEquals(2, parse.rows.size)
+		assertEquals("Kandel ch. 4", parse.rows[0].source)
+		assertEquals("Kandel ch. 8", parse.rows[1].source)
+	}
+
+	@Test
+	fun oneRealRowIsLeftAlone() {
+		val parse = SeedFormat.parse("hang on | Hang on a second. | подожди")
+		assertEquals(1, parse.rows.size)
+		assertEquals(0, parse.problems.size)
+	}
+
+	/**
+	 * Twelve fields divide by three and by four, and the count alone would cut
+	 * this deck into threes: sources would become phrases and every card would
+	 * be false without a single line being refused.
+	 */
+	@Test
+	fun aGluedPasteWithSourcesIsNotCutIntoThrees() {
+		val glued = "hang on | Hang on, I am coming. | подожди | Kandel ch. 4 | " +
+			"make it | I can not make it tonight. | добраться | Kandel ch. 8 | " +
+			"give up | Do not give up now. | сдаваться | Kandel ch. 9"
+
+		val parse = SeedParser.parse(glued)
+
+		assertEquals(3, parse.rows.size)
+		assertEquals(0, parse.problems.size)
+		assertEquals("hang on", parse.rows[0].phrase)
+		assertEquals("Kandel ch. 4", parse.rows[0].source)
+		assertEquals("give up", parse.rows[2].phrase)
+		assertEquals("Kandel ch. 9", parse.rows[2].source)
+	}
+
+	@Test
 	fun theTwoFormatsAreToldApartByContent() {
 		// Not by file name: a file picked out of a chat app is called "document".
 		val jsonl = "{\"id\":\"a\",\"text\":\"hang on\"}"

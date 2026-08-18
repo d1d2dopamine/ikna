@@ -12,6 +12,161 @@ replace the space with a dash: `0.1.1 press` is tagged `v0.1.1-press`. What the
 words mean and what a number promises inside an epoch is written down once, in
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
+## 0.4.0 press
+
+A pasted deck arrives whole, and the app can now update itself.
+
+Two things, and they are both about the same failure: something was wrong, it had
+already been fixed, and the person holding the phone had no way to find that out.
+`0.3.0 press` shipped a paste bug that was fixed the same evening and the only
+reason anybody knew is that they asked. So this release fixes the paste path, and
+then fixes the reason it took a day to reach anyone.
+
+This is the first version that opens a socket, and that is a change to what the
+app promised rather than a feature added to it. Every claim about the network in
+the README and in `docs/` has been rewritten to match; `docs/UPDATES.md` is the
+whole of it.
+
+### The update window
+
+- Says what is available, in the order the questions arrive: the installed version
+  and the offered one either side of an arrow, the download size, then what
+  changed.
+- The notes are the release's own text, fetched with it -- the build being offered
+  knows what is in it and the installed one does not. Badges, rules and link
+  syntax are stripped, and the text scrolls inside a fixed box so a long release
+  cannot push the buttons off the screen.
+- Two small words, `skip` and `update`. Skip silences that one version and the
+  next release asks again; tapping outside behaves like skip without remembering
+  it.
+- `Update` downloads the file here, in the window that offered it, and hands it to
+  the system installer. What that looks like is below.
+- A phone with no 64-bit ABI is offered the 32-bit file. The speech runtime is
+  native code, and the wrong APK installs and then fails at the first sentence.
+
+### Settings -> Updates
+
+- The same check on demand, for the case the window was waved away and the mind
+  changed an hour later. Here the skipped version is ignored: pressing the button
+  is the change of mind.
+- Shows the installed version, the skipped one if there is one, and a link to the
+  releases page for when the check cannot work at all.
+- One switch turns the whole thing off, and off it opens no socket at all.
+
+### What is sent
+
+- Nothing. One GET with no body, at most once a day while the app is open, or when
+  the button is pressed. No account, no identifier, no statistics, no card, no
+  answer. The version is in the user agent so a broken release can be recognised.
+- The review log is untouched by all of this: still append-only, still exported by
+  hand to `Documents/ikna/`, still with `allowBackup` off.
+- Short timeouts, a capped reply, and every failure returning nothing. A check that
+  failed is not an event and says nothing.
+
+### Downloading it
+
+- Pressing `update` no longer sends anybody to the browser. The two words are
+  replaced, in the same window, by a band that fills, the percentage beside it and
+  the megabytes under it -- `18.9 / 40.2 MB` -- because a percentage of an unknown
+  size tells somebody on a metered connection nothing.
+- The browser was the deliberate choice until now, and the argument for it left out
+  the person on the other end: an app that leaves, a file that lands in a folder
+  they then have to find, and a notification that looks like every other one they
+  ignore. The update was available and nobody installed it.
+- When the file is whole the system installer opens by itself and puts the new
+  version **over** the old one. Every release is signed with the same committed
+  key, so the review log, the decks and the settings are all still there
+  afterwards; that is what `docs/KEYSTORE.md` has always been for.
+- The percentage cannot reach 100 before the last byte is written, so "100%" and
+  "the installer is opening" are one moment rather than two seconds apart.
+- A download that stopped short is thrown away rather than handed on. A truncated
+  APK with the right name is refused by the installer, and that reads as "the
+  update is broken" instead of "the network dropped".
+- The file goes into the app's own cache, under `updates/`, one at a time, cleared
+  before the next attempt. Nothing is resumed and nothing accumulates.
+- While bytes are arriving a tap outside the window does nothing: a download
+  cancelled by a misplaced finger at eighty percent is the worst thing this window
+  could do. `Cancel` is there, and cancelling closes the socket rather than only
+  the display.
+- Android asks, per app and on a settings screen, before anything may be
+  installed from this source. That screen is opened at the moment it is needed --
+  file already downloaded, window saying what it is for -- and never on first
+  launch. Granting it and pressing `install` again costs no second download.
+- A failure says which way it failed and keeps both ways out within reach:
+  `retry`, and `in the browser`. The app fetching the file is a convenience and is
+  not allowed to become the only way to get it.
+- The same download runs from **Settings -> Updates**, with the same band and the
+  same percentage. Two ways in, one thing happening.
+
+### Pasting a whole deck
+
+- **Paste from clipboard**, the button under the field. A hundred kilobytes of
+  table handed to a phone keyboard came back cut short and with its line breaks
+  flattened into one line; the importer then read the whole deck as row one with
+  six hundred columns and refused all of it -- "line 1 has not got three
+  fields", about a paste that was, field for field, correct. This button reads
+  the clipboard directly, so nothing passes through a keyboard at all.
+- A paste that **did** come through the keyboard is now rescued: on create, if the
+  text in the field is one line carrying a deck's worth of separators while the
+  clipboard still holds the same deck with its line breaks intact, the clipboard
+  is what gets imported. Silently -- the person did nothing wrong and has nothing
+  to fix.
+- Where that cannot be done, the importer **puts the line breaks back itself**: one
+  real line holding six or more fields is read as the rows it plainly is, three or
+  four columns wide. Twelve fields and twenty-four divide by both widths, and
+  there the count is not allowed to decide: the wrong width shifts every field one
+  place along and turns a whole deck false without refusing a single line. The
+  deck's own rule decides instead -- a phrase appears inside its own sentence --
+  and the width that holds on more rows wins.
+- And where even that fails, the message says **which** thing went wrong: the text
+  arrived as one line, press paste from clipboard. Not "line 1 has not got three
+  fields" printed under three hundred rows that were all correct.
+- The pasted text is **folded away**. In place of the wall of text: one line saying
+  how many lines and how many characters arrived, and **SHOW THE TEXT** beside it.
+  Opened, it shows the first forty rows -- enough to see that the columns line up
+  -- and says how many more there are. That is a fixed cost: opening the preview on
+  ten thousand rows costs what opening it on forty costs.
+- Nothing large is held in an editable field any more. Laying a megabyte of text
+  out on the main thread, on every keystroke, is what made this screen take a
+  minute to scroll to its own create button.
+- The paste ceiling was a quarter of the file ceiling: four megabytes from a file,
+  four hundred thousand characters from a paste. A ten-thousand-row deck is about
+  a megabyte and a half, so a large paste was cut in silence. Both ends now hold a
+  whole deck, and a paste that still does not fit **says it was cut** instead of
+  installing a deck missing its last two hundred cards.
+
+### The wrong-card action
+
+- It is written as an order now: **MARK AS WRONG**, upper case, the way this app
+  writes every other action. It read "this card is wrong" in the same muted grey
+  as the captions around it, in the bar under every card that had been turned
+  over -- so it looked like a verdict the app had passed on the card, on card
+  after card, and the reasonable conclusion was that every card in the deck had
+  been marked. Nothing was ever marked by it without a tap; Settings -> Data
+  counts what actually was, and puts it all back with one button.
+
+### The deck row
+
+- The three dots moved to the **left** of the switch. They had been put on the
+  right, which took the outer edge the switch has held since the first version --
+  the one control on that row people already knew how to find, moved -- and made
+  the pair look unintended.
+- They are also the same height as the switch now. At 44dp against its 32dp they
+  had made every row in the list twelve points taller, which pushed the progress
+  bar and the percentage under it out of proportion.
+
+### Notes
+
+- No database migration. Room stays at version 3. The review log, the cards and the
+  schedule are untouched; everything here happens before a deck becomes cards,
+  after it already is, or outside the database entirely.
+- New permissions: `INTERNET`, and `REQUEST_INSTALL_PACKAGES` for handing the
+  downloaded file to the installer. The manifest says why, at length, next to each
+  of them. Neither is reached with the update check switched off.
+- The file provider now covers a second cache directory, `updates/`. Still not
+  exported, still granting per intent, still nowhere near the review log.
+- Version code 200040000.
+
 ## 0.3.0 press
 
 What you can learn here, and what happens when a deck is wrong about it.
@@ -59,17 +214,6 @@ half a minute, the other half of this release is about not trusting it blindly.
   learner was struggling. That was the single worst-behaved thing left in the app.
 - Marked cards are **not deleted**. Settings -> Data says how many there are and
   puts them all back with one button; the day is then planned again with them in it.
-
-### The deck row
-
-- The three dots moved to the **left** of the switch. They had been put on the
-  right, which took the outer edge the switch has held since the first version --
-  the one control on that row people already knew how to find, moved -- and made
-  the pair look unintended.
-- They are also the same height as the switch now. At 44dp against its 32dp they
-  had made every row in the list twelve points taller, which pushed the progress
-  bar and the percentage under it out of proportion.
-
 ### Notes
 
 - No database migration: the schema stays at version 3. The list of marked cards is

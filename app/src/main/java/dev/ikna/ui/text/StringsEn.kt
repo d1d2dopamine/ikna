@@ -137,7 +137,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Анимации
 	"set.020" to "Animations",
 	// Карточки улетают, конец дня с анимацией
-	// Вибрация
+	// Вибра��ия
 	"set.022" to "Vibration",
 	// Короткий отклик на свайп
 	// Язык
@@ -341,6 +341,9 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"set.135" to "Cards taken out of rotation: ",
 	"set.136" to "Put them back",
 	"set.137" to "The cards are back",
+	"set.138" to "Updates",
+	"set.139" to "The app is installed from a file, so nothing but the app itself can tell you a newer one exists.",
+	"set.140" to "UPDATE",
 	// БЕТА
 	"set.123" to "BETA",
 	// Пока в бете и по умолчанию выключено: как звучит голос, решает движок на телефоне, а плохой голос хуже тишины.
@@ -487,6 +490,15 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"add.060" to "Subject and section",
 	"add.061" to "for example, neuroscience, synaptic plasticity",
 	"add.062" to "Language of the cards",
+	"add.063" to "Paste from clipboard",
+	"add.064" to "The clipboard has no text",
+	"add.065" to "lines",
+	"add.066" to "characters",
+	"add.067" to "SHOW THE TEXT",
+	"add.068" to "HIDE THE TEXT",
+	"add.069" to "and more lines: ",
+	"add.070" to "the whole text arrived as one line. Press “paste from clipboard”: a keyboard cuts large pastes short",
+	"add.071" to "The text was longer than the limit and was cut. Split the deck in two.",
 	// тап в любом месте
 	"card.002" to "tap anywhere",
 	// ← НЕ ЗНАЮ
@@ -577,7 +589,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// карточек
 	"sess.042" to "cards",
 	"sess.043" to "Yesterday ran long — today is a lighter day, with nothing new in it.",
-	"sess.044" to "this card is wrong",
+	"sess.044" to "MARK AS WRONG",
 	"sess.045" to "Taken out of rotation. The mistake was not written into your statistics.",
 	"sess.046" to "the term",
 	"sess.047" to "from memory",
@@ -727,4 +739,31 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Под левую руку
 	"bar.003" to "For the left hand",
 	// Нижний бар зеркалится: плюс уходит в левый угол, остальные кнопки — вправо
+
+	// The update window and the update section in settings.
+	"upd.001" to "UPDATE AVAILABLE",
+	"upd.002" to "Size: ",
+	"upd.003" to "MB",
+	"upd.004" to "What is new:",
+	"upd.005" to "UPDATE",
+	"upd.006" to "SKIP",
+	"upd.007" to "The app downloads the file itself; the bar and the percentage are here. Android's installer puts the new version over the old one, and cards and progress stay.",
+	"upd.008" to "Check for updates",
+	"upd.009" to "One request to the releases page, at most once a day. Nothing is sent. Switched off, no socket is opened at all.",
+	"upd.010" to "CHECK NOW",
+	"upd.011" to "Installed: ",
+	"upd.012" to "Nothing newer. If there is no network the check simply failed — the app cannot tell those apart.",
+	"upd.013" to "RELEASES PAGE",
+	"upd.014" to "CHECKING…",
+	"upd.015" to "Skipped: ",
+	"upd.016" to "Update to ",
+	"upd.017" to "DOWNLOADING",
+	"upd.018" to "The file is here. Android's installer puts the new version over the old one — cards, progress and settings stay.",
+	"upd.019" to "CANCEL",
+	"upd.020" to "INSTALL",
+	"upd.021" to "Android asks permission to install apps from this source; without it the installer will not open. The file is already downloaded and stays.",
+	"upd.022" to "ALLOW",
+	"upd.023" to "The download failed — the connection dropped, or the file arrived short. Retry, or take the file in the browser.",
+	"upd.024" to "RETRY",
+	"upd.025" to "IN THE BROWSER",
 )

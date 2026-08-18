@@ -28,6 +28,7 @@ import dev.ikna.ui.session.SessionScreen
 import dev.ikna.ui.settings.SettingsScreen
 import dev.ikna.ui.settings.VoiceScreen
 import dev.ikna.ui.stats.StatsScreen
+import dev.ikna.ui.update.UpdateGate
 
 /**
  * Where the app can be.
@@ -217,5 +218,10 @@ fun IknaNavHost(
                 )
             }
         }
+
+        // Above the graph rather than inside it, so it is asked once per
+        // launch and cannot be re-asked by walking between screens. It draws
+        // nothing at all until there is something to say.
+        UpdateGate(container = container, settings = settings)
     }
 }

@@ -135,8 +135,9 @@ term | a sentence that uses it | what it means | where it comes from
 ```
 
 It is optional, it is capped at 60 characters, and it is the cheapest defence this
-app has against a card that is simply wrong. ikna has no `INTERNET` permission and
-never will, so nothing inside it can check a claim. A source cannot make a card
+app has against a card that is simply wrong. ikna asks the network exactly one
+question -- whether a newer release exists -- and nothing inside it can check a
+claim about the world. A source cannot make a card
 true either -- but it turns "is this right?" into somewhere to go and look, which is
 the most an offline app can honestly offer.
 
@@ -144,6 +145,23 @@ Until the schema gains a column of its own, the source travels at the end of the
 meaning, after a dash on its own line. That is a compromise and it is written down
 as one: the alternative was to hold the whole idea back for a release that can
 migrate the database.
+
+## Pasting a deck of thousands of lines
+
+Use **paste from clipboard**, the button under the field, rather than the
+keyboard's own paste. A phone keyboard is built for messages: hand it a hundred
+kilobytes of table and it hands back a shorter text with its line breaks gone.
+The button reads the clipboard itself, so a ten-thousand-row deck arrives as it
+was written.
+
+The text is then folded away: how many lines, how many characters, and **SHOW THE
+TEXT** to see the first forty rows. That is the whole preview by design -- nobody
+corrects a generated deck with a thumb, and a megabyte of text laid out in an
+editable field is what used to put the create button a minute of scrolling away.
+
+If a deck came through the keyboard anyway and arrived as one long line, the app
+tries the clipboard, then puts the line breaks back itself, and only then says
+what happened -- naming the flattening rather than blaming line 1.
 
 ## Lines worth reading twice
 
