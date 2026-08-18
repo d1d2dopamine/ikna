@@ -103,9 +103,13 @@ class SchemaTest {
 			"IknaDatabase is no longer version $DB_VERSION. Raise DB_VERSION in this " +
 				"test to match, which is also the reminder to commit the new schema " +
 				"file and to write the migration that reaches it.",
-			src!!.readText().contains("version = $DB_VERSION")
-		)
-	}
+				src!!.readText().contains("version = $DB_VERSION")
+			)
+			assertTrue(
+				"The diagnostic database version must move with Room's version.",
+				src!!.readText().contains("const val IKNA_DATABASE_VERSION = $DB_VERSION")
+			)
+		}
 
 	private fun schema(version: Int): File? = find("$SCHEMA_DIR/$version.json")
 

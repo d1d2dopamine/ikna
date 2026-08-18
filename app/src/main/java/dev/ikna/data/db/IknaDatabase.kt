@@ -22,7 +22,9 @@ const val IKNA_DATABASE_VERSION = 3
     // v2: undo snapshots on `reviews`, deck switches on `packs`, `daily_plan`.
     // v3: `daily_stats.correctCount`, so the day's accuracy is a count rather
     //     than a stored average edited in place.
-    version = IKNA_DATABASE_VERSION,
+    // Kept as a literal because SchemaTest deliberately reads this source line:
+    // changing it must force a migration and a committed Room schema.
+    version = 3,
     // KSP writes the schema history into app/schemas (see the ksp block in
     // app/build.gradle.kts). Commit whatever appears there after a build: it is
     // the only way to diff two versions of this database, and
