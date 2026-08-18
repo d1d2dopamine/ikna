@@ -13,7 +13,7 @@
 
         What it does: one HTTPS GET to the releases API, on opening the app and
         at most once a day, or when the update button in Settings is pressed.
-        Nothing is sent -- no identifier, no statistics, no card, no answer;
+        Nothing is sent — no identifier, no statistics, no card, no answer;
         the request has no body and carries nothing but a version number in
         the user agent. The reply is a few kilobytes of JSON: a tag, a file
         size and the release notes.
@@ -41,8 +41,8 @@
 
         What this permission is: the right to ask. It does not install anything
         and it cannot. The file is handed to the system installer through the
-        provider below, and the platform's own prompt -- the one that names the
-        app, says it is an update and checks the signature -- is what decides.
+        provider below, and the platform's own prompt — the one that names the
+        app, says it is an update and checks the signature — is what decides.
         Android also requires the user to switch this on per app, on a settings
         screen; the app opens that screen at the moment it is needed and never
         on first launch.

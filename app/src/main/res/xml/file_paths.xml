@@ -8,7 +8,7 @@
     they are not under either path.
 
     Both are cache. The system may empty them whenever it needs the space, which
-    is the right arrangement for a file that matters for one minute -- the length
+    is the right arrangement for a file that matters for one minute — the length
     of a share, or the length of an install.
 -->
 <paths>
