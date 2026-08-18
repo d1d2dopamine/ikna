@@ -47,15 +47,45 @@ fun versionNumbers(text: String): List<Int>? {
 }
 
 /**
+ * The word after the numbers, lowercased, or empty if there is none.
+ *
+ * "0.4.0 press" and "v0.4.0-press" both give "press". A leading "v" is not it:
+ * only letters that come after the first digit count, and the first thing that
+ * is neither a letter nor a separator ends the word.
+ */
+fun epochWord(text: String): String {
+    val letters = StringBuilder()
+    var seenDigit = false
+    for (c in text) {
+        if (c.isDigit()) {
+            seenDigit = true
+            continue
+        }
+        if (!seenDigit) continue
+        if (c.isLetter()) letters.append(c.lowercaseChar())
+        else if (letters.isNotEmpty()) break
+    }
+    return letters.toString()
+}
+
+/**
  * Whether [found] is a later version than [installed].
  *
  * Unreadable on either side means no: an app that cannot tell must not be able
  * to nag. Equal means no, and older means no -- a release pulled back to fix
  * something must not offer itself as an upgrade to the build that replaced it.
+ *
+ * Two epochs share the page and their numbers restarted, so the word has to
+ * agree before the numbers are read at all: 0.5.0 proof is a larger number than
+ * 0.4.0 press and is not an update to it. Where either side has no word, the
+ * numbers decide on their own.
  */
 fun isNewer(installed: String, found: String): Boolean {
     val here = versionNumbers(installed) ?: return false
     val there = versionNumbers(found) ?: return false
+    val hereWord = epochWord(installed)
+    val thereWord = epochWord(found)
+    if (hereWord.isNotEmpty() && thereWord.isNotEmpty() && hereWord != thereWord) return false
     for (i in 0 until maxOf(here.size, there.size)) {
         val h = here.getOrElse(i) { 0 }
         val t = there.getOrElse(i) { 0 }

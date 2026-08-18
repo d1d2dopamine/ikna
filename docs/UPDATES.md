@@ -135,7 +135,8 @@ in Settings is the only way to ask.
 | `ui/update/UpdateDownloadUi.kt` | The band, the percentage and the buttons, shared by the window and Settings. |
 | `ui/settings/SettingsScreen.kt` | The Updates section. |
 
-Version comparison ignores the epoch word: `0.3.0 press` against `v0.4.0-press`
-is three numbers against three numbers, so a `proof` tag left on the page cannot
-pull a `press` install sideways. An unreadable version on either side means no
-update -- an app that cannot tell must not be able to nag.
+Version comparison is three numbers against three numbers, `0.3.0 press` against
+`v0.4.0-press`, but the word before them has to agree: the numbers of the two
+epochs overlap, so a `proof` tag left on the page cannot pull a `press` install
+sideways however large its numbers are. An unreadable version on either side
+means no update -- an app that cannot tell must not be able to nag.

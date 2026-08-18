@@ -98,8 +98,12 @@ fun apkFileName(tag: String, url: String): String {
     if (safe.length > 4 && !safe.startsWith(".") && safe.endsWith(".apk", ignoreCase = true)) {
         return safe
     }
-    val fromTag = tag.filter { it.isLetterOrDigit() || it == '.' || it == '-' || it == '_' }
-    return if (fromTag.isEmpty()) "ikna-update.apk" else "ikna-$fromTag.apk"
+    val fromTag = tag
+        .filter { it.isLetterOrDigit() || it == '.' || it == '-' || it == '_' }
+        .trim('.', '-', '_')
+    // A tag of nothing but dots and dashes is not a name. It has to carry at
+    // least one letter or digit, or the fixed name is used instead.
+    return if (fromTag.none { it.isLetterOrDigit() }) "ikna-update.apk" else "ikna-$fromTag.apk"
 }
 
 /**
