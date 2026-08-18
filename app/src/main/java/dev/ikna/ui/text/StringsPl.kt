@@ -123,7 +123,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"set.012" to "Ustawienia",
 	// Нагрузка
 	"set.013" to "Obciążenie",
-	// Сколько повторений в день считать нормой. От этого зависит, сколько новых чанков придёт за
+	// Сколько повторений в день считать нормой. О�� этого ��ависит, сколько новых чанков придёт за
 	// АВТО
 	"set.015" to "AUTO",
 	// РУЧНОЙ
@@ -223,7 +223,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"set.066" to "POKAŻ",
 	// ПЕРЕСЧИТАТЬ СЛОЙ СЛОВ
 	"set.067" to "PRZELICZ WARSTWĘ SŁÓW",
-	// Слой слов пересчитан по журналу
+	// Сло�� слов пересчитан по журналу
 	"set.068" to "Warstwa słów przeliczona z dziennika",
 	// ТЕХНИЧЕСКИЙ ЭКРАН
 	"set.069" to "EKRAN TECHNICZNY",
@@ -231,7 +231,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"set.070" to "ZACZNIJ OD NOWA",
 	// Стереть всё
 	"set.071" to "Wymaż wszystko",
-	// Полный сброс: карточки, сроки, статистика, журнал ответов и сами настройки. Приложение ста
+	// Полный сброс: карточки, сроки, статистика, журнал ответов и сами настройки. Прилож����н����е ста
 	"set.072" to "Pełny reset: karty, terminy, statystyka, dziennik odpowiedzi i same ustawienia. Aplikacja stanie się taka jak zaraz po instalacji i uruchomi się ponownie. Przed wymazaniem dziennik trafia do Dokumenty/ikna — potem można go przywrócić.",
 	// ТОЧНО СТЕРЕТЬ ВСЁ
 	"set.073" to "NA PEWNO WYMAŻ WSZYSTKO",
@@ -481,7 +481,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"add.051" to "znaczenie powtarza sam termin",
 	"add.052" to "niepewne sformułowanie",
 	"add.053" to "to znaczenie już było wyżej",
-	"add.054" to "są liczby — sprawdź je w źródle",
+	"add.054" to "są liczby — sprawdź je w ��ródle",
 	"add.055" to "Czego się uczymy",
 	"add.056" to "języka",
 	"add.057" to "przedmiotu",
@@ -497,7 +497,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"add.067" to "POKAŻ TEKST",
 	"add.068" to "UKRYJ TEKST",
 	"add.069" to "i jeszcze wierszy: ",
-	"add.070" to "cały tekst przyszedł jako jeden wiersz. Naciśnij „wklej ze schowka”: klawiatura ucina duże wklejenia",
+	"add.070" to "podziały wierszy zginęły po drodze i tego wiersza nie udało się rozłożyć. Naciśnij „wklej ze schowka”: klawiatura ucina duże wklejenia",
 	"add.071" to "Tekst był dłuższy niż limit i został ucięty. Podziel talię na dwie części.",
 	// тап в любом месте
 	"card.002" to "dotknij gdziekolwiek",
@@ -561,7 +561,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// Добавлю хотя бы один новый чанк, чтобы не стоять на месте.
 	"sess.028" to "Dodam choć jeden nowy chunk, żeby nie stać w miejscu.",
 	// Новых чанков здесь больше нет — все уже знакомы. Повторения продолжат приходить по срокам,
-	"sess.029" to "Nowych chunków tu już nie ma — wszystkie są znajome. Powtórki będą przychodzić w swoich terminach, a po nowy materiał potrzebna jest kolejna talia.",
+	"sess.029" to "Nowych chunków tu już nie ma — wszystkie są znajome. Powtórki będ�� przychodzić w swoich terminach, a po nowy materiał potrzebna jest kolejna talia.",
 	// следующие — сегодня в 
 	"sess.030" to "następne — dziś o ",
 	// следующие — завтра в 
@@ -766,4 +766,38 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"upd.023" to "Pobieranie się nie udało — połączenie zerwane albo plik przyszedł niecały. Można powtórzyć lub wziąć plik w przeglądarce.",
 	"upd.024" to "POWTÓRZ",
 	"upd.025" to "W PRZEGLĄDARCE",
+
+	"cat.001" to "Katalog talii",
+	"cat.002" to "Talie, których nikt tu nie napisał: zdanie i jego znaczenie pochodzą z Tatoeby, a Wikisłownik służy tylko przy składaniu, do odróżniania form jednego słowa. Składanie odbywa się raz, na serwerze budującym, a telefon pobiera gotowy plik. Licencja i autor są pokazane przed pobraniem i zostają w kartach.",
+	"cat.003" to "WCZYTUJĘ LISTĘ…",
+	"cat.004" to "Lista nie dotarła — nie ma sieci albo strona katalogu jest nieosiągalna. Nic się nie zepsuło: wbudowane talie i tworzenie talii z modelem są na miejscu.",
+	"cat.005" to "STRONA KATALOGU",
+	"cat.006" to "POWTÓRZ",
+	"cat.007" to "Czego się uczyć",
+	"cat.008" to "Znaczenia w",
+	"cat.009" to "Temat",
+	"cat.010" to "Poziom",
+	"cat.011" to "WSZYSTKIE",
+	"cat.012" to "Ta para jest pełna: w korpusie jest dużo zdań, talie są duże.",
+	"cat.013" to "Ta para jest cienka: w korpusie jest mało zdań, więc talie wyjdą krótsze. To ograniczenie źródła, nie aplikacji.",
+	"cat.014" to "Dla tej pary jeszcze nic nie ma. Pełność wszystkich par jest wypisana w README projektu.",
+	"cat.015" to "kart",
+	"cat.016" to "Licencja: ",
+	"cat.017" to "Źródło: ",
+	"cat.018" to "POBIERZ",
+	"cat.019" to "POBIERANIE",
+	"cat.020" to "Pobieranie się nie udało — połączenie zerwane albo plik przyszedł niecały. Nic nie zostało zainstalowane, można powtórzyć.",
+	"cat.021" to "Plik dotarł, ale nie udało się złożyć ani jednej karty. Talia nie została dodana.",
+	"cat.022" to "Gotowe. Kart w talii: ",
+	"cat.023" to "SKŁADAM TALIĘ…",
+	"cat.024" to "MB",
+	"cat.025" to "CC BY-SA: talia zbudowana z tej i przekazana dalej idzie na tej samej licencji. Na naukę to nie ma żadnego wpływu.",
+	"cat.026" to "Lista złożona: ",
+	"cat.027" to "początek",
+	"cat.028" to "środek",
+	"cat.029" to "zaawansowany",
+	"cat.030" to "Dla tych filtrów nic nie ma.",
+	"cat.031" to "Gotowa talia",
+	"cat.032" to "Jeśli nie chce się bawić w model: talia z katalogu, zdania napisane przez ludzi, licencja otwarta, autor wskazany.",
+	"cat.033" to "OTWÓRZ KATALOG",
 )

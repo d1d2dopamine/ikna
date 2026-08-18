@@ -19,6 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dev.ikna.AppContainer
 import dev.ikna.data.prefs.IknaSettings
+import dev.ikna.ui.catalog.CatalogScreen
 import dev.ikna.ui.debug.DebugHooks
 import dev.ikna.ui.decks.AddDeckScreen
 import dev.ikna.ui.decks.DeckScreen
@@ -46,6 +47,7 @@ object Routes {
     const val STATS = "stats"
     const val SETTINGS = "settings"
     const val ADD_DECK = "add-deck"
+    const val CATALOG = "catalog"
     const val VOICE = "voice"
     const val DECK = "deck/{deck}"
     const val DEBUG = "debug"
@@ -146,6 +148,18 @@ fun IknaNavHost(
             // room in a file browser to say it.
             composable(Routes.ADD_DECK) {
                 AddDeckScreen(
+                    container = container,
+                    onOpenCatalog = { navController.navigate(Routes.CATALOG) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            // Decks somebody else already built, reached from the screen that
+            // asks where a deck comes from. Behind that screen rather than
+            // beside it: the answer "download a ready one" only makes sense
+            // once the question has been asked.
+            composable(Routes.CATALOG) {
+                CatalogScreen(
                     container = container,
                     onBack = { navController.popBackStack() }
                 )

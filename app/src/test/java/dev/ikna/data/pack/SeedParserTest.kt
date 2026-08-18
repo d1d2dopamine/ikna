@@ -305,6 +305,51 @@ class SeedParserTest {
 		assertEquals("Kandel ch. 9", parse.rows[2].source)
 	}
 
+	/**
+	 * A keyboard flattens in patches. A deck of three hundred rows arrives as
+	 * four enormous lines rather than as one, and while the rescue insisted on a
+	 * single line, that deck imported the one line that happened to hold three
+	 * fields and refused everything else.
+	 */
+	@Test
+	fun aPasteThatKeptSomeOfItsLineBreaksIsPutBackTogether() {
+		val parse = SeedFormat.parse(
+			"hang on | Hang on a second. | подожди | " +
+				"make it | I can't make it tonight. | добраться\n" +
+				"give up | Don't give up now. | сдаваться | " +
+				"look after | I look after my sister. | присматривать"
+		)
+		assertEquals(4, parse.rows.size)
+		assertEquals(0, parse.problems.size)
+		assertEquals("hang on", parse.rows[0].phrase)
+		assertEquals("look after", parse.rows[3].phrase)
+	}
+
+	@Test
+	fun aLineWithAStrayBarIsNotCutIntoCards() {
+		// Six fields, and neither half of them reads like a card. Cutting it into
+		// two rows of three would import half a sentence as a meaning instead of
+		// saying what was wrong with the line.
+		val parse = SeedFormat.parse("a | b | c | d | e | f")
+		assertEquals(0, parse.rows.size)
+		assertEquals(SeedProblem.NOT_THREE_COLUMNS, parse.problems[0].problem)
+	}
+
+	@Test
+	fun aFlattenedLineIsNamedEvenWhenItIsNotTheOnlyLine() {
+		// The text has two lines, so "the whole text arrived as one line" is not
+		// what happened -- but line 2 still lost its breaks, and a stray pipe is
+		// not what to tell the person about it.
+		val parse = SeedFormat.parse(
+			"hang on | Hang on a second. | подожди\n" +
+				"a | b | c | d | e | f | g"
+		)
+		assertEquals(1, parse.rows.size)
+		assertEquals(1, parse.problems.size)
+		assertEquals(2, parse.problems[0].line)
+		assertEquals(SeedProblem.ONE_LONG_LINE, parse.problems[0].problem)
+	}
+
 	@Test
 	fun theTwoFormatsAreToldApartByContent() {
 		// Not by file name: a file picked out of a chat app is called "document".

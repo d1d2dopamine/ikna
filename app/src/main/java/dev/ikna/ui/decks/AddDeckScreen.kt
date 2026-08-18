@@ -82,6 +82,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun AddDeckScreen(
 	container: AppContainer,
+	onOpenCatalog: () -> Unit,
 	onBack: () -> Unit
 ) {
 	val context = LocalContext.current
@@ -262,6 +263,33 @@ fun AddDeckScreen(
 				Step(S.t("add.006"))
 			}
 
+			Spacer(Modifier.height(Space.lg))
+			IknaRule()
+			Spacer(Modifier.height(Space.lg))
+
+			// The other way, offered before the long one. Everything below this
+			// point asks somebody to talk to a model and paste the answer back,
+			// which works and is still the only way to get a deck about a subject
+			// nobody has written a corpus for. A language is not that: sentences
+			// written by people already exist under a licence that allows this,
+			// and for those the catalogue is simply better than a model.
+			Text(
+				text = S.t("cat.031"),
+				style = MaterialTheme.typography.labelMedium,
+				color = muted
+			)
+			Spacer(Modifier.height(Space.sm))
+			Text(
+				text = S.t("cat.032"),
+				style = MaterialTheme.typography.bodySmall,
+				color = muted
+			)
+			Spacer(Modifier.height(Space.md))
+			IknaWideButton(
+				label = S.t("cat.033"),
+				onClick = onOpenCatalog,
+				enabled = !busy
+			)
 
 			Spacer(Modifier.height(Space.xl))
 			IknaRule()

@@ -12,6 +12,83 @@ replace the space with a dash: `0.1.1 press` is tagged `v0.1.1-press`. What the
 words mean and what a number promises inside an epoch is written down once, in
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
+## 0.5.0 press
+
+Decks you did not have to write.
+
+Until now a deck came from one of two places: the two that ship with the app, or a
+model you pasted a prompt into. The second one works, and it is still the way to
+get a deck about exactly what you want — but it asks somebody to go somewhere else,
+ask a machine for text, and trust text that no one can check. A model that invents
+a sentence cannot be looked up. That is the hole this release fills.
+
+The plus screen now has a **catalogue**: finished decks cut out of open corpora on
+the build server, listed with their licence, downloaded with a progress bar, and
+imported through the same path a pasted deck already went through. Every card in
+them names the sentence it came from, by number, on a public site.
+
+### The catalogue screen
+
+- One small index is fetched when the screen opens. Everything after that — the
+  language pair, the topic, the level, the search box — is filtered on the phone,
+  so trying ten combinations still costs one request.
+- A row says the title, the pair, the card count and the size in megabytes. Tapping
+  it unfolds the licence, who is credited, and which corpora the deck was cut out
+  of, **before** the download button.
+- The download draws the same band and the same percentage as the update download
+  in `0.4.0 press`, because it is the same widget and the same arithmetic.
+- The list not arriving is a sentence, not a spinner that never stops: the screen
+  says the list did not come, offers to retry, and offers the catalogue page in a
+  browser. Nothing else in the app is affected.
+
+### What a deck brings with it
+
+- **The licence travels with the deck.** It is in the index, on the screen before
+  the download, and appended to every card's meaning as a `— Tatoeba #12345` line
+  — the same source mark a hand-written deck's fourth column produces, so it
+  survives an export and a share.
+- **A catalogue deck cannot overwrite yours.** Its identifier starts with
+  `catalog-`; a deck you imported yourself starts with `user-`. Downloading the
+  same deck twice replaces it instead of leaving two copies.
+- **The phrase was cut out of its sentence, not written beside it.** The pipeline
+  stores the offsets it cut at, so the one fault a pasted deck sometimes has — a
+  phrase that is not in its sentence — cannot exist in a catalogue deck, in any
+  language.
+
+### Eight languages taught, ten understood
+
+The matrix is deliberately lopsided. A phrase is cut on word boundaries, so the
+language being **learned** has to be one written with spaces: English, Russian,
+Polish, Spanish, French, German, Italian, Portuguese. A translation is shown whole
+and never cut, so the language the **meanings** are in can also be Chinese or
+Japanese.
+
+How well a pair is served is measured by the pipeline and published with the
+catalogue — `full`, `thin`, or absent — rather than promised in a README. A deck's
+size is a result of what the sieve kept, not a number anybody chose.
+
+### The pipeline
+
+- `tools/catalog/build_catalog.py` reads the Tatoeba exports, keeps only direct
+  translations, picks the rarest word in an otherwise ordinary sentence as the
+  card's phrase, cuts it out with offsets, and writes decks in the format the
+  importer already reads.
+- `tools/catalog/make_sample.py` writes a hundred and twenty invented sentences in
+  Tatoeba's shape, so the whole pipeline runs end to end in about a second.
+- `.github/workflows/catalog.yml` runs that sample first and checks that every
+  card's phrase sits exactly at its stored offsets, then builds the real catalogue
+  and attaches it to one release called `catalog`. That release is explicitly not
+  marked as the latest one, so the update check still finds versions and not decks.
+- Wiktionary is read at build time only, to tell the forms of one word apart. None
+  of its text goes into a deck, so a deck carries Tatoeba's licence alone.
+
+### What did not change
+
+No account, no identifier, no statistics. The second network request exists only
+when somebody taps a deck, and it is a GET for a static file, the same shape as the
+update check. The review log is untouched, the database schema is unchanged, and
+nothing in the session, the governor or the grading was modified by this release.
+
 ## 0.4.0 press
 
 A pasted deck arrives whole, and the app can now update itself.
@@ -111,16 +188,27 @@ whole of it.
   clipboard still holds the same deck with its line breaks intact, the clipboard
   is what gets imported. Silently -- the person did nothing wrong and has nothing
   to fix.
-- Where that cannot be done, the importer **puts the line breaks back itself**: one
-  real line holding six or more fields is read as the rows it plainly is, three or
-  four columns wide. Twelve fields and twenty-four divide by both widths, and
-  there the count is not allowed to decide: the wrong width shifts every field one
-  place along and turns a whole deck false without refusing a single line. The
-  deck's own rule decides instead -- a phrase appears inside its own sentence --
-  and the width that holds on more rows wins.
-- And where even that fails, the message says **which** thing went wrong: the text
-  arrived as one line, press paste from clipboard. Not "line 1 has not got three
-  fields" printed under three hundred rows that were all correct.
+- Where that cannot be done, the importer **puts the line breaks back itself**: a
+  line holding six or more fields is read as the rows it plainly is, three or four
+  columns wide. Twelve fields and twenty-four divide by both widths, and there the
+  count is not allowed to decide: the wrong width shifts every field one place
+  along and turns a whole deck false without refusing a single line. The deck's own
+  rule decides instead -- a phrase appears inside its own sentence -- and the width
+  that holds on more rows wins.
+- That rescue now works **line by line**, which is the whole of the fix. A keyboard
+  does not flatten a text evenly: it keeps a break here and there and glues
+  everything between them, so three hundred rows arrive as a handful of enormous
+  lines rather than as one. Only a text of a single line was rescued before, so
+  that far commoner case imported the one line that happened to hold three fields
+  and refused the rest -- "1 card added" out of three hundred.
+- A line is only split when the result reads like cards, on at least two rows and
+  on at least half of them. A line with a stray bar in it stays one line and is
+  reported as the mistake it is, rather than being cut into halves of sentences and
+  imported as meanings.
+- And where even that fails, the message says **which** thing went wrong: the line
+  breaks were lost, press paste from clipboard. Not "line 1 has not got three
+  fields" printed under three hundred rows that were all correct. It is said about
+  the line it happened to, whether the text arrived as one line or as four.
 - The pasted text is **folded away**. In place of the wall of text: one line saying
   how many lines and how many characters arrived, and **SHOW THE TEXT** beside it.
   Opened, it shows the first forty rows -- enough to see that the columns line up

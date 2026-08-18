@@ -120,9 +120,15 @@ cannot honestly tell them apart, so the line it shows says both.
 
 ## Switched off
 
-With the switch off no socket is opened at all: the check is the only network
-code in the app, and it is not reached. The window cannot appear, and the button
-in Settings is the only way to ask.
+With the switch off no socket is opened at all: this check is not reached, the
+window cannot appear, and the button in Settings is the only way to ask.
+
+The check is not the only network code in the app any more, but it is still the
+only code that opens a socket **by itself**. Since `0.5.0 press` the deck
+catalogue asks for two static files — an index when its screen is opened, a deck
+when a deck is tapped — and both happen because somebody pressed something.
+Nothing is sent there either: no account, no identifier, no card, no answer. See
+[`SOURCES.md`](SOURCES.md).
 
 ## Where the code is
 

@@ -1,0 +1,155 @@
+name: catalog
+
+# Building the deck catalogue.
+#
+# Nothing about this touches the app. It downloads two open corpora, cuts decks
+# out of them with tools/catalog/build_catalog.py, and attaches the result to one
+# fixed release called "catalog" - which is the only place the app ever looks.
+# The phone downloads static files from that release and assembles nothing, which
+# is the whole reason this job exists.
+#
+# Run it by hand from the Actions tab. It is not on a schedule: a corpus does not
+# change in a way anybody needs weekly, and a catalogue that quietly rebuilds
+# itself is a catalogue nobody has read.
+on:
+  workflow_dispatch:
+    inputs:
+      learn:
+        description: "Languages to teach, comma separated"
+        default: "en,ru,pl,es,fr,de,it,pt"
+      meanings:
+        description: "Languages the meanings may be in"
+        default: "en,ru,pl,es,fr,de,it,pt,zh,ja"
+      max_deck:
+        description: "Cards per deck at most"
+        default: "3000"
+      public_domain:
+        description: "Also build decks from the public-domain subset only"
+        type: boolean
+        default: false
+      publish:
+        description: "Attach the result to the catalog release"
+        type: boolean
+        default: true
+
+# Needed to attach the files to the release.
+permissions:
+  contents: write
+
+jobs:
+  # A hundred and twenty made-up sentences through the whole pipeline, in about a
+  # second. It runs first and on its own so that a mistake in the script is a
+  # one-minute failure rather than a failure found forty minutes into a download.
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Pipeline on a made-up corpus
+        run: |
+          python3 tools/catalog/make_sample.py sample
+          python3 tools/catalog/build_catalog.py \
+            --tatoeba sample --out sample-out \
+            --learn en,ru,pl --meanings en,ru,pl \
+            --min-deck 5 --function-top 12 --full-threshold 60
+
+      # A deck the importer would refuse is worse than no deck, so the shape of
+      # every line is checked here rather than discovered on a phone: the phrase
+      # has to sit exactly where the offsets say it does.
+      - name: Every card holds together
+        run: |
+          python3 - <<'PY'
+          import glob, json, sys
+          bad = 0
+          cards = 0
+          for path in glob.glob("sample-out/*.jsonl"):
+              for number, line in enumerate(open(path, encoding="utf-8"), start=1):
+                  card = json.loads(line)
+                  cards += 1
+                  cut = card["context"][card["targetStart"]:card["targetEnd"]]
+                  if cut != card["text"]:
+                      print("%s:%d phrase %r is not at its offsets (%r)" % (path, number, card["text"], cut))
+                      bad += 1
+                  for key in ("id", "text", "context", "translation", "tokens"):
+                      if not card.get(key):
+                          print("%s:%d empty %s" % (path, number, key))
+                          bad += 1
+          index = json.load(open("sample-out/index.json", encoding="utf-8"))
+          for deck in index["decks"]:
+              if not deck["licence"] or not deck["file"].endswith(".jsonl"):
+                  print("deck %s has no licence or no file" % deck["id"])
+                  bad += 1
+          print("%d cards, %d decks, %d problems" % (cards, len(index["decks"]), bad))
+          sys.exit(1 if bad or not cards else 0)
+          PY
+
+  catalogue:
+    needs: sample
+    runs-on: ubuntu-latest
+    # The corpus is hundreds of megabytes and the sieve reads every sentence of
+    # ten languages. Generous, but not open-ended.
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Tatoeba publishes plain tab-separated exports and asks nothing of anybody
+      # who downloads them. The licence of what comes out the other end is
+      # written into every deck by the script, not decided here.
+      - name: Tatoeba
+        run: |
+          mkdir -p corpus
+          cd corpus
+          curl -fsSL --retry 3 -O https://downloads.tatoeba.org/exports/sentences.tar.bz2
+          curl -fsSL --retry 3 -O https://downloads.tatoeba.org/exports/links.tar.bz2
+          curl -fsSL --retry 3 -O https://downloads.tatoeba.org/exports/sentences_CC0.tar.bz2 || true
+          for archive in *.tar.bz2; do tar -xjf "$archive"; done
+          ls -la
+          wc -l sentences.csv links.csv
+
+      # Word forms are optional and enormous - the English extract alone is
+      # several gigabytes - so they are not downloaded here. Without them a
+      # dictionary word is the written form lowercased, which teaches "ran" and
+      # "run" as two cards in the worst case. To use them, fetch the extracts
+      # from kaikki.org into a folder as <code>.jsonl and pass --wiktextract.
+      - name: Build
+        run: |
+          python3 tools/catalog/build_catalog.py \
+            --tatoeba corpus --out catalog \
+            --learn "${{ inputs.learn }}" \
+            --meanings "${{ inputs.meanings }}" \
+            --max-deck "${{ inputs.max_deck }}" \
+            ${{ inputs.public_domain && '--public-domain' || '' }}
+          echo ""
+          cat catalog/TIERS.md
+
+      - name: Keep the result whether or not it is published
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalog
+          path: catalog/
+
+      # One release, reused. make_latest is false on purpose: the app asks GitHub
+      # for the latest release to find out whether there is a new version, and a
+      # catalogue holding that title would offer people a download with no APK in
+      # it.
+      - name: Publish
+        if: ${{ inputs.publish }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: catalog
+          name: deck catalogue
+          body_path: catalog/TIERS.md
+          files: |
+            catalog/index.json
+            catalog/*.jsonl
+          make_latest: false
+          prerelease: false

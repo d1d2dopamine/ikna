@@ -177,11 +177,16 @@ object SeedFormat {
             // one habit worth encouraging -- citing a source -- was the one thing
             // the importer punished.
             if (parts.size != 3 && parts.size != 4) {
-                // Seven fields or more, and it is the only line there is: that is
-                // a deck that lost its line breaks, not a row with a stray pipe.
-                // Reporting it as "line 1 has not got three fields" was true and
-                // useless, said about three hundred rows that were all correct.
-                val flattened = parts.size >= 7 && realLines(text) == 1
+                // Seven fields or more on one line, after the rescue above has
+                // already tried and failed to split it: that is a deck that lost
+                // its line breaks, not a row with a stray pipe. Reporting it as
+                // "line 1 has not got three fields" was true and useless, said
+                // about three hundred rows that were all correct.
+                //
+                // It does not have to be the only line in the text. A keyboard
+                // flattens in patches, and a text of four such lines was being
+                // told about a stray pipe four times.
+                val flattened = parts.size >= 7
                 problems += SeedLineProblem(
                     number,
                     line,
@@ -395,38 +400,56 @@ object SeedFormat {
      * got three fields" -- the most confusing thing it could possibly say about
      * a paste that was, field for field, perfectly correct.
      *
-     * Only a text with a single real line is touched, and only when it holds
-     * enough fields to be several rows. One row stays one row.
+     * Every line is looked at on its own, and that is the whole of the fix this
+     * function needed. A keyboard does not always flatten the entire text: it
+     * keeps a break here and there and glues everything between them, so three
+     * hundred rows arrive as four enormous lines rather than as one. Requiring a
+     * single line meant that case was left exactly as broken as before -- every
+     * glued line refused for having six hundred fields, and the one line that
+     * happened to hold three became the entire import.
+     *
+     * A line that is not several rows glued together is returned untouched, so a
+     * deck that arrived whole passes through this function unchanged.
      */
-    /** Lines with something on them, decoration already taken off. */
-    private fun realLines(text: String): Int =
-        text.lineSequence().count { undecorate(it).isNotEmpty() }
-
     private fun unglue(text: String): String {
-        if (realLines(text) != 1) return text
+        if (text.none { it == '|' || it == '\t' }) return text
+        return text.lineSequence().joinToString("\n") { unglueLine(it) }
+    }
+
+    /**
+     * One glued line as the rows it was written as, or unchanged.
+     *
+     * The width is not decided by counting fields: twelve divide by three and by
+     * four, and guessing wrong there does not cost a line -- it shifts every
+     * field by one place and every card in the deck becomes false in the same
+     * quiet way, a source read as a phrase, a phrase as a sentence, a sentence as
+     * a meaning. The deck settles it instead. A card's phrase appears inside its
+     * own sentence, always, and that is the rule this parser already refuses
+     * lines over, so the width that satisfies it on more rows is the width the
+     * text was written in.
+     *
+     * The same rule says when not to split at all. A line with six fields and a
+     * stray bar in it is one refused line; cutting it into two rows of three
+     * would import half a sentence as a meaning instead of saying what was
+     * wrong. So a split has to read like cards on at least two rows and on at
+     * least half of them, or the line is left as it stands and reported.
+     */
+    private fun unglueLine(line: String): String {
         val separator = when {
-            text.contains('|') -> '|'
-            text.contains('\t') -> '\t'
-            else -> return text
+            line.contains('|') -> '|'
+            line.contains('\t') -> '\t'
+            else -> return line
         }
-        val fields = text.split(separator).map { it.trim() }.filter { it.isNotEmpty() }
-        if (fields.size < 6) return text
-        // Three columns, or four when the deck cites its sources -- and when the
-        // count divides by both, which twelve fields and twenty-four do, the
-        // count cannot answer it. Guessing wrong there does not cost a line: it
-        // shifts every field by one place and every card in the deck becomes
-        // false in the same quiet way -- a source read as a phrase, a phrase as a
-        // sentence, a sentence as a meaning. The deck itself settles it instead.
-        // A card's phrase appears inside its own sentence, always, and that is
-        // the rule this parser already refuses lines over; so the width that
-        // satisfies it on more rows is the width the text was written in.
-        val width = when {
-            fields.size % 3 != 0 && fields.size % 4 == 0 -> 4
-            fields.size % 4 != 0 && fields.size % 3 == 0 -> 3
-            fields.size % 3 == 0 -> if (reads(fields, 4) > reads(fields, 3)) 4 else 3
-            else -> 3
-        }
-        return fields.chunked(width).joinToString("\n") { it.joinToString(" | ") }
+        val fields = line.split(separator).map { it.trim() }.filter { it.isNotEmpty() }
+        if (fields.size < 6) return line
+        val asThrees = reads(fields, 3)
+        val asFours = reads(fields, 4)
+        val width = if (asFours > asThrees) 4 else 3
+        val rows = fields.chunked(width)
+        val whole = rows.count { it.size == width }
+        val readable = if (width == 4) asFours else asThrees
+        if (readable < 2 || readable * 2 < whole) return line
+        return rows.joinToString("\n") { it.joinToString(" | ") }
     }
 
     /**

@@ -19,6 +19,40 @@ started keeps its schedule and its history, so switching decks is never a decisi
 with consequences — and a decision with consequences is a decision that gets
 avoided.
 
+## The catalogue
+
+Since `0.5.0 press` there is a third way to get a deck, and it is the one that
+asks nothing of anybody: **plus → catalogue**. The screen fetches one small index,
+lists finished decks, and imports the one that is tapped through the same path a
+pasted deck goes through.
+
+What is on a row before anything is downloaded: the title, the pair, how many
+cards, how many megabytes, the licence, who is credited, and which corpora it was
+cut out of. Nothing about a deck's terms is discovered afterwards, because a
+licence found after a download is a licence somebody already broke.
+
+The filters run on the phone over that one index — what you are learning, what the
+meanings should be in, the topic, the level, and a search box — so trying six
+combinations costs one request in total. A pair is marked `full` when the pipeline's
+sieve dropped little, `thin` when decks came out smaller than asked for, and a pair
+the catalogue has nothing for says so instead of showing an empty list.
+
+Three things about it worth knowing:
+
+- **A catalogue deck is a deck.** It lands in the decks list, can be switched off,
+  exported, and deleted like any other. Its identifier starts with `catalog-`, so it
+  can never overwrite something you imported yourself, and downloading it twice
+  replaces it rather than making a second copy.
+- **The phrase was cut, not written.** The card's phrase comes out of its own
+  sentence, at stored offsets, which is why a catalogue deck cannot contain the one
+  fault a pasted deck sometimes has — a phrase that is not in its sentence.
+- **The credit travels inside the file.** Each meaning ends with a line naming the
+  corpus and the sentence number, the same `— source` mark a hand-made deck's fourth
+  column produces, so it survives an export and a share.
+
+The corpora, the licences, the sieve, the tiers and why AnkiWeb is not used:
+[`SOURCES.md`](SOURCES.md).
+
 ## Making your own
 
 The plus in the bottom bar opens a screen, not a file browser. On it:
@@ -159,9 +193,19 @@ TEXT** to see the first forty rows. That is the whole preview by design -- nobod
 corrects a generated deck with a thumb, and a megabyte of text laid out in an
 editable field is what used to put the create button a minute of scrolling away.
 
-If a deck came through the keyboard anyway and arrived as one long line, the app
-tries the clipboard, then puts the line breaks back itself, and only then says
-what happened -- naming the flattening rather than blaming line 1.
+If a deck came through the keyboard anyway and its line breaks were eaten, the app
+tries the clipboard, then puts the breaks back itself, and only then says what
+happened -- naming the flattening rather than blaming line 1.
+
+The breaks are put back one line at a time, because a keyboard flattens in
+patches: a deck of three hundred rows usually arrives as a handful of enormous
+lines rather than as a single one, and a rescue that only looked at texts of one
+line left that case untouched -- every glued line refused for having six hundred
+fields, and the one line that happened to hold three becoming the whole import.
+A line is only split when the result reads like cards, which is the rule the rest
+of this file rests on: a phrase appears inside its own sentence. A line with a
+stray bar in it fails that test, stays one line, and is reported as the mistake it
+is instead of being quietly cut into halves of sentences.
 
 ## Lines worth reading twice
 

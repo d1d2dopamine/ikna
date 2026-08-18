@@ -1,0 +1,198 @@
+package dev.ikna.data.catalog
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import java.net.HttpURLConnection
+import java.net.URL
+
+/*
+ * The two requests the catalogue makes, and nothing else.
+ *
+ * Until this version the app opened one socket in its life, to ask the releases
+ * page for a newer build. This adds a second of the same shape, and the shape is
+ * the promise: a GET for a static file, no body, no cookie, no identifier, and
+ * nothing about the person on the phone travelling in either direction. A deck
+ * is downloaded because somebody tapped it, and the server learns what a web
+ * server learns when a browser asks for a file.
+ *
+ * Both files live in one release, so both URLs are fixed at build time. A deck's
+ * address is its file name joined to that release -- never a URL out of the
+ * index, because an index is data off the network and data off the network does
+ * not get to choose which host this app downloads from.
+ */
+
+/** The release the pipeline publishes the catalogue into. */
+const val CATALOG_BASE_URL: String =
+    "https://github.com/d1d2dopamine/ikna/releases/download/catalog/"
+
+/** The one file that lists everything. About a hundred kilobytes. */
+const val CATALOG_INDEX_URL: String = CATALOG_BASE_URL + "index.json"
+
+/** The page a person can read the same thing on, when the app cannot. */
+const val CATALOG_PAGE_URL: String =
+    "https://github.com/d1d2dopamine/ikna/releases/tag/catalog"
+
+private const val CONNECT_TIMEOUT_MS = 15_000
+private const val READ_TIMEOUT_MS = 60_000
+private const val BUFFER_BYTES = 64 * 1024
+
+/**
+ * Ceilings, because a download with nowhere to stop is a way to fill a phone.
+ * The index is a list of a few hundred decks; a deck of ten thousand chunks with
+ * its token arrays is a couple of megabytes.
+ */
+private const val MAX_INDEX_BYTES = 2 * 1024 * 1024
+private const val MAX_DECK_BYTES = 24 * 1024 * 1024
+
+/**
+ * Turns a deck's file name into the address it is fetched from.
+ *
+ * The name is stripped to characters a file name can be made of, so nothing in
+ * the index can climb out of the release it was published in or point somewhere
+ * else entirely. A name that does not survive that is not fetched at all.
+ */
+fun catalogDeckUrl(fileName: String): String? {
+    val safe = fileName.trim().filter {
+        it.isLetterOrDigit() || it == '.' || it == '-' || it == '_'
+    }
+    if (safe.length < 3 || safe.startsWith(".") || safe.contains("..")) return null
+    if (!safe.endsWith(".jsonl", ignoreCase = true)) return null
+    return CATALOG_BASE_URL + safe
+}
+
+/**
+ * The catalogue over the network.
+ *
+ * Every failure arrives as null. There is no retry loop, no error code and no
+ * message for the interface to explain: either the list is here or the screen
+ * says it could not be fetched and offers the page in a browser.
+ */
+class CatalogFetch(
+    private val installedVersion: String,
+    private val json: Json = Json { ignoreUnknownKeys = true }
+) {
+
+    /** The whole list, or null. */
+    suspend fun index(): CatalogIndex? = withContext(Dispatchers.IO) {
+        val text = runCatching { text(CATALOG_INDEX_URL, MAX_INDEX_BYTES) }.getOrNull()
+            ?: return@withContext null
+        val parsed = runCatching { json.decodeFromString<CatalogIndex>(text) }.getOrNull()
+        // An index that parsed but holds nothing is the same event as no index:
+        // there is nothing to draw either way, and "empty" would read as "this
+        // app has no decks" rather than "the list did not arrive".
+        if (parsed == null || parsed.decks.isEmpty()) null else parsed
+    }
+
+    /**
+     * One deck's lines, as text, or null.
+     *
+     * [onProgress] is called with the bytes so far and the total, once per whole
+     * percent, exactly as the updater's download reports itself -- the band on
+     * screen is the same band, so it had better be fed the same way.
+     *
+     * The file is held in memory rather than written to the cache. A deck is a
+     * couple of megabytes of text on its way into the database in one go; a file
+     * on disk would be a second copy to delete afterwards and a half-written one
+     * to explain when the network drops.
+     */
+    suspend fun deck(
+        deck: CatalogDeck,
+        onProgress: (read: Long, total: Long) -> Unit
+    ): String? = withContext(Dispatchers.IO) {
+        val url = catalogDeckUrl(deck.file) ?: return@withContext null
+        var connection: HttpURLConnection? = null
+        try {
+            connection = open(url)
+            if (connection.responseCode != HttpURLConnection.HTTP_OK) return@withContext null
+
+            val declared = connection.contentLengthLong
+            val total = if (declared > 0L) declared else deck.sizeBytes
+            if (total > MAX_DECK_BYTES) return@withContext null
+
+            val text = StringBuilder()
+            var read = 0L
+            var shown = -1
+            onProgress(0L, total)
+            connection.inputStream.reader(Charsets.UTF_8).use { reader ->
+                val buffer = CharArray(BUFFER_BYTES)
+                while (true) {
+                    // Leaving the screen has to stop the socket, not just stop
+                    // looking at it.
+                    if (!isActive) return@withContext null
+                    val count = reader.read(buffer)
+                    if (count < 0) break
+                    text.append(buffer, 0, count)
+                    read += count
+                    if (read > MAX_DECK_BYTES) return@withContext null
+                    val percent = progressPercentOf(read, total)
+                    if (percent != shown) {
+                        shown = percent
+                        onProgress(read, total)
+                    }
+                }
+            }
+            if (text.isEmpty()) return@withContext null
+            onProgress(read, total)
+            text.toString()
+        } catch (failed: Exception) {
+            null
+        } finally {
+            connection?.disconnect()
+        }
+    }
+
+    private fun text(url: String, cap: Int): String? {
+        var connection: HttpURLConnection? = null
+        try {
+            connection = open(url)
+            if (connection.responseCode != HttpURLConnection.HTTP_OK) return null
+            val buffer = CharArray(8 * 1024)
+            val text = StringBuilder()
+            connection.inputStream.reader(Charsets.UTF_8).use { reader ->
+                while (true) {
+                    val read = reader.read(buffer)
+                    if (read <= 0) break
+                    text.append(buffer, 0, read)
+                    if (text.length > cap) return null
+                }
+            }
+            return text.toString()
+        } finally {
+            connection?.disconnect()
+        }
+    }
+
+    private fun open(url: String): HttpURLConnection =
+        (URL(url).openConnection() as HttpURLConnection).apply {
+            connectTimeout = CONNECT_TIMEOUT_MS
+            readTimeout = READ_TIMEOUT_MS
+            instanceFollowRedirects = true
+            setRequestProperty("Accept", "application/json, text/plain")
+            // The version is here for the same reason it is on the update check:
+            // so a broken catalogue can be recognised in a log, not so anybody
+            // can be counted.
+            setRequestProperty("User-Agent", "ikna/" + installedVersion)
+        }
+}
+
+/**
+ * The number beside the band, 0 to 100.
+ *
+ * The same arithmetic the updater uses, spelled out here rather than imported,
+ * because a deck download reporting characters and an APK download reporting
+ * bytes are two different totals and only one of them may ever be called "the
+ * size of the file".
+ */
+fun progressPercentOf(read: Long, total: Long): Int {
+    if (total <= 0L || read <= 0L) return 0
+    val fraction = (read.toDouble() / total.toDouble()).coerceIn(0.0, 1.0)
+    return (fraction * 100.0).toInt().coerceIn(0, 100)
+}
+
+/** How full the band is drawn. Unknown length means nothing is drawn. */
+fun progressFractionOf(read: Long, total: Long): Float {
+    if (total <= 0L || read <= 0L) return 0f
+    return (read.toFloat() / total.toFloat()).coerceIn(0f, 1f)
+}
