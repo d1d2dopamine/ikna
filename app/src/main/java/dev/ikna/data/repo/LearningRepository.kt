@@ -31,6 +31,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
+import kotlin.math.abs
 import kotlin.math.max
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -996,6 +997,17 @@ class LearningRepository(
         val wasNew = last.prevIsNew ?: return null
 
         val card = cardDao.card(last.chunkId, last.level) ?: return null
+
+        // A snapshot written before a scheduler migration describes the old
+        // algorithm's state. The immutable review row is still true history,
+        // but restoring that snapshot would put one card back on FSRS-4.5.
+        // A current state that does not equal the row's recorded after-state is
+        // therefore an undo boundary. After one new FSRS-6 answer the values
+        // match again, and ordinary multi-step undo continues to work.
+        if (abs(card.stability - last.stabilityAfter) > STATE_EPSILON ||
+            abs(card.difficulty - last.difficultyAfter) > STATE_EPSILON
+        ) return null
+
         cardDao.upsert(
             card.copy(
                 stability = stability,
@@ -1230,6 +1242,7 @@ class LearningRepository(
     }
 
     private companion object {
+        const val STATE_EPSILON = 1e-9
         /** How far back countCleanDays and daysSinceReturn look, in days. */
         const val CLEAN_DAY_SCAN = 30
         const val RETURN_SCAN_DAYS = 90

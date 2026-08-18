@@ -11,6 +11,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.ikna.data.prefs.IknaSettings
+import dev.ikna.data.repo.SchedulerMigrationState
+import dev.ikna.ui.migration.SchedulerMigrationScreen
 import dev.ikna.ui.nav.IknaNavHost
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaTheme
@@ -49,6 +51,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val settings by container.settings.flow.collectAsState(initial = IknaSettings())
+            val schedulerMigration by container.schedulerMigration.collectAsState()
             // The phone's own light/dark switch is read here and nowhere else,
             // and it decides one thing only: the lighting. Which palette the app
             // wears is the user's choice and does not change at sunset.
@@ -83,11 +86,23 @@ class MainActivity : ComponentActivity() {
             val contentFont = rememberContentFont(settings.fontName)
 
             IknaTheme(palette = palette, contentFont = contentFont) {
-                IknaNavHost(
-                    container = container,
-                    settings = settings,
-                    startSession = startSession
-                )
+                when (schedulerMigration) {
+                    is SchedulerMigrationState.Ready -> IknaNavHost(
+                        container = container,
+                        settings = settings,
+                        startSession = startSession
+                    )
+
+                    SchedulerMigrationState.Running -> SchedulerMigrationScreen(
+                        failed = false,
+                        onRetry = container::startSchedulerMigration
+                    )
+
+                    is SchedulerMigrationState.Failed -> SchedulerMigrationScreen(
+                        failed = true,
+                        onRetry = container::startSchedulerMigration
+                    )
+                }
             }
         }
     }

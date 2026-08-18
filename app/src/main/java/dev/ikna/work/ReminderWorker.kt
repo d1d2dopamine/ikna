@@ -44,6 +44,13 @@ class ReminderWorker(context: Context, params: WorkerParameters) :
             minute = settings.reminderMinute
         )
 
+        // The reminder reads today's derived counters. Wait for the same
+        // scheduler gate as the activity and daily-plan worker so it cannot
+        // observe the card table halfway through the one-time FSRS-6 replay.
+        if (runCatching { container.awaitSchedulerReady() }.isFailure) {
+            return Result.retry()
+        }
+
         val repo = container.learningRepository
         if (repo.answeredToday() >= repo.dailyMinimum()) return Result.success()
 

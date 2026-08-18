@@ -100,15 +100,24 @@ fun isNewer(installed: String, found: String): Boolean {
  * A release carries two APKs, and handing a 64-bit-only build to a 32-bit
  * phone produces an install that fails at the first sentence it tries to
  * speak: the speech runtime is native code. A phone with no 64-bit ABI gets the
- * file whose name says 32bit, everything else gets the other one.
+ * file whose name says legacy32 (the name produced by release.yml), everything
+ * else gets the ordinary APK. "32bit" is accepted as well for older releases.
+ *
+ * This deliberately matches the workflow's real asset names rather than their
+ * order in GitHub's API. The API once returned legacy32 first; because the old
+ * check only recognised "32bit", both files looked ordinary and a modern phone
+ * was handed the compatibility build.
  */
 fun pickAsset(assets: List<UpdateAsset>, has64Bit: Boolean): UpdateAsset? {
     val apks = assets.filter { it.name.endsWith(".apk", ignoreCase = true) }
     if (apks.isEmpty()) return null
-    val small = apks.filter { it.name.contains("32bit", ignoreCase = true) }
-    val large = apks.filter { !it.name.contains("32bit", ignoreCase = true) }
-    return if (has64Bit) large.firstOrNull() ?: small.firstOrNull()
-    else small.firstOrNull() ?: large.firstOrNull()
+    val legacy32 = apks.filter { asset ->
+        asset.name.contains("legacy32", ignoreCase = true) ||
+            asset.name.contains("32bit", ignoreCase = true)
+    }
+    val regular = apks.filterNot { it in legacy32 }
+    return if (has64Bit) regular.firstOrNull() ?: legacy32.firstOrNull()
+    else legacy32.firstOrNull() ?: regular.firstOrNull()
 }
 
 /** Megabytes with one decimal, as text, so the caller can name the unit. */

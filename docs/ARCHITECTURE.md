@@ -16,7 +16,7 @@ repositories -> Room (append-only reviews + derived tables)
 
 ## Two memory layers
 
-**Item layer** — `cards`, scheduled by FSRS-4.5. One chunk produces up to three cards, one per
+**Item layer** — `cards`, scheduled by FSRS-6. One chunk produces up to three cards, one per
 presentation level (recognition, cloze, production).
 
 **Component layer** — `components`, keyed by `(lemma, pos)`. Every answer updates the

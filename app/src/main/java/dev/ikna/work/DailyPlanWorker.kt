@@ -13,6 +13,7 @@ class DailyPlanWorker(context: Context, params: WorkerParameters) :
     override suspend fun doWork(): Result {
         val container = (applicationContext as IknaApp).container
         return runCatching {
+            container.awaitSchedulerReady()
             container.packLoader.installBundledPacks()
             container.learningRepository.runDailyPlan()
 

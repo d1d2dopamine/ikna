@@ -12,6 +12,47 @@ replace the space with a dash: `0.1.1 press` is tagged `v0.1.1-press`. What the
 words mean and what a number promises inside an epoch is written down once, in
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
+## 0.6.0 press
+
+The same history, scheduled by the current memory model.
+
+### FSRS-6
+
+- The item scheduler moves from FSRS-4.5's 17 parameters to the official
+  FSRS-6 default set of 21. The trainable forgetting-curve shape, the damped
+  difficulty update and the FSRS-6 short-term stability formula are implemented
+  directly in Kotlin.
+- A repeat under 24 hours uses the short-term model. This matters here more than
+  it does in a conventional deck: a card answered `AGAIN` deliberately returns
+  to the same Ikna session, so same-day learning is the ordinary path.
+- Desired retention, the one-day interval floor, the 04:00 study-day boundary,
+  the governor and the one-way component prior do not change.
+
+### The migration
+
+- On the first launch, every card that still exists is replayed through FSRS-6
+  from the append-only review log. `stability`, `difficulty` and `dueAt` are
+  derived again; decks, chunks, reviews and statistics are not rewritten.
+- Reviews belonging to a deleted deck stay in the log and remain part of the
+  statistics, but do not resurrect the deleted cards. Introduced cards with no
+  answer are preserved as-is; their first answer replaces the prior with a real
+  FSRS-6 observation.
+- The card replay and daily-plan invalidation are one Room transaction. The
+  migration marker is written only after it commits; a killed process safely
+  repeats the same deterministic replay on the next launch instead of leaving
+  a database split between two schedulers.
+- Screens and the nightly worker share one launch gate. Nothing can build a
+  plan or answer a card while the derived card table is being replaced. A failed
+  replay deletes nothing and offers a retry.
+- Restoring an exported review log now derives its cards through FSRS-6 too.
+
+### Verification
+
+- Golden vectors cover all four long-term ratings and same-day ratings against
+  py-fsrs 6.3.2 with the official defaults.
+- Migration tests pin down idempotence, preservation of unanswered cards and
+  the rule that old reviews never recreate a deleted deck.
+
 ## 0.5.0 press
 
 Decks you did not have to write.
@@ -94,6 +135,10 @@ size is a result of what the sieve kept, not a number anybody chose.
   offers a small *download again* instead of the download button. The list of what
   is installed is read from the deck table every time the screen opens, so a deck
   deleted on the decks screen becomes downloadable again.
+- The updater now recognises the actual `-legacy32.apk` name produced by CI. A
+  64-bit phone always chooses the ordinary APK regardless of the order in which
+  GitHub returns the two release assets; `-32bit.apk` remains understood for old
+  releases.
 - Chip rows wrap by measured width instead of four to a row. Four was a guess about
   how wide a word is, and it cut the last letters off «продвинутый» inside its own
   border.

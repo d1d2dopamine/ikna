@@ -231,7 +231,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"set.070" to "ZACZNIJ OD NOWA",
 	// Стереть всё
 	"set.071" to "Wymaż wszystko",
-	// Полный сброс: карточки, сроки, статистика, журнал ответов и сами настройки. Прилож����н����е ста
+	// Полный сброс: карточки, сроки, статистика, журнал ответов и сами настройки. Прилож������н����е ста
 	"set.072" to "Pełny reset: karty, terminy, statystyka, dziennik odpowiedzi i same ustawienia. Aplikacja stanie się taka jak zaraz po instalacji i uruchomi się ponownie. Przed wymazaniem dziennik trafia do Dokumenty/ikna — potem można go przywrócić.",
 	// ТОЧНО СТЕРЕТЬ ВСЁ
 	"set.073" to "NA PEWNO WYMAŻ WSZYSTKO",
@@ -567,7 +567,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"sess.029" to "Nowych chunków tu już nie ma — wszystkie są znajome. Powtórki będ�� przychodzić w swoich terminach, a po nowy materiał potrzebna jest kolejna talia.",
 	// следующие — сегодня в 
 	"sess.030" to "następne — dziś o ",
-	// следующие — завтра в 
+	// ��ледующие — завтра в 
 	"sess.031" to "następne — jutro o ",
 	// следующие — через 
 	"sess.032" to "następne — za ",
@@ -805,4 +805,9 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"cat.033" to "OTWÓRZ KATALOG",
 	"cat.034" to "JUŻ POBRANE",
 	"cat.035" to "pobierz ponownie",
+	"mig.001" to "Aktualizuję harmonogram",
+	"mig.002" to "Talie i historia zostają na miejscu. Odpowiedzi są raz przeliczane przez FSRS-6.",
+	"mig.003" to "Harmonogram nie został zaktualizowany",
+	"mig.004" to "Nic nie usunięto: talie i historia są na miejscu. Przeliczenie można bezpiecznie powtórzyć.",
+	"mig.005" to "POWTÓRZ",
 )

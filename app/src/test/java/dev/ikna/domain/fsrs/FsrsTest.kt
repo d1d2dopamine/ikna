@@ -17,8 +17,21 @@ class FsrsTest {
     private val params = FsrsParams()
 
     @Test
+    fun `the official FSRS 6 parameter set is complete`() {
+        assertEquals(21, params.w.size)
+        assertEquals(0.212, params.w.first(), 1e-12)
+        assertEquals(0.1542, params.w.last(), 1e-12)
+    }
+
+    @Test
     fun `a memory just reviewed is fully retrievable`() {
         assertEquals(1.0, Fsrs.retrievability(0.0, 5.0), 1e-9)
+    }
+
+    @Test
+    fun `stability is still the day on which recall reaches ninety percent`() {
+        assertEquals(0.9, Fsrs.retrievability(5.0, 5.0), 1e-12)
+        assertEquals(5.0, Fsrs.intervalDays(5.0, 0.9), 1e-12)
     }
 
     @Test
@@ -42,6 +55,40 @@ class FsrsTest {
             assertTrue(d >= 1.0)
             assertTrue(d <= 10.0)
         }
+    }
+
+    @Test
+    fun `official FSRS 6 reference vector matches`() {
+        // Calculated from py-fsrs 6.3.2 with the official default parameters:
+        // S=3, D=5, elapsed=12 days, then each of the four ratings.
+        val before = MemoryState(stability = 3.0, difficulty = 5.0)
+        val expected = listOf(
+            0.8462891714168654 to 8.341762369296838,
+            14.100494612014888 to 6.665995369296838,
+            21.45775625542881 to 4.9902283692968386,
+            37.569531690792616 to 3.3144613692968385
+        )
+
+        for ((index, rating) in Rating.entries.withIndex()) {
+            val after = Fsrs.next(before, elapsedDays = 12.0, rating = rating, p = params)
+            assertEquals(expected[index].first, after.stability, 1e-10)
+            assertEquals(expected[index].second, after.difficulty, 1e-10)
+        }
+    }
+
+    @Test
+    fun `same day answers use the FSRS 6 short term model`() {
+        val before = MemoryState(stability = 3.0, difficulty = 5.0)
+
+        val again = Fsrs.next(before, elapsedDays = 0.2, rating = Rating.AGAIN, p = params)
+        val hard = Fsrs.next(before, elapsedDays = 0.2, rating = Rating.HARD, p = params)
+        val good = Fsrs.next(before, elapsedDays = 0.2, rating = Rating.GOOD, p = params)
+        val easy = Fsrs.next(before, elapsedDays = 0.2, rating = Rating.EASY, p = params)
+
+        assertEquals(0.9908417942528911, again.stability, 1e-10)
+        assertEquals(3.0, hard.stability, 1e-10)
+        assertEquals(3.0, good.stability, 1e-10)
+        assertEquals(5.044505343174817, easy.stability, 1e-10)
     }
 
     @Test

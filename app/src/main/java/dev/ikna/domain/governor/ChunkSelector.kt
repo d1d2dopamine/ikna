@@ -4,6 +4,8 @@ import dev.ikna.data.db.ChunkEntity
 import dev.ikna.data.db.ChunkTokenEntity
 import dev.ikna.data.db.ComponentEntity
 import dev.ikna.domain.fsrs.ComponentPrior
+import kotlin.math.max
+import kotlin.math.pow
 
 data class ScoredChunk(
     val chunk: ChunkEntity,
@@ -92,8 +94,14 @@ class ChunkSelector(
             .take(count)
     }
 
+    /**
+     * The component layer is a small ranking heuristic, not an FSRS card.
+     * Keep its original curve when the item scheduler moves to FSRS-6: changing
+     * it here would silently change which chunks the governor introduces, and
+     * would mix a scheduler migration with a content-selection experiment.
+     */
     private fun retrievability(elapsedDays: Double, stability: Double): Double =
-        dev.ikna.domain.fsrs.Fsrs.retrievability(elapsedDays, stability)
+        (1.0 + (19.0 / 81.0) * elapsedDays / max(stability, 0.1)).pow(-0.5)
 }
 
 data class ComponentKey(val lemma: String, val pos: String)

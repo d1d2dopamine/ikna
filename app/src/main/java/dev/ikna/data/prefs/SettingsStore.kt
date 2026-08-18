@@ -279,6 +279,9 @@ class SettingsStore(private val context: Context) {
         val updateCheck = booleanPreferencesKey("updateCheck")
         val updateSkipped = stringPreferencesKey("updateSkipped")
         val updateCheckedAt = longPreferencesKey("updateCheckedAt")
+        // Internal migration marker, deliberately absent from IknaSettings:
+        // it is not a preference and no screen is allowed to change it.
+        val schedulerVersion = intPreferencesKey("schedulerVersion")
     }
 
     val flow: Flow<IknaSettings> = context.iknaDataStore.data.map { p ->
@@ -430,6 +433,15 @@ class SettingsStore(private val context: Context) {
     }
 
     suspend fun markUpdateChecked(now: Long) = put { it[Keys.updateCheckedAt] = now }
+
+    /** Which scheduler has produced the card table. Zero means a pre-marker build. */
+    suspend fun schedulerVersion(): Int =
+        context.iknaDataStore.data.first()[Keys.schedulerVersion] ?: 0
+
+    /** Written only after the card-table replay has committed successfully. */
+    suspend fun setSchedulerVersion(version: Int) = put {
+        it[Keys.schedulerVersion] = version
+    }
 
     suspend fun setReminder(enabled: Boolean, hour: Int, minute: Int) = put {
         it[Keys.reminderEnabled] = enabled

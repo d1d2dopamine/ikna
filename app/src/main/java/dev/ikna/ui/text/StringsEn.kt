@@ -805,4 +805,9 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"cat.033" to "OPEN THE CATALOGUE",
 	"cat.034" to "ALREADY DOWNLOADED",
 	"cat.035" to "download again",
+	"mig.001" to "Updating the schedule",
+	"mig.002" to "Decks and history stay where they are. The answers are replayed through FSRS-6 once.",
+	"mig.003" to "The schedule was not updated",
+	"mig.004" to "Nothing was deleted: the decks and history are still here. The replay can be retried safely.",
+	"mig.005" to "RETRY",
 )

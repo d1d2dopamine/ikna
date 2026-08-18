@@ -50,7 +50,7 @@ class Scheduler(
             Fsrs.next(before, elapsedDays, rating, params)
         }
 
-        val interval = Fsrs.intervalDays(after.stability, params.desiredRetention)
+        val interval = Fsrs.intervalDays(after.stability, params.desiredRetention, params)
         val updated = card.copy(
             stability = after.stability,
             difficulty = after.difficulty,
@@ -83,7 +83,7 @@ class Scheduler(
             max(1.0, Fsrs.initialDifficulty(Rating.GOOD, params) - componentPrior.knownRatio * 1.5)
         )
         val interval = if (componentPrior.knownRatio >= 0.75) {
-            Fsrs.intervalDays(stability, params.desiredRetention)
+            Fsrs.intervalDays(stability, params.desiredRetention, params)
         } else {
             0.0
         }

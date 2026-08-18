@@ -12,6 +12,8 @@ import dev.ikna.data.repo.ComponentRepository
 import dev.ikna.data.repo.DeckRepository
 import dev.ikna.data.repo.LearningRepository
 import dev.ikna.data.repo.RestoreRepository
+import dev.ikna.data.repo.SchedulerMigration
+import dev.ikna.data.repo.SchedulerMigrationState
 import dev.ikna.domain.fsrs.FsrsParams
 import dev.ikna.domain.fsrs.Scheduler
 import dev.ikna.domain.governor.ChunkSelector
@@ -22,6 +24,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import dev.ikna.data.prefs.suppressedOf
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
@@ -84,6 +90,16 @@ class AppContainer(context: Context) {
         config = config
     )
 
+    private val schedulerMigrator = SchedulerMigration(
+        db = db,
+        cardDao = db.cardDao(),
+        reviewDao = db.reviewDao(),
+        planDao = db.planDao(),
+        settings = settings,
+        scheduler = scheduler,
+        config = config
+    )
+
     val components: ComponentRepository get() = componentRepository
 
     /**
@@ -121,8 +137,20 @@ class AppContainer(context: Context) {
     val voiceInstaller = VoiceInstaller(voiceModels)
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val _schedulerMigration = MutableStateFlow<SchedulerMigrationState>(
+        SchedulerMigrationState.Running
+    )
+    val schedulerMigration: StateFlow<SchedulerMigrationState> =
+        _schedulerMigration.asStateFlow()
+    private var schedulerMigrationJob: Job? = null
 
     init {
+        // No repository is allowed to expose a card until its state belongs to
+        // FSRS-6. The activity draws a small launch gate while this runs, and
+        // workers await the same state; there is one migration and no race
+        // between a cold-start screen and the nightly plan.
+        startSchedulerMigration()
+
         // The load switch, readable on demand instead of waited for. The mirror
         // below still exists, because a switch flipped while a session is open
         // should reach the next plan without anyone asking; this is what makes a
@@ -169,6 +197,35 @@ class AppContainer(context: Context) {
                     )
                 }
             }
+        }
+    }
+
+    /** Retry is offered only after failure; an active migration is never doubled. */
+    @Synchronized
+    fun startSchedulerMigration() {
+        if (schedulerMigrationJob?.isActive == true) return
+        _schedulerMigration.value = SchedulerMigrationState.Running
+        schedulerMigrationJob = scope.launch(Dispatchers.IO) {
+            _schedulerMigration.value = runCatching { schedulerMigrator.runIfNeeded() }
+                .fold(
+                    onSuccess = { SchedulerMigrationState.Ready(it.migratedCards) },
+                    onFailure = {
+                        SchedulerMigrationState.Failed(
+                            it.message ?: it::class.java.simpleName
+                        )
+                    }
+                )
+        }
+    }
+
+    /** Background work uses the same gate as the UI. */
+    suspend fun awaitSchedulerReady() {
+        when (val state = schedulerMigration.first {
+            it is SchedulerMigrationState.Ready || it is SchedulerMigrationState.Failed
+        }) {
+            is SchedulerMigrationState.Ready -> Unit
+            is SchedulerMigrationState.Failed -> error(state.reason)
+            SchedulerMigrationState.Running -> error("unreachable")
         }
     }
 }

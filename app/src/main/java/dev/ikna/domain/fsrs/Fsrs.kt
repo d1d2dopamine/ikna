@@ -35,28 +35,45 @@ data class FsrsParams(
     val w: List<Double> = DEFAULT_W,
     val desiredRetention: Double = 0.9
 ) {
+    init {
+        require(w.size == PARAMETER_COUNT) {
+            "FSRS-6 needs $PARAMETER_COUNT parameters, got ${w.size}"
+        }
+    }
+
     companion object {
-        // FSRS-4.5 defaults. Replaced later by locally optimised parameters
-        // computed from the `reviews` log.
+        const val PARAMETER_COUNT = 21
+
+        // FSRS-6 defaults from the official algorithm description and py-fsrs
+        // 6.3.2. Replaced later by locally optimised parameters computed from
+        // the append-only `reviews` log; no review has to leave the phone for it.
         val DEFAULT_W = listOf(
-            0.4872, 1.4003, 3.7145, 13.8206,
-            5.1618, 1.2298, 0.8975, 0.0310,
-            1.6474, 0.1367, 1.0461, 2.1072,
-            0.0793, 0.3246, 1.5870, 0.2272, 2.8755
+            0.2120, 1.2931, 2.3065, 8.2956,
+            6.4133, 0.8334, 3.0194, 0.0010,
+            1.8722, 0.1666, 0.7960, 1.4835,
+            0.0614, 0.2629, 1.6483, 0.6014,
+            1.8729, 0.5425, 0.0912, 0.0658,
+            0.1542
         )
     }
 }
 
-/** FSRS-4.5. Item level only; the component layer never feeds back into it. */
+/** FSRS-6. Item level only; the component layer never feeds back into it. */
 object Fsrs {
 
-    private const val DECAY = -0.5
-    private const val FACTOR = 19.0 / 81.0
     private const val MIN_STABILITY = 0.1
     private const val MAX_STABILITY = 36500.0
 
-    fun retrievability(elapsedDays: Double, stability: Double): Double =
-        (1.0 + FACTOR * elapsedDays / max(stability, MIN_STABILITY)).pow(DECAY)
+    private fun decay(p: FsrsParams): Double = -p.w[20]
+
+    private fun factor(p: FsrsParams): Double = 0.9.pow(1.0 / decay(p)) - 1.0
+
+    fun retrievability(
+        elapsedDays: Double,
+        stability: Double,
+        p: FsrsParams = FsrsParams()
+    ): Double =
+        (1.0 + factor(p) * elapsedDays / max(stability, MIN_STABILITY)).pow(decay(p))
 
     /**
      * Days until the card should come back, at the desired retention.
@@ -69,14 +86,20 @@ object Fsrs {
      * been dealt with. It is also what makes day-boundary snapping in
      * [Scheduler] unable to move a due time into the past.
      */
-    fun intervalDays(stability: Double, desiredRetention: Double): Double =
-        max(1.0, stability / FACTOR * (desiredRetention.pow(1.0 / DECAY) - 1.0))
+    fun intervalDays(
+        stability: Double,
+        desiredRetention: Double,
+        p: FsrsParams = FsrsParams()
+    ): Double = max(
+        1.0,
+        stability / factor(p) * (desiredRetention.pow(1.0 / decay(p)) - 1.0)
+    )
 
     fun initialStability(rating: Rating, p: FsrsParams): Double =
         clampStability(p.w[rating.value - 1])
 
     fun initialDifficulty(rating: Rating, p: FsrsParams): Double =
-        clampDifficulty(p.w[4] - (rating.value - 3) * p.w[5])
+        clampDifficulty(initialDifficultyRaw(rating, p))
 
     fun initial(rating: Rating, p: FsrsParams): MemoryState =
         MemoryState(initialStability(rating, p), initialDifficulty(rating, p))
@@ -87,20 +110,49 @@ object Fsrs {
         rating: Rating,
         p: FsrsParams
     ): MemoryState {
-        val r = retrievability(elapsedDays, state.stability)
-        val d = nextDifficulty(state.difficulty, rating, p)
-        val s = if (rating == Rating.AGAIN) {
-            forgetStability(d, state.stability, r, p)
+        val s = if (elapsedDays < 1.0) {
+            shortTermStability(state.stability, rating, p)
         } else {
-            recallStability(d, state.stability, r, rating, p)
+            val r = retrievability(elapsedDays, state.stability, p)
+            if (rating == Rating.AGAIN) {
+                forgetStability(state.difficulty, state.stability, r, p)
+            } else {
+                recallStability(state.difficulty, state.stability, r, rating, p)
+            }
         }
+        // The official scheduler updates stability from the difficulty that
+        // existed before this answer, then computes the next difficulty. Using
+        // D' in the stability formula is a plausible-looking but different
+        // model, and diverges most on HARD and EASY.
+        val d = nextDifficulty(state.difficulty, rating, p)
         return MemoryState(clampStability(s), d)
     }
 
+    private fun initialDifficultyRaw(rating: Rating, p: FsrsParams): Double =
+        p.w[4] - exp(p.w[5] * (rating.value - 1)) + 1.0
+
     private fun nextDifficulty(d: Double, rating: Rating, p: FsrsParams): Double {
-        val delta = d - p.w[6] * (rating.value - 3)
-        val reverted = p.w[7] * initialDifficulty(Rating.EASY, p) + (1.0 - p.w[7]) * delta
+        // FSRS-5/6 damp the change as difficulty approaches 10, then pull it
+        // very slightly towards the unclamped initial EASY difficulty. Earlier
+        // versions used D0(GOOD) and had no damping.
+        val delta = -p.w[6] * (rating.value - 3)
+        val damped = d + (10.0 - d) * delta / 9.0
+        val reverted = p.w[7] * initialDifficultyRaw(Rating.EASY, p) +
+            (1.0 - p.w[7]) * damped
         return clampDifficulty(reverted)
+    }
+
+    /**
+     * FSRS-6's short-term memory model, used for every repeat under 24 hours.
+     *
+     * A failed card is deliberately put back into Ikna's current session. That
+     * makes this a common path here, not an Anki compatibility detail. HARD,
+     * GOOD and EASY may not weaken a memory; AGAIN is allowed to do so.
+     */
+    private fun shortTermStability(s: Double, rating: Rating, p: FsrsParams): Double {
+        var increase = exp(p.w[17] * (rating.value - 3 + p.w[18])) * s.pow(-p.w[19])
+        if (rating != Rating.AGAIN) increase = max(increase, 1.0)
+        return clampStability(s * increase)
     }
 
     private fun recallStability(
@@ -123,12 +175,12 @@ object Fsrs {
     }
 
     private fun forgetStability(d: Double, s: Double, r: Double, p: FsrsParams): Double {
-        val lapsed = p.w[11] *
+        val longTerm = p.w[11] *
             d.pow(-p.w[12]) *
             ((s + 1.0).pow(p.w[13]) - 1.0) *
             exp((1.0 - r) * p.w[14])
-        // A lapse can never make a memory stronger.
-        return min(lapsed, s)
+        val shortTermLimit = s / exp(p.w[17] * p.w[18])
+        return min(longTerm, shortTermLimit)
     }
 
     private fun clampStability(s: Double) = min(max(s, MIN_STABILITY), MAX_STABILITY)

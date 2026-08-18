@@ -10,7 +10,7 @@ swipe described in the first section.
 One axis. Left is `AGAIN`, right is `GOOD`. Vertical movement springs the card
 back and grades nothing. See `ui/session/SwipeDecision.kt`.
 
-FSRS-4.5 accepts four grades and the `Rating` enum already carries all four.
+FSRS-6 accepts four grades and the `Rating` enum already carries all four.
 `HARD` and `GOOD` differ by `w[15]`, `EASY` by `w[16]`. Two of the four are
 currently unreachable from the UI: the scheduler can use them, nothing produces
 them.
@@ -150,7 +150,7 @@ before it goes anywhere near a release.
 
 ## Known caveat
 
-The FSRS-4.5 default parameters were fitted on Anki data, where `HARD` and
+The FSRS-6 default parameters were fitted on Anki data, where `HARD` and
 `EASY` come from a person pressing a button about themselves. Derived grades do
 not mean quite the same thing, so `w[15]` and `w[16]` are not guaranteed to fit
 them. Keep the derived grades conservative until per-user parameter optimisation

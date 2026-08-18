@@ -41,13 +41,26 @@ class UpdateLogicTest {
     }
 
     @Test
-    fun `a phone without a 64 bit abi is given the small apk`() {
+    fun `the workflow asset names select the apk for this phone`() {
         val assets = listOf(
-            UpdateAsset("ikna-v0.5.0-press.apk", "a", 40_000_000),
-            UpdateAsset("ikna-v0.5.0-press-32bit.apk", "b", 30_000_000)
+            // GitHub may return these in either order. Put legacy32 first to
+            // reproduce the failure that sent it to a modern phone.
+            UpdateAsset("ikna-v0.5.0-press-legacy32.apk", "legacy", 30_000_000),
+            UpdateAsset("ikna-v0.5.0-press.apk", "regular", 40_000_000)
         )
-        assertEquals("b", pickAsset(assets, has64Bit = false)?.url)
-        assertEquals("a", pickAsset(assets, has64Bit = true)?.url)
+        assertEquals("legacy", pickAsset(assets, has64Bit = false)?.url)
+        assertEquals("regular", pickAsset(assets, has64Bit = true)?.url)
+    }
+
+    @Test
+    fun `the old 32bit asset name remains understood`() {
+        val assets = listOf(
+            UpdateAsset("ikna-v0.4.0-press-32bit.apk", "legacy", 30_000_000),
+            UpdateAsset("ikna-v0.4.0-press.apk", "regular", 40_000_000)
+        )
+
+        assertEquals("legacy", pickAsset(assets, has64Bit = false)?.url)
+        assertEquals("regular", pickAsset(assets, has64Bit = true)?.url)
     }
 
     @Test

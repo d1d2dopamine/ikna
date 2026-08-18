@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.5.0-press"><img src="https://img.shields.io/badge/release-0.5.0%20press-crimson?style=flat-square" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.6.0-press"><img src="https://img.shields.io/badge/release-0.6.0%20press-crimson?style=flat-square" alt="release"></a>
   <a href="https://github.com/d1d2dopamine/ikna/releases"><img src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?label=downloads&style=flat-square&logo=github&color=blueviolet" alt="downloads"></a>
   <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.5.0-press/ikna-v0.5.0-press.apk"><strong>Download</strong></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.6.0-press/ikna-v0.6.0-press.apk"><strong>Download</strong></a>
   &nbsp;·&nbsp;
   <a href="CHANGELOG.md">Changelog</a>
   &nbsp;·&nbsp;
@@ -65,13 +65,13 @@ sans-serif faces and reads as a lower case L, so "Ikna" invites being read as
 
 | Platform | File in the release |
 | --- | --- |
-| **Android** 10+ (`minSdk 29`) | `ikna-v0.5.0-press.apk` (~40 MB) |
+| **Android** 10+ (`minSdk 29`) | `ikna-v0.6.0-press.apk` (~40 MB) |
 
-**[Download ikna-v0.5.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.5.0-press/ikna-v0.5.0-press.apk)** ·
-[all files](https://github.com/d1d2dopamine/ikna/releases/tag/v0.5.0-press)
+**[Download ikna-v0.6.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.6.0-press/ikna-v0.6.0-press.apk)** ·
+[all files](https://github.com/d1d2dopamine/ikna/releases/tag/v0.6.0-press)
 
 The file above is for every phone sold since roughly 2017. Older 32-bit ones
-take `ikna-v0.5.0-press-legacy32.apk` from the same page: the same app, built
+take `ikna-v0.6.0-press-legacy32.apk` from the same page: the same app, built
 for the one architecture they can run.
 
 Download it and open it; Android asks once whether to allow installing from this
@@ -97,7 +97,7 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
   choose between.
 - **A governor that rations new material for you**, from your own recent numbers.
 - **Three levels per chunk** — recognition, cloze, production — scheduled
-  independently by FSRS-4.5.
+  independently by FSRS-6.
 - **A second memory layer** under the cards: individual words carry their own state,
   so a phrase you have never seen can already be partly known.
 - **20% amnesty.** A card you missed comes back inside the same day, but not
@@ -132,7 +132,8 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
    when you did not. Distance and speed turn two directions into four grades, judged
    against a rolling window of your own answers rather than a fixed threshold:
    [`docs/GRADING.md`](docs/GRADING.md).
-3. **FSRS-4.5 schedules each level separately**, and answers also credit the
+3. **FSRS-6 schedules each level separately**, including a separate model for
+   repeats inside the same day, and answers also credit the
    individual words inside the trained phrase.
 4. **The governor decides the size of the day** before you see it, and can refuse
    new material without refusing the session: [`docs/GOVERNOR.md`](docs/GOVERNOR.md).
@@ -219,9 +220,9 @@ Format, refusals, the deck screen and the offline generator:
 
 ## 🏷️ Versions
 
-A version here is a number **and a word**: `0.5.0 press`. The word names the epoch
+A version here is a number **and a word**: `0.6.0 press`. The word names the epoch
 the build belongs to, the number counts releases inside it, and git tags replace the
-space with a dash: `v0.5.0-press`.
+space with a dash: `v0.6.0-press`.
 
 What the words mean, what the numbers promise and how `appVersionCode` is built:
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
@@ -256,8 +257,8 @@ Bump the two version lines in `app/build.gradle.kts`, then tag the commit with t
 same string, space replaced by a dash:
 
 ```
-git tag v0.5.0-press
-git push origin v0.5.0-press
+git tag v0.6.0-press
+git push origin v0.6.0-press
 ```
 
 The `release` workflow refuses to continue if the tag and the build file disagree,
@@ -311,7 +312,7 @@ release, the ones published before this notice as well as every future one.
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.5.0-press"><img src="https://img.shields.io/badge/release-0.5.0%20press-crimson?style=flat-square" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.6.0-press"><img src="https://img.shields.io/badge/release-0.6.0%20press-crimson?style=flat-square" alt="release"></a>
   <a href="https://github.com/d1d2dopamine/ikna/releases"><img src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?label=downloads&style=flat-square&logo=github&color=blueviolet" alt="downloads"></a>
   <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
@@ -321,7 +322,7 @@ release, the ones published before this notice as well as every future one.
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.5.0-press/ikna-v0.5.0-press.apk"><strong>Скачать</strong></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.6.0-press/ikna-v0.6.0-press.apk"><strong>Скачать</strong></a>
   &nbsp;·&nbsp;
   <a href="CHANGELOG.md">Изменения</a>
   &nbsp;·&nbsp;
@@ -332,7 +333,7 @@ release, the ones published before this notice as well as every future one.
 
 ## 🧩 Что это
 
-ikna учит язык **кусками**: короткая фраза, живое предложение с ней и то, что она
+ikna учит язык **кусками**: короткая фраза, живое предл��жение с ней и то, что она
 значит. Не слово и перевод, а фраза в своём естественном окружении — вместе с
 предложением, из-за которого она понятна.
 
@@ -361,13 +362,13 @@ ikna учит язык **кусками**: короткая фраза, живо
 
 | Платформа | Файл в релизе |
 | --- | --- |
-| **Android** 10+ (`minSdk 29`) | `ikna-v0.5.0-press.apk` (~40 МБ) |
+| **Android** 10+ (`minSdk 29`) | `ikna-v0.6.0-press.apk` (~40 МБ) |
 
-**[Скачать ikna-v0.5.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.5.0-press/ikna-v0.5.0-press.apk)** ·
-[все файлы](https://github.com/d1d2dopamine/ikna/releases/tag/v0.5.0-press)
+**[Скачать ikna-v0.6.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.6.0-press/ikna-v0.6.0-press.apk)** ·
+[все файлы](https://github.com/d1d2dopamine/ikna/releases/tag/v0.6.0-press)
 
 Файл выше — для любого телефона примерно с 2017 года. Для более старых
-32-битных рядом лежит `ikna-v0.5.0-press-legacy32.apk`: то же самое
+32-битных рядом лежит `ikna-v0.6.0-press-legacy32.apk`: то же самое
 приложение, одна архитектура, которую они умею��.
 
 Скачать и открыть; андроид один раз спросит, разрешить ли установку из этого
@@ -392,7 +393,7 @@ ikna учит язык **кусками**: короткая фраза, живо
   кнопок, между которыми надо выбирать.
 - **Регулятор дозирует новый материал за тебя**, от твоих же чисел.
 - **Три уровня у каждого куска** — узнавание, пропуск, производство — и у каждого
-  своё расписание по FSRS-4.5.
+  своё расписание по FSRS-6.
 - **Второй слой памяти** под карточками: у отдельных слов есть своё состояние,
   так что ни разу не виденная фраза может быть уже частично знакомой.
 - **Амнистия 20%.** Проваленная карточка вернётся в тот же день, но не сразу и
@@ -428,7 +429,8 @@ ikna учит язык **кусками**: короткая фраза, живо
    скорость превращают две стороны в четыре оценки, и сравниваются они с твоими
    же последними ответами, а не с фиксированным порогом:
    [`docs/GRADING.md`](docs/GRADING.md).
-3. **FSRS-4.5 ведёт каждый уровень отдельно**, а ответ засчитывается ещё и словам
+3. **FSRS-6 ведёт каждый уровень отдельно**, отдельно учитывает повторы в тот же
+   день, а ответ засчитывается ещё и словам
    внутри тренируемой фразы.
 4. **Регулятор решает размер дня** до того, как ты его увидишь, и может отказать в
    новом материале, не отказывая в сессии: [`docs/GOVERNOR.md`](docs/GOVERNOR.md).
@@ -514,9 +516,9 @@ get used to | It takes a while to get used to the noise. | привыкать
 
 ## 🏷️ Версии
 
-Версия здесь — это номер **и слово**: `0.5.0 press`. Слово называет эпоху, к которой
+Версия здесь — это номер **и слово**: `0.6.0 press`. Слово называет эпоху, к которой
 относится сборка, номер считает релизы внутри неё, а в тегах git пробел заменяется
-дефисом: `v0.5.0-press`.
+дефисом: `v0.6.0-press`.
 
 Что значат слова, что обещают номера и как собирается `appVersionCode` — в
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
@@ -551,8 +553,8 @@ bash tools/voice/fetch-voice.sh                # один раз на клон: 
 же строкой, где пробел заменён дефисом:
 
 ```
-git tag v0.5.0-press
-git push origin v0.5.0-press
+git tag v0.6.0-press
+git push origin v0.6.0-press
 ```
 
 Воркфлоу `release` откажется работать, если тег и файл сборки расходятся, а затем

@@ -144,6 +144,10 @@ interface CardDao {
     @Upsert suspend fun upsert(card: CardEntity)
     @Upsert suspend fun upsertAll(cards: List<CardEntity>)
 
+    /** Every scheduled question, for an algorithm migration performed in memory. */
+    @Query("SELECT * FROM cards ORDER BY chunkId ASC, level ASC")
+    suspend fun all(): List<CardEntity>
+
     @Query("SELECT * FROM cards WHERE chunkId = :chunkId AND level = :level")
     suspend fun card(chunkId: String, level: Int): CardEntity?
 

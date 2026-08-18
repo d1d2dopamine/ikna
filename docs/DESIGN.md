@@ -21,7 +21,7 @@ stutter. Build it and see it; it takes one `gradlew assembleDebug`.
 | --- | --- |
 | Unit of learning | chunk = phrase + carrier sentence + translation + `target_span` |
 | Presentation levels | 0 recognition, 1 cloze, 2 production |
-| Scheduler | FSRS-4.5 (17 parameters), local optimisation later |
+| Scheduler | FSRS-6 (21 parameters), local optimisation later |
 | Second memory layer | component-level (lemma) state, one-directional influence |
 | New-material control | `LoadGovernor` — a forecast-aware valve |
 | Debt handling | amnesty pool, 20% of each session, never a visible backlog number |
