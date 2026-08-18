@@ -56,7 +56,7 @@ const val MANUAL_LOAD_MAX = 120
 const val MANUAL_LOAD_STEP = 5
 const val MANUAL_LOAD_DEFAULT = 40
 
-/** Interface language: "system" follows the phone, or "ru" / "en" / "pl". */
+/** Interface language: "system" follows the phone, or a supported ISO code. */
 const val LANGUAGE_SYSTEM = "system"
 
 /**

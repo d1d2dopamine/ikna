@@ -25,6 +25,7 @@ import dev.ikna.ui.decks.AddDeckScreen
 import dev.ikna.ui.decks.DeckScreen
 import dev.ikna.ui.decks.DecksScreen
 import dev.ikna.ui.onboarding.OnboardingScreen
+import dev.ikna.ui.search.DeckSearchScreen
 import dev.ikna.ui.session.SessionScreen
 import dev.ikna.ui.settings.SettingsScreen
 import dev.ikna.ui.settings.VoiceScreen
@@ -48,6 +49,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val ADD_DECK = "add-deck"
     const val CATALOG = "catalog"
+    const val SEARCH = "search"
     const val VOICE = "voice"
     const val DECK = "deck/{deck}"
     const val DEBUG = "debug"
@@ -138,7 +140,16 @@ fun IknaNavHost(
                     onOpenDeck = { deckId -> navController.navigate(Routes.deck(deckId)) },
                     onOpenStats = { navController.navigate(Routes.STATS) },
                     onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+                    onOpenSearch = { navController.navigate(Routes.SEARCH) },
                     onAddDeck = { navController.navigate(Routes.ADD_DECK) }
+                )
+            }
+
+            composable(Routes.SEARCH) {
+                DeckSearchScreen(
+                    container = container,
+                    onBack = { navController.popBackStack() },
+                    onOpenDeck = { deckId -> navController.navigate(Routes.deck(deckId)) }
                 )
             }
 

@@ -8,9 +8,12 @@ import java.util.Locale
 const val LANG_RU = "ru"
 const val LANG_EN = "en"
 const val LANG_PL = "pl"
+const val LANG_ES = "es"
+const val LANG_FR = "fr"
+const val LANG_DE = "de"
 
 /**
- * Interface text in three languages.
+ * Interface text in six languages.
  *
  * [lang] is snapshot state, so every composable that calls [t] redraws itself
  * when the language changes -- no activity restart, no configuration change.
@@ -22,7 +25,7 @@ object S {
 	var lang by mutableStateOf(LANG_RU)
 		private set
 
-	/** Accepts a stored setting value: "system", "ru", "en" or "pl". */
+	/** Accepts "system" or one of the supported ISO language codes. */
 	fun apply(code: String) {
 		lang = resolve(code)
 	}
@@ -32,6 +35,9 @@ object S {
 		return when (raw.lowercase(Locale.ROOT)) {
 			LANG_EN -> LANG_EN
 			LANG_PL -> LANG_PL
+			LANG_ES -> LANG_ES
+			LANG_FR -> LANG_FR
+			LANG_DE -> LANG_DE
 			else -> LANG_RU
 		}
 	}
@@ -40,6 +46,9 @@ object S {
 		val table = when (lang) {
 			LANG_EN -> STRINGS_EN
 			LANG_PL -> STRINGS_PL
+			LANG_ES -> STRINGS_ES
+			LANG_FR -> STRINGS_FR
+			LANG_DE -> STRINGS_DE
 			else -> STRINGS_RU
 		}
 		return table[key] ?: STRINGS_RU[key] ?: key

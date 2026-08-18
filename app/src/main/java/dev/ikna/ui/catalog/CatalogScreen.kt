@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
@@ -38,6 +40,7 @@ import dev.ikna.data.catalog.CatalogDeck
 import dev.ikna.data.catalog.CatalogFetch
 import dev.ikna.data.catalog.CatalogFilter
 import dev.ikna.data.catalog.CatalogIndex
+import dev.ikna.data.catalog.CatalogPreviewCard
 import dev.ikna.data.catalog.TIER_FULL
 import dev.ikna.data.catalog.catalogPackId
 import dev.ikna.data.catalog.catalogSize
@@ -49,6 +52,7 @@ import dev.ikna.data.catalog.meaningLangsFor
 import dev.ikna.data.catalog.progressFractionOf
 import dev.ikna.data.catalog.progressPercentOf
 import dev.ikna.data.catalog.subjectsFor
+import dev.ikna.data.catalog.tatoebaSentenceUrl
 import dev.ikna.data.catalog.tierOf
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.BarHeight
@@ -87,9 +91,9 @@ import kotlinx.coroutines.withContext
  * - The licence is shown before the download, not after it. It is on the row that
  *   is tapped, and the line that names who is being credited travels inside the
  *   deck's own cards, so it survives an export and a phone being replaced.
- * - Nothing about the person goes out. Two GETs for two static files, no account,
- *   no identifier, and the list is asked for when this screen is opened rather
- *   than in the background.
+ * - Nothing about the person goes out. Every request is a GET for a static file:
+ *   the index, an optional bounded preview, or the deck somebody pressed. There
+ *   is no account or identifier, and nothing is fetched in the background.
  *
  * How much there is for a given pair is not decided here. The pipeline measures
  * it and says "full" or "thin" in the index, and this screen repeats that, because
@@ -118,6 +122,11 @@ fun CatalogScreen(
 	var totalBytes by remember { mutableStateOf(0L) }
 	var note by remember { mutableStateOf<String?>(null) }
 	var installed by remember { mutableStateOf(emptySet<String>()) }
+	var previewId by remember { mutableStateOf<String?>(null) }
+	var previewLoading by remember { mutableStateOf(false) }
+	var previewFailed by remember { mutableStateOf(false) }
+	var previewCards by remember { mutableStateOf<List<CatalogPreviewCard>>(emptyList()) }
+	var previewToken by remember { mutableStateOf(0) }
 
 	// Which of these decks the phone already has. Read from the deck table
 	// each time this screen opens rather than remembered inside it: a deck
@@ -153,7 +162,7 @@ fun CatalogScreen(
 	}
 
 	fun install(deck: CatalogDeck) {
-		if (busyId != null) return
+		if (busyId != null || previewLoading) return
 		scope.launch {
 			busyId = deck.id
 			importing = false
@@ -196,6 +205,25 @@ fun CatalogScreen(
 			} else {
 				S.t("cat.022") + result.installed
 			}
+		}
+	}
+
+	fun preview(deck: CatalogDeck) {
+		if (busyId != null || (previewLoading && previewId == deck.id)) return
+		val token = previewToken + 1
+		previewToken = token
+		previewId = deck.id
+		previewLoading = true
+		previewFailed = false
+		previewCards = emptyList()
+		scope.launch {
+			val cards = CatalogFetch(installedVersion(context)).preview(deck)
+			// A slow answer for a row that has since been closed must not appear
+			// under the next row the person opened.
+			if (previewToken != token || previewId != deck.id) return@launch
+			previewCards = cards.orEmpty()
+			previewFailed = cards == null
+			previewLoading = false
 		}
 	}
 
@@ -371,11 +399,26 @@ fun CatalogScreen(
 							open = openId == deck.id,
 							installed = installed.contains(catalogPackId(deck.id)),
 							busy = busyId == deck.id,
-							blocked = busyId != null && busyId != deck.id,
+							blocked = (busyId != null && busyId != deck.id) || previewLoading,
 							importing = importing && busyId == deck.id,
 							fraction = progressFractionOf(readBytes, totalBytes),
 							percent = progressPercentOf(readBytes, totalBytes),
-							onOpen = { openId = if (openId == deck.id) null else deck.id },
+							previewLoading = previewLoading && previewId == deck.id,
+							previewFailed = previewFailed && previewId == deck.id,
+							previewCards = if (previewId == deck.id) previewCards else emptyList(),
+							onOpen = {
+								val next = if (openId == deck.id) null else deck.id
+								openId = next
+								if (next != previewId) {
+									previewToken++
+									previewId = null
+									previewLoading = false
+									previewFailed = false
+									previewCards = emptyList()
+								}
+							},
+							onPreview = { preview(deck) },
+							onSource = { id -> openTatoeba(context, id) },
 							onInstall = { install(deck) }
 						)
 						Spacer(Modifier.height(Space.md))
@@ -438,7 +481,12 @@ private fun DeckRow(
 	importing: Boolean,
 	fraction: Float,
 	percent: Int,
+	previewLoading: Boolean,
+	previewFailed: Boolean,
+	previewCards: List<CatalogPreviewCard>,
 	onOpen: () -> Unit,
+	onPreview: () -> Unit,
+	onSource: (String) -> Unit,
 	onInstall: () -> Unit
 ) {
 	val ink = MaterialTheme.colorScheme.onBackground
@@ -505,6 +553,39 @@ private fun DeckRow(
 					color = muted
 				)
 			}
+
+			Spacer(Modifier.height(Space.md))
+			when {
+				previewLoading -> Text(
+					text = S.t("cat.037"),
+					style = MaterialTheme.typography.labelLarge,
+					color = muted
+				)
+
+				previewFailed -> IknaTextButton(
+					label = S.t("cat.038"),
+					onClick = onPreview,
+					color = muted
+				)
+
+				previewCards.isEmpty() -> IknaTextButton(
+					label = S.t("cat.036"),
+					onClick = onPreview,
+					color = muted
+				)
+
+				else -> {
+					Text(
+						text = S.t("cat.039"),
+						style = MaterialTheme.typography.labelMedium,
+						color = muted
+					)
+					previewCards.forEachIndexed { index, card ->
+						Spacer(Modifier.height(Space.md))
+						PreviewCard(card = card, number = index + 1, onSource = onSource)
+					}
+				}
+			}
 		}
 
 		if (busy) {
@@ -550,6 +631,49 @@ private fun DeckRow(
 				enabled = !blocked,
 				height = 52.dp,
 				onClick = onInstall
+			)
+		}
+	}
+}
+
+@Composable
+private fun PreviewCard(
+	card: CatalogPreviewCard,
+	number: Int,
+	onSource: (String) -> Unit
+) {
+	val muted = MaterialTheme.colorScheme.onSurfaceVariant
+	Column(
+		modifier = Modifier
+			.fillMaxWidth()
+			.background(MaterialTheme.colorScheme.surface)
+			.padding(Space.md)
+	) {
+		Text(
+			text = S.t("cat.040") + number + "  ·  " + card.text,
+			style = MaterialTheme.typography.labelLarge,
+			color = MaterialTheme.colorScheme.onBackground
+		)
+		Spacer(Modifier.height(Space.xs))
+		Text(
+			text = card.context,
+			style = MaterialTheme.typography.bodyMedium,
+			color = MaterialTheme.colorScheme.onBackground
+		)
+		Spacer(Modifier.height(Space.xs))
+		Text(
+			text = card.translation,
+			style = MaterialTheme.typography.bodySmall,
+			color = muted
+		)
+		card.tatoebaId?.let { id ->
+			Spacer(Modifier.height(Space.xs))
+			Text(
+				text = S.t("src.001") + "Tatoeba #" + id,
+				style = MaterialTheme.typography.labelMedium,
+				color = MaterialTheme.colorScheme.primary,
+				textDecoration = TextDecoration.Underline,
+				modifier = Modifier.clickable { onSource(id) }
 			)
 		}
 	}
@@ -619,6 +743,16 @@ private fun openPage(context: Context) {
 	runCatching {
 		context.startActivity(
 			Intent(Intent.ACTION_VIEW, Uri.parse(CATALOG_PAGE_URL))
+				.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+		)
+	}
+}
+
+private fun openTatoeba(context: Context, id: String) {
+	val url = tatoebaSentenceUrl(id) ?: return
+	runCatching {
+		context.startActivity(
+			Intent(Intent.ACTION_VIEW, Uri.parse(url))
 				.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 		)
 	}

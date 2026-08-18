@@ -30,7 +30,7 @@ stutter. Build it and see it; it takes one `gradlew assembleDebug`.
 | Answering | one axis: left *not known*, right *known*. Nothing else is an answer |
 | Audio | the phone's own engine by default; a neural engine inside, for a model you add |
 | Colour | nine palettes, each in two lightings. Every pair passes 4.5:1, enforced by a test |
-| Interface languages | Russian, English, Polish |
+| Interface languages | Russian, English, Polish, Spanish, French, German |
 | Network | one request, switchable off: is there a newer release. Nothing is uploaded, ever |
 
 ## A session
@@ -124,9 +124,9 @@ Both skip the deck list on purpose: tapping either one is already an answer to
 ## Accessibility
 
 Every mark in this app is drawn on a canvas, and a drawn shape has no text for a
-screen reader to find — so each one is given a name, in all three languages, and the
+screen reader to find — so each one is given a name, in all six languages, and the
 switches are real toggles that announce their state. The system's per-app language
-picker (Android 13+) lists the three languages through `res/xml/locales_config.xml`.
+picker (Android 13+) lists the six languages through `res/xml/locales_config.xml`.
 
 ## Your answers are the only backup that matters
 

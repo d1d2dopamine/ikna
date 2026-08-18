@@ -1,10 +1,16 @@
 package dev.ikna
 
 import dev.ikna.ui.text.LANG_EN
+import dev.ikna.ui.text.LANG_ES
+import dev.ikna.ui.text.LANG_FR
+import dev.ikna.ui.text.LANG_DE
 import dev.ikna.ui.text.LANG_PL
 import dev.ikna.ui.text.LANG_RU
 import dev.ikna.ui.text.S
 import dev.ikna.ui.text.STRINGS_EN
+import dev.ikna.ui.text.STRINGS_ES
+import dev.ikna.ui.text.STRINGS_FR
+import dev.ikna.ui.text.STRINGS_DE
 import dev.ikna.ui.text.STRINGS_PL
 import dev.ikna.ui.text.STRINGS_RU
 import org.junit.Assert.assertEquals
@@ -13,7 +19,7 @@ import org.junit.Test
 import java.util.Locale
 
 /**
- * The interface is written three times over, and a missing line is invisible
+ * The interface is written six times over, and a missing line is invisible
  * until someone is standing in front of it in Warsaw. These tests are the only
  * place where all three copies are laid next to each other, so a key added to
  * one language and forgotten in another fails the build instead of shipping an
@@ -22,24 +28,23 @@ import java.util.Locale
 class StringsCatalogTest {
 
     @Test
-    fun `every russian line is also written in english and polish`() {
-        val missingEn = STRINGS_RU.keys.filterNot { it in STRINGS_EN }
-        val missingPl = STRINGS_RU.keys.filterNot { it in STRINGS_PL }
-
-        assertEquals("english is missing these keys: $missingEn", emptyList<String>(), missingEn)
-        assertEquals("polish is missing these keys: $missingPl", emptyList<String>(), missingPl)
+    fun `every language has exactly the russian key set`() {
+        val tables = listOf(STRINGS_EN, STRINGS_PL, STRINGS_ES, STRINGS_FR, STRINGS_DE)
+        tables.forEach { table -> assertEquals(STRINGS_RU.keys, table.keys) }
     }
 
     @Test
     fun `no translation carries a key russian does not have`() {
-        val strays = (STRINGS_EN.keys + STRINGS_PL.keys).filterNot { it in STRINGS_RU }.sorted()
+        val strays = (STRINGS_EN.keys + STRINGS_PL.keys + STRINGS_ES.keys +
+            STRINGS_FR.keys + STRINGS_DE.keys).filterNot { it in STRINGS_RU }.sorted()
 
         assertEquals("keys without a russian original: $strays", emptyList<String>(), strays)
     }
 
     @Test
     fun `nothing is blank`() {
-        val blank = (STRINGS_RU + STRINGS_EN + STRINGS_PL).filterValues { it.isEmpty() }.keys
+        val blank = (STRINGS_RU + STRINGS_EN + STRINGS_PL + STRINGS_ES +
+            STRINGS_FR + STRINGS_DE).filterValues { it.isEmpty() }.keys
 
         assertEquals("blank text for: $blank", emptySet<String>(), blank)
     }
@@ -86,6 +91,9 @@ class LanguageResolverTest {
         withLocale(Locale("ru")) {
             assertEquals(LANG_PL, S.resolve("pl"))
             assertEquals(LANG_EN, S.resolve("en"))
+            assertEquals(LANG_ES, S.resolve("es"))
+            assertEquals(LANG_FR, S.resolve("fr"))
+            assertEquals(LANG_DE, S.resolve("de"))
         }
     }
 
@@ -94,6 +102,9 @@ class LanguageResolverTest {
         withLocale(Locale("pl", "PL")) { assertEquals(LANG_PL, S.resolve("system")) }
         withLocale(Locale("en", "GB")) { assertEquals(LANG_EN, S.resolve("system")) }
         withLocale(Locale("ru", "RU")) { assertEquals(LANG_RU, S.resolve("system")) }
+        withLocale(Locale("es", "ES")) { assertEquals(LANG_ES, S.resolve("system")) }
+        withLocale(Locale("fr", "FR")) { assertEquals(LANG_FR, S.resolve("system")) }
+        withLocale(Locale("de", "DE")) { assertEquals(LANG_DE, S.resolve("system")) }
     }
 
     @Test
@@ -109,6 +120,15 @@ class LanguageResolverTest {
 
         S.apply("pl")
         assertEquals("Ustawienia", S.t("set.012"))
+
+        S.apply("es")
+        assertEquals("Ajustes", S.t("set.012"))
+
+        S.apply("fr")
+        assertEquals("Réglages", S.t("set.012"))
+
+        S.apply("de")
+        assertEquals("Einstellungen", S.t("set.012"))
 
         S.apply("ru")
         assertTrue(S.t("set.012").isNotEmpty())

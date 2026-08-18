@@ -1,5 +1,10 @@
 package dev.ikna.ui.session
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import dev.ikna.ui.text.S
 
 import androidx.compose.animation.core.Animatable
@@ -20,19 +25,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.ikna.AppContainer
+import dev.ikna.data.catalog.catalogCardReport
+import dev.ikna.data.catalog.tatoebaSentenceUrl
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.repo.NO_LANG
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.governor.GovernorReason
 import dev.ikna.domain.session.Level
 import dev.ikna.ui.theme.IknaBottomBar
+import dev.ikna.ui.theme.IknaDialog
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
@@ -78,6 +89,8 @@ fun SessionScreen(
     deckId: String?,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    var reportCard by remember { mutableStateOf<dev.ikna.domain.session.SessionCard?>(null) }
     // Keyed by deck: opening Polish and then English must not hand the second
     // session the first one's queue.
     val vm: SessionViewModel = viewModel(
@@ -136,9 +149,13 @@ fun SessionScreen(
                         // showing it beside a definition with the term blanked out
                         // would simply print the answer.
                         hint = if (card.level == Level.CLOZE && card.chunk.lang != NO_LANG) {
-                            card.chunk.translation
+                            card.meaning
                         } else {
                             null
+                        },
+                        sourceLabel = card.sourceId?.let { S.t("src.001") + "Tatoeba #" + it },
+                        onSource = card.sourceId?.let { id ->
+                            { openTatoeba(context, id) }
                         },
                         revealed = state.revealed,
                         // The one line that says how to turn a card over. It was
@@ -164,8 +181,11 @@ fun SessionScreen(
             visible = state.undoVisible,
             failed = state.undoFailed,
             wrong = state.wrongMarked,
+            wrongSourceId = state.wrongSourceId,
+            reportCopied = state.wrongReportCopied,
             onUndo = vm::undo,
-            onDismiss = vm::dismissUndo
+            onDismiss = vm::dismissUndo,
+            onOpenSource = { id -> openTatoeba(context, id) }
         )
 
         // The way out and the loudspeaker, both within reach of the thumb that is
@@ -192,7 +212,14 @@ fun SessionScreen(
                 // written here already: see sess.013 beside an answer.
                 IknaTextButton(
                     label = S.t("sess.044"),
-                    onClick = vm::markWrong,
+                    onClick = {
+                        val current = state.current
+                        if (current != null && catalogCardReport(current.chunk) != null) {
+                            reportCard = current
+                        } else {
+                            vm.markWrong()
+                        }
+                    },
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.width(8.dp))
@@ -209,6 +236,23 @@ fun SessionScreen(
                 )
             }
         }
+    }
+
+    reportCard?.let { pending ->
+        IknaDialog(
+            title = S.t("src.002"),
+            body = S.t("src.003"),
+            confirmLabel = S.t("src.004"),
+            onConfirm = {
+                val copied = catalogCardReport(pending.chunk)?.let { report ->
+                    copyReport(context, report)
+                } == true
+                reportCard = null
+                vm.markWrong(reportCopied = copied)
+            },
+            dismissLabel = S.t("src.005"),
+            onDismiss = { reportCard = null }
+        )
     }
 }
 
@@ -362,8 +406,11 @@ private fun UndoBar(
     visible: Boolean,
     failed: Boolean,
     wrong: Boolean,
+    wrongSourceId: String?,
+    reportCopied: Boolean,
     onUndo: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onOpenSource: (String) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -383,11 +430,23 @@ private fun UndoBar(
             // purpose, and it can be brought back in settings if that was a
             // mistake, which is the right amount of friction for a decision
             // about the deck rather than about an answer.
-            wrong -> Text(
-                text = S.t("sess.045"),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            wrong -> Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (reportCopied) S.t("src.006") else S.t("sess.045"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f)
+                )
+                if (wrongSourceId != null) {
+                    IknaTextButton(
+                        label = S.t("src.007"),
+                        onClick = { onOpenSource(wrongSourceId) }
+                    )
+                }
+            }
 
             visible -> Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -406,6 +465,20 @@ private fun UndoBar(
         }
     }
 }
+
+private fun openTatoeba(context: Context, id: String) {
+    val url = tatoebaSentenceUrl(id) ?: return
+    runCatching {
+        context.startActivity(
+            Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
+    }
+}
+
+private fun copyReport(context: Context, report: String): Boolean = runCatching {
+    val clipboard = context.getSystemService(ClipboardManager::class.java)
+    clipboard.setPrimaryClip(ClipData.newPlainText("ikna catalogue card report", report))
+}.isSuccess
 
 /**
  * What the question is asking for.

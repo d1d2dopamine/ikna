@@ -17,6 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Repository text is intact
+        run: python3 tools/check_text.py
+
       - name: JDK 17
         uses: actions/setup-java@v5
         with:
@@ -43,6 +46,9 @@ jobs:
       # without it, so it is fetched first and a failure here fails the run.
       - name: Speech runtime
         run: bash tools/voice/fetch-voice.sh
+
+      - name: Pinned starter deck
+        run: bash tools/catalog/fetch-bundled-pack.sh
 
       - name: Build APK
         run: gradle --no-daemon --stacktrace assembleDebug

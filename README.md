@@ -12,11 +12,11 @@
 
 <p align="center">
   Anki, but reversed. The system feeds you; you never feed the system.<br>
-  Android · no accounts · no telemetry · two requests: a new version, a deck catalogue
+  Android · no accounts · no telemetry · network only for static release and catalogue files
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.6.0-press"><img src="https://img.shields.io/badge/release-0.6.0%20press-crimson?style=flat-square" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.7.0-press"><img src="https://img.shields.io/badge/release-0.7.0%20press-crimson?style=flat-square" alt="release"></a>
   <a href="https://github.com/d1d2dopamine/ikna/releases"><img src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?label=downloads&style=flat-square&logo=github&color=blueviolet" alt="downloads"></a>
   <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.6.0-press/ikna-v0.6.0-press.apk"><strong>Download</strong></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.7.0-press/ikna-v0.7.0-press.apk"><strong>Download</strong></a>
   &nbsp;·&nbsp;
   <a href="CHANGELOG.md">Changelog</a>
   &nbsp;·&nbsp;
@@ -65,13 +65,13 @@ sans-serif faces and reads as a lower case L, so "Ikna" invites being read as
 
 | Platform | File in the release |
 | --- | --- |
-| **Android** 10+ (`minSdk 29`) | `ikna-v0.6.0-press.apk` (~40 MB) |
+| **Android** 10+ (`minSdk 29`) | `ikna-v0.7.0-press.apk` (~40 MB) |
 
-**[Download ikna-v0.6.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.6.0-press/ikna-v0.6.0-press.apk)** ·
-[all files](https://github.com/d1d2dopamine/ikna/releases/tag/v0.6.0-press)
+**[Download ikna-v0.7.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.7.0-press/ikna-v0.7.0-press.apk)** ·
+[all files](https://github.com/d1d2dopamine/ikna/releases/tag/v0.7.0-press)
 
 The file above is for every phone sold since roughly 2017. Older 32-bit ones
-take `ikna-v0.6.0-press-legacy32.apk` from the same page: the same app, built
+take `ikna-v0.7.0-press-legacy32.apk` from the same page: the same app, built
 for the one architecture they can run.
 
 Download it and open it; Android asks once whether to allow installing from this
@@ -107,7 +107,7 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
 - **Share a deck** as plain text that imports on any other phone.
 - **Nine palettes**, each in two lightings, plus any font file on the phone.
 - **A widget and one reminder a day**, both opening the cards directly.
-- **Russian, English and Polish** interface, switchable from the system too.
+- **Russian, English, Polish, Spanish, French and German** interface, switchable from the system too. The picker stays folded until all languages are requested.
 - **Your answers are append-only** and exported to `Documents/ikna/`, outside the
   app sandbox, so they survive an uninstall.
 - **A catalogue of ready-made decks**, cut out of open corpora on the build server
@@ -154,7 +154,7 @@ The reasoning behind each of these, and the interface built on top of them, is i
 
 | Deck | Chunks | Shipped |
 | --- | --- | --- |
-| `en-ru-core` — English core chunks | 121 | on |
+| `catalog-en-ru-beginner` — English from Russian, beginner | catalogue deck | on |
 
 A deck can be turned off without consequences: only **new** chunks stop coming from
 it, and everything already started keeps its schedule.
@@ -171,7 +171,19 @@ over one small index.
 **Getting one on the phone:** **+** → **A ready-made deck** → **OPEN THE CATALOGUE**,
 then say what you are learning and which language the meanings should be in. A deck
 already installed says **ALREADY DOWNLOADED** on its row instead of offering the same
-file twice.
+file twice. An unfolded row can fetch three examples first; that request is capped
+at 96 KiB even if a server ignores HTTP Range.
+
+The English-from-Russian beginner deck is also bundled into the APK, so a clean
+installation starts with real catalogue material before the first network request.
+CI downloads that exact release asset and verifies its size and SHA-256 before
+Gradle builds the app.
+
+The square search mark on the home screen searches phrases, sentences and meanings
+across installed decks only. It reads the local Room database and never opens a
+socket. On a catalogue card, **Tatoeba #…** opens the public source sentence. Marking
+one wrong can hide it and copy a paste-ready report containing only the deck, card
+text and public source link — never review history or device data.
 
 **Reading the catalogue without the app:**
 
@@ -220,9 +232,9 @@ Format, refusals, the deck screen and the offline generator:
 
 ## 🏷️ Versions
 
-A version here is a number **and a word**: `0.6.0 press`. The word names the epoch
+A version here is a number **and a word**: `0.7.0 press`. The word names the epoch
 the build belongs to, the number counts releases inside it, and git tags replace the
-space with a dash: `v0.6.0-press`.
+space with a dash: `v0.7.0-press`.
 
 What the words mean, what the numbers promise and how `appVersionCode` is built:
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
@@ -235,7 +247,8 @@ Push to `main`, or run the `build` workflow by hand, and download the `ikna-apk`
 artifact. No Gradle wrapper jar is committed; CI provisions Gradle itself.
 
 ```
-bash tools/voice/fetch-voice.sh                # once per clone: the speech runtime
+bash tools/voice/fetch-voice.sh                # once per clone: speech runtime
+bash tools/catalog/fetch-bundled-pack.sh         # pinned starter catalogue deck
 ./gradlew assembleDebug                        # the app
 ./gradlew assembleRelease -Pikna.unsigned=true # unsigned, without the committed key
 ./gradlew testReleaseUnitTest                  # the tests CI runs
@@ -257,8 +270,8 @@ Bump the two version lines in `app/build.gradle.kts`, then tag the commit with t
 same string, space replaced by a dash:
 
 ```
-git tag v0.6.0-press
-git push origin v0.6.0-press
+git tag v0.7.0-press
+git push origin v0.7.0-press
 ```
 
 The `release` workflow refuses to continue if the tag and the build file disagree,
@@ -308,11 +321,11 @@ release, the ones published before this notice as well as every future one.
 
 <p align="center">
   Анки наизнанку. Система кормит тебя, а не ты её.<br>
-  Android · без аккаунтов · без телеметрии · два запроса: новая версия и каталог колод
+  Android · без аккаунтов · без телеметрии · сеть только для статических файлов релиза и каталога
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.6.0-press"><img src="https://img.shields.io/badge/release-0.6.0%20press-crimson?style=flat-square" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.7.0-press"><img src="https://img.shields.io/badge/release-0.7.0%20press-crimson?style=flat-square" alt="release"></a>
   <a href="https://github.com/d1d2dopamine/ikna/releases"><img src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?label=downloads&style=flat-square&logo=github&color=blueviolet" alt="downloads"></a>
   <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
@@ -322,7 +335,7 @@ release, the ones published before this notice as well as every future one.
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.6.0-press/ikna-v0.6.0-press.apk"><strong>Скачать</strong></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.7.0-press/ikna-v0.7.0-press.apk"><strong>Скачать</strong></a>
   &nbsp;·&nbsp;
   <a href="CHANGELOG.md">Изменения</a>
   &nbsp;·&nbsp;
@@ -333,7 +346,7 @@ release, the ones published before this notice as well as every future one.
 
 ## 🧩 Что это
 
-ikna учит язык **кусками**: короткая фраза, живое предл��жение с ней и то, что она
+ikna учит язык **кусками**: короткая фраза, живое предложение с ней и то, что она
 значит. Не слово и перевод, а фраза в своём естественном окружении — вместе с
 предложением, из-за которого она понятна.
 
@@ -362,14 +375,14 @@ ikna учит язык **кусками**: короткая фраза, живо
 
 | Платформа | Файл в релизе |
 | --- | --- |
-| **Android** 10+ (`minSdk 29`) | `ikna-v0.6.0-press.apk` (~40 МБ) |
+| **Android** 10+ (`minSdk 29`) | `ikna-v0.7.0-press.apk` (~40 МБ) |
 
-**[Скачать ikna-v0.6.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.6.0-press/ikna-v0.6.0-press.apk)** ·
-[все файлы](https://github.com/d1d2dopamine/ikna/releases/tag/v0.6.0-press)
+**[Скачать ikna-v0.7.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.7.0-press/ikna-v0.7.0-press.apk)** ·
+[все файлы](https://github.com/d1d2dopamine/ikna/releases/tag/v0.7.0-press)
 
 Файл выше — для любого телефона примерно с 2017 года. Для более старых
-32-битных рядом лежит `ikna-v0.6.0-press-legacy32.apk`: то же самое
-приложение, одна архитектура, которую они умею��.
+32-битных рядом лежит `ikna-v0.7.0-press-legacy32.apk`: то же самое
+приложение, одна архитектура, которую они умеют.
 
 Скачать и открыть; андроид один раз спросит, разрешить ли установку из этого
 источника. Никакого магазина нет. Все релизы подписаны ключом из этого же
@@ -404,17 +417,16 @@ ikna учит язык **кусками**: короткая фраза, живо
   телефон.
 - **Девять палитр**, каждая в двух освещениях, плюс любой шрифт с телефона.
 - **Виджет и одно напоминание в день**, оба открывают сразу карточки.
-- **Русский, английский и польский** интерфейс, переключается и из системы.
+- **Русский, английский, польский, испанский, французский и немецкий** интерфейс, переключается и из системы. Список свёрнут, пока не понадобятся все языки.
 - **Ответы только дописываются** и выгружаются в `Documents/ikna/` — вне песочницы
   приложения, чтобы пережить удаление.
 - **Каталог готовых колод**, собранных не моделью, а из открытых корпусов на
   сервере сборки: у каждой карточки есть номер предложения, которое можно
   открыть на публичном сайте. Лицензия и автор — до скачивания, а не после.
-- **Два запроса в сеть, и оба — просьба о файле.** Приложение ставится файлом, и
-  о версии с исправлением ему некому сказать — кроме самого себя. Раз в сутки
-  оно спрашивает страницу релизов про последний тег и показывает, что
-  изменилось. Второй запрос случается только тогда, когда ты сам нажал на
-  колоду в каталоге. Ничего не отправляется: ни аккаунта, ни идентификатора, ни
+- **Сеть только для статических файлов.** Раз в сутки приложение может проверить
+  страницу релизов. Каталог загружает индекс, выбранный по запросу ограниченный
+  предпросмотр и саму колоду только после нажатия. Ничего не отправляется: ни
+  аккаунта, ни идентификатора, ни текста карточек.
   статистики, ни карточек, ни ответов. APK скачивает браузер, а не
   приложение. Подробности в [`docs/UPDATES.md`](docs/UPDATES.md) и
   [`docs/SOURCES.md`](docs/SOURCES.md).
@@ -450,7 +462,7 @@ ikna учит язык **кусками**: короткая фраза, живо
 
 | Колода | Кусков | В комплекте |
 | --- | --- | --- |
-| `en-ru-core` — английские базовые куски | 121 | вкл |
+| `catalog-en-ru-beginner` — английский с русскими значениями, начало | колода каталога | вкл |
 
 Колоду можно выключить без последствий: перестанут приходить только **новые**
 куски из неё, а всё уже начатое сохранит своё расписание.
@@ -466,7 +478,19 @@ ikna учит язык **кусками**: короткая фраза, живо
 **Как скачать колоду на телефоне:** **+** → **Готовая колода** → **ОТКРЫТЬ КАТАЛОГ**,
 дальше выбрать, что учишь и на каком языке должны быть значения. Уже скачанная
 колода пишет на своей строке **УЖЕ СКАЧАНА** вместо того, чтобы предлагать
-тот же файл второй раз.
+тот же файл второй раз. В раскрытой строке можно сначала получить три примера;
+даже если сервер проигнорирует HTTP Range, приложение прочитает не больше 96 КиБ.
+
+Beginner-колода английского с русскими значениями теперь входит прямо в APK, так
+что после чистой установки настоящие карточки каталога есть ещё до первого запроса
+в сеть. CI скачивает конкретный файл релиза и до сборки проверяет его размер и
+SHA-256.
+
+Квадратная кнопка поиска на главном экране ищет фразу, предложение и перевод во
+всех установленных колодах. Поиск читает только локальную Room-базу и не открывает
+сеть. На карточке каталога строка **Tatoeba #…** открывает исходное предложение.
+Действие «карточка неверна» может скрыть её и скопировать готовый отчёт: только
+колода, текст и публичная ссылка — без истории ответов и данных телефона.
 
 **Где посмотреть каталог без приложения:**
 
@@ -516,9 +540,9 @@ get used to | It takes a while to get used to the noise. | привыкать
 
 ## 🏷️ Версии
 
-Версия здесь — это номер **и слово**: `0.6.0 press`. Слово называет эпоху, к которой
+Версия здесь — это номер **и слово**: `0.7.0 press`. Слово называет эпоху, к которой
 относится сборка, номер считает релизы внутри неё, а в тегах git пробел заменяется
-дефисом: `v0.6.0-press`.
+дефисом: `v0.7.0-press`.
 
 Что значат слова, что обещают номера и как собирается `appVersionCode` — в
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
@@ -532,6 +556,7 @@ get used to | It takes a while to get used to the noise. | привыкать
 
 ```
 bash tools/voice/fetch-voice.sh                # один раз на клон: движок озвучки
+bash tools/catalog/fetch-bundled-pack.sh         # закреплённая стартовая колода
 ./gradlew assembleDebug                        # приложение
 ./gradlew assembleRelease -Pikna.unsigned=true # без коммитнутого ключа
 ./gradlew testReleaseUnitTest                  # тесты, которые гоняет CI
@@ -553,8 +578,8 @@ bash tools/voice/fetch-voice.sh                # один раз на клон: 
 же строкой, где пробел заменён дефисом:
 
 ```
-git tag v0.6.0-press
-git push origin v0.6.0-press
+git tag v0.7.0-press
+git push origin v0.7.0-press
 ```
 
 Воркфлоу `release` откажется работать, если тег и файл сборки расходятся, а затем
@@ -587,5 +612,5 @@ git push origin v0.6.0-press
 ikna — свободное программное обеспечение под **GNU General Public License версии 3
 или (по твоему выбору) любой позднеей**. Полный текст — в [LICENSE](LICENSE).
 
-Лице��зия покрывает весь репозиторий — каждый файл, каждый коммит и каждый релиз,
+Лицензия покрывает весь репозиторий — каждый файл, каждый коммит и каждый релиз,
 выложенные и до этой оговорки, и после неё.

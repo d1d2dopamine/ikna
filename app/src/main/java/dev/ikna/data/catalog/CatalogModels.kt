@@ -69,5 +69,13 @@ data class CatalogIndex(
     val pairs: List<CatalogPair> = emptyList()
 )
 
+/** A small, read-only glimpse of a deck before its full file is downloaded. */
+data class CatalogPreviewCard(
+    val text: String,
+    val context: String,
+    val translation: String,
+    val tatoebaId: String? = null
+)
+
 const val TIER_FULL: String = "full"
 const val TIER_THIN: String = "thin"

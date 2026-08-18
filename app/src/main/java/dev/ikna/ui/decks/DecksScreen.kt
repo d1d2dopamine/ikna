@@ -76,6 +76,7 @@ fun DecksScreen(
     onOpenDeck: (String) -> Unit,
     onOpenStats: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenSearch: () -> Unit,
     onAddDeck: () -> Unit
 ) {
     val context = LocalContext.current
@@ -229,6 +230,11 @@ fun DecksScreen(
                     onClick = onAddDeck,
                     label = S.t("a11y.004")
                 )
+                IknaIconButton(
+                    glyph = IknaGlyph.SEARCH,
+                    onClick = onOpenSearch,
+                    label = S.t("a11y.011")
+                )
                 Spacer(Modifier.weight(1f))
                 IknaIconButton(
                     glyph = IknaGlyph.GEAR,
@@ -258,6 +264,11 @@ fun DecksScreen(
                     label = S.t("a11y.002")
                 )
                 Spacer(Modifier.weight(1f))
+                IknaIconButton(
+                    glyph = IknaGlyph.SEARCH,
+                    onClick = onOpenSearch,
+                    label = S.t("a11y.011")
+                )
                 IknaIconButton(
                     glyph = IknaGlyph.PLUS,
                     onClick = onAddDeck,
@@ -564,4 +575,3 @@ private fun cardWord(count: Int): String {
         else -> S.t("deck.017")
     }
 }
-

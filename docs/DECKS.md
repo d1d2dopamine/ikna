@@ -5,7 +5,7 @@ contains it, and what the phrase means — not a word and its translation.
 
 | Deck | Chunks | Shipped |
 | --- | --- | --- |
-| `en-ru-core` — English core chunks | 121 | on |
+| `catalog-en-ru-beginner` — English from Russian, beginner | catalogue deck | on |
 
 A second language ships **off** on purpose: two active decks interleave two
 languages inside one session, and the switch lives in the deck list. Everything

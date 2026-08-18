@@ -4,11 +4,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import dev.ikna.data.pack.PackChunk
+import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
 /*
- * The two requests the catalogue makes, and nothing else.
+ * The static requests the catalogue can make, and nothing else.
  *
  * Until this version the app opened one socket in its life, to ask the releases
  * page for a newer build. This adds a second of the same shape, and the shape is
@@ -17,7 +19,8 @@ import java.net.URL
  * is downloaded because somebody tapped it, and the server learns what a web
  * server learns when a browser asks for a file.
  *
- * Both files live in one release, so both URLs are fixed at build time. A deck's
+ * The index, a bounded preview prefix and the full deck all live in one release,
+ * so every URL is fixed at build time. A deck's
  * address is its file name joined to that release -- never a URL out of the
  * index, because an index is data off the network and data off the network does
  * not get to choose which host this app downloads from.
@@ -45,6 +48,9 @@ private const val BUFFER_BYTES = 64 * 1024
  */
 private const val MAX_INDEX_BYTES = 2 * 1024 * 1024
 private const val MAX_DECK_BYTES = 24 * 1024 * 1024
+private const val MAX_PREVIEW_BYTES = 96 * 1024
+private const val PREVIEW_SCAN_LINES = 12
+const val CATALOG_PREVIEW_COUNT = 3
 
 /**
  * Turns a deck's file name into the address it is fetched from.
@@ -148,6 +154,22 @@ class CatalogFetch(
         }
     }
 
+    /**
+     * Three real cards before the full deck is requested.
+     *
+     * A Range request asks GitHub for only the beginning. Some HTTP mirrors
+     * ignore ranges, so [prefix] also stops reading locally at 96 KiB and closes
+     * the socket. A preview can therefore never turn into a hidden full download.
+     */
+    suspend fun preview(deck: CatalogDeck): List<CatalogPreviewCard>? =
+        withContext(Dispatchers.IO) {
+            val url = catalogDeckUrl(deck.file) ?: return@withContext null
+            val text = runCatching { prefix(url, MAX_PREVIEW_BYTES) }.getOrNull()
+                ?: return@withContext null
+            parseCatalogPreview(text, CATALOG_PREVIEW_COUNT, json)
+                .takeIf { it.isNotEmpty() }
+        }
+
     private fun text(url: String, cap: Int): String? {
         var connection: HttpURLConnection? = null
         try {
@@ -169,6 +191,35 @@ class CatalogFetch(
         }
     }
 
+    private fun prefix(url: String, cap: Int): String? {
+        var connection: HttpURLConnection? = null
+        try {
+            connection = open(url).apply {
+                setRequestProperty("Range", "bytes=0-${cap - 1}")
+            }
+            val code = connection.responseCode
+            if (code != HttpURLConnection.HTTP_OK && code != HttpURLConnection.HTTP_PARTIAL) {
+                return null
+            }
+
+            val bytes = ByteArrayOutputStream(cap)
+            val buffer = ByteArray(8 * 1024)
+            var lines = 0
+            connection.inputStream.use { input ->
+                while (bytes.size() < cap && lines < PREVIEW_SCAN_LINES) {
+                    val wanted = minOf(buffer.size, cap - bytes.size())
+                    val read = input.read(buffer, 0, wanted)
+                    if (read <= 0) break
+                    bytes.write(buffer, 0, read)
+                    for (i in 0 until read) if (buffer[i] == '\n'.code.toByte()) lines++
+                }
+            }
+            return bytes.toString(Charsets.UTF_8.name()).takeIf { it.isNotBlank() }
+        } finally {
+            connection?.disconnect()
+        }
+    }
+
     private fun open(url: String): HttpURLConnection =
         (URL(url).openConnection() as HttpURLConnection).apply {
             connectTimeout = CONNECT_TIMEOUT_MS
@@ -180,6 +231,30 @@ class CatalogFetch(
             // can be counted.
             setRequestProperty("User-Agent", "ikna/" + installedVersion)
         }
+}
+
+/** Pure parser kept outside the socket so malformed-prefix cases are unit tested. */
+fun parseCatalogPreview(
+    text: String,
+    limit: Int = CATALOG_PREVIEW_COUNT,
+    json: Json = Json { ignoreUnknownKeys = true }
+): List<CatalogPreviewCard> {
+    if (limit <= 0) return emptyList()
+    val cards = ArrayList<CatalogPreviewCard>(limit)
+    for (line in text.lineSequence().take(PREVIEW_SCAN_LINES)) {
+        if (line.isBlank()) continue
+        val card = runCatching { json.decodeFromString<PackChunk>(line) }.getOrNull() ?: continue
+        if (card.text.isBlank() || card.context.isBlank()) continue
+        val meaning = catalogMeaning(card.translation)
+        cards += CatalogPreviewCard(
+            text = card.text,
+            context = card.context,
+            translation = meaning.text,
+            tatoebaId = meaning.tatoebaId
+        )
+        if (cards.size == limit) break
+    }
+    return cards
 }
 
 /**

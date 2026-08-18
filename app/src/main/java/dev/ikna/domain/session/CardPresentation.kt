@@ -1,5 +1,6 @@
 package dev.ikna.domain.session
 
+import dev.ikna.data.catalog.catalogMeaning
 import dev.ikna.data.db.CardEntity
 import dev.ikna.data.db.ChunkEntity
 
@@ -27,16 +28,24 @@ data class SessionCard(
     val level: Level,
     val fromAmnesty: Boolean
 ) {
+    /** The answer without the catalogue's machine-readable source suffix. */
+    val meaning: String
+        get() = catalogMeaning(chunk.translation).text
+
+    /** Public sentence id, present only on cards built out of Tatoeba. */
+    val sourceId: String?
+        get() = catalogMeaning(chunk.translation).tatoebaId
+
     val prompt: String
         get() = when (level) {
             Level.RECOGNITION -> chunk.contextSentence
             Level.CLOZE -> blanked()
-            Level.PRODUCTION -> chunk.translation
+            Level.PRODUCTION -> meaning
         }
 
     val answer: String
         get() = when (level) {
-            Level.RECOGNITION -> chunk.translation
+            Level.RECOGNITION -> meaning
             Level.CLOZE -> chunk.text
             Level.PRODUCTION -> chunk.contextSentence
         }

@@ -1,6 +1,7 @@
 package dev.ikna.data.repo
 
 import dev.ikna.data.db.ChunkDao
+import dev.ikna.data.db.ChunkSearchRow
 import dev.ikna.data.pack.ImportResult
 import dev.ikna.data.pack.PackLoader
 import dev.ikna.data.pack.SeedFormat
@@ -76,6 +77,16 @@ class DeckRepository(
             introduced = chunkDao.introducedCountFor(pack.id),
             known = chunkDao.knownCountFor(pack.id, KNOWN_STABILITY_DAYS),
             isActive = pack.isActive
+        )
+    }
+
+    /** Up to eighty matches from decks already on this phone. */
+    suspend fun search(raw: String, limit: Int = 80): List<ChunkSearchRow> {
+        val terms = localSearchTerms(raw) ?: return emptyList()
+        return chunkDao.search(
+            pattern = terms.contains,
+            prefix = terms.prefix,
+            limit = limit.coerceIn(1, 80)
         )
     }
 

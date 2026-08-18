@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
+const val IKNA_DATABASE_VERSION = 3
+
 @Database(
     entities = [
         ChunkEntity::class,
@@ -20,7 +22,7 @@ import androidx.room.RoomDatabase
     // v2: undo snapshots on `reviews`, deck switches on `packs`, `daily_plan`.
     // v3: `daily_stats.correctCount`, so the day's accuracy is a count rather
     //     than a stored average edited in place.
-    version = 3,
+    version = IKNA_DATABASE_VERSION,
     // KSP writes the schema history into app/schemas (see the ksp block in
     // app/build.gradle.kts). Commit whatever appears there after a build: it is
     // the only way to diff two versions of this database, and

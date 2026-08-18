@@ -67,6 +67,27 @@ interface ChunkDao {
     @Query("SELECT * FROM chunks WHERE id IN (:ids)")
     suspend fun chunks(ids: List<String>): List<ChunkEntity>
 
+    /**
+     * Local concordance over installed content. It is deliberately an ordinary
+     * read rather than a new FTS table: adding or replacing a pack is already
+     * atomic, and there is no second index that can drift out of sync.
+     */
+    @Query(
+        "SELECT c.id AS chunkId, c.packId AS packId, " +
+            "COALESCE(p.title, p.id) AS packTitle, c.lang AS lang, " +
+            "c.text AS text, c.contextSentence AS contextSentence, " +
+            "c.translation AS translation, c.freqRank AS freqRank " +
+            "FROM chunks c JOIN packs p ON p.id = c.packId " +
+            "WHERE c.text COLLATE NOCASE LIKE :pattern ESCAPE '\\' " +
+            "OR c.contextSentence COLLATE NOCASE LIKE :pattern ESCAPE '\\' " +
+            "OR c.translation COLLATE NOCASE LIKE :pattern ESCAPE '\\' " +
+            "ORDER BY CASE " +
+            "WHEN c.text COLLATE NOCASE LIKE :prefix ESCAPE '\\' THEN 0 " +
+            "WHEN c.contextSentence COLLATE NOCASE LIKE :prefix ESCAPE '\\' THEN 1 " +
+            "ELSE 2 END, c.freqRank ASC, c.id ASC LIMIT :limit"
+    )
+    suspend fun search(pattern: String, prefix: String, limit: Int): List<ChunkSearchRow>
+
     @Query("SELECT * FROM chunk_tokens WHERE chunkId IN (:ids)")
     suspend fun tokensFor(ids: List<String>): List<ChunkTokenEntity>
 

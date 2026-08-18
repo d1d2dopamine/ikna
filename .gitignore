@@ -21,3 +21,6 @@ app/libs/
 
 # Left behind by the version that packed a model into the APK.
 app/src/voice/assets/kokoro/
+
+# Downloaded and hash-checked by tools/catalog/fetch-bundled-pack.sh
+app/src/main/assets/packs/en-ru-beginner.jsonl

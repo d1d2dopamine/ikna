@@ -279,6 +279,9 @@ fun ChunkCard(
     /** The same, for the sentence shown as the answer of a production card. */
     answerTarget: IntRange? = null,
     hint: String?,
+    /** Public source shown only after the answer is visible. */
+    sourceLabel: String? = null,
+    onSource: (() -> Unit)? = null,
     revealed: Boolean,
     showTapHint: Boolean,
     progress: () -> Float,
@@ -352,6 +355,16 @@ fun ChunkCard(
                         text = hint,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                if (!sourceLabel.isNullOrBlank() && onSource != null) {
+                    Spacer(Modifier.height(Space.md))
+                    Text(
+                        text = sourceLabel,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        textDecoration = TextDecoration.Underline,
+                        modifier = Modifier.clickable(onClick = onSource)
                     )
                 }
             } else if (showTapHint) {

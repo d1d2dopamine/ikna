@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# The starter deck is a release asset rather than a generated source file. Keep
+# the repository small, but make the APK reproducible: this exact byte sequence
+# is pinned by both size and SHA-256 before Gradle is allowed to see it.
+url="https://github.com/d1d2dopamine/ikna/releases/download/catalog/en-ru-beginner.jsonl"
+dest="app/src/main/assets/packs/en-ru-beginner.jsonl"
+expected_size="1066608"
+expected_sha256="1a60305e630e75fbd86e449173f9bd1b9cc5ac5fb6822f85d00163b2aed32d9b"
+
+mkdir -p "$(dirname "$dest")"
+# The old 121-card seed is no longer shipped. Removing the unreferenced file
+# here also handles repositories updated by extracting this ZIP over an older
+# checkout, where deleting a file from the archive cannot delete it on disk.
+rm -f app/src/main/assets/packs/en-ru-core.jsonl
+tmp="${dest}.part"
+rm -f "$tmp"
+
+if [ -f "$dest" ]; then
+  current_size=$(wc -c < "$dest" | tr -d ' ')
+  current_sha256=$(sha256sum "$dest" | cut -d' ' -f1)
+  if [ "$current_size" = "$expected_size" ] && [ "$current_sha256" = "$expected_sha256" ]; then
+    echo "Bundled catalogue deck already verified."
+    exit 0
+  fi
+fi
+
+curl -fL --retry 3 --retry-all-errors --connect-timeout 20 --max-time 180 \
+  "$url" -o "$tmp"
+
+actual_size=$(wc -c < "$tmp" | tr -d ' ')
+actual_sha256=$(sha256sum "$tmp" | cut -d' ' -f1)
+if [ "$actual_size" != "$expected_size" ]; then
+  echo "Unexpected en-ru-beginner size: $actual_size (expected $expected_size)" >&2
+  rm -f "$tmp"
+  exit 1
+fi
+if [ "$actual_sha256" != "$expected_sha256" ]; then
+  echo "Unexpected en-ru-beginner SHA-256: $actual_sha256" >&2
+  rm -f "$tmp"
+  exit 1
+fi
+
+python3 - "$tmp" <<'PY'
+import json
+import sys
+
+path = sys.argv[1]
+count = 0
+with open(path, encoding="utf-8") as handle:
+    for number, line in enumerate(handle, start=1):
+        card = json.loads(line)
+        for key in ("id", "text", "context", "translation", "targetStart", "targetEnd", "tokens"):
+            if key not in card:
+                raise SystemExit(f"line {number}: missing {key}")
+        start, end = card["targetStart"], card["targetEnd"]
+        if card["context"][start:end] != card["text"]:
+            raise SystemExit(f"line {number}: phrase does not match offsets")
+        if "\n— Tatoeba #" not in card["translation"]:
+            raise SystemExit(f"line {number}: source id is missing")
+        count += 1
+if count < 100:
+    raise SystemExit(f"starter deck is unexpectedly short: {count} cards")
+print(f"Verified bundled catalogue deck: {count} cards")
+PY
+
+mv "$tmp" "$dest"

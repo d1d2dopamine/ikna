@@ -25,6 +25,18 @@ data class ChunkEntity(
     val audioRef: String? = null
 )
 
+/** One local concordance hit, joined to the deck that owns it. */
+data class ChunkSearchRow(
+    val chunkId: String,
+    val packId: String,
+    val packTitle: String,
+    val lang: String,
+    val text: String,
+    val contextSentence: String,
+    val translation: String,
+    val freqRank: Int
+)
+
 @Entity(tableName = "chunk_tokens", primaryKeys = ["chunkId", "position"], indices = [Index("lemma", "pos")])
 data class ChunkTokenEntity(
     val chunkId: String,

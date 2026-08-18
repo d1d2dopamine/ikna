@@ -123,7 +123,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"set.012" to "Ustawienia",
 	// Нагрузка
 	"set.013" to "Obciążenie",
-	// Сколько повторений в день считать нормой. О�� этого ��ависит, сколько новых чанков придёт за
+	// Сколько повторений в день считать нормой. От этого зависит, сколько новых чанков придёт за
 	// АВТО
 	"set.015" to "AUTO",
 	// РУЧНОЙ
@@ -223,7 +223,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"set.066" to "POKAŻ",
 	// ПЕРЕСЧИТАТЬ СЛОЙ СЛОВ
 	"set.067" to "PRZELICZ WARSTWĘ SŁÓW",
-	// Сло�� слов пересчитан по журналу
+	// Слой слов пересчитан по журналу
 	"set.068" to "Warstwa słów przeliczona z dziennika",
 	// ТЕХНИЧЕСКИЙ ЭКРАН
 	"set.069" to "EKRAN TECHNICZNY",
@@ -231,7 +231,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"set.070" to "ZACZNIJ OD NOWA",
 	// Стереть всё
 	"set.071" to "Wymaż wszystko",
-	// Полный сброс: карточки, сроки, статистика, журнал ответов и сами настройки. Прилож������н����е ста
+	// Полный сброс: карточки, сроки, статистика, журнал ответов и сами настройки. Приложение ста
 	"set.072" to "Pełny reset: karty, terminy, statystyka, dziennik odpowiedzi i same ustawienia. Aplikacja stanie się taka jak zaraz po instalacji i uruchomi się ponownie. Przed wymazaniem dziennik trafia do Dokumenty/ikna — potem można go przywrócić.",
 	// ТОЧНО СТЕРЕТЬ ВСЁ
 	"set.073" to "NA PEWNO WYMAŻ WSZYSTKO",
@@ -481,7 +481,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"add.051" to "znaczenie powtarza sam termin",
 	"add.052" to "niepewne sformułowanie",
 	"add.053" to "to znaczenie już było wyżej",
-	"add.054" to "są liczby — sprawdź je w ��ródle",
+	"add.054" to "są liczby — sprawdź je w źródle",
 	"add.055" to "Czego się uczymy",
 	"add.056" to "języka",
 	"add.057" to "przedmiotu",
@@ -564,10 +564,10 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// Добавлю хотя бы один новый чанк, чтобы не стоять на месте.
 	"sess.028" to "Dodam choć jeden nowy chunk, żeby nie stać w miejscu.",
 	// Новых чанков здесь больше нет — все уже знакомы. Повторения продолжат приходить по срокам,
-	"sess.029" to "Nowych chunków tu już nie ma — wszystkie są znajome. Powtórki będ�� przychodzić w swoich terminach, a po nowy materiał potrzebna jest kolejna talia.",
+	"sess.029" to "Nowych chunków tu już nie ma — wszystkie są znajome. Powtórki będą przychodzić w swoich terminach, a po nowy materiał potrzebna jest kolejna talia.",
 	// следующие — сегодня в 
 	"sess.030" to "następne — dziś o ",
-	// ��ледующие — завтра в 
+	// следующие — завтра в 
 	"sess.031" to "następne — jutro o ",
 	// следующие — через 
 	"sess.032" to "następne — za ",
@@ -805,9 +805,40 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"cat.033" to "OTWÓRZ KATALOG",
 	"cat.034" to "JUŻ POBRANE",
 	"cat.035" to "pobierz ponownie",
+	"cat.036" to "POKAŻ PRZYKŁADY",
+	"cat.037" to "WCZYTUJĘ PRZYKŁADY…",
+	"cat.038" to "PONÓW PRZYKŁADY",
+	"cat.039" to "PRZYKŁADY Z TALII",
+	"cat.040" to "KARTA ",
+	"a11y.011" to "Szukaj w taliach",
+	"src.001" to "Źródło · ",
+	"src.002" to "Ta karta jest błędna?",
+	"src.003" to "Karta zostanie ukryta, a gotowe zgłoszenie z tekstem i linkiem do źródła skopiowane. Można je wkleić do GitHub Issues.",
+	"src.004" to "UKRYJ I SKOPIUJ",
+	"src.005" to "ANULUJ",
+	"src.006" to "Karta ukryta · zgłoszenie skopiowane",
+	"src.007" to "ŹRÓDŁO",
+	"search.001" to "Szukaj w taliach",
+	"search.002" to "Przeszukuje tylko talie już zainstalowane na tym telefonie. Sieć nie jest używana.",
+	"search.003" to "Zwrot, zdanie lub tłumaczenie",
+	"search.004" to "SZUKAJ",
+	"search.005" to "SZUKAM…",
+	"search.006" to "Wpisz co najmniej dwa znaki.",
+	"search.007" to "W zainstalowanych taliach niczego nie znaleziono.",
+	"search.008" to "Pokazano pierwszych 80 wyników — doprecyzuj zapytanie, aby skrócić listę.",
+	"search.009" to "Wyszukiwanie się nie udało. Dane nie zostały zmienione; można ponowić.",
+	"search.010" to "TALIA · ",
 	"mig.001" to "Aktualizuję harmonogram",
 	"mig.002" to "Talie i historia zostają na miejscu. Odpowiedzi są raz przeliczane przez FSRS-6.",
 	"mig.003" to "Harmonogram nie został zaktualizowany",
 	"mig.004" to "Nic nie usunięto: talie i historia są na miejscu. Przeliczenie można bezpiecznie powtórzyć.",
 	"mig.005" to "POWTÓRZ",
+	"diag.001" to "Diagnostyka",
+	"diag.002" to "Tylko podsumowanie techniczne: bez nazw talii, tekstu kart, historii odpowiedzi i identyfikatorów. Nic nie jest wysyłane; raport zostaje w telefonie, dopóki go nie skopiujesz.",
+	"diag.003" to "POKAŻ DIAGNOSTYKĘ",
+	"diag.004" to "UKRYJ DIAGNOSTYKĘ",
+	"diag.005" to "ZBIERANIE…",
+	"diag.006" to "KOPIUJ PODSUMOWANIE",
+	"diag.007" to "Skopiowano diagnostykę",
+	"diag.008" to "Nie udało się zebrać diagnostyki",
 )

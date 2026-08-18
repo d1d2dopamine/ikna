@@ -55,6 +55,10 @@ data class SessionUiState(
      * card disappearing without a word looks like the app losing work.
      */
     val wrongMarked: Boolean = false,
+    /** Tatoeba sentence left behind by the card that was just hidden. */
+    val wrongSourceId: String? = null,
+    /** Whether a paste-ready catalogue report reached the clipboard. */
+    val wrongReportCopied: Boolean = false,
     val noMoreExtra: Boolean = false,
     /**
      * True once enough answers have been given by swiping. The two words at the
@@ -369,7 +373,7 @@ class SessionViewModel(
      * Every level of the chunk goes at once, including the copies queued for a
      * second pass: what is wrong is the fact, not the way it was asked.
      */
-    fun markWrong() {
+    fun markWrong(reportCopied: Boolean = false) {
         val s = _state.value
         val card = s.current ?: return
         val chunkId = card.chunk.id
@@ -397,6 +401,8 @@ class SessionViewModel(
             undoVisible = false,
             undoFailed = false,
             wrongMarked = true,
+            wrongSourceId = card.sourceId,
+            wrongReportCopied = reportCopied,
             finished = index >= queue.size
         )
         shownAt = System.currentTimeMillis()
@@ -448,6 +454,8 @@ class SessionViewModel(
             undoVisible = true,
             undoFailed = false,
             wrongMarked = false,
+            wrongSourceId = null,
+            wrongReportCopied = false,
             showRevealHint = hintsShown < HINT_LIMIT,
             extraAdded = 0,
             finished = nextIndex >= queue.size

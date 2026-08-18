@@ -5,6 +5,8 @@ import dev.ikna.ui.text.S
 import dev.ikna.ui.debug.DebugHooks
 
 import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -160,6 +162,12 @@ fun SettingsScreen(
     // Every interface language at once, for when there are more of them than the
     // section can show without turning into a wall. See LANGUAGE_FOLD.
     var languagesOpen by remember { mutableStateOf(false) }
+
+    // Generated only on request. The report stays in memory until this screen
+    // leaves and is not sent anywhere; copying it is a separate explicit tap.
+    var diagnosticsOpen by remember { mutableStateOf(false) }
+    var diagnosticsBusy by remember { mutableStateOf(false) }
+    var diagnostics by remember { mutableStateOf<String?>(null) }
 
     val scroll = rememberScrollState()
     // Filled in as the sections are laid out, so the pinned row can jump to a
@@ -922,6 +930,66 @@ fun SettingsScreen(
                             }
                         )
                     }
+
+                    Spacer(Modifier.height(20.dp))
+                    Text(
+                        text = S.t("diag.001"),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = S.t("diag.002"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    IknaTextButton(
+                        label = when {
+                            diagnosticsBusy -> S.t("diag.005")
+                            diagnosticsOpen -> S.t("diag.004")
+                            else -> S.t("diag.003")
+                        },
+                        onClick = {
+                            if (diagnosticsBusy) return@IknaTextButton
+                            if (diagnosticsOpen) {
+                                diagnosticsOpen = false
+                            } else {
+                                diagnosticsOpen = true
+                                diagnosticsBusy = true
+                                scope.launch {
+                                    val result = withContext(Dispatchers.IO) {
+                                        runCatching { collectDiagnostics(context, container) }
+                                    }
+                                    diagnostics = result.getOrNull()
+                                    diagnosticsBusy = false
+                                    if (result.isFailure) message = S.t("diag.008")
+                                }
+                            }
+                        },
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    val report = diagnostics
+                    if (diagnosticsOpen && report != null) {
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            text = report,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        IknaWideButton(
+                            label = S.t("diag.006"),
+                            height = 52.dp,
+                            onClick = {
+                                context.getSystemService(ClipboardManager::class.java)
+                                    ?.setPrimaryClip(
+                                        ClipData.newPlainText("ikna diagnostics", report)
+                                    )
+                                message = S.t("diag.007")
+                            }
+                        )
+                    }
                 }
             }
 
@@ -1461,7 +1529,9 @@ private val JUMPS = listOf(
  * learning English tomorrow, and an interface stuck in one language turns the
  * other deck into homework in translation.
  */
-private val LANGUAGES = listOf(LANGUAGE_SYSTEM, "ru", "en", "pl")
+private val LANGUAGES = listOf(
+    LANGUAGE_SYSTEM, "ru", "en", "pl", "es", "fr", "de"
+)
 
 /**
  * How many language chips are shown before the rest go behind one tap.
@@ -1482,6 +1552,9 @@ private fun languageLabel(code: String): String = when (code) {
     "ru" -> S.t("set.100")
     "en" -> "ENGLISH"
     "pl" -> "POLSKI"
+    "es" -> "ESPAÑOL"
+    "fr" -> "FRANÇAIS"
+    "de" -> "DEUTSCH"
     else -> code.uppercase(Locale.getDefault())
 }
 

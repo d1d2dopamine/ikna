@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,6 +35,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -63,7 +66,7 @@ import androidx.compose.ui.window.Dialog
  * clip-art, and a pulled-in icon font would bring Material's rounded geometry
  * back through the side door.
  */
-enum class IknaGlyph { SPARK, STACK, BARS, SLIDERS, GEAR, PLUS, BACK, SOUND, DOTS }
+enum class IknaGlyph { SPARK, STACK, BARS, SLIDERS, GEAR, PLUS, BACK, SOUND, DOTS, SEARCH }
 
 @Composable
 fun IknaGlyphIcon(
@@ -181,6 +184,22 @@ fun IknaGlyphIcon(
                 drawRect(color, Offset(x, s * 0.10f), Size(d, d))
                 drawRect(color, Offset(x, (s - d) / 2f), Size(d, d))
                 drawRect(color, Offset(x, s * 0.90f - d), Size(d, d))
+            }
+            // Search: an angular lens, kept in the same right-angle vocabulary
+            // as the other marks rather than importing one rounded icon.
+            IknaGlyph.SEARCH -> {
+                drawRect(
+                    color = color,
+                    topLeft = Offset(s * 0.08f, s * 0.08f),
+                    size = Size(s * 0.58f, s * 0.58f),
+                    style = Stroke(width = s * 0.11f)
+                )
+                drawLine(
+                    color,
+                    Offset(s * 0.62f, s * 0.62f),
+                    Offset(s * 0.96f, s * 0.96f),
+                    strokeWidth = s * 0.13f
+                )
             }
             // Back out of a screen.
             IknaGlyph.BACK -> {
@@ -421,6 +440,44 @@ fun IknaHexField(
             singleLine = true,
             cursorBrush = SolidColor(ink),
             modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+/** Ordinary single-line text, in the same rectangular shell as every field. */
+@Composable
+fun IknaTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    onSearch: () -> Unit,
+    modifier: Modifier = Modifier,
+    maxLength: Int = 80
+) {
+    val ink = MaterialTheme.colorScheme.onBackground
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    Box(
+        modifier = modifier
+            .height(48.dp)
+            .border(1.dp, MaterialTheme.colorScheme.outline)
+            .padding(horizontal = 12.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        BasicTextField(
+            value = value,
+            onValueChange = { onValueChange(it.take(maxLength)) },
+            textStyle = MaterialTheme.typography.bodyLarge.copy(color = ink),
+            singleLine = true,
+            cursorBrush = SolidColor(ink),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = { onSearch() }),
+            modifier = Modifier.fillMaxWidth(),
+            decorationBox = { inner ->
+                if (value.isEmpty()) {
+                    Text(placeholder, style = MaterialTheme.typography.bodyLarge, color = muted)
+                }
+                inner()
+            }
         )
     }
 }

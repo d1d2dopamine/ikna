@@ -12,9 +12,60 @@ replace the space with a dash: `0.1.1 press` is tagged `v0.1.1-press`. What the
 words mean and what a number promises inside an epoch is written down once, in
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
+## 0.7.0 press
+
+A wider interface, a smaller language picker, and support facts that stay private.
+
+### Six interface languages
+
+- Spanish, French and German join Russian, English and Polish. Every language has
+  the complete 525-key interface table and is exposed to Android's per-app
+  language picker.
+- The in-app picker shows the system choice and the current language while folded;
+  one button opens the complete two-column list, so more translations do not turn
+  settings into a wall.
+
+### Private diagnostics
+
+- Settings can build and copy a local support summary with app/build version,
+  Android/ABI, database and FSRS versions, interface language, and aggregate deck
+  and card counts.
+- It never includes deck names, card text, review history, paths or identifiers,
+  and nothing is sent automatically.
+
+### Text integrity
+
+- README and all maintained text were normalized and scanned again.
+- CI now rejects invalid UTF-8, non-NFC text, replacement marks, hidden bidi and
+  zero-width controls, common mojibake fragments, malformed JSON/XML, duplicate
+  localization keys, missing translations and undefined `S.t` keys.
+- `.editorconfig` and `.gitattributes` pin UTF-8/LF handling before CI runs.
+
 ## 0.6.0 press
 
 The same history, scheduled by the current memory model.
+
+### Catalogue cards can be checked
+
+- The `Tatoeba #…` suffix is separated from the answer and becomes a link to the
+  public source sentence after the card is revealed.
+- Marking a catalogue card wrong asks before hiding it, then copies a paste-ready
+  report with the deck id, chunk id, card text and public source URL. Review state,
+  device data and identity are never included.
+- A catalogue row can show three real cards before download. The preview requests
+  a byte range and also enforces a 96 KiB local ceiling when a server ignores it.
+
+### Local concordance and a real starter deck
+
+- A search screen finds text in phrases, context sentences and translations across
+  installed decks. LIKE wildcards are escaped, the query is capped, and results
+  are limited to 80; no network or new database table is involved.
+- `catalog-en-ru-beginner` replaces the old 121-card seed on clean installs. CI
+  fetches the catalogue release asset pinned to byte size and SHA-256, validates
+  every JSONL line and only then lets Gradle build the APK.
+- Broken UTF-8 replacement marks in the Russian catalogue level, two Polish UI
+  lines and documentation were removed, and a repository-wide check now rejects
+  any remaining `U+FFFD` character.
 
 ### FSRS-6
 

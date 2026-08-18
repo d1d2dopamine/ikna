@@ -1,13 +1,13 @@
 {
   "packs": [
     {
-      "id": "en-ru-core",
-      "version": 2,
+      "id": "catalog-en-ru-beginner",
+      "version": 1,
       "lang": "en",
       "sourceLang": "ru",
-      "title": "English core chunks",
-      "chunkCount": 121,
-      "file": "en-ru-core.jsonl",
+      "title": "English from Russian · beginner",
+      "chunkCount": 0,
+      "file": "en-ru-beginner.jsonl",
       "active": true
     }
   ]

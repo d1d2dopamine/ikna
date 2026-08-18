@@ -180,12 +180,19 @@ log anybody can read.
 
 ## What the app does
 
-The app reads two static files over HTTPS and nothing else:
+The app reads static files over HTTPS and nothing else:
 
 1. the **index** — one small file listing each deck's id, title, language pair,
    chunk count, subject, level, size, licence, and attribution line;
-2. the **deck** — one file, downloaded when a person taps it, with a progress bar
+2. an optional **preview prefix** — three complete JSONL lines, requested with
+   HTTP Range and stopped locally after 96 KiB even if the range is ignored;
+3. the **deck** — one file, downloaded when a person taps it, with a progress bar
    and a percentage, the same download panel the updater uses.
+
+One English-from-Russian beginner deck is copied into the APK at build time. It is
+not fetched by the phone: both build workflows run
+`tools/catalog/fetch-bundled-pack.sh`, which pins the release asset by byte size and
+SHA-256 and validates every line before Gradle packages it.
 
 Filters run over the index, on the device, so choosing among decks costs nothing
 and works with the phone in a pocket of a train. The licence and the source of a
@@ -200,6 +207,9 @@ checking for an update.
 
 The decks are not reviewed by us and are not certified as correct. The claim is
 narrower and checkable: every chunk names the corpus, the contributor and the
-sentence it came from, under a licence that allows it to be there. A card that
-looks wrong can be looked up, argued with, and fixed upstream — which is the part
-a generated deck can never offer.
+sentence it came from, under a licence that allows it to be there. The session,
+preview and local search all render that sentence id as a link. Marking a catalogue
+card wrong can copy a report containing the public card and source, but never the
+review state or device data. A card that looks wrong can therefore be looked up,
+argued with, and fixed upstream — which is the part a generated deck can never
+offer.
