@@ -295,7 +295,7 @@ class SeedParserTest {
 			"make it | I can not make it tonight. | добраться | Kandel ch. 8 | " +
 			"give up | Do not give up now. | сдаваться | Kandel ch. 9"
 
-		val parse = SeedParser.parse(glued)
+		val parse = SeedFormat.parse(glued)
 
 		assertEquals(3, parse.rows.size)
 		assertEquals(0, parse.problems.size)
