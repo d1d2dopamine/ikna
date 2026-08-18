@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -128,7 +127,7 @@ fun DecksScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         // Only the unused field carries the lattice. Content remains on plain
         // paper, and the bottom bar paints its own background above it.
-        IknaMemoryField(seed = 0x1A4B_7C2D, modifier = Modifier.matchParentSize())
+        IknaMemoryField(seed = 0x1A4B_7C2D, modifier = Modifier.fillMaxSize())
         Column(modifier = Modifier.fillMaxSize()) {
         // The name of the app, and nothing else up here. The marks that used to
         // share this row now live in the bar at the bottom of the screen: a phone
@@ -553,7 +552,7 @@ private fun DeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
             .border(Space.hair, edge),
         contentAlignment = Alignment.Center
     ) {
-        Canvas(modifier = Modifier.matchParentSize()) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
             val inset = 4.dp.toPx()
             val step = (size.minDimension - inset * 2f) / LANGUAGE_SEAL_SIDE
             val cell = step * 0.56f
