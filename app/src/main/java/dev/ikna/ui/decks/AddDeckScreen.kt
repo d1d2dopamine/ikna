@@ -12,6 +12,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -66,7 +68,7 @@ import kotlinx.coroutines.withContext
  * took the app down with it. Worse than the crash was the silence: nothing on
  * that screen ever said what a deck file is, and the only format it accepted was
  * one JSON object per line with character offsets in it. Nobody writes that by
- * hand. In practice the app shipped with two decks and no way to get a third.
+ * hand. In practice the app shipped with a deck of its own and no way to get another.
  *
  * This screen exists because the app is for people who lose the thread while
  * doing setup. So the setup is handed to a model: one button copies a prompt that
@@ -103,6 +105,10 @@ fun AddDeckScreen(
 	// whether the deck claims a language at all.
 	var subject by remember { mutableStateOf(false) }
 	var guide by remember { mutableStateOf(false) }
+	// The model way, folded shut until it is asked for. Adding cards is no
+	// longer a prompt and a hope that nothing came back malformed; the
+	// catalogue is the front door and this is the side one.
+	var modelWay by remember { mutableStateOf(false) }
 	var lang by remember { mutableStateOf(NO_LANG) }
 
 	// What the prompt used to leave blank for the person to type into a chat
@@ -245,28 +251,7 @@ fun AddDeckScreen(
 				style = MaterialTheme.typography.bodyMedium
 			)
 
-			Spacer(Modifier.height(Space.md))
-			// The four steps are this screen explaining itself, and they were
-			// printed in full above the two buttons that do the same thing. Read
-			// once, they are never read again, and every later visit had to scroll
-			// past them. So they fold away and the buttons come first.
-			IknaTextButton(
-				label = if (guide) S.t("add.037") else S.t("add.036"),
-				onClick = { guide = !guide },
-				color = MaterialTheme.colorScheme.onSurfaceVariant
-			)
-			if (guide) {
-				Spacer(Modifier.height(Space.md))
-				Step(S.t("add.003"))
-				Step(S.t("add.004"))
-				Step(S.t("add.005"))
-				Step(S.t("add.006"))
-			}
-
 			Spacer(Modifier.height(Space.lg))
-			IknaRule()
-			Spacer(Modifier.height(Space.lg))
-
 			// The other way, offered before the long one. Everything below this
 			// point asks somebody to talk to a model and paste the answer back,
 			// which works and is still the only way to get a deck about a subject
@@ -287,187 +272,224 @@ fun AddDeckScreen(
 			Spacer(Modifier.height(Space.md))
 			IknaWideButton(
 				label = S.t("cat.033"),
+				filled = true,
 				onClick = onOpenCatalog,
 				enabled = !busy
 			)
 
-			Spacer(Modifier.height(Space.xl))
-			IknaRule()
-			Spacer(Modifier.height(Space.lg))
+						Spacer(Modifier.height(Space.lg))
+						IknaRule()
+						Spacer(Modifier.height(Space.lg))
 
-			// Asked here rather than left to the deck page. A deck without a
-			// language cannot be read aloud, and the only screen that could fix
-			// that sat behind a deck nobody had opened yet -- so the deck was
-			// silent and nothing said why. Here the answer is one tap, on the
-			// screen where the deck is being made, and it defaults to the honest
-			// one: no language claimed, no voice offered.
-			// What kind of deck this is, asked before anything else, because it
-			// decides what the rest of the screen is even asking about.
+			// The other way, and from now on the second one.
 			//
-			// The app was built for languages and its core turned out not to care:
-			// a card is a unit, a sentence that carries it and what it means, and
-			// that describes a definition in neuroscience as well as a phrase in
-			// Polish. Only three things were language-specific, and all three are
-			// now decided here -- which prompt the model gets, whether the deck
-			// claims a language it can be read aloud in, and whether the third way
-			// of asking (produce the phrase from its meaning) is used at all.
+			// It is the same screen it always was: a prompt copied into a model, an
+			// answer pasted back, a preview that says which lines look wrong. What
+			// changed is where it sits. For a language the catalogue is the better
+			// deck -- real sentences, a licence, a name -- and nobody should have to
+			// read four prompt questions to find that out. So the model way is folded
+			// away behind one button, for the deck the catalogue does not have.
 			Text(
-				text = S.t("add.055"),
+				text = S.t("add.072"),
 				style = MaterialTheme.typography.labelMedium,
 				color = muted
 			)
 			Spacer(Modifier.height(Space.sm))
-			Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
-				IknaChip(
-					label = S.t("add.056"),
-					selected = !subject,
-					onClick = {
-						subject = false
-						level = LEVEL_BEGINNER
-					}
-				)
-				IknaChip(
-					label = S.t("add.057"),
-					selected = subject,
-					onClick = {
-						subject = true
-						// A subject deck claims no language: nothing in it is meant
-						// to be pronounced, and a voice reading definitions aloud in
-						// a guessed accent is worse than silence.
-						lang = NO_LANG
-						level = LEVEL_BEGINNER
-					}
-				)
-			}
-			Spacer(Modifier.height(Space.sm))
 			Text(
-				text = if (subject) S.t("add.058") else S.t("add.039"),
+				text = S.t("add.073"),
 				style = MaterialTheme.typography.bodySmall,
 				color = muted
 			)
+			Spacer(Modifier.height(Space.md))
+			IknaWideButton(
+				label = if (modelWay) S.t("add.037") else S.t("add.074"),
+				onClick = { modelWay = !modelWay },
+				enabled = !busy
+			)
 
-			Spacer(Modifier.height(Space.lg))
-			IknaRule()
-			Spacer(Modifier.height(Space.lg))
+			if (modelWay) {
+				Spacer(Modifier.height(Space.xl))
+				IknaRule()
+				Spacer(Modifier.height(Space.lg))
+				// The four steps are this screen explaining itself, and they were
+				// printed in full above the two buttons that do the same thing. Read
+				// once, they are never read again, and every later visit had to scroll
+				// past them. So they fold away and the buttons come first.
+				IknaTextButton(
+					label = if (guide) S.t("add.037") else S.t("add.036"),
+					onClick = { guide = !guide },
+					color = MaterialTheme.colorScheme.onSurfaceVariant
+				)
+				if (guide) {
+					Spacer(Modifier.height(Space.md))
+					Step(S.t("add.003"))
+					Step(S.t("add.004"))
+					Step(S.t("add.005"))
+					Step(S.t("add.006"))
+				}
 
-			if (!subject) {
+				// Asked here rather than left to the deck page. A deck without a
+				// language cannot be read aloud, and the only screen that could fix
+				// that sat behind a deck nobody had opened yet -- so the deck was
+				// silent and nothing said why. Here the answer is one tap, on the
+				// screen where the deck is being made, and it defaults to the honest
+				// one: no language claimed, no voice offered.
+				// What kind of deck this is, asked before anything else, because it
+				// decides what the rest of the screen is even asking about.
+				//
+				// The app was built for languages and its core turned out not to care:
+				// a card is a unit, a sentence that carries it and what it means, and
+				// that describes a definition in neuroscience as well as a phrase in
+				// Polish. Only three things were language-specific, and all three are
+				// now decided here -- which prompt the model gets, whether the deck
+				// claims a language it can be read aloud in, and whether the third way
+				// of asking (produce the phrase from its meaning) is used at all.
 				Text(
-					text = S.t("add.038"),
+					text = S.t("add.055"),
 					style = MaterialTheme.typography.labelMedium,
 					color = muted
 				)
 				Spacer(Modifier.height(Space.sm))
-				LangChips(current = lang, onPick = { lang = it })
+				Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+					IknaChip(
+						label = S.t("add.056"),
+						selected = !subject,
+						onClick = {
+							subject = false
+							level = LEVEL_BEGINNER
+						}
+					)
+					IknaChip(
+						label = S.t("add.057"),
+						selected = subject,
+						onClick = {
+							subject = true
+							// A subject deck claims no language: nothing in it is meant
+							// to be pronounced, and a voice reading definitions aloud in
+							// a guessed accent is worse than silence.
+							lang = NO_LANG
+							level = LEVEL_BEGINNER
+						}
+					)
+				}
+				Spacer(Modifier.height(Space.sm))
+				Text(
+					text = if (subject) S.t("add.058") else S.t("add.039"),
+					style = MaterialTheme.typography.bodySmall,
+					color = muted
+				)
 
 				Spacer(Modifier.height(Space.lg))
 				IknaRule()
 				Spacer(Modifier.height(Space.lg))
-			}
 
-			Text(
-				text = S.t("add.040"),
-				style = MaterialTheme.typography.labelMedium,
-				color = muted
-			)
-			Spacer(Modifier.height(Space.sm))
-			Text(
-				text = S.t("add.049"),
-				style = MaterialTheme.typography.bodySmall,
-				color = muted
-			)
 
-			Spacer(Modifier.height(Space.md))
-			Text(
-				// On a subject deck this is the language the cards themselves are
-				// written in, not the language the meanings are translated into.
-				text = if (subject) S.t("add.062") else S.t("add.042"),
-				style = MaterialTheme.typography.bodySmall
-			)
-			Spacer(Modifier.height(Space.sm))
-			PromptChoice(
-				options = MEANING_LANGS,
-				label = { it.uppercase() },
-				current = meanings,
-				onPick = { meanings = it }
-			)
+				Text(
+					text = S.t("add.040"),
+					style = MaterialTheme.typography.labelMedium,
+					color = muted
+				)
+				Spacer(Modifier.height(Space.sm))
+				Text(
+					text = S.t("add.049"),
+					style = MaterialTheme.typography.bodySmall,
+					color = muted
+				)
 
-			Text(
-				text = S.t("add.041"),
-				style = MaterialTheme.typography.bodySmall
-			)
-			Spacer(Modifier.height(Space.sm))
-			PromptChoice(
-				options = PROMPT_COUNTS.map { it.toString() },
-				label = { it },
-				current = count.toString(),
-				onPick = { picked -> count = picked.toIntOrNull() ?: count }
-			)
+				Spacer(Modifier.height(Space.md))
+				Text(
+					// On a subject deck this is the language the cards themselves are
+					// written in, not the language the meanings are translated into.
+					text = if (subject) S.t("add.062") else S.t("add.042"),
+					style = MaterialTheme.typography.bodySmall
+				)
+				Spacer(Modifier.height(Space.sm))
+				PromptChoice(
+					options = MEANING_LANGS,
+					label = { it.uppercase() },
+					current = meanings,
+					onPick = { meanings = it }
+				)
 
-			Text(
-				text = S.t("add.046"),
-				style = MaterialTheme.typography.bodySmall
-			)
-			Spacer(Modifier.height(Space.sm))
-			PromptChoice(
-				options = if (subject) SUBJECT_LEVELS else PROMPT_LEVELS,
-				label = { option ->
-					when (option) {
-						LEVEL_BEGINNER -> S.t("add.043")
-						LEVEL_TALKING -> S.t("add.044")
-						LEVEL_SOME_BACKGROUND -> S.t("add.059")
-						else -> S.t("add.045")
+				Text(
+					text = S.t("add.041"),
+					style = MaterialTheme.typography.bodySmall
+				)
+				Spacer(Modifier.height(Space.sm))
+				PromptChoice(
+					options = PROMPT_COUNTS.map { it.toString() },
+					label = { it },
+					current = count.toString(),
+					onPick = { picked -> count = picked.toIntOrNull() ?: count }
+				)
+
+				Text(
+					text = S.t("add.046"),
+					style = MaterialTheme.typography.bodySmall
+				)
+				Spacer(Modifier.height(Space.sm))
+				PromptChoice(
+					options = if (subject) SUBJECT_LEVELS else PROMPT_LEVELS,
+					label = { option ->
+						when (option) {
+							LEVEL_BEGINNER -> S.t("add.043")
+							LEVEL_TALKING -> S.t("add.044")
+							LEVEL_SOME_BACKGROUND -> S.t("add.059")
+							else -> S.t("add.045")
+						}
+					},
+					current = level,
+					onPick = { level = it }
+				)
+
+				Text(
+					text = if (subject) S.t("add.060") else S.t("add.047"),
+					style = MaterialTheme.typography.bodySmall
+				)
+				Spacer(Modifier.height(Space.sm))
+				Box(
+					modifier = Modifier
+						.fillMaxWidth()
+						.border(Space.hair, line)
+						.padding(Space.md)
+				) {
+					if (topic.isEmpty()) {
+						Text(
+							text = if (subject) S.t("add.061") else S.t("add.048"),
+							style = MaterialTheme.typography.bodyMedium,
+							color = muted
+						)
 					}
-				},
-				current = level,
-				onPick = { level = it }
-			)
-
-			Text(
-				text = if (subject) S.t("add.060") else S.t("add.047"),
-				style = MaterialTheme.typography.bodySmall
-			)
-			Spacer(Modifier.height(Space.sm))
-			Box(
-				modifier = Modifier
-					.fillMaxWidth()
-					.border(Space.hair, line)
-					.padding(Space.md)
-			) {
-				if (topic.isEmpty()) {
-					Text(
-						text = if (subject) S.t("add.061") else S.t("add.048"),
-						style = MaterialTheme.typography.bodyMedium,
-						color = muted
+					BasicTextField(
+						value = topic,
+						onValueChange = { topic = it.take(MAX_TOPIC_CHARS) },
+						singleLine = true,
+						textStyle = MaterialTheme.typography.bodyMedium.copy(
+							color = MaterialTheme.colorScheme.onBackground
+						),
+						cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+						modifier = Modifier.fillMaxWidth()
 					)
 				}
-				BasicTextField(
-					value = topic,
-					onValueChange = { topic = it.take(MAX_TOPIC_CHARS) },
-					singleLine = true,
-					textStyle = MaterialTheme.typography.bodyMedium.copy(
-						color = MaterialTheme.colorScheme.onBackground
-					),
-					cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-					modifier = Modifier.fillMaxWidth()
-				)
-			}
 
-			Spacer(Modifier.height(Space.md))
-			IknaWideButton(
-				label = S.t("add.007"),
-				filled = true,
-				enabled = filled.isNotEmpty() && !busy,
-				onClick = {
-					clipboard.setText(AnnotatedString(filled))
-					note = S.t("add.009")
-				}
-			)
-			Spacer(Modifier.height(Space.sm))
-			IknaWideButton(
-				label = S.t("add.008"),
-				enabled = filled.isNotEmpty() && !busy,
-				onClick = { saver.launch(PROMPT_FILE) }
-			)
+				Spacer(Modifier.height(Space.md))
+				IknaWideButton(
+					label = S.t("add.007"),
+					filled = true,
+					enabled = filled.isNotEmpty() && !busy,
+					onClick = {
+						clipboard.setText(AnnotatedString(filled))
+						note = S.t("add.009")
+					}
+				)
+				Spacer(Modifier.height(Space.sm))
+				IknaWideButton(
+					label = S.t("add.008"),
+					enabled = filled.isNotEmpty() && !busy,
+					onClick = { saver.launch(PROMPT_FILE) }
+				)
+
+			}
 
 			Spacer(Modifier.height(Space.lg))
 			IknaRule()
@@ -479,6 +501,22 @@ fun AddDeckScreen(
 				color = muted
 			)
 			Spacer(Modifier.height(Space.sm))
+			// The language of the deck, asked where the deck actually arrives.
+			//
+			// It used to stand with the prompt questions, and the prompt is folded
+			// away now. A file a friend sent has a language too, and the voice and
+			// the reader for a deck are chosen by it, so the question stays here in
+			// the open where any deck being installed can answer it.
+			if (!subject) {
+				Text(
+					text = S.t("add.038"),
+					style = MaterialTheme.typography.labelMedium,
+					color = muted
+				)
+				Spacer(Modifier.height(Space.sm))
+				LangChips(current = lang, onPick = { lang = it })
+				Spacer(Modifier.height(Space.md))
+			}
 
 			// Two different things, decided by size: a field for a deck small enough
 			// to be typed by hand, and a folded summary for one that was pasted.
@@ -684,6 +722,7 @@ fun AddDeckScreen(
  * scrolls sideways hides half of its options behind a gesture nobody is told
  * about.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PromptChoice(
 	options: List<String>,
@@ -691,18 +730,22 @@ private fun PromptChoice(
 	current: String,
 	onPick: (String) -> Unit
 ) {
-	options.chunked(4).forEach { group ->
-		Row(
-			modifier = Modifier.padding(bottom = Space.sm),
-			horizontalArrangement = Arrangement.spacedBy(Space.sm)
-		) {
-			group.forEach { option ->
-				IknaChip(
-					label = label(option),
-					selected = current == option,
-					onClick = { onPick(option) }
-				)
-			}
+	// Four chips to a row was a guess about how wide a word is, and the guess
+	// was wrong in Russian: «продвинутый» is wider than a quarter of the screen and the
+	// last chip in the row lost its final letters inside its own border. The row
+	// wraps by measured width now, so the layout is a question for the text and
+	// the screen instead of a number typed here, in all three languages.
+	FlowRow(
+		modifier = Modifier.fillMaxWidth(),
+		horizontalArrangement = Arrangement.spacedBy(Space.sm),
+		verticalArrangement = Arrangement.spacedBy(Space.sm)
+	) {
+		options.forEach { option ->
+			IknaChip(
+				label = label(option),
+				selected = current == option,
+				onClick = { onPick(option) }
+			)
 		}
 	}
 }

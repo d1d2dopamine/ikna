@@ -6,7 +6,6 @@ contains it, and what the phrase means — not a word and its translation.
 | Deck | Chunks | Shipped |
 | --- | --- | --- |
 | `en-ru-core` — English core chunks | 121 | on |
-| `pl-ru-core` — Polish core chunks | 121 | off |
 
 A second language ships **off** on purpose: two active decks interleave two
 languages inside one session, and the switch lives in the deck list. Everything
@@ -280,7 +279,7 @@ Both shipped packs are built by the same generator, from a three-column TSV
 python3 tools/genpack/generate_pack.py \
   --seed tools/genpack/seed_chunks_pl.tsv \
   --out app/src/main/assets/packs \
-  --pack-id pl-ru-core --lang pl --title "Polish core chunks" --inactive --strict
+  --pack-id pl-ru-extra --lang pl --title "Polish extra chunks" --inactive --strict
 ```
 
 Polish is tokenised but deliberately **not** lemmatised, for the reason above.

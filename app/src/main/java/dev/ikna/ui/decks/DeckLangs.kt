@@ -1,8 +1,9 @@
 package dev.ikna.ui.decks
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.ikna.data.repo.NO_LANG
@@ -38,20 +39,25 @@ internal val DECK_LANGS = listOf(
  * hides half of its options behind a gesture nobody is told about, and there are
  * only eleven of them.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun LangChips(current: String, onPick: (String) -> Unit) {
-    DECK_LANGS.chunked(4).forEach { group ->
-        Row(
-            modifier = Modifier.padding(bottom = Space.sm),
-            horizontalArrangement = Arrangement.spacedBy(Space.sm)
-        ) {
-            group.forEach { code ->
-                IknaChip(
-                    label = if (code == NO_LANG) S.t("dp.005") else code.uppercase(),
-                    selected = current == code,
-                    onClick = { onPick(code) }
-                )
-            }
-        }
+    // Four chips to a row was a guess about how wide a word is, and the guess
+    // was wrong in Russian: «продвинутый» is wider than a quarter of the screen and the
+    // last chip in the row lost its final letters inside its own border. The row
+    // wraps by measured width now, so the layout is a question for the text and
+    // the screen instead of a number typed here, in all three languages.
+    FlowRow(
+    	modifier = Modifier.fillMaxWidth(),
+    	horizontalArrangement = Arrangement.spacedBy(Space.sm),
+    	verticalArrangement = Arrangement.spacedBy(Space.sm)
+    ) {
+    	DECK_LANGS.forEach { code ->
+    		IknaChip(
+    		    label = if (code == NO_LANG) S.t("dp.005") else code.uppercase(),
+    		    selected = current == code,
+    		    onClick = { onPick(code) }
+    		)
+    	}
     }
 }

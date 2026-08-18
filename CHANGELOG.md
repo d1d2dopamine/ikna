@@ -82,6 +82,31 @@ size is a result of what the sieve kept, not a number anybody chose.
 - Wiktionary is read at build time only, to tell the forms of one word apart. None
   of its text goes into a deck, so a deck carries Tatoeba's licence alone.
 
+### The plus screen, rearranged
+
+- The catalogue is the first thing the screen offers now, and the model way is
+  folded behind one button underneath it. Adding cards is no longer a prompt, a
+  paste and a hope that nothing came back malformed — that path still exists,
+  unchanged, for the deck the catalogue does not have.
+- The language of the deck moved down to where a deck actually arrives, so a file
+  somebody sent you can still say which language it is in.
+- A catalogue row whose deck is already installed says **ALREADY DOWNLOADED** and
+  offers a small *download again* instead of the download button. The list of what
+  is installed is read from the deck table every time the screen opens, so a deck
+  deleted on the decks screen becomes downloadable again.
+- Chip rows wrap by measured width instead of four to a row. Four was a guess about
+  how wide a word is, and it cut the last letters off «продвинутый» inside its own
+  border.
+- A deck name is cut to 40 characters on the way into the database, on a word
+  boundary where there is one, and the deck list draws it on one line. A catalogue
+  name three lines long used to push the progress bar down out of its row and leave
+  every row in the list a different height.
+- A deck named in the bundled manifest whose file is not in the build is skipped
+  instead of stopping the other decks from installing.
+- The Polish deck (`pl-ru-core`) is no longer shipped inside the APK: 121 chunks
+  against the catalogue's Polish decks is not worth carrying for everybody. Nothing
+  is removed from a phone that already installed it.
+
 ### What did not change
 
 No account, no identifier, no statistics. The second network request exists only

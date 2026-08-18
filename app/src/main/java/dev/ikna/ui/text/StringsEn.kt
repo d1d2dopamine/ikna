@@ -499,6 +499,9 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"add.069" to "and more lines: ",
 	"add.070" to "the line breaks were lost on the way in, and this line could not be put back. Press “paste from clipboard”: a keyboard cuts large pastes short",
 	"add.071" to "The text was longer than the limit and was cut. Split the deck in two.",
+	"add.072" to "If there is no ready-made deck",
+	"add.073" to "The optional way: ask a model to write a deck. It can be about anything, but what comes back has to be read by eye. For a language the catalogue is better.",
+	"add.074" to "THE MODEL WAY",
 	// тап в любом месте
 	"card.002" to "tap anywhere",
 	// ← НЕ ЗНАЮ
@@ -770,7 +773,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"cat.001" to "Deck catalogue",
 	"cat.002" to "Decks nobody here wrote: the sentence and what it means come from Tatoeba, and Wiktionary is used only while a deck is built, to tell the forms of one word apart. The cutting happens once, on the build server, and the phone downloads a finished file. The licence and the credit are shown before the download and stay inside the cards.",
 	"cat.003" to "LOADING THE LIST…",
-	"cat.004" to "The list did not arrive — no network, or the catalogue page is unreachable. Nothing broke: the bundled decks and building a deck with a model are where they were.",
+	"cat.004" to "The list did not arrive — no network, or the catalogue page is unreachable. Nothing broke: the deck in the app and building a deck with a model are where they were.",
 	"cat.005" to "CATALOGUE PAGE",
 	"cat.006" to "RETRY",
 	"cat.007" to "What to learn",
@@ -800,4 +803,6 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"cat.031" to "A ready-made deck",
 	"cat.032" to "If talking to a model is not worth the trouble: a deck from the catalogue, sentences written by people, an open licence, the author named.",
 	"cat.033" to "OPEN THE CATALOGUE",
+	"cat.034" to "ALREADY DOWNLOADED",
+	"cat.035" to "download again",
 )

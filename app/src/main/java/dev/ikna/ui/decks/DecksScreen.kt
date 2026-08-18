@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
 import dev.ikna.data.prefs.DeckLook
@@ -389,6 +390,15 @@ private fun DeckRow(
                     // the deck. Both are visible before they are touched.
                     Text(
                         text = deck.title,
+                        // One line, cut with an ellipsis.
+                        //
+                        // A catalogue deck brings its own name with it, and a name three lines
+                        // long grew the row downwards: the progress bar and the percentage under
+                        // it were pushed out of the shape every other row in the list has. The
+                        // name is also cut on the way into the database now; this is the second
+                        // line of defence, for the decks that were installed before that.
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onBackground.copy(

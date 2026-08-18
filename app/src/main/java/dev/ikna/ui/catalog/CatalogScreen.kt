@@ -7,6 +7,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
 import dev.ikna.data.catalog.CATALOG_PAGE_URL
@@ -114,6 +117,18 @@ fun CatalogScreen(
 	var readBytes by remember { mutableStateOf(0L) }
 	var totalBytes by remember { mutableStateOf(0L) }
 	var note by remember { mutableStateOf<String?>(null) }
+	var installed by remember { mutableStateOf(emptySet<String>()) }
+
+	// Which of these decks the phone already has. Read from the deck table
+	// each time this screen opens rather than remembered inside it: a deck
+	// deleted on the decks screen has to become downloadable again, and a
+	// deck installed here has to stop being offered the moment it lands.
+	suspend fun refreshInstalled() {
+		installed = withContext(Dispatchers.IO) {
+			runCatching { container.deckRepository.decks().map { it.id }.toSet() }
+				.getOrDefault(emptySet())
+		}
+	}
 
 	suspend fun load() {
 		loading = true
@@ -132,7 +147,10 @@ fun CatalogScreen(
 		)
 	}
 
-	LaunchedEffect(Unit) { load() }
+	LaunchedEffect(Unit) {
+		refreshInstalled()
+		load()
+	}
 
 	fun install(deck: CatalogDeck) {
 		if (busyId != null) return
@@ -170,6 +188,7 @@ fun CatalogScreen(
 			if (result != null && result.installed > 0) {
 				container.learningRepository.invalidatePlan()
 			}
+			refreshInstalled()
 			importing = false
 			busyId = null
 			note = if (result == null || result.installed == 0) {
@@ -226,8 +245,8 @@ fun CatalogScreen(
 				)
 			} else if (list == null) {
 				// A list that did not arrive is not an error to be explained away:
-				// the same page can be read in a browser, and the two decks that
-				// ship with the app are still there.
+				// the same page can be read in a browser, and the deck that ships
+				// with the app is still there.
 				Spacer(Modifier.height(Space.lg))
 				Text(
 					text = S.t("cat.004"),
@@ -350,6 +369,7 @@ fun CatalogScreen(
 						DeckRow(
 							deck = deck,
 							open = openId == deck.id,
+							installed = installed.contains(catalogPackId(deck.id)),
 							busy = busyId == deck.id,
 							blocked = busyId != null && busyId != deck.id,
 							importing = importing && busyId == deck.id,
@@ -412,6 +432,7 @@ fun CatalogScreen(
 private fun DeckRow(
 	deck: CatalogDeck,
 	open: Boolean,
+	installed: Boolean,
 	busy: Boolean,
 	blocked: Boolean,
 	importing: Boolean,
@@ -429,6 +450,8 @@ private fun DeckRow(
 			Column(modifier = Modifier.weight(1f)) {
 				Text(
 					text = deck.title,
+					maxLines = 2,
+					overflow = TextOverflow.Ellipsis,
 					style = MaterialTheme.typography.bodyLarge,
 					color = ink
 				)
@@ -498,6 +521,27 @@ private fun DeckRow(
 				color = ink,
 				track = true
 			)
+		} else if (installed) {
+			// Already on the phone, said on the row rather than found out by
+			// downloading the same file twice. The way to fetch a fresh copy is
+			// next to it, small, because wanting one is the rarer case: a deck
+			// that is already installed is replaced by its own identifier, so
+			// nothing splits in two and no history is lost.
+			Spacer(Modifier.height(Space.md))
+			Row(verticalAlignment = Alignment.CenterVertically) {
+				Text(
+					text = S.t("cat.034"),
+					style = MaterialTheme.typography.labelLarge,
+					color = muted,
+					modifier = Modifier.weight(1f)
+				)
+				IknaTextButton(
+					label = S.t("cat.035"),
+					onClick = onInstall,
+					enabled = !blocked,
+					color = muted
+				)
+			}
 		} else {
 			Spacer(Modifier.height(Space.md))
 			IknaWideButton(
@@ -533,6 +577,7 @@ private fun CodeChips(
  * pressing the thing that set it -- there is no reset button anywhere in this app
  * and this screen is not the place to invent one.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PickChips(
 	options: List<String>,
@@ -541,18 +586,23 @@ private fun PickChips(
 	onPick: (String) -> Unit
 ) {
 	val all = listOf("") + options
-	all.chunked(4).forEach { group ->
-		Row(
-			modifier = Modifier.padding(bottom = Space.sm),
-			horizontalArrangement = Arrangement.spacedBy(Space.sm)
-		) {
-			group.forEach { option ->
-				IknaChip(
-					label = if (option.isEmpty()) S.t("cat.011") else label(option),
-					selected = current == option,
-					onClick = { onPick(if (current == option) "" else option) }
-				)
-			}
+	// Four chips to a row was a guess about how wide a word is, and the guess
+	// was wrong in Russian: «продвинутый» is wider than a quarter of the screen, so
+	// the last chip in the row had its final letters cut off inside its own
+	// border. Now the row wraps when the next chip does not fit, which makes
+	// the layout a question for the text and the screen rather than for a
+	// number typed here -- and it holds in all three languages of the app.
+	FlowRow(
+		modifier = Modifier.fillMaxWidth(),
+		horizontalArrangement = Arrangement.spacedBy(Space.sm),
+		verticalArrangement = Arrangement.spacedBy(Space.sm)
+	) {
+		all.forEach { option ->
+			IknaChip(
+				label = if (option.isEmpty()) S.t("cat.011") else label(option),
+				selected = current == option,
+				onClick = { onPick(if (current == option) "" else option) }
+			)
 		}
 	}
 }

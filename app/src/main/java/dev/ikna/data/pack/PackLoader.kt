@@ -10,6 +10,35 @@ import kotlinx.serialization.json.Json
 data class ImportResult(val packId: String, val installed: Int, val skipped: Int)
 
 /**
+ * How long a deck's name is allowed to be.
+ *
+ * A catalogue title is written to be read in a list on a wide page. The deck
+ * row shows it next to a menu, a switch and a progress bar, and a name that
+ * wrapped onto a third line pushed the bar down out of its row and left every
+ * row in the list a different height. So the cut is made once, here, on the way
+ * into the database, instead of being repeated by every screen that draws a
+ * deck -- and it is the stored name that is short, so it is also short when the
+ * deck is exported or renamed.
+ */
+const val MAX_PACK_TITLE = 40
+
+/**
+ * A name cut to [MAX_PACK_TITLE], on a word boundary when there is one near the
+ * end, because "English from Russian, beg\u2026" reads worse than "English from
+ * Russian\u2026". A name with nothing in it falls back to the pack's identifier:
+ * the deck list has no other handle on it.
+ */
+fun packTitle(raw: String?, packId: String): String {
+    val trimmed = (raw ?: "").trim()
+    if (trimmed.isEmpty()) return packId
+    if (trimmed.length <= MAX_PACK_TITLE) return trimmed
+    val cut = trimmed.take(MAX_PACK_TITLE)
+    val space = cut.lastIndexOf(' ')
+    val head = if (space >= MAX_PACK_TITLE / 2) cut.take(space) else cut
+    return head.trimEnd(' ', ',', ';', '-', '\u2014', '\u00B7') + "\u2026"
+}
+
+/**
  * Installs chunk packs shipped in assets, and imports packs the user brings in
  * from a file.
  *
@@ -29,7 +58,11 @@ class PackLoader(
         for (manifest in index.packs) {
             val installed = chunkDao.pack(manifest.id)
             if (installed != null && installed.version >= manifest.version) continue
-            install(manifest)
+            // A deck named in the manifest whose file is not in this build is skipped
+            // rather than fatal. The manifest is the list of what ships; a file missing
+            // from it must cost the other decks nothing, and an empty first run is a
+            // worse answer than one deck short.
+            runCatching { install(manifest) }
         }
     }
 
@@ -45,7 +78,7 @@ class PackLoader(
                 lang = manifest.lang,
                 chunkCount = if (count > 0) count else manifest.chunkCount,
                 installedAt = System.currentTimeMillis(),
-                title = manifest.title,
+                title = packTitle(manifest.title, manifest.id),
                 // A deck the user already switched keeps their choice.
                 isActive = chunkDao.pack(manifest.id)?.isActive ?: manifest.active
             )
@@ -83,7 +116,7 @@ class PackLoader(
                 lang = lang,
                 chunkCount = chunks.size,
                 installedAt = System.currentTimeMillis(),
-                title = title,
+                title = packTitle(title, packId),
                 isActive = existing?.isActive ?: true
             )
         )
@@ -125,7 +158,7 @@ class PackLoader(
                 chunkCount = if (append) (existing?.chunkCount ?: 0) + chunks.size
                 else chunks.size,
                 installedAt = System.currentTimeMillis(),
-                title = title,
+                title = packTitle(title, packId),
                 isActive = existing?.isActive ?: true
             )
         )

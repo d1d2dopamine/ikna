@@ -154,18 +154,33 @@ The reasoning behind each of these, and the interface built on top of them, is i
 | Deck | Chunks | Shipped |
 | --- | --- | --- |
 | `en-ru-core` — English core chunks | 121 | on |
-| `pl-ru-core` — Polish core chunks | 121 | off |
 
 A deck can be turned off without consequences: only **new** chunks stop coming from
 it, and everything already started keeps its schedule.
 
-There is a **catalogue** in the app now, next to the prompt: finished decks cut out
+There is a **catalogue** in the app now, and it is the first thing the plus screen
+offers: finished decks cut out
 of open corpora on the build server. Sentences come from
 [Tatoeba](https://tatoeba.org), the phrase on a card is cut out of the sentence it
 appears in rather than written next to it, and the licence and the credit are on
 screen before the download and inside the cards after it. The filters — what you
 are learning, what the meanings should be in, which level — run on the phone,
 over one small index.
+
+**Getting one on the phone:** **+** → **A ready-made deck** → **OPEN THE CATALOGUE**,
+then say what you are learning and which language the meanings should be in. A deck
+already installed says **ALREADY DOWNLOADED** on its row instead of offering the same
+file twice.
+
+**Reading the catalogue without the app:**
+
+- the release itself: [`releases/tag/catalog`](https://github.com/d1d2dopamine/ikna/releases/tag/catalog)
+- the index the phone reads: [`index.json`](https://github.com/d1d2dopamine/ikna/releases/download/catalog/index.json)
+- one deck, to look at the format: [`en-ru-beginner.jsonl`](https://github.com/d1d2dopamine/ikna/releases/download/catalog/en-ru-beginner.jsonl)
+
+The first build came out at **466,061 cards** in **216 decks** over **72 language
+pairs** — 66 of them full, 6 thin — every card under `CC BY 2.0 FR`, credited to
+Tatoeba contributors, and every card naming the sentence it was cut out of by number.
 
 | Can be learned | Can carry the meanings |
 | --- | --- |
@@ -434,17 +449,32 @@ ikna учит язык **кусками**: короткая фраза, живо
 | Колода | Кусков | В комплекте |
 | --- | --- | --- |
 | `en-ru-core` — английские базовые куски | 121 | вкл |
-| `pl-ru-core` — польские базовые куски | 121 | выкл |
 
 Колоду можно выключить без последствий: перестанут приходить только **новые**
 куски из неё, а всё уже начатое сохранит своё расписание.
 
-В приложении теперь есть **каталог** — рядом с промптом лежат готовые колоды,
+В приложении теперь есть **каталог**, и это первое, что предлагает экран
+добавления: готовые колоды,
 собранные из открытых корпусов на сервере сборки. Предложения — из
 [Tatoeba](https://tatoeba.org), фраза на карточке не написана рядом, а вырезана из
 того же предложения, а лицензия и автор видны до скачивания и остаются
 внутри карточек после. Фильтры — что учишь, на каком языке значения, какой
 уровень — работают на телефоне, по одному маленькому списку.
+
+**Как скачать колоду на телефоне:** **+** → **Готовая колода** → **ОТКРЫТЬ КАТАЛОГ**,
+дальше выбрать, что учишь и на каком языке должны быть значения. Уже скачанная
+колода пишет на своей строке **УЖЕ СКАЧАНА** вместо того, чтобы предлагать
+тот же файл второй раз.
+
+**Где посмотреть каталог без приложения:**
+
+- сам релиз: [`releases/tag/catalog`](https://github.com/d1d2dopamine/ikna/releases/tag/catalog)
+- список, который читает телефон: [`index.json`](https://github.com/d1d2dopamine/ikna/releases/download/catalog/index.json)
+- одна колода, чтобы посмотреть формат: [`en-ru-beginner.jsonl`](https://github.com/d1d2dopamine/ikna/releases/download/catalog/en-ru-beginner.jsonl)
+
+Первая сборка вышла на **466 061 карточку** в **216 колодах** по **72 парам языков** —
+66 из них full, 6 thin — всё под `CC BY 2.0 FR`, с указанием авторов Tatoeba, и
+каждая карточка называет номер предложения, из которого она вырезана.
 
 | Можно учить | Может быть языком значений |
 | --- | --- |

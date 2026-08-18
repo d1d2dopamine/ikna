@@ -499,6 +499,9 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"add.069" to "i jeszcze wierszy: ",
 	"add.070" to "podziały wierszy zginęły po drodze i tego wiersza nie udało się rozłożyć. Naciśnij „wklej ze schowka”: klawiatura ucina duże wklejenia",
 	"add.071" to "Tekst był dłuższy niż limit i został ucięty. Podziel talię na dwie części.",
+	"add.072" to "Jeśli nie ma gotowej talii",
+	"add.073" to "Droga opcjonalna: poprosić model, żeby napisał talię. Może być o czymkolwiek, ale to, co wróci, trzeba przeczytać własnymi oczami. Dla języka katalog jest lepszy.",
+	"add.074" to "SPOSÓB Z MODELEM",
 	// тап в любом месте
 	"card.002" to "dotknij gdziekolwiek",
 	// ← НЕ ЗНАЮ
@@ -770,7 +773,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"cat.001" to "Katalog talii",
 	"cat.002" to "Talie, których nikt tu nie napisał: zdanie i jego znaczenie pochodzą z Tatoeby, a Wikisłownik służy tylko przy składaniu, do odróżniania form jednego słowa. Składanie odbywa się raz, na serwerze budującym, a telefon pobiera gotowy plik. Licencja i autor są pokazane przed pobraniem i zostają w kartach.",
 	"cat.003" to "WCZYTUJĘ LISTĘ…",
-	"cat.004" to "Lista nie dotarła — nie ma sieci albo strona katalogu jest nieosiągalna. Nic się nie zepsuło: wbudowane talie i tworzenie talii z modelem są na miejscu.",
+	"cat.004" to "Lista nie dotarła — nie ma sieci albo strona katalogu jest nieosiągalna. Nic się nie zepsuło: wbudowana talia i tworzenie talii z modelem są na miejscu.",
 	"cat.005" to "STRONA KATALOGU",
 	"cat.006" to "POWTÓRZ",
 	"cat.007" to "Czego się uczyć",
@@ -800,4 +803,6 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"cat.031" to "Gotowa talia",
 	"cat.032" to "Jeśli nie chce się bawić w model: talia z katalogu, zdania napisane przez ludzi, licencja otwarta, autor wskazany.",
 	"cat.033" to "OTWÓRZ KATALOG",
+	"cat.034" to "JUŻ POBRANE",
+	"cat.035" to "pobierz ponownie",
 )

@@ -49,17 +49,22 @@ private const val MAX_DECK_BYTES = 24 * 1024 * 1024
 /**
  * Turns a deck's file name into the address it is fetched from.
  *
- * The name is stripped to characters a file name can be made of, so nothing in
- * the index can climb out of the release it was published in or point somewhere
- * else entirely. A name that does not survive that is not fetched at all.
+ * The name is checked, not repaired. Stripping the characters a file name cannot
+ * hold would quietly turn `https://elsewhere/x.jsonl` into a name that passes,
+ * and a check that edits its input until it agrees is not a check. So anything
+ * that is not a plain file name of ours -- a slash, a colon, a dot leading
+ * nowhere, an extension that is not a deck -- is refused, and nothing is
+ * fetched. The address itself is always built here, from our own release.
  */
 fun catalogDeckUrl(fileName: String): String? {
-    val safe = fileName.trim().filter {
-        it.isLetterOrDigit() || it == '.' || it == '-' || it == '_'
+    val name = fileName.trim()
+    if (name.length < 3 || name.length > 120) return null
+    if (!name.all { it in 'a'..'z' || it in 'A'..'Z' || it in '0'..'9' || it == '.' || it == '-' || it == '_' }) {
+        return null
     }
-    if (safe.length < 3 || safe.startsWith(".") || safe.contains("..")) return null
-    if (!safe.endsWith(".jsonl", ignoreCase = true)) return null
-    return CATALOG_BASE_URL + safe
+    if (name.startsWith(".") || name.contains("..")) return null
+    if (!name.endsWith(".jsonl", ignoreCase = true)) return null
+    return CATALOG_BASE_URL + name
 }
 
 /**
