@@ -81,11 +81,14 @@ fun Modifier.readable(): Modifier = this.widthIn(max = ReadableWidth)
  * feedback that repeats itself is decoration.
  */
 object Motion {
-    /** One screen being rewritten into another by the navigation signal. */
-    const val signalDurationMillis = 220
+    /** The incoming screen in the quiet classic cross-fade. */
+    const val screenFadeInDurationMillis = 180
 
-    /** The old field closes slightly before the new one finishes opening. */
-    const val signalExitDurationMillis = 180
+    /** The outgoing screen clears a little sooner, without a snap. */
+    const val screenFadeOutDurationMillis = 140
+
+    /** Settings section jumps use the same calm rhythm, not navigation geometry. */
+    const val sectionScrollDurationMillis = 180
 
     /** Back to rest, under the finger. Slightly underdamped: it has weight. */
     val settle: AnimationSpec<Float> =

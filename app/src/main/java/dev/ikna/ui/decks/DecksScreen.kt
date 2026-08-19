@@ -535,14 +535,14 @@ private fun DeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
     val patternCells = remember(deck.lang) { languageSealCells(deck.lang) }
     val highlightCells = remember(deck.id) { deckSealHighlights(deck.id) }
     val pattern = when {
-        owes -> background.copy(alpha = 0.22f)
-        deck.isActive -> accent.copy(alpha = 0.24f)
-        else -> muted.copy(alpha = 0.12f)
+        owes -> background.copy(alpha = 0.16f)
+        deck.isActive -> accent.copy(alpha = 0.18f)
+        else -> muted.copy(alpha = 0.10f)
     }
     val highlight = when {
-        owes -> background.copy(alpha = 0.48f)
-        deck.isActive -> accent.copy(alpha = 0.62f)
-        else -> muted.copy(alpha = 0.24f)
+        owes -> background.copy(alpha = 0.34f)
+        deck.isActive -> accent.copy(alpha = 0.40f)
+        else -> muted.copy(alpha = 0.20f)
     }
 
     Box(
@@ -557,6 +557,7 @@ private fun DeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
             val step = (size.minDimension - inset * 2f) / LANGUAGE_SEAL_SIDE
             val cell = step * 0.56f
             fun drawCell(index: Int, color: androidx.compose.ui.graphics.Color) {
+                if (isDeckSealLetterZone(index)) return
                 val column = index % LANGUAGE_SEAL_SIDE
                 val row = index / LANGUAGE_SEAL_SIDE
                 val x = inset + column * step + (step - cell) / 2f

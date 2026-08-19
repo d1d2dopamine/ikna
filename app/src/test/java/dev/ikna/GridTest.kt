@@ -101,10 +101,12 @@ class GridTest {
     }
 
     @Test
-    fun the_navigation_signal_is_short_and_closes_before_it_opens() {
-        assertEquals(220, Motion.signalDurationMillis)
-        assertTrue(Motion.signalExitDurationMillis < Motion.signalDurationMillis)
-        assertTrue(Motion.signalExitDurationMillis >= 150)
+    fun the_classic_crossfade_is_gentle_and_never_lingers() {
+        assertEquals(180, Motion.screenFadeInDurationMillis)
+        assertEquals(140, Motion.screenFadeOutDurationMillis)
+        assertEquals(180, Motion.sectionScrollDurationMillis)
+        assertTrue(Motion.screenFadeOutDurationMillis < Motion.screenFadeInDurationMillis)
+        assertTrue(Motion.screenFadeOutDurationMillis >= 120)
     }
 
     @Test

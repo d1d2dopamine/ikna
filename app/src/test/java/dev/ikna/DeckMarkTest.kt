@@ -4,6 +4,7 @@ import dev.ikna.ui.decks.DECK_MARK_FALLBACK
 import dev.ikna.ui.decks.LANGUAGE_SEAL_SIDE
 import dev.ikna.ui.decks.deckSealHighlights
 import dev.ikna.ui.decks.languageSealCells
+import dev.ikna.ui.decks.isDeckSealLetterZone
 import dev.ikna.ui.decks.monogramOf
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -89,6 +90,16 @@ class DeckMarkTest {
                 val mirror = row * LANGUAGE_SEAL_SIDE + LANGUAGE_SEAL_SIDE - 1 - column
                 assertTrue("$language/$index", mirror in seal)
             }
+        }
+    }
+
+    @Test
+    fun seals_leave_a_clean_window_around_the_language_letters() {
+        listOf("en", "ru", "pl", "de", "es", "fr", "uk").forEach { language ->
+            assertTrue(languageSealCells(language).none { isDeckSealLetterZone(it) })
+        }
+        listOf("catalog-en-ru-beginner", "catalog-en-ru-middle", "custom").forEach { id ->
+            assertTrue(deckSealHighlights(id).none { isDeckSealLetterZone(it) })
         }
     }
 

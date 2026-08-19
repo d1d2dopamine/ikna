@@ -32,32 +32,31 @@ stutter. Build it and see it; it takes one `gradlew assembleDebug`.
 | Colour | nine palettes, each in two lightings. Every pair passes 4.5:1, enforced by a test |
 | Interface languages | Russian, English, Polish, Spanish, French, German |
 | Network | static release, catalogue and optional voice files only. Nothing is uploaded, ever |
-| Motion | a 220 ms directional signal rewrites the field; no blur, bounce or looping |
+| Motion | a quiet 180/140 ms classic cross-fade; no scan, blur, bounce or looping |
 
 ## Memory lattice
 
-The visual system has three pieces: a square cell, an interrupted route and the
-field left around them. They are not a pixel-art skin. They are the same grammar
-at different scales: language seals identify decks, segmented tracks show
-progress, activity cells show time and unfinished lattices say that a chart or a
-search does not have enough material yet.
+The visual system uses square cells, short marks and the field left around them.
+It is not a pixel-art skin. The same grammar works at different scales: language
+seals identify decks, segmented tracks show progress, activity cells show time and
+unfinished lattices say that a chart or search does not have enough material yet.
 
 Every language owns a deterministic mirrored 7×7 seal. A deck adds four brighter
-cells from its stable id, so two English decks belong to the same family without
-becoming identical. The letters stay over the seal for accessibility and instant
-recognition; no flag or cultural stereotype is used.
+cells from its stable id, so two English decks belong to one family without
+becoming identical. A protected 5×5 window around the monogram contains no pattern
+at all, keeping the two letters sharp. No flag or cultural stereotype is used.
 
-Navigation is a field rewrite rather than a stock sheet slide. The old screen
-closes from one edge, the next opens from that edge, and a two-pixel accent signal
-marks the boundary. Forward and back travel in opposite directions. The whole
-motion lasts 220 ms, contains no blur or spring, never loops, and becomes an
-instant replacement when animations are disabled.
+Navigation is intentionally conventional. Screens cross-fade in 180/140 ms with
+no geometric crop, moving boundary, directional signal, blur or spring. Android
+system Back uses the same transition, and disabling animations replaces every
+screen immediately.
 
 Empty space is divided deliberately. The card keeps a completely silent field
-because the phrase is the only object to read. The deck list may carry a barely
-visible lattice in unused space, while empty search, catalogue and statistics
-states show a compact unfinished structure instead of looking unloaded. Texture
-is never painted behind reading content and never becomes wallpaper.
+because the phrase is the only object to read. Unused home space may carry a dense
+but faint grain made from hundreds of disconnected dots and very short orthogonal
+strokes. It never joins into a route or snake. Empty search, catalogue and
+statistics states retain a compact unfinished structure instead of looking
+unloaded, and texture is never painted on the learning card.
 
 ## A session
 

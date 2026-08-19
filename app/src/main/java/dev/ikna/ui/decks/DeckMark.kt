@@ -65,6 +65,14 @@ fun monogramOf(lang: String, title: String): String {
 /** The fixed side of every language seal. Seven stays legible inside 52dp. */
 const val LANGUAGE_SEAL_SIDE = 7
 
+/** The 5×5 centre is paper reserved for the two language letters. */
+fun isDeckSealLetterZone(index: Int): Boolean {
+    if (index !in 0 until LANGUAGE_SEAL_SIDE * LANGUAGE_SEAL_SIDE) return false
+    val row = index / LANGUAGE_SEAL_SIDE
+    val column = index % LANGUAGE_SEAL_SIDE
+    return row in 1..5 && column in 1..5
+}
+
 /**
  * The base pixel seal of a language.
  *
@@ -99,13 +107,22 @@ fun languageSealCells(lang: String): Set<Int> {
     cells += (LANGUAGE_SEAL_SIDE - 1) * LANGUAGE_SEAL_SIDE + anchor
     cells += (LANGUAGE_SEAL_SIDE - 1) * LANGUAGE_SEAL_SIDE +
         (LANGUAGE_SEAL_SIDE - 1 - anchor)
+
+    // Pattern and text never share a pixel neighbourhood. Filtering a symmetric
+    // window preserves the mirror while leaving the monogram optically clean.
+    cells.removeAll { isDeckSealLetterZone(it) }
     if (cells.size < 12) {
-        // Preserve the mirror while preventing a rare hash from producing a
-        // mark too faint to survive a 52dp square.
-        for (column in 0 until LANGUAGE_SEAL_SIDE / 2) {
-            cells += 3 * LANGUAGE_SEAL_SIDE + column
-            cells += 3 * LANGUAGE_SEAL_SIDE + LANGUAGE_SEAL_SIDE - 1 - column
-            if (cells.size >= 12) break
+        // Add mirrored border pairs only. The centre remains empty even for the
+        // rare language hash that would otherwise become too sparse.
+        outer@ for (row in 0 until LANGUAGE_SEAL_SIDE) {
+            for (column in 0 until LANGUAGE_SEAL_SIDE / 2) {
+                val left = row * LANGUAGE_SEAL_SIDE + column
+                val right = row * LANGUAGE_SEAL_SIDE + LANGUAGE_SEAL_SIDE - 1 - column
+                if (isDeckSealLetterZone(left)) continue
+                cells += left
+                cells += right
+                if (cells.size >= 12) break@outer
+            }
         }
     }
     return cells
@@ -113,12 +130,14 @@ fun languageSealCells(lang: String): Set<Int> {
 
 /** Four brighter cells that distinguish decks without changing their language. */
 fun deckSealHighlights(deckId: String): Set<Int> {
+    val allowed = (0 until LANGUAGE_SEAL_SIDE * LANGUAGE_SEAL_SIDE)
+        .filterNot(::isDeckSealLetterZone)
     val cells = linkedSetOf<Int>()
     var state = sealHash(deckId.ifEmpty { "deck" })
     var attempts = 0
     while (cells.size < 4 && attempts < 32) {
         state = sealStep(state + attempts * 17)
-        cells += (state ushr 1) % (LANGUAGE_SEAL_SIDE * LANGUAGE_SEAL_SIDE)
+        cells += allowed[(state ushr 1) % allowed.size]
         attempts++
     }
     return cells

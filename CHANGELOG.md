@@ -19,30 +19,28 @@ The field now remembers its own shape.
 ### Memory lattice
 
 - Deck marks are mirrored 7×7 language seals generated deterministically from the
-  language code. Four brighter cells vary by deck id, so decks from one language
-  remain related without becoming identical. The letters remain readable above
-  the pattern and no flag imagery is used.
+  language code. Four brighter cells vary by deck id, while a protected 5×5 centre
+  keeps every pattern away from the two language letters. No flag imagery is used.
 - The same cells now form progress tracks in deck lists, deck details, sessions,
   catalogue downloads and app updates. A partial cell preserves exact progress;
   tracks still draw nothing where zero progress is intentionally silent.
-- Unused space on the home screen is a very faint interrupted field rather than
-  missing content. Empty search, catalogue, retention and first-deck states use a
-  compact unfinished lattice, while the learning card remains completely clear.
+- Unused home space carries a dense but faint grain of independent square dots and
+  short orthogonal strokes. There is no route, connected snake or decorative line.
+  Empty states retain a compact lattice and the learning card remains fully clear.
 
-### Signal motion
+### Classic motion
 
-- A forward navigation closes and opens from left to right; back runs the same
-  grammar in reverse. A two-pixel accent boundary crosses the screen in 220 ms,
-  with no stock slide, blur, bounce, particle effect or looping decoration.
-- The Settings jump row uses the same duration, centres its active section and
-  marks it with three signal cells.
+- Route and tab changes now use a quiet 180/140 ms cross-fade. There is no moving
+  crop, bright scan boundary, directional effect, blur, bounce or looping motion.
+- The Settings jump row uses the same calm rhythm, centres its active section and
+  marks it with three small cells.
 - Turning Animations off removes both navigation and section motion immediately;
-  card gestures and every existing accessibility behaviour remain intact.
+  Android system Back and every existing accessibility behaviour remain intact.
 
 ### Invariants
 
 - Unit tests pin language-seal uniqueness, mirroring, density and deck variation,
-  as well as segmented progress arithmetic and the signal timing bounds.
+  as well as segmented progress arithmetic, the clear letter window and fade timing bounds.
 - This release changes no database schema, scheduler, card content, answer log,
   catalogue format or network permission. No migration is required.
 

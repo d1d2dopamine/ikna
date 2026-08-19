@@ -12,16 +12,16 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.dp
 
 /*
- * Empty space with a memory in it.
+ * Empty space with a fine digital grain.
  *
- * The field is deliberately sparse and quiet. It is not wallpaper: most of the
- * screen remains untouched, while a few cells and interrupted routes make a
- * large unused area read as reserved space rather than missing content. The
- * card screen never uses this component; silence around a phrase is functional
- * and must stay completely silent.
+ * This is not one route and never resolves into a snake. Hundreds of independent
+ * square dots and very short orthogonal strokes form a quiet field, inspired by
+ * plotter and terminal noise. The marks are deterministic, faint and concentrated
+ * where the home screen is genuinely unused. The learning card never uses this
+ * component: silence around a phrase is functional and stays completely clean.
  */
 
-/** A low-contrast, deterministic lattice for genuinely empty screen regions. */
+/** A dense, low-contrast, deterministic pixel grain for unused screen regions. */
 @Composable
 fun IknaMemoryField(
     seed: Int,
@@ -29,40 +29,50 @@ fun IknaMemoryField(
 ) {
     val ink = MaterialTheme.colorScheme.onSurfaceVariant
     Canvas(modifier = modifier.fillMaxSize()) {
-        val step = 24.dp.toPx()
-        val cell = 4.dp.toPx()
-        val columns = (size.width / step).toInt().coerceAtLeast(1)
-        val rows = (size.height / step).toInt().coerceAtLeast(1)
-        val firstRow = (rows * 0.42f).toInt().coerceAtMost(rows - 1)
-        val availableRows = (rows - firstRow).coerceAtLeast(1)
-        val marks = minOf(30, (columns * availableRows / 5).coerceAtLeast(8))
+        val pitch = 7.dp.toPx()
+        val dot = 1.25.dp.toPx()
+        val jitter = 0.45.dp.toPx()
+        val columns = (size.width / pitch).toInt().coerceAtLeast(1)
+        val rows = (size.height / pitch).toInt().coerceAtLeast(1)
+        val firstRow = (rows * 0.24f).toInt().coerceAtMost(rows - 1)
         var state = seed xor 0x4B1D5A77
 
-        repeat(marks) { index ->
-            state = fieldStep(state + index * 31)
-            val column = (state ushr 1) % columns
-            state = fieldStep(state)
-            val row = firstRow + (state ushr 1) % availableRows
-            // A few cells are short vertical fragments. This is the same
-            // distinction as the activity map: a cell can be present without
-            // pretending it is complete.
-            val height = if ((state and 3) == 0) cell * 2f else cell
-            drawRect(
-                color = ink.copy(alpha = if ((state and 7) == 0) 0.10f else 0.055f),
-                topLeft = Offset(column * step, row * step),
-                size = Size(cell, height)
-            )
-        }
+        for (row in firstRow until rows) {
+            for (column in 0 until columns) {
+                state = fieldStep(state + row * 131 + column * 53)
+                val gate = state ushr 28
+                if (gate >= 8) continue
 
-        // Two interrupted routes, never a frame and never a full-width rule.
-        // They give the scattered cells a direction without competing with the
-        // actual separators and controls above them.
-        val route = ink.copy(alpha = 0.045f)
-        val y1 = size.height * 0.68f
-        val y2 = size.height * 0.82f
-        drawLine(route, Offset(size.width * 0.58f, y1), Offset(size.width * 0.78f, y1), 1.dp.toPx())
-        drawLine(route, Offset(size.width * 0.78f, y1), Offset(size.width * 0.78f, y2), 1.dp.toPx())
-        drawLine(route, Offset(size.width * 0.78f, y2), Offset(size.width * 0.94f, y2), 1.dp.toPx())
+                val kind = (state ushr 4) and 15
+                val markWidth = when (kind) {
+                    0, 1 -> dot * 3f
+                    2, 3, 4 -> dot * 2f
+                    else -> dot
+                }
+                val markHeight = when (kind) {
+                    5 -> dot * 3f
+                    6, 7 -> dot * 2f
+                    else -> dot
+                }
+                val alpha = when ((state ushr 24) and 3) {
+                    0 -> 0.130f
+                    1 -> 0.095f
+                    else -> 0.065f
+                }
+                val x = (
+                    column * pitch + ((state ushr 8) and 3) * jitter
+                ).coerceIn(0f, (size.width - markWidth).coerceAtLeast(0f))
+                val y = (
+                    row * pitch + ((state ushr 10) and 3) * jitter
+                ).coerceIn(0f, (size.height - markHeight).coerceAtLeast(0f))
+
+                drawRect(
+                    color = ink.copy(alpha = alpha),
+                    topLeft = Offset(x, y),
+                    size = Size(markWidth, markHeight)
+                )
+            }
+        }
     }
 }
 

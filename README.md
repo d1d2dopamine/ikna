@@ -106,9 +106,9 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
   answer back. Three columns, one line per card.
 - **Share a deck** as plain text that imports on any other phone.
 - **Nine palettes**, each in two lightings, plus any font file on the phone.
-- **A memory lattice of lines and cells:** language seals, segmented progress,
-  structured empty states and a direction-aware signal transition. Motion can be
-  switched off instantly.
+- **A memory field of cells and fine pixel grain:** clear language marks,
+  segmented progress, structured empty states and a quiet classic cross-fade.
+  Motion can be switched off instantly.
 - **A widget and one reminder a day**, both opening the cards directly.
 - **Russian, English, Polish, Spanish, French and German** interface, switchable from the system too. The picker stays folded until all languages are requested.
 - **Your answers are append-only** and exported to `Documents/ikna/`, outside the

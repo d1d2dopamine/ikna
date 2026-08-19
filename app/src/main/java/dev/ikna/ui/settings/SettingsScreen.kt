@@ -333,7 +333,7 @@ fun SettingsScreen(
                     scroll.animateScrollTo(
                         target,
                         animationSpec = tween(
-                            durationMillis = Motion.signalDurationMillis,
+                            durationMillis = Motion.sectionScrollDurationMillis,
                             easing = LinearOutSlowInEasing
                         )
                     )
@@ -1181,7 +1181,7 @@ private fun JumpRow(
             row.animateScrollTo(
                 target,
                 animationSpec = tween(
-                    durationMillis = Motion.signalDurationMillis,
+                    durationMillis = Motion.sectionScrollDurationMillis,
                     easing = LinearOutSlowInEasing
                 )
             )
