@@ -2,6 +2,7 @@ package dev.ikna.ui.theme
 
 import java.io.File
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -20,6 +21,7 @@ class MotionPolishTest {
         assertTrue(settings.contains("verticalScrolling || rowWidth == 0"))
         assertTrue(settings.contains("SettingsJumpRow("))
         assertTrue(settings.contains("listState = listState"))
+        assertFalse(settings.contains("return@JumpRow"))
         assertEquals(
             9,
             Regex("item\(key = ID_[A-Z_]+, contentType = SETTINGS_SECTION_CONTENT_TYPE\)")

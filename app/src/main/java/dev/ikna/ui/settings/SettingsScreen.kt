@@ -340,12 +340,16 @@ fun SettingsScreen(
             settled = routeSettled
         ) { id ->
             val targetIndex = JUMPS.indexOfFirst { it.first == id }
-            if (targetIndex < 0) return@JumpRow
-            scope.launch {
-                if (settings.animations) {
-                    listState.animateScrollToItem(targetIndex)
-                } else {
-                    listState.scrollToItem(targetIndex)
+            // Keep this lambda expression-only. A labelled return inherited the
+            // old JumpRow call name and became illegal after scroll observation
+            // moved into SettingsJumpRow.
+            if (targetIndex >= 0) {
+                scope.launch {
+                    if (settings.animations) {
+                        listState.animateScrollToItem(targetIndex)
+                    } else {
+                        listState.scrollToItem(targetIndex)
+                    }
                 }
             }
         }
