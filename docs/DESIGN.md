@@ -48,9 +48,11 @@ at all, keeping the two letters sharp. No flag or cultural stereotype is used.
 
 Navigation uses Material Shared Axis X at a deliberately restrained scale. A
 forward destination enters from the right while the old route gives way by 14 dp;
-Android system Back mirrors the axis. Translation and a sequenced fade finish in
-280 ms. There is no full-width shove, crop, scan boundary, blur, spring or flash,
-and disabling animations replaces every screen immediately.
+Android system Back mirrors the axis. The NavHost is a fixed full-screen viewport.
+Fade-out owns the first 90 ms and fade-in begins at that exact hand-off, so the two
+interfaces never remain readable in one frame. Translation finishes in 280 ms.
+There is no full-width shove, crop, scan, blur, spring or flash, and disabling
+animations replaces every screen immediately.
 
 Empty space is divided deliberately. The card keeps a completely silent field
 because the phrase is the only object to read. Unused home space may carry a dense

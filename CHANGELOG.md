@@ -39,11 +39,14 @@ The field now remembers its own shape.
 
 ### Shared-axis motion
 
-- Route and tab changes now use Material Shared Axis X: a restrained 14 dp shift
-  paired with a sequenced fade over 280 ms. Forward destinations arrive from the
-  right; Android system Back mirrors the same motion from the left.
-- Only route content moves. There is no full-width shove, moving crop, bright scan
-  boundary, blur, bounce, spring, flash or looping animation.
+- Route and tab changes use Material Shared Axis X: a restrained 14 dp shift
+  over a fixed full-screen viewport. Forward destinations arrive from the right;
+  Android system Back mirrors the same motion from the left.
+- Fade-out owns the first 90 ms and fade-in starts only after that hand-off. The
+  two route interfaces are never readable together, removing the stacked-layout
+  flicker without a full-width shove, crop, scan, blur, bounce, spring or flash.
+- Settings defers its database labels, speech-engine warm-up and nested jump-row
+  motion until the route transition has settled.
 - The Settings jump row keeps its own calm 180 ms rhythm, centres its active
   section and marks it with three small cells.
 - Turning Animations off removes both navigation and section motion immediately;
@@ -52,7 +55,7 @@ The field now remembers its own shape.
 ### Invariants
 
 - Unit tests pin language-seal uniqueness, mirroring, density and deck variation,
-  as well as segmented progress arithmetic, the clear letter window, Shared Axis direction and timing bounds.
+  as well as segmented progress arithmetic, the clear letter window, Shared Axis direction, fixed viewport and non-overlapping fade hand-off.
 - This release changes no database schema, scheduler, card content, answer log,
   catalogue format or network permission. No migration is required.
 

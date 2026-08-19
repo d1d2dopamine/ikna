@@ -104,13 +104,17 @@ class GridTest {
     fun shared_axis_x_is_short_subtle_and_completes_its_fades() {
         assertEquals(280, Motion.sharedAxisDurationMillis)
         assertEquals(14f, Motion.sharedAxisTravel.value, 0.001f)
-        assertEquals(40, Motion.sharedAxisFadeInDelayMillis)
-        assertEquals(220, Motion.sharedAxisFadeInDurationMillis)
-        assertEquals(180, Motion.sharedAxisFadeOutDurationMillis)
+        assertEquals(90, Motion.sharedAxisFadeInDelayMillis)
+        assertEquals(190, Motion.sharedAxisFadeInDurationMillis)
+        assertEquals(90, Motion.sharedAxisFadeOutDurationMillis)
         assertEquals(180, Motion.sectionScrollDurationMillis)
         assertTrue(
             Motion.sharedAxisFadeInDelayMillis + Motion.sharedAxisFadeInDurationMillis <=
                 Motion.sharedAxisDurationMillis
+        )
+        assertEquals(
+            Motion.sharedAxisFadeOutDurationMillis,
+            Motion.sharedAxisFadeInDelayMillis
         )
         assertTrue(Motion.sharedAxisFadeOutDurationMillis < Motion.sharedAxisDurationMillis)
     }

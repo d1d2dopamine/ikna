@@ -97,6 +97,7 @@ import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.work.WorkScheduler
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
@@ -172,6 +173,16 @@ fun SettingsScreen(
     var diagnosticsBusy by remember { mutableStateOf(false) }
     var diagnostics by remember { mutableStateOf<String?>(null) }
 
+    // Navigation keeps both destinations composed until Shared Axis X finishes.
+    // This screen also starts database reads, optional speech-engine warm-up and
+    // a nested jump-row animation. Let the route own those first 280 ms instead
+    // of asking the entering layout and its internal state to move at once.
+    var routeSettled by remember { mutableStateOf(!settings.animations) }
+    LaunchedEffect(Unit) {
+        if (settings.animations) delay(Motion.sharedAxisDurationMillis.toLong())
+        routeSettled = true
+    }
+
     val scroll = rememberScrollState()
     // Filled in as the sections are laid out, so the pinned row can jump to a
     // real offset instead of a guessed one.
@@ -183,7 +194,8 @@ fun SettingsScreen(
     // moves under your finger.
     var measuredNorm by remember { mutableStateOf(0) }
     var normMeasured by remember { mutableStateOf(true) }
-    LaunchedEffect(settings.autoLoad, settings.manualLoad) {
+    LaunchedEffect(routeSettled, settings.autoLoad, settings.manualLoad) {
+        if (!routeSettled) return@LaunchedEffect
         measuredNorm = container.learningRepository.currentDailyTarget()
         normMeasured = container.learningRepository.normIsMeasured()
     }
@@ -194,8 +206,8 @@ fun SettingsScreen(
     // names -- "RU . ORDINARY" next to "default" -- which said nothing about who
     // would read a card and changed nothing anybody could hear.
     var speechStatus by remember { mutableStateOf(SpeakerStatus.UNKNOWN) }
-    LaunchedEffect(settings.speechEnabled) {
-        if (!settings.speechEnabled) return@LaunchedEffect
+    LaunchedEffect(routeSettled, settings.speechEnabled) {
+        if (!routeSettled || !settings.speechEnabled) return@LaunchedEffect
         speechStatus = if (container.speaker.warmUp()) SpeakerStatus.READY
         else SpeakerStatus.NO_ENGINE
     }
@@ -326,7 +338,11 @@ fun SettingsScreen(
                     ?: JUMPS.first().first
             }
         }
-        JumpRow(activeId = activeSection, animations = settings.animations) { id ->
+        JumpRow(
+            activeId = activeSection,
+            animations = settings.animations,
+            settled = routeSettled
+        ) { id ->
             val target = anchors[id] ?: return@JumpRow
             scope.launch {
                 if (settings.animations) {
@@ -1159,6 +1175,7 @@ fun SettingsScreen(
 private fun JumpRow(
     activeId: String,
     animations: Boolean,
+    settled: Boolean,
     onJump: (String) -> Unit
 ) {
     val row = rememberScrollState()
@@ -1172,8 +1189,8 @@ private fun JumpRow(
     // The turn. Not a jump to the edge: the label of the section being read ends
     // up in the middle, which is the only position that reads as "you are here"
     // rather than "here is a list".
-    LaunchedEffect(activeId, rowWidth, animations) {
-        if (rowWidth == 0) return@LaunchedEffect
+    LaunchedEffect(activeId, rowWidth, animations, settled) {
+        if (!settled || rowWidth == 0) return@LaunchedEffect
         val spot = spots[activeId] ?: return@LaunchedEffect
         val middle = spot.first + (spot.last - spot.first) / 2
         val target = (middle - rowWidth / 2).coerceIn(0, row.maxValue)

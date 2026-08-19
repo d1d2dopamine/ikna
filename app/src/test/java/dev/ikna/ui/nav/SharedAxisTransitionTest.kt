@@ -1,6 +1,8 @@
 package dev.ikna.ui.nav
 
+import dev.ikna.ui.theme.Motion
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** Direction is the meaning of Shared Axis X, so pin it without a device. */
@@ -16,6 +18,21 @@ class SharedAxisTransitionTest {
     fun back_navigation_mirrors_the_axis() {
         assertEquals(-14, sharedAxisEnterOffset(forward = false, travelPx = 14))
         assertEquals(14, sharedAxisExitOffset(forward = false, travelPx = 14))
+    }
+
+    @Test
+    fun fade_handoff_never_exposes_two_routes_at_once() {
+        assertEquals(
+            Motion.sharedAxisFadeOutDurationMillis,
+            Motion.sharedAxisFadeInDelayMillis
+        )
+        assertEquals(
+            Motion.sharedAxisDurationMillis,
+            Motion.sharedAxisFadeInDelayMillis + Motion.sharedAxisFadeInDurationMillis
+        )
+        assertTrue(
+            Motion.sharedAxisFadeOutDurationMillis <= Motion.sharedAxisFadeInDelayMillis
+        )
     }
 
     @Test

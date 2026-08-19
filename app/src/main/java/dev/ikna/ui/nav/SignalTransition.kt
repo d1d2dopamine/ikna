@@ -18,8 +18,9 @@ import dev.ikna.ui.theme.Motion
  * A forward destination arrives from the right while the old one gives way to
  * the left; Back mirrors both movements. Fourteen dp is enough to make the
  * relationship legible without turning an ordinary tab change into a carousel.
- * The surface also fades, so there is no hard edge, full-width shove, scan,
- * geometric crop, blur, spring or flash.
+ * Opacity has one hand-off: the old route reaches zero before the new route
+ * gains any opacity. Two complete interfaces are therefore never readable at the
+ * same time. There is no hard edge, full-width shove, scan, crop, blur or spring.
  */
 
 internal fun sharedAxisEnterOffset(forward: Boolean, travelPx: Int): Int =

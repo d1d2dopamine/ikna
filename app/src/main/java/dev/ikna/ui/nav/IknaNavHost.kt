@@ -131,10 +131,12 @@ fun IknaNavHost(
         }
 
         NavHost(
+            modifier = Modifier.fillMaxSize(),
             navController = navController,
             startDestination = if (known) Routes.HOME else Routes.ONBOARDING,
             // Forward navigation advances along the x axis; system Back mirrors it.
-            // Only the route content moves. UpdateGate and the system bars stay still.
+            // The host is a fixed viewport and opacity has a single hand-off, so
+            // outgoing and incoming layouts never negotiate or remain readable together.
             enterTransition = {
                 sharedAxisEnter(settings.animations, forward = true, travelPx = sharedAxisTravelPx)
             },

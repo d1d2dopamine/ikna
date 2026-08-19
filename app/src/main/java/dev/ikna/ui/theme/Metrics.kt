@@ -84,14 +84,14 @@ object Motion {
     /** A complete Shared Axis X route change. */
     const val sharedAxisDurationMillis = 280
 
-    /** Incoming content waits until the outgoing route has begun to clear. */
-    const val sharedAxisFadeInDelayMillis = 40
+    /** Incoming content waits until the outgoing route is fully clear. */
+    const val sharedAxisFadeInDelayMillis = 90
 
-    /** The new route becomes fully opaque before its small translation ends. */
-    const val sharedAxisFadeInDurationMillis = 220
+    /** The new route reaches full opacity exactly as its translation finishes. */
+    const val sharedAxisFadeInDurationMillis = 190
 
-    /** The old route clears early enough that the two screens never look stacked. */
-    const val sharedAxisFadeOutDurationMillis = 180
+    /** The old route owns the first phase, then yields the surface completely. */
+    const val sharedAxisFadeOutDurationMillis = 90
 
     /** Small enough to read as continuity rather than as a full-screen carousel. */
     val sharedAxisTravel = 14.dp
