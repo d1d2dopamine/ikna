@@ -101,12 +101,18 @@ class GridTest {
     }
 
     @Test
-    fun the_classic_crossfade_is_gentle_and_never_lingers() {
-        assertEquals(180, Motion.screenFadeInDurationMillis)
-        assertEquals(140, Motion.screenFadeOutDurationMillis)
+    fun shared_axis_x_is_short_subtle_and_completes_its_fades() {
+        assertEquals(280, Motion.sharedAxisDurationMillis)
+        assertEquals(14f, Motion.sharedAxisTravel.value, 0.001f)
+        assertEquals(40, Motion.sharedAxisFadeInDelayMillis)
+        assertEquals(220, Motion.sharedAxisFadeInDurationMillis)
+        assertEquals(180, Motion.sharedAxisFadeOutDurationMillis)
         assertEquals(180, Motion.sectionScrollDurationMillis)
-        assertTrue(Motion.screenFadeOutDurationMillis < Motion.screenFadeInDurationMillis)
-        assertTrue(Motion.screenFadeOutDurationMillis >= 120)
+        assertTrue(
+            Motion.sharedAxisFadeInDelayMillis + Motion.sharedAxisFadeInDurationMillis <=
+                Motion.sharedAxisDurationMillis
+        )
+        assertTrue(Motion.sharedAxisFadeOutDurationMillis < Motion.sharedAxisDurationMillis)
     }
 
     @Test

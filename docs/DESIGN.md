@@ -29,10 +29,10 @@ stutter. Build it and see it; it takes one `gradlew assembleDebug`.
 | Daily minimum | 1 card |
 | Answering | one axis: left *not known*, right *known*. Nothing else is an answer |
 | Audio | the phone's own engine by default; a neural engine inside, for a model you add |
-| Colour | nine palettes, each in two lightings. Every pair passes 4.5:1, enforced by a test |
+| Colour | twelve palettes, each in two lightings. Every pair passes 4.5:1, enforced by a test |
 | Interface languages | Russian, English, Polish, Spanish, French, German |
 | Network | static release, catalogue and optional voice files only. Nothing is uploaded, ever |
-| Motion | a quiet 180/140 ms classic cross-fade; no scan, blur, bounce or looping |
+| Motion | Material Shared Axis X: 14 dp over 280 ms; no scan, blur, bounce or looping |
 
 ## Memory lattice
 
@@ -46,10 +46,11 @@ cells from its stable id, so two English decks belong to one family without
 becoming identical. A protected 5×5 window around the monogram contains no pattern
 at all, keeping the two letters sharp. No flag or cultural stereotype is used.
 
-Navigation is intentionally conventional. Screens cross-fade in 180/140 ms with
-no geometric crop, moving boundary, directional signal, blur or spring. Android
-system Back uses the same transition, and disabling animations replaces every
-screen immediately.
+Navigation uses Material Shared Axis X at a deliberately restrained scale. A
+forward destination enters from the right while the old route gives way by 14 dp;
+Android system Back mirrors the axis. Translation and a sequenced fade finish in
+280 ms. There is no full-width shove, crop, scan boundary, blur, spring or flash,
+and disabling animations replaces every screen immediately.
 
 Empty space is divided deliberately. The card keeps a completely silent field
 because the phrase is the only object to read. Unused home space may carry a dense
@@ -99,13 +100,16 @@ Colour is two choices, not one. **Which palette:**
 | Фосфор | *phosphor* | a phosphor tube: the ink itself is the colour, not just the accent |
 | Ноль | *zero* | pure black and white, nothing else |
 | Нейтральная | *neutral* | grey that gets out of the way |
+| Ультрафиолет | *ultraviolet* | saturated purple with pale violet ink |
+| Лагуна | *lagoon* | deep teal and clean mint |
+| Кобальт | *cobalt* | blue-black with a restrained yellow signal |
 
 **And how it is lit:** dark, light, as the phone is set, or four colours picked by
 hand (background, ink, muted, accent).
 
 A palette is not a theme: the same one exists in both lightings and keeps its hue in
 both, so the light version is tinted paper rather than white with the colour drained
-out. The nine are chosen from tiles painted in themselves rather than from a list of
+out. The twelve are chosen from tiles painted in themselves rather than from a list of
 names. Every pair of colours in every palette — including the warning red, which
 each lighting defines for itself and which steps aside entirely when the palette's
 accent is already a warm red — is held to 4.5:1 by a unit test, and the hand-picked

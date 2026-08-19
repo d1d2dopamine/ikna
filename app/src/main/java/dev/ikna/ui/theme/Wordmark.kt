@@ -41,8 +41,8 @@ import kotlin.math.roundToInt
  * The dot. The square over the i is the only part of the mark that is not a
  * letterform: it is a rectangle, so drawing it costs nothing and traces nothing.
  * It is erased from the asset and drawn here in the accent colour, which is what
- * makes the logo answer the palette instead of sitting on top of it. Nine
- * palettes, nine logos, one asset. Removing it from the bitmap rather than
+ * makes the logo answer the palette instead of sitting on top of it. Twelve
+ * palettes, twelve logos, one asset. Removing it from the bitmap rather than
  * painting over it matters — a leftover antialiased crumb under a hard-edged
  * square is exactly the kind of thing that is invisible on the screen it was
  * checked on and obvious on someone else's.

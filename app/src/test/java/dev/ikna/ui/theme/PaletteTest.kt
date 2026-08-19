@@ -24,6 +24,25 @@ import org.junit.Test
 class PaletteTest {
 
 	@Test
+	fun `the chooser contains twelve authored palettes`() {
+		assertEquals(12, IknaPalettes.size)
+		assertEquals(
+			listOf("ultraviolet", "lagoon", "cobalt"),
+			IknaPalettes.takeLast(3).map { it.id }
+		)
+	}
+
+	@Test
+	fun `ultraviolet is actually a purple palette`() {
+		val ultraviolet = paletteSpec("ultraviolet")
+		listOf(ultraviolet.dark.accent, ultraviolet.light.accent).forEach { accent ->
+			val (hue, saturation) = hueAndSaturation(accent)
+			assertTrue("ultraviolet hue drifted to $hue", hue in 250f..290f)
+			assertTrue("ultraviolet became grey", saturation > 0.35f)
+		}
+	}
+
+	@Test
 	fun `every palette is readable in both lightings`() {
 		IknaPalettes.forEach { spec ->
 			listOf("dark" to spec.dark, "light" to spec.light).forEach { (lighting, p) ->

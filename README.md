@@ -105,10 +105,10 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
 - **Make a deck with any AI.** The app gives you a written prompt; you paste the
   answer back. Three columns, one line per card.
 - **Share a deck** as plain text that imports on any other phone.
-- **Nine palettes**, each in two lightings, plus any font file on the phone.
+- **Twelve palettes**, each in two lightings, plus any font file on the phone.
 - **A memory field of cells and fine pixel grain:** clear language marks,
-  segmented progress, structured empty states and a quiet classic cross-fade.
-  Motion can be switched off instantly.
+  segmented progress, structured empty states and a soft 280 ms Shared Axis X
+  transition. Forward and Back mirror each other; motion can be switched off instantly.
 - **A widget and one reminder a day**, both opening the cards directly.
 - **Russian, English, Polish, Spanish, French and German** interface, switchable from the system too. The picker stays folded until all languages are requested.
 - **Your answers are append-only** and exported to `Documents/ikna/`, outside the
@@ -417,10 +417,10 @@ ikna учит язык **кусками**: короткая фраза, живо
   обратно. Три столбца, одна строка — одна карточка.
 - **Колодой можно поделиться** — обычным текстом, который встанет на любой другой
   телефон.
-- **Девять палитр**, каждая в двух освещениях, плюс любой шрифт с телефона.
-- **Решётка памяти из линий и ячеек:** языковые печати, сегментированный
-  прогресс, собранные пустые состояния и направленный сигнальный переход.
-  Анимации можно мгновенно отключить.
+- **Двенадцать палитр**, каждая в двух освещениях, плюс любой шрифт с телефона.
+- **Поле памяти из ячеек и мелкого пиксельного зерна:** чёткие языковые
+  знаки, сегментированный прогресс, собранные пустые состояния и мягкий
+  Shared Axis X на 280 мс. Вперёд и назад зеркальны; анимации можно отключить.
 - **Виджет и одно напоминание в день**, оба открывают сразу карточки.
 - **Русский, английский, польский, испанский, французский и немецкий** интерфейс, переключается и из системы. Список свёрнут, пока не понадобятся все языки.
 - **Ответы только дописываются** и выгружаются в `Documents/ikna/` — вне песочницы

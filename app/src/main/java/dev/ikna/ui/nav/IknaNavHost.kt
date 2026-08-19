@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -30,6 +31,7 @@ import dev.ikna.ui.session.SessionScreen
 import dev.ikna.ui.settings.SettingsScreen
 import dev.ikna.ui.settings.VoiceScreen
 import dev.ikna.ui.stats.StatsScreen
+import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.update.UpdateGate
 
 /**
@@ -83,6 +85,9 @@ fun IknaNavHost(
     startSession: Boolean = false
 ) {
     val navController = rememberNavController()
+    val sharedAxisTravelPx = with(LocalDensity.current) {
+        Motion.sharedAxisTravel.roundToPx()
+    }
 
     fun forward(route: String) {
         navController.navigate(route)
@@ -128,10 +133,20 @@ fun IknaNavHost(
         NavHost(
             navController = navController,
             startDestination = if (known) Routes.HOME else Routes.ONBOARDING,
-            enterTransition = { classicEnter(settings.animations) },
-            exitTransition = { classicExit(settings.animations) },
-            popEnterTransition = { classicEnter(settings.animations) },
-            popExitTransition = { classicExit(settings.animations) }
+            // Forward navigation advances along the x axis; system Back mirrors it.
+            // Only the route content moves. UpdateGate and the system bars stay still.
+            enterTransition = {
+                sharedAxisEnter(settings.animations, forward = true, travelPx = sharedAxisTravelPx)
+            },
+            exitTransition = {
+                sharedAxisExit(settings.animations, forward = true, travelPx = sharedAxisTravelPx)
+            },
+            popEnterTransition = {
+                sharedAxisEnter(settings.animations, forward = false, travelPx = sharedAxisTravelPx)
+            },
+            popExitTransition = {
+                sharedAxisExit(settings.animations, forward = false, travelPx = sharedAxisTravelPx)
+            }
         ) {
             composable(Routes.ONBOARDING) {
                 OnboardingScreen(

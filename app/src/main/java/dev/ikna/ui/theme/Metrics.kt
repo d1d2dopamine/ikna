@@ -81,11 +81,20 @@ fun Modifier.readable(): Modifier = this.widthIn(max = ReadableWidth)
  * feedback that repeats itself is decoration.
  */
 object Motion {
-    /** The incoming screen in the quiet classic cross-fade. */
-    const val screenFadeInDurationMillis = 180
+    /** A complete Shared Axis X route change. */
+    const val sharedAxisDurationMillis = 280
 
-    /** The outgoing screen clears a little sooner, without a snap. */
-    const val screenFadeOutDurationMillis = 140
+    /** Incoming content waits until the outgoing route has begun to clear. */
+    const val sharedAxisFadeInDelayMillis = 40
+
+    /** The new route becomes fully opaque before its small translation ends. */
+    const val sharedAxisFadeInDurationMillis = 220
+
+    /** The old route clears early enough that the two screens never look stacked. */
+    const val sharedAxisFadeOutDurationMillis = 180
+
+    /** Small enough to read as continuity rather than as a full-screen carousel. */
+    val sharedAxisTravel = 14.dp
 
     /** Settings section jumps use the same calm rhythm, not navigation geometry. */
     const val sectionScrollDurationMillis = 180

@@ -338,7 +338,7 @@ fun DeckScreen(
                 Spacer(Modifier.height(Space.sm))
 
                 // Eight fixed colours, no colour picker. The square has to stay
-                // legible against nine palettes in two lighting modes, and a
+                // legible against twelve palettes in two lighting modes, and a
                 // free hex field is one slider away from a deck nobody can see.
                 Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
                     DeckTints.forEachIndexed { index, colour ->

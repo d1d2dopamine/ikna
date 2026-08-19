@@ -16,6 +16,15 @@ words mean and what a number promises inside an epoch is written down once, in
 
 The field now remembers its own shape.
 
+### First-run identity and colour
+
+- The first onboarding frame now draws the real ikna wordmark instead of typing
+  four letters in the interface font. Its letterforms stay exact, while its ink
+  and square follow the active palette.
+- Ultraviolet, Lagoon and Cobalt bring the chooser from nine palettes to twelve.
+  Each has separately authored dark and light versions; every functional colour
+  passes the same 4.5:1 contrast tests as the original set.
+
 ### Memory lattice
 
 - Deck marks are mirrored 7×7 language seals generated deterministically from the
@@ -28,19 +37,22 @@ The field now remembers its own shape.
   short orthogonal strokes. There is no route, connected snake or decorative line.
   Empty states retain a compact lattice and the learning card remains fully clear.
 
-### Classic motion
+### Shared-axis motion
 
-- Route and tab changes now use a quiet 180/140 ms cross-fade. There is no moving
-  crop, bright scan boundary, directional effect, blur, bounce or looping motion.
-- The Settings jump row uses the same calm rhythm, centres its active section and
-  marks it with three small cells.
+- Route and tab changes now use Material Shared Axis X: a restrained 14 dp shift
+  paired with a sequenced fade over 280 ms. Forward destinations arrive from the
+  right; Android system Back mirrors the same motion from the left.
+- Only route content moves. There is no full-width shove, moving crop, bright scan
+  boundary, blur, bounce, spring, flash or looping animation.
+- The Settings jump row keeps its own calm 180 ms rhythm, centres its active
+  section and marks it with three small cells.
 - Turning Animations off removes both navigation and section motion immediately;
-  Android system Back and every existing accessibility behaviour remain intact.
+  every existing accessibility behaviour remains intact.
 
 ### Invariants
 
 - Unit tests pin language-seal uniqueness, mirroring, density and deck variation,
-  as well as segmented progress arithmetic, the clear letter window and fade timing bounds.
+  as well as segmented progress arithmetic, the clear letter window, Shared Axis direction and timing bounds.
 - This release changes no database schema, scheduler, card content, answer log,
   catalogue format or network permission. No migration is required.
 

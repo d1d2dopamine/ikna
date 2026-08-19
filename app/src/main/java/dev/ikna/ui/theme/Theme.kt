@@ -343,6 +343,60 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             muted = Color(0xFF6B685F),
             accent = Color(0xFF33469E)
         )
+    ),
+    // Ультрафиолет. Purple is the accent as well as the atmosphere: unlike
+    // Слива, this one does not answer an aubergine field with mint.
+    IknaPaletteSpec(
+        id = "ultraviolet",
+        nameKey = "set.141",
+        dark = IknaPalette(
+            background = Color(0xFF110C24),
+            ink = Color(0xFFF0E9FF),
+            muted = Color(0xFF9787B5),
+            accent = Color(0xFFC29BFF)
+        ),
+        light = IknaPalette(
+            background = Color(0xFFF3EEFC),
+            ink = Color(0xFF1C1230),
+            muted = Color(0xFF6C5D83),
+            accent = Color(0xFF6D32C4)
+        )
+    ),
+    // Лагуна. A green-blue field with no brass or coral: calm, cool and distinct
+    // from both the reading-room green and the harder cyan of Иней.
+    IknaPaletteSpec(
+        id = "lagoon",
+        nameKey = "set.142",
+        dark = IknaPalette(
+            background = Color(0xFF071918),
+            ink = Color(0xFFE2F5F1),
+            muted = Color(0xFF7F9F99),
+            accent = Color(0xFF69E0C0)
+        ),
+        light = IknaPalette(
+            background = Color(0xFFEDF7F4),
+            ink = Color(0xFF10231F),
+            muted = Color(0xFF58746E),
+            accent = Color(0xFF08705D)
+        )
+    ),
+    // Кобальт. A deep blue field with a yellow signal. Чернила is navy and
+    // coral; this keeps the background family but reverses the temperature.
+    IknaPaletteSpec(
+        id = "cobalt",
+        nameKey = "set.143",
+        dark = IknaPalette(
+            background = Color(0xFF0A132B),
+            ink = Color(0xFFEAF0FF),
+            muted = Color(0xFF8491B5),
+            accent = Color(0xFFFFD45A)
+        ),
+        light = IknaPalette(
+            background = Color(0xFFEEF2FF),
+            ink = Color(0xFF121A34),
+            muted = Color(0xFF5D6888),
+            accent = Color(0xFF6E5700)
+        )
     )
 )
 

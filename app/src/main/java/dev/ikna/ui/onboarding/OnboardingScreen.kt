@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
 import dev.ikna.ui.theme.IknaTextButton
+import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.IknaWideButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -83,10 +84,12 @@ fun OnboardingScreen(container: AppContainer, onDone: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(48.dp))
-        Text(
-            text = "ikna",
-            style = MaterialTheme.typography.displaySmall,
-            color = MaterialTheme.colorScheme.primary
+        // The supplied mark is artwork, not four letters set in the UI font.
+        // IknaWordmark keeps those exact letterforms while tinting the ink and
+        // square for whichever of the twelve palettes is active.
+        IknaWordmark(
+            height = 44.dp,
+            label = "ikna"
         )
 
         Spacer(Modifier.weight(1f))

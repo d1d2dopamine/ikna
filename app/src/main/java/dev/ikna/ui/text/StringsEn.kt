@@ -330,6 +330,9 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"set.126" to "FROST",
 	// ФОСФОР
 	"set.127" to "PHOSPHOR",
+	"set.141" to "ULTRAVIOLET",
+	"set.142" to "LAGOON",
+	"set.143" to "COBALT",
 	// ОСВЕЩЕНИЕ
 	"set.122" to "LIGHTING",
 	"set.128" to "ALL LANGUAGES",

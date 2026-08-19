@@ -4,37 +4,69 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import dev.ikna.ui.theme.Motion
 
 /*
- * Navigation should disappear behind the decision to navigate.
+ * Route changes use Material Shared Axis X, but at a deliberately small scale.
  *
- * The first 0.8 draft tried to turn every route change into a bright field scan.
- * That made an ordinary tab change louder than the screen it opened. The final
- * motion is deliberately classic: one quiet cross-fade, no moving edge, no
- * geometric crop, no flash and no direction to decode.
+ * A forward destination arrives from the right while the old one gives way to
+ * the left; Back mirrors both movements. Fourteen dp is enough to make the
+ * relationship legible without turning an ordinary tab change into a carousel.
+ * The surface also fades, so there is no hard edge, full-width shove, scan,
+ * geometric crop, blur, spring or flash.
  */
 
-internal fun classicEnter(enabled: Boolean): EnterTransition {
+internal fun sharedAxisEnterOffset(forward: Boolean, travelPx: Int): Int =
+    if (forward) travelPx else -travelPx
+
+internal fun sharedAxisExitOffset(forward: Boolean, travelPx: Int): Int =
+    -sharedAxisEnterOffset(forward, travelPx)
+
+internal fun sharedAxisEnter(
+    enabled: Boolean,
+    forward: Boolean,
+    travelPx: Int
+): EnterTransition {
     if (!enabled) return EnterTransition.None
-    return fadeIn(
+    val distance = sharedAxisEnterOffset(forward, travelPx.coerceAtLeast(0))
+    return slideInHorizontally(
         animationSpec = tween(
-            durationMillis = Motion.screenFadeInDurationMillis,
-            delayMillis = 12,
+            durationMillis = Motion.sharedAxisDurationMillis,
+            easing = FastOutSlowInEasing
+        ),
+        initialOffsetX = { distance }
+    ) + fadeIn(
+        animationSpec = tween(
+            durationMillis = Motion.sharedAxisFadeInDurationMillis,
+            delayMillis = Motion.sharedAxisFadeInDelayMillis,
             easing = LinearOutSlowInEasing
         ),
         initialAlpha = 0f
     )
 }
 
-internal fun classicExit(enabled: Boolean): ExitTransition {
+internal fun sharedAxisExit(
+    enabled: Boolean,
+    forward: Boolean,
+    travelPx: Int
+): ExitTransition {
     if (!enabled) return ExitTransition.None
-    return fadeOut(
+    val distance = sharedAxisExitOffset(forward, travelPx.coerceAtLeast(0))
+    return slideOutHorizontally(
         animationSpec = tween(
-            durationMillis = Motion.screenFadeOutDurationMillis,
+            durationMillis = Motion.sharedAxisDurationMillis,
+            easing = FastOutSlowInEasing
+        ),
+        targetOffsetX = { distance }
+    ) + fadeOut(
+        animationSpec = tween(
+            durationMillis = Motion.sharedAxisFadeOutDurationMillis,
             easing = FastOutLinearInEasing
         ),
         targetAlpha = 0f

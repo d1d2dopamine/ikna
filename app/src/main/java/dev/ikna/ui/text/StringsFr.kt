@@ -76,7 +76,7 @@ internal val STRINGS_FR: Map<String, String> = mapOf(
     "set.107" to "ALLEMAND", "set.108" to "ESPAGNOL", "set.109" to "FRANÇAIS", "set.110" to "police",
     "set.114" to "PALETTE", "set.116" to "BRAISE", "set.117" to "BIBLIOTHÈQUE", "set.118" to "ENCRE",
     "set.119" to "PRUNE", "set.120" to "ZÉRO", "set.121" to "NEUTRE", "set.125" to "ROSE",
-    "set.126" to "GIVRE", "set.127" to "PHOSPHORE", "set.122" to "ÉCLAIRAGE",
+    "set.126" to "GIVRE", "set.127" to "PHOSPHORE", "set.141" to "ULTRAVIOLET", "set.142" to "LAGON", "set.143" to "COBALT", "set.122" to "ÉCLAIRAGE",
     "set.128" to "TOUTES LES LANGUES", "set.130" to "Voix du téléphone",
     "set.131" to "Lit les langues que vos modèles ne couvrent pas", "set.132" to "Toujours parler",
     "set.133" to "La carte se lit à chaque apparition", "set.134" to "La carte se lit uniquement au premier contact",
