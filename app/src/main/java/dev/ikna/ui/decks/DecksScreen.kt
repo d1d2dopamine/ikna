@@ -18,11 +18,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,6 +59,31 @@ import dev.ikna.widget.TodayWidget
 import kotlinx.coroutines.launch
 
 /**
+ * Data that belongs to the Home back-stack entry, not to one composition of it.
+ *
+ * Navigation removes a destination from composition after its exit transition.
+ * Keeping this state in [IknaNavHost] means Back can draw the last complete deck
+ * list immediately, then refresh it without an empty frame in between.
+ */
+@Stable
+class DecksHomeState {
+    var decks by mutableStateOf<List<DeckSummary>>(emptyList())
+        private set
+
+    var today by mutableStateOf<Map<String, Int>>(emptyMap())
+        private set
+
+    suspend fun reload(container: AppContainer) {
+        val nextDecks = container.deckRepository.decks()
+        val nextToday = runCatching {
+            container.learningRepository.remainingByDeck()
+        }.getOrDefault(emptyMap())
+        decks = nextDecks
+        today = nextToday
+    }
+}
+
+/**
  * The first screen: decks, and how much each of them owes today.
  *
  * This used to be a side tab behind an edge-swipe drawer, while the app opened
@@ -77,6 +104,9 @@ import kotlinx.coroutines.launch
 fun DecksScreen(
     container: AppContainer,
     settings: IknaSettings,
+    state: DecksHomeState,
+    listState: LazyListState,
+    showMemoryField: Boolean,
     onOpenSession: (String?) -> Unit,
     onOpenDeck: (String) -> Unit,
     onOpenStats: () -> Unit,
@@ -86,22 +116,14 @@ fun DecksScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var decks by remember { mutableStateOf<List<DeckSummary>>(emptyList()) }
-    var today by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
-
-    suspend fun reload() {
-        decks = container.deckRepository.decks()
-        // The home screen must survive a bad plan. If the day cannot be built for
-        // any reason, the decks still list — without today's numbers.
-        today = runCatching { container.learningRepository.remainingByDeck() }
-            .getOrDefault(emptyMap())
-    }
+    val decks = state.decks
+    val today = state.today
 
     // Re-runs whenever this screen comes back to the front, so the counts are
     // right after a session instead of a minute stale. Coming back from the
     // add-deck screen lands here too, which is how a deck imported a moment ago
     // is already in the list and already counted.
-    LaunchedEffect(Unit) { reload() }
+    LaunchedEffect(Unit) { state.reload(container) }
 
     val todayTotal = today.values.sum()
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
@@ -127,7 +149,11 @@ fun DecksScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         // Only the unused field carries the lattice. Content remains on plain
         // paper, and the bottom bar paints its own background above it.
-        IknaMemoryField(seed = 0x1A4B_7C2D, modifier = Modifier.fillMaxSize())
+        // Decorative Home grain is removed as soon as another route owns
+        // the foreground. It cannot remain underneath a transparent route frame.
+        if (showMemoryField) {
+            IknaMemoryField(seed = 0x1A4B_7C2D, modifier = Modifier.fillMaxSize())
+        }
         Column(modifier = Modifier.fillMaxSize()) {
         // The name of the app, and nothing else up here. The marks that used to
         // share this row now live in the bar at the bottom of the screen: a phone
@@ -155,6 +181,7 @@ fun DecksScreen(
         }
 
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = Edge),
@@ -179,7 +206,7 @@ fun DecksScreen(
                             // a deck does exactly this, for exactly this reason;
                             // the toggle was the path that forgot to.
                             container.learningRepository.invalidatePlan()
-                            reload()
+                            state.reload(container)
                         }
                     }
                 )

@@ -305,7 +305,11 @@ fun SettingsScreen(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         // Header and jump row stay put; only the settings themselves scroll.
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
             // The glyph box is 44dp with a 19dp mark in it, so it is pulled back

@@ -112,6 +112,8 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
   for the same frame. Forward and Back mirror; motion can be switched off instantly.
 - **Settings stay light on entry:** only visible sections are composed. The jump
   strip targets stable lazy items, and speech warm-up waits until its section is visible.
+- **Back keeps Home continuous:** the populated deck list and its scroll position live
+  above route composition, while opaque clipped route surfaces prevent background bleed.
 - **A widget and one reminder a day**, both opening the cards directly.
 - **Russian, English, Polish, Spanish, French and German** interface, switchable from the system too. The picker stays folded until all languages are requested.
 - **Your answers are append-only** and exported to `Documents/ikna/`, outside the
@@ -427,6 +429,8 @@ ikna учит язык **кусками**: короткая фраза, живо
   не спорят за один кадр. Вперёд и назад зеркальны; анимации можно отключить.
 - **Настройки открываются легко:** создаются только видимые разделы. Полоса
   переходов работает по ленивым элементам, а озвучка ждёт появления своего раздела.
+- **Возврат сохраняет экран колод:** список и прокрутка живут выше маршрута, а
+  непрозрачные обрезанные поверхности не позволяют фонам вкладок смешиваться.
 - **Виджет и одно напоминание в день**, оба открывают сразу карточки.
 - **Русский, английский, польский, испанский, французский и немецкий** интерфейс, переключается и из системы. Список свёрнут, пока не понадобятся все языки.
 - **Ответы только дописываются** и выгружаются в `Documents/ikna/` — вне песочницы

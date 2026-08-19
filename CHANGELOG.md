@@ -51,13 +51,17 @@ The field now remembers its own shape.
   entire document. Its active label still centres with a calm 180 ms rhythm.
 - The daily-target row keeps a reserved line, and speech-engine warm-up starts
   only after both route settlement and the speech section becoming visible.
+- Home deck data and LazyColumn position now live at graph scope. Back renders the
+  previous populated list immediately, then refreshes it without an empty rebuild.
+- The navigation viewport is painted and clipped, Settings owns an opaque surface,
+  and Home grain is disabled whenever another route owns the foreground.
 - Turning Animations off removes both navigation and section motion immediately;
   every existing accessibility behaviour remains intact.
 
 ### Invariants
 
 - Unit tests pin language-seal uniqueness, mirroring, density and deck variation,
-  as well as segmented progress arithmetic, the clear letter window, Shared Axis direction, fixed viewport, non-overlapping fade hand-off and lazy Settings entry.
+  as well as segmented progress arithmetic, the clear letter window, Shared Axis direction, fixed viewport, non-overlapping fade hand-off, lazy Settings entry and Home continuity.
 - This release changes no database schema, scheduler, card content, answer log,
   catalogue format or network permission. No migration is required.
 

@@ -60,6 +60,12 @@ document. The jump strip navigates by item index; its own label-centering motion
 remains separate. Daily-target text reserves a line, while speech-engine warm-up
 waits until the speech section is actually visible.
 
+Home data and its LazyColumn state belong to the navigation graph rather than one
+composition of the Home destination. Back therefore starts from the same populated
+list and scroll position. The NavHost is a painted, clipped viewport; Settings owns
+an opaque background; and Home's decorative grain exists only while Home is the
+foreground route, so route layers cannot visually leak into each other.
+
 Empty space is divided deliberately. The card keeps a completely silent field
 because the phrase is the only object to read. Unused home space may carry a dense
 but faint grain made from hundreds of disconnected dots and very short orthogonal

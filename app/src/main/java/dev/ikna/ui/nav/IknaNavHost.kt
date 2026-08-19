@@ -1,10 +1,12 @@
 package dev.ikna.ui.nav
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -12,10 +14,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalDensity
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dev.ikna.AppContainer
@@ -24,6 +28,7 @@ import dev.ikna.ui.catalog.CatalogScreen
 import dev.ikna.ui.debug.DebugHooks
 import dev.ikna.ui.decks.AddDeckScreen
 import dev.ikna.ui.decks.DeckScreen
+import dev.ikna.ui.decks.DecksHomeState
 import dev.ikna.ui.decks.DecksScreen
 import dev.ikna.ui.onboarding.OnboardingScreen
 import dev.ikna.ui.search.DeckSearchScreen
@@ -32,6 +37,7 @@ import dev.ikna.ui.settings.SettingsScreen
 import dev.ikna.ui.settings.VoiceScreen
 import dev.ikna.ui.stats.StatsScreen
 import dev.ikna.ui.theme.Motion
+import androidx.compose.material3.MaterialTheme
 import dev.ikna.ui.update.UpdateGate
 
 /**
@@ -85,6 +91,15 @@ fun IknaNavHost(
     startSession: Boolean = false
 ) {
     val navController = rememberNavController()
+
+    // Home is removed from composition while a pushed route is open. These two
+    // objects stay at graph scope, so Back restores the populated list and the
+    // exact scroll position before its first visible frame.
+    val decksState = remember { DecksHomeState() }
+    val decksListState = rememberLazyListState()
+    val currentEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = currentEntry?.destination?.route
+
     val sharedAxisTravelPx = with(LocalDensity.current) {
         Motion.sharedAxisTravel.roundToPx()
     }
@@ -131,7 +146,10 @@ fun IknaNavHost(
         }
 
         NavHost(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .clipToBounds(),
             navController = navController,
             startDestination = if (known) Routes.HOME else Routes.ONBOARDING,
             // Forward navigation advances along the x axis; system Back mirrors it.
@@ -165,6 +183,9 @@ fun IknaNavHost(
                 DecksScreen(
                     container = container,
                     settings = settings,
+                    state = decksState,
+                    listState = decksListState,
+                    showMemoryField = currentRoute == null || currentRoute == Routes.HOME,
                     onOpenSession = { deckId -> forward(Routes.session(deckId)) },
                     onOpenDeck = { deckId -> forward(Routes.deck(deckId)) },
                     onOpenStats = { forward(Routes.STATS) },
