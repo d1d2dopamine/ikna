@@ -24,6 +24,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,8 +33,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,7 +54,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -183,10 +184,17 @@ fun SettingsScreen(
         routeSettled = true
     }
 
-    val scroll = rememberScrollState()
-    // Filled in as the sections are laid out, so the pinned row can jump to a
-    // real offset instead of a guessed one.
-    val anchors = remember { mutableStateMapOf<String, Int>() }
+    val listState = rememberLazyListState()
+    val activeSection by remember {
+        derivedStateOf {
+            JUMPS[listState.firstVisibleItemIndex.coerceIn(0, JUMPS.lastIndex)].first
+        }
+    }
+    val speechSectionVisible by remember {
+        derivedStateOf {
+            listState.layoutInfo.visibleItemsInfo.any { it.index == SPEECH_SECTION_INDEX }
+        }
+    }
 
     // The measured norm is shown rather than asked for. The chip says "АВТО" and
     // nothing else; the number goes on its own line, in the same form the font
@@ -206,8 +214,10 @@ fun SettingsScreen(
     // names -- "RU . ORDINARY" next to "default" -- which said nothing about who
     // would read a card and changed nothing anybody could hear.
     var speechStatus by remember { mutableStateOf(SpeakerStatus.UNKNOWN) }
-    LaunchedEffect(routeSettled, settings.speechEnabled) {
-        if (!routeSettled || !settings.speechEnabled) return@LaunchedEffect
+    LaunchedEffect(routeSettled, settings.speechEnabled, speechSectionVisible) {
+        if (!routeSettled || !settings.speechEnabled || !speechSectionVisible) {
+            return@LaunchedEffect
+        }
         speechStatus = if (container.speaker.warmUp()) SpeakerStatus.READY
         else SpeakerStatus.NO_ENGINE
     }
@@ -318,57 +328,35 @@ fun SettingsScreen(
         }
         Spacer(Modifier.height(16.dp))
 
-        // Which section the page is actually showing.
-        //
-        // The row above used to be a one-way remote control: it could send
-        // the page somewhere, and then stood still while the page moved under
-        // it. So the name of the section you were reading could be anywhere,
-        // including scrolled off the edge, and nothing on screen agreed with
-        // anything else. The anchors were already being measured for the jump;
-        // reading them the other way costs one comparison per frame.
-        //
-        // The bias is what makes it feel right rather than merely correct: a
-        // section counts as the current one once its heading has passed the
-        // top by a finger's width, not the instant its first pixel appears.
-        val bias = with(LocalDensity.current) { 120.dp.toPx() }
-        val activeSection by remember(bias) {
-            derivedStateOf {
-                val y = scroll.value + bias
-                JUMPS.lastOrNull { (anchors[it.first] ?: Int.MAX_VALUE) <= y }?.first
-                    ?: JUMPS.first().first
-            }
-        }
+        // Lazy item indices replace measured pixel anchors. Only visible
+        // sections exist, and the first visible item tells the jump strip which
+        // section is active without measuring the full settings document.
         JumpRow(
             activeId = activeSection,
             animations = settings.animations,
             settled = routeSettled
         ) { id ->
-            val target = anchors[id] ?: return@JumpRow
+            val targetIndex = JUMPS.indexOfFirst { it.first == id }
+            if (targetIndex < 0) return@JumpRow
             scope.launch {
                 if (settings.animations) {
-                    scroll.animateScrollTo(
-                        target,
-                        animationSpec = tween(
-                            durationMillis = Motion.sectionScrollDurationMillis,
-                            easing = LinearOutSlowInEasing
-                        )
-                    )
+                    listState.animateScrollToItem(targetIndex)
                 } else {
-                    scroll.scrollTo(target)
+                    listState.scrollToItem(targetIndex)
                 }
             }
         }
         Spacer(Modifier.height(12.dp))
         IknaRule(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.18f))
 
-        Column(
+        LazyColumn(
+            state = listState,
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth()
-                .verticalScroll(scroll)
-                .padding(horizontal = 20.dp)
+                .fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 20.dp)
         ) {
-            Anchored(ID_LOAD, anchors) {
+            item(key = ID_LOAD) {
                 Section(S.t("set.013"), null) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         IknaChip(
@@ -387,14 +375,16 @@ fun SettingsScreen(
                         )
                     }
                     if (settings.autoLoad) {
-                        if (normMeasured && measuredNorm > 0) {
-                            Spacer(Modifier.height(12.dp))
-                            Text(
-                                text = S.t("set.017") + measuredNorm,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            text = if (normMeasured && measuredNorm > 0) {
+                                S.t("set.017") + measuredNorm
+                            } else {
+                                " "
+                            },
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     } else {
                         Spacer(Modifier.height(16.dp))
                         Stepper(
@@ -415,7 +405,7 @@ fun SettingsScreen(
                 }
             }
 
-            Anchored(ID_LOOK, anchors) {
+            item(key = ID_LOOK) {
                 Section(S.t("set.019"), null) {
                     // Which palette, then how it is lit. In that order, because
                     // the palette is the app's face and the mode is only the lamp
@@ -503,7 +493,7 @@ fun SettingsScreen(
                 }
             }
 
-            Anchored(ID_LANGUAGE, anchors) {
+            item(key = ID_LANGUAGE) {
                 Section(S.t("set.024"), null) {
                     // Two chips to a row rather than one full-width chip per
                     // language. A section that grows by a row of forty-four
@@ -546,7 +536,7 @@ fun SettingsScreen(
                 }
             }
 
-            Anchored(ID_SPEECH, anchors) {
+            item(key = ID_SPEECH) {
                 Section(
                     // Marked beta in the heading and off by default. The feature
                     // works, but how good it sounds is decided by an engine this
@@ -679,7 +669,7 @@ fun SettingsScreen(
                 }
             }
 
-            Anchored(ID_FONT, anchors) {
+            item(key = ID_FONT) {
                 Section(
                     S.t("set.040"),
                     S.t("set.041")
@@ -718,7 +708,7 @@ fun SettingsScreen(
                 }
             }
 
-            Anchored(ID_REMINDER, anchors) {
+            item(key = ID_REMINDER) {
                 Section(S.t("set.047"), null) {
                     ToggleRow(
                         title = S.t("set.049"),
@@ -775,7 +765,7 @@ fun SettingsScreen(
             // to go: the offer was gone until the release after it. So the same
             // check lives here, on demand, and here the skipped version is
             // ignored -- pressing the button is the change of mind.
-            Anchored(ID_UPDATE, anchors) {
+            item(key = ID_UPDATE) {
                 Section(S.t("set.138"), S.t("set.139")) {
                     Text(
                         text = S.t("upd.011") + installedVersion(context),
@@ -873,7 +863,7 @@ fun SettingsScreen(
                 }
             }
 
-            Anchored(ID_DATA, anchors) {
+            item(key = ID_DATA) {
                 Section(
                     S.t("set.052"),
                     S.t("set.053")
@@ -1024,7 +1014,7 @@ fun SettingsScreen(
                 }
             }
 
-            Anchored(ID_ADVANCED, anchors) {
+            item(key = ID_ADVANCED) {
                 Section(S.t("set.063"), null) {
                     IknaTextButton(
                         label = if (advancedOpen) S.t("set.065") else S.t("set.066"),
@@ -1132,15 +1122,21 @@ fun SettingsScreen(
                 }
             }
 
-            message?.let {
-                Spacer(Modifier.height(20.dp))
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            if (message != null) {
+                item(key = "settings-message") {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Spacer(Modifier.height(20.dp))
+                        Text(
+                            text = message.orEmpty(),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
-            Spacer(Modifier.height(40.dp))
+            item(key = "settings-bottom-space") {
+                Spacer(Modifier.height(40.dp))
+            }
         }
     }
 
@@ -1250,32 +1246,6 @@ private fun JumpRow(
                 }
             }
         }
-    }
-}
-
-/** Remembers where a section starts, so the row above can scroll straight to it. */
-@Composable
-private fun Anchored(
-    id: String,
-    anchors: MutableMap<String, Int>,
-    content: @Composable () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .onGloballyPositioned { coords ->
-                // positionInParent() reads better, but it is an extension that has
-                // to be imported, and the import was missing — nothing here could
-                // tell me that until a build reached this file. The parent's own
-                // coordinates answer the same question using members only.
-                val y = coords.parentLayoutCoordinates
-                    ?.localPositionOf(coords, Offset.Zero)
-                    ?.y
-                    ?: 0f
-                anchors[id] = y.roundToInt()
-            }
-    ) {
-        content()
     }
 }
 
@@ -1586,6 +1556,8 @@ private val JUMPS = listOf(
     ID_UPDATE to "set.140",
     ID_ADVANCED to "set.098"
 )
+
+private val SPEECH_SECTION_INDEX = JUMPS.indexOfFirst { it.first == ID_SPEECH }
 
 /**
  * Interface languages. English and Polish are here because the app is used in

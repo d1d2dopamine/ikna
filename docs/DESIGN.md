@@ -54,6 +54,12 @@ interfaces never remain readable in one frame. Translation finishes in 280 ms.
 There is no full-width shove, crop, scan, blur, spring or flash, and disabling
 animations replaces every screen immediately.
 
+Settings is a pinned header over a lazy list of nine stable section items. Entry
+composes only the visible controls instead of measuring the complete settings
+document. The jump strip navigates by item index; its own label-centering motion
+remains separate. Daily-target text reserves a line, while speech-engine warm-up
+waits until the speech section is actually visible.
+
 Empty space is divided deliberately. The card keeps a completely silent field
 because the phrase is the only object to read. Unused home space may carry a dense
 but faint grain made from hundreds of disconnected dots and very short orthogonal

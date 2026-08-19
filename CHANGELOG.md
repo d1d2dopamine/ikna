@@ -45,17 +45,19 @@ The field now remembers its own shape.
 - Fade-out owns the first 90 ms and fade-in starts only after that hand-off. The
   two route interfaces are never readable together, removing the stacked-layout
   flicker without a full-width shove, crop, scan, blur, bounce, spring or flash.
-- Settings defers its database labels, speech-engine warm-up and nested jump-row
-  motion until the route transition has settled.
-- The Settings jump row keeps its own calm 180 ms rhythm, centres its active
-  section and marks it with three small cells.
+- Settings uses a lazy section list: only the visible controls are composed and
+  measured during entry, while off-screen groups wait until they are approached.
+- The Settings jump row targets stable lazy-item indices instead of measuring the
+  entire document. Its active label still centres with a calm 180 ms rhythm.
+- The daily-target row keeps a reserved line, and speech-engine warm-up starts
+  only after both route settlement and the speech section becoming visible.
 - Turning Animations off removes both navigation and section motion immediately;
   every existing accessibility behaviour remains intact.
 
 ### Invariants
 
 - Unit tests pin language-seal uniqueness, mirroring, density and deck variation,
-  as well as segmented progress arithmetic, the clear letter window, Shared Axis direction, fixed viewport and non-overlapping fade hand-off.
+  as well as segmented progress arithmetic, the clear letter window, Shared Axis direction, fixed viewport, non-overlapping fade hand-off and lazy Settings entry.
 - This release changes no database schema, scheduler, card content, answer log,
   catalogue format or network permission. No migration is required.
 

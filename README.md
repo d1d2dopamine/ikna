@@ -110,6 +110,8 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
   segmented progress and a soft 280 ms Shared Axis X transition. The route
   viewport stays fixed and the fade has one hand-off, so two screens never fight
   for the same frame. Forward and Back mirror; motion can be switched off instantly.
+- **Settings stay light on entry:** only visible sections are composed. The jump
+  strip targets stable lazy items, and speech warm-up waits until its section is visible.
 - **A widget and one reminder a day**, both opening the cards directly.
 - **Russian, English, Polish, Spanish, French and German** interface, switchable from the system too. The picker stays folded until all languages are requested.
 - **Your answers are append-only** and exported to `Documents/ikna/`, outside the
@@ -423,6 +425,8 @@ ikna учит язык **кусками**: короткая фраза, живо
   знаки, сегментированный прогресс и мягкий Shared Axis X на 280 мс.
   Область экрана зафиксирована, а затухания не пересекаются: две вкладки больше
   не спорят за один кадр. Вперёд и назад зеркальны; анимации можно отключить.
+- **Настройки открываются легко:** создаются только видимые разделы. Полоса
+  переходов работает по ленивым элементам, а озвучка ждёт появления своего раздела.
 - **Виджет и одно напоминание в день**, оба открывают сразу карточки.
 - **Русский, английский, польский, испанский, французский и немецкий** интерфейс, переключается и из системы. Список свёрнут, пока не понадобятся все языки.
 - **Ответы только дописываются** и выгружаются в `Documents/ikna/` — вне песочницы
