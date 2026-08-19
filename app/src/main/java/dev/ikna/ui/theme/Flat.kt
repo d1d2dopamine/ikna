@@ -1,5 +1,11 @@
 package dev.ikna.ui.theme
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,6 +18,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,6 +29,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -275,7 +283,16 @@ fun IknaWideButton(
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
     val paper = MaterialTheme.colorScheme.background
-    val alpha = (if (enabled) 1f else 0.35f) * (if (quiet) 0.6f else 1f)
+    val motionEnabled = LocalIknaMotionEnabled.current
+    val targetAlpha = (if (enabled) 1f else 0.35f) * (if (quiet) 0.6f else 1f)
+    val alpha by animateFloatAsState(
+        targetValue = targetAlpha,
+        animationSpec = if (motionEnabled) tween(
+            durationMillis = Motion.controlChangeDurationMillis,
+            easing = LinearOutSlowInEasing
+        ) else snap(),
+        label = "wide-button-alpha"
+    )
 
     Box(
         modifier = modifier
@@ -310,7 +327,15 @@ fun IknaTextButton(
     enabled: Boolean = true,
     color: Color = MaterialTheme.colorScheme.onBackground
 ) {
-    val alpha = if (enabled) 1f else 0.35f
+    val motionEnabled = LocalIknaMotionEnabled.current
+    val alpha by animateFloatAsState(
+        targetValue = if (enabled) 1f else 0.35f,
+        animationSpec = if (motionEnabled) tween(
+            durationMillis = Motion.controlChangeDurationMillis,
+            easing = LinearOutSlowInEasing
+        ) else snap(),
+        label = "text-button-alpha"
+    )
     Box(
         modifier = modifier
             .height(44.dp)
@@ -330,9 +355,8 @@ fun IknaTextButton(
 /**
  * A switch made of two rectangles.
  *
- * The knob does not slide and does not animate: the state is read from where the
- * filled block sits, and an animation on a control this small only makes the
- * current state ambiguous for 150ms.
+ * The filled block travels only the 24 dp between its two unambiguous end states.
+ * It never bounces and snaps immediately when the app's Animations switch is off.
  */
 @Composable
 fun IknaToggle(
@@ -350,6 +374,24 @@ fun IknaToggle(
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
     val alpha = if (enabled) 1f else 0.35f
+    val motionEnabled = LocalIknaMotionEnabled.current
+    val knobOffset by animateDpAsState(
+        targetValue = if (checked) 24.dp else 0.dp,
+        animationSpec = if (motionEnabled) tween(
+            durationMillis = Motion.controlChangeDurationMillis,
+            easing = LinearOutSlowInEasing
+        ) else snap(),
+        label = "toggle-position"
+    )
+    val knobColor by animateColorAsState(
+        targetValue = if (checked) ink.copy(alpha = alpha)
+        else ink.copy(alpha = 0.22f * alpha),
+        animationSpec = if (motionEnabled) tween(
+            durationMillis = Motion.controlChangeDurationMillis,
+            easing = LinearOutSlowInEasing
+        ) else snap(),
+        label = "toggle-fill"
+    )
 
     Box(
         modifier = modifier
@@ -367,15 +409,13 @@ fun IknaToggle(
                 onValueChange = onCheckedChange
             )
             .padding(4.dp),
-        contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart
+        contentAlignment = Alignment.CenterStart
     ) {
         Box(
             modifier = Modifier
+                .offset(x = knobOffset)
                 .size(width = 24.dp, height = 24.dp)
-                .background(
-                    if (checked) ink.copy(alpha = alpha)
-                    else ink.copy(alpha = 0.22f * alpha)
-                )
+                .background(knobColor)
         )
     }
 }
@@ -391,12 +431,37 @@ fun IknaChip(
     val ink = MaterialTheme.colorScheme.onBackground
     val paper = MaterialTheme.colorScheme.background
     val line = MaterialTheme.colorScheme.outline
+    val motionEnabled = LocalIknaMotionEnabled.current
+    val fillColor by animateColorAsState(
+        targetValue = if (selected) ink else Color.Transparent,
+        animationSpec = if (motionEnabled) tween(
+            durationMillis = Motion.controlChangeDurationMillis,
+            easing = LinearOutSlowInEasing
+        ) else snap(),
+        label = "chip-fill"
+    )
+    val borderColor by animateColorAsState(
+        targetValue = if (selected) ink else line,
+        animationSpec = if (motionEnabled) tween(
+            durationMillis = Motion.controlChangeDurationMillis,
+            easing = LinearOutSlowInEasing
+        ) else snap(),
+        label = "chip-border"
+    )
+    val labelColor by animateColorAsState(
+        targetValue = if (selected) paper else ink,
+        animationSpec = if (motionEnabled) tween(
+            durationMillis = Motion.controlChangeDurationMillis,
+            easing = LinearOutSlowInEasing
+        ) else snap(),
+        label = "chip-label"
+    )
 
     Box(
         modifier = modifier
             .height(40.dp)
-            .background(if (selected) ink else Color.Transparent)
-            .border(1.dp, if (selected) ink else line)
+            .background(fillColor)
+            .border(1.dp, borderColor)
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center
@@ -404,7 +469,7 @@ fun IknaChip(
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = if (selected) paper else ink,
+            color = labelColor,
             maxLines = 1
         )
     }
@@ -597,7 +662,7 @@ fun IknaRule(
 }
 
 /**
- * Progress as a row of memory cells, no rounding and no animation.
+ * Progress as a row of memory cells, no rounding and no decorative motion.
  *
  * The gaps are the important part. A solid strip looks like a download widget
  * wherever it appears; a sequence of cells reads as material being introduced
@@ -617,9 +682,18 @@ fun IknaProgress(
     segments: Int = 24
 ) {
     val safe = fraction.coerceIn(0f, 1f)
+    val motionEnabled = LocalIknaMotionEnabled.current
+    val shownFraction by animateFloatAsState(
+        targetValue = safe,
+        animationSpec = if (motionEnabled) tween(
+            durationMillis = Motion.progressChangeDurationMillis,
+            easing = LinearOutSlowInEasing
+        ) else snap(),
+        label = "segmented-progress"
+    )
     val trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.45f)
     val count = segments.coerceIn(1, 64)
-    val fill = segmentFill(safe, count)
+    val fill = segmentFill(shownFraction, count)
     Canvas(
         modifier = modifier
             .fillMaxWidth()

@@ -55,13 +55,17 @@ The field now remembers its own shape.
   previous populated list immediately, then refreshes it without an empty rebuild.
 - The navigation viewport is painted and clipped, Settings owns an opaque surface,
   and Home grain is disabled whenever another route owns the foreground.
+- Fast Settings flings no longer trigger simultaneous horizontal jump-strip motion:
+  section tracking recomposes in a small scope and the strip recentres after rest.
+- Switches, chips, enabled controls, conditional settings content and segmented
+  progress use short non-bouncing interpolation, all governed by Animations.
 - Turning Animations off removes both navigation and section motion immediately;
   every existing accessibility behaviour remains intact.
 
 ### Invariants
 
 - Unit tests pin language-seal uniqueness, mirroring, density and deck variation,
-  as well as segmented progress arithmetic, the clear letter window, Shared Axis direction, fixed viewport, non-overlapping fade hand-off, lazy Settings entry and Home continuity.
+  as well as segmented progress arithmetic, the clear letter window, Shared Axis direction, fixed viewport, non-overlapping fade hand-off, lazy Settings entry, Home continuity and fling isolation.
 - This release changes no database schema, scheduler, card content, answer log,
   catalogue format or network permission. No migration is required.
 

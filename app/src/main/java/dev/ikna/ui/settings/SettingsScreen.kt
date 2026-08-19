@@ -15,7 +15,9 @@ import android.provider.OpenableColumns
 import android.speech.tts.TextToSpeech
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,6 +36,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
@@ -86,6 +89,7 @@ import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaSwatch
 import dev.ikna.ui.theme.IknaPalettes
+import dev.ikna.ui.theme.LocalIknaMotionEnabled
 import dev.ikna.ui.theme.MIN_READABLE_CONTRAST
 import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.theme.contrastRatio
@@ -185,11 +189,6 @@ fun SettingsScreen(
     }
 
     val listState = rememberLazyListState()
-    val activeSection by remember {
-        derivedStateOf {
-            JUMPS[listState.firstVisibleItemIndex.coerceIn(0, JUMPS.lastIndex)].first
-        }
-    }
     val speechSectionVisible by remember {
         derivedStateOf {
             listState.layoutInfo.visibleItemsInfo.any { it.index == SPEECH_SECTION_INDEX }
@@ -335,8 +334,8 @@ fun SettingsScreen(
         // Lazy item indices replace measured pixel anchors. Only visible
         // sections exist, and the first visible item tells the jump strip which
         // section is active without measuring the full settings document.
-        JumpRow(
-            activeId = activeSection,
+        SettingsJumpRow(
+            listState = listState,
             animations = settings.animations,
             settled = routeSettled
         ) { id ->
@@ -360,7 +359,7 @@ fun SettingsScreen(
                 .fillMaxWidth(),
             contentPadding = PaddingValues(horizontal = 20.dp)
         ) {
-            item(key = ID_LOAD) {
+            item(key = ID_LOAD, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
                 Section(S.t("set.013"), null) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         IknaChip(
@@ -409,7 +408,7 @@ fun SettingsScreen(
                 }
             }
 
-            item(key = ID_LOOK) {
+            item(key = ID_LOOK, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
                 Section(S.t("set.019"), null) {
                     // Which palette, then how it is lit. In that order, because
                     // the palette is the app's face and the mode is only the lamp
@@ -497,7 +496,7 @@ fun SettingsScreen(
                 }
             }
 
-            item(key = ID_LANGUAGE) {
+            item(key = ID_LANGUAGE, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
                 Section(S.t("set.024"), null) {
                     // Two chips to a row rather than one full-width chip per
                     // language. A section that grows by a row of forty-four
@@ -540,7 +539,7 @@ fun SettingsScreen(
                 }
             }
 
-            item(key = ID_SPEECH) {
+            item(key = ID_SPEECH, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
                 Section(
                     // Marked beta in the heading and off by default. The feature
                     // works, but how good it sounds is decided by an engine this
@@ -673,7 +672,7 @@ fun SettingsScreen(
                 }
             }
 
-            item(key = ID_FONT) {
+            item(key = ID_FONT, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
                 Section(
                     S.t("set.040"),
                     S.t("set.041")
@@ -712,7 +711,7 @@ fun SettingsScreen(
                 }
             }
 
-            item(key = ID_REMINDER) {
+            item(key = ID_REMINDER, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
                 Section(S.t("set.047"), null) {
                     ToggleRow(
                         title = S.t("set.049"),
@@ -769,7 +768,7 @@ fun SettingsScreen(
             // to go: the offer was gone until the release after it. So the same
             // check lives here, on demand, and here the skipped version is
             // ignored -- pressing the button is the change of mind.
-            item(key = ID_UPDATE) {
+            item(key = ID_UPDATE, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
                 Section(S.t("set.138"), S.t("set.139")) {
                     Text(
                         text = S.t("upd.011") + installedVersion(context),
@@ -867,7 +866,7 @@ fun SettingsScreen(
                 }
             }
 
-            item(key = ID_DATA) {
+            item(key = ID_DATA, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
                 Section(
                     S.t("set.052"),
                     S.t("set.053")
@@ -1018,7 +1017,7 @@ fun SettingsScreen(
                 }
             }
 
-            item(key = ID_ADVANCED) {
+            item(key = ID_ADVANCED, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
                 Section(S.t("set.063"), null) {
                     IknaTextButton(
                         label = if (advancedOpen) S.t("set.065") else S.t("set.066"),
@@ -1164,6 +1163,34 @@ fun SettingsScreen(
 }
 
 /**
+ * Reads scroll state in a small restart scope. A fast fling can change the first
+ * visible section several times without recomposing the settings document.
+ */
+@Composable
+private fun SettingsJumpRow(
+    listState: LazyListState,
+    animations: Boolean,
+    settled: Boolean,
+    onJump: (String) -> Unit
+) {
+    val activeId by remember(listState) {
+        derivedStateOf {
+            JUMPS[listState.firstVisibleItemIndex.coerceIn(0, JUMPS.lastIndex)].first
+        }
+    }
+    val verticalScrolling by remember(listState) {
+        derivedStateOf { listState.isScrollInProgress }
+    }
+    JumpRow(
+        activeId = activeId,
+        animations = animations,
+        settled = settled,
+        verticalScrolling = verticalScrolling,
+        onJump = onJump
+    )
+}
+
+/**
  * The pinned row of jumps.
  *
  * This is the whole answer to "menu or canvas": it gives the one thing a menu is
@@ -1176,6 +1203,7 @@ private fun JumpRow(
     activeId: String,
     animations: Boolean,
     settled: Boolean,
+    verticalScrolling: Boolean,
     onJump: (String) -> Unit
 ) {
     val row = rememberScrollState()
@@ -1189,8 +1217,11 @@ private fun JumpRow(
     // The turn. Not a jump to the edge: the label of the section being read ends
     // up in the middle, which is the only position that reads as "you are here"
     // rather than "here is a list".
-    LaunchedEffect(activeId, rowWidth, animations, settled) {
-        if (!settled || rowWidth == 0) return@LaunchedEffect
+    LaunchedEffect(activeId, rowWidth, animations, settled, verticalScrolling) {
+        // Do not run a second scroll animation while the main list is moving.
+        // When it settles, verticalScrolling becomes false and this effect
+        // recentres the final active label once.
+        if (!settled || verticalScrolling || rowWidth == 0) return@LaunchedEffect
         val spot = spots[activeId] ?: return@LaunchedEffect
         val middle = spot.first + (spot.last - spot.first) / 2
         val target = (middle - rowWidth / 2).coerceIn(0, row.maxValue)
@@ -1319,7 +1350,17 @@ private fun Section(
         )
     }
     Spacer(Modifier.height(12.dp))
-    content()
+    val motionEnabled = LocalIknaMotionEnabled.current
+    Column(
+        modifier = Modifier.animateContentSize(
+            animationSpec = if (motionEnabled) tween(
+                durationMillis = Motion.contentChangeDurationMillis,
+                easing = LinearOutSlowInEasing
+            ) else snap()
+        )
+    ) {
+        content()
+    }
 }
 
 @Composable
@@ -1533,6 +1574,8 @@ private fun PaletteTiles(
 
 /** The one word in the app that is never translated. */
 private const val WORDMARK = "ikna"
+
+private const val SETTINGS_SECTION_CONTENT_TYPE = "settings-section"
 
 private const val ID_LOAD = "load"
 private const val ID_LOOK = "look"

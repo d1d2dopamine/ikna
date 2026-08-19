@@ -56,7 +56,9 @@ animations replaces every screen immediately.
 
 Settings is a pinned header over a lazy list of nine stable section items. Entry
 composes only the visible controls instead of measuring the complete settings
-document. The jump strip navigates by item index; its own label-centering motion
+document. Scroll-derived section tracking lives in a small recomposition scope,
+and the pinned strip never starts horizontal centring during a vertical fling.
+The jump strip navigates by item index; its own label-centering motion
 remains separate. Daily-target text reserves a line, while speech-engine warm-up
 waits until the speech section is actually visible.
 
@@ -65,6 +67,11 @@ composition of the Home destination. Back therefore starts from the same populat
 list and scroll position. The NavHost is a painted, clipped viewport; Settings owns
 an opaque background; and Home's decorative grain exists only while Home is the
 foreground route, so route layers cannot visually leak into each other.
+
+Control motion is deliberately local: 160 ms for switches, chips and enabled
+states, 200 ms for conditional settings height, and 260 ms for segmented progress.
+Nothing loops or bounces. Every one of these transitions reads the same Animations
+preference as navigation and snaps to its destination when motion is disabled.
 
 Empty space is divided deliberately. The card keeps a completely silent field
 because the phrase is the only object to read. Unused home space may carry a dense

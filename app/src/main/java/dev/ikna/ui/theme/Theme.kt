@@ -614,6 +614,7 @@ fun rememberContentFont(fontName: String): FontFamily? {
 fun IknaTheme(
     palette: IknaPalette = DarkPalette,
     contentFont: FontFamily? = null,
+    motionEnabled: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val scheme = schemeOf(palette)
@@ -636,7 +637,10 @@ fun IknaTheme(
         // all — rendered black on both themes.
         //
         // Both are fixed here once, for every screen, instead of per call site.
-        CompositionLocalProvider(LocalContentColor provides palette.ink) {
+        CompositionLocalProvider(
+            LocalContentColor provides palette.ink,
+            LocalIknaMotionEnabled provides motionEnabled
+        ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()

@@ -85,7 +85,11 @@ class MainActivity : ComponentActivity() {
             // them knowing that a custom font is a possibility.
             val contentFont = rememberContentFont(settings.fontName)
 
-            IknaTheme(palette = palette, contentFont = contentFont) {
+            IknaTheme(
+                palette = palette,
+                contentFont = contentFont,
+                motionEnabled = settings.animations
+            ) {
                 when (schedulerMigration) {
                     is SchedulerMigrationState.Ready -> IknaNavHost(
                         container = container,

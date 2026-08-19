@@ -6,6 +6,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
@@ -80,6 +81,13 @@ fun Modifier.readable(): Modifier = this.widthIn(max = ReadableWidth)
  * Nothing here loops, pulses or breathes. Motion in this app is feedback, and
  * feedback that repeats itself is decoration.
  */
+/**
+ * Whether restrained interface feedback may animate. The app-level setting is
+ * provided once by IknaTheme, so primitives never invent their own accessibility
+ * policy and an in-flight transition snaps to its destination when motion is off.
+ */
+val LocalIknaMotionEnabled = staticCompositionLocalOf { true }
+
 object Motion {
     /** A complete Shared Axis X route change. */
     const val sharedAxisDurationMillis = 280
@@ -98,6 +106,15 @@ object Motion {
 
     /** Settings section jumps use the same calm rhythm, not navigation geometry. */
     const val sectionScrollDurationMillis = 180
+
+    /** Switches, chips and enabled states acknowledge a deliberate tap. */
+    const val controlChangeDurationMillis = 160
+
+    /** Conditional settings content changes shape without jumping. */
+    const val contentChangeDurationMillis = 200
+
+    /** Progress follows real work while filtering noisy per-chunk updates. */
+    const val progressChangeDurationMillis = 260
 
     /** Back to rest, under the finger. Slightly underdamped: it has weight. */
     val settle: AnimationSpec<Float> =

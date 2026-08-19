@@ -114,6 +114,9 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
   strip targets stable lazy items, and speech warm-up waits until its section is visible.
 - **Back keeps Home continuous:** the populated deck list and its scroll position live
   above route composition, while opaque clipped route surfaces prevent background bleed.
+- **Fast scrolling stays dedicated to the list:** the pinned Settings strip waits for a
+  fling to finish, while switches, chips, expandable content and progress use short,
+  non-bouncing transitions that obey the Animations preference.
 - **A widget and one reminder a day**, both opening the cards directly.
 - **Russian, English, Polish, Spanish, French and German** interface, switchable from the system too. The picker stays folded until all languages are requested.
 - **Your answers are append-only** and exported to `Documents/ikna/`, outside the
@@ -431,6 +434,9 @@ ikna учит язык **кусками**: короткая фраза, живо
   переходов работает по ленивым элементам, а озвучка ждёт появления своего раздела.
 - **Возврат сохраняет экран колод:** список и прокрутка живут выше маршрута, а
   непрозрачные обрезанные поверхности не позволяют фонам вкладок смешиваться.
+- **Быстрая прокрутка принадлежит только списку:** закреплённая полоса настроек ждёт
+  окончания инерции, а переключатели, чипы, раскрытие и прогресс используют короткие
+  переходы без пружин и подчиняются общему тумблеру анимаций.
 - **Виджет и одно напоминание в день**, оба открывают сразу карточки.
 - **Русский, английский, польский, испанский, французский и немецкий** интерфейс, переключается и из системы. Список свёрнут, пока не понадобятся все языки.
 - **Ответы только дописываются** и выгружаются в `Documents/ikna/` — вне песочницы
