@@ -553,17 +553,17 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// Повторений впереди и так много — новые слова подождут.
 	"sess.021" to "Powtórek przed tobą i tak dużo — nowe słowa poczekają.",
 	// Сначала разбираем накопившееся, потом новое.
-	"sess.022" to "Najpierw ogarniamy to, co się nazbierało, potem nowe.",
+	"sess.022" to "Dziś tylko najważniejsze powtórki; nowy materiał wróci, gdy będzie na niego miejsce.",
 	// После перерыва сначала разогрев на старом.
-	"sess.023" to "Po przerwie najpierw rozgrzewka na starym.",
+	"sess.023" to "Witaj z powrotem. Zaczniemy od krótkiego, znajomego kroku.",
 	// Неделя вышла тихая — новое подождёт, сроки уже сдвинуты, долгов нет.
-	"sess.024" to "Tydzień wyszedł cichy — nowe poczeka, terminy już przesunięte, długów nie ma.",
+	"sess.024" to "Spokojny tydzień — nowe może poczekać, terminy już się dostosowały.",
 	// Для новых чанков поздно — познакомимся утром, повторения на месте.
 	"sess.025" to "Na nowe chunki za późno — poznamy je rano, powtórki zostają.",
 	// Пока старое не закрепится — без новых.
 	"sess.026" to "Dopóki stare się nie utrwali — bez nowych.",
 	// Режим возвращения: несколько коротких дней, без долгов.
-	"sess.027" to "Tryb powrotu: kilka krótkich dni, bez długów.",
+	"sess.027" to "Witaj z powrotem. Plan już dopasował się do twojego rytmu. Dziś jeden krótki, skończony krok. Kontynuuj od miejsca, w którym jesteś.",
 	// Добавлю хотя бы один новый чанк, чтобы не стоять на месте.
 	"sess.028" to "Dodam choć jeden nowy chunk, żeby nie stać w miejscu.",
 	// Новых чанков здесь больше нет — все уже знакомы. Повторения продолжат приходить по срокам,
@@ -844,4 +844,35 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"diag.006" to "KOPIUJ PODSUMOWANIE",
 	"diag.007" to "Skopiowano diagnostykę",
 	"diag.008" to "Nie udało się zebrać diagnostyki",
+
+    "anki.001" to "Z Anki",
+    "anki.002" to "Wybierz jeden plik .apkg. Talie, czytelny tekst kart i dostępna historia pozostają lokalnie w telefonie.",
+    "anki.003" to "Najlepiej wyeksportować także historię planowania. Czytane są starsze SQLite i nowoczesne pakiety zstd; nieobsługiwane szablony pojawią się w raporcie.",
+    "anki.004" to "Język importowanych kart",
+    "anki.005" to "WYBIERZ .APKG",
+    "anki.006" to "ODCZYT PAKIETU I ODTWARZANIE HISTORII…",
+    "anki.007" to "Możesz opuścić ekran; import trwa dalej. Baza zmieni się dopiero w całości po sukcesie.",
+    "anki.008" to "Talie: ",
+    "anki.009" to "Karty: ",
+    "anki.010" to "Dodane wpisy historii: ",
+    "anki.011" to "Istniejące lub pominięte wpisy: ",
+    "anki.012" to "Wstrzymane lub zakopane w Anki, nie dodane: ",
+    "anki.013" to "Pominięte nieczytelne karty: ",
+    "anki.014" to "Karty z mediami zaimportowane jako tekst: ",
+    "anki.015" to "Historia jest bardzo duża: użyto najnowszych 100 000 ocen. Limit opisuje specyfikacja.",
+    "anki.016" to "GOTOWE",
+    "anki.017" to "IMPORTUJ KOLEJNY",
+    "anki.018" to "Nie udało się odczytać tego .apkg.",
+    "anki.019" to "Pakiet nie zawiera kolekcji Anki.",
+    "anki.020" to "Ten format kolekcji nie jest jeszcze obsługiwany. Wyeksportuj ponownie z obsługą starszych wersji Anki.",
+    "anki.021" to "Kolekcja SQLite jest uszkodzona albo ma nieobsługiwany schemat.",
+    "anki.022" to "Pakiet przekracza bezpieczny limit 300 MB. Dane nie zmieniły się.",
+    "anki.023" to "Pakiet nie ma czytelnych kart tekstowych. Dane nie zmieniły się.",
+    "anki.024" to "Nic się nie zmieniło — popraw eksport i spróbuj ponownie.",
+    "anki.025" to "Anki Bridge",
+    "anki.026" to "Przenieś .apkg w telefonie: talie i historię ocen bez ręcznego odtwarzania.",
+    "anki.027" to "IMPORTUJ Z ANKI",
+    "anki.028" to "Interwały Anki nie są kopiowane wprost: oceny są odtwarzane przez FSRS-6 ikna.",
+    "anki.029" to "Źródłowy plik Anki pozostaje bez zmian. CSS, JavaScript i media nie są uruchamiane ani kopiowane.",
+    "anki.030" to "Karty odtworzone z pól w trybie uproszczonym: ",
 )

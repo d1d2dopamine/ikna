@@ -553,17 +553,17 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Повторений впереди и так много — новые слова подождут.
 	"sess.021" to "There are plenty of reviews ahead already — new words will wait.",
 	// Сначала разбираем накопившееся, потом новое.
-	"sess.022" to "First we clear what piled up, then the new.",
+	"sess.022" to "Only the most useful reviews today; new material returns when there is room.",
 	// После перерыва сначала разогрев на старом.
-	"sess.023" to "After a break, a warm-up on the old first.",
+	"sess.023" to "Welcome back. We will start with one short, familiar step.",
 	// Неделя вышла тихая — новое подождёт, сроки уже сдвинуты, долгов нет.
-	"sess.024" to "The week came out quiet — the new will wait, the dates are already shifted, there are no debts.",
+	"sess.024" to "A quiet week — new material can wait; the dates have already adapted.",
 	// Для новых чанков поздно — познакомимся утром, повторения на месте.
 	"sess.025" to "Too late for new chunks — we will meet them in the morning, reviews stay.",
 	// Пока старое не закрепится — без новых.
 	"sess.026" to "Until the old settles — no new ones.",
 	// Режим возвращения: несколько коротких дней, без долгов.
-	"sess.027" to "Return mode: a few short days, no debts.",
+	"sess.027" to "Welcome back. The plan has already adapted to your rhythm. Today is one short, finite step. Continue from where you are now.",
 	// Добавлю хотя бы один новый чанк, чтобы не стоять на месте.
 	"sess.028" to "I will add at least one new chunk so we do not stand still.",
 	// Новых чанков здесь больше нет — все уже знакомы. Повторения продолжат приходить по срокам,
@@ -844,4 +844,35 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"diag.006" to "COPY THE SUMMARY",
 	"diag.007" to "Diagnostics copied",
 	"diag.008" to "Could not gather diagnostics",
+
+    "anki.001" to "From Anki",
+    "anki.002" to "Choose one .apkg file. Decks, readable card text and available review history stay local on this phone.",
+    "anki.003" to "For the best result, include scheduling history when exporting. Legacy SQLite and modern zstd packages are read; unsupported templates are counted in the report.",
+    "anki.004" to "Language of imported cards",
+    "anki.005" to "CHOOSE .APKG",
+    "anki.006" to "READING THE PACKAGE AND REPLAYING HISTORY…",
+    "anki.007" to "You can leave this screen; the import continues. The database changes together only after success.",
+    "anki.008" to "Decks: ",
+    "anki.009" to "Cards: ",
+    "anki.010" to "Review events added: ",
+    "anki.011" to "Existing or skipped review events: ",
+    "anki.012" to "Suspended or buried in Anki, not added: ",
+    "anki.013" to "Unreadable cards skipped: ",
+    "anki.014" to "Cards with media references imported as text: ",
+    "anki.015" to "The history is very large: the newest 100,000 ratings were used. The limit is recorded in the follow-up specification.",
+    "anki.016" to "DONE",
+    "anki.017" to "IMPORT ANOTHER",
+    "anki.018" to "This .apkg could not be read.",
+    "anki.019" to "The package does not contain an Anki collection.",
+    "anki.020" to "This collection format is not supported yet. Export again with “Support older Anki versions” enabled.",
+    "anki.021" to "The SQLite collection is damaged or uses an unsupported schema.",
+    "anki.022" to "The package is over the safe 300 MB limit. No data changed.",
+    "anki.023" to "The package contains no readable text cards. No data changed.",
+    "anki.024" to "Nothing changed — fix the export and try again.",
+    "anki.025" to "Anki Bridge",
+    "anki.026" to "Bring an .apkg over on the phone: decks and rating history without rebuilding them by hand.",
+    "anki.027" to "IMPORT FROM ANKI",
+    "anki.028" to "Anki intervals are not copied blindly: ratings are replayed through ikna’s FSRS-6.",
+    "anki.029" to "The source Anki file is untouched. CSS, JavaScript and media files are neither executed nor copied.",
+    "anki.030" to "Cards recovered from fields with a simplified fallback: ",
 )

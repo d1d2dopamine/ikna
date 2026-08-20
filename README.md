@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.8.0-press"><img src="https://img.shields.io/badge/release-0.8.0%20press-crimson?style=flat-square" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.9.0-press"><img src="https://img.shields.io/badge/release-0.9.0%20press-crimson?style=flat-square" alt="release"></a>
   <a href="https://github.com/d1d2dopamine/ikna/releases"><img src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?label=downloads&style=flat-square&logo=github&color=blueviolet" alt="downloads"></a>
   <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.8.0-press/ikna-v0.8.0-press.apk"><strong>Download</strong></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.9.0-press/ikna-v0.9.0-press.apk"><strong>Download</strong></a>
   &nbsp;·&nbsp;
   <a href="CHANGELOG.md">Changelog</a>
   &nbsp;·&nbsp;
@@ -65,13 +65,13 @@ sans-serif faces and reads as a lower case L, so "Ikna" invites being read as
 
 | Platform | File in the release |
 | --- | --- |
-| **Android** 10+ (`minSdk 29`) | `ikna-v0.8.0-press.apk` (~40 MB) |
+| **Android** 10+ (`minSdk 29`) | `ikna-v0.9.0-press.apk` (~40 MB) |
 
-**[Download ikna-v0.8.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.8.0-press/ikna-v0.8.0-press.apk)** ·
-[all files](https://github.com/d1d2dopamine/ikna/releases/tag/v0.8.0-press)
+**[Download ikna-v0.9.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.9.0-press/ikna-v0.9.0-press.apk)** ·
+[all files](https://github.com/d1d2dopamine/ikna/releases/tag/v0.9.0-press)
 
 The file above is for every phone sold since roughly 2017. Older 32-bit ones
-take `ikna-v0.8.0-press-legacy32.apk` from the same page: the same app, built
+take `ikna-v0.9.0-press-legacy32.apk` from the same page: the same app, built
 for the one architecture they can run.
 
 Download it and open it; Android asks once whether to allow installing from this
@@ -105,7 +105,12 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
 - **Make a deck with any AI.** The app gives you a written prompt; you paste the
   answer back. Three columns, one line per card.
 - **Share a deck** as plain text that imports on any other phone.
-- **Twelve palettes**, each in two lightings, plus any font file on the phone.
+- **Move in from Anki.** Pick an `.apkg` on the phone, read a compatibility report,
+  then import the text cards and up to the newest 100,000 review events. Nothing is
+  uploaded, the package is never modified and imported HTML never runs.
+- **Twelve palettes**, each in two lightings, plus any font file on the phone. A
+  clean install opens in Ink; the launcher icon, the splash and the first frame all
+  wear it, so nothing flashes a different colour on the way in.
 - **A memory field of cells and fine pixel grain:** clear language marks,
   segmented progress and a soft 280 ms Shared Axis X transition. The route
   viewport stays fixed and the fade has one hand-off, so two screens never fight
@@ -240,11 +245,53 @@ Format, refusals, the deck screen and the offline generator:
 
 ---
 
+## 🔀 Moving from Anki
+
+Years of answers are the reason people stay in a program they have outgrown, so
+0.9.0 opens a one-way local door instead of asking anyone to start over.
+
+1. **+** → **Add a deck** → **Move from Anki**.
+2. Pick an `.apkg` and say which language it teaches.
+3. Read the compatibility report. It is shown *before* anything is written.
+4. Import.
+
+Text cards are grouped by their Anki deck, and up to the newest 100,000 usable
+review events are replayed through FSRS-6 — ikna does not gain a second scheduler
+to accommodate an import. Basic, reversed, cloze and ordinary custom-text
+templates are read. Card HTML is converted to text; no WebView is created and no
+imported script or style ever runs.
+
+What the bridge refuses to guess, it counts instead. Suspended and buried cards
+stay behind. Cards whose only content is a picture or a sound are skipped and
+reported as skipped, because binary media is deliberately not imported — a deck
+of images is the hand-built homework this app exists to avoid. `[image]` and
+`[audio]` markers show where something was left out.
+
+The ceilings are on purpose: 300 MiB package, 512 MiB extracted collection,
+20,000 ZIP entries, 50,000 active cards, 100,000 newest review rows. The
+original file is opened read-only and never modified, the import makes no network
+request, and the whole write — decks, review rows, replay, plan — is a single
+transaction: a package that fails halfway leaves nothing behind. Importing the
+same collection twice replaces its own decks rather than duplicating them, and
+never touches a deck that did not come from it.
+
+History carries ratings and timing, not Anki's internal scheduling state. The
+report says so rather than implying a perfect transplant. Unsupported collection
+schemas are refused before the first write; what is still deferred, and why, is
+written down in [`0.9.0_FOLLOW_UP_SPEC.txt`](0.9.0_FOLLOW_UP_SPEC.txt).
+
+There is no Anki *export*. The format is not documented for outside writers, its
+schema has changed on a patch release before, and a half-working exporter that
+makes Anki ask for database repair would be worse than none. Your answers leave
+in the append-only export in `Documents/ikna/` instead.
+
+---
+
 ## 🏷️ Versions
 
-A version here is a number **and a word**: `0.8.0 press`. The word names the epoch
+A version here is a number **and a word**: `0.9.0 press`. The word names the epoch
 the build belongs to, the number counts releases inside it, and git tags replace the
-space with a dash: `v0.8.0-press`.
+space with a dash: `v0.9.0-press`.
 
 What the words mean, what the numbers promise and how `appVersionCode` is built:
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
@@ -280,8 +327,8 @@ Bump the two version lines in `app/build.gradle.kts`, then tag the commit with t
 same string, space replaced by a dash:
 
 ```
-git tag v0.8.0-press
-git push origin v0.8.0-press
+git tag v0.9.0-press
+git push origin v0.9.0-press
 ```
 
 The `release` workflow refuses to continue if the tag and the build file disagree,
@@ -297,6 +344,7 @@ the GitHub release.
 [`GOVERNOR.md`](docs/GOVERNOR.md) ·
 [`GRADING.md`](docs/GRADING.md) ·
 [`DECKS.md`](docs/DECKS.md) ·
+[`ANKI.md`](docs/ANKI.md) ·
 [`SOURCES.md`](docs/SOURCES.md) ·
 [`UPDATES.md`](docs/UPDATES.md) ·
 [`VERSIONS.md`](docs/VERSIONS.md) ·
@@ -335,7 +383,7 @@ release, the ones published before this notice as well as every future one.
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.8.0-press"><img src="https://img.shields.io/badge/release-0.8.0%20press-crimson?style=flat-square" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.9.0-press"><img src="https://img.shields.io/badge/release-0.9.0%20press-crimson?style=flat-square" alt="release"></a>
   <a href="https://github.com/d1d2dopamine/ikna/releases"><img src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?label=downloads&style=flat-square&logo=github&color=blueviolet" alt="downloads"></a>
   <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
@@ -345,7 +393,7 @@ release, the ones published before this notice as well as every future one.
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.8.0-press/ikna-v0.8.0-press.apk"><strong>Скачать</strong></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.9.0-press/ikna-v0.9.0-press.apk"><strong>Скачать</strong></a>
   &nbsp;·&nbsp;
   <a href="CHANGELOG.md">Изменения</a>
   &nbsp;·&nbsp;
@@ -385,13 +433,13 @@ ikna учит язык **кусками**: короткая фраза, живо
 
 | Платформа | Файл в релизе |
 | --- | --- |
-| **Android** 10+ (`minSdk 29`) | `ikna-v0.8.0-press.apk` (~40 МБ) |
+| **Android** 10+ (`minSdk 29`) | `ikna-v0.9.0-press.apk` (~40 МБ) |
 
-**[Скачать ikna-v0.8.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.8.0-press/ikna-v0.8.0-press.apk)** ·
-[все файлы](https://github.com/d1d2dopamine/ikna/releases/tag/v0.8.0-press)
+**[Скачать ikna-v0.9.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.9.0-press/ikna-v0.9.0-press.apk)** ·
+[все файлы](https://github.com/d1d2dopamine/ikna/releases/tag/v0.9.0-press)
 
 Файл выше — для любого телефона примерно с 2017 года. Для более старых
-32-битных рядом лежит `ikna-v0.8.0-press-legacy32.apk`: то же самое
+32-битных рядом лежит `ikna-v0.9.0-press-legacy32.apk`: то же самое
 приложение, одна архитектура, которую они умеют.
 
 Скачать и открыть; андроид один раз спросит, разрешить ли установку из этого
@@ -425,7 +473,12 @@ ikna учит язык **кусками**: короткая фраза, живо
   обратно. Три столбца, одна строка — одна карточка.
 - **Колодой можно поделиться** — обычным текстом, который встанет на любой другой
   телефон.
+- **Переезд из Anki.** Выбери `.apkg` на телефоне, прочитай отчёт о совместимости
+  и перенеси текстовые карточки и до 100 000 свежих ответов. Ничего не
+  отправляется, исходный файл не меняется, а HTML из карточек не исполняется.
 - **Двенадцать палитр**, каждая в двух освещениях, плюс любой шрифт с телефона.
+  Чистая установка открывается в «Чернилах»; иконка, экран входа и первый кадр
+  носят их же, так что на входе ничего не мигает другим цветом.
 - **Поле памяти из ячеек и мелкого пиксельного зерна:** чёткие языковые
   знаки, сегментированный прогресс и мягкий Shared Axis X на 280 мс.
   Область экрана зафиксирована, а затухания не пересекаются: две вкладки больше
@@ -559,11 +612,55 @@ get used to | It takes a while to get used to the noise. | привыкать
 
 ---
 
+## 🔀 Переезд из Anki
+
+Годы ответов — главная причина, по которой люди остаются в программе, из
+которой уже выросли. 0.9.0 открывает локальную дверь в одну сторону вместо
+того, чтобы предлагать начать с нуля.
+
+1. **+** → **Добавить колоду** → **Переехать из Anki**.
+2. Выбери `.apkg` и укажи, какому языку он учит.
+3. Прочитай отчёт о совместимости. Он показывается *до* любой записи.
+4. Импорт.
+
+Текстовые карточки группируются по своим колодам Anki, а до 100 000 свежих
+пригодных ответов переигрываются через FSRS-6: ради импорта в приложении не
+появляется второго планировщика. Читаются шаблоны Basic, обратный, cloze и
+обычные текстовые. HTML карточки превращается в текст: WebView не создаётся,
+ни один импортированный скрипт или стиль не исполняется.
+
+Чего мост не берётся угадывать — то пересчитывает. Приостановленные и отложенные
+карточки остаются на месте. Карточки, где всё содержание — картинка или звук,
+пропускаются и показываются в отчёте как пропущенные: бинарное медиа не
+импортируется сознательно — колода из картинок это та самая ручная домашка,
+ради отказа от которой приложение и существует. Метки `[image]` и `[audio]`
+показывают, где что-то осталось за бортом.
+
+Потолки поставлены специально: 300 МиБ пакет, 512 МиБ распакованная база,
+20 000 записей в ZIP, 50 000 активных карточек, 100 000 свежих ответов. Исходный
+файл открывается только на чтение и никогда не меняется, импорт не делает ни
+одного сетевого запроса, а вся запись — колоды, ответы, переигрывание, план —
+одна транзакция: пакет, упавший на полпути, не оставляет ничего. Повторный
+импорт той же коллекции заменяет свои же колоды, а не плодит дубли, и никогда
+не трогает колоду, которая пришла не оттуда.
+
+История переносит оценки и время, а не внутреннее состояние планировщика Anki.
+Отчёт говорит это прямо, а не намекает на идеальную пересадку. Неподдержанные
+схемы отклоняются до первой записи; что отложено и почему — в
+[`0.9.0_FOLLOW_UP_SPEC.txt`](0.9.0_FOLLOW_UP_SPEC.txt).
+
+Экспорта в Anki нет. Формат не документирован для сторонней записи, его схема
+уже менялась внутри патч-версии, а полурабочий экспортёр, после которого Anki
+просит восстановить базу, был бы хуже отсутствия. Твои ответы уходят через
+выгрузку в `Documents/ikna/`, которая только дописывается.
+
+---
+
 ## 🏷️ Версии
 
-Версия здесь — это номер **и слово**: `0.8.0 press`. Слово называет эпоху, к которой
+Версия здесь — это номер **и слово**: `0.9.0 press`. Слово называет эпоху, к которой
 относится сборка, номер считает релизы внутри неё, а в тегах git пробел заменяется
-дефисом: `v0.8.0-press`.
+дефисом: `v0.9.0-press`.
 
 Что значат слова, что обещают номера и как собирается `appVersionCode` — в
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
@@ -599,8 +696,8 @@ bash tools/catalog/fetch-bundled-pack.sh         # закреплённая ст
 же строкой, где пробел заменён дефисом:
 
 ```
-git tag v0.8.0-press
-git push origin v0.8.0-press
+git tag v0.9.0-press
+git push origin v0.9.0-press
 ```
 
 Воркфлоу `release` откажется работать, если тег и файл сборки расходятся, а затем
@@ -616,6 +713,7 @@ git push origin v0.8.0-press
 [`GOVERNOR.md`](docs/GOVERNOR.md) ·
 [`GRADING.md`](docs/GRADING.md) ·
 [`DECKS.md`](docs/DECKS.md) ·
+[`ANKI.md`](docs/ANKI.md) ·
 [`SOURCES.md`](docs/SOURCES.md) ·
 [`UPDATES.md`](docs/UPDATES.md) ·
 [`VERSIONS.md`](docs/VERSIONS.md) ·

@@ -12,6 +12,72 @@ replace the space with a dash: `0.1.1 press` is tagged `v0.1.1-press`. What the
 words mean and what a number promises inside an epoch is written down once, in
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
+## 0.9.0 press
+
+Bring your history, keep your rhythm.
+
+### Anki bridge
+
+- **+** → **Add a deck** → **Move from Anki** reads an `.apkg` on the phone and
+  commits it as ordinary ikna data. The package is opened read-only and never
+  modified, the import makes no network request, and nothing is uploaded.
+- Accepted collection members are `collection.anki2`, `collection.anki21` and
+  `collection.anki21b`, raw or Zstandard-compressed, exposing the classic
+  `col / notes / cards / revlog` schema with JSON model and deck metadata. An
+  unsupported schema is refused before the first write.
+- Basic, reversed, cloze and ordinary custom-text templates are rendered. Card
+  HTML is converted to text with scripts, styles and comments removed. No WebView
+  is created and no imported script ever runs.
+- Up to the newest 100,000 usable review events are mapped onto ikna's review log
+  and replayed through FSRS-6. **The scheduler is not touched and no second
+  scheduler is added:** the import produces answers, and the existing replay
+  derives every schedule from them. The review log gains rows and loses none.
+  History carries ratings and timing only, not Anki's internal scheduling state,
+  and the report says so instead of implying a perfect transplant.
+- Binary media is deliberately not imported. `[sound:…]` and `img` become
+  `[image]` / `[audio]` markers, and a card whose only content is a picture or a
+  sound is skipped and counted as skipped. A deck of hand-collected images is the
+  homework this app exists to refuse, so the honest report is the feature.
+- Suspended and buried cards stay behind and are counted. Safety ceilings are
+  300 MiB package, 512 MiB extracted collection, 20,000 ZIP entries, 50,000 active
+  cards, 100,000 newest review rows and 120,000 ms per recorded answer.
+- Deck and card identity is deterministic — `anki-<collection>-deck-<id>` and
+  `anki-<collection>-card-<id>` — so importing the same collection twice replaces
+  its own decks instead of duplicating them, and never touches a deck that came
+  from anywhere else. Pack replacement, the imported answers, the replay and plan
+  invalidation are one transaction: a package that fails halfway leaves nothing.
+- No Room schema change. The database version stays 3.
+- There is no Anki *export*, and the JSONL backup is not labelled as one. The
+  format is not documented for outside writers and its schema has changed on a
+  patch release before; an exporter that made Anki ask for database repair would
+  be worse than none. Deferred compatibility work is written down in
+  `0.9.0_FOLLOW_UP_SPEC.txt` rather than half-shipped here.
+
+### Ink, all the way in
+
+- A clean install now opens in **Чернила** instead of Уголь. A palette already
+  chosen is left exactly as it is; nothing is migrated and nothing is reset.
+- The launch window follows it. `window_background`, the Android 12+ splash field
+  and the adaptive launcher icon were all still the retired default's near-black,
+  so every cold start showed a warm tile in front of a navy app — the same fault
+  0.6.1 fixed, in the other direction. The icon, the splash and the first frame
+  are one surface again.
+- The widget's four duplicated colours follow the new default too. It still wears
+  the brand rather than the palette the user picked, because the launcher process
+  cannot read app preferences at draw time and a tile one palette behind the app
+  would read as broken rather than themed.
+- `LaunchWindowTest` now pins those hexes to `DEFAULT_PALETTE_ID`, and
+  `ContrastTest` was asserting the retired default's background — a test that
+  would have failed the moment the default moved. Both are stated literally, so a
+  test cannot pass by reading the same wrong value twice.
+
+### A gentler return
+
+- Return copy describes a finite plan for today and quiet adaptation. The words
+  debt, backlog, missed and recovery countdown appear nowhere in the interface.
+- Six complete localisation tables stay key-identical, UTF-8, NFC and free of
+  U+FFFD: Russian, English, Polish, Spanish, French and German.
+
 ## 0.8.0 press
 
 The field now remembers its own shape.
@@ -1640,3 +1706,14 @@ going to contain is in this version, so there is one release note rather than tw
 
 First working builds: FSRS-4.5 scheduling, the load governor, chunk packs, the
 append-only review log, and the weekly export.
+
+## 0.9.0 press
+
+- Added the on-device Anki Bridge for `.apkg` packages.
+- Added raw SQLite and Zstandard collection extraction with strict ZIP, file, card and history limits.
+- Added safe Basic, reverse, cloze and custom-text template rendering without WebView or JavaScript execution.
+- Added deterministic imported deck/card IDs, transactional re-import and review-log replay through the existing FSRS-6 path.
+- Added a localized compatibility report in Russian, English, Polish, Spanish, French and German.
+- Changed the clean-install palette from Ember to Ink while preserving every existing user's saved palette.
+- Rewrote return-mode copy around a finite plan for today, without debt, backlog or recovery-day language.
+- Version: `0.9.0 press` (`200090000`). Database schema remains version 3; scheduler remains version 6.

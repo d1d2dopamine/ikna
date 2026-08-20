@@ -22,7 +22,7 @@ import dev.ikna.data.prefs.NO_TINT
  */
 val DeckTints: List<Color> = listOf(
     Color(0xFFE5484D), // red
-    Color(0xFFF2683C), // ember, the app's own accent
+    Color(0xFFF2683C), // ember, the app's accent up to 0.8.0
     Color(0xFFF5A524), // amber
     Color(0xFF46A758), // green
     Color(0xFF12A594), // teal

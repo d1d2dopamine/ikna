@@ -63,8 +63,8 @@ val hasFixedKey = keystoreFile.exists()
 // why the count restarted with the epoch and the code did not: docs/VERSIONS.md.
 // It is written down once, there, and not repeated here.
 // ---------------------------------------------------------------------------
-val appVersionName = "0.8.0 press"
-val appVersionCode = 200080000        // press epoch: 200000000 + 0.8.0
+val appVersionName = "0.9.0 press"
+val appVersionCode = 200090000        // press epoch: 200000000 + 0.9.0
 
 // A build from a clone has to be able to come out unsigned: the key committed
 // here is this project's, and nobody else should be shipping APKs under it.
@@ -213,6 +213,11 @@ dependencies {
     // lets a model be added from the archive it was downloaded as instead of
     // sending the user off to find a file manager that can open one.
     implementation("org.apache.commons:commons-compress:1.27.1")
+
+    // Modern .apkg files store the collection as a Zstandard frame. Only the
+    // ABI selected above is packaged, so this adds one native decoder rather
+    // than every architecture to each APK.
+    implementation("com.github.luben:zstd-jni:1.5.6-8")
 
     testImplementation("junit:junit:4.13.2")
 

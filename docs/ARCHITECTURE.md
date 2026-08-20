@@ -91,3 +91,11 @@ card state is keyed by chunk id.
 The governor is configured by `assets/governor.json`, deserialised into `GovernorConfig`. It is
 not exposed in the UI. This is deliberate: a settings screen turns the app into a tuning toy
 and the tuning is more interesting than the studying.
+
+## Anki Bridge (0.9.0)
+
+`AnkiImportManager` owns process-lifetime UI state. `AnkiImporter` copies a selected document into the app cache, validates and extracts one supported collection member, opens SQLite read-only, renders text cards through `AnkiText`, then commits through the existing `PackLoader` and `RestoreRepository` paths.
+
+Imported identities are deterministic (`anki-<collection>-deck-<deck>` and `anki-<collection>-card-<card>`). Re-import therefore replaces the bridge-owned pack rather than making a second copy. The outer `IknaDatabase.withTransaction` covers replacement, pack writes, imported review writes, FSRS-6 replay and plan invalidation. No Room entity or database migration is introduced.
+
+Untrusted card HTML is data, not UI code: no WebView is created, JavaScript and CSS are discarded, and media is reduced to explicit text markers. Parsing and compatibility checks happen before the transaction.

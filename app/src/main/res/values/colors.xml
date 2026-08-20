@@ -3,9 +3,14 @@
     <!-- The field behind the wordmark on the launcher, and the same colour as
          window_background and the widget below. Until 0.6.1 it was #110F0F,
          taken from the original artwork - a colder near-black, chosen before the
-         app had a palette of its own. Next to the new default it read as a grey
-         tile, and the icon, the splash and the first frame of the app are three
-         things the eye takes for one surface.
+         app had a palette of its own. From 0.6.1 through 0.8.0 it was #17100C,
+         the dark background of "Уголь", which was the default palette then.
+
+         0.9.0 makes "Чернила" the clean-install default, and this follows it to
+         #0B1120. The icon, the splash and the first frame of the app are three
+         things the eye takes for one surface: leaving this on the retired
+         default would have put a warm near-black tile in front of a navy app,
+         which is the exact fault 0.6.1 fixed in the other direction.
 
          The raster icons in mipmap-*dpi still carry the old field, and that is
          not a leftover to fix: minSdk is 29, so every launcher here draws the
@@ -16,14 +21,17 @@
          The artwork is not shipped whole as the foreground because the system
          applies its own mask - a pre-rounded tile handed to it comes out clipped
          with a rim of wallpaper. -->
-    <color name="ic_launcher_background">#17100C</color>
+    <color name="ic_launcher_background">#0B1120</color>
 
-    <!-- The default palette's dark background from Theme.kt — "Уголь". The app
-         opens dark, so this is what the launch window should be; Compose repaints
-         it a frame later. It has to be the brand colour rather than a neutral
-         grey: on Android 12+ this is also the splash field, and a grey flash in
-         front of a warm near-black app is visible every single launch. -->
-    <color name="window_background">#17100C</color>
+    <!-- The default palette's dark background from Theme.kt - "Чернила", which is
+         what DEFAULT_PALETTE_ID has named since 0.9.0. The app opens dark, so
+         this is what the launch window should be; Compose repaints it a frame
+         later. It has to track the current default rather than a neutral grey or
+         a retired palette: on Android 12+ this is also the system splash field,
+         and a mismatched flash in front of the first frame is visible on every
+         single launch. ContrastTest pins this hex to DarkPalette.background so
+         the two cannot drift again. -->
+    <color name="window_background">#0B1120</color>
 
     <!-- The widget is drawn by the launcher, which cannot read the Compose
          palette, so the four colours it needs are duplicated here. These are the
@@ -31,11 +39,11 @@
          in-app light theme would be a white brick on most people's wallpaper.
 
          The widget deliberately does not follow the palette the user picked. It
-         cannot — the launcher process has no access to the app's preferences at
-         draw time — and a tile that lagged one palette behind the app would look
+         cannot - the launcher process has no access to the app's preferences at
+         draw time - and a tile that lagged one palette behind the app would look
          broken rather than themed. It wears the brand instead. -->
-    <color name="widget_background">#17100C</color>
-    <color name="widget_ink">#F2E6D9</color>
-    <color name="widget_muted">#9C8574</color>
-    <color name="widget_accent">#F2683C</color>
+    <color name="widget_background">#0B1120</color>
+    <color name="widget_ink">#E5EAF4</color>
+    <color name="widget_muted">#78859C</color>
+    <color name="widget_accent">#FF7A5C</color>
 </resources>

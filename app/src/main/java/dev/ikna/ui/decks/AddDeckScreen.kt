@@ -85,6 +85,7 @@ import kotlinx.coroutines.withContext
 fun AddDeckScreen(
 	container: AppContainer,
 	onOpenCatalog: () -> Unit,
+	onOpenAnki: () -> Unit,
 	onBack: () -> Unit
 ) {
 	val context = LocalContext.current
@@ -252,7 +253,30 @@ fun AddDeckScreen(
 			)
 
 			Spacer(Modifier.height(Space.lg))
-			// The other way, offered before the long one. Everything below this
+			// A migration path before any card-generation path. Anki stays untouched;
+			// its package is read locally and ikna reports every unsupported part.
+			Text(
+				text = S.t("anki.025"),
+				style = MaterialTheme.typography.labelMedium,
+				color = muted
+			)
+			Spacer(Modifier.height(Space.sm))
+			Text(
+				text = S.t("anki.026"),
+				style = MaterialTheme.typography.bodySmall,
+				color = muted
+			)
+			Spacer(Modifier.height(Space.md))
+			IknaWideButton(
+				label = S.t("anki.027"),
+				onClick = onOpenAnki,
+				enabled = !busy
+			)
+			Spacer(Modifier.height(Space.lg))
+			IknaRule()
+			Spacer(Modifier.height(Space.lg))
+			// Ready-made open decks, offered before the model path.
+			// The catalogue remains the default for open, attributed language material.
 			// point asks somebody to talk to a model and paste the answer back,
 			// which works and is still the only way to get a deck about a subject
 			// nobody has written a corpus for. A language is not that: sentences

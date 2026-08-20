@@ -86,3 +86,7 @@ That is the whole list, and each one is explained where it is declared, in
 
 There are none. If the app crashes, nobody is told, including us. Open an issue
 with what you were doing and, if you can, the log from `adb logcat`.
+
+## Local Anki import
+
+Anki packages selected in 0.9.0 are copied only into ikna's private cache for parsing and are deleted after the attempt. The original document is not modified. Card text, deck names, review history and compatibility reports are not uploaded by the importer. Imported scripts and styles are discarded rather than executed. Android's document picker remains the only file-access boundary.

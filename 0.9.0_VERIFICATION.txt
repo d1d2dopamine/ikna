@@ -1,0 +1,26 @@
+IKNA 0.9.0 PRESS — LOCAL VERIFICATION
+
+PASSED
+- Repository text and six localization tables
+- Python tool syntax
+- Version, database and scheduler identities
+- XML, JSON and workflow syntax
+- Kotlin lexical delimiter and escape audit
+- Anki route/wiring/security/limit contracts
+- Palette order and Ink clean-install default
+- Gentle return-copy contract
+- Complete-file comparison against the supplied full 0.8.0 archive
+- Signing keystore presence and unchanged SHA-256
+
+NOT RUN IN THIS SANDBOX
+- assembleDebug
+- testReleaseUnitTest
+- lintVitalRelease
+
+Reason: the sandbox has a Java runtime but no Gradle distribution, Kotlin compiler or Android SDK, and outbound dependency resolution is unavailable. GitHub Actions is therefore the mandatory compiler, unit-test, lint and native-ABI gate. Do not publish APK assets unless all three CI jobs are green.
+
+RELEASE IDENTITY
+- versionName: 0.9.0 press
+- versionCode: 200090000
+- tag: v0.9.0-press
+- title: 0.9.0 press — Bring your history, keep your rhythm

@@ -32,14 +32,14 @@ import kotlinx.coroutines.flow.map
 enum class ThemeMode { DARK, LIGHT, SYSTEM, CUSTOM }
 
 /**
- * The palette the app wears out of the box: "Уголь", the warm near-black of the
- * launcher icon with the ember of the mark on it.
+ * The palette the app wears out of the box: "Чернила", a calm ink-blue field
+ * with the warm ikna mark kept as its accent.
  *
  * Lives here rather than in the theme package because a stored preference has to
  * have a default that the preferences layer can name without reaching up into the
  * interface. The colours themselves are in ui/theme/Theme.kt.
  */
-const val DEFAULT_PALETTE_ID = "ember"
+const val DEFAULT_PALETTE_ID = "ink"
 
 /**
  * The hand-set daily norm.
@@ -77,10 +77,10 @@ private fun legacyLoad(name: String?): Int? = when (name) {
  * custom theme: whoever opens the hex fields starts from what they were already
  * looking at, not from a scheme the app no longer uses.
  */
-private const val DEFAULT_CUSTOM_BACKGROUND = 0xFF17100C
-private const val DEFAULT_CUSTOM_INK = 0xFFF2E6D9
-private const val DEFAULT_CUSTOM_MUTED = 0xFF9C8574
-private const val DEFAULT_CUSTOM_ACCENT = 0xFFF2683C
+private const val DEFAULT_CUSTOM_BACKGROUND = 0xFF0B1120
+private const val DEFAULT_CUSTOM_INK = 0xFFE5EAF4
+private const val DEFAULT_CUSTOM_MUTED = 0xFF78859C
+private const val DEFAULT_CUSTOM_ACCENT = 0xFFFF7A5C
 
 data class IknaSettings(
     val theme: ThemeMode = ThemeMode.DARK,

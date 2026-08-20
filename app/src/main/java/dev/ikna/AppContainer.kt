@@ -1,6 +1,8 @@
 package dev.ikna
 
 import android.content.Context
+import dev.ikna.data.anki.AnkiImportManager
+import dev.ikna.data.anki.AnkiImporter
 import dev.ikna.data.db.IknaDatabase
 import dev.ikna.audio.Speaker
 import dev.ikna.audio.VoiceInstaller
@@ -88,6 +90,17 @@ class AppContainer(context: Context) {
         components = componentRepository,
         scheduler = scheduler,
         config = config
+    )
+
+    /** One app-lifetime, transactional bridge from Anki packages. */
+    val ankiImport = AnkiImportManager(
+        AnkiImporter(
+            context = appContext,
+            db = db,
+            chunkDao = db.chunkDao(),
+            packs = packLoader,
+            restore = restoreRepository
+        )
     )
 
     private val schedulerMigrator = SchedulerMigration(

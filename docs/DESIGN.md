@@ -112,9 +112,9 @@ Colour is two choices, not one. **Which palette:**
 
 | Palette | | Character |
 | --- | --- | --- |
-| Уголь | *ember* | warm near-black and ember. The default |
+| Чернила | *ink* | navy and coral. The default since 0.9.0 |
 | Библиотека | *library* | dark green and brass |
-| Чернила | *ink* | navy and coral |
+| Уголь | *ember* | warm near-black and ember. The default up to 0.8.0 |
 | Слива | *plum* | aubergine and mint |
 | Роза | *rose* | wine, and a rose that reads as a highlighter |
 | Иней | *frost* | the one with nothing warm in it anywhere |
@@ -127,6 +127,16 @@ Colour is two choices, not one. **Which palette:**
 
 **And how it is lit:** dark, light, as the phone is set, or four colours picked by
 hand (background, ink, muted, accent).
+
+The default is only half a decision. Three surfaces are read as one thing — the
+launcher icon, the system splash and the first frame of the app — and only the
+third of them comes from the palette. The other two are Android colour
+resources, painted before any app code runs, so nothing in Compose can keep them
+honest. When the default moved to Чернила in 0.9.0 they stayed behind, and a warm
+near-black tile flashed in front of a navy app on every cold start — the same
+fault 0.6.1 fixed, running the other way. They are pinned to the default by test
+now, stated as literal hexes on both sides, because a test that read the same
+resource the app reads would pass while both were wrong together.
 
 A palette is not a theme: the same one exists in both lightings and keeps its hue in
 both, so the light version is tinted paper rather than white with the colour drained

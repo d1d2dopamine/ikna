@@ -284,3 +284,9 @@ python3 tools/genpack/generate_pack.py \
 
 Polish is tokenised but deliberately **not** lemmatised, for the reason above.
 Surface forms aggregate less, but they never lie.
+
+## Anki packages in 0.9.0
+
+The Add Deck screen can import `.apkg` packages containing `collection.anki2`, `collection.anki21` or `collection.anki21b`. The collection may be raw SQLite or Zstandard-compressed SQLite. The first release expects the classic `col`, `notes`, `cards` and `revlog` tables plus JSON model/deck metadata in `col.models` and `col.decks`.
+
+Supported rendering: Basic, reverse, cloze and text-based custom templates. Unsupported executable/template behavior is never evaluated. Image-only and audio-only cards are skipped. Suspended and buried cards remain outside ikna. The completion report states every skipped or simplified category.

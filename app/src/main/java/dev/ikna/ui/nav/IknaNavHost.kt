@@ -26,6 +26,7 @@ import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.ui.catalog.CatalogScreen
 import dev.ikna.ui.debug.DebugHooks
 import dev.ikna.ui.decks.AddDeckScreen
+import dev.ikna.ui.decks.AnkiImportScreen
 import dev.ikna.ui.decks.DeckScreen
 import dev.ikna.ui.decks.DecksHomeState
 import dev.ikna.ui.decks.DecksScreen
@@ -55,6 +56,7 @@ object Routes {
     const val STATS = "stats"
     const val SETTINGS = "settings"
     const val ADD_DECK = "add-deck"
+    const val ANKI_IMPORT = "anki-import"
     const val CATALOG = "catalog"
     const val SEARCH = "search"
     const val VOICE = "voice"
@@ -207,6 +209,14 @@ fun IknaNavHost(
                 AddDeckScreen(
                     container = container,
                     onOpenCatalog = { forward(Routes.CATALOG) },
+                    onOpenAnki = { forward(Routes.ANKI_IMPORT) },
+                    onBack = { back() }
+                )
+            }
+
+            composable(Routes.ANKI_IMPORT) {
+                AnkiImportScreen(
+                    container = container,
                     onBack = { back() }
                 )
             }

@@ -63,3 +63,13 @@ Git tags carry the same string with the space turned into a dash, because a tag
 cannot contain one: `v0.1.0-proof`. The `release` workflow refuses to publish if
 the tag and the build file disagree, so the About line in the app and the file on
 the release page cannot drift apart.
+
+## 0.9.0 press
+
+- `versionName`: `0.9.0 press`
+- `versionCode`: `200090000`
+- release tag: `v0.9.0-press`
+- database schema: 3 (unchanged)
+- scheduler: FSRS-6 / scheduler version 6 (unchanged)
+- clean-install palette: Ink
+- flagship feature: local Anki `.apkg` bridge

@@ -1,0 +1,94 @@
+IKNA 0.9.0 FOLLOW-UP SPECIFICATION
+=====================================
+
+Purpose
+-------
+This file defines work intentionally not claimed as complete by 0.9.0 press. A later implementer must preserve all safety and identity contracts below. Do not broaden support by silently importing a package incorrectly.
+
+Shipped baseline in 0.9.0 press
+-------------------------------
+- Entry point: AddDeckScreen -> Routes.ANKI_IMPORT -> AnkiImportScreen.
+- Coordinator: dev.ikna.data.anki.AnkiImportManager.
+- Parser/committer: dev.ikna.data.anki.AnkiImporter.
+- Safe renderer: dev.ikna.data.anki.AnkiText.
+- Accepted ZIP member names: collection.anki2, collection.anki21, collection.anki21b.
+- Accepted member encoding: raw SQLite or Zstandard-compressed SQLite.
+- Required classic tables: col, notes, cards, revlog.
+- Required metadata: JSON in col.models and col.decks.
+- Rendered templates: Basic, reversed, ordinary text templates, and cloze.
+- HTML policy: convert to text; remove script, style and comments; never create a WebView or execute JavaScript.
+- Media policy: detect [sound:...] and img tags; emit [audio] / [image] markers; skip cards that have no usable text; do not copy media files.
+- Suspended/buried policy: cards with queue < 0 are excluded and counted.
+- Limits: package 300 MiB; extracted collection 512 MiB; ZIP entries 20,000; active cards 50,000; newest review rows 100,000; review duration 120,000 ms.
+- Identity: stableChunkId(collectionKey, cardId) = anki-<collectionKey>-card-<cardId>; stablePackId(collectionKey, deckId) = anki-<collectionKey>-deck-<deckId>.
+- Re-import: delete and replace only deterministic packs owned by that package identity.
+- History: Anki ease 1..4 maps to ReviewRecord.rating 1..4; history is replayed by RestoreRepository so FSRS-6 remains the only scheduler.
+- Atomicity: one IknaDatabase.withTransaction covers pack replacement, imported review write, replay and plan invalidation. Any error rolls the entire import back.
+- No Room schema change: database version remains 3.
+
+Deferred work, in priority order
+--------------------------------
+
+P0 — Real fixture and device compatibility matrix
+1. Add fixtures produced by current Anki Desktop for schema generations encountered in the wild, including collection.anki21b.
+2. Test on arm64-v8a and armeabi-v7a release APKs so zstd-jni native loading is verified for both published assets.
+3. Cover raw and Zstandard collection members, Basic, Basic (and reversed), cloze, custom text, media-only, suspended, buried, filtered-deck and large-history cases.
+4. Re-import the same package twice and prove: no duplicate deck/card, no duplicate review signature, same final schedule.
+5. Corrupt the collection halfway through parsing and inject a failure during commit; prove zero deck/review/plan changes.
+Acceptance: all fixtures have an expected compatibility report checked byte-for-byte and both release ABIs import the same supported fixture successfully.
+
+P0 — Modern collection schemas
+1. Detect schema from SQLite table/column metadata before querying; do not infer support from filename.
+2. Add explicit adapters rather than branching SQL throughout AnkiImporter:
+   - interface AnkiCollectionAdapter
+   - ClassicJsonCollectionAdapter for the shipped schema
+   - one adapter per newer schema family
+3. Adapter output must be a shared immutable ParsedPackage model.
+4. An unknown schema returns UNSUPPORTED_COLLECTION before db.withTransaction.
+Acceptance: every supported schema imports the same logical fixture into identical PackChunk and ReviewRecord output; unknown schema writes nothing and names the unsupported schema in the report.
+
+P1 — Dry-run preview and selective decks
+1. Split AnkiImporter into inspect(uri, language) and commit(inspection, selectedDeckIds).
+2. Inspection reports deck hierarchy, active/suspended counts, usable/skipped/media/template categories, review count and estimated local storage.
+3. AnkiImportScreen shows checkboxes for leaf/root decks and imports only selected IDs.
+4. Selection identity is Anki deck ID, never display title.
+Acceptance: selecting one child deck imports no card from siblings; preview performs no Room writes and leaves no permanent cache file.
+
+P1 — Media, MathJax and image occlusion
+1. Parse the package media map without path traversal and with the same entry/byte limits.
+2. Store media in app-private storage keyed by content hash. Never expose a file:// URI.
+3. Render still images and local audio with native Compose/media APIs; never execute imported HTML, CSS or JavaScript.
+4. Add a documented text fallback and screen-reader label for every media card.
+5. Image occlusion needs an explicit parser and native overlay renderer. Do not treat its template as ordinary HTML.
+Acceptance: malicious filenames cannot leave app-private storage; scripts do not run; deleting an imported deck releases unreferenced media; image/audio-only cards are either faithfully supported or clearly excluded in preview.
+
+P1 — Bounded history replay without a giant JSONL string
+1. Add RestoreRepository.restoreRecords(records: Sequence<ReviewRecord> or batched source, parseSkipped: Int = 0).
+2. Preserve the exact deduplication signature chunkId:level:ts and existing replay ordering.
+3. Make AnkiImporter call the records API directly; keep restoreFromJsonl for files/backups.
+4. Benchmark 100k and 300k rows on a low-memory Android device before raising MAX_HISTORY_RECORDS.
+Acceptance: peak memory is measured; direct and JSONL replay produce byte-equivalent card state and review signatures for the same fixture.
+
+P2 — Anki-compatible export
+1. Do not label JSONL backup as Anki export.
+2. Export requires a documented .apkg writer, stable model/deck IDs, template generation, media map handling and a round trip through current Anki Desktop.
+3. Preserve attribution/licence metadata from catalogue decks.
+Acceptance: Anki imports the generated package without repair; card count/text/media match; an ikna backup/restore remains lossless independently.
+
+P2 — One-day return-plan choices
+1. Offer Shorter / As usual / A little more only for the current day.
+2. Do not create a second scheduler and do not promise a multi-day recovery date.
+3. Persist the chosen card-key subset for that day so reopening the session does not undo Shorter.
+4. A little more may use existing safe due-review expansion; it must not force new cards when the governor blocks them.
+Acceptance: the choice survives process recreation for the same day, resets the next day, and UI contains no debt/backlog/missed/recovery-countdown wording.
+
+Non-negotiable invariants
+-------------------------
+- Original .apkg is read-only and never modified.
+- No network request is part of import.
+- No imported executable content runs.
+- No partial import on failure.
+- Existing non-Anki decks and reviews are never deleted by re-import cleanup.
+- FSRS-6 remains the only schedule implementation.
+- Unknown or lossy behavior must be visible in preview/report, never silently guessed.
+- Keep all six localization tables key-identical, UTF-8, NFC and free of U+FFFD.

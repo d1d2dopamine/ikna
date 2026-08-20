@@ -68,7 +68,7 @@ class ContrastTest {
      * before: it has to be genuinely bright, not an inverted dark theme.
      *
      * The line is 0.80 rather than 0.85 because the light version of a palette is
-     * tinted paper, not white — the default one measures 0.84. That is the point
+     * tinted paper, not white — the default one measures 0.88. That is the point
      * of it: a white light theme and a coloured dark theme are two apps, and the
      * hue has to survive the lamp being turned on. Anything below 0.80 stops being
      * paper and starts being a dim room.
@@ -101,8 +101,8 @@ class ContrastTest {
     @Test
     fun `a colour survives the trip through the text field`() {
         assertEquals("1B1813", hexOf(parseHexColor("1b1813")!!))
-        assertEquals("B8431F", hexOf(LightPalette.accent))
-        assertEquals("17100C", hexOf(DarkPalette.background))
+        assertEquals("B83A21", hexOf(LightPalette.accent))
+        assertEquals("0B1120", hexOf(DarkPalette.background))
     }
 
     @Test

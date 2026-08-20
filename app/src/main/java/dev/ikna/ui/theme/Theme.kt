@@ -163,22 +163,25 @@ data class IknaPaletteSpec(
  * Every entry here is asserted readable, in both lightings, by PaletteTest.
  */
 val IknaPalettes: List<IknaPaletteSpec> = listOf(
-    // Уголь. Burnt earth and an ember: the launcher field and the spark, finally
-    // also inside the app.
+    // Чернила. The clean-install default: ink-blue paper with a warm accent on it.
     IknaPaletteSpec(
-        id = "ember",
-        nameKey = "set.116",
+        id = "ink",
+        nameKey = "set.118",
         dark = IknaPalette(
-            background = Color(0xFF17100C),
-            ink = Color(0xFFF2E6D9),
-            muted = Color(0xFF9C8574),
-            accent = Color(0xFFF2683C)
+            background = Color(0xFF0B1120),
+            ink = Color(0xFFE5EAF4),
+            muted = Color(0xFF78859C),
+            accent = Color(0xFFFF7A5C)
         ),
         light = IknaPalette(
-            background = Color(0xFFF7EADC),
-            ink = Color(0xFF241610),
-            muted = Color(0xFF7A5B49),
-            accent = Color(0xFFB8431F)
+            background = Color(0xFFEDF1F8),
+            // Deeper than the coral of the dark version by two steps rather than
+            // one: #C9452B looked right next to it and measured 4.2:1 on this
+            // paper, which is under the line for the small mono labels the accent
+            // is also used for.
+            ink = Color(0xFF0E1526),
+            muted = Color(0xFF58637A),
+            accent = Color(0xFFB83A21)
         )
     ),
     // Библиотека. Bottle green and brass: a reading room, nothing hurrying.
@@ -198,25 +201,22 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFF7E6413)
         )
     ),
-    // Чернила. Ink-blue paper with a warm accent on it.
+    // Уголь. Kept for existing installs: burnt earth and an ember, finally
+    // also inside the app.
     IknaPaletteSpec(
-        id = "ink",
-        nameKey = "set.118",
+        id = "ember",
+        nameKey = "set.116",
         dark = IknaPalette(
-            background = Color(0xFF0B1120),
-            ink = Color(0xFFE5EAF4),
-            muted = Color(0xFF78859C),
-            accent = Color(0xFFFF7A5C)
+            background = Color(0xFF17100C),
+            ink = Color(0xFFF2E6D9),
+            muted = Color(0xFF9C8574),
+            accent = Color(0xFFF2683C)
         ),
         light = IknaPalette(
-            background = Color(0xFFEDF1F8),
-            // Deeper than the coral of the dark version by two steps rather than
-            // one: #C9452B looked right next to it and measured 4.2:1 on this
-            // paper, which is under the line for the small mono labels the accent
-            // is also used for.
-            ink = Color(0xFF0E1526),
-            muted = Color(0xFF58637A),
-            accent = Color(0xFFB83A21)
+            background = Color(0xFFF7EADC),
+            ink = Color(0xFF241610),
+            muted = Color(0xFF7A5B49),
+            accent = Color(0xFFB8431F)
         )
     ),
     // Слива. The loudest one: aubergine and mint.

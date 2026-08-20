@@ -223,3 +223,7 @@ second write erased the first, so a card was answered but not counted — and th
 measured norm, which feeds capacity, which decides how much new material the day gets. Writes that
 touch card state, the review log and the day counter now go through a single mutex in
 `LearningRepository`. Swiping fast is the normal speed of a good session, not misuse.
+
+## Return language in 0.9.0
+
+Return mode remains a scheduler decision, not a promise that learning pauses for a number of days. Ordinary UI says that the plan for today was adapted and bounded. It does not show debt, backlog, missed-day or recovery-countdown language. New material may continue only when the existing governor considers it safe; the current release does not add a second scheduler or a persistent multi-day recovery target.
