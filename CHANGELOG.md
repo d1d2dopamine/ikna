@@ -62,6 +62,17 @@ The field now remembers its own shape.
 - Turning Animations off removes both navigation and section motion immediately;
   every existing accessibility behaviour remains intact.
 
+### Review ergonomics
+
+- The display stays awake while an actual review card is visible, then returns to
+  the phone's normal timeout on the finish screen, on exit and in the background.
+  This uses Android's view flag and adds no permission, service or battery use
+  outside a session.
+- TalkBack now follows the same reveal-then-answer contract as touch: the front
+  exposes only a reveal action, and `KNOW` / `DON'T KNOW` appear only after the
+  answer is visible. The two-swipe interface is unchanged and no answer buttons
+  were added.
+
 ### Invariants
 
 - Unit tests pin language-seal uniqueness, mirroring, density and deck variation,

@@ -131,6 +131,7 @@ fun SwipeableCard(
 
     val progress: () -> Float = { (offsetX.value / SWIPE_THRESHOLD).coerceIn(-1f, 1f) }
 
+    val revealAction = S.t("card.002")
     val missAction = S.t("a11y.008")
     val keepAction = S.t("a11y.009")
 
@@ -138,16 +139,32 @@ fun SwipeableCard(
         modifier = Modifier
             .fillMaxSize()
             .semantics {
-                customActions = listOf(
-                    CustomAccessibilityAction(keepAction) {
-                        rateNow.value(Rating.GOOD)
-                        true
-                    },
-                    CustomAccessibilityAction(missAction) {
-                        rateNow.value(Rating.AGAIN)
-                        true
-                    }
-                )
+                // TalkBack follows the same two-step contract as a finger. The
+                // old semantics exposed both grades on the front, so a screen-
+                // reader action could record an answer that had never been
+                // revealed even though touch input deliberately forbids that.
+                customActions = if (revealed) {
+                    listOf(
+                        CustomAccessibilityAction(keepAction) {
+                            val canRate = revealedNow.value
+                            if (canRate) rateNow.value(Rating.GOOD)
+                            canRate
+                        },
+                        CustomAccessibilityAction(missAction) {
+                            val canRate = revealedNow.value
+                            if (canRate) rateNow.value(Rating.AGAIN)
+                            canRate
+                        }
+                    )
+                } else {
+                    listOf(
+                        CustomAccessibilityAction(revealAction) {
+                            val canReveal = !revealedNow.value
+                            if (canReveal) revealNow.value()
+                            canReveal
+                        }
+                    )
+                }
             }
             // On the whole screen rather than on the card: the card moves, and a
             // touch area that moves with it stops accepting the second half of a

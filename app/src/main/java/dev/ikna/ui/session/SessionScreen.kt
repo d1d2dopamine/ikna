@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -106,6 +108,19 @@ fun SessionScreen(
     val settings by container.settings.flow.collectAsState(initial = IknaSettings())
 
     val card = state.current
+
+    // A review is one of the few places where no touch for a minute can mean
+    // concentration rather than absence. Keep the display awake only while an
+    // actual card is in front of the user: not during loading, not on the finish
+    // screen, and not after this destination leaves composition. View-level
+    // keepScreenOn needs no permission and Android ignores it in the background.
+    val view = LocalView.current
+    val keepScreenAwake = card != null && !state.loading && !state.finished
+    DisposableEffect(view, keepScreenAwake) {
+        val previous = view.keepScreenOn
+        view.keepScreenOn = previous || keepScreenAwake
+        onDispose { view.keepScreenOn = previous }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopBar(state = state)
