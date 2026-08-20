@@ -19,7 +19,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dev.ikna.AppContainer
@@ -97,8 +96,6 @@ fun IknaNavHost(
     // exact scroll position before its first visible frame.
     val decksState = remember { DecksHomeState() }
     val decksListState = rememberLazyListState()
-    val currentEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = currentEntry?.destination?.route
 
     val sharedAxisTravelPx = with(LocalDensity.current) {
         Motion.sharedAxisTravel.roundToPx()
@@ -185,7 +182,6 @@ fun IknaNavHost(
                     settings = settings,
                     state = decksState,
                     listState = decksListState,
-                    showMemoryField = currentRoute == null || currentRoute == Routes.HOME,
                     onOpenSession = { deckId -> forward(Routes.session(deckId)) },
                     onOpenDeck = { deckId -> forward(Routes.deck(deckId)) },
                     onOpenStats = { forward(Routes.STATS) },

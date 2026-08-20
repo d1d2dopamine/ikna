@@ -198,13 +198,20 @@ fun SettingsScreen(
     // The measured norm is shown rather than asked for. The chip says "АВТО" and
     // nothing else; the number goes on its own line, in the same form the font
     // section uses, because a chip that changes its own text is a chip that
-    // moves under your finger.
-    var measuredNorm by remember { mutableStateOf(0) }
-    var normMeasured by remember { mutableStateOf(true) }
+    // moves under your finger. Null is also the loading/unmeasured state. Both
+    // repository answers are read before one state write, so the default target
+    // can never flash for a frame while the measurement flag is still stale.
+    var measuredNorm by remember { mutableStateOf<Int?>(null) }
     LaunchedEffect(routeSettled, settings.autoLoad, settings.manualLoad) {
         if (!routeSettled) return@LaunchedEffect
-        measuredNorm = container.learningRepository.currentDailyTarget()
-        normMeasured = container.learningRepository.normIsMeasured()
+        measuredNorm = null
+        val measured = container.learningRepository.normIsMeasured()
+        val target = if (measured) {
+            container.learningRepository.currentDailyTarget()
+        } else {
+            0
+        }
+        measuredNorm = target.takeIf { measured && it > 0 }
     }
 
     // Whether anything can speak at all. Which voice reads which deck is a
@@ -384,11 +391,7 @@ fun SettingsScreen(
                     if (settings.autoLoad) {
                         Spacer(Modifier.height(12.dp))
                         Text(
-                            text = if (normMeasured && measuredNorm > 0) {
-                                S.t("set.017") + measuredNorm
-                            } else {
-                                " "
-                            },
+                            text = measuredNorm?.let { S.t("set.017") + it } ?: " ",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

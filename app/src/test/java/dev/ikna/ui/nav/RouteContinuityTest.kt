@@ -26,13 +26,14 @@ class RouteContinuityTest {
     }
 
     @Test
-    fun home_grain_cannot_leak_into_settings() {
+    fun home_grain_leaves_with_home_and_cannot_leak_into_settings() {
         val decks = source("dev/ikna/ui/decks/DecksScreen.kt")
         val nav = source("dev/ikna/ui/nav/IknaNavHost.kt")
         val settings = source("dev/ikna/ui/settings/SettingsScreen.kt")
-        assertTrue(nav.contains("currentBackStackEntryAsState()"))
-        assertTrue(nav.contains("showMemoryField = currentRoute == null || currentRoute == Routes.HOME"))
-        assertTrue(decks.contains("if (showMemoryField)"))
+        assertTrue(decks.contains("IknaMemoryField(seed = 0x1A4B_7C2D"))
+        assertFalse(decks.contains("showMemoryField"))
+        assertFalse(nav.contains("currentBackStackEntryAsState()"))
+        assertFalse(nav.contains("showMemoryField ="))
         assertTrue(nav.contains(".background(MaterialTheme.colorScheme.background)"))
         assertTrue(nav.contains(".clipToBounds()"))
         assertTrue(settings.contains(".background(MaterialTheme.colorScheme.background)"))

@@ -106,7 +106,6 @@ fun DecksScreen(
     settings: IknaSettings,
     state: DecksHomeState,
     listState: LazyListState,
-    showMemoryField: Boolean,
     onOpenSession: (String?) -> Unit,
     onOpenDeck: (String) -> Unit,
     onOpenStats: () -> Unit,
@@ -148,12 +147,12 @@ fun DecksScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Only the unused field carries the lattice. Content remains on plain
-        // paper, and the bottom bar paints its own background above it.
-        // Decorative Home grain is removed as soon as another route owns
-        // the foreground. It cannot remain underneath a transparent route frame.
-        if (showMemoryField) {
-            IknaMemoryField(seed = 0x1A4B_7C2D, modifier = Modifier.fillMaxSize())
-        }
+        // paper, and the bottom bar paints its own background above it. The field
+        // belongs to the Home destination itself, so Shared Axis fades and moves it
+        // with the deck interface instead of removing it at the start of navigation.
+        // Every pushed route and the NavHost paint an opaque clipped surface, so the
+        // field cannot survive after Home's exit or leak into Settings.
+        IknaMemoryField(seed = 0x1A4B_7C2D, modifier = Modifier.fillMaxSize())
         Column(modifier = Modifier.fillMaxSize()) {
         // The name of the app, and nothing else up here. The marks that used to
         // share this row now live in the bar at the bottom of the screen: a phone

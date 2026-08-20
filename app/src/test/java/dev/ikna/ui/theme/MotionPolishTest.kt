@@ -24,9 +24,20 @@ class MotionPolishTest {
         assertFalse(settings.contains("return@JumpRow"))
         assertEquals(
             9,
-            Regex("item\(key = ID_[A-Z_]+, contentType = SETTINGS_SECTION_CONTENT_TYPE\)")
-                .findAll(settings).count()
+            settings.lineSequence().count { line ->
+                line.contains("item(key = ID_") &&
+                    line.contains("contentType = SETTINGS_SECTION_CONTENT_TYPE")
+            }
         )
+    }
+
+    @Test
+    fun auto_load_target_is_published_only_after_measurement_is_known() {
+        val settings = source("dev/ikna/ui/settings/SettingsScreen.kt")
+        assertTrue(settings.contains("mutableStateOf<Int?>(null)"))
+        assertTrue(settings.contains("val measured = container.learningRepository.normIsMeasured()"))
+        assertTrue(settings.contains("measuredNorm = target.takeIf { measured && it > 0 }"))
+        assertFalse(settings.contains("var normMeasured"))
     }
 
     @Test
