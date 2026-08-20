@@ -26,7 +26,7 @@ import java.io.File
  * on disk agrees with the migration that is supposed to produce it, and that
  * every version step has a migration at all.
  */
-private const val DB_VERSION = 3
+private const val DB_VERSION = 4
 
 private const val SCHEMA_DIR = "schemas/dev.ikna.data.db.IknaDatabase"
 
@@ -60,6 +60,28 @@ class SchemaTest {
 				"one that runs on other people's phones.",
 			text.contains("correctCount")
 		)
+	}
+
+	@Test
+	fun `the columns the newest migration adds are in the schema it produces`() {
+		// Skips until a build has written 4.json. That file carries an identity
+		// hash computed by Room from the entities, so it cannot be written by
+		// hand -- and a hand-made one would be worse than none, because the
+		// next reader would have no way to tell it apart from Room's.
+		val text = schema(4)?.readText() ?: return
+		val added = listOf(
+			"activityRatio", "daysSinceStart", "cleanDays",
+			"newIntroducedLastWeek", "totalReviews", "daysSinceReturn",
+			"overheated", "newCeiling", "gate"
+		)
+		for (column in added) {
+			assertTrue(
+				"$column is missing from the version 4 schema, but MIGRATION_3_4 " +
+					"adds it. One of the two is wrong, and the migration is the one " +
+					"that runs on other people's phones.",
+				text.contains(column)
+			)
+		}
 	}
 
 	@Test

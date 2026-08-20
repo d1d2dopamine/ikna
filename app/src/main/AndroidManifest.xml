@@ -80,12 +80,27 @@
         Local device-to-device transfer is still allowed, in
         data_extraction_rules.xml: it is a direct copy to the new phone, with no
         server in between.
+
+        fullBackupContent used to be declared here too, pointing at
+        backup_rules.xml. With allowBackup off the platform never read that file,
+        and the file's own header said so. Two documents describing a backup that
+        cannot happen is a good way for somebody to get the privacy story wrong
+        later, so the attribute and the file are gone; data_extraction_rules.xml
+        is the one that still runs.
+
+        enableOnBackInvokedCallback opts into predictive back. Android 13 and
+        later can show where the gesture leads while the finger is still down,
+        and from Android 16 it is the only behaviour. Nothing in this app
+        intercepts back (no onBackPressed override, no BackHandler), so this
+        is the system animation and nothing else. The gesture that answers a card
+        is a horizontal drag on the card itself, not an edge swipe, so the two do
+        not compete.
     -->
     <application
         android:name=".IknaApp"
         android:allowBackup="false"
-        android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"
+        android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:localeConfig="@xml/locales_config"

@@ -207,7 +207,21 @@ class LearningRepository(
                 // asking about the valve: why it had to open again.
                 reason = decision.gate
                     ?.let { decision.reason.name + "/" + it.name }
-                    ?: decision.reason.name
+                    ?: decision.reason.name,
+                // Everything the decision was actually made from. Kept as its
+                // own columns rather than folded into `reason` so that the log
+                // can be read as data -- "what did activity look like on the
+                // days that were capped" is a query, not an exercise in
+                // parsing strings.
+                activityRatio = signals.activityRatio,
+                daysSinceStart = signals.daysSinceStart,
+                cleanDays = signals.cleanDays,
+                newIntroducedLastWeek = signals.newIntroducedLastWeek,
+                totalReviews = signals.totalReviews,
+                daysSinceReturn = signals.daysSinceReturn,
+                overheated = signals.overheated,
+                newCeiling = decision.newCeiling,
+                gate = decision.gate?.name
             )
         )
 

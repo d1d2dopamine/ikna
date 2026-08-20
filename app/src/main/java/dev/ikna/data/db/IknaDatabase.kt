@@ -4,8 +4,9 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 
-const val IKNA_DATABASE_VERSION = 3
+const val IKNA_DATABASE_VERSION = 4
 
 @Database(
     entities = [
@@ -22,9 +23,12 @@ const val IKNA_DATABASE_VERSION = 3
     // v2: undo snapshots on `reviews`, deck switches on `packs`, `daily_plan`.
     // v3: `daily_stats.correctCount`, so the day's accuracy is a count rather
     //     than a stored average edited in place.
+    // v4: the nine `governor_log` signals that were being thrown away, and the
+    //     full-text index over `chunks` (see ChunkFtsIndex -- it is not a Room
+    //     entity on purpose).
     // Kept as a literal because SchemaTest deliberately reads this source line:
     // changing it must force a migration and a committed Room schema.
-    version = 3,
+    version = 4,
     // KSP writes the schema history into app/schemas (see the ksp block in
     // app/build.gradle.kts). Commit whatever appears there after a build: it is
     // the only way to diff two versions of this database, and
@@ -45,6 +49,15 @@ abstract class IknaDatabase : RoomDatabase() {
         fun build(context: Context): IknaDatabase =
             Room.databaseBuilder(context, IknaDatabase::class.java, "ikna.db")
                 .addMigrations(*IknaMigrations.ALL)
+                // The search index is not a Room entity, so Room does not
+                // create it. A fresh install has to end up in the same state as
+                // an upgrade, which is what this callback is for; MIGRATION_3_4
+                // does the same thing for a database that already exists.
+                .addCallback(object : RoomDatabase.Callback() {
+                    override fun onCreate(db: SupportSQLiteDatabase) {
+                        ChunkFtsIndex.create(db)
+                    }
+                })
                 // NOTE: fallbackToDestructiveMigration() is banned in this project.
                 // It is the one line that silently deletes the user history on a
                 // schema change. If a migration is missing the app must crash

@@ -80,13 +80,36 @@ class DeckRepository(
         )
     }
 
-    /** Up to eighty matches from decks already on this phone. */
+    /**
+     * Up to eighty matches from decks already on this phone.
+     *
+     * The index answers, and the scan is the fallback -- for a query with no
+     * words in it, for a database whose index has not been built, and for
+     * anything else that makes the fast path fail. Search getting slower is
+     * recoverable; search returning nothing because an index was missing is the
+     * kind of bug that looks like an empty collection.
+     *
+     * An empty result from the index is treated as a reason to scan rather than
+     * as an answer. That costs one wasted query on a genuinely unmatched search
+     * and buys correctness on a partially built index.
+     */
     suspend fun search(raw: String, limit: Int = 80): List<ChunkSearchRow> {
         val terms = localSearchTerms(raw) ?: return emptyList()
+        val capped = limit.coerceIn(1, 80)
+
+        val indexed = runCatching {
+            chunkDao.searchFts(
+                match = terms.match,
+                prefix = terms.prefix,
+                limit = capped
+            )
+        }.getOrDefault(emptyList())
+        if (indexed.isNotEmpty()) return indexed
+
         return chunkDao.search(
             pattern = terms.contains,
             prefix = terms.prefix,
-            limit = limit.coerceIn(1, 80)
+            limit = capped
         )
     }
 

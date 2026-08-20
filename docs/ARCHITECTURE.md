@@ -86,11 +86,21 @@ MVP.
 A pack can be replaced without touching the database: chunks are upserted by stable id, and
 card state is keyed by chunk id.
 
-## No user settings
+## No governor settings
 
-The governor is configured by `assets/governor.json`, deserialised into `GovernorConfig`. It is
-not exposed in the UI. This is deliberate: a settings screen turns the app into a tuning toy
-and the tuning is more interesting than the studying.
+This section used to say "no user settings", and that stopped being true several epochs ago:
+there is a settings screen, and it holds language, theme, font, the day boundary, voice, decks,
+export and restore. What has not changed is the part the heading was actually about.
+
+The governor is configured by `assets/governor.json`, deserialised into `GovernorConfig`, and it
+is not exposed in the UI. This is deliberate: twenty-six load-control numbers in a settings
+screen turn the app into a tuning toy, and the tuning is more interesting than the studying.
+The daily target can be overridden and load control can be switched off — one decision each,
+both reversible — and that is the whole surface.
+
+The same reasoning applies to the FSRS weights: `docs/FSRS-OPTIMIZER.md` fits them from this
+phone's own review log, and what a user sees is whether the schedule is running on the published
+defaults or on fitted parameters, not twenty-one numbers to adjust.
 
 ## Anki Bridge (0.9.0)
 

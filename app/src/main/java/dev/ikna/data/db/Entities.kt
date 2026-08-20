@@ -188,7 +188,29 @@ data class GovernorLogEntity(
     val capacity: Int,
     val headroom: Double,
     val allowedNew: Int,
-    val reason: String
+    val reason: String,
+
+    // v4: the rest of what the decision was made from.
+    //
+    // docs/GOVERNOR.md says every decision is logged together with its inputs.
+    // Nine of the thirteen signals were not stored, which left this table
+    // unable to answer the only question it exists for -- why was today capped
+    // -- and made the diagnostics screen a list of outcomes with no causes.
+    //
+    // Additive, defaulted, on a derived table: old rows keep their meaning, and
+    // nothing here is required to rebuild anything.
+    @ColumnInfo(defaultValue = "0") val activityRatio: Double = 0.0,
+    @ColumnInfo(defaultValue = "0") val daysSinceStart: Int = 0,
+    @ColumnInfo(defaultValue = "0") val cleanDays: Int = 0,
+    @ColumnInfo(defaultValue = "0") val newIntroducedLastWeek: Int = 0,
+    @ColumnInfo(defaultValue = "0") val totalReviews: Int = 0,
+    @ColumnInfo(defaultValue = "0") val overheated: Boolean = false,
+    /** The ceiling the earned-new rule allowed, before the day's own limits. */
+    @ColumnInfo(defaultValue = "0") val newCeiling: Int = 0,
+    /** Null unless the user was coming back after a gap. */
+    val daysSinceReturn: Int? = null,
+    /** The rule that overrode the ordinary decision, when one did. */
+    val gate: String? = null
 )
 
 /**

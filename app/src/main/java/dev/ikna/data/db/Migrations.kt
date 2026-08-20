@@ -87,5 +87,45 @@ object IknaMigrations {
         }
     }
 
-    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
+    /**
+     * The nine columns v4 adds to `governor_log`.
+     *
+     * All defaulted or nullable, so the rows an older version wrote stay valid
+     * and simply read as zero -- which is honest: that install did not record
+     * the value.
+     */
+    private val GOVERNOR_LOG_V4 = listOf(
+        "ALTER TABLE governor_log ADD COLUMN activityRatio REAL NOT NULL DEFAULT 0",
+        "ALTER TABLE governor_log ADD COLUMN daysSinceStart INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE governor_log ADD COLUMN cleanDays INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE governor_log ADD COLUMN newIntroducedLastWeek INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE governor_log ADD COLUMN totalReviews INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE governor_log ADD COLUMN overheated INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE governor_log ADD COLUMN newCeiling INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE governor_log ADD COLUMN daysSinceReturn INTEGER",
+        "ALTER TABLE governor_log ADD COLUMN gate TEXT"
+    )
+
+    /**
+     * v3 -> v4
+     *
+     *  - `governor_log` gains the nine signals it was throwing away. The log is
+     *    derived and could have been dropped and recreated; ALTER TABLE is used
+     *    instead because the rows already there are the only record of why
+     *    earlier days were capped, and that record cannot be rebuilt from
+     *    `reviews`.
+     *  - The full-text index over `chunks` is created and filled. Content is
+     *    reinstallable, so this is cheap to get wrong and cheap to repair: see
+     *    [ChunkFtsIndex].
+     *
+     * `reviews` is not touched.
+     */
+    private val MIGRATION_3_4 = object : Migration(3, 4) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            GOVERNOR_LOG_V4.forEach { db.execSQL(it) }
+            ChunkFtsIndex.create(db)
+        }
+    }
+
+    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
 }

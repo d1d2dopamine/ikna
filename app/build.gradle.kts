@@ -115,6 +115,16 @@ android {
             abiFilters.clear()
             abiFilters += if (legacyAbi) "armeabi-v7a" else "arm64-v8a"
         }
+
+        // The six languages the interface is actually translated into, in
+        // ui/text/Strings*.kt and res/xml/locales_config.xml. Everything else
+        // that AndroidX and Compose bring translations for -- around seventy
+        // locales of framework strings -- cannot ever be shown by this app,
+        // because the language picker offers these six and nothing else.
+        //
+        // Keep this list in step with locales_config.xml. A language present
+        // there and missing here would fall back to English silently.
+        resourceConfigurations += listOf("en", "ru", "pl", "es", "fr", "de")
     }
 
     signingConfigs {
@@ -135,7 +145,26 @@ android {
             if (signWithFixedKey) signingConfig = signingConfigs.getByName("fixed")
         }
         release {
-            isMinifyEnabled = false
+            // R8 was off for every release up to and including 0.9.0, which
+            // also meant proguard-rules.pro had never once run: the rules were
+            // there, untested, for whenever somebody switched this line.
+            //
+            // It is on now because the app carries a speech runtime, an archive
+            // library and a compression library for the sake of features most
+            // installs never touch, and shipping the unreachable half of that to
+            // everybody is a cost paid by people on metered connections and
+            // small phones.
+            //
+            // What makes this safe is that every keep rule in
+            // proguard-rules.pro names the thing it protects: the serializers
+            // the pack format reaches by name, the JNI entry points of the
+            // speech and Zstandard libraries, and the workers WorkManager
+            // constructs from a class name it stored weeks ago. A missing rule
+            // here is a release-only crash, so assembleRelease and a run on a
+            // real phone -- voice, deck download, the daily worker -- are part
+            // of shipping this, not optional.
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             if (signWithFixedKey) signingConfig = signingConfigs.getByName("fixed")
         }

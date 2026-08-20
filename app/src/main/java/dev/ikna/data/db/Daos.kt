@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.SkipQueryVerification
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
@@ -68,9 +69,17 @@ interface ChunkDao {
     suspend fun chunks(ids: List<String>): List<ChunkEntity>
 
     /**
-     * Local concordance over installed content. It is deliberately an ordinary
-     * read rather than a new FTS table: adding or replacing a pack is already
-     * atomic, and there is no second index that can drift out of sync.
+     * Local concordance over installed content, by scan.
+     *
+     * This used to be the only search, and the comment here used to defend that
+     * on the grounds that a second index can drift out of sync. The drift is
+     * real and it is handled -- triggers plus a rebuild, in [ChunkFtsIndex] --
+     * whereas the cost of the scan grows with everything the user installs, and
+     * it grows in the one place where somebody is waiting while typing.
+     *
+     * So the scan stays, as the fallback for a query the index cannot parse or
+     * an index that is not there. Slow search is a much better failure than no
+     * search: [searchFts] is tried first, this answers when it cannot.
      */
     @Query(
         "SELECT c.id AS chunkId, c.packId AS packId, " +
@@ -87,6 +96,36 @@ interface ChunkDao {
             "ELSE 2 END, c.freqRank ASC, c.id ASC LIMIT :limit"
     )
     suspend fun search(pattern: String, prefix: String, limit: Int): List<ChunkSearchRow>
+
+    /**
+     * The same concordance, through the full-text index.
+     *
+     * Same columns, same prefix boost, same ordering, so the results are the
+     * ones the screen already knows how to show; only the way the rows are found
+     * differs. `MATCH` takes the query built by `ftsMatch`.
+     *
+     * `@SkipQueryVerification` is required and is the price of the index being
+     * hand-written SQL: Room cannot verify a query against a table it did not
+     * generate. In exchange, an upgrade cannot be broken by Room refusing to
+     * open a database whose virtual table it does not recognise. The read path
+     * treats a failure here as "use the scan".
+     */
+    @SkipQueryVerification
+    @Query(
+        "SELECT c.id AS chunkId, c.packId AS packId, " +
+            "COALESCE(p.title, p.id) AS packTitle, c.lang AS lang, " +
+            "c.text AS text, c.contextSentence AS contextSentence, " +
+            "c.translation AS translation, c.freqRank AS freqRank " +
+            "FROM chunks_fts " +
+            "JOIN chunks c ON c.rowid = chunks_fts.docid " +
+            "JOIN packs p ON p.id = c.packId " +
+            "WHERE chunks_fts MATCH :match " +
+            "ORDER BY CASE " +
+            "WHEN c.text COLLATE NOCASE LIKE :prefix ESCAPE '\\' THEN 0 " +
+            "WHEN c.contextSentence COLLATE NOCASE LIKE :prefix ESCAPE '\\' THEN 1 " +
+            "ELSE 2 END, c.freqRank ASC, c.id ASC LIMIT :limit"
+    )
+    suspend fun searchFts(match: String, prefix: String, limit: Int): List<ChunkSearchRow>
 
     @Query("SELECT * FROM chunk_tokens WHERE chunkId IN (:ids)")
     suspend fun tokensFor(ids: List<String>): List<ChunkTokenEntity>

@@ -76,6 +76,21 @@ private val V2_DDL = listOf(
     "CREATE TABLE IF NOT EXISTS `daily_plan` (`day` TEXT NOT NULL, `plannedIds` TEXT NOT NULL, `plannedTotal` INTEGER NOT NULL, `capacity` INTEGER NOT NULL, `allowedNew` INTEGER NOT NULL, `amnestyQuota` INTEGER NOT NULL, `reason` TEXT NOT NULL, `extraRequested` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`day`))"
 )
 
+// Version 3 is version 2 plus one column, so it is expressed as exactly that
+// rather than as another copy of fifteen CREATE TABLE statements that would have
+// to be kept in step by hand.
+private val V3_DDL = V2_DDL.map { ddl ->
+    if (ddl.startsWith("CREATE TABLE IF NOT EXISTS `daily_stats`")) {
+        ddl.replace(
+            "`planCompleted` INTEGER NOT NULL, PRIMARY KEY(`day`)",
+            "`planCompleted` INTEGER NOT NULL, " +
+                "`correctCount` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`day`)"
+        )
+    } else {
+        ddl
+    }
+}
+
 private const val DB_NAME = "ikna-migration-test.db"
 
 /**
@@ -217,9 +232,102 @@ class MigrationTest {
     }
 
     @Test
+    fun `an upgrade from version 3 gains the governor's inputs and a search index`() {
+        createOldDatabase(3, V3_DDL) { db ->
+            db.execSQL(
+                "INSERT INTO governor_log (ts, day, dueToday, forecastAvg3d, backlog, " +
+                    "accuracyRecent, daysSinceLastSession, reviewsDoneToday, capacity, " +
+                    "headroom, allowedNew, reason) VALUES " +
+                    "(1700000000000, '2024-03-03', 12, 9.5, 4, 0.82, 1, 6, 40, 0.4, " +
+                    "3, 'OK/LOW_ACTIVITY')"
+            )
+            db.execSQL(
+                "INSERT INTO chunks (id, packId, lang, text, contextSentence, " +
+                    "translation, targetStart, targetEnd, freqRank) VALUES " +
+                    "('chunk-3', 'en-ru-core', 'en', 'get used to', " +
+                    "'It takes a while to get used to the noise.', " +
+                    "'to grow accustomed', 0, 11, 120)"
+            )
+        }
+
+        withMigratedDatabase { db ->
+            assertEquals(
+                "The composite reason written by version 3 did not survive. It is " +
+                    "the only record of why that day was capped and cannot be " +
+                    "rebuilt from the review log.",
+                1,
+                count(
+                    db,
+                    "SELECT COUNT(*) FROM governor_log " +
+                        "WHERE reason = 'OK/LOW_ACTIVITY'"
+                )
+            )
+            assertEquals(
+                "A signal that version 3 never recorded has to read as zero, not " +
+                    "as a number somebody might mistake for a measurement.",
+                0,
+                count(
+                    db,
+                    "SELECT activityRatio FROM governor_log WHERE day = '2024-03-03'"
+                )
+            )
+            assertEquals(
+                "gate has to stay null on a row from before the column existed.",
+                1,
+                count(
+                    db,
+                    "SELECT COUNT(*) FROM governor_log " +
+                        "WHERE day = '2024-03-03' AND gate IS NULL"
+                )
+            )
+            assertEquals(
+                "The search index was not filled from the content that was " +
+                    "already installed, so upgrading would leave every existing " +
+                    "deck unsearchable by the fast path.",
+                1,
+                count(
+                    db,
+                    "SELECT COUNT(*) FROM chunks_fts WHERE chunks_fts MATCH 'used*'"
+                )
+            )
+
+            // A phrase that arrives after the migration has to be indexed by
+            // the triggers, otherwise every deck installed from now on would be
+            // missing from search until the next rebuild.
+            db.execSQL(
+                "INSERT INTO chunks (id, packId, lang, text, contextSentence, " +
+                    "translation, targetStart, targetEnd, freqRank) VALUES " +
+                    "('chunk-4', 'en-ru-core', 'en', 'sombrero', " +
+                    "'He wore a sombrero.', 'shade hat', 0, 8, 900)"
+            )
+            assertEquals(
+                "The insert trigger did not index a newly installed phrase.",
+                1,
+                count(
+                    db,
+                    "SELECT COUNT(*) FROM chunks_fts " +
+                        "WHERE chunks_fts MATCH 'sombrero*'"
+                )
+            )
+
+            db.execSQL("DELETE FROM chunks WHERE id = 'chunk-4'")
+            assertEquals(
+                "The delete trigger left a removed phrase in the index, so a " +
+                    "deleted deck would go on appearing in search results.",
+                0,
+                count(
+                    db,
+                    "SELECT COUNT(*) FROM chunks_fts " +
+                        "WHERE chunks_fts MATCH 'sombrero*'"
+                )
+            )
+        }
+    }
+
+    @Test
     fun `a fresh install opens at the current version`() {
         withMigratedDatabase { db ->
-            assertEquals(3, count(db, "PRAGMA user_version"))
+            assertEquals(4, count(db, "PRAGMA user_version"))
             assertTrue(
                 "correctCount is missing from a freshly created database.",
                 count(db, "SELECT COUNT(*) FROM daily_stats") == 0

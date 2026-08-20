@@ -12,6 +12,90 @@ replace the space with a dash: `0.1.1 press` is tagged `v0.1.1-press`. What the
 words mean and what a number promises inside an epoch is written down once, in
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
+## Unreleased
+
+Not built, not signed, not released. Every item below is source only: this batch
+was written without an Android toolchain to hand, so nothing here has been
+compiled and nothing has run on a phone. Treat it as a reviewable patch, not as a
+version.
+
+**The review log is untouched.** No row is rewritten, dropped or re-typed by
+anything below. The one migration adds columns to a derived table only.
+
+### Search finds phrases in the middle of a sentence again
+
+- Deck search was a `LIKE '%term%'` scan over the loaded packs. That is fine at a
+  few thousand chunks and it is the wrong shape at the catalogue's size.
+- Added an FTS4 index over `chunks` (`text`, `contextSentence`, `translation`),
+  kept in step by triggers, plus a `MATCH` query with the same prefix boost and
+  the same ordering as before.
+- The scan stays as the fallback and is now documented as one: if the index is
+  missing or a query cannot be parsed, search still works, only slower. Nothing
+  fails because the fast path failed.
+- The index is a plain SQL table rather than a Room `@Fts4` entity, deliberately.
+  Room would validate DDL it did not generate and crash on open; the price of
+  hand-rolling it is one `@SkipQueryVerification` and a best-effort read path,
+  which is the cheaper of the two failure modes. See `data/db/ChunkFtsIndex.kt`.
+
+### The governor log now records what it decided with
+
+- `docs/GOVERNOR.md` promised that every decision is logged with its inputs. Nine
+  of the thirteen signals were not stored, which made the log unable to answer
+  the one question it exists for: why was today capped.
+- `governor_log` gains `activityRatio`, `daysSinceStart`, `cleanDays`,
+  `newIntroducedLastWeek`, `totalReviews`, `daysSinceReturn`, `overheated`,
+  `newCeiling` and `gate` (database version 4, migration 3 → 4). Additive, with
+  defaults, on a derived table; existing rows keep their meaning and the reason
+  string is unchanged.
+
+### Release builds are shrunk
+
+- `isMinifyEnabled` was false and `proguard-rules.pro` had therefore never run.
+  Both are on now, with keep rules that each name the thing they protect: the
+  serializers the pack format needs, the JNI surface of the speech runtime and
+  the Zstandard decoder, and the reflective construction of the three workers.
+- Line numbers are kept in release builds so a pasted stack trace stays readable
+  without a mapping file uploaded to anybody.
+- `resourceConfigurations` is pinned to the six languages the app actually
+  translates, which drops the rest of the AndroidX strings from the APK.
+- **This is the riskiest change in the batch.** A wrong keep rule shows up as a
+  release-only crash, so `assembleRelease` plus a run on a phone is required
+  before this ships — particularly voice and deck download.
+
+### Local FSRS optimiser (estimator only, nothing wired in)
+
+- `domain/fsrs/FsrsOptimizer.kt` fits the twenty-one FSRS-6 weights from this
+  phone's own review log. It predicts through the shipping `Fsrs` code rather
+  than a copy of the formulas, scores binary log loss on answers a day or more
+  apart, pulls towards the published defaults, and is deterministic.
+- It replaces the defaults only if the fit beats them on the last 30% of the
+  timeline, which it never trained on. On short logs it refuses outright.
+- Prototyped on synthetic logs before being written: the gate rejected two of
+  three fits, and the fits that won on prediction sat *further* from the
+  generating weights than the defaults did. Both results are in
+  `docs/FSRS-OPTIMIZER.md`, along with the exact wiring steps left, which are
+  deliberately not taken in this batch.
+
+### Smaller things
+
+- Predictive back is opted into (`enableOnBackInvokedCallback`). Nothing in the
+  app intercepts back, so this is the system animation and nothing else.
+- `res/xml/backup_rules.xml` is deleted along with `fullBackupContent`. With
+  `allowBackup="false"` the platform never read either, and a second file
+  describing a backup that cannot happen is a good way to get the privacy story
+  wrong later.
+- `docs/ARCHITECTURE.md` no longer claims the app has no user settings, and
+  `docs/GRADING.md` no longer dates its own status to `0.1.0 proof`.
+- New: `docs/FSRS-OPTIMIZER.md`, `docs/REFACTOR.md` (the plan for splitting
+  `LearningRepository` and `SettingsScreen`, including which invariants a split
+  may not break).
+- Tests: `FsrsOptimizerTest` (refusal, determinism, bounds, the gate's promise,
+  the direction of the loss) and a 3 → 4 migration test.
+- Still to do on a machine with the toolchain: `./gradlew testReleaseUnitTest`,
+  `assembleRelease`, `connectedDebugAndroidTest`, and committing the generated
+  `app/schemas/dev.ikna.data.db.IknaDatabase/4.json`, which carries an identity
+  hash and cannot be written by hand.
+
 ## 0.9.0 press
 
 Bring your history, keep your rhythm.

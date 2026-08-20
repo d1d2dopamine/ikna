@@ -1,9 +1,16 @@
 # Grading
 
-**Status: decided, not implemented.** This file records a design decision taken
-during the `proof` epoch so it does not have to be re-argued. Nothing described
-under "Derived grades" ships in `0.1.0 proof`. What ships today is the binary
-swipe described in the first section.
+**Status as of the `press` epoch: still decided, still not implemented.** This
+file records a design decision taken during the `proof` epoch so it does not have
+to be re-argued, and the decision has held: nothing described under "Derived
+grades" ships yet. What ships today is the binary swipe described in the first
+section.
+
+Step 1 below — recording the gesture detail the derivation would need, without
+using it for anything — has not been taken either. It is the cheap half and the
+one that has to happen first: the columns cost a migration and nothing else, and
+until they exist there is no data with which to check whether derived grades
+would have been any good.
 
 ## What ships today
 
