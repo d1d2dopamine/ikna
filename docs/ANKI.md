@@ -1,17 +1,7 @@
 # Anki
 
-How the `.apkg` bridge works, what it refuses, and why the refusals are the
-interesting part.
-
-## Why a bridge at all
-
-The thing that keeps people inside a program they have outgrown is not the
-program. It is the years of answers inside it. Asking someone to start over is
-asking them to throw away the only irreplaceable thing they own, so 0.9.0 opens a
-door rather than an argument.
-
-The door goes one way. There is no export back, and that is a decision — see
-[Why there is no export](#why-there-is-no-export).
+How the `.apkg` bridge works and what it refuses. The import is one way: there
+is no `.apkg` writer, for the reasons at the end.
 
 ## The path through the code
 
@@ -132,9 +122,6 @@ look like it worked.
 Answers leave through the append-only export in `Documents/ikna/`, outside the app
 sandbox, so they survive an uninstall. Anki officially imports tab-separated
 plain text, which is the supported road out if one is wanted later.
-
-Deferred compatibility work is in `0.9.0_FOLLOW_UP_SPEC.txt`, unshipped and
-written down, rather than half-shipped and undocumented.
 
 ## Testing
 

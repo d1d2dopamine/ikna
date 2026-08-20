@@ -105,12 +105,11 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
 - **Make a deck with any AI.** The app gives you a written prompt; you paste the
   answer back. Three columns, one line per card.
 - **Share a deck** as plain text that imports on any other phone.
-- **Move in from Anki.** Pick an `.apkg` on the phone, read a compatibility report,
-  then import the text cards and up to the newest 100,000 review events. Nothing is
-  uploaded, the package is never modified and imported HTML never runs.
+- **Move in from Anki.** Import an `.apkg` and your answer history comes over with
+  the cards, so the schedule carries on instead of restarting. Nothing leaves the
+  phone.
 - **Twelve palettes**, each in two lightings, plus any font file on the phone. A
-  clean install opens in Ink; the launcher icon, the splash and the first frame all
-  wear it, so nothing flashes a different colour on the way in.
+  clean install opens in Ink.
 - **A memory field of cells and fine pixel grain:** clear language marks,
   segmented progress and a soft 280 ms Shared Axis X transition. The route
   viewport stays fixed and the fade has one hand-off, so two screens never fight
@@ -247,43 +246,23 @@ Format, refusals, the deck screen and the offline generator:
 
 ## 🔀 Moving from Anki
 
-Years of answers are the reason people stay in a program they have outgrown, so
-0.9.0 opens a one-way local door instead of asking anyone to start over.
-
 1. **+** → **Add a deck** → **Move from Anki**.
-2. Pick an `.apkg` and say which language it teaches.
-3. Read the compatibility report. It is shown *before* anything is written.
-4. Import.
+2. Pick an `.apkg` file and the language it teaches.
+3. Read the report, then import.
 
-Text cards are grouped by their Anki deck, and up to the newest 100,000 usable
-review events are replayed through FSRS-6 — ikna does not gain a second scheduler
-to accommodate an import. Basic, reversed, cloze and ordinary custom-text
-templates are read. Card HTML is converted to text; no WebView is created and no
-imported script or style ever runs.
+Cards arrive grouped by the decks they were already in, and your answer history
+comes with them, so the schedule carries on instead of starting from zero.
 
-What the bridge refuses to guess, it counts instead. Suspended and buried cards
-stay behind. Cards whose only content is a picture or a sound are skipped and
-reported as skipped, because binary media is deliberately not imported — a deck
-of images is the hand-built homework this app exists to avoid. `[image]` and
-`[audio]` markers show where something was left out.
+Text cards move over. Pictures and sounds do not: where one was, the card shows
+`[image]` or `[audio]`, and a card that was nothing but a picture is listed as
+skipped. Suspended and buried cards stay in Anki.
 
-The ceilings are on purpose: 300 MiB package, 512 MiB extracted collection,
-20,000 ZIP entries, 50,000 active cards, 100,000 newest review rows. The
-original file is opened read-only and never modified, the import makes no network
-request, and the whole write — decks, review rows, replay, plan — is a single
-transaction: a package that fails halfway leaves nothing behind. Importing the
-same collection twice replaces its own decks rather than duplicating them, and
-never touches a deck that did not come from it.
+The report appears before anything is saved and says what came over and what did
+not. Your `.apkg` is only ever read, never changed, and nothing leaves the phone.
+Collections above 300 MB are turned down rather than half-imported.
 
-History carries ratings and timing, not Anki's internal scheduling state. The
-report says so rather than implying a perfect transplant. Unsupported collection
-schemas are refused before the first write; what is still deferred, and why, is
-written down in [`0.9.0_FOLLOW_UP_SPEC.txt`](0.9.0_FOLLOW_UP_SPEC.txt).
-
-There is no Anki *export*. The format is not documented for outside writers, its
-schema has changed on a patch release before, and a half-working exporter that
-makes Anki ask for database repair would be worse than none. Your answers leave
-in the append-only export in `Documents/ikna/` instead.
+Importing the same file again updates those decks instead of making copies. There
+is no export back to Anki.
 
 ---
 
@@ -473,12 +452,11 @@ ikna учит язык **кусками**: короткая фраза, живо
   обратно. Три столбца, одна строка — одна карточка.
 - **Колодой можно поделиться** — обычным текстом, который встанет на любой другой
   телефон.
-- **Переезд из Anki.** Выбери `.apkg` на телефоне, прочитай отчёт о совместимости
-  и перенеси текстовые карточки и до 100 000 свежих ответов. Ничего не
-  отправляется, исходный файл не меняется, а HTML из карточек не исполняется.
+- **Переезд из Anki.** Импортируй `.apkg` — вместе с карточками переедет
+  история ответов, так что расписание продолжится, а не начнётся заново.
+  С телефона ничего не уходит.
 - **Двенадцать палитр**, каждая в двух освещениях, плюс любой шрифт с телефона.
-  Чистая установка открывается в «Чернилах»; иконка, экран входа и первый кадр
-  носят их же, так что на входе ничего не мигает другим цветом.
+  Чистая установка открывается в «Чернилах».
 - **Поле памяти из ячеек и мелкого пиксельного зерна:** чёткие языковые
   знаки, сегментированный прогресс и мягкий Shared Axis X на 280 мс.
   Область экрана зафиксирована, а затухания не пересекаются: две вкладки больше
@@ -614,45 +592,23 @@ get used to | It takes a while to get used to the noise. | привыкать
 
 ## 🔀 Переезд из Anki
 
-Годы ответов — главная причина, по которой люди остаются в программе, из
-которой уже выросли. 0.9.0 открывает локальную дверь в одну сторону вместо
-того, чтобы предлагать начать с нуля.
-
 1. **+** → **Добавить колоду** → **Переехать из Anki**.
-2. Выбери `.apkg` и укажи, какому языку он учит.
-3. Прочитай отчёт о совместимости. Он показывается *до* любой записи.
-4. Импорт.
+2. Выбери файл `.apkg` и язык, которому он учит.
+3. Прочитай отчёт и импортируй.
 
-Текстовые карточки группируются по своим колодам Anki, а до 100 000 свежих
-пригодных ответов переигрываются через FSRS-6: ради импорта в приложении не
-появляется второго планировщика. Читаются шаблоны Basic, обратный, cloze и
-обычные текстовые. HTML карточки превращается в текст: WebView не создаётся,
-ни один импортированный скрипт или стиль не исполняется.
+Карточки приезжают теми же колодами, в которых уже лежали, и вместе с ними
+переезжает история ответов — расписание продолжается, а не начинается с нуля.
 
-Чего мост не берётся угадывать — то пересчитывает. Приостановленные и отложенные
-карточки остаются на месте. Карточки, где всё содержание — картинка или звук,
-пропускаются и показываются в отчёте как пропущенные: бинарное медиа не
-импортируется сознательно — колода из картинок это та самая ручная домашка,
-ради отказа от которой приложение и существует. Метки `[image]` и `[audio]`
-показывают, где что-то осталось за бортом.
+Переезжают текстовые карточки. Картинки и звук — нет: на их месте в карточке
+будет `[image]` или `[audio]`, а карточка, в которой кроме картинки ничего не было,
+попадёт в список пропущенных. Приостановленные и отложенные карточки остаются в Anki.
 
-Потолки поставлены специально: 300 МиБ пакет, 512 МиБ распакованная база,
-20 000 записей в ZIP, 50 000 активных карточек, 100 000 свежих ответов. Исходный
-файл открывается только на чтение и никогда не меняется, импорт не делает ни
-одного сетевого запроса, а вся запись — колоды, ответы, переигрывание, план —
-одна транзакция: пакет, упавший на полпути, не оставляет ничего. Повторный
-импорт той же коллекции заменяет свои же колоды, а не плодит дубли, и никогда
-не трогает колоду, которая пришла не оттуда.
+Отчёт показывается до того, как что-то будет сохранено, и говорит, что переехало,
+а что нет. Твой `.apkg` только читается и никогда не меняется, с телефона ничего
+не уходит. Коллекции тяжелее 300 МБ отклоняются, а не импортируются наполовину.
 
-История переносит оценки и время, а не внутреннее состояние планировщика Anki.
-Отчёт говорит это прямо, а не намекает на идеальную пересадку. Неподдержанные
-схемы отклоняются до первой записи; что отложено и почему — в
-[`0.9.0_FOLLOW_UP_SPEC.txt`](0.9.0_FOLLOW_UP_SPEC.txt).
-
-Экспорта в Anki нет. Формат не документирован для сторонней записи, его схема
-уже менялась внутри патч-версии, а полурабочий экспортёр, после которого Anki
-просит восстановить базу, был бы хуже отсутствия. Твои ответы уходят через
-выгрузку в `Documents/ikna/`, которая только дописывается.
+Повторный импорт того же файла обновляет эти колоды, а не плодит копии.
+Экспорта обратно в Anki нет.
 
 ---
 

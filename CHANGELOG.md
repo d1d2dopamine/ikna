@@ -50,8 +50,8 @@ Bring your history, keep your rhythm.
 - There is no Anki *export*, and the JSONL backup is not labelled as one. The
   format is not documented for outside writers and its schema has changed on a
   patch release before; an exporter that made Anki ask for database repair would
-  be worse than none. Deferred compatibility work is written down in
-  `0.9.0_FOLLOW_UP_SPEC.txt` rather than half-shipped here.
+  be worse than none. Remaining compatibility work is deferred rather than
+  half-shipped here.
 
 ### Ink, all the way in
 
