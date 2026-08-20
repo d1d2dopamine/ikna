@@ -9,6 +9,7 @@ import dev.ikna.data.prefs.SettingsStore
 import dev.ikna.data.repo.LearningRepository
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.governor.GovernorReason
+import dev.ikna.domain.session.Ask
 import dev.ikna.domain.session.Level
 import dev.ikna.domain.session.SessionCard
 import kotlinx.coroutines.delay
@@ -95,7 +96,7 @@ data class SessionUiState(
      */
     val speakable: Boolean
         get() = current?.let { card ->
-            card.level == Level.RECOGNITION || revealed
+            card.ask == Ask.RECOGNISE || revealed
         } == true
 }
 

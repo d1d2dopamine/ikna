@@ -3,6 +3,7 @@ package dev.ikna.data.repo
 import dev.ikna.data.db.CardDao
 import dev.ikna.data.db.CardEntity
 import dev.ikna.data.db.ChunkDao
+import dev.ikna.data.db.ChunkEntity
 import dev.ikna.data.db.DailyPlanEntity
 import dev.ikna.data.db.DailyStatEntity
 import dev.ikna.data.db.GovernorDao
@@ -26,6 +27,7 @@ import dev.ikna.domain.session.Level
 import dev.ikna.domain.session.SessionBuilder
 import dev.ikna.domain.session.SessionCard
 import dev.ikna.domain.session.SessionPlan
+import dev.ikna.domain.session.Shapes
 import dev.ikna.domain.time.DayBoundary
 import java.time.Instant
 import java.time.LocalDate
@@ -803,8 +805,16 @@ class LearningRepository(
      * definition. The third level asks for the phrase from its meaning, which is
      * a language exercise -- see [LevelPromotion].
      */
-    private fun maxLevelFor(lang: String): Int =
-        if (lang == NO_LANG) Level.CLOZE.value else Level.PRODUCTION.value
+    private fun maxLevelFor(chunk: ChunkEntity): Int {
+        val byShape = Shapes.maxLevel(Shapes.of(chunk))
+        val byLanguage =
+            if (chunk.lang == NO_LANG) Level.CLOZE.value else Level.PRODUCTION.value
+        // The lower of the two wins. The deck sets one limit; the chunk sets
+        // the other, because a bare word has no sentence to take a gap out of.
+        // Promoting past either produces a question that cannot be answered,
+        // and the miss is then recorded against the item.
+        return minOf(byShape, byLanguage)
+    }
 
     suspend fun markWrong(sessionCard: SessionCard, now: Long = System.currentTimeMillis()) =
         writeLock.withLock { markWrongLocked(sessionCard, now) }
@@ -886,7 +896,7 @@ class LearningRepository(
         // been asked, and the governor is the only thing allowed to decide how
         // many of those arrive in a day. See LevelPromotion.
         builder()
-            .nextLevelFor(result.card, newRoomToday(now), maxLevelFor(sessionCard.chunk.lang))
+            .nextLevelFor(result.card, newRoomToday(now), maxLevelFor(sessionCard.chunk))
             ?.let { nextLevel ->
             if (cardDao.card(result.card.chunkId, nextLevel) == null) {
                 cardDao.upsert(

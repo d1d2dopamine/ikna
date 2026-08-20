@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import dev.ikna.domain.session.Ask
 import dev.ikna.ui.text.S
 
 import androidx.compose.animation.core.Animatable
@@ -152,7 +153,7 @@ fun SessionScreen(
                     onRate = { rating -> vm.rate(rating, viaSwipe = true) }
                 ) { progress ->
                     ChunkCard(
-                        label = levelLabel(card.level, card.chunk.lang == NO_LANG),
+                        label = askLabel(card.ask, card.chunk.lang == NO_LANG),
                         prompt = card.prompt,
                         answer = card.answer,
                         // Which part of the sentence the card is actually
@@ -163,7 +164,7 @@ fun SessionScreen(
                         // On a subject deck the third field IS the meaning of the term, so
                         // showing it beside a definition with the term blanked out
                         // would simply print the answer.
-                        hint = if (card.level == Level.CLOZE && card.chunk.lang != NO_LANG) {
+                        hint = if (card.ask == Ask.GAP && card.chunk.lang != NO_LANG) {
                             card.meaning
                         } else {
                             null
@@ -503,10 +504,10 @@ private fun copyReport(context: Context, report: String): Boolean = runCatching 
  * "recognition" and "a gap in a sentence" describes a phrasebook instead. The
  * third level never appears there at all -- see [dev.ikna.domain.session.LevelPromotion].
  */
-private fun levelLabel(level: Level, subject: Boolean): String = when (level) {
-    Level.RECOGNITION -> if (subject) S.t("sess.046") else S.t("sess.015")
-    Level.CLOZE -> if (subject) S.t("sess.047") else S.t("sess.016")
-    Level.PRODUCTION -> S.t("sess.017")
+private fun askLabel(ask: Ask, subject: Boolean): String = when (ask) {
+    Ask.RECOGNISE -> if (subject) S.t("sess.046") else S.t("sess.015")
+    Ask.GAP -> if (subject) S.t("sess.047") else S.t("sess.016")
+    Ask.PRODUCE -> S.t("sess.017")
 }
 
 /**

@@ -4,6 +4,15 @@ import dev.ikna.data.catalog.catalogMeaning
 import dev.ikna.data.db.CardEntity
 import dev.ikna.data.db.ChunkEntity
 
+/**
+ * Which step of the ladder a card is on.
+ *
+ * The names are historical: this used to be the kind of question itself, back
+ * when every chunk was a phrase inside a sentence and step one was always
+ * recognition. The value is the index into the chunk's ladder now, and what is
+ * actually asked comes from [Ask]. The enum stays because the number is stored
+ * on every card and in every history record.
+ */
 enum class Level(val value: Int) {
     RECOGNITION(0),
     CLOZE(1),
@@ -15,12 +24,13 @@ enum class Level(val value: Int) {
 }
 
 /**
- * One chunk, three ways of asking. Novelty without new content, which matters
- * more here than in a normal SRS: the same 40 items feel different across
- * levels, so boredom does not force the queue to grow.
+ * One chunk, asked in as many ways as it can be asked.
  *
- * Cloze is the primary format because it attributes an error to a specific
- * word for free, which is exactly the labelling the component layer needs.
+ * Novelty without new content, which matters more here than in a normal spaced
+ * system: the same forty items feel different across steps, so boredom does not
+ * force the queue to grow. Which ways exist is decided by [Shapes] from the
+ * chunk itself, never guessed here -- a bare word imported from somewhere else
+ * has no sentence to take a gap out of.
  */
 data class SessionCard(
     val card: CardEntity,
@@ -28,7 +38,7 @@ data class SessionCard(
     val level: Level,
     val fromAmnesty: Boolean
 ) {
-    /** The answer without the catalogue's machine-readable source suffix. */
+    /** The answer without the catalogue machine-readable source suffix. */
     val meaning: String
         get() = catalogMeaning(chunk.translation).text
 
@@ -36,47 +46,58 @@ data class SessionCard(
     val sourceId: String?
         get() = catalogMeaning(chunk.translation).tatoebaId
 
+    /** What this chunk is, and therefore which steps exist for it. */
+    val shape: ChunkShape
+        get() = Shapes.of(chunk)
+
+    /** What this card asks right now. */
+    val ask: Ask
+        get() = Shapes.askAt(shape, level.value)
+
     val prompt: String
-        get() = when (level) {
-            Level.RECOGNITION -> chunk.contextSentence
-            Level.CLOZE -> blanked()
-            Level.PRODUCTION -> meaning
+        get() = when (ask) {
+            Ask.RECOGNISE -> chunk.contextSentence
+            Ask.GAP -> blanked()
+            Ask.PRODUCE -> meaning
         }
 
     val answer: String
-        get() = when (level) {
-            Level.RECOGNITION -> meaning
-            Level.CLOZE -> chunk.text
-            Level.PRODUCTION -> chunk.contextSentence
+        get() = when (ask) {
+            // A chunk with nothing written down about it is shown and
+            // acknowledged rather than tested, so the back is the text itself
+            // instead of an empty card.
+            Ask.RECOGNISE -> meaning.ifBlank { chunk.text }
+            Ask.GAP -> chunk.text
+            Ask.PRODUCE -> chunk.contextSentence
         }
 
     /**
-     * Where the phrase being learned sits inside the sentence on the front of
-     * the card, so the screen can mark it.
+     * Where the phrase being learned sits inside the sentence on the front, so
+     * the screen can mark it.
      *
      * The sentence is deliberately never translated -- it is the context to
-     * guess from -- but the card only asks one question, and that question is
-     * about one phrase inside it. Leaving the phrase unmarked adds a second,
-     * accidental question: which of these six words am I being asked about. That
-     * is not desirable difficulty, it is noise, and it lands in the grading: a
-     * card failed because the eye was on the wrong word is still recorded as the
-     * phrase forgotten, and the whole schedule is built out of those records.
+     * guess from -- but the card asks about one phrase inside it. Leaving that
+     * phrase unmarked adds a second, accidental question: which of these six
+     * words am I being asked about. That is not desirable difficulty, it is
+     * noise, and it lands in the grading, because a card failed with the eye on
+     * the wrong word is still recorded as the phrase forgotten.
      *
-     * Null at the other two levels, and for different reasons: the cloze already
-     * shows the position as a gap, and the production prompt is the translation,
-     * which contains no sentence to mark.
+     * Null when there is nothing to single out: the gap step already shows the
+     * position as a gap, the production prompt is a translation with no
+     * sentence in it, and an imported card whose span covers its whole text
+     * would be marked end to end, which reads as a fault rather than a phrase.
      */
     val promptTarget: IntRange?
-        get() = if (level == Level.RECOGNITION) targetRange() else null
+        get() = if (ask == Ask.RECOGNISE && Shapes.hasContext(chunk)) targetRange() else null
 
     /** The same mark on the back of a production card, which is the sentence. */
     val answerTarget: IntRange?
-        get() = if (level == Level.PRODUCTION) targetRange() else null
+        get() = if (ask == Ask.PRODUCE && Shapes.hasContext(chunk)) targetRange() else null
 
     /**
-     * Clamped rather than trusted. The offsets are written by the importer and
-     * an off-by-one in a hand-edited deck file must not be able to crash a
-     * session in the middle of it.
+     * Clamped rather than trusted. These offsets are written by the importer,
+     * and an off-by-one in a hand-edited deck must not be able to end a session
+     * in the middle of it.
      */
     private fun targetRange(): IntRange? {
         val s = chunk.contextSentence
@@ -86,16 +107,16 @@ data class SessionCard(
     }
 
     /**
-     * Never answered before: level zero, no repetitions yet.
+     * Never answered before: first step, no repetitions yet.
      *
-     * There is no separate introduction card. A chunk met for the first time
-     * is asked like every other card -- the answer is one tap away and the
-     * first miss costs nothing. This flag only decides that the card comes
-     * back once more inside the same session, because a single pass on the day
-     * a chunk appears is the weakest point of any spaced system.
+     * There is no separate introduction card. A chunk met for the first time is
+     * asked like every other card -- the answer is one tap away and the first
+     * miss costs nothing. This flag only decides that the card comes back once
+     * more inside the same session, because a single pass on the day a chunk
+     * appears is the weakest point of any spaced system.
      */
     val isFirstContact: Boolean
-        get() = level == Level.RECOGNITION && card.isNew && card.reps == 0
+        get() = level.value == 0 && card.isNew && card.reps == 0
 
     val target: String
         get() = chunk.contextSentence.substring(

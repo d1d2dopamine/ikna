@@ -281,33 +281,119 @@ class AnkiImporter(
                 val deckId = cursor.getLong(2)
                 val model = models[cursor.getLong(3)]
                 val values = cursor.getString(4).orEmpty().split(FIELD_SEPARATOR)
+                val fields = fieldsOf(model, values)
+
+                // An occlusion note describes rectangles drawn over a picture.
+                // Without the picture there is nothing to answer, so it is
+                // refused and counted rather than stored as text about
+                // coordinates.
+                if (AnkiText.isImageOcclusion(fields)) {
+                    skipped++
+                    continue
+                }
+
+                // A cloze card already holds what this app marks by hand: a
+                // sentence, and the exact phrase somebody chose to learn.
+                val reading =
+                    if (model != null && model.cloze) {
+                        AnkiText.readCloze(fields, ordinal + 1)
+                    } else {
+                        null
+                    }
+                val target = reading?.target
+                var wholeText = ""
+                var wholeMeaning = ""
+                if (reading != null && target == null) {
+                    // The gap cannot be reconstructed. The card may still arrive
+                    // whole, but only if the note says somewhere what it means:
+                    // a sentence with its words already hidden and nothing to
+                    // explain them is worse than a card that never arrived,
+                    // because it looks real.
+                    wholeText = AnkiText.filledIn(fields)
+                    wholeMeaning = AnkiText.extraMeaning(fields)
+                    if (reading.shape != ClozeShape.MULTI_GAP ||
+                        wholeText.isBlank() ||
+                        wholeMeaning.isBlank()
+                    ) {
+                        skipped++
+                        continue
+                    }
+                }
+
                 val rendered = render(model, values, ordinal)
-                if (!substantive(rendered.question) || !substantive(rendered.answer)) {
+                if (reading == null &&
+                    (!substantive(rendered.question) || !substantive(rendered.answer))
+                ) {
                     skipped++
                     continue
                 }
                 if (rendered.hadMedia) mediaCards++
-                if (rendered.usedFallback) fallbackCards++
+                // A cloze card is read from its fields by design, so counting it
+                // as recovered from fields would report a fault that is not one.
+                if (rendered.usedFallback && reading == null) fallbackCards++
 
                 val chunkId = stableChunkId(collectionKey, cardId)
-                val question = rendered.question.take(AnkiText.MAX_SIDE_CHARS)
-                val answer = rendered.answer.take(AnkiText.MAX_SIDE_CHARS)
-                val tokens = SeedFormat.tokens(question, 0, question.length)
-                if (tokens.isEmpty()) {
+                val chunk = if (target != null) {
+                    val context = target.context.take(AnkiText.MAX_SIDE_CHARS)
+                    val tokens = SeedFormat.tokens(context, target.start, target.end)
+                    if (tokens.isEmpty()) {
+                        null
+                    } else {
+                        PackChunk(
+                            id = chunkId,
+                            text = context.substring(target.start, target.end),
+                            context = context,
+                            translation = AnkiText.extraMeaning(fields),
+                            targetStart = target.start,
+                            targetEnd = target.end,
+                            freqRank = ++rank,
+                            audioRef = null,
+                            tokens = tokens
+                        )
+                    }
+                } else if (reading != null) {
+                    val context = wholeText.take(AnkiText.MAX_SIDE_CHARS)
+                    val tokens = SeedFormat.tokens(context, 0, context.length)
+                    if (tokens.isEmpty()) {
+                        null
+                    } else {
+                        PackChunk(
+                            id = chunkId,
+                            text = context,
+                            context = context,
+                            translation = wholeMeaning,
+                            targetStart = 0,
+                            targetEnd = context.length,
+                            freqRank = ++rank,
+                            audioRef = null,
+                            tokens = tokens
+                        )
+                    }
+                } else {
+                    val question = rendered.question.take(AnkiText.MAX_SIDE_CHARS)
+                    val answer = rendered.answer.take(AnkiText.MAX_SIDE_CHARS)
+                    val tokens = SeedFormat.tokens(question, 0, question.length)
+                    if (tokens.isEmpty()) {
+                        null
+                    } else {
+                        PackChunk(
+                            id = chunkId,
+                            text = question,
+                            context = question,
+                            translation = answer,
+                            targetStart = 0,
+                            targetEnd = question.length,
+                            freqRank = ++rank,
+                            audioRef = null,
+                            tokens = tokens
+                        )
+                    }
+                }
+                if (chunk == null) {
                     skipped++
                     continue
                 }
-                grouped.getOrPut(deckId) { ArrayList() } += PackChunk(
-                    id = chunkId,
-                    text = question,
-                    context = question,
-                    translation = answer,
-                    targetStart = 0,
-                    targetEnd = question.length,
-                    freqRank = ++rank,
-                    audioRef = null,
-                    tokens = tokens
-                )
+                grouped.getOrPut(deckId) { ArrayList() } += chunk
                 chunkByCard[cardId] = chunkId
             }
         }
@@ -395,8 +481,7 @@ class AnkiImporter(
 
     private fun render(model: Model?, values: List<String>, ordinal: Int): AnkiRenderedCard {
         if (model == null) return fallback(values, hadMedia = values.any(AnkiText::hasMedia))
-        val fields = LinkedHashMap<String, String>()
-        model.fields.forEachIndexed { index, name -> fields[name] = values.getOrElse(index) { "" } }
+        val fields = fieldsOf(model, values)
         val template = if (model.cloze) model.templates.firstOrNull()
             else model.templates.firstOrNull { it.ordinal == ordinal }
                 ?: model.templates.getOrNull(ordinal)
@@ -408,6 +493,23 @@ class AnkiImporter(
             fields = fields,
             clozeNumber = if (model.cloze) ordinal + 1 else 1
         )
+    }
+
+    /**
+     * The note field values by name.
+     *
+     * A note whose notetype is missing from the collection has no field names at
+     * all, so numbered stand-ins are used instead: the card can still be read
+     * from its values, and nothing downstream has to special-case a null model.
+     */
+    private fun fieldsOf(model: Model?, values: List<String>): Map<String, String> {
+        val fields = LinkedHashMap<String, String>()
+        if (model == null) {
+            values.forEachIndexed { index, value -> fields["Field ${index + 1}"] = value }
+            return fields
+        }
+        model.fields.forEachIndexed { index, name -> fields[name] = values.getOrElse(index) { "" } }
+        return fields
     }
 
     private fun fallback(values: List<String>, hadMedia: Boolean): AnkiRenderedCard {

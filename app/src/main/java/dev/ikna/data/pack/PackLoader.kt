@@ -5,6 +5,7 @@ import dev.ikna.data.db.ChunkDao
 import dev.ikna.data.db.ChunkEntity
 import dev.ikna.data.db.ChunkTokenEntity
 import dev.ikna.data.db.PackEntity
+import dev.ikna.domain.session.Shapes
 import kotlinx.serialization.json.Json
 
 data class ImportResult(val packId: String, val installed: Int, val skipped: Int)
@@ -208,8 +209,14 @@ class PackLoader(
             freqRank = c.freqRank,
             audioRef = c.audioRef
         )
+        // A span covering the text end to end singles nothing out: an
+        // imported card is its own context. Marking every word as the target
+        // there tells the component layer that the whole sentence is the thing
+        // being learned, so every word carries full blame for a lapse and no
+        // word is ever the weak one.
+        val marked = Shapes.hasContext(c.context.length, c.targetStart, c.targetEnd)
         c.tokens.forEachIndexed { i, t ->
-            val inTarget = isInTarget(c, i)
+            val inTarget = marked && isInTarget(c, i)
             tokens += ChunkTokenEntity(
                 chunkId = c.id,
                 position = i,

@@ -1,5 +1,7 @@
 package dev.ikna.data.pack
 
+import dev.ikna.domain.session.Shapes
+
 /*
  * The format a person can actually produce, read on the phone.
  *
@@ -357,9 +359,11 @@ object SeedFormat {
      * span this file has no way to tell a content word from "the" — so it claims
      * nothing. PackLoader gives the span itself full weight regardless.
      */
-    fun tokens(sentence: String, targetStart: Int, targetEnd: Int): List<PackToken> =
-        WORD.findAll(sentence).map { match ->
-            val inTarget = match.range.first >= targetStart && match.range.last < targetEnd
+    fun tokens(sentence: String, targetStart: Int, targetEnd: Int): List<PackToken> {
+        val marked = Shapes.hasContext(sentence.length, targetStart, targetEnd)
+        return WORD.findAll(sentence).map { match ->
+            val inTarget = marked &&
+                match.range.first >= targetStart && match.range.last < targetEnd
             PackToken(
                 surface = match.value,
                 lemma = match.value.lowercase(),
@@ -367,6 +371,7 @@ object SeedFormat {
                 isContent = inTarget
             )
         }.toList()
+    }
 
     /**
      * Where the phrase sits in its sentence.

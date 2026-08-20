@@ -31,6 +31,7 @@ import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
+import dev.ikna.ui.theme.IknaPanel
 import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.Space
@@ -76,18 +77,21 @@ fun AnkiImportScreen(
                 .padding(Edge),
             verticalArrangement = Arrangement.spacedBy(Space.md)
         ) {
-            Text(S.t("anki.002"), style = MaterialTheme.typography.bodyLarge)
-            Text(
-                S.t("anki.003"),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                S.t("anki.028"),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-            IknaRule()
+            IknaPanel {
+                Text(S.t("anki.002"), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    S.t("anki.003"),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                // The accent colour was doing the job of an alarm here. This is
+                // a plain fact about how the schedule is rebuilt, not a warning.
+                Text(
+                    S.t("anki.028"),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             Text(
                 S.t("anki.004"),
                 style = MaterialTheme.typography.labelLarge,
@@ -113,12 +117,14 @@ fun AnkiImportScreen(
                     IknaWideButton(label = S.t("anki.016"), onClick = onBack, filled = true)
                 }
                 is AnkiImportState.Failed -> {
-                    Text(
-                        errorText(current.error),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                    Text(S.t("anki.024"), style = MaterialTheme.typography.bodyMedium)
+                    IknaPanel {
+                        Text(
+                            errorText(current.error),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Text(S.t("anki.024"), style = MaterialTheme.typography.bodyMedium)
+                    }
                     IknaWideButton(label = S.t("anki.017"), onClick = choose, filled = true)
                 }
             }

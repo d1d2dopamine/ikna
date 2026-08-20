@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -732,4 +733,31 @@ fun segmentFill(fraction: Float, segments: Int): SegmentFill {
     val complete = floor(scaled.toDouble()).toInt().coerceIn(0, count)
     val partial = if (complete >= count) 0f else (scaled - complete).coerceIn(0f, 1f)
     return SegmentFill(complete, partial)
+}
+
+/**
+ * A bordered block for text the app is telling you, as opposed to text you are
+ * meant to act on.
+ *
+ * Explanations used to run down the screen as loose paragraphs with a hairline
+ * somewhere in the middle, which reads as one long wall: nothing says where the
+ * explaining stops and the choosing begins. The border says it. It is heavier
+ * than the 1 dp lines used for buttons and fields on purpose -- a control you
+ * press and a note you read should not be drawn with the same weight -- and it
+ * is the muted palette colour rather than a grey, so it stays correct in all
+ * twelve palettes and in both of their variants.
+ */
+@Composable
+fun IknaPanel(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .border(2.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f))
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        content = content
+    )
 }
