@@ -457,13 +457,37 @@ private fun DeckRow(
                         )
                     )
                     Spacer(Modifier.height(Space.xs))
-                    Text(
-                        text = if (owes) S.t("deck.009") + dueToday +
-                            minutesTail(dueToday, perCardMs)
-                        else S.t("deck.010"),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = if (owes) accent else muted
-                    )
+                    // What today asks of this deck, and how far through it you
+                    // are, on one line.
+                    //
+                    // The percentage used to sit under the progress bar, where it
+                    // gave a switched-on row a fourth line and a shape no other
+                    // row in the list had. Beside today's figure it costs no
+                    // height at all, and the two belong together: both are one
+                    // glance at the same deck. The bar keeps the last line to
+                    // itself, which is what a bar is for.
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = if (owes) S.t("deck.009") + dueToday +
+                                minutesTail(dueToday, perCardMs)
+                            else S.t("deck.010"),
+                            // The percentage is short and fixed; today's figure
+                            // yields first if the row runs out of width.
+                            modifier = Modifier.weight(1f, fill = false),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (owes) accent else muted
+                        )
+                        if (deck.isActive) {
+                            Text(
+                                text = " · " + percentDone(deck.introduced, deck.total),
+                                maxLines = 1,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = muted
+                            )
+                        }
+                    }
                 }
                 // Settings on the left of the switch, and the same height as it.
                 //
@@ -503,21 +527,6 @@ private fun DeckRow(
                     // Here the empty part means something — it is the rest of the deck.
                     track = true,
                     segments = 18
-                )
-                Spacer(Modifier.height(Space.sm))
-                // One number under the bar, not three.
-                //
-                // This line used to read "введено 34 из 121 · знаю 12": three
-                // figures in a sentence, under a bar that already draws the first
-                // two of them. Nobody reads a three-number sentence on a list row
-                // — the eye slides off it — and the two numbers it repeated were
-                // the two the bar was for. What is left is how far through the
-                // deck you are, as a percentage, which is the only part the bar
-                // cannot say out loud.
-                Text(
-                    text = percentDone(deck.introduced, deck.total),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = muted
                 )
             }
             // Sharing used to be written out on every row, which put a

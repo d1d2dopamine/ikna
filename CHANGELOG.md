@@ -107,6 +107,10 @@ anything below. The one migration adds columns to a derived table only.
 - One answered card in a deck of six hundred used to put a hair of colour in the
   bar beside the figure “0%”. The figure is in whole percents, so the bar now
   agrees with it and stays empty until there is a percent to show.
+- How far through a deck you are now sits beside today's figure on the deck
+  row instead of under the bar. Under the bar it gave a switched-on row a
+  fourth line and a shape none of the other rows in the list had; beside
+  today's figure it costs no height at all.
 
 ### Fewer words on the way in
 
