@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,6 +37,7 @@ import dev.ikna.data.repo.localSearchTerms
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
+import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaLatticePlaceholder
@@ -86,95 +88,95 @@ fun DeckSearchScreen(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(BarHeight)
-                .padding(horizontal = Space.sm),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IknaIconButton(
-                glyph = IknaGlyph.BACK,
-                onClick = onBack,
-                label = S.t("a11y.001")
-            )
-            Text(
-                text = S.t("search.001"),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(start = Space.xs)
-            )
-        }
-
-        Column(modifier = Modifier.padding(horizontal = Edge)) {
-            Spacer(Modifier.height(Space.md))
-            Text(
-                text = S.t("search.002"),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.height(Space.md))
-            IknaTextField(
-                value = query,
-                onValueChange = {
-                    query = it
-                    // Invalidate a Room query for the previous text. Room can
-                    // cancel suspend queries, and the token also prevents a
-                    // late result from being drawn under a newer query.
-                    token++
-                    loading = false
-                    searched = false
-                    failed = false
-                    results = emptyList()
-                },
-                placeholder = S.t("search.003"),
-                onSearch = ::search,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(Space.sm))
-            IknaWideButton(
-                label = if (loading) S.t("search.005") else S.t("search.004"),
-                filled = true,
-                enabled = !loading && localSearchTerms(query) != null,
-                onClick = ::search
-            )
-            Spacer(Modifier.height(Space.lg))
-            IknaRule()
-            Spacer(Modifier.height(Space.md))
-        }
-
-        when {
-            failed -> SearchMessage(S.t("search.009"))
-            loading -> SearchMessage(S.t("search.005"))
-            !searched -> SearchMessage(S.t("search.006"), lattice = true)
-            results.isEmpty() -> SearchMessage(S.t("search.007"), lattice = true)
-            else -> LazyColumn(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().padding(bottom = BarHeight)) {
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = Edge)
+                    .fillMaxWidth()
+                    .height(BarHeight)
+                    .padding(horizontal = Space.sm),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                items(results, key = { it.chunkId }) { row ->
-                    SearchResult(
-                        row = row,
-                        onOpenDeck = { onOpenDeck(row.packId) },
-                        onSource = { id -> openTatoeba(context, id) }
-                    )
-                    Spacer(Modifier.height(Space.md))
-                    IknaRule()
-                    Spacer(Modifier.height(Space.md))
-                }
-                if (results.size == 80) {
-                    item {
-                        Text(
-                            text = S.t("search.008"),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                Text(
+                    text = S.t("search.001"),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(start = Space.xs)
+                )
+            }
+
+            Column(modifier = Modifier.padding(horizontal = Edge)) {
+                Spacer(Modifier.height(Space.md))
+                Text(
+                    text = S.t("search.002"),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(Space.md))
+                IknaTextField(
+                    value = query,
+                    onValueChange = {
+                        query = it
+                        // Invalidate a Room query for the previous text. Room can
+                        // cancel suspend queries, and the token also prevents a
+                        // late result from being drawn under a newer query.
+                        token++
+                        loading = false
+                        searched = false
+                        failed = false
+                        results = emptyList()
+                    },
+                    placeholder = S.t("search.003"),
+                    onSearch = ::search,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(Space.sm))
+                IknaWideButton(
+                    label = if (loading) S.t("search.005") else S.t("search.004"),
+                    filled = true,
+                    enabled = !loading && localSearchTerms(query) != null,
+                    onClick = ::search
+                )
+                Spacer(Modifier.height(Space.lg))
+                IknaRule()
+                Spacer(Modifier.height(Space.md))
+            }
+
+            when {
+                failed -> SearchMessage(S.t("search.009"))
+                loading -> SearchMessage(S.t("search.005"))
+                !searched -> SearchMessage(S.t("search.006"), lattice = true)
+                results.isEmpty() -> SearchMessage(S.t("search.007"), lattice = true)
+                else -> LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = Edge)
+                ) {
+                    items(results, key = { it.chunkId }) { row ->
+                        SearchResult(
+                            row = row,
+                            onOpenDeck = { onOpenDeck(row.packId) },
+                            onSource = { id -> openTatoeba(context, id) }
                         )
-                        Spacer(Modifier.height(Space.xl))
+                        Spacer(Modifier.height(Space.md))
+                        IknaRule()
+                        Spacer(Modifier.height(Space.md))
+                    }
+                    if (results.size == 80) {
+                        item {
+                            Text(
+                                text = S.t("search.008"),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.height(Space.xl))
+                        }
                     }
                 }
             }
+        }
+        IknaBottomBar(modifier = Modifier.align(Alignment.BottomCenter)) {
+            IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
         }
     }
 }

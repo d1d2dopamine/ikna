@@ -39,6 +39,21 @@ anything below. The one migration adds columns to a derived table only.
 - Neither shape changes anything after the notetypes are known, so cloze
   boundaries, the shape ladder and every refusal behave exactly as before.
 
+### Any file Anki wrote is opened the long way round if it has to be
+
+- Every member of the package that could be a collection is now tried in turn
+  instead of only the first one found. One awkward member -- a decoy left for
+  older readers, a name a later Anki adds -- used to end the import while the
+  real collection sat in the same file, untouched.
+- When neither shape gives up its notetypes, the notes are read on their own
+  instead of the file being called unsupported: first field to the front, the
+  rest to the back, cloze recognised from the text itself. Those cards are
+  counted as recovered from fields in the report, so the long way round is
+  visible rather than silent. Only a file with no notes and no cards at all is
+  refused now.
+- A missing or unreadably wide legacy `col` row costs a creation date, not the
+  import.
+
 ### Anki's “please update” card is refused, not imported
 
 - A modern export ships a decoy `collection.anki2` holding a single card that asks
@@ -64,6 +79,34 @@ anything below. The one migration adds columns to a derived table only.
   has the language chips, so correcting a guess is one tap where the deck already
   is.
 - The import screen has nothing left to answer but which file.
+
+### An imported deck arrives at nothing, like every other new deck
+
+- A deck from Anki used to land showing 100% done and switched on. It arrived
+  with a card for every note, and the deck list counted card rows -- so a deck
+  nobody had opened yet looked finished, and ten decks at once started rewriting
+  today's plan.
+- Progress through a deck now means what has been answered here since the deck
+  arrived, which is nothing on the day it arrives and the same measure for a deck
+  that came from the catalogue. The imported schedule is untouched: those cards
+  still come back when their own history says they should.
+- An imported deck arrives switched off. Switching it on is one tap, and the
+  choice is remembered when the same deck is imported again.
+- A deck keeps the date it first arrived when a newer version of it is installed,
+  so an update no longer resets its progress.
+
+### The way out of a screen is always at the bottom
+
+- Statistics and the deck list had it at the bottom; the catalogue, add a deck,
+  move from Anki, a deck, deck search, settings and voices had it at the top left
+  -- a reach across the whole phone for the most-used control in the app. All of
+  them now put it in the same bar at the bottom, where a thumb already is.
+
+### Progress under one percent draws nothing
+
+- One answered card in a deck of six hundred used to put a hair of colour in the
+  bar beside the figure “0%”. The figure is in whole percents, so the bar now
+  agrees with it and stays empty until there is a percent to show.
 
 ### Fewer words on the way in
 

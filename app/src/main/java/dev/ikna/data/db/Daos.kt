@@ -186,11 +186,19 @@ interface ChunkDao {
     @Query("SELECT COUNT(*) FROM chunks WHERE packId = :packId")
     suspend fun chunkCountFor(packId: String): Int
 
+    // How far into this deck the reader has come *here*, which is not the
+    // number of card rows. An imported deck arrives with a card for every note
+    // and a schedule replayed from its old answers, and counting rows showed
+    // such a deck as finished the moment it landed. Answered since the deck
+    // arrived is the honest measure, and it is the same measure for a deck that
+    // came from the catalogue.
     @Query(
         "SELECT COUNT(DISTINCT c.chunkId) FROM cards c " +
-            "JOIN chunks ch ON ch.id = c.chunkId WHERE ch.packId = :packId"
+            "JOIN chunks ch ON ch.id = c.chunkId " +
+            "WHERE ch.packId = :packId AND c.lastReviewAt IS NOT NULL " +
+            "AND c.lastReviewAt >= :since"
     )
-    suspend fun introducedCountFor(packId: String): Int
+    suspend fun introducedCountFor(packId: String, since: Long): Int
 
     @Query(
         "SELECT COUNT(*) FROM cards c JOIN chunks ch ON ch.id = c.chunkId " +

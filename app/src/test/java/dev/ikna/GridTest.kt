@@ -133,4 +133,20 @@ class GridTest {
 
         assertEquals(0, segmentFill(Float.NaN, 18).complete)
     }
+
+    /**
+     * One card of six hundred is a real thing that happened, and the bar beside
+     * it says "0%". A hair of a cell there contradicts the number, so under one
+     * percent the bar draws nothing at all.
+     */
+    @Test
+    fun segmented_progress_draws_nothing_below_one_percent() {
+        val hair = segmentFill(0.004f, 18)
+        assertEquals(0, hair.complete)
+        assertEquals(0f, hair.partial, 0.0001f)
+
+        val visible = segmentFill(0.02f, 18)
+        assertEquals(0, visible.complete)
+        assertTrue(visible.partial > 0f)
+    }
 }

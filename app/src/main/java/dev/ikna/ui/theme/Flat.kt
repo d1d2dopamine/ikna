@@ -722,6 +722,9 @@ fun IknaProgress(
     }
 }
 
+/** Below this share, progress draws as nothing rather than as a sliver. */
+const val MIN_DRAWN_FRACTION = 0.01f
+
 /** The exact full and partial cells represented by a progress fraction. */
 data class SegmentFill(val complete: Int, val partial: Float)
 
@@ -729,6 +732,11 @@ data class SegmentFill(val complete: Int, val partial: Float)
 fun segmentFill(fraction: Float, segments: Int): SegmentFill {
     val count = segments.coerceAtLeast(1)
     val safe = if (fraction.isFinite()) fraction.coerceIn(0f, 1f) else 0f
+    // Under one percent draws nothing at all. The figure beside the bar is in
+    // whole percents, so a hair of a cell next to "0%" contradicts the number,
+    // and the number is the one that is right. One card of six hundred is a
+    // real thing that happened, and it is not progress through the deck yet.
+    if (safe < MIN_DRAWN_FRACTION) return SegmentFill(0, 0f)
     val scaled = safe * count
     val complete = floor(scaled.toDouble()).toInt().coerceIn(0, count)
     val partial = if (complete >= count) 0f else (scaled - complete).coerceIn(0f, 1f)

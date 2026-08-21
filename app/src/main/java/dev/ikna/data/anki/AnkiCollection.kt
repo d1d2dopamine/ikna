@@ -33,9 +33,12 @@ internal data class CollectionShape(
  *
  * Both shapes are read here, chosen by what the file actually contains rather
  * than by a version number: the JSON columns if they hold notetypes, the tables
- * otherwise. Neither path writes anything, and the decision happens before the
- * import transaction opens, so a collection this cannot read is refused with
- * "not supported" and no half-written deck.
+ * otherwise. When neither gives up a notetype -- a shape no Anki has written
+ * yet, or a blob this cannot parse -- the notes are still read on their own,
+ * field by field, instead of the file being called unsupported. Only a file with
+ * no notes and no cards at all is refused. No path writes anything, and the
+ * decision happens before the import transaction opens, so a refusal never
+ * leaves half a deck behind.
  */
 internal object AnkiCollection {
 
@@ -45,6 +48,9 @@ internal object AnkiCollection {
     /** Notetypes and decks in their own tables: Anki 2.1.28 and later. */
     const val TABLES = "tables"
 
+    /** No notetypes anywhere: each note read by the order of its own fields. */
+    const val FIELDS = "fields"
+
     fun read(
         database: SQLiteDatabase,
         json: Json,
@@ -53,7 +59,7 @@ internal object AnkiCollection {
     ): CollectionShape =
         classic(json, models, decks)
             ?: tables(database)
-            ?: throw AnkiImportException(AnkiImportError.UNSUPPORTED_COLLECTION)
+            ?: fields(database, json, decks)
 
     private fun classic(json: Json, models: String, decks: String): CollectionShape? =
         runCatching {
@@ -131,6 +137,39 @@ internal object AnkiCollection {
 
         CollectionShape(models, deckNames, TABLES)
     }.getOrNull()
+
+    /**
+     * Last resort: the notes, and nothing about how they were meant to look.
+     *
+     * A file can reach here for good reasons -- a shape newer than this reader,
+     * a protobuf field renumbered, a blob that lost a byte -- and in all of them
+     * the notes themselves are still plain text in a table this can read. The
+     * importer already reads a note's fields in order when its notetype is
+     * missing, and that is exactly what happens to every note here: first field
+     * to the front, the rest to the back, cloze recognised from the text itself.
+     * Those cards are counted as recovered from fields in the report, so the
+     * person importing sees that the file was read the long way round.
+     *
+     * Only the absence of notes or cards is a real refusal.
+     */
+    private fun fields(database: SQLiteDatabase, json: Json, decks: String): CollectionShape {
+        if (!hasTable(database, "notes") || !hasTable(database, "cards")) {
+            throw AnkiImportException(AnkiImportError.UNSUPPORTED_COLLECTION)
+        }
+        val names = LinkedHashMap<Long, String>()
+        runCatching {
+            database.rawQuery("SELECT id, name FROM decks", null).use { cursor ->
+                while (cursor.moveToNext()) {
+                    names[cursor.getLong(0)] =
+                        cursor.getString(1).orEmpty().replace(NAME_SEPARATOR, "::")
+                }
+            }
+        }
+        if (names.isEmpty()) {
+            names += runCatching { parseDecks(json, decks) }.getOrDefault(emptyMap())
+        }
+        return CollectionShape(emptyMap(), names, FIELDS)
+    }
 
     private fun hasTable(database: SQLiteDatabase, name: String): Boolean =
         database.rawQuery(

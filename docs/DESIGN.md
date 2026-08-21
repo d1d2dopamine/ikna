@@ -181,6 +181,15 @@ project.
 Both skip the deck list on purpose: tapping either one is already an answer to
 "shall I study now", and asking again is where the intention is lost.
 
+## The way out is at the bottom
+
+Every screen that can be left puts that control in the same bar at the bottom
+left. It is the most-used control in the app and a phone is held from below; a
+top-left arrow is a reach across the whole screen, and worse, it is a reach that
+changes place from screen to screen. Progress bars follow the figure printed
+beside them: under one percent they draw nothing, because a hair of colour next
+to “0%” says the opposite of what the number says.
+
 ## Accessibility
 
 Every mark in this app is drawn on a canvas, and a drawn shape has no text for a

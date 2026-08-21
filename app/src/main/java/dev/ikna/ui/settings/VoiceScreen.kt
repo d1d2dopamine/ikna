@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -43,6 +44,7 @@ import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaChip
+import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaRule
@@ -187,412 +189,412 @@ fun VoiceScreen(
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val active = models.firstOrNull { it.enabled }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(BarHeight)
-                .padding(horizontal = Space.sm),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IknaIconButton(
-                glyph = IknaGlyph.BACK,
-                onClick = onBack,
-                label = S.t("a11y.001")
-            )
-            Text(
-                text = S.t("voice.001"),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(start = Space.xs)
-            )
-        }
-
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = Edge)
-        ) {
-            // ---- switched on at all ---------------------------------------
-            //
-            // The switch used to live one screen back, in settings, and the test
-            // button below does not go through it. So a model could be added,
-            // proved out loud on this very screen, and every card still stayed
-            // silent -- with nothing anywhere connecting the two facts.
-            Spacer(Modifier.height(Space.md))
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().padding(bottom = BarHeight)) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(BarHeight)
+                    .padding(horizontal = Space.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = S.t("voice.030"),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Spacer(Modifier.height(Space.hair))
-                    Text(
-                        text = S.t("voice.031"),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = muted
-                    )
-                }
-                Spacer(Modifier.width(Space.sm))
-                IknaToggle(
-                    checked = speechEnabled,
-                    onCheckedChange = { on ->
-                        scope.launch {
-                            container.settings.setSpeechEnabled(on)
-                            if (!on) container.speaker.stop()
-                        }
-                    },
-                    label = S.t("voice.030")
-                )
-            }
-
-            Spacer(Modifier.height(Space.lg))
-            IknaRule()
-
-            // ---- who is speaking ------------------------------------------
-            Spacer(Modifier.height(Space.md))
-            Text(
-                text = S.t("voice.002"),
-                style = MaterialTheme.typography.labelMedium,
-                color = muted
-            )
-            Spacer(Modifier.height(Space.xs))
-            Text(
-                text = if (ready == true && active != null) active.name else S.t("voice.003"),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Medium
-            )
-            Spacer(Modifier.height(Space.xs))
-            Text(
-                text = when {
-                    !speechEnabled -> S.t("voice.025")
-                    ready == null -> S.t("voice.007")
-                    ready == true -> S.t("voice.008")
-                    active != null -> S.t("voice.005")
-                    runtime -> S.t("voice.006")
-                    else -> S.t("voice.004")
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = muted
-            )
-
-            Spacer(Modifier.height(Space.lg))
-            IknaWideButton(
-                label = S.t("voice.010"),
-                enabled = !busy,
-                onClick = {
-                    scope.launch {
-                        val lang = active?.lang ?: "en"
-                        container.speaker.speak(sampleFor(lang), lang)
-                    }
-                }
-            )
-
-            Spacer(Modifier.height(Space.xl))
-            IknaRule()
-            Spacer(Modifier.height(Space.lg))
-
-            // ---- the models -----------------------------------------------
-            Text(
-                text = S.t("voice.011"),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Medium
-            )
-            Spacer(Modifier.height(Space.xs))
-            Text(
-                text = if (runtime) S.t("voice.012") else S.t("voice.016"),
-                style = MaterialTheme.typography.bodySmall,
-                color = muted
-            )
-
-            if (runtime) {
-                Spacer(Modifier.height(Space.xs))
                 Text(
-                    text = S.t("voice.044"),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = muted
+                    text = S.t("voice.001"),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(start = Space.xs)
                 )
             }
 
-            // Said once there is something to say it about: with two models
-            // installed, "one per language" stops being trivia and starts being
-            // the reason one of them just switched itself off.
-            if (models.size > 1) {
-                Spacer(Modifier.height(Space.xs))
-                Text(
-                    text = S.t("voice.040"),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = muted
-                )
-            }
-
-            models.forEach { model ->
-                Spacer(Modifier.height(Space.lg))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = Edge)
+            ) {
+                // ---- switched on at all ---------------------------------------
+                //
+                // The switch used to live one screen back, in settings, and the test
+                // button below does not go through it. So a model could be added,
+                // proved out loud on this very screen, and every card still stayed
+                // silent -- with nothing anywhere connecting the two facts.
+                Spacer(Modifier.height(Space.md))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = model.name,
+                            text = S.t("voice.030"),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium
                         )
                         Spacer(Modifier.height(Space.hair))
                         Text(
-                            text = kindOf(model.kind) + " \u00b7 " + megabytes(model.bytes) +
-                                if (model.enabled) "" else " \u00b7 " + S.t("voice.038"),
+                            text = S.t("voice.031"),
                             style = MaterialTheme.typography.bodySmall,
                             color = muted
                         )
                     }
                     Spacer(Modifier.width(Space.sm))
-                    // Off keeps the files. "This voice is worse than my phone's"
-                    // should cost one tap to act on and one to take back, not
-                    // sixty megabytes of copying.
                     IknaToggle(
-                        checked = model.enabled,
+                        checked = speechEnabled,
                         onCheckedChange = { on ->
-                            change { store.setEnabled(model.slug, on) }
+                            scope.launch {
+                                container.settings.setSpeechEnabled(on)
+                                if (!on) container.speaker.stop()
+                            }
                         },
-                        enabled = !busy,
-                        label = model.name
+                        label = S.t("voice.030")
                     )
                 }
 
-                // The language used to be four chips under every model, always.
-                // It is a question worth asking about exactly one kind of release
-                // -- the multi-language ones, which name no language at all --
-                // and asking it about a folder called vits-piper-ru_RU-dmitri is
-                // an invitation to answer it wrongly and silence a deck for it.
-                // So a language read off the model's own name is a statement, and
-                // the chips sit behind the line that admits it can be wrong.
-                Spacer(Modifier.height(Space.sm))
-                val declared = model.lang
-                if (declared == null) {
+                Spacer(Modifier.height(Space.lg))
+                IknaRule()
+
+                // ---- who is speaking ------------------------------------------
+                Spacer(Modifier.height(Space.md))
+                Text(
+                    text = S.t("voice.002"),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = muted
+                )
+                Spacer(Modifier.height(Space.xs))
+                Text(
+                    text = if (ready == true && active != null) active.name else S.t("voice.003"),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(Modifier.height(Space.xs))
+                Text(
+                    text = when {
+                        !speechEnabled -> S.t("voice.025")
+                        ready == null -> S.t("voice.007")
+                        ready == true -> S.t("voice.008")
+                        active != null -> S.t("voice.005")
+                        runtime -> S.t("voice.006")
+                        else -> S.t("voice.004")
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = muted
+                )
+
+                Spacer(Modifier.height(Space.lg))
+                IknaWideButton(
+                    label = S.t("voice.010"),
+                    enabled = !busy,
+                    onClick = {
+                        scope.launch {
+                            val lang = active?.lang ?: "en"
+                            container.speaker.speak(sampleFor(lang), lang)
+                        }
+                    }
+                )
+
+                Spacer(Modifier.height(Space.xl))
+                IknaRule()
+                Spacer(Modifier.height(Space.lg))
+
+                // ---- the models -----------------------------------------------
+                Text(
+                    text = S.t("voice.011"),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(Modifier.height(Space.xs))
+                Text(
+                    text = if (runtime) S.t("voice.012") else S.t("voice.016"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = muted
+                )
+
+                if (runtime) {
+                    Spacer(Modifier.height(Space.xs))
                     Text(
-                        text = S.t("voice.014"),
-                        style = MaterialTheme.typography.labelMedium,
+                        text = S.t("voice.044"),
+                        style = MaterialTheme.typography.bodySmall,
                         color = muted
                     )
+                }
+
+                // Said once there is something to say it about: with two models
+                // installed, "one per language" stops being trivia and starts being
+                // the reason one of them just switched itself off.
+                if (models.size > 1) {
                     Spacer(Modifier.height(Space.xs))
-                    LanguageChips(model, busy) { code ->
-                        change { store.setLanguage(model.slug, code) }
-                    }
-                } else {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = S.t("voice.045") + " " + declared.uppercase(),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = muted,
-                            modifier = Modifier.weight(1f)
-                        )
-                        IknaTextButton(
-                            label = S.t("voice.046"),
+                    Text(
+                        text = S.t("voice.040"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted
+                    )
+                }
+
+                models.forEach { model ->
+                    Spacer(Modifier.height(Space.lg))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = model.name,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(Modifier.height(Space.hair))
+                            Text(
+                                text = kindOf(model.kind) + " \u00b7 " + megabytes(model.bytes) +
+                                    if (model.enabled) "" else " \u00b7 " + S.t("voice.038"),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = muted
+                            )
+                        }
+                        Spacer(Modifier.width(Space.sm))
+                        // Off keeps the files. "This voice is worse than my phone's"
+                        // should cost one tap to act on and one to take back, not
+                        // sixty megabytes of copying.
+                        IknaToggle(
+                            checked = model.enabled,
+                            onCheckedChange = { on ->
+                                change { store.setEnabled(model.slug, on) }
+                            },
                             enabled = !busy,
-                            color = muted,
-                            onClick = {
-                                openLang = if (openLang == model.slug) null else model.slug
-                            }
+                            label = model.name
                         )
                     }
-                    if (openLang == model.slug) {
+
+                    // The language used to be four chips under every model, always.
+                    // It is a question worth asking about exactly one kind of release
+                    // -- the multi-language ones, which name no language at all --
+                    // and asking it about a folder called vits-piper-ru_RU-dmitri is
+                    // an invitation to answer it wrongly and silence a deck for it.
+                    // So a language read off the model's own name is a statement, and
+                    // the chips sit behind the line that admits it can be wrong.
+                    Spacer(Modifier.height(Space.sm))
+                    val declared = model.lang
+                    if (declared == null) {
+                        Text(
+                            text = S.t("voice.014"),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = muted
+                        )
                         Spacer(Modifier.height(Space.xs))
                         LanguageChips(model, busy) { code ->
                             change { store.setLanguage(model.slug, code) }
                         }
+                    } else {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = S.t("voice.045") + " " + declared.uppercase(),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = muted,
+                                modifier = Modifier.weight(1f)
+                            )
+                            IknaTextButton(
+                                label = S.t("voice.046"),
+                                enabled = !busy,
+                                color = muted,
+                                onClick = {
+                                    openLang = if (openLang == model.slug) null else model.slug
+                                }
+                            )
+                        }
+                        if (openLang == model.slug) {
+                            Spacer(Modifier.height(Space.xs))
+                            LanguageChips(model, busy) { code ->
+                                change { store.setLanguage(model.slug, code) }
+                            }
+                        }
                     }
-                }
 
-                // Kokoro holds a voice per number and by nothing else -- they
-                // have no names to list. The top of the range is the number of
-                // voices the net reported when it was read in: one past the last
-                // one is not a wrong voice, it is the end of the process, because
-                // sherpa-onnx checks the index in C++ and exits. Until a load has
-                // answered, one voice is offered, since voice 0 always exists.
-                if (model.kind == VoiceModelKind.KOKORO || model.speakers > 1) {
+                    // Kokoro holds a voice per number and by nothing else -- they
+                    // have no names to list. The top of the range is the number of
+                    // voices the net reported when it was read in: one past the last
+                    // one is not a wrong voice, it is the end of the process, because
+                    // sherpa-onnx checks the index in C++ and exits. Until a load has
+                    // answered, one voice is offered, since voice 0 always exists.
+                    if (model.kind == VoiceModelKind.KOKORO || model.speakers > 1) {
+                        Spacer(Modifier.height(Space.sm))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = S.t("voice.039") + " " + model.speaker +
+                                    if (model.speakers > 0) " / " + (model.speakers - 1) else "",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = muted,
+                                modifier = Modifier.weight(1f)
+                            )
+                            IknaTextButton(
+                                label = "\u2212",
+                                enabled = !busy && model.speaker > 0,
+                                onClick = { change { store.setSpeaker(model.slug, model.speaker - 1) } }
+                            )
+                            Spacer(Modifier.width(Space.sm))
+                            IknaTextButton(
+                                label = "+",
+                                enabled = !busy && model.speaker + 1 < model.speakers,
+                                onClick = { change { store.setSpeaker(model.slug, model.speaker + 1) } }
+                            )
+                        }
+                        if (model.speakers <= 0) {
+                            Spacer(Modifier.height(Space.hair))
+                            Text(
+                                text = S.t("voice.047"),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = muted
+                            )
+                        }
+                    }
+
+                    // Speed, per model. One number for every voice installed suited
+                    // none of them: a Piper voice recorded slowly and a Kokoro voice
+                    // that hurries do not agree on what 100% is. Tone is not here and
+                    // that is not an omission -- a neural voice has one pitch, its
+                    // own, and the phone's voice keeps both numbers in settings,
+                    // where both of them do something.
                     Spacer(Modifier.height(Space.sm))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = S.t("voice.039") + " " + model.speaker +
-                                if (model.speakers > 0) " / " + (model.speakers - 1) else "",
+                            text = S.t("voice.048") + " " + model.rate + "%",
                             style = MaterialTheme.typography.bodySmall,
                             color = muted,
                             modifier = Modifier.weight(1f)
                         )
                         IknaTextButton(
                             label = "\u2212",
-                            enabled = !busy && model.speaker > 0,
-                            onClick = { change { store.setSpeaker(model.slug, model.speaker - 1) } }
+                            enabled = !busy && model.rate > MIN_RATE,
+                            onClick = { change { store.setRate(model.slug, model.rate - RATE_STEP) } }
                         )
                         Spacer(Modifier.width(Space.sm))
                         IknaTextButton(
                             label = "+",
-                            enabled = !busy && model.speaker + 1 < model.speakers,
-                            onClick = { change { store.setSpeaker(model.slug, model.speaker + 1) } }
+                            enabled = !busy && model.rate < MAX_RATE,
+                            onClick = { change { store.setRate(model.slug, model.rate + RATE_STEP) } }
                         )
                     }
-                    if (model.speakers <= 0) {
-                        Spacer(Modifier.height(Space.hair))
-                        Text(
-                            text = S.t("voice.047"),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = muted
-                        )
-                    }
-                }
 
-                // Speed, per model. One number for every voice installed suited
-                // none of them: a Piper voice recorded slowly and a Kokoro voice
-                // that hurries do not agree on what 100% is. Tone is not here and
-                // that is not an omission -- a neural voice has one pitch, its
-                // own, and the phone's voice keeps both numbers in settings,
-                // where both of them do something.
-                Spacer(Modifier.height(Space.sm))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = S.t("voice.048") + " " + model.rate + "%",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = muted,
-                        modifier = Modifier.weight(1f)
-                    )
+                    Spacer(Modifier.height(Space.xs))
                     IknaTextButton(
-                        label = "\u2212",
-                        enabled = !busy && model.rate > MIN_RATE,
-                        onClick = { change { store.setRate(model.slug, model.rate - RATE_STEP) } }
-                    )
-                    Spacer(Modifier.width(Space.sm))
-                    IknaTextButton(
-                        label = "+",
-                        enabled = !busy && model.rate < MAX_RATE,
-                        onClick = { change { store.setRate(model.slug, model.rate + RATE_STEP) } }
-                    )
-                }
-
-                Spacer(Modifier.height(Space.xs))
-                IknaTextButton(
-                    label = S.t("voice.013"),
-                    enabled = !busy,
-                    onClick = {
-                        change {
-                            store.remove(model.slug)
-                            note = null
+                        label = S.t("voice.013"),
+                        enabled = !busy,
+                        onClick = {
+                            change {
+                                store.remove(model.slug)
+                                note = null
+                            }
                         }
-                    }
-                )
-            }
+                    )
+                }
 
-            Spacer(Modifier.height(Space.lg))
-            IknaWideButton(
-                label = if (models.isEmpty()) S.t("voice.029") else S.t("voice.017"),
-                enabled = !busy && runtime,
-                onClick = { picker.launch(null) }
-            )
-
-            Spacer(Modifier.height(Space.sm))
-            IknaWideButton(
-                label = S.t("voice.041"),
-                enabled = !busy && runtime,
-                quiet = true,
-                onClick = { archivePicker.launch(arrayOf("*/*")) }
-            )
-
-            // What a copy in progress says about itself.
-            //
-            // A percentage of the picked file, because the old line -- files
-            // copied so far -- was true and useless: a Kokoro release is one file
-            // of a few hundred megabytes and some crumbs, so it read "1" from the
-            // first second to the last and every user who saw it decided the app
-            // had hung. The two lines under it answer the two questions that
-            // followed: why is this slow, and may I leave.
-            if (busy) {
-                val percent = running?.progress?.percent ?: -1
-                Spacer(Modifier.height(Space.md))
-                Text(
-                    text = if (percent >= 0) S.t("voice.049") + " " + percent + "%"
-                    else S.t("voice.018") + (running?.progress?.files ?: 0),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(Modifier.height(Space.hair))
-                Text(
-                    text = S.t("voice.050"),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = muted
-                )
-                Spacer(Modifier.height(Space.hair))
-                Text(
-                    text = S.t("voice.051"),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = muted
-                )
-            }
-
-            note?.let { text ->
-                Spacer(Modifier.height(Space.md))
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            // ---- who reads which deck -------------------------------------
-            //
-            // One line per deck language. A model speaks one language; a deck in
-            // another falls through to the phone, and a deck in a language the
-            // phone has no voice for is silence. All three used to look the same
-            // from here, which is why "the test button works and my cards do not"
-            // had nowhere to be answered.
-            if (voices.isNotEmpty()) {
-                Spacer(Modifier.height(Space.xl))
-                IknaRule()
                 Spacer(Modifier.height(Space.lg))
-                Text(
-                    text = S.t("voice.032"),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium
+                IknaWideButton(
+                    label = if (models.isEmpty()) S.t("voice.029") else S.t("voice.017"),
+                    enabled = !busy && runtime,
+                    onClick = { picker.launch(null) }
                 )
-                Spacer(Modifier.height(Space.xs))
-                Text(
-                    text = S.t("voice.036"),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = muted
+
+                Spacer(Modifier.height(Space.sm))
+                IknaWideButton(
+                    label = S.t("voice.041"),
+                    enabled = !busy && runtime,
+                    quiet = true,
+                    onClick = { archivePicker.launch(arrayOf("*/*")) }
                 )
-                voices.forEach { (lang, source) ->
+
+                // What a copy in progress says about itself.
+                //
+                // A percentage of the picked file, because the old line -- files
+                // copied so far -- was true and useless: a Kokoro release is one file
+                // of a few hundred megabytes and some crumbs, so it read "1" from the
+                // first second to the last and every user who saw it decided the app
+                // had hung. The two lines under it answer the two questions that
+                // followed: why is this slow, and may I leave.
+                if (busy) {
+                    val percent = running?.progress?.percent ?: -1
                     Spacer(Modifier.height(Space.md))
                     Text(
-                        text = if (lang == CUSTOM_LANG) S.t("voice.037")
-                        else lang.uppercase(),
-                        style = MaterialTheme.typography.labelMedium,
+                        text = if (percent >= 0) S.t("voice.049") + " " + percent + "%"
+                        else S.t("voice.018") + (running?.progress?.files ?: 0),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(Modifier.height(Space.hair))
+                    Text(
+                        text = S.t("voice.050"),
+                        style = MaterialTheme.typography.bodySmall,
                         color = muted
                     )
                     Spacer(Modifier.height(Space.hair))
                     Text(
-                        text = when (source) {
-                            SpeechSource.MODEL -> S.t("voice.033")
-                            SpeechSource.PHONE -> S.t("voice.034")
-                            SpeechSource.NOBODY -> S.t("voice.035")
-                        },
-                        style = MaterialTheme.typography.bodyMedium
+                        text = S.t("voice.051"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted
                     )
                 }
-            }
 
-            Spacer(Modifier.height(Space.xl))
-            IknaRule()
-            Spacer(Modifier.height(Space.lg))
-            Text(
-                text = S.t("voice.026"),
-                style = MaterialTheme.typography.bodySmall,
-                color = muted
-            )
-            Spacer(Modifier.height(Space.xxl))
+                note?.let { text ->
+                    Spacer(Modifier.height(Space.md))
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                // ---- who reads which deck -------------------------------------
+                //
+                // One line per deck language. A model speaks one language; a deck in
+                // another falls through to the phone, and a deck in a language the
+                // phone has no voice for is silence. All three used to look the same
+                // from here, which is why "the test button works and my cards do not"
+                // had nowhere to be answered.
+                if (voices.isNotEmpty()) {
+                    Spacer(Modifier.height(Space.xl))
+                    IknaRule()
+                    Spacer(Modifier.height(Space.lg))
+                    Text(
+                        text = S.t("voice.032"),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(Modifier.height(Space.xs))
+                    Text(
+                        text = S.t("voice.036"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted
+                    )
+                    voices.forEach { (lang, source) ->
+                        Spacer(Modifier.height(Space.md))
+                        Text(
+                            text = if (lang == CUSTOM_LANG) S.t("voice.037")
+                            else lang.uppercase(),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = muted
+                        )
+                        Spacer(Modifier.height(Space.hair))
+                        Text(
+                            text = when (source) {
+                                SpeechSource.MODEL -> S.t("voice.033")
+                                SpeechSource.PHONE -> S.t("voice.034")
+                                SpeechSource.NOBODY -> S.t("voice.035")
+                            },
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(Space.xl))
+                IknaRule()
+                Spacer(Modifier.height(Space.lg))
+                Text(
+                    text = S.t("voice.026"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = muted
+                )
+                Spacer(Modifier.height(Space.xxl))
+            }
+        }
+        IknaBottomBar(modifier = Modifier.align(Alignment.BottomCenter)) {
+            IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
         }
     }
 }

@@ -49,6 +49,7 @@ import dev.ikna.data.repo.NO_LANG
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaChip
+import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaPanel
@@ -219,528 +220,528 @@ fun AddDeckScreen(
 	val muted = MaterialTheme.colorScheme.onSurfaceVariant
 	val line = MaterialTheme.colorScheme.outline
 
-	Column(modifier = Modifier.fillMaxSize()) {
-		Row(
-			modifier = Modifier
-				.fillMaxWidth()
-				.height(BarHeight)
-				.padding(horizontal = Space.sm),
-			verticalAlignment = Alignment.CenterVertically
-		) {
-			IknaIconButton(
-				glyph = IknaGlyph.BACK,
-				onClick = onBack,
-				label = S.t("a11y.001")
-			)
-			Spacer(Modifier.height(Space.sm))
-			Text(
-				text = S.t("add.001"),
-				style = MaterialTheme.typography.titleMedium,
-				fontWeight = FontWeight.SemiBold,
-				modifier = Modifier.padding(start = Space.xs)
-			)
-		}
-
-		Column(
-			modifier = Modifier
-				.weight(1f)
-				.verticalScroll(rememberScrollState())
-				.padding(horizontal = Edge)
-		) {
-			Spacer(Modifier.height(Space.md))
-			// The same border the import screen uses. An explanation is a panel with
-			// an edge, not a paragraph loose on the page.
-			IknaPanel {
+	Box(modifier = Modifier.fillMaxSize()) {
+		Column(modifier = Modifier.fillMaxSize().padding(bottom = BarHeight)) {
+			Row(
+				modifier = Modifier
+					.fillMaxWidth()
+					.height(BarHeight)
+					.padding(horizontal = Space.sm),
+				verticalAlignment = Alignment.CenterVertically
+			) {
+				Spacer(Modifier.height(Space.sm))
 				Text(
-					text = S.t("add.002"),
-					style = MaterialTheme.typography.bodyMedium
+					text = S.t("add.001"),
+					style = MaterialTheme.typography.titleMedium,
+					fontWeight = FontWeight.SemiBold,
+					modifier = Modifier.padding(start = Space.xs)
 				)
 			}
 
-			Spacer(Modifier.height(Space.lg))
-			// A migration path before any card-generation path. Anki stays untouched;
-			// its package is read locally and ikna reports every unsupported part.
-			Text(
-				text = S.t("anki.025"),
-				style = MaterialTheme.typography.labelMedium,
-				color = muted
-			)
-			Spacer(Modifier.height(Space.sm))
-			Text(
-				text = S.t("anki.026"),
-				style = MaterialTheme.typography.bodySmall,
-				color = muted
-			)
-			Spacer(Modifier.height(Space.md))
-			IknaWideButton(
-				label = S.t("anki.027"),
-				onClick = onOpenAnki,
-				enabled = !busy
-			)
-			Spacer(Modifier.height(Space.lg))
-			IknaRule()
-			Spacer(Modifier.height(Space.lg))
-			// Ready-made open decks, offered before the model path.
-			// The catalogue remains the default for open, attributed language material.
-			// point asks somebody to talk to a model and paste the answer back,
-			// which works and is still the only way to get a deck about a subject
-			// nobody has written a corpus for. A language is not that: sentences
-			// written by people already exist under a licence that allows this,
-			// and for those the catalogue is simply better than a model.
-			Text(
-				text = S.t("cat.031"),
-				style = MaterialTheme.typography.labelMedium,
-				color = muted
-			)
-			Spacer(Modifier.height(Space.sm))
-			Text(
-				text = S.t("cat.032"),
-				style = MaterialTheme.typography.bodySmall,
-				color = muted
-			)
-			Spacer(Modifier.height(Space.md))
-			IknaWideButton(
-				label = S.t("cat.033"),
-				filled = true,
-				onClick = onOpenCatalog,
-				enabled = !busy
-			)
-
-						Spacer(Modifier.height(Space.lg))
-						IknaRule()
-						Spacer(Modifier.height(Space.lg))
-
-			// The other way, and from now on the second one.
-			//
-			// It is the same screen it always was: a prompt copied into a model, an
-			// answer pasted back, a preview that says which lines look wrong. What
-			// changed is where it sits. For a language the catalogue is the better
-			// deck -- real sentences, a licence, a name -- and nobody should have to
-			// read four prompt questions to find that out. So the model way is folded
-			// away behind one button, for the deck the catalogue does not have.
-			IknaPanel {
-				Text(
-					text = S.t("add.072"),
-					style = MaterialTheme.typography.labelMedium,
-					color = muted
-				)
-				Text(
-					text = S.t("add.073"),
-					style = MaterialTheme.typography.bodySmall,
-					color = muted
-				)
-			}
-			Spacer(Modifier.height(Space.md))
-			IknaWideButton(
-				label = if (modelWay) S.t("add.037") else S.t("add.074"),
-				onClick = { modelWay = !modelWay },
-				enabled = !busy
-			)
-
-			if (modelWay) {
-				Spacer(Modifier.height(Space.xl))
-				IknaRule()
-				Spacer(Modifier.height(Space.lg))
-				// The four steps are this screen explaining itself, and they were
-				// printed in full above the two buttons that do the same thing. Read
-				// once, they are never read again, and every later visit had to scroll
-				// past them. So they fold away and the buttons come first.
-				IknaTextButton(
-					label = if (guide) S.t("add.037") else S.t("add.036"),
-					onClick = { guide = !guide },
-					color = MaterialTheme.colorScheme.onSurfaceVariant
-				)
-				if (guide) {
-					Spacer(Modifier.height(Space.md))
-					Step(S.t("add.003"))
-					Step(S.t("add.004"))
-					Step(S.t("add.005"))
-					Step(S.t("add.006"))
-				}
-
-				// Asked here rather than left to the deck page. A deck without a
-				// language cannot be read aloud, and the only screen that could fix
-				// that sat behind a deck nobody had opened yet -- so the deck was
-				// silent and nothing said why. Here the answer is one tap, on the
-				// screen where the deck is being made, and it defaults to the honest
-				// one: no language claimed, no voice offered.
-				// What kind of deck this is, asked before anything else, because it
-				// decides what the rest of the screen is even asking about.
-				//
-				// The app was built for languages and its core turned out not to care:
-				// a card is a unit, a sentence that carries it and what it means, and
-				// that describes a definition in neuroscience as well as a phrase in
-				// Polish. Only three things were language-specific, and all three are
-				// now decided here -- which prompt the model gets, whether the deck
-				// claims a language it can be read aloud in, and whether the third way
-				// of asking (produce the phrase from its meaning) is used at all.
-				Text(
-					text = S.t("add.055"),
-					style = MaterialTheme.typography.labelMedium,
-					color = muted
-				)
-				Spacer(Modifier.height(Space.sm))
-				Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
-					IknaChip(
-						label = S.t("add.056"),
-						selected = !subject,
-						onClick = {
-							subject = false
-							level = LEVEL_BEGINNER
-						}
-					)
-					IknaChip(
-						label = S.t("add.057"),
-						selected = subject,
-						onClick = {
-							subject = true
-							// A subject deck claims no language: nothing in it is meant
-							// to be pronounced, and a voice reading definitions aloud in
-							// a guessed accent is worse than silence.
-							lang = NO_LANG
-							level = LEVEL_BEGINNER
-						}
-					)
-				}
-				Spacer(Modifier.height(Space.sm))
-				Text(
-					text = if (subject) S.t("add.058") else S.t("add.039"),
-					style = MaterialTheme.typography.bodySmall,
-					color = muted
-				)
-
-				Spacer(Modifier.height(Space.lg))
-				IknaRule()
-				Spacer(Modifier.height(Space.lg))
-
-
-				Text(
-					text = S.t("add.040"),
-					style = MaterialTheme.typography.labelMedium,
-					color = muted
-				)
-				Spacer(Modifier.height(Space.sm))
-				Text(
-					text = S.t("add.049"),
-					style = MaterialTheme.typography.bodySmall,
-					color = muted
-				)
-
+			Column(
+				modifier = Modifier
+					.weight(1f)
+					.verticalScroll(rememberScrollState())
+					.padding(horizontal = Edge)
+			) {
 				Spacer(Modifier.height(Space.md))
-				Text(
-					// On a subject deck this is the language the cards themselves are
-					// written in, not the language the meanings are translated into.
-					text = if (subject) S.t("add.062") else S.t("add.042"),
-					style = MaterialTheme.typography.bodySmall
-				)
-				Spacer(Modifier.height(Space.sm))
-				PromptChoice(
-					options = MEANING_LANGS,
-					label = { it.uppercase() },
-					current = meanings,
-					onPick = { meanings = it }
-				)
-
-				Text(
-					text = S.t("add.041"),
-					style = MaterialTheme.typography.bodySmall
-				)
-				Spacer(Modifier.height(Space.sm))
-				PromptChoice(
-					options = PROMPT_COUNTS.map { it.toString() },
-					label = { it },
-					current = count.toString(),
-					onPick = { picked -> count = picked.toIntOrNull() ?: count }
-				)
-
-				Text(
-					text = S.t("add.046"),
-					style = MaterialTheme.typography.bodySmall
-				)
-				Spacer(Modifier.height(Space.sm))
-				PromptChoice(
-					options = if (subject) SUBJECT_LEVELS else PROMPT_LEVELS,
-					label = { option ->
-						when (option) {
-							LEVEL_BEGINNER -> S.t("add.043")
-							LEVEL_TALKING -> S.t("add.044")
-							LEVEL_SOME_BACKGROUND -> S.t("add.059")
-							else -> S.t("add.045")
-						}
-					},
-					current = level,
-					onPick = { level = it }
-				)
-
-				Text(
-					text = if (subject) S.t("add.060") else S.t("add.047"),
-					style = MaterialTheme.typography.bodySmall
-				)
-				Spacer(Modifier.height(Space.sm))
-				Box(
-					modifier = Modifier
-						.fillMaxWidth()
-						.border(Space.hair, line)
-						.padding(Space.md)
-				) {
-					if (topic.isEmpty()) {
-						Text(
-							text = if (subject) S.t("add.061") else S.t("add.048"),
-							style = MaterialTheme.typography.bodyMedium,
-							color = muted
-						)
-					}
-					BasicTextField(
-						value = topic,
-						onValueChange = { topic = it.take(MAX_TOPIC_CHARS) },
-						singleLine = true,
-						textStyle = MaterialTheme.typography.bodyMedium.copy(
-							color = MaterialTheme.colorScheme.onBackground
-						),
-						cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-						modifier = Modifier.fillMaxWidth()
-					)
-				}
-
-				Spacer(Modifier.height(Space.md))
-				IknaWideButton(
-					label = S.t("add.007"),
-					filled = true,
-					enabled = filled.isNotEmpty() && !busy,
-					onClick = {
-						clipboard.setText(AnnotatedString(filled))
-						note = S.t("add.009")
-					}
-				)
-				Spacer(Modifier.height(Space.sm))
-				IknaWideButton(
-					label = S.t("add.008"),
-					enabled = filled.isNotEmpty() && !busy,
-					onClick = { saver.launch(PROMPT_FILE) }
-				)
-
-			}
-
-			Spacer(Modifier.height(Space.lg))
-			IknaRule()
-			Spacer(Modifier.height(Space.lg))
-
-			Text(
-				text = S.t("add.016"),
-				style = MaterialTheme.typography.labelMedium,
-				color = muted
-			)
-			Spacer(Modifier.height(Space.sm))
-			// The language of the deck, asked where the deck actually arrives.
-			//
-			// It used to stand with the prompt questions, and the prompt is folded
-			// away now. A file a friend sent has a language too, and the voice and
-			// the reader for a deck are chosen by it, so the question stays here in
-			// the open where any deck being installed can answer it.
-			if (!subject) {
-				Text(
-					text = S.t("add.038"),
-					style = MaterialTheme.typography.labelMedium,
-					color = muted
-				)
-				Spacer(Modifier.height(Space.sm))
-				LangChips(current = lang, onPick = { lang = it })
-				Spacer(Modifier.height(Space.md))
-			}
-
-			// Two different things, decided by size: a field for a deck small enough
-			// to be typed by hand, and a folded summary for one that was pasted.
-			val pastedLines = remember(pasted) {
-				pasted.lineSequence().count { it.isNotBlank() }
-			}
-			val bulky = pasted.length > PREVIEW_CHARS
-			val pasteScroll = rememberScrollState()
-			if (bulky) {
-				// A pasted deck is a file that happened to arrive through the
-				// clipboard, so it is treated as one: named by its size, folded
-				// away, opened only if asked for. It used to be laid out in full
-				// inside an editable field -- ten thousand rows of it, on the main
-				// thread -- which is what turned this screen into a wall of text
-				// with a create button somewhere past the bottom of it. Nobody
-				// corrects a generated deck with a thumb; what is wanted here is
-				// proof that the text arrived whole.
-				Row(verticalAlignment = Alignment.CenterVertically) {
+				// The same border the import screen uses. An explanation is a panel with
+				// an edge, not a paragraph loose on the page.
+				IknaPanel {
 					Text(
-						text = pastedLines.toString() + " " + S.t("add.065") +
-							", " + pasted.length + " " + S.t("add.066"),
-						style = MaterialTheme.typography.bodyMedium,
-						color = MaterialTheme.colorScheme.onBackground,
-						modifier = Modifier.weight(1f)
+						text = S.t("add.002"),
+						style = MaterialTheme.typography.bodyMedium
 					)
-					IknaTextButton(
-						label = if (previewOpen) S.t("add.068") else S.t("add.067"),
-						onClick = { previewOpen = !previewOpen },
+				}
+
+				Spacer(Modifier.height(Space.lg))
+				// A migration path before any card-generation path. Anki stays untouched;
+				// its package is read locally and ikna reports every unsupported part.
+				Text(
+					text = S.t("anki.025"),
+					style = MaterialTheme.typography.labelMedium,
+					color = muted
+				)
+				Spacer(Modifier.height(Space.sm))
+				Text(
+					text = S.t("anki.026"),
+					style = MaterialTheme.typography.bodySmall,
+					color = muted
+				)
+				Spacer(Modifier.height(Space.md))
+				IknaWideButton(
+					label = S.t("anki.027"),
+					onClick = onOpenAnki,
+					enabled = !busy
+				)
+				Spacer(Modifier.height(Space.lg))
+				IknaRule()
+				Spacer(Modifier.height(Space.lg))
+				// Ready-made open decks, offered before the model path.
+				// The catalogue remains the default for open, attributed language material.
+				// point asks somebody to talk to a model and paste the answer back,
+				// which works and is still the only way to get a deck about a subject
+				// nobody has written a corpus for. A language is not that: sentences
+				// written by people already exist under a licence that allows this,
+				// and for those the catalogue is simply better than a model.
+				Text(
+					text = S.t("cat.031"),
+					style = MaterialTheme.typography.labelMedium,
+					color = muted
+				)
+				Spacer(Modifier.height(Space.sm))
+				Text(
+					text = S.t("cat.032"),
+					style = MaterialTheme.typography.bodySmall,
+					color = muted
+				)
+				Spacer(Modifier.height(Space.md))
+				IknaWideButton(
+					label = S.t("cat.033"),
+					filled = true,
+					onClick = onOpenCatalog,
+					enabled = !busy
+				)
+
+							Spacer(Modifier.height(Space.lg))
+							IknaRule()
+							Spacer(Modifier.height(Space.lg))
+
+				// The other way, and from now on the second one.
+				//
+				// It is the same screen it always was: a prompt copied into a model, an
+				// answer pasted back, a preview that says which lines look wrong. What
+				// changed is where it sits. For a language the catalogue is the better
+				// deck -- real sentences, a licence, a name -- and nobody should have to
+				// read four prompt questions to find that out. So the model way is folded
+				// away behind one button, for the deck the catalogue does not have.
+				IknaPanel {
+					Text(
+						text = S.t("add.072"),
+						style = MaterialTheme.typography.labelMedium,
+						color = muted
+					)
+					Text(
+						text = S.t("add.073"),
+						style = MaterialTheme.typography.bodySmall,
 						color = muted
 					)
 				}
-				if (previewOpen) {
-					Spacer(Modifier.height(Space.sm))
-					// The head of it and never all of it. Forty rows is enough to
-					// see that the columns line up, and it is a fixed cost: opening
-					// the preview on a deck of ten thousand rows costs the same as
-					// opening it on forty.
-					val head = remember(pasted) {
-						pasted.lineSequence()
-							.filter { it.isNotBlank() }
-							.take(PREVIEW_LINES)
-							.joinToString("\n")
+				Spacer(Modifier.height(Space.md))
+				IknaWideButton(
+					label = if (modelWay) S.t("add.037") else S.t("add.074"),
+					onClick = { modelWay = !modelWay },
+					enabled = !busy
+				)
+
+				if (modelWay) {
+					Spacer(Modifier.height(Space.xl))
+					IknaRule()
+					Spacer(Modifier.height(Space.lg))
+					// The four steps are this screen explaining itself, and they were
+					// printed in full above the two buttons that do the same thing. Read
+					// once, they are never read again, and every later visit had to scroll
+					// past them. So they fold away and the buttons come first.
+					IknaTextButton(
+						label = if (guide) S.t("add.037") else S.t("add.036"),
+						onClick = { guide = !guide },
+						color = MaterialTheme.colorScheme.onSurfaceVariant
+					)
+					if (guide) {
+						Spacer(Modifier.height(Space.md))
+						Step(S.t("add.003"))
+						Step(S.t("add.004"))
+						Step(S.t("add.005"))
+						Step(S.t("add.006"))
 					}
+
+					// Asked here rather than left to the deck page. A deck without a
+					// language cannot be read aloud, and the only screen that could fix
+					// that sat behind a deck nobody had opened yet -- so the deck was
+					// silent and nothing said why. Here the answer is one tap, on the
+					// screen where the deck is being made, and it defaults to the honest
+					// one: no language claimed, no voice offered.
+					// What kind of deck this is, asked before anything else, because it
+					// decides what the rest of the screen is even asking about.
+					//
+					// The app was built for languages and its core turned out not to care:
+					// a card is a unit, a sentence that carries it and what it means, and
+					// that describes a definition in neuroscience as well as a phrase in
+					// Polish. Only three things were language-specific, and all three are
+					// now decided here -- which prompt the model gets, whether the deck
+					// claims a language it can be read aloud in, and whether the third way
+					// of asking (produce the phrase from its meaning) is used at all.
+					Text(
+						text = S.t("add.055"),
+						style = MaterialTheme.typography.labelMedium,
+						color = muted
+					)
+					Spacer(Modifier.height(Space.sm))
+					Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+						IknaChip(
+							label = S.t("add.056"),
+							selected = !subject,
+							onClick = {
+								subject = false
+								level = LEVEL_BEGINNER
+							}
+						)
+						IknaChip(
+							label = S.t("add.057"),
+							selected = subject,
+							onClick = {
+								subject = true
+								// A subject deck claims no language: nothing in it is meant
+								// to be pronounced, and a voice reading definitions aloud in
+								// a guessed accent is worse than silence.
+								lang = NO_LANG
+								level = LEVEL_BEGINNER
+							}
+						)
+					}
+					Spacer(Modifier.height(Space.sm))
+					Text(
+						text = if (subject) S.t("add.058") else S.t("add.039"),
+						style = MaterialTheme.typography.bodySmall,
+						color = muted
+					)
+
+					Spacer(Modifier.height(Space.lg))
+					IknaRule()
+					Spacer(Modifier.height(Space.lg))
+
+
+					Text(
+						text = S.t("add.040"),
+						style = MaterialTheme.typography.labelMedium,
+						color = muted
+					)
+					Spacer(Modifier.height(Space.sm))
+					Text(
+						text = S.t("add.049"),
+						style = MaterialTheme.typography.bodySmall,
+						color = muted
+					)
+
+					Spacer(Modifier.height(Space.md))
+					Text(
+						// On a subject deck this is the language the cards themselves are
+						// written in, not the language the meanings are translated into.
+						text = if (subject) S.t("add.062") else S.t("add.042"),
+						style = MaterialTheme.typography.bodySmall
+					)
+					Spacer(Modifier.height(Space.sm))
+					PromptChoice(
+						options = MEANING_LANGS,
+						label = { it.uppercase() },
+						current = meanings,
+						onPick = { meanings = it }
+					)
+
+					Text(
+						text = S.t("add.041"),
+						style = MaterialTheme.typography.bodySmall
+					)
+					Spacer(Modifier.height(Space.sm))
+					PromptChoice(
+						options = PROMPT_COUNTS.map { it.toString() },
+						label = { it },
+						current = count.toString(),
+						onPick = { picked -> count = picked.toIntOrNull() ?: count }
+					)
+
+					Text(
+						text = S.t("add.046"),
+						style = MaterialTheme.typography.bodySmall
+					)
+					Spacer(Modifier.height(Space.sm))
+					PromptChoice(
+						options = if (subject) SUBJECT_LEVELS else PROMPT_LEVELS,
+						label = { option ->
+							when (option) {
+								LEVEL_BEGINNER -> S.t("add.043")
+								LEVEL_TALKING -> S.t("add.044")
+								LEVEL_SOME_BACKGROUND -> S.t("add.059")
+								else -> S.t("add.045")
+							}
+						},
+						current = level,
+						onPick = { level = it }
+					)
+
+					Text(
+						text = if (subject) S.t("add.060") else S.t("add.047"),
+						style = MaterialTheme.typography.bodySmall
+					)
+					Spacer(Modifier.height(Space.sm))
 					Box(
 						modifier = Modifier
 							.fillMaxWidth()
-							.heightIn(max = 220.dp)
+							.border(Space.hair, line)
+							.padding(Space.md)
+					) {
+						if (topic.isEmpty()) {
+							Text(
+								text = if (subject) S.t("add.061") else S.t("add.048"),
+								style = MaterialTheme.typography.bodyMedium,
+								color = muted
+							)
+						}
+						BasicTextField(
+							value = topic,
+							onValueChange = { topic = it.take(MAX_TOPIC_CHARS) },
+							singleLine = true,
+							textStyle = MaterialTheme.typography.bodyMedium.copy(
+								color = MaterialTheme.colorScheme.onBackground
+							),
+							cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+							modifier = Modifier.fillMaxWidth()
+						)
+					}
+
+					Spacer(Modifier.height(Space.md))
+					IknaWideButton(
+						label = S.t("add.007"),
+						filled = true,
+						enabled = filled.isNotEmpty() && !busy,
+						onClick = {
+							clipboard.setText(AnnotatedString(filled))
+							note = S.t("add.009")
+						}
+					)
+					Spacer(Modifier.height(Space.sm))
+					IknaWideButton(
+						label = S.t("add.008"),
+						enabled = filled.isNotEmpty() && !busy,
+						onClick = { saver.launch(PROMPT_FILE) }
+					)
+
+				}
+
+				Spacer(Modifier.height(Space.lg))
+				IknaRule()
+				Spacer(Modifier.height(Space.lg))
+
+				Text(
+					text = S.t("add.016"),
+					style = MaterialTheme.typography.labelMedium,
+					color = muted
+				)
+				Spacer(Modifier.height(Space.sm))
+				// The language of the deck, asked where the deck actually arrives.
+				//
+				// It used to stand with the prompt questions, and the prompt is folded
+				// away now. A file a friend sent has a language too, and the voice and
+				// the reader for a deck are chosen by it, so the question stays here in
+				// the open where any deck being installed can answer it.
+				if (!subject) {
+					Text(
+						text = S.t("add.038"),
+						style = MaterialTheme.typography.labelMedium,
+						color = muted
+					)
+					Spacer(Modifier.height(Space.sm))
+					LangChips(current = lang, onPick = { lang = it })
+					Spacer(Modifier.height(Space.md))
+				}
+
+				// Two different things, decided by size: a field for a deck small enough
+				// to be typed by hand, and a folded summary for one that was pasted.
+				val pastedLines = remember(pasted) {
+					pasted.lineSequence().count { it.isNotBlank() }
+				}
+				val bulky = pasted.length > PREVIEW_CHARS
+				val pasteScroll = rememberScrollState()
+				if (bulky) {
+					// A pasted deck is a file that happened to arrive through the
+					// clipboard, so it is treated as one: named by its size, folded
+					// away, opened only if asked for. It used to be laid out in full
+					// inside an editable field -- ten thousand rows of it, on the main
+					// thread -- which is what turned this screen into a wall of text
+					// with a create button somewhere past the bottom of it. Nobody
+					// corrects a generated deck with a thumb; what is wanted here is
+					// proof that the text arrived whole.
+					Row(verticalAlignment = Alignment.CenterVertically) {
+						Text(
+							text = pastedLines.toString() + " " + S.t("add.065") +
+								", " + pasted.length + " " + S.t("add.066"),
+							style = MaterialTheme.typography.bodyMedium,
+							color = MaterialTheme.colorScheme.onBackground,
+							modifier = Modifier.weight(1f)
+						)
+						IknaTextButton(
+							label = if (previewOpen) S.t("add.068") else S.t("add.067"),
+							onClick = { previewOpen = !previewOpen },
+							color = muted
+						)
+					}
+					if (previewOpen) {
+						Spacer(Modifier.height(Space.sm))
+						// The head of it and never all of it. Forty rows is enough to
+						// see that the columns line up, and it is a fixed cost: opening
+						// the preview on a deck of ten thousand rows costs the same as
+						// opening it on forty.
+						val head = remember(pasted) {
+							pasted.lineSequence()
+								.filter { it.isNotBlank() }
+								.take(PREVIEW_LINES)
+								.joinToString("\n")
+						}
+						Box(
+							modifier = Modifier
+								.fillMaxWidth()
+								.heightIn(max = 220.dp)
+								.border(Space.hair, line)
+								.padding(Space.md)
+								.verticalScroll(pasteScroll)
+						) {
+							Text(
+								text = head,
+								style = MaterialTheme.typography.bodySmall,
+								color = MaterialTheme.colorScheme.onBackground
+							)
+						}
+						if (pastedLines > PREVIEW_LINES) {
+							Spacer(Modifier.height(Space.xs))
+							Text(
+								text = S.t("add.069") + (pastedLines - PREVIEW_LINES),
+								style = MaterialTheme.typography.labelMedium,
+								color = muted
+							)
+						}
+					}
+				} else {
+					// Small enough to be typed and corrected by hand, which is the only
+					// case in which this has any business being a text field. The field
+					// is deliberately the same shape as the hex field in settings: a
+					// rectangle with a line around it and nothing else in it.
+					Box(
+						modifier = Modifier
+							.fillMaxWidth()
+							.heightIn(min = 140.dp, max = 220.dp)
 							.border(Space.hair, line)
 							.padding(Space.md)
 							.verticalScroll(pasteScroll)
 					) {
-						Text(
-							text = head,
-							style = MaterialTheme.typography.bodySmall,
-							color = MaterialTheme.colorScheme.onBackground
-						)
-					}
-					if (pastedLines > PREVIEW_LINES) {
-						Spacer(Modifier.height(Space.xs))
-						Text(
-							text = S.t("add.069") + (pastedLines - PREVIEW_LINES),
-							style = MaterialTheme.typography.labelMedium,
-							color = muted
+						if (pasted.isEmpty()) {
+							Text(
+								text = S.t("add.012"),
+								style = MaterialTheme.typography.bodyMedium,
+								color = muted
+							)
+						}
+						BasicTextField(
+							value = pasted,
+							onValueChange = { pasted = it.take(MAX_PASTED_CHARS) },
+							textStyle = MaterialTheme.typography.bodyMedium.copy(
+								color = MaterialTheme.colorScheme.onBackground
+							),
+							cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+							modifier = Modifier.fillMaxWidth()
 						)
 					}
 				}
-			} else {
-				// Small enough to be typed and corrected by hand, which is the only
-				// case in which this has any business being a text field. The field
-				// is deliberately the same shape as the hex field in settings: a
-				// rectangle with a line around it and nothing else in it.
-				Box(
-					modifier = Modifier
-						.fillMaxWidth()
-						.heightIn(min = 140.dp, max = 220.dp)
-						.border(Space.hair, line)
-						.padding(Space.md)
-						.verticalScroll(pasteScroll)
-				) {
-					if (pasted.isEmpty()) {
-						Text(
-							text = S.t("add.012"),
-							style = MaterialTheme.typography.bodyMedium,
-							color = muted
-						)
-					}
-					BasicTextField(
-						value = pasted,
-						onValueChange = { pasted = it.take(MAX_PASTED_CHARS) },
-						textStyle = MaterialTheme.typography.bodyMedium.copy(
-							color = MaterialTheme.colorScheme.onBackground
-						),
-						cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-						modifier = Modifier.fillMaxWidth()
-					)
-				}
-			}
 
-			Spacer(Modifier.height(Space.sm))
-			Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
-				// Straight out of the clipboard, not through the keyboard. Handing a
-				// hundred kilobytes of table to an IME is where the text was being cut
-				// short and its line breaks flattened into one line, which the importer
-				// then read as a single row with six hundred columns.
-				IknaTextButton(
-					label = S.t("add.063"),
-					onClick = {
-						val text = clipboard.getText()?.text.orEmpty()
-						if (text.isBlank()) {
-							note = S.t("add.064")
-						} else {
-							pasted = text.take(MAX_PASTED_CHARS)
-							previewOpen = false
-							// Said out loud rather than found out later as a deck
-							// missing its last two hundred cards.
-							note = if (text.length > MAX_PASTED_CHARS) {
-								S.t("add.071")
+				Spacer(Modifier.height(Space.sm))
+				Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+					// Straight out of the clipboard, not through the keyboard. Handing a
+					// hundred kilobytes of table to an IME is where the text was being cut
+					// short and its line breaks flattened into one line, which the importer
+					// then read as a single row with six hundred columns.
+					IknaTextButton(
+						label = S.t("add.063"),
+						onClick = {
+							val text = clipboard.getText()?.text.orEmpty()
+							if (text.isBlank()) {
+								note = S.t("add.064")
 							} else {
-								null
+								pasted = text.take(MAX_PASTED_CHARS)
+								previewOpen = false
+								// Said out loud rather than found out later as a deck
+								// missing its last two hundred cards.
+								note = if (text.length > MAX_PASTED_CHARS) {
+									S.t("add.071")
+								} else {
+									null
+								}
 							}
 						}
-					}
-				)
-				IknaTextButton(
-					label = S.t("add.013"),
-					onClick = {
-						pasted = S.t("add.027")
-						note = S.t("add.028")
-					}
-				)
-				if (pasted.isNotEmpty()) {
+					)
 					IknaTextButton(
-						label = S.t("add.029"),
-						onClick = { pasted = "" },
-						color = muted
-					)
-				}
-			}
-
-			Spacer(Modifier.height(Space.md))
-			IknaWideButton(
-				label = S.t("add.014"),
-				filled = true,
-				enabled = !busy,
-				onClick = {
-					if (pasted.isBlank()) {
-						note = S.t("add.020")
-					} else {
-						// One last rescue before the importer sees it. A keyboard that
-						// flattened the paste hands over a single line no parser can
-						// split back with certainty, while the clipboard almost always
-						// still holds the same deck with its line breaks intact. When it
-						// does, that is what gets imported -- silently, because the
-						// person did nothing wrong and has nothing to fix.
-						val fromClip = clipboard.getText()?.text.orEmpty()
-						val text = if (glued(pasted) && fromClip.isNotBlank() && !glued(fromClip)) {
-							fromClip.take(MAX_PASTED_CHARS)
-						} else {
-							pasted
+						label = S.t("add.013"),
+						onClick = {
+							pasted = S.t("add.027")
+							note = S.t("add.028")
 						}
-						scope.launch { install(S.t("add.030"), text) }
+					)
+					if (pasted.isNotEmpty()) {
+						IknaTextButton(
+							label = S.t("add.029"),
+							onClick = { pasted = "" },
+							color = muted
+						)
 					}
 				}
-			)
-			Spacer(Modifier.height(Space.sm))
-			IknaWideButton(
-				label = S.t("add.015"),
-				enabled = !busy,
-				onClick = { picker.launch(ACCEPTED_TYPES) }
-			)
 
-			Spacer(Modifier.height(Space.lg))
-			val shown = if (busy) S.t("add.017") else note
-			if (shown != null) {
-				Box(
-					modifier = Modifier
-						.fillMaxWidth()
-						.background(MaterialTheme.colorScheme.surface)
-						.padding(Space.md)
-				) {
-					Text(
-						text = shown,
-						style = MaterialTheme.typography.bodyMedium
-					)
-				}
 				Spacer(Modifier.height(Space.md))
 				IknaWideButton(
-					label = S.t("add.026"),
-					onClick = onBack,
-					enabled = !busy
+					label = S.t("add.014"),
+					filled = true,
+					enabled = !busy,
+					onClick = {
+						if (pasted.isBlank()) {
+							note = S.t("add.020")
+						} else {
+							// One last rescue before the importer sees it. A keyboard that
+							// flattened the paste hands over a single line no parser can
+							// split back with certainty, while the clipboard almost always
+							// still holds the same deck with its line breaks intact. When it
+							// does, that is what gets imported -- silently, because the
+							// person did nothing wrong and has nothing to fix.
+							val fromClip = clipboard.getText()?.text.orEmpty()
+							val text = if (glued(pasted) && fromClip.isNotBlank() && !glued(fromClip)) {
+								fromClip.take(MAX_PASTED_CHARS)
+							} else {
+								pasted
+							}
+							scope.launch { install(S.t("add.030"), text) }
+						}
+					}
 				)
-			}
+				Spacer(Modifier.height(Space.sm))
+				IknaWideButton(
+					label = S.t("add.015"),
+					enabled = !busy,
+					onClick = { picker.launch(ACCEPTED_TYPES) }
+				)
 
-			Spacer(Modifier.height(Space.xxl))
+				Spacer(Modifier.height(Space.lg))
+				val shown = if (busy) S.t("add.017") else note
+				if (shown != null) {
+					Box(
+						modifier = Modifier
+							.fillMaxWidth()
+							.background(MaterialTheme.colorScheme.surface)
+							.padding(Space.md)
+					) {
+						Text(
+							text = shown,
+							style = MaterialTheme.typography.bodyMedium
+						)
+					}
+					Spacer(Modifier.height(Space.md))
+					IknaWideButton(
+						label = S.t("add.026"),
+						onClick = onBack,
+						enabled = !busy
+					)
+				}
+
+				Spacer(Modifier.height(Space.xxl))
+			}
+		}
+		IknaBottomBar(modifier = Modifier.align(Alignment.BottomCenter)) {
+			IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
 		}
 	}
 }

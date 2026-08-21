@@ -46,6 +46,7 @@ import dev.ikna.data.repo.DeckSummary
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.DeckTints
 import dev.ikna.ui.theme.Edge
+import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
@@ -138,307 +139,307 @@ fun DeckScreen(
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val current = deck
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(BarHeight)
-                .padding(horizontal = Space.sm),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IknaIconButton(
-                glyph = IknaGlyph.BACK,
-                onClick = onBack,
-                label = S.t("a11y.001")
-            )
-            Text(
-                text = current?.title ?: "",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                modifier = Modifier.padding(start = Space.xs)
-            )
-        }
-
-        if (current != null) {
-            Column(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().padding(bottom = BarHeight)) {
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = Edge)
+                    .fillMaxWidth()
+                    .height(BarHeight)
+                    .padding(horizontal = Space.sm),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Spacer(Modifier.height(Space.md))
                 Text(
-                    text = stateLine(current),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = muted
+                    text = current?.title ?: "",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    modifier = Modifier.padding(start = Space.xs)
                 )
-                Spacer(Modifier.height(Space.md))
-                IknaProgress(
-                    fraction = if (current.total == 0) 0f
-                    else current.introduced.toFloat() / current.total,
-                    height = 4.dp,
-                    color = MaterialTheme.colorScheme.primary,
-                    track = true,
-                    segments = 18
-                )
+            }
 
-                Spacer(Modifier.height(Space.xl))
-                IknaRule()
-                Spacer(Modifier.height(Space.lg))
-
-                // The name.
-                //
-                // Typed straight into the row that shows it, with no save button
-                // and no dialog: a dialog would ask a question the field answers
-                // by itself, and a save button would be a second chance to lose
-                // the edit. Left blank the old name stays -- the repository
-                // refuses an empty title, and the list has no other handle.
-                Text(
-                    text = S.t("dp.013"),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(Modifier.height(Space.md))
-                Box(
+            if (current != null) {
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .border(Space.hair, MaterialTheme.colorScheme.outline)
-                        .padding(horizontal = Space.md, vertical = Space.sm)
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = Edge)
                 ) {
-                    BasicTextField(
-                        value = current.title,
-                        onValueChange = { raw ->
-                            val value = raw.take(DeckRepository.MAX_TITLE)
-                            // Shown at once, stored in the same breath. The copy
-                            // is what keeps the bar at the top of this screen and
-                            // the field in step while the letters are arriving.
-                            deck = deck?.copy(title = value)
-                            scope.launch {
-                                container.deckRepository.rename(deckId, value)
-                            }
-                        },
-                        textStyle = MaterialTheme.typography.titleMedium.copy(
-                            color = MaterialTheme.colorScheme.onBackground
-                        ),
-                        singleLine = true,
-                        cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
-                        modifier = Modifier.fillMaxWidth()
+                    Spacer(Modifier.height(Space.md))
+                    Text(
+                        text = stateLine(current),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = muted
                     )
-                }
+                    Spacer(Modifier.height(Space.md))
+                    IknaProgress(
+                        fraction = if (current.total == 0) 0f
+                        else current.introduced.toFloat() / current.total,
+                        height = 4.dp,
+                        color = MaterialTheme.colorScheme.primary,
+                        track = true,
+                        segments = 18
+                    )
 
-                Spacer(Modifier.height(Space.lg))
-                IknaRule()
-                Spacer(Modifier.height(Space.lg))
+                    Spacer(Modifier.height(Space.xl))
+                    IknaRule()
+                    Spacer(Modifier.height(Space.lg))
 
-                Text(
-                    text = S.t("dp.003"),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(Modifier.height(Space.xs))
-                Text(
-                    text = S.t("dp.004"),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = muted
-                )
-                Spacer(Modifier.height(Space.md))
-
-                LangChips(
-                    current = current.lang,
-                    onPick = { code ->
-                        scope.launch {
-                            container.deckRepository.setLang(deckId, code)
-                            reload()
-                        }
-                    }
-                )
-
-                Spacer(Modifier.height(Space.lg))
-                IknaRule()
-                Spacer(Modifier.height(Space.lg))
-
-                // What the deck looks like on the list.
-                //
-                // Kept out of the deck file on purpose. An icon and a colour are
-                // how one person tells their own decks apart at a glance; they
-                // are not part of what the deck teaches, and a deck sent to
-                // somebody else should arrive as cards rather than as somebody
-                // else's taste. So this is stored in settings, beside the theme.
-                val look = settings.lookFor(deckId)
-
-                Text(
-                    text = S.t("look.001"),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(Modifier.height(Space.xs))
-                Text(
-                    text = S.t("look.002"),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = muted
-                )
-                Spacer(Modifier.height(Space.md))
-
-                // Two characters, typed, rather than a grid of emoji.
-                //
-                // The grid was here until 0.2.0 and it was the wrong offer: the
-                // phone draws emoji in its own full-colour style, which sits on
-                // this app's flat marks like a sticker on a blueprint. A field
-                // is also smaller than the grid it replaces, and it accepts the
-                // things people actually want in that square -- initials, a
-                // language pair, a number -- none of which a fixed set of
-                // pictures could have guessed.
-                //
-                // Left empty, the square keeps working out its own letters, so
-                // there is nothing to undo and no third state to explain.
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(Space.md)
-                ) {
+                    // The name.
+                    //
+                    // Typed straight into the row that shows it, with no save button
+                    // and no dialog: a dialog would ask a question the field answers
+                    // by itself, and a save button would be a second chance to lose
+                    // the edit. Left blank the old name stays -- the repository
+                    // refuses an empty title, and the list has no other handle.
+                    Text(
+                        text = S.t("dp.013"),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(Modifier.height(Space.md))
                     Box(
                         modifier = Modifier
-                            .size(52.dp)
-                            .border(Space.hair, MaterialTheme.colorScheme.outline),
-                        contentAlignment = Alignment.Center
+                            .fillMaxWidth()
+                            .border(Space.hair, MaterialTheme.colorScheme.outline)
+                            .padding(horizontal = Space.md, vertical = Space.sm)
                     ) {
                         BasicTextField(
-                            value = look.label,
-                            onValueChange = { typed ->
+                            value = current.title,
+                            onValueChange = { raw ->
+                                val value = raw.take(DeckRepository.MAX_TITLE)
+                                // Shown at once, stored in the same breath. The copy
+                                // is what keeps the bar at the top of this screen and
+                                // the field in step while the letters are arriving.
+                                deck = deck?.copy(title = value)
                                 scope.launch {
-                                    container.settings.setDeckLook(
-                                        packId = deckId,
-                                        label = typed,
-                                        tint = look.tint
-                                    )
+                                    container.deckRepository.rename(deckId, value)
                                 }
                             },
                             textStyle = MaterialTheme.typography.titleMedium.copy(
-                                color = MaterialTheme.colorScheme.onBackground,
-                                textAlign = TextAlign.Center
+                                color = MaterialTheme.colorScheme.onBackground
                             ),
                             singleLine = true,
                             cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
+
+                    Spacer(Modifier.height(Space.lg))
+                    IknaRule()
+                    Spacer(Modifier.height(Space.lg))
+
                     Text(
-                        text = S.t("look.004"),
+                        text = S.t("dp.003"),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(Modifier.height(Space.xs))
+                    Text(
+                        text = S.t("dp.004"),
                         style = MaterialTheme.typography.bodySmall,
                         color = muted
                     )
-                }
+                    Spacer(Modifier.height(Space.md))
 
-                Spacer(Modifier.height(Space.sm))
-                Text(
-                    text = S.t("look.003"),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = muted
-                )
-                Spacer(Modifier.height(Space.sm))
+                    LangChips(
+                        current = current.lang,
+                        onPick = { code ->
+                            scope.launch {
+                                container.deckRepository.setLang(deckId, code)
+                                reload()
+                            }
+                        }
+                    )
 
-                // Eight fixed colours, no colour picker. The square has to stay
-                // legible against twelve palettes in two lighting modes, and a
-                // free hex field is one slider away from a deck nobody can see.
-                Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
-                    DeckTints.forEachIndexed { index, colour ->
-                        val picked = look.tint == index
+                    Spacer(Modifier.height(Space.lg))
+                    IknaRule()
+                    Spacer(Modifier.height(Space.lg))
+
+                    // What the deck looks like on the list.
+                    //
+                    // Kept out of the deck file on purpose. An icon and a colour are
+                    // how one person tells their own decks apart at a glance; they
+                    // are not part of what the deck teaches, and a deck sent to
+                    // somebody else should arrive as cards rather than as somebody
+                    // else's taste. So this is stored in settings, beside the theme.
+                    val look = settings.lookFor(deckId)
+
+                    Text(
+                        text = S.t("look.001"),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(Modifier.height(Space.xs))
+                    Text(
+                        text = S.t("look.002"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted
+                    )
+                    Spacer(Modifier.height(Space.md))
+
+                    // Two characters, typed, rather than a grid of emoji.
+                    //
+                    // The grid was here until 0.2.0 and it was the wrong offer: the
+                    // phone draws emoji in its own full-colour style, which sits on
+                    // this app's flat marks like a sticker on a blueprint. A field
+                    // is also smaller than the grid it replaces, and it accepts the
+                    // things people actually want in that square -- initials, a
+                    // language pair, a number -- none of which a fixed set of
+                    // pictures could have guessed.
+                    //
+                    // Left empty, the square keeps working out its own letters, so
+                    // there is nothing to undo and no third state to explain.
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Space.md)
+                    ) {
                         Box(
                             modifier = Modifier
-                                .size(30.dp)
-                                .background(colour)
-                                .border(
-                                    if (picked) 2.dp else Space.hair,
-                                    if (picked) MaterialTheme.colorScheme.onBackground
-                                    else MaterialTheme.colorScheme.outline
-                                )
-                                .clickable {
+                                .size(52.dp)
+                                .border(Space.hair, MaterialTheme.colorScheme.outline),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            BasicTextField(
+                                value = look.label,
+                                onValueChange = { typed ->
                                     scope.launch {
                                         container.settings.setDeckLook(
                                             packId = deckId,
-                                            label = look.label,
-                                            tint = if (picked) NO_TINT else index
+                                            label = typed,
+                                            tint = look.tint
                                         )
                                     }
-                                }
+                                },
+                                textStyle = MaterialTheme.typography.titleMedium.copy(
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    textAlign = TextAlign.Center
+                                ),
+                                singleLine = true,
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                        Text(
+                            text = S.t("look.004"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = muted
                         )
                     }
-                }
 
-                Spacer(Modifier.height(Space.lg))
-                IknaRule()
-                Spacer(Modifier.height(Space.lg))
-
-                IknaWideButton(
-                    label = if (adding) S.t("dp.011") else S.t("dp.010"),
-                    enabled = !adding,
-                    onClick = { more.launch(ACCEPTED_TYPES) }
-                )
-
-                Spacer(Modifier.height(Space.lg))
-                IknaWideButton(
-                    label = S.t("dp.006"),
-                    onClick = {
-                        scope.launch {
-                            val body = container.deckRepository.exportText(deckId)
-                            note = when {
-                                body.isBlank() -> S.t("share.004")
-                                !DeckShare.shareText(
-                                    context = context,
-                                    fileName = DeckShare.fileNameFor(current.title),
-                                    body = body,
-                                    chooserTitle = S.t("share.002")
-                                ) -> S.t("share.003")
-                                else -> null
-                            }
-                        }
-                    }
-                )
-
-                // Deleting is put well below everything else, behind its own
-                // line, and says what survives before it says what goes: the
-                // answers stay in the log either way, because that table is the
-                // one thing in the app that is never rewritten.
-                Spacer(Modifier.height(Space.xxl))
-                IknaRule()
-                Spacer(Modifier.height(Space.lg))
-
-                Text(
-                    text = S.t("dp.009"),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = muted
-                )
-                Spacer(Modifier.height(Space.sm))
-                IknaTextButton(
-                    label = if (armed) S.t("dp.008") else S.t("dp.007"),
-                    color = MaterialTheme.colorScheme.primary,
-                    onClick = {
-                        if (!armed) {
-                            armed = true
-                        } else {
-                            scope.launch {
-                                container.deckRepository.delete(deckId)
-                                // The day was planned while this deck still
-                                // existed, so the plan is dropped rather than
-                                // left pointing at cards that are gone.
-                                container.learningRepository.invalidatePlan()
-                                onBack()
-                            }
-                        }
-                    }
-                )
-
-                note?.let { text ->
-                    Spacer(Modifier.height(Space.lg))
+                    Spacer(Modifier.height(Space.sm))
                     Text(
-                        text = text,
+                        text = S.t("look.003"),
                         style = MaterialTheme.typography.bodySmall,
                         color = muted
                     )
-                }
+                    Spacer(Modifier.height(Space.sm))
 
-                Spacer(Modifier.height(Space.xxl))
+                    // Eight fixed colours, no colour picker. The square has to stay
+                    // legible against twelve palettes in two lighting modes, and a
+                    // free hex field is one slider away from a deck nobody can see.
+                    Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+                        DeckTints.forEachIndexed { index, colour ->
+                            val picked = look.tint == index
+                            Box(
+                                modifier = Modifier
+                                    .size(30.dp)
+                                    .background(colour)
+                                    .border(
+                                        if (picked) 2.dp else Space.hair,
+                                        if (picked) MaterialTheme.colorScheme.onBackground
+                                        else MaterialTheme.colorScheme.outline
+                                    )
+                                    .clickable {
+                                        scope.launch {
+                                            container.settings.setDeckLook(
+                                                packId = deckId,
+                                                label = look.label,
+                                                tint = if (picked) NO_TINT else index
+                                            )
+                                        }
+                                    }
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(Space.lg))
+                    IknaRule()
+                    Spacer(Modifier.height(Space.lg))
+
+                    IknaWideButton(
+                        label = if (adding) S.t("dp.011") else S.t("dp.010"),
+                        enabled = !adding,
+                        onClick = { more.launch(ACCEPTED_TYPES) }
+                    )
+
+                    Spacer(Modifier.height(Space.lg))
+                    IknaWideButton(
+                        label = S.t("dp.006"),
+                        onClick = {
+                            scope.launch {
+                                val body = container.deckRepository.exportText(deckId)
+                                note = when {
+                                    body.isBlank() -> S.t("share.004")
+                                    !DeckShare.shareText(
+                                        context = context,
+                                        fileName = DeckShare.fileNameFor(current.title),
+                                        body = body,
+                                        chooserTitle = S.t("share.002")
+                                    ) -> S.t("share.003")
+                                    else -> null
+                                }
+                            }
+                        }
+                    )
+
+                    // Deleting is put well below everything else, behind its own
+                    // line, and says what survives before it says what goes: the
+                    // answers stay in the log either way, because that table is the
+                    // one thing in the app that is never rewritten.
+                    Spacer(Modifier.height(Space.xxl))
+                    IknaRule()
+                    Spacer(Modifier.height(Space.lg))
+
+                    Text(
+                        text = S.t("dp.009"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted
+                    )
+                    Spacer(Modifier.height(Space.sm))
+                    IknaTextButton(
+                        label = if (armed) S.t("dp.008") else S.t("dp.007"),
+                        color = MaterialTheme.colorScheme.primary,
+                        onClick = {
+                            if (!armed) {
+                                armed = true
+                            } else {
+                                scope.launch {
+                                    container.deckRepository.delete(deckId)
+                                    // The day was planned while this deck still
+                                    // existed, so the plan is dropped rather than
+                                    // left pointing at cards that are gone.
+                                    container.learningRepository.invalidatePlan()
+                                    onBack()
+                                }
+                            }
+                        }
+                    )
+
+                    note?.let { text ->
+                        Spacer(Modifier.height(Space.lg))
+                        Text(
+                            text = text,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = muted
+                        )
+                    }
+
+                    Spacer(Modifier.height(Space.xxl))
+                }
             }
+        }
+        IknaBottomBar(modifier = Modifier.align(Alignment.BottomCenter)) {
+            IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
         }
     }
 }

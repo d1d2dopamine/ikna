@@ -85,6 +85,19 @@ removed with their bodies. **No WebView is created anywhere in the import path,*
 so an imported script has nothing to run in even if a future change let one
 through as text.
 
+## When the notetypes cannot be read
+
+A file can arrive in a shape this reader has never seen: a container named
+something new, a protobuf field renumbered, a blob that lost a byte. In all of
+them the notes themselves are still plain text in a table SQLite can read, so
+the import does not stop. Every package member named like a collection is tried
+in turn, newest container first, and the first one that opens as SQLite wins.
+If neither the JSON columns nor the tables give up a notetype, each note is read
+by the order of its own fields -- first field to the front, the rest to the back,
+cloze recognised from the text itself -- and those cards are counted as recovered
+from fields in the report. Only a file with no notes and no cards at all is
+refused.
+
 ## What is refused, and counted
 
 A silent skip is a bug. Everything below appears in the report shown *before*
@@ -125,6 +138,15 @@ What crosses over is the rating and the timing. Anki's internal scheduling state
 does not, because it belongs to a different algorithm and inventing an equivalent
 would be a guess wearing a number's clothes. The report says this plainly instead
 of implying a perfect transplant.
+
+## What an imported deck looks like afterwards
+
+It arrives switched off, like any other new deck, and shows no progress. Progress
+through a deck counts what has been answered in ikna since the deck arrived, not
+how many card rows exist -- an imported deck has a card for every note from the
+moment it lands, and counting rows made it look finished. The replayed schedule
+is not affected by either: those cards come back when their own history says
+they should, once the deck is switched on.
 
 ## Identity, and importing twice
 

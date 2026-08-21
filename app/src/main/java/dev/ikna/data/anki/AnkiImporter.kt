@@ -101,7 +101,11 @@ class AnkiImporter(
                 packId = deck.packId,
                 title = deck.title,
                 lang = deck.lang,
-                source = deck.cards
+                source = deck.cards,
+                // A deck that has just arrived is off, like every other new
+                // deck. Ten decks switching themselves on at once would rewrite
+                // today's plan around material nobody has looked at yet.
+                active = false
             ).installed
         }
 
@@ -157,33 +161,52 @@ class AnkiImporter(
                 if (entries.size > MAX_ZIP_ENTRIES) {
                     throw AnkiImportException(AnkiImportError.NOT_APKG)
                 }
-                val entry = COLLECTION_NAMES.firstNotNullOfOrNull { name -> zip.getEntry(name) }
-                    ?: throw AnkiImportException(AnkiImportError.NO_COLLECTION)
-                if (entry.isDirectory || entry.size > MAX_COLLECTION_BYTES) {
-                    throw AnkiImportException(AnkiImportError.UNSUPPORTED_COLLECTION)
+                // Every member that could be a collection is tried in turn,
+                // newest container first, and the first one that lands as a
+                // readable SQLite file wins. Taking only the first name found
+                // meant one awkward member -- a decoy left for older readers, a
+                // name a later Anki adds -- ended the import while the real
+                // collection sat in the same file untouched.
+                val known = entries.filter { !it.isDirectory && it.name in COLLECTION_NAMES }
+                    .sortedBy { COLLECTION_NAMES.indexOf(it.name) }
+                val others = entries.filter {
+                    !it.isDirectory &&
+                        it.name.startsWith(COLLECTION_PREFIX) &&
+                        it.name !in COLLECTION_NAMES
                 }
+                val candidates = known + others
+                if (candidates.isEmpty()) {
+                    throw AnkiImportException(AnkiImportError.NO_COLLECTION)
+                }
+                for (entry in candidates) {
+                    if (entry.size > MAX_COLLECTION_BYTES) continue
+                    val landed = runCatching {
+                        BufferedInputStream(zip.getInputStream(entry)).use { input ->
+                            input.mark(SQLITE_HEADER.size + 4)
+                            val header = ByteArray(SQLITE_HEADER.size)
+                            val read = input.read(header)
+                            input.reset()
+                            FileOutputStream(collection).use { output ->
+                                when {
+                                    read == SQLITE_HEADER.size &&
+                                        header.contentEquals(SQLITE_HEADER) ->
+                                        copyLimited(input, output, MAX_COLLECTION_BYTES)
 
-                val buffered = BufferedInputStream(zip.getInputStream(entry))
-                buffered.use { input ->
-                    input.mark(SQLITE_HEADER.size + 4)
-                    val header = ByteArray(SQLITE_HEADER.size)
-                    val read = input.read(header)
-                    input.reset()
-                    FileOutputStream(collection).use { output ->
-                        when {
-                            read == SQLITE_HEADER.size && header.contentEquals(SQLITE_HEADER) ->
-                                copyLimited(input, output, MAX_COLLECTION_BYTES)
-                            isZstd(header) -> ZstdInputStream(input).use { zstd ->
-                                copyLimited(zstd, output, MAX_COLLECTION_BYTES)
+                                    isZstd(header) -> ZstdInputStream(input).use { zstd ->
+                                        copyLimited(zstd, output, MAX_COLLECTION_BYTES)
+                                    }
+
+                                    else -> throw AnkiImportException(
+                                        AnkiImportError.UNSUPPORTED_COLLECTION
+                                    )
+                                }
                             }
-                            else -> throw AnkiImportException(AnkiImportError.UNSUPPORTED_COLLECTION)
                         }
-                    }
+                        hasSqliteHeader(collection)
+                    }.getOrDefault(false)
+                    if (landed) return ExtractedCollection(collection, entry.name)
                 }
-                if (!hasSqliteHeader(collection)) {
-                    throw AnkiImportException(AnkiImportError.UNSUPPORTED_COLLECTION)
-                }
-                return ExtractedCollection(collection, entry.name)
+                throw AnkiImportException(AnkiImportError.UNSUPPORTED_COLLECTION)
             }
         } catch (known: AnkiImportException) {
             throw known
@@ -236,7 +259,19 @@ class AnkiImporter(
         }
     }
 
-    private fun readMeta(database: SQLiteDatabase): CollectionMeta {
+    /**
+     * The creation date and the JSON columns, when the file still has them.
+     *
+     * Anki keeps the legacy `col` row for compatibility and leaves its JSON
+     * columns empty; nothing promises a later version keeps the row at all, and
+     * a `models` string too wide for a cursor window cannot be read even when it
+     * is there. Notetypes and decks come from the tables in both cases, so this
+     * failing costs a creation date, not the import.
+     */
+    private fun readMeta(database: SQLiteDatabase): CollectionMeta =
+        runCatching { readColRow(database) }.getOrNull() ?: CollectionMeta(1L, "", "")
+
+    private fun readColRow(database: SQLiteDatabase): CollectionMeta {
         database.rawQuery("SELECT crt, scm, models, decks FROM col LIMIT 1", null).use { cursor ->
             if (!cursor.moveToFirst()) throw AnkiImportException(AnkiImportError.UNREADABLE_DATABASE)
             val crt = cursor.getLong(0)
@@ -606,7 +641,10 @@ class AnkiImporter(
         private const val MAX_REVIEW_DURATION_MS = 120_000L
         private const val DAY_MS = 86_400_000.0
         private const val FIELD_SEPARATOR = '\u001F'
-        private val COLLECTION_NAMES = listOf("collection.anki21b", "collection.anki21", "collection.anki2")
+        /** Any other member named like a collection is still worth opening. */
+    private const val COLLECTION_PREFIX = "collection.anki"
+
+    private val COLLECTION_NAMES = listOf("collection.anki21b", "collection.anki21", "collection.anki2")
         private val SQLITE_HEADER = "SQLite format 3\u0000".toByteArray(Charsets.US_ASCII)
 
         fun stableChunkId(collectionKey: Long, cardId: Long): String =

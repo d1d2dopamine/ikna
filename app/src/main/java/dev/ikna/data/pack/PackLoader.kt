@@ -72,16 +72,20 @@ class PackLoader(
         context.assets.open("packs/" + manifest.file).bufferedReader().useLines { lines ->
             count = insertChunks(manifest.id, manifest.lang, lines)
         }
+        val existing = chunkDao.pack(manifest.id)
         chunkDao.upsertPack(
             PackEntity(
                 id = manifest.id,
                 version = manifest.version,
                 lang = manifest.lang,
                 chunkCount = if (count > 0) count else manifest.chunkCount,
-                installedAt = System.currentTimeMillis(),
+                // When the deck first arrived, not when it was last written.
+                // Progress through a deck is measured from this date, so a new
+                // version of the same deck must not reset it.
+                installedAt = existing?.installedAt ?: System.currentTimeMillis(),
                 title = packTitle(manifest.title, manifest.id),
                 // A deck the user already switched keeps their choice.
-                isActive = chunkDao.pack(manifest.id)?.isActive ?: manifest.active
+                isActive = existing?.isActive ?: manifest.active
             )
         )
     }
@@ -116,7 +120,7 @@ class PackLoader(
                 version = (existing?.version ?: 0) + 1,
                 lang = lang,
                 chunkCount = chunks.size,
-                installedAt = System.currentTimeMillis(),
+                installedAt = existing?.installedAt ?: System.currentTimeMillis(),
                 title = packTitle(title, packId),
                 isActive = existing?.isActive ?: true
             )
@@ -138,7 +142,8 @@ class PackLoader(
         lang: String,
         source: List<PackChunk>,
         skipped: Int = 0,
-        append: Boolean = false
+        append: Boolean = false,
+        active: Boolean = true
     ): ImportResult {
         val chunks = ArrayList<ChunkEntity>(source.size)
         val tokens = ArrayList<ChunkTokenEntity>(source.size * 8)
@@ -158,9 +163,11 @@ class PackLoader(
                 // showing the portion instead of the deck.
                 chunkCount = if (append) (existing?.chunkCount ?: 0) + chunks.size
                 else chunks.size,
-                installedAt = System.currentTimeMillis(),
+                installedAt = existing?.installedAt ?: System.currentTimeMillis(),
                 title = packTitle(title, packId),
-                isActive = existing?.isActive ?: true
+                // A deck the user already switched keeps their choice; one
+                // arriving for the first time starts where the caller says.
+                isActive = existing?.isActive ?: active
             )
         )
         return ImportResult(packId, chunks.size, skipped)

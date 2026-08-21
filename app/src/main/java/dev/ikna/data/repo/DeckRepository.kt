@@ -74,7 +74,7 @@ class DeckRepository(
             title = pack.title ?: pack.id,
             lang = pack.lang,
             total = chunkDao.chunkCountFor(pack.id),
-            introduced = chunkDao.introducedCountFor(pack.id),
+            introduced = chunkDao.introducedCountFor(pack.id, pack.installedAt),
             known = chunkDao.knownCountFor(pack.id, KNOWN_STABILITY_DAYS),
             isActive = pack.isActive
         )
@@ -122,7 +122,7 @@ class DeckRepository(
             title = pack.title ?: pack.id,
             lang = pack.lang,
             total = chunkDao.chunkCountFor(pack.id),
-            introduced = chunkDao.introducedCountFor(pack.id),
+            introduced = chunkDao.introducedCountFor(pack.id, pack.installedAt),
             known = chunkDao.knownCountFor(pack.id, KNOWN_STABILITY_DAYS),
             isActive = pack.isActive
         )
