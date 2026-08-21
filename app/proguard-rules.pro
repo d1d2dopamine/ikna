@@ -64,6 +64,13 @@
 -keep class com.github.luben.zstd.** { *; }
 -dontwarn com.github.luben.zstd.**
 
+# commons-compress can hand a zip entry to XZ or Brotli. Neither library is a
+# dependency here, so R8 warns about the classes it cannot find and fails the
+# release build. .apkg files are deflate or zstd, so the missing branches are
+# never reached.
+-dontwarn org.tukaani.xz.**
+-dontwarn org.brotli.**
+
 # ---------------------------------------------------------------------------
 # WorkManager.
 #

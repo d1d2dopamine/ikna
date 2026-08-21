@@ -6,9 +6,12 @@ is no `.apkg` writer, for the reasons at the end.
 ## The path through the code
 
 ```
-AnkiImportScreen  → pick a file (SAF), pick the language it teaches
+AnkiImportScreen  → pick a file (SAF); nothing else is asked
 AnkiImportManager → owns the run, holds the report
 AnkiImporter      → copy → unzip → open → read → map → commit
+AnkiCollection    → which schema the collection is in, and its notetypes
+AnkiProto         → the protobuf blobs a modern schema keeps notetypes in
+DeckLanguage      → what language each deck turned out to be in
 AnkiText          → card HTML → plain text
 RestoreRepository → replay the imported answers through FSRS-6
 ```
@@ -33,9 +36,47 @@ that says to update Anki and import again. Reading members in the order above is
 therefore not a preference but a correctness requirement: taking the last one
 would import that warning as a flashcard.
 
-Inside, the bridge expects the classic schema — a `col` row carrying `crt`, `scm`
-and JSON `models` / `decks`, plus `notes`, `cards` and `revlog`. Fields inside a
+Two collection shapes are read, and which one this is gets settled before the
+first write.
+
+- **Classic.** Everything is in `col`: `crt`, `scm` and JSON `models` / `decks`.
+- **Schema 18**, what a current Anki writes. Those two columns are left empty and
+  the same information lives in `notetypes`, `fields`, `templates` and `decks`,
+  with the parts that are not columns encoded as protobuf blobs. Deck names nest
+  with `U+001F` there, which is turned back into `::`.
+
+`AnkiCollection` tries the JSON first, then the tables, and refuses with
+`UNSUPPORTED_COLLECTION` when neither yields a notetype. `AnkiProto` reads exactly
+two things out of the blobs: whether a notetype is cloze (`NotetypeConfig.kind`,
+field 1) and the two sides of a template (`CardTemplateConfig.q_format` and
+`a_format`, fields 1 and 2). It is not a protobuf library: it walks tag/value
+pairs, skips what it was not asked for, and returns null on anything that does not
+add up, which every caller already had to handle for a missing notetype.
+
+`notes`, `cards` and `revlog` are the same in both shapes, and fields inside a
 note are separated by `U+001F`.
+
+## Which language a deck is in
+
+Nothing is asked at import. `DeckLanguage` decides per deck, in this order:
+
+1. A language named in the deck title wins, exam names included (JLPT, HSK,
+   IELTS, TestDaF). Somebody typed that name on purpose.
+2. Otherwise the cards decide: a non-Latin script answers by itself, and Latin
+   script is settled by accented letters and by the short function words a
+   language cannot write around.
+3. Cards and meanings in the same language, and that language is the one the app
+   is read in, means a subject rather than a language — `NO_LANG`, which keeps a
+   voice from reading definitions aloud and keeps the ladder from demanding a
+   definition back word for word.
+4. Cards nothing can name, with meanings in the reader's own language, are a
+   language deck with no name yet: `und`.
+5. When nothing can be told apart, `NO_LANG`. It is the smaller mistake: it
+   withholds one step of the ladder, while a wrong language puts a voice and the
+   wrong alphabet behind every card in the deck.
+
+The report lists what each deck was decided to be, and the deck's own page has
+the language chips, so a wrong guess is one tap where the deck already is.
 
 Supported templates: Basic, reversed, cloze, and ordinary custom text. Card HTML
 is converted to text by `AnkiText`: tags are dropped, entities decoded, `<br>` and
@@ -55,6 +96,9 @@ anything is written.
   to train, so it is skipped and reported as skipped.
 - **Unsupported collection schemas** are refused *before the first write*, with
   `UNSUPPORTED_COLLECTION` rather than a generic failure.
+- **A package that yielded nothing but Anki's own “please update” card** is
+  refused with `PLACEHOLDER_COLLECTION`. Preferring `collection.anki21b` by name
+  already avoids the decoy; this is the second line of defence.
 - **Ceilings**, all deliberate: 300 MiB package, 512 MiB extracted collection,
   20,000 ZIP entries, 50,000 active cards, 100,000 newest review rows, 120,000 ms
   per recorded answer. A single answer longer than two minutes is a phone left on

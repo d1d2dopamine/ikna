@@ -69,7 +69,9 @@ the release page cannot drift apart.
 - `versionName`: `0.9.0 press`
 - `versionCode`: `200090000`
 - release tag: `v0.9.0-press`
-- database schema: 3 (unchanged)
+- database schema: 4 (the governor log gains derived columns; the review log is
+  not touched)
 - scheduler: FSRS-6 / scheduler version 6 (unchanged)
 - clean-install palette: Ink
-- flagship feature: local Anki `.apkg` bridge
+- flagship feature: local Anki `.apkg` bridge — any export reads, and each deck's
+  language is worked out rather than asked for

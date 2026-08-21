@@ -247,11 +247,14 @@ Format, refusals, the deck screen and the offline generator:
 ## 🔀 Moving from Anki
 
 1. **+** → **Add a deck** → **Move from Anki**.
-2. Pick an `.apkg` file and the language it teaches.
+2. Pick an `.apkg` file.
 3. Read the report, then import.
 
 Cards arrive grouped by the decks they were already in, and your answer history
 comes with them, so the schedule carries on instead of starting from zero.
+
+Any `.apkg` works, old or new. The language of each deck is read from its cards,
+and if that comes out wrong, the deck's own page changes it.
 
 Text cards move over. Pictures and sounds do not: where one was, the card shows
 `[image]` or `[audio]`, and a card that was nothing but a picture is listed as
@@ -593,11 +596,14 @@ get used to | It takes a while to get used to the noise. | привыкать
 ## 🔀 Переезд из Anki
 
 1. **+** → **Добавить колоду** → **Переехать из Anki**.
-2. Выбери файл `.apkg` и язык, которому он учит.
+2. Выбери файл `.apkg`.
 3. Прочитай отчёт и импортируй.
 
 Карточки приезжают теми же колодами, в которых уже лежали, и вместе с ними
 переезжает история ответов — расписание продолжается, а не начинается с нуля.
+
+Подойдёт любой `.apkg` — из старой или новой Anki. Язык каждой колоды
+берётся из её карточек, а если определился неверно — меняется на странице колоды.
 
 Переезжают текстовые карточки. Картинки и звук — нет: на их месте в карточке
 будет `[image]` или `[audio]`, а карточка, в которой кроме картинки ничего не было,

@@ -12,15 +12,83 @@ replace the space with a dash: `0.1.1 press` is tagged `v0.1.1-press`. What the
 words mean and what a number promises inside an epoch is written down once, in
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
-## Unreleased
+## 0.9.0 press
 
-Not built, not signed, not released. Every item below is source only: this batch
-was written without an Android toolchain to hand, so nothing here has been
-compiled and nothing has run on a phone. Treat it as a reviewable patch, not as a
-version.
+Bring your history, keep your rhythm. The Anki bridge is this release: an `.apkg`
+from any version of Anki reads, nothing is asked at import but which file, and
+Anki's own decoy card is refused instead of imported as a flashcard. Nothing here
+was compiled on the machine it was written on — the release workflow builds it and
+runs the tests from the tag.
 
 **The review log is untouched.** No row is rewritten, dropped or re-typed by
 anything below. The one migration adds columns to a derived table only.
+
+### An export from a current Anki reads
+
+- Anki 2.1.50 and later write schema 18: `col.models` and `col.decks` are left
+  empty, and notetypes, fields, templates and decks live in their own tables with
+  the parts that are not columns encoded as protobuf blobs. The bridge read the
+  JSON only, found no notetype, and reported a perfectly good file as unsupported.
+  Exporting with “Support older Anki versions” was the only way in.
+- Added `AnkiCollection`, which tries the JSON and then the tables, and
+  `AnkiProto`, which reads two things out of those blobs: whether a notetype is
+  cloze, and the two sides of a template. `AnkiProto` is not a protobuf library —
+  it walks tag/value pairs, skips what it was not asked for, and returns null on
+  anything that does not add up, which every caller already handled.
+- Deck names in the table form nest with `U+001F`; that is turned back into `::`.
+- Neither shape changes anything after the notetypes are known, so cloze
+  boundaries, the shape ladder and every refusal behave exactly as before.
+
+### Anki's “please update” card is refused, not imported
+
+- A modern export ships a decoy `collection.anki2` holding a single card that asks
+  the reader to update Anki and import again. Preferring `collection.anki21b` by
+  name already avoided it; a package that yields nothing else now fails with a
+  message that says to export again, instead of installing a deck whose only card
+  is that notice.
+
+### The language of an imported deck is worked out, not asked
+
+- The import screen asked for one language and applied it to every deck in the
+  file. A collection can hold German, Japanese and a chemistry deck at once, so
+  one answer was wrong for at least two of them.
+- `DeckLanguage` decides per deck: a language named in the deck title wins, exam
+  names included; then the script of the cards; then accented letters and the
+  short function words a language cannot write around. Cards and meanings in the
+  same language, when that is the language the app is read in, is a subject deck
+  rather than a language deck.
+- When nothing can be told apart the deck gets no language, which withholds one
+  step of the ladder. A wrong language would put a voice and the wrong alphabet
+  behind every card in the deck, so the blank is the smaller mistake.
+- The report lists what each deck was decided to be, and the deck's own page still
+  has the language chips, so correcting a guess is one tap where the deck already
+  is.
+- The import screen has nothing left to answer but which file.
+
+### Fewer words on the way in
+
+- Twelve explanations across the catalogue, statistics, settings, onboarding and
+  the deck screens said in three sentences what one says. Cut to one, in all six
+  languages.
+- Two of them had also become false: both told the reader that a deck's language
+  is asked at import.
+- The explanations on the add-deck screen now sit in the same bordered panel the
+  import screen uses.
+
+### Release builds warn about nothing
+
+- commons-compress carries optional XZ and Brotli branches that ikna never calls,
+  and R8 warned about both on every release build. Two `-dontwarn` rules, each
+  with the reason next to it.
+
+### What is checked
+
+- `AnkiProtoTest`: 11 cases over the blob reader — both template sides, every wire
+  type skipped, an absent field, the wrong wire type, an over-long length, an
+  unterminated varint, a group refused.
+- `DeckLanguageTest`: 13 decks — name hints, scripts, Ukrainian told apart from
+  Russian, Polish from English, a subject deck, a translated deck, bare words,
+  digits only, an empty deck, and a regional app language.
 
 ### Search finds phrases in the middle of a sentence again
 
@@ -95,10 +163,6 @@ anything below. The one migration adds columns to a derived table only.
   `assembleRelease`, `connectedDebugAndroidTest`, and committing the generated
   `app/schemas/dev.ikna.data.db.IknaDatabase/4.json`, which carries an identity
   hash and cannot be written by hand.
-
-## 0.9.0 press
-
-Bring your history, keep your rhythm.
 
 ### Anki bridge
 
@@ -1790,14 +1854,3 @@ going to contain is in this version, so there is one release note rather than tw
 
 First working builds: FSRS-4.5 scheduling, the load governor, chunk packs, the
 append-only review log, and the weekly export.
-
-## 0.9.0 press
-
-- Added the on-device Anki Bridge for `.apkg` packages.
-- Added raw SQLite and Zstandard collection extraction with strict ZIP, file, card and history limits.
-- Added safe Basic, reverse, cloze and custom-text template rendering without WebView or JavaScript execution.
-- Added deterministic imported deck/card IDs, transactional re-import and review-log replay through the existing FSRS-6 path.
-- Added a localized compatibility report in Russian, English, Polish, Spanish, French and German.
-- Changed the clean-install palette from Ember to Ink while preserving every existing user's saved palette.
-- Rewrote return-mode copy around a finite plan for today, without debt, backlog or recovery-day language.
-- Version: `0.9.0 press` (`200090000`). Database schema remains version 3; scheduler remains version 6.

@@ -94,7 +94,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Пока таких нет: ничего не забывалось по четыре раза и больше.
 	"stats.030" to "None so far: nothing has been forgotten four times or more.",
 	// Справа — сколько раз фраза забывалась. Это про фразу, а не про тебя: обычно она слишком дл
-	"stats.031" to "On the right is how many times the phrase was forgotten. This is about the phrase, not about you: usually it is too long or the translation in it is off. Nothing needs doing — these come round less often than the rest.",
+	"stats.031" to "On the right: how often the phrase was forgotten. That is about the phrase, not about you.",
 	// СЕГОДНЯ
 	"stats.032" to "TODAY",
 	// Не удалось открыть файл
@@ -146,7 +146,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Озвучка
 	"set.026" to "Speech",
 	// Говорит движок синтеза речи, который уже стоит на телефоне. Ничего не скачивается и ничего
-	"set.027" to "The speech engine already installed on the phone does the talking. Nothing is downloaded and nothing goes to the network: voices that need the internet do not get into the list at all.",
+	"set.027" to "The engine already on the phone speaks. Nothing is downloaded, nothing goes to the network.",
 	// Читать вслух
 	"set.028" to "Read aloud",
 	// Значок звука появляется только там, где он не выдаёт ответ
@@ -170,11 +170,11 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// ПО УМОЛЧАНИЮ
 	"set.038" to "DEFAULT",
 	// Первый звук после запуска может задуматься на пару секунд — движок просыпается. Следующая 
-	"set.039" to "The first sound after launch may think for a couple of seconds — the engine is waking up. The next card is voiced in advance, so after that the sound comes at once.",
+	"set.039" to "The first sound after launch may take a second - the engine is waking up.",
 	// Шрифт
 	"set.040" to "Font",
 	// Свой .ttf или .otf для текста карточек и заголовков. Служебные подписи остаются моноширинн
-	"set.041" to "Your own .ttf or .otf for card text and headings. Service captions stay monospaced — the interface is read by them. The file is checked before it is applied: a broken font would bring down every screen at once, including this one.",
+	"set.041" to "Your own .ttf or .otf for card text. The file is checked before it is applied.",
 	// СЕЙЧАС · СИСТЕМНЫЙ
 	"set.042" to "NOW · SYSTEM",
 	// СЕЙЧАС · 
@@ -232,7 +232,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Стереть всё
 	"set.071" to "Erase everything",
 	// Полный сброс: карточки, сроки, статистика, журнал ответов и сами настройки. Приложение ста
-	"set.072" to "A full reset: cards, dates, statistics, the answer log and the settings themselves. The app becomes what it was right after installation and restarts. Before erasing, the log is exported to Documents/ikna — it can be restored afterwards.",
+	"set.072" to "Cards, dates, statistics, settings and the answer log all go. The log is exported to Documents/ikna first.",
 	// ТОЧНО СТЕРЕТЬ ВСЁ
 	"set.073" to "REALLY ERASE EVERYTHING",
 	// СТЕРЕТЬ ДАННЫЕ
@@ -457,7 +457,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"dp.001" to "In use",
 	"dp.002" to "Switched off",
 	"dp.003" to "Deck language",
-	"dp.004" to "Used for the voice only. A deck imported from a file starts with no language, which is why it cannot be read aloud until one is chosen.",
+	"dp.004" to "Used for the voice. An imported deck takes its language from its cards - change it here if that is wrong.",
 	"dp.005" to "no voice",
 	"dp.006" to "Send deck",
 	"dp.007" to "Delete deck",
@@ -503,7 +503,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"add.070" to "the line breaks were lost on the way in, and this line could not be put back. Press “paste from clipboard”: a keyboard cuts large pastes short",
 	"add.071" to "The text was longer than the limit and was cut. Split the deck in two.",
 	"add.072" to "If there is no ready-made deck",
-	"add.073" to "The optional way: ask a model to write a deck. It can be about anything, but what comes back has to be read by eye. For a language the catalogue is better.",
+	"add.073" to "The optional way: ask a model to write a deck. What comes back has to be read by eye.",
 	"add.074" to "THE MODEL WAY",
 	// тап в любом месте
 	"card.002" to "tap anywhere",
@@ -606,7 +606,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Пропуск — не провал
 	"onb.003" to "A skip is not a failure",
 	// Если день или неделя пропали, завала на входе не будет. Старое уйдёт в тихий пул и будет в
-	"onb.004" to "If a day or a week went missing, there will be no pile-up at the door. The old goes into a quiet pool and comes back little by little, and new chunks arrive only when there is room.",
+	"onb.004" to "A missed week leaves no pile at the door: the old comes back little by little.",
 	// Минимум — одна карточка
 	"onb.005" to "The minimum is one card",
 	// Одна карточка закрывает день целиком. Захочется больше — есть кнопка «ещё немного», и она 
@@ -622,7 +622,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	// Влево и вправо
 	"onb.011" to "Left and right",
 	// Карточку смахивают: влево — не знаю, вправо — знаю. Можно вместо этого нажать на слово внизу. Ответ отменяется сразу после него, так что ошибиться не страшно.
-	"onb.012" to "You swipe the card: left if you don't know it, right if you do. Tapping the word at the bottom does the same thing. An answer can be undone right after it, so getting one wrong costs nothing.",
+	"onb.012" to "Swipe left if you don't know the card, right if you do. An answer can be undone right after it.",
 	// ОТЛИЧНОЕ
 	"speaker.001" to "EXCELLENT",
 	// ХОРОШЕЕ
@@ -715,7 +715,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"voice.033" to "the model reads it",
 	"voice.034" to "the phone's voice reads it",
 	"voice.035" to "nobody: the model does not know this language and the phone has no voice for it",
-	"voice.036" to "A model speaks one language. A deck's language is asked at import and can be changed in the deck.",
+	"voice.036" to "A model speaks one language. A deck's language comes from its cards and can be changed on the deck.",
 	"voice.037" to "NO LANGUAGE",
 	"voice.038" to "switched off",
 	"voice.039" to "Voice number",
@@ -774,7 +774,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"upd.025" to "IN THE BROWSER",
 
 	"cat.001" to "Deck catalogue",
-	"cat.002" to "Decks nobody here wrote: the sentence and what it means come from Tatoeba, and Wiktionary is used only while a deck is built, to tell the forms of one word apart. The cutting happens once, on the build server, and the phone downloads a finished file. The licence and the credit are shown before the download and stay inside the cards.",
+	"cat.002" to "The sentences come from Tatoeba, the word forms from Wiktionary. The licence and the credit are shown before the download.",
 	"cat.003" to "LOADING THE LIST…",
 	"cat.004" to "The list did not arrive — no network, or the catalogue page is unreachable. Nothing broke: the deck in the app and building a deck with a model are where they were.",
 	"cat.005" to "CATALOGUE PAGE",
@@ -837,7 +837,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 	"mig.004" to "Nothing was deleted: the decks and history are still here. The replay can be retried safely.",
 	"mig.005" to "RETRY",
 	"diag.001" to "Diagnostics",
-	"diag.002" to "A technical summary only: no deck names, card text, review history or identifiers. Nothing is sent; the report stays on the phone until you copy it yourself.",
+	"diag.002" to "A technical summary only: no deck names, card text or history. Nothing is sent.",
 	"diag.003" to "SHOW DIAGNOSTICS",
 	"diag.004" to "HIDE DIAGNOSTICS",
 	"diag.005" to "GATHERING…",
@@ -847,8 +847,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
 
     "anki.001" to "From Anki",
     "anki.002" to "Choose an .apkg file. Everything stays on this phone.",
-    "anki.003" to "When exporting from Anki, tick “Support older Anki versions”.",
-    "anki.004" to "Language of imported cards",
+    "anki.003" to "Any .apkg from Anki works, old or new.",
     "anki.005" to "CHOOSE .APKG",
     "anki.006" to "READING THE FILE…",
     "anki.007" to "You can leave this screen; the import continues.",
@@ -864,7 +863,7 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
     "anki.017" to "IMPORT ANOTHER",
     "anki.018" to "This .apkg could not be read.",
     "anki.019" to "The package does not contain an Anki collection.",
-    "anki.020" to "This collection format is not supported yet. Export again with “Support older Anki versions” enabled.",
+    "anki.020" to "This collection cannot be read. No data changed.",
     "anki.021" to "The file is damaged, or its format cannot be read yet.",
     "anki.022" to "The package is over the safe 300 MB limit. No data changed.",
     "anki.023" to "The package contains no readable text cards. No data changed.",
@@ -875,4 +874,8 @@ internal val STRINGS_EN: Map<String, String> = mapOf(
     "anki.028" to "The schedule is built again here; Anki’s intervals are not carried over.",
     "anki.029" to "The source Anki file is left untouched.",
     "anki.030" to "Recovered from fields: ",
+    "anki.031" to "This file only holds Anki's “please update” card. Export it again from Anki.",
+    "anki.032" to "Languages: ",
+    "anki.033" to "subject",
+    "anki.034" to "not named",
 )

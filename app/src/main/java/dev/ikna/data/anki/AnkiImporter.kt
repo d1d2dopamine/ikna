@@ -20,11 +20,6 @@ import java.util.UUID
 import java.util.zip.ZipFile
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.intOrNull
-import kotlinx.serialization.json.jsonPrimitive
 
 /** A finite, user-readable account of what crossed the bridge. */
 data class AnkiImportResult(
@@ -38,7 +33,9 @@ data class AnkiImportResult(
     val mediaCards: Int,
     val fallbackCards: Int,
     val historyWasLimited: Boolean,
-    val collectionKind: String
+    val collectionKind: String,
+    /** What each deck was decided to be in, in the order the decks arrived. */
+    val languages: List<String>
 )
 
 enum class AnkiImportError {
@@ -48,6 +45,7 @@ enum class AnkiImportError {
     UNSUPPORTED_COLLECTION,
     UNREADABLE_DATABASE,
     NO_USABLE_CARDS,
+    PLACEHOLDER_COLLECTION,
     FAILED
 }
 
@@ -74,14 +72,14 @@ class AnkiImporter(
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 
-    suspend fun importPackage(uri: Uri, lang: String): AnkiImportResult {
+    suspend fun importPackage(uri: Uri, appLanguage: String): AnkiImportResult {
         val work = File(context.cacheDir, "anki-import-" + UUID.randomUUID())
         if (!work.mkdirs()) throw AnkiImportException(AnkiImportError.FAILED)
         return try {
             val packageFile = File(work, "package.apkg")
             copyUri(uri, packageFile)
             val collection = extractCollection(packageFile, work)
-            val parsed = readCollection(collection.file, collection.kind, lang)
+            val parsed = readCollection(collection.file, collection.kind, appLanguage)
             commit(parsed)
         } catch (known: AnkiImportException) {
             throw known
@@ -102,7 +100,7 @@ class AnkiImporter(
             installed += packs.importChunks(
                 packId = deck.packId,
                 title = deck.title,
-                lang = parsed.lang,
+                lang = deck.lang,
                 source = deck.cards
             ).installed
         }
@@ -135,7 +133,8 @@ class AnkiImporter(
             mediaCards = parsed.mediaCards,
             fallbackCards = parsed.fallbackCards,
             historyWasLimited = parsed.historyWasLimited,
-            collectionKind = parsed.kind
+            collectionKind = parsed.kind,
+            languages = parsed.decks.map { it.lang }
         )
     }
 
@@ -193,7 +192,7 @@ class AnkiImporter(
         }
     }
 
-    private fun readCollection(file: File, kind: String, lang: String): ParsedPackage {
+    private fun readCollection(file: File, kind: String, appLanguage: String): ParsedPackage {
         val source = try {
             SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READONLY)
         } catch (problem: Throwable) {
@@ -201,15 +200,23 @@ class AnkiImporter(
         }
         return try {
             val meta = readMeta(source)
-            val models = parseModels(meta.models)
-            val deckNames = parseDecks(meta.decks)
-            val cards = readCards(source, meta.collectionKey, models, deckNames)
+            // Which shape this collection is in is settled here, before anything
+            // is written: the old JSON columns, or the tables a current Anki
+            // writes instead. A shape this cannot read is refused as
+            // unsupported rather than reported as a damaged file.
+            val shape = AnkiCollection.read(source, json, meta.models, meta.decks)
+            val cards = readCards(
+                database = source,
+                collectionKey = meta.collectionKey,
+                models = shape.models,
+                deckNames = shape.deckNames,
+                appLanguage = appLanguage
+            )
             if (cards.decks.isEmpty()) {
                 throw AnkiImportException(AnkiImportError.NO_USABLE_CARDS)
             }
             val reviews = readReviews(source, cards.chunkByCardId)
             ParsedPackage(
-                lang = lang,
                 kind = kind,
                 decks = cards.decks,
                 reviews = reviews.records,
@@ -252,7 +259,8 @@ class AnkiImporter(
         database: SQLiteDatabase,
         collectionKey: Long,
         models: Map<Long, Model>,
-        deckNames: Map<Long, String>
+        deckNames: Map<Long, String>,
+        appLanguage: String
     ): CardRead {
         val suspended = scalarLong(database, "SELECT COUNT(*) FROM cards WHERE queue < 0").toInt()
         val activeTotal = scalarLong(database, "SELECT COUNT(*) FROM cards WHERE queue >= 0").toInt()
@@ -261,6 +269,7 @@ class AnkiImporter(
         var skipped = (activeTotal - MAX_CARDS).coerceAtLeast(0)
         var mediaCards = 0
         var fallbackCards = 0
+        var placeholders = 0
         var rank = 0
 
         val sql = """
@@ -395,13 +404,31 @@ class AnkiImporter(
                 }
                 grouped.getOrPut(deckId) { ArrayList() } += chunk
                 chunkByCard[cardId] = chunkId
+                if (isPlaceholder(chunk.text) || isPlaceholder(chunk.translation)) placeholders++
             }
         }
 
+        // An .apkg exported in the current format for an older reader carries a
+        // decoy collection: one card asking the reader to update. Importing it
+        // would leave a deck holding one sentence about Anki.
+        if (chunkByCard.isNotEmpty() && placeholders == chunkByCard.size) {
+            throw AnkiImportException(AnkiImportError.PLACEHOLDER_COLLECTION)
+        }
+
         val decks = grouped.map { (deckId, chunks) ->
+            val title = deckNames[deckId].orEmpty().ifBlank { "Anki deck $deckId" }
             ImportedDeck(
                 packId = stablePackId(collectionKey, deckId),
-                title = deckNames[deckId].orEmpty().ifBlank { "Anki deck $deckId" },
+                title = title,
+                // Asked of the deck rather than of the person importing it. The
+                // cards say what they are in, and every deck in one package can
+                // say something different, which one question could not answer.
+                lang = DeckLanguage.of(
+                    deckName = title,
+                    samples = chunks.take(DeckLanguage.MAX_SAMPLES)
+                        .map { LanguageSample(it.context, it.translation) },
+                    appLanguage = appLanguage
+                ),
                 cards = chunks
             )
         }
@@ -525,40 +552,18 @@ class AnkiImporter(
     private fun substantive(value: String): Boolean =
         AnkiText.usable(value.replace("[image]", "").replace("[audio]", ""))
 
-    private fun parseModels(raw: String): Map<Long, Model> {
-        val root = json.parseToJsonElement(raw) as? JsonObject
-            ?: throw AnkiImportException(AnkiImportError.UNSUPPORTED_COLLECTION)
-        return root.mapNotNull model@ { (id, element) ->
-            val body = element as? JsonObject ?: return@model null
-            val fields = (body["flds"] as? JsonArray)?.mapNotNull field@ { field ->
-                (field as? JsonObject)?.get("name")?.jsonPrimitive?.contentOrNull
-            }.orEmpty()
-            val templates = (body["tmpls"] as? JsonArray)?.mapNotNull template@ { item ->
-                val template = item as? JsonObject ?: return@template null
-                Template(
-                    ordinal = template["ord"]?.jsonPrimitive?.intOrNull ?: 0,
-                    question = template["qfmt"]?.jsonPrimitive?.contentOrNull.orEmpty(),
-                    answer = template["afmt"]?.jsonPrimitive?.contentOrNull.orEmpty()
-                )
-            }.orEmpty()
-            id.toLongOrNull()?.let { key ->
-                key to Model(
-                    fields = fields,
-                    templates = templates,
-                    cloze = body["type"]?.jsonPrimitive?.intOrNull == 1
-                )
-            }
-        }.toMap()
-    }
-
-    private fun parseDecks(raw: String): Map<Long, String> {
-        val root = json.parseToJsonElement(raw) as? JsonObject
-            ?: throw AnkiImportException(AnkiImportError.UNSUPPORTED_COLLECTION)
-        return root.mapNotNull { (id, element) ->
-            val body = element as? JsonObject ?: return@mapNotNull null
-            val name = body["name"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
-            id.toLongOrNull()?.let { it to name }
-        }.toMap()
+    /**
+     * The card Anki leaves behind for readers that cannot open its own format.
+     *
+     * Such a package holds two collections: the real one, and a decoy whose
+     * single card reads "Please update to the latest Anki version, then import
+     * the .colpkg/.apkg file again." The real one is preferred by name, so this
+     * is the second line of defence: if everything a package yielded is that
+     * sentence, the file is refused and says why.
+     */
+    private fun isPlaceholder(value: String): Boolean {
+        val text = value.lowercase()
+        return text.contains("latest anki version") || text.contains(".colpkg")
     }
 
     private fun scalarLong(database: SQLiteDatabase, query: String): Long =
@@ -614,9 +619,12 @@ class AnkiImporter(
 
 private data class ExtractedCollection(val file: File, val kind: String)
 private data class CollectionMeta(val collectionKey: Long, val models: String, val decks: String)
-private data class Template(val ordinal: Int, val question: String, val answer: String)
-private data class Model(val fields: List<String>, val templates: List<Template>, val cloze: Boolean)
-private data class ImportedDeck(val packId: String, val title: String, val cards: List<PackChunk>)
+private data class ImportedDeck(
+    val packId: String,
+    val title: String,
+    val lang: String,
+    val cards: List<PackChunk>
+)
 private data class ReviewRow(val id: Long, val cardId: Long, val rating: Int, val durationMs: Long)
 private data class CardRead(
     val decks: List<ImportedDeck>,
@@ -628,7 +636,6 @@ private data class CardRead(
 )
 private data class ReviewRead(val records: List<ReviewRecord>, val skipped: Int, val limited: Boolean)
 private data class ParsedPackage(
-    val lang: String,
     val kind: String,
     val decks: List<ImportedDeck>,
     val reviews: List<ReviewRecord>,

@@ -94,7 +94,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// Пока таких нет: ничего не забывалось по четыре раза и больше.
 	"stats.030" to "Na razie takich nie ma: nic nie zostało zapomniane cztery razy ani więcej.",
 	// Справа — сколько раз фраза забывалась. Это про фразу, а не про тебя: обычно она слишком дл
-	"stats.031" to "Po prawej — ile razy zwrot został zapomniany. To o zwrocie, nie o tobie: zwykle jest za długi albo tłumaczenie w nim jest nie to. Nic nie trzeba robić — takie wracają rzadziej niż reszta.",
+	"stats.031" to "Po prawej: ile razy zapomniano tę frazę. To o frazie, nie o tobie.",
 	// СЕГОДНЯ
 	"stats.032" to "DZIŚ",
 	// Не удалось открыть файл
@@ -146,7 +146,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// Озвучка
 	"set.026" to "Mowa",
 	// Говорит движок синтеза речи, который уже стоит на телефоне. Ничего не скачивается и ничего
-	"set.027" to "Mówi silnik syntezy mowy, który już jest w telefonie. Nic się nie pobiera i nic nie idzie do sieci: głosy, które potrzebują internetu, w ogóle nie trafiają na listę.",
+	"set.027" to "Mówi silnik już zainstalowany w telefonie. Nic się nie pobiera i nic nie idzie do sieci.",
 	// Читать вслух
 	"set.028" to "Czytaj na głos",
 	// Значок звука появляется только там, где он не выдаёт ответ
@@ -170,11 +170,11 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// ПО УМОЛЧАНИЮ
 	"set.038" to "DOMYŚLNY",
 	// Первый звук после запуска может задуматься на пару секунд — движок просыпается. Следующая 
-	"set.039" to "Pierwszy dźwięk po starcie może się zastanawiać kilka sekund — silnik się budzi. Następna karta jest przygotowywana z wyprzedzeniem, więc dalej dźwięk idzie od razu.",
+	"set.039" to "Pierwszy dźwięk po starcie może chwilę pomyśleć — silnik się budzi.",
 	// Шрифт
 	"set.040" to "Czcionka",
 	// Свой .ttf или .otf для текста карточек и заголовков. Служебные подписи остаются моноширинн
-	"set.041" to "Własny .ttf albo .otf dla tekstu kart i nagłówków. Podpisy służbowe zostają monospace — po nich czyta się interfejs. Plik jest sprawdzany przed zastosowaniem: zepsuta czcionka położyłaby wszystkie ekrany naraz, ten też.",
+	"set.041" to "Własny plik .ttf lub .otf do tekstu fiszek. Plik jest sprawdzany przed użyciem.",
 	// СЕЙЧАС · СИСТЕМНЫЙ
 	"set.042" to "TERAZ · SYSTEMOWA",
 	// СЕЙЧАС · 
@@ -232,7 +232,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// Стереть всё
 	"set.071" to "Wymaż wszystko",
 	// Полный сброс: карточки, сроки, статистика, журнал ответов и сами настройки. Приложение ста
-	"set.072" to "Pełny reset: karty, terminy, statystyka, dziennik odpowiedzi i same ustawienia. Aplikacja stanie się taka jak zaraz po instalacji i uruchomi się ponownie. Przed wymazaniem dziennik trafia do Dokumenty/ikna — potem można go przywrócić.",
+	"set.072" to "Fiszki, daty, statystyki, ustawienia i dziennik odpowiedzi znikają. Dziennik jest najpierw zapisany w Documents/ikna.",
 	// ТОЧНО СТЕРЕТЬ ВСЁ
 	"set.073" to "NA PEWNO WYMAŻ WSZYSTKO",
 	// СТЕРЕТЬ ДАННЫЕ
@@ -457,7 +457,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"dp.001" to "W użyciu",
 	"dp.002" to "Wyłączona",
 	"dp.003" to "Język talii",
-	"dp.004" to "Potrzebny tylko do lektora. Talia z pliku zaczyna bez języka, więc nie da się jej przeczytać na głos, dopóki go nie wybierzesz.",
+	"dp.004" to "Potrzebny do lektora. Zaimportowana talia bierze język z fiszek — tutaj można go poprawić.",
 	"dp.005" to "bez lektora",
 	"dp.006" to "Wyślij talię",
 	"dp.007" to "Usuń talię",
@@ -503,7 +503,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"add.070" to "podziały wierszy zginęły po drodze i tego wiersza nie udało się rozłożyć. Naciśnij „wklej ze schowka”: klawiatura ucina duże wklejenia",
 	"add.071" to "Tekst był dłuższy niż limit i został ucięty. Podziel talię na dwie części.",
 	"add.072" to "Jeśli nie ma gotowej talii",
-	"add.073" to "Droga opcjonalna: poprosić model, żeby napisał talię. Może być o czymkolwiek, ale to, co wróci, trzeba przeczytać własnymi oczami. Dla języka katalog jest lepszy.",
+	"add.073" to "Droga opcjonalna: poproś model o talię. To, co wróci, trzeba przejrzeć okiem.",
 	"add.074" to "SPOSÓB Z MODELEM",
 	// тап в любом месте
 	"card.002" to "dotknij gdziekolwiek",
@@ -606,7 +606,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// Пропуск — не провал
 	"onb.003" to "Przerwa to nie porażka",
 	// Если день или неделя пропали, завала на входе не будет. Старое уйдёт в тихий пул и будет в
-	"onb.004" to "Jeśli dzień albo tydzień przepadł, przy wejściu nie będzie zwału. Stare trafi do cichej puli i będzie wracać po trochu, a nowe chunki przyjdą dopiero, gdy będzie miejsce.",
+	"onb.004" to "Opuszczony tydzień nie zostawi zatoru: stare wraca po trochu.",
 	// Минимум — одна карточка
 	"onb.005" to "Minimum to jedna karta",
 	// Одна карточка закрывает день целиком. Захочется больше — есть кнопка «ещё немного», и она 
@@ -622,7 +622,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	// Влево и вправо
 	"onb.011" to "W lewo i w prawo",
 	// Карточку смахивают: влево — не знаю, вправо — знаю. Можно вместо этого нажать на слово внизу. Ответ отменяется сразу после него, так что ошибиться не страшно.
-	"onb.012" to "Kartę przesuwa się: w lewo — nie wiem, w prawo — wiem. Zamiast tego można dotknąć słowa na dole. Odpowiedź da się cofnąć zaraz po niej, więc pomyłka nic nie kosztuje.",
+	"onb.012" to "W lewo — nie znam, w prawo — znam. Odpowiedź można cofnąć od razu po niej.",
 	// ОТЛИЧНОЕ
 	"speaker.001" to "ŚWIETNA",
 	// ХОРОШЕЕ
@@ -715,7 +715,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"voice.033" to "czyta model",
 	"voice.034" to "czyta głos telefonu",
 	"voice.035" to "nikt: model nie zna tego języka, a telefon nie ma dla niego głosu",
-	"voice.036" to "Model mówi jednym językiem. Język talii jest pytany przy imporcie i można go zmienić w talii.",
+	"voice.036" to "Model mówi jednym językiem. Język talii bierze się z fiszek i można go zmienić na jej stronie.",
 	"voice.037" to "BEZ JĘZYKA",
 	"voice.038" to "wyłączony",
 	"voice.039" to "Numer głosu",
@@ -774,7 +774,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"upd.025" to "W PRZEGLĄDARCE",
 
 	"cat.001" to "Katalog talii",
-	"cat.002" to "Talie, których nikt tu nie napisał: zdanie i jego znaczenie pochodzą z Tatoeby, a Wikisłownik służy tylko przy składaniu, do odróżniania form jednego słowa. Składanie odbywa się raz, na serwerze budującym, a telefon pobiera gotowy plik. Licencja i autor są pokazane przed pobraniem i zostają w kartach.",
+	"cat.002" to "Zdania pochodzą z Tatoeby, formy słów z Wikisłownika. Licencja i autorstwo są pokazane przed pobraniem.",
 	"cat.003" to "WCZYTUJĘ LISTĘ…",
 	"cat.004" to "Lista nie dotarła — nie ma sieci albo strona katalogu jest nieosiągalna. Nic się nie zepsuło: wbudowana talia i tworzenie talii z modelem są na miejscu.",
 	"cat.005" to "STRONA KATALOGU",
@@ -837,7 +837,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 	"mig.004" to "Nic nie usunięto: talie i historia są na miejscu. Przeliczenie można bezpiecznie powtórzyć.",
 	"mig.005" to "POWTÓRZ",
 	"diag.001" to "Diagnostyka",
-	"diag.002" to "Tylko podsumowanie techniczne: bez nazw talii, tekstu kart, historii odpowiedzi i identyfikatorów. Nic nie jest wysyłane; raport zostaje w telefonie, dopóki go nie skopiujesz.",
+	"diag.002" to "Tylko podsumowanie techniczne: bez nazw talii, tekstu fiszek i historii. Nic nie jest wysyłane.",
 	"diag.003" to "POKAŻ DIAGNOSTYKĘ",
 	"diag.004" to "UKRYJ DIAGNOSTYKĘ",
 	"diag.005" to "ZBIERANIE…",
@@ -847,8 +847,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
 
     "anki.001" to "Z Anki",
     "anki.002" to "Wybierz plik .apkg. Wszystko zostaje na tym telefonie.",
-    "anki.003" to "Przy eksporcie z Anki zaznacz „Support older Anki versions”.",
-    "anki.004" to "Język importowanych kart",
+    "anki.003" to "Każdy plik .apkg z Anki się nada — stary i nowy.",
     "anki.005" to "WYBIERZ .APKG",
     "anki.006" to "ODCZYT PLIKU…",
     "anki.007" to "Możesz opuścić ten ekran — import trwa dalej.",
@@ -864,7 +863,7 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
     "anki.017" to "IMPORTUJ KOLEJNY",
     "anki.018" to "Nie udało się odczytać tego .apkg.",
     "anki.019" to "Pakiet nie zawiera kolekcji Anki.",
-    "anki.020" to "Ten format kolekcji nie jest jeszcze obsługiwany. Wyeksportuj ponownie z obsługą starszych wersji Anki.",
+    "anki.020" to "Nie udało się odczytać tej kolekcji. Dane bez zmian.",
     "anki.021" to "Plik jest uszkodzony albo jego format nie jest jeszcze czytany.",
     "anki.022" to "Pakiet przekracza bezpieczny limit 300 MB. Dane nie zmieniły się.",
     "anki.023" to "Pakiet nie ma czytelnych kart tekstowych. Dane nie zmieniły się.",
@@ -875,4 +874,8 @@ internal val STRINGS_PL: Map<String, String> = mapOf(
     "anki.028" to "Harmonogram powstaje tutaj od nowa — interwały Anki nie są przenoszone.",
     "anki.029" to "Źródłowy plik Anki pozostaje bez zmian.",
     "anki.030" to "Odtworzono z pól: ",
+    "anki.031" to "W pliku jest tylko systemowa fiszka Anki z prośbą o aktualizację. Wyeksportuj go ponownie.",
+    "anki.032" to "Języki: ",
+    "anki.033" to "przedmiot",
+    "anki.034" to "nieokreślony",
 )

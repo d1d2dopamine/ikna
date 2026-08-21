@@ -29,12 +29,12 @@ class AnkiImportManager(private val importer: AnkiImporter) {
     val state: StateFlow<AnkiImportState> = _state.asStateFlow()
 
     @Synchronized
-    fun start(uri: Uri, lang: String) {
+    fun start(uri: Uri, appLanguage: String) {
         if (_state.value is AnkiImportState.Running) return
         _state.value = AnkiImportState.Running
         scope.launch {
             _state.value = try {
-                AnkiImportState.Done(importer.importPackage(uri, lang))
+                AnkiImportState.Done(importer.importPackage(uri, appLanguage))
             } catch (known: AnkiImportException) {
                 AnkiImportState.Failed(known.error)
             } catch (_: Throwable) {

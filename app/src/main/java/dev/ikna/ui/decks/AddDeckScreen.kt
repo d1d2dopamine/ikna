@@ -51,6 +51,7 @@ import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaChip
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
+import dev.ikna.ui.theme.IknaPanel
 import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaWideButton
@@ -247,10 +248,14 @@ fun AddDeckScreen(
 				.padding(horizontal = Edge)
 		) {
 			Spacer(Modifier.height(Space.md))
-			Text(
-				text = S.t("add.002"),
-				style = MaterialTheme.typography.bodyMedium
-			)
+			// The same border the import screen uses. An explanation is a panel with
+			// an edge, not a paragraph loose on the page.
+			IknaPanel {
+				Text(
+					text = S.t("add.002"),
+					style = MaterialTheme.typography.bodyMedium
+				)
+			}
 
 			Spacer(Modifier.height(Space.lg))
 			// A migration path before any card-generation path. Anki stays untouched;
@@ -313,17 +318,18 @@ fun AddDeckScreen(
 			// deck -- real sentences, a licence, a name -- and nobody should have to
 			// read four prompt questions to find that out. So the model way is folded
 			// away behind one button, for the deck the catalogue does not have.
-			Text(
-				text = S.t("add.072"),
-				style = MaterialTheme.typography.labelMedium,
-				color = muted
-			)
-			Spacer(Modifier.height(Space.sm))
-			Text(
-				text = S.t("add.073"),
-				style = MaterialTheme.typography.bodySmall,
-				color = muted
-			)
+			IknaPanel {
+				Text(
+					text = S.t("add.072"),
+					style = MaterialTheme.typography.labelMedium,
+					color = muted
+				)
+				Text(
+					text = S.t("add.073"),
+					style = MaterialTheme.typography.bodySmall,
+					color = muted
+				)
+			}
 			Spacer(Modifier.height(Space.md))
 			IknaWideButton(
 				label = if (modelWay) S.t("add.037") else S.t("add.074"),

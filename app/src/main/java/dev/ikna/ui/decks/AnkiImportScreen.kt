@@ -17,9 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +24,8 @@ import dev.ikna.AppContainer
 import dev.ikna.data.anki.AnkiImportError
 import dev.ikna.data.anki.AnkiImportResult
 import dev.ikna.data.anki.AnkiImportState
+import dev.ikna.data.anki.DeckLanguage
+import dev.ikna.data.repo.NO_LANG
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaGlyph
@@ -43,9 +42,8 @@ fun AnkiImportScreen(
     onBack: () -> Unit
 ) {
     val state by container.ankiImport.state.collectAsState()
-    var lang by remember { mutableStateOf("en") }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) container.ankiImport.start(uri, lang)
+        if (uri != null) container.ankiImport.start(uri, S.lang)
     }
     val choose: () -> Unit = {
         container.ankiImport.reset()
@@ -92,13 +90,6 @@ fun AnkiImportScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Text(
-                S.t("anki.004"),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold
-            )
-            LangChips(current = lang, onPick = { lang = it })
-
             when (val current = state) {
                 AnkiImportState.Idle -> {
                     IknaWideButton(label = S.t("anki.005"), onClick = choose, filled = true)
@@ -145,6 +136,16 @@ private fun ResultSummary(result: AnkiImportResult) {
         if (result.skippedCards > 0) Metric(S.t("anki.013"), result.skippedCards)
         if (result.mediaCards > 0) Metric(S.t("anki.014"), result.mediaCards)
         if (result.fallbackCards > 0) Metric(S.t("anki.030"), result.fallbackCards)
+        // What each deck turned out to be in, now that nobody is asked. A wrong
+        // guess is one tap to fix on the deck's own page, so it is said here
+        // instead of being discovered in the middle of a session.
+        val languages = result.languages.distinct()
+        if (languages.isNotEmpty()) {
+            Text(
+                S.t("anki.032") + languages.joinToString(", ") { languageLabel(it) },
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
         if (result.historyWasLimited) Text(S.t("anki.015"), color = MaterialTheme.colorScheme.primary)
         Text(S.t("anki.029"), style = MaterialTheme.typography.bodySmall)
     }
@@ -155,6 +156,12 @@ private fun Metric(label: String, value: Int) {
     Text(label + value, style = MaterialTheme.typography.bodyMedium)
 }
 
+private fun languageLabel(code: String): String = when (code) {
+    NO_LANG -> S.t("anki.033")
+    DeckLanguage.UNDECIDED -> S.t("anki.034")
+    else -> code.uppercase()
+}
+
 private fun errorText(error: AnkiImportError): String = when (error) {
     AnkiImportError.FILE_TOO_LARGE -> S.t("anki.022")
     AnkiImportError.NOT_APKG -> S.t("anki.018")
@@ -162,5 +169,6 @@ private fun errorText(error: AnkiImportError): String = when (error) {
     AnkiImportError.UNSUPPORTED_COLLECTION -> S.t("anki.020")
     AnkiImportError.UNREADABLE_DATABASE -> S.t("anki.021")
     AnkiImportError.NO_USABLE_CARDS -> S.t("anki.023")
+    AnkiImportError.PLACEHOLDER_COLLECTION -> S.t("anki.031")
     AnkiImportError.FAILED -> S.t("anki.018")
 }
