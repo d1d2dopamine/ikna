@@ -87,6 +87,10 @@ data class SettingsSnapshot(
     // without those decks simply carries a line nothing reads -- which is right:
     // importing the deck again gives it its square back.
     val deckLooks: String = "",
+    // Which transcription each deck shows. Named by deck id like the looks
+    // above, so a restore onto an install without those decks carries a line
+    // nothing reads -- which is right: installing the deck again gives it back.
+    val deckPhonetics: String = "",
     // The learner's own corrections. Restoring a backup without them would
     // put every card they threw away back into circulation.
     val suppressed: String = ""
@@ -124,6 +128,7 @@ object SettingsBackup {
         showWordmark = settings.showWordmark,
         leftHanded = settings.leftHanded,
         deckLooks = settings.deckLooks,
+        deckPhonetics = settings.deckPhonetics,
         suppressed = settings.suppressed
     )
 
@@ -180,6 +185,7 @@ object SettingsBackup {
         store.setShowWordmark(snapshot.showWordmark)
         store.setLeftHanded(snapshot.leftHanded)
         store.setDeckLooks(snapshot.deckLooks)
+        store.setDeckPhonetics(snapshot.deckPhonetics)
         store.setSuppressed(snapshot.suppressed)
     }
 }

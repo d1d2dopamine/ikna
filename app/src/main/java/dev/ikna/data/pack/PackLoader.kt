@@ -214,7 +214,13 @@ class PackLoader(
             targetStart = c.targetStart,
             targetEnd = c.targetEnd,
             freqRank = c.freqRank,
-            audioRef = c.audioRef
+            audioRef = c.audioRef,
+            // Carried through untouched, including when it is absent. Nothing
+            // here validates the IPA: a deck is content, the renderer already
+            // survives anything, and a strict importer would reject a whole
+            // deck over one odd symbol.
+            ipa = c.ipa,
+            ipaContext = c.ipaContext
         )
         // A span covering the text end to end singles nothing out: an
         // imported card is its own context. Marking every word as the target

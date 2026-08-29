@@ -295,6 +295,15 @@ fun ChunkCard(
     promptTarget: IntRange? = null,
     /** The same, for the sentence shown as the answer of a production card. */
     answerTarget: IntRange? = null,
+    /**
+     * How the prompt sounds, already rendered into whatever notation the deck
+     * is set to. Null draws nothing and reserves no height, which is not the
+     * same as an empty string: a blank line under a phrase reads as a layout
+     * fault, and most decks in the world have no transcription at all.
+     */
+    promptTranscription: String? = null,
+    /** The same under the answer. */
+    answerTranscription: String? = null,
     hint: String?,
     /** Public source shown only after the answer is visible. */
     sourceLabel: String? = null,
@@ -352,6 +361,19 @@ fun ChunkCard(
                 color = MaterialTheme.colorScheme.onBackground
             )
 
+            // Pronunciation sits directly under the words it belongs to, in the
+            // muted colour and at body size. Deliberately not styled like the
+            // phrase: it is a note about the line above, and a second line in
+            // the same weight would read as a second thing to learn.
+            if (!promptTranscription.isNullOrBlank()) {
+                Spacer(Modifier.height(Space.sm))
+                Text(
+                    text = promptTranscription,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
             if (revealed) {
                 Spacer(Modifier.height(Space.lg))
                 Box(
@@ -366,6 +388,14 @@ fun ChunkCard(
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onBackground
                 )
+                if (!answerTranscription.isNullOrBlank()) {
+                    Spacer(Modifier.height(Space.sm))
+                    Text(
+                        text = answerTranscription,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 if (!hint.isNullOrBlank()) {
                     Spacer(Modifier.height(Space.md))
                     Text(

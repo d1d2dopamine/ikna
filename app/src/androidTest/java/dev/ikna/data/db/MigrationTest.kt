@@ -91,6 +91,40 @@ private val V3_DDL = V2_DDL.map { ddl ->
     }
 }
 
+// Version 4 is version 3 plus the nine signals the governor was throwing
+// away and the full-text index over chunks. Both are expressed as the
+// statements that produce them rather than as another copy of the tables,
+// because that is literally how a phone reached version 4 -- and a copy
+// would be a second description of the same schema, free to drift.
+private val V4_DDL = V3_DDL + listOf(
+    "ALTER TABLE governor_log ADD COLUMN activityRatio REAL NOT NULL DEFAULT 0",
+    "ALTER TABLE governor_log ADD COLUMN daysSinceStart INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE governor_log ADD COLUMN cleanDays INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE governor_log ADD COLUMN newIntroducedLastWeek INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE governor_log ADD COLUMN totalReviews INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE governor_log ADD COLUMN overheated INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE governor_log ADD COLUMN newCeiling INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE governor_log ADD COLUMN daysSinceReturn INTEGER",
+    "ALTER TABLE governor_log ADD COLUMN gate TEXT",
+    "CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts4(" +
+        "text, contextSentence, translation, " +
+        "tokenize=unicode61, content=chunks)",
+    "CREATE TRIGGER IF NOT EXISTS chunks_fts_before_update " +
+        "BEFORE UPDATE ON chunks BEGIN " +
+        "DELETE FROM chunks_fts WHERE docid = OLD.rowid; END",
+    "CREATE TRIGGER IF NOT EXISTS chunks_fts_before_delete " +
+        "BEFORE DELETE ON chunks BEGIN " +
+        "DELETE FROM chunks_fts WHERE docid = OLD.rowid; END",
+    "CREATE TRIGGER IF NOT EXISTS chunks_fts_after_update " +
+        "AFTER UPDATE ON chunks BEGIN " +
+        "INSERT INTO chunks_fts(docid, text, contextSentence, translation) " +
+        "VALUES (NEW.rowid, NEW.text, NEW.contextSentence, NEW.translation); END",
+    "CREATE TRIGGER IF NOT EXISTS chunks_fts_after_insert " +
+        "AFTER INSERT ON chunks BEGIN " +
+        "INSERT INTO chunks_fts(docid, text, contextSentence, translation) " +
+        "VALUES (NEW.rowid, NEW.text, NEW.contextSentence, NEW.translation); END"
+)
+
 private const val DB_NAME = "ikna-migration-test.db"
 
 /**
@@ -325,9 +359,62 @@ class MigrationTest {
     }
 
     @Test
+    fun `an upgrade from version 4 gains the transcription columns`() {
+        createOldDatabase(4, V4_DDL) { db ->
+            db.execSQL(
+                "INSERT INTO chunks (id, packId, lang, text, contextSentence, " +
+                    "translation, targetStart, targetEnd, freqRank) VALUES " +
+                    "('chunk-4', 'pl-ru-core', 'pl', 'dzi\u0119kuj\u0119', " +
+                    "'Bardzo dzi\u0119kuj\u0119 za pomoc.', " +
+                    "'\u0441\u043f\u0430\u0441\u0438\u0431\u043e', 7, 16, 40)"
+            )
+        }
+
+        withMigratedDatabase { db ->
+            // The chunk is still there. A deck installed before this release
+            // is not reinstalled, re-parsed or rewritten by the upgrade.
+            assertEquals(1, count(db, "SELECT COUNT(*) FROM chunks"))
+            assertEquals(
+                1,
+                count(
+                    db,
+                    "SELECT COUNT(*) FROM chunks WHERE id = 'chunk-4' " +
+                        "AND text = 'dzi\u0119kuj\u0119'"
+                )
+            )
+
+            // And it has no transcription, which is the correct answer
+            // rather than a gap to be filled in: nothing on the phone knows
+            // how to produce one, and inventing it here would be worse than
+            // leaving the line off the card.
+            assertEquals(
+                1,
+                count(
+                    db,
+                    "SELECT COUNT(*) FROM chunks " +
+                        "WHERE ipa IS NULL AND ipaContext IS NULL"
+                )
+            )
+
+            // The search index still answers, which is the thing most
+            // likely to have been broken by adding columns to the table it
+            // shadows. It is left alone on purpose: its triggers name the
+            // three columns they copy, and ALTER TABLE ADD COLUMN fires no
+            // row triggers, so there is nothing to rebuild.
+            assertEquals(
+                1,
+                count(
+                    db,
+                    "SELECT COUNT(*) FROM chunks_fts WHERE chunks_fts MATCH 'pomoc'"
+                )
+            )
+        }
+    }
+
+    @Test
     fun `a fresh install opens at the current version`() {
         withMigratedDatabase { db ->
-            assertEquals(4, count(db, "PRAGMA user_version"))
+            assertEquals(5, count(db, "PRAGMA user_version"))
             assertTrue(
                 "correctCount is missing from a freshly created database.",
                 count(db, "SELECT COUNT(*) FROM daily_stats") == 0

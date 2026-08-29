@@ -26,7 +26,7 @@ import java.io.File
  * on disk agrees with the migration that is supposed to produce it, and that
  * every version step has a migration at all.
  */
-private const val DB_VERSION = 4
+private const val DB_VERSION = 5
 
 private const val SCHEMA_DIR = "schemas/dev.ikna.data.db.IknaDatabase"
 
@@ -63,7 +63,7 @@ class SchemaTest {
 	}
 
 	@Test
-	fun `the columns the newest migration adds are in the schema it produces`() {
+	fun `the columns the governor migration adds are in the schema it produces`() {
 		// Skips until a build has written 4.json. That file carries an identity
 		// hash computed by Room from the entities, so it cannot be written by
 		// hand -- and a hand-made one would be worse than none, because the
@@ -82,6 +82,41 @@ class SchemaTest {
 				text.contains(column)
 			)
 		}
+	}
+
+	@Test
+	fun `the columns the newest migration adds are in the schema it produces`() {
+		// Skips until a build has written 5.json, for the same reason as above:
+		// Room computes an identity hash into it from the entities, so the file
+		// appears when the project is built and must not be typed out by hand.
+		val text = schema(5)?.readText() ?: return
+		for (column in listOf("ipa", "ipaContext")) {
+			assertTrue(
+				"$column is missing from the version 5 schema, but MIGRATION_4_5 " +
+					"adds it. One of the two is wrong, and the migration is the one " +
+					"that runs on other people's phones.",
+				text.contains(column)
+			)
+		}
+	}
+
+	@Test
+	fun `the transcription columns are nullable`() {
+		// The whole reason an upgrade is free: nothing is rewritten and nothing
+		// is recomputed, because a chunk installed before this release is
+		// allowed to have no transcription at all. A NOT NULL here would mean
+		// inventing a value for every row already on every phone.
+		val src = source("src/main/java/dev/ikna/data/db/Entities.kt")
+		assertNotNull("Entities.kt was not found from the test's directory.", src)
+		val text = src!!.readText()
+		assertTrue(
+			"ChunkEntity.ipa is not a nullable column with a default.",
+			text.contains("val ipa: String? = null")
+		)
+		assertTrue(
+			"ChunkEntity.ipaContext is not a nullable column with a default.",
+			text.contains("val ipaContext: String? = null")
+		)
 	}
 
 	@Test

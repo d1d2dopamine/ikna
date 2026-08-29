@@ -27,6 +27,10 @@ on:
         description: "Also build decks from the public-domain subset only"
         type: boolean
         default: false
+      phonetics:
+        description: "transcribe every card (adds about an hour)"
+        type: boolean
+        default: true
       publish:
         description: "Attach the result to the catalog release"
         type: boolean
@@ -50,12 +54,27 @@ jobs:
         with:
           python-version: "3.12"
 
+      # Rules rather than a model, so it installs in seconds and answers the
+      # same way every run. espeak-ng is here as a second opinion only: it is
+      # GPL-3, nothing it produces is allowed near a deck, and it exists in
+      # this job so a language whose rules have quietly broken shows up as a
+      # disagreement instead of as a shipped mistake.
+      - name: Phonetics
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq espeak-ng
+          python3 -m pip install --quiet -r tools/phonetics/requirements.txt
+          for code in en ru pl es fr de it pt; do
+            python3 tools/phonetics/g2p.py --lang "$code" --selftest
+          done
+
       - name: Pipeline on a made-up corpus
         run: |
           python3 tools/catalog/make_sample.py sample
           python3 tools/catalog/build_catalog.py \
             --tatoeba sample --out sample-out \
             --learn en,ru,pl --meanings en,ru,pl \
+            --phonetics \
             --min-deck 5 --function-top 12 --full-threshold 60
 
       # A deck the importer would refuse is worse than no deck, so the shape of
@@ -120,6 +139,17 @@ jobs:
       # dictionary word is the written form lowercased, which teaches "ran" and
       # "run" as two cards in the worst case. To use them, fetch the extracts
       # from kaikki.org into a folder as <code>.jsonl and pass --wiktextract.
+      # Rule-based, offline, permissively licensed. Installed before the build
+      # rather than inside it so that a dependency that will not install fails
+      # in ten seconds instead of after the corpus download.
+      - name: Phonetics
+        if: ${{ inputs.phonetics }}
+        run: |
+          python3 -m pip install --quiet -r tools/phonetics/requirements.txt
+          for code in en pl es fr de it pt; do
+            python3 tools/phonetics/g2p.py --lang "$code" --selftest
+          done
+
       - name: Build
         run: |
           python3 tools/catalog/build_catalog.py \
@@ -127,6 +157,7 @@ jobs:
             --learn "${{ inputs.learn }}" \
             --meanings "${{ inputs.meanings }}" \
             --max-deck "${{ inputs.max_deck }}" \
+            ${{ inputs.phonetics && '--phonetics' || '' }} \
             ${{ inputs.public_domain && '--public-domain' || '' }}
           echo ""
           cat catalog/TIERS.md

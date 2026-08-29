@@ -1,5 +1,7 @@
 package dev.ikna.data.prefs
 
+import dev.ikna.domain.phonetics.PhoneticsMode
+
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -182,6 +184,23 @@ data class IknaSettings(
      */
     val deckLooks: String = "",
     /**
+     * Which transcription each deck shows, stored as "packId=mode" pairs joined
+     * by semicolons. A deck not named here uses the default.
+     *
+     * Per deck rather than one switch for the whole app, and the reason is that
+     * the question genuinely has different answers on the same phone. Somebody
+     * learning Polish needs the line under every phrase; the same person
+     * reading Spanish from English mostly does not, because Spanish spelling
+     * already says how Spanish sounds. One global switch would force them to
+     * pick the worse answer for one of the two decks.
+     *
+     * It follows deckLooks into a preference for the reasons that one is a
+     * preference: this is how a person reads their own copy of a deck, it must
+     * not travel to whoever the deck is sent to, and a schema migration is too
+     * much machinery for a line of text under a phrase.
+     */
+    val deckPhonetics: String = "",
+    /**
      * Chunks the learner has marked as wrong, separated by semicolons.
      *
      * A deck written by a language model can contain a card that is simply
@@ -271,6 +290,7 @@ class SettingsStore(private val context: Context) {
         val showWordmark = booleanPreferencesKey("showWordmark")
         val leftHanded = booleanPreferencesKey("leftHanded")
         val deckLooks = stringPreferencesKey("deckLooks")
+        val deckPhonetics = stringPreferencesKey("deckPhonetics")
         val suppressed = stringPreferencesKey("suppressed")
         val onboardingDone = booleanPreferencesKey("onboardingDone")
         val revealHintsShown = intPreferencesKey("revealHintsShown")
@@ -318,6 +338,7 @@ class SettingsStore(private val context: Context) {
             showWordmark = p[Keys.showWordmark] ?: defaults.showWordmark,
             leftHanded = p[Keys.leftHanded] ?: defaults.leftHanded,
             deckLooks = p[Keys.deckLooks] ?: defaults.deckLooks,
+            deckPhonetics = p[Keys.deckPhonetics] ?: defaults.deckPhonetics,
             suppressed = p[Keys.suppressed] ?: defaults.suppressed,
             onboardingDone = p[Keys.onboardingDone] ?: defaults.onboardingDone,
             revealHintsShown = p[Keys.revealHintsShown] ?: defaults.revealHintsShown,
@@ -393,6 +414,26 @@ class SettingsStore(private val context: Context) {
         val look = DeckLook(label = deckLabelOf(label), tint = tint ?: NO_TINT)
         if (look.isPlain) map.remove(packId) else map[packId] = look
         prefs[Keys.deckLooks] = encodeDeckLooks(map)
+    }
+
+    /** Every deck's transcription choice at once. Used by a restore. */
+    suspend fun setDeckPhonetics(value: String) = put { it[Keys.deckPhonetics] = value }
+
+    /**
+     * One deck's transcription, read-modify-write inside a single edit, for the
+     * same reason a deck's look is: two decks changed a second apart must not be
+     * able to drop each other's choice.
+     *
+     * Unlike a deck's look, the chosen mode is written even when it happens to
+     * equal the current default. Storing only what differs would mean that
+     * changing the default in a later release silently changes the behaviour of
+     * decks somebody had already made up their mind about, and three words per
+     * deck is not worth buying that with.
+     */
+    suspend fun setDeckPhonetic(packId: String, mode: PhoneticsMode) = put { prefs ->
+        val map = parseDeckPhonetics(prefs[Keys.deckPhonetics] ?: "").toMutableMap()
+        map[packId] = mode
+        prefs[Keys.deckPhonetics] = encodeDeckPhonetics(map)
     }
 
     /**
@@ -549,6 +590,54 @@ fun encodeDeckLooks(map: Map<String, DeckLook>): String =
 /** What this deck should look like. Never null: an undecorated deck is plain. */
 fun IknaSettings.lookFor(packId: String): DeckLook =
     parseDeckLooks(deckLooks)[packId] ?: DeckLook()
+
+// ---- deck transcriptions ---------------------------------------------------
+//
+// The same hand-rolled shape as the deck looks above, minus the second half:
+// "packId=mode" pairs joined by semicolons. Third appearance of this pattern in
+// this file, and the reasons have not changed -- a handful of entries, read by
+// builds that may predate the feature, and a format somebody can read in an
+// exported backup and repair by hand.
+//
+// One difference is worth naming. A deck's label is typed by a person, so the
+// three separator characters have to be stripped out of it. A mode is not typed
+// by anybody: it is one of three words this file writes and this file reads, so
+// there is nothing to sanitise and an unrecognised word is simply dropped.
+
+/**
+ * Which transcription this deck shows. Never null: a deck nobody has decided
+ * about gets the default, which is what almost every deck is.
+ */
+fun IknaSettings.phoneticsFor(packId: String): PhoneticsMode =
+    parseDeckPhonetics(deckPhonetics)[packId] ?: PhoneticsMode.DEFAULT
+
+/**
+ * A damaged pair loses one deck's choice and nothing else, the same way a
+ * damaged deck look does. An unknown mode is dropped rather than defaulted, so
+ * a deck whose entry was mangled behaves like a deck with no entry instead of
+ * quietly switching to something nobody picked.
+ */
+fun parseDeckPhonetics(value: String): Map<String, PhoneticsMode> =
+    value.split(';')
+        .asSequence()
+        .mapNotNull { pair ->
+            val at = pair.indexOf('=')
+            if (at <= 0 || at == pair.lastIndex) return@mapNotNull null
+            val id = pair.substring(0, at).trim()
+            val mode = when (pair.substring(at + 1).trim().lowercase()) {
+                PhoneticsMode.OFF.stored -> PhoneticsMode.OFF
+                PhoneticsMode.RESPELL.stored -> PhoneticsMode.RESPELL
+                PhoneticsMode.IPA.stored -> PhoneticsMode.IPA
+                else -> null
+            }
+            if (id.isEmpty() || mode == null) null else id to mode
+        }
+        .toMap()
+
+fun encodeDeckPhonetics(map: Map<String, PhoneticsMode>): String =
+    map.entries
+        .filter { it.key.isNotBlank() }
+        .joinToString(";") { it.key + "=" + it.value.stored }
 
 // ---- suppressed chunks -----------------------------------------------------
 //

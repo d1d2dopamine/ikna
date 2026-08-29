@@ -41,12 +41,16 @@ import dev.ikna.AppContainer
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.NO_TINT
 import dev.ikna.data.prefs.lookFor
+import dev.ikna.data.prefs.phoneticsFor
 import dev.ikna.data.repo.DeckRepository
 import dev.ikna.data.repo.DeckSummary
+import dev.ikna.domain.phonetics.Phonetics
+import dev.ikna.domain.phonetics.PhoneticsMode
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.DeckTints
 import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaBottomBar
+import dev.ikna.ui.theme.IknaChip
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
@@ -254,6 +258,106 @@ fun DeckScreen(
                     Spacer(Modifier.height(Space.lg))
                     IknaRule()
                     Spacer(Modifier.height(Space.lg))
+
+                    // How this deck writes down the way its phrases sound.
+                    //
+                    // Here, in the deck's own settings, and that placement is
+                    // the design rather than somewhere convenient to put one
+                    // more switch.
+                    //
+                    // Not in Settings, because the question does not have one
+                    // answer per person. Somebody learning Polish wants the line
+                    // under every phrase; the same person reading Spanish from
+                    // English usually does not, because Spanish spelling already
+                    // says how Spanish sounds. A single global switch forces
+                    // them to accept the wrong answer for one of the two decks.
+                    //
+                    // Not when a deck is downloaded either, and not when one is
+                    // made. A choice offered before the first card has been seen
+                    // is a choice made without the information needed to make
+                    // it, and afterwards it lives somewhere nobody thinks to
+                    // look. Here it sits beside the deck it changes, and it can
+                    // be changed again after the first session -- which is when
+                    // anybody actually forms an opinion about it.
+                    //
+                    // The section is absent rather than disabled for a deck with
+                    // no transcription in it, and for a language the renderer
+                    // does not know. A control that does nothing when it is
+                    // pressed teaches the reader that the setting is broken,
+                    // which is worse than never having offered it.
+                    if (current.hasPhonetics && current.lang in Phonetics.SUPPORTED) {
+                        val mode = settings.phoneticsFor(deckId)
+
+                        Text(
+                            text = S.t("dp.014"),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(Modifier.height(Space.xs))
+                        Text(
+                            text = S.t("dp.015"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = muted
+                        )
+                        Spacer(Modifier.height(Space.md))
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+                            IknaChip(
+                                label = S.t("dp.016"),
+                                selected = mode == PhoneticsMode.RESPELL,
+                                onClick = {
+                                    scope.launch {
+                                        container.settings.setDeckPhonetic(
+                                            deckId,
+                                            PhoneticsMode.RESPELL
+                                        )
+                                    }
+                                }
+                            )
+                            IknaChip(
+                                label = S.t("dp.017"),
+                                selected = mode == PhoneticsMode.IPA,
+                                onClick = {
+                                    scope.launch {
+                                        container.settings.setDeckPhonetic(
+                                            deckId,
+                                            PhoneticsMode.IPA
+                                        )
+                                    }
+                                }
+                            )
+                            IknaChip(
+                                label = S.t("dp.018"),
+                                selected = mode == PhoneticsMode.OFF,
+                                onClick = {
+                                    scope.launch {
+                                        container.settings.setDeckPhonetic(
+                                            deckId,
+                                            PhoneticsMode.OFF
+                                        )
+                                    }
+                                }
+                            )
+                        }
+
+                        Spacer(Modifier.height(Space.md))
+
+                        // What the choice looks like, drawn by the same renderer
+                        // the card uses rather than typed out beside it. A
+                        // sample written by hand drifts out of agreement with
+                        // the code; one that goes through the same function
+                        // cannot.
+                        Text(
+                            text = Phonetics.sample(current.lang, mode)
+                                ?: S.t("dp.019"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = muted
+                        )
+
+                        Spacer(Modifier.height(Space.lg))
+                        IknaRule()
+                        Spacer(Modifier.height(Space.lg))
+                    }
 
                     // What the deck looks like on the list.
                     //

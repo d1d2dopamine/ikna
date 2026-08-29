@@ -41,9 +41,11 @@ import dev.ikna.AppContainer
 import dev.ikna.data.catalog.catalogCardReport
 import dev.ikna.data.catalog.tatoebaSentenceUrl
 import dev.ikna.data.prefs.IknaSettings
+import dev.ikna.data.prefs.phoneticsFor
 import dev.ikna.data.repo.NO_LANG
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.governor.GovernorReason
+import dev.ikna.domain.phonetics.Phonetics
 import dev.ikna.domain.session.Level
 import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaDialog
@@ -161,6 +163,27 @@ fun SessionScreen(
                         // is not a sentence, which the card handles.
                         promptTarget = card.promptTarget,
                         answerTarget = card.answerTarget,
+                        // How it sounds, in whatever notation this deck is set
+                        // to. Resolved per card rather than once per session,
+                        // because a session draws from every active deck at
+                        // once and the setting belongs to the deck -- Polish
+                        // and Spanish can want different answers in the same
+                        // twenty cards.
+                        //
+                        // Phonetics.line returns null for a deck with no
+                        // transcription, a language the pipeline cannot
+                        // transcribe, and a deck switched off, so all three
+                        // arrive at the card as the same thing: draw nothing.
+                        promptTranscription = Phonetics.line(
+                            ipa = card.promptIpa,
+                            lang = card.chunk.lang,
+                            mode = settings.phoneticsFor(card.chunk.packId)
+                        ),
+                        answerTranscription = Phonetics.line(
+                            ipa = card.answerIpa,
+                            lang = card.chunk.lang,
+                            mode = settings.phoneticsFor(card.chunk.packId)
+                        ),
                         // On a subject deck the third field IS the meaning of the term, so
                         // showing it beside a definition with the term blanked out
                         // would simply print the answer.

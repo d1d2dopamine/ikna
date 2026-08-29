@@ -40,6 +40,15 @@ data class CatalogDeck(
     val attribution: String = "",
     /** The corpora this deck was cut out of, for the line under the licence. */
     val sources: List<String> = emptyList(),
+    /**
+     * Whether every chunk in this deck carries a pronunciation.
+     *
+     * On the row before anything is downloaded, because it is a reason to
+     * pick one deck over another and finding out afterwards is too late. It
+     * defaults to false, which is what every deck published before the
+     * pipeline learned to transcribe reports simply by not mentioning it.
+     */
+    val phonetics: Boolean = false,
     val version: Int = 1
 )
 

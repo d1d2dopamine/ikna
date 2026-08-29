@@ -548,6 +548,19 @@ private fun DeckRow(
 					color = muted
 				)
 			}
+			if (deck.phonetics) {
+				// Said here and not as a badge on the collapsed row: it is a
+				// reason to prefer one deck over another, but not a reason to
+				// make every row taller for the people who will never use it.
+				// Absent rather than negated when a deck has none, because
+				// "no pronunciation" on two hundred rows is noise.
+				Spacer(Modifier.height(Space.xs))
+				Text(
+					text = S.t("cat.041"),
+					style = MaterialTheme.typography.bodySmall,
+					color = muted
+				)
+			}
 			if (licenceIsShareAlike(deck.licence)) {
 				// Said here because it is the one clause that reaches somebody who
 				// does more than study: a deck built out of this one and handed on

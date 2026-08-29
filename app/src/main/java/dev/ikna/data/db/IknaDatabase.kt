@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-const val IKNA_DATABASE_VERSION = 4
+const val IKNA_DATABASE_VERSION = 5
 
 @Database(
     entities = [
@@ -28,7 +28,7 @@ const val IKNA_DATABASE_VERSION = 4
     //     entity on purpose).
     // Kept as a literal because SchemaTest deliberately reads this source line:
     // changing it must force a migration and a committed Room schema.
-    version = 4,
+    version = 5,
     // KSP writes the schema history into app/schemas (see the ksp block in
     // app/build.gradle.kts). Commit whatever appears there after a build: it is
     // the only way to diff two versions of this database, and

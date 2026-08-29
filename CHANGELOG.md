@@ -12,6 +12,47 @@ replace the space with a dash: `0.1.1 press` is tagged `v0.1.1-press`. What the
 words mean and what a number promises inside an epoch is written down once, in
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
+## 0.10.0 press
+
+How it is said, written down. A catalogue card can now carry a pronunciation,
+and the card shows it under the phrase in an English respelling that almost
+anybody can read aloud — `dziękuję` becomes `jeng-KOO-yeh` — rather than in a
+notation that needs to be learned first. The exact IPA is one tap away for the
+people who read it.
+
+- **A pronunciation line on the card.** Under the phrase, in the muted colour,
+  never on the side of a card that is asking the learner to produce the phrase
+  — printing how it sounds above the blank would hand over most of the answer.
+- **Set per deck, in that deck's settings**, between the language and the look.
+  Three choices: English respelling, IPA, off, with a live preview of the
+  deck's own language underneath. Not in the app's settings, because somebody
+  learning Polish from Russian needs this on every card and their
+  English-from-Russian deck does not; one switch for both is wrong for one of
+  them. Not offered at download either, where the choice would be made before
+  the first card had been seen.
+- **On by default**, unlike speech. A voice that starts talking in a quiet room
+  has to be opted into; a line of small grey text does not.
+- **The section is absent, not greyed out**, for a deck with no transcription in
+  it or a language nothing can transcribe. A disabled control is a question the
+  reader has to answer.
+- **All eight learnable languages** — English, Russian, Polish, Spanish, French,
+  German, Italian, Portuguese. Portuguese is Brazilian: its vowels stay open,
+  and open vowels are what survive the trip through an English respelling.
+- **The deck file stores IPA; the respelling is computed on the phone.** That is
+  what lets a better respelling ship in an APK and improve decks that were
+  downloaded a year earlier, instead of needing every deck rebuilt.
+- **Database version 5.** Two nullable columns on `chunks`. Nothing is
+  rewritten, nothing is recomputed, and the review log is not touched. A deck
+  installed before this release keeps working and simply has nothing to show
+  until it is reinstalled from a newer catalogue.
+- **The published catalogue has no transcriptions yet.** It was built before any
+  of this existed. Rebuilding it is a workflow run, described in
+  [`docs/PHONETICS.md`](docs/PHONETICS.md); the catalogue row says which decks
+  have pronunciation before anything is downloaded.
+
+Why an English respelling for languages that are not English, what it gets
+wrong, and why that trade was made anyway: [`docs/PHONETICS.md`](docs/PHONETICS.md).
+
 ## 0.9.0 press
 
 Bring your history, keep your rhythm. The Anki bridge is this release: an `.apkg`

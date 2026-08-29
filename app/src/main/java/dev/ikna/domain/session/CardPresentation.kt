@@ -72,6 +72,46 @@ data class SessionCard(
         }
 
     /**
+     * How the front sounds, in IPA, or null when saying so would be wrong.
+     *
+     * Only the recognition step has one. That step shows the sentence and asks
+     * whether it is understood, so pronunciation is a note about something
+     * already on the screen and costs the question nothing.
+     *
+     * The other two are null on purpose, and this is the part that matters:
+     *
+     *  - The gap step shows the sentence with the phrase cut out of it. Its
+     *    transcription would still contain the missing phrase's sounds, so a
+     *    line under the gap would spell out the answer -- "boh-KOO" under a
+     *    sentence missing `bardzo` is not a hint, it is the card being given
+     *    away, and the miss it prevents is recorded as a success.
+     *  - The production step shows only the meaning, in the meaning language.
+     *    Transcribing that would be transcribing the language the learner
+     *    already speaks.
+     */
+    val promptIpa: String?
+        get() = when (ask) {
+            Ask.RECOGNISE -> chunk.ipaContext
+            Ask.GAP -> null
+            Ask.PRODUCE -> null
+        }
+
+    /**
+     * The same for the back, where every step may have one because the answer
+     * is no longer being withheld.
+     *
+     * The recognition case follows [answer]: a chunk with no meaning written
+     * down shows its own text rather than an empty card, so what is transcribed
+     * is the phrase and not the sentence.
+     */
+    val answerIpa: String?
+        get() = when (ask) {
+            Ask.RECOGNISE -> if (meaning.isBlank()) chunk.ipa else null
+            Ask.GAP -> chunk.ipa
+            Ask.PRODUCE -> chunk.ipaContext
+        }
+
+    /**
      * Where the phrase being learned sits inside the sentence on the front, so
      * the screen can mark it.
      *

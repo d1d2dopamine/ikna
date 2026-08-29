@@ -22,7 +22,26 @@ data class ChunkEntity(
     val freqRank: Int,
     // Reserved for a later audio pack. Nullable on purpose so adding audio
     // never requires a data migration.
-    val audioRef: String? = null
+    val audioRef: String? = null,
+    /**
+     * How the phrase sounds, in IPA, as the catalogue pipeline worked it out.
+     *
+     * Nullable for the same reason audioRef is, and this time the reason is not
+     * hypothetical: every deck installed before version 5 has no transcription
+     * and has to go on working exactly as it did. A null here is not a fault. It
+     * is a deck that predates the feature, or a deck somebody wrote by hand, or
+     * a language the pipeline cannot transcribe -- all three are ordinary, and
+     * all three mean the same thing to the screen: draw nothing.
+     *
+     * IPA rather than a finished respelling, because a respelling is an opinion
+     * about who is reading it. Keeping the fact in the deck and forming the
+     * opinion on the phone is what lets one catalogue serve all seventy-two
+     * language pairs, and what lets a better renderer ship in a release instead
+     * of in a rebuild of four hundred thousand cards.
+     */
+    val ipa: String? = null,
+    /** The same for contextSentence. Null whenever ipa is. */
+    val ipaContext: String? = null
 )
 
 /** One local concordance hit, joined to the deck that owns it. */

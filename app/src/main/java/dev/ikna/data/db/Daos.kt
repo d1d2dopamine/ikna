@@ -186,6 +186,25 @@ interface ChunkDao {
     @Query("SELECT COUNT(*) FROM chunks WHERE packId = :packId")
     suspend fun chunkCountFor(packId: String): Int
 
+    /**
+     * Whether this deck was built with transcriptions.
+     *
+     * EXISTS rather than COUNT, because the question is "any" and not "how
+     * many": on a three thousand card deck this stops at the first matching row
+     * instead of reading all of them, and a deck built before version 5 stops
+     * at the first row it looks at.
+     *
+     * Asked at all because the deck's settings must not offer a switch that
+     * does nothing. Every deck installed before this release, every deck
+     * somebody wrote by hand, and every deck built from a catalogue without the
+     * phonetics step answers false, and the section stays off the screen.
+     */
+    @Query(
+        "SELECT EXISTS(SELECT 1 FROM chunks " +
+            "WHERE packId = :packId AND ipa IS NOT NULL AND ipa != '')"
+    )
+    suspend fun hasPhonetics(packId: String): Boolean
+
     // How far into this deck the reader has come *here*, which is not the
     // number of card rows. An imported deck arrives with a card for every note
     // and a schedule replayed from its old answers, and counting rows showed

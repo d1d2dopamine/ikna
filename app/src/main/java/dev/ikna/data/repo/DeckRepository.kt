@@ -49,7 +49,13 @@ data class DeckSummary(
     val total: Int,
     val introduced: Int,
     val known: Int,
-    val isActive: Boolean
+    val isActive: Boolean,
+    /**
+     * Whether the deck was built with pronunciation. Defaulted, so the few
+     * places that build a summary for something other than a real deck do not
+     * have to have an opinion about it.
+     */
+    val hasPhonetics: Boolean = false
 )
 
 /**
@@ -77,6 +83,10 @@ class DeckRepository(
             introduced = chunkDao.introducedCountFor(pack.id, pack.installedAt),
             known = chunkDao.knownCountFor(pack.id, KNOWN_STABILITY_DAYS),
             isActive = pack.isActive
+            // Deliberately not asked here. This builds the whole deck list, and
+            // one more query per deck on a screen that already runs four is a
+            // cost paid by everybody to answer a question only the deck's own
+            // settings screen asks.
         )
     }
 
@@ -124,7 +134,8 @@ class DeckRepository(
             total = chunkDao.chunkCountFor(pack.id),
             introduced = chunkDao.introducedCountFor(pack.id, pack.installedAt),
             known = chunkDao.knownCountFor(pack.id, KNOWN_STABILITY_DAYS),
-            isActive = pack.isActive
+            isActive = pack.isActive,
+            hasPhonetics = chunkDao.hasPhonetics(pack.id)
         )
     }
 

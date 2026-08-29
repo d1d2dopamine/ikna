@@ -347,7 +347,8 @@ def level_of(rank):
     return "advanced"
 
 
-def build_pair(lang, meaning, sentences, links, ranks, forms, cc0, stats, public_domain):
+def build_pair(lang, meaning, sentences, links, ranks, forms, cc0, stats,
+               public_domain, phonetics=None):
     """
     Every card this pipeline can make for one direction of one pair.
 
@@ -404,6 +405,21 @@ def build_pair(lang, meaning, sentences, links, ranks, forms, cc0, stats, public
             continue
 
         used.add(lemma)
+        # Both the phrase and the sentence it sits in. Transcribing only the
+        # phrase would have saved about half the extra bytes, and the sentence
+        # is what a recognition card actually shows -- so the half that was
+        # cheaper to drop is the half that gets read most.
+        #
+        # Either can come back None, and None here is a decision rather than a
+        # failure: the transcriber refuses a line when any word in it was
+        # unknown, because a line that is right about four words in five gives
+        # the reader no way to tell which one was the fifth.
+        ipa = phonetics.line(surface) if phonetics else None
+        ipa_context = phonetics.line(sentence) if phonetics else None
+        if ipa or ipa_context:
+            stats["card transcribed"] += 1
+        elif phonetics:
+            stats["card not transcribed"] += 1
         cards.append(
             {
                 "rank": rank,
@@ -413,6 +429,8 @@ def build_pair(lang, meaning, sentences, links, ranks, forms, cc0, stats, public
                 "targetStart": span[0],
                 "targetEnd": span[1],
                 "tokens": token_list(sentence, ranks, forms),
+                "ipa": ipa,
+                "ipaContext": ipa_context,
             }
         )
 
@@ -424,22 +442,25 @@ def write_deck(out_dir, deck_id, cards):
     path = os.path.join(out_dir, deck_id + ".jsonl")
     with open(path, "w", encoding="utf-8") as handle:
         for position, card in enumerate(cards, start=1):
-            handle.write(
-                json.dumps(
-                    {
-                        "id": "%s-%04d" % (deck_id, position),
-                        "text": card["text"],
-                        "context": card["context"],
-                        "translation": card["translation"],
-                        "targetStart": card["targetStart"],
-                        "targetEnd": card["targetEnd"],
-                        "freqRank": card["rank"],
-                        "tokens": card["tokens"],
-                    },
-                    ensure_ascii=False,
-                )
-                + "\n"
-            )
+            record = {
+                "id": "%s-%04d" % (deck_id, position),
+                "text": card["text"],
+                "context": card["context"],
+                "translation": card["translation"],
+                "targetStart": card["targetStart"],
+                "targetEnd": card["targetEnd"],
+                "freqRank": card["rank"],
+                "tokens": card["tokens"],
+            }
+            # Left out entirely rather than written as null. The reader treats
+            # a missing key and a null the same way, and a deck built without
+            # transcription should be byte-identical to one built by the old
+            # pipeline -- otherwise every deck looks changed in every diff.
+            if card.get("ipa"):
+                record["ipa"] = card["ipa"]
+            if card.get("ipaContext"):
+                record["ipaContext"] = card["ipaContext"]
+            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
     return os.path.getsize(path)
 
 
@@ -485,6 +506,16 @@ def main(argv=None):
     parser.add_argument("--learn", default=",".join(LEARNABLE), help="languages to teach")
     parser.add_argument("--meanings", default=",".join(MEANINGS), help="languages meanings may be in")
     parser.add_argument("--public-domain", action="store_true", help="also build CC0-only decks")
+    parser.add_argument(
+        "--phonetics",
+        action="store_true",
+        help="transcribe every card into IPA (needs tools/phonetics/requirements.txt)",
+    )
+    parser.add_argument(
+        "--russian-stress",
+        default=None,
+        help="stress dictionary for ru; without it Russian cards are left untranscribed",
+    )
     args = parser.parse_args(argv)
 
     # How much of a language is glue depends on how much of the language there
@@ -505,6 +536,36 @@ def main(argv=None):
             parser.error("missing " + path)
 
     os.makedirs(args.out, exist_ok=True)
+
+    # Made on first use and kept, because building one costs real time and a
+    # run touches the same language for every pair it appears in. A language
+    # whose engine will not load is reported once and then treated as a
+    # language with no transcriber, which is already a case with defined
+    # behaviour -- the decks come out exactly as they did before.
+    transcribers = {}
+
+    def phonetics_for(code):
+        if not args.phonetics:
+            return None
+        if code in transcribers:
+            return transcribers[code]
+        made = None
+        try:
+            import sys as _sys
+
+            here = os.path.dirname(os.path.abspath(__file__))
+            beside = os.path.join(os.path.dirname(here), "phonetics")
+            if beside not in _sys.path:
+                _sys.path.insert(0, beside)
+            import g2p
+
+            made = g2p.transcriber_for(code, args.russian_stress)
+            print("  phonetics ready for %s" % code, flush=True)
+        except Exception as error:
+            print("  no phonetics for %s: %s" % (code, error), flush=True)
+            made = None
+        transcribers[code] = made
+        return made
 
     print("reading sentences", flush=True)
     sentences = read_sentences(sentences_path, wanted)
@@ -557,6 +618,7 @@ def main(argv=None):
                     cc0,
                     stats,
                     public_domain,
+                    phonetics_for(lang),
                 )
                 if not cards:
                     continue
@@ -585,6 +647,10 @@ def main(argv=None):
                             "licence": licence,
                             "attribution": attribution,
                             "sources": sources,
+                            "phonetics": any(
+                                card.get("ipa") or card.get("ipaContext")
+                                for card in group
+                            ),
                             "version": 1,
                         }
                     )

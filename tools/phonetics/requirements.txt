@@ -1,0 +1,22 @@
+# What the transcription step needs.
+#
+# Everything here is permissively licensed and none of it is copied into a deck.
+# A deck's licence stays Tatoeba's alone, which is the promise the catalogue row
+# makes before anything is downloaded -- and it is the reason the obvious better
+# source of pronunciations, Wiktionary via kaikki.org, is not in this list. That
+# data is CC BY-SA, and pulling it in would force share-alike terms onto content
+# that does not currently carry them.
+#
+# espeak-ng is deliberately absent too. It is GPL-3, it is used in CI as a second
+# opinion only, and it is installed there with apt rather than pinned here, so
+# that nothing it produces can end up inside a published deck by accident.
+
+# Rule-based grapheme-to-phoneme. MIT. Covers de, fr, es, it, pl and pt-BR
+# without a dictionary, deterministically and offline.
+epitran==1.25.1
+
+# A dependency of Epitran's Latin-script support. Apache-2.0.
+panphon==0.21.2
+
+# English, which spelling cannot predict, so it is looked up instead. BSD.
+cmudict==1.0.32

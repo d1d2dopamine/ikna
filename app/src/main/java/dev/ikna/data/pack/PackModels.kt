@@ -40,5 +40,16 @@ data class PackChunk(
     val targetEnd: Int,
     val freqRank: Int,
     val tokens: List<PackToken>,
-    val audioRef: String? = null
+    val audioRef: String? = null,
+    /**
+     * IPA for [text], written by the catalogue pipeline.
+     *
+     * Defaulted, not required. Every deck published before transcriptions
+     * existed lacks the key, every deck a person writes by hand lacks it too,
+     * and a reader that refused those files would have turned a new field into
+     * a broken catalogue.
+     */
+    val ipa: String? = null,
+    /** IPA for [context]. Absent whenever [ipa] is. */
+    val ipaContext: String? = null
 )

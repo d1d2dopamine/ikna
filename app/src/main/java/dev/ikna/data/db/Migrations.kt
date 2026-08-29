@@ -127,5 +127,39 @@ object IknaMigrations {
         }
     }
 
-    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+    /**
+     * v4 -> v5
+     *
+     * `chunks` gains the two transcription columns, and that is the whole
+     * change. Both are nullable with no default, which is the entire safety
+     * argument: every row already in the table stays valid and reads as "this
+     * deck has no transcription", which is precisely what it is. Nothing is
+     * rewritten, nothing is recomputed, and no phrase is looked at twice.
+     *
+     * Transcriptions arrive by installing a deck built by a pipeline that emits
+     * them. They cannot arrive by migration: working out that `dziękuję` is
+     * `d͡ʑɛŋˈkujɛ` needs a converter per language and, for Russian and
+     * English, a dictionary far larger than the app. So an upgrade leaves the
+     * user with the decks they had, unchanged, and the catalogue offers new
+     * ones.
+     *
+     * The full-text index is deliberately left alone. `chunks_fts` indexes
+     * `text`, `contextSentence` and `translation`, and all four of its triggers
+     * name those three columns explicitly rather than copying whatever `chunks`
+     * happens to hold -- so a new column cannot put the index out of step with
+     * the table. Nobody searches a deck by its pronunciation, and adding a
+     * column to an external-content FTS4 table means dropping and rebuilding
+     * it: real work, on every phone, for nothing.
+     *
+     * `reviews` is not touched.
+     */
+    private val MIGRATION_4_5 = object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE chunks ADD COLUMN ipa TEXT")
+            db.execSQL("ALTER TABLE chunks ADD COLUMN ipaContext TEXT")
+        }
+    }
+
+    val ALL: Array<Migration> =
+        arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
 }
