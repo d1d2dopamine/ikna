@@ -69,6 +69,13 @@ class DesktopUi {
     var openDeck by mutableStateOf<String?>(null)
     var sessionDeck by mutableStateOf<String?>(null)
     var showShortcuts by mutableStateOf(false)
+
+    /**
+     * Whether the deck column is shown in a window too narrow to keep it.
+     *
+     * In a wide window the list is simply always there, and this is not read.
+     */
+    var listOpen by mutableStateOf(false)
     var reload by mutableStateOf(0)
 
     fun show(target: Pane) {
@@ -172,10 +179,10 @@ private fun DesktopShell(
         val edge = if (roomy) 40.dp else Space.lg
 
         Row(Modifier.fillMaxSize()) {
-            Rail(palette, settings, ui)
+            Rail(palette, settings, ui, narrow = !wide)
             VerticalRule(palette)
 
-            if (wide) {
+            if (wide || ui.listOpen) {
                 Box(Modifier.width(listWidth).fillMaxHeight()) {
                     DeckColumn(
                         settings = settings,
@@ -214,7 +221,12 @@ private fun DesktopShell(
 
 /** The destinations, down the left edge. The phone's bottom bar, stood up. */
 @Composable
-private fun Rail(palette: IknaPalette, settings: IknaSettings, ui: DesktopUi) {
+private fun Rail(
+    palette: IknaPalette,
+    settings: IknaSettings,
+    ui: DesktopUi,
+    narrow: Boolean
+) {
     Column(
         Modifier.width(64.dp).fillMaxHeight(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -229,8 +241,15 @@ private fun Rail(palette: IknaPalette, settings: IknaSettings, ui: DesktopUi) {
             ui.sessionDeck = null
             ui.show(Pane.SESSION)
         }
-        RailButton(IknaGlyph.STACK, S.t("pc.015"), ui.pane == Pane.DECK, palette) {
-            ui.show(Pane.DECK)
+        // No button for the decks in a wide window: the list is a permanent
+        // column two centimetres to the right of this rail, and a button that
+        // opens what is already open is a button that does nothing. It comes
+        // back only when the window is too narrow to keep the column, and then
+        // it shows and hides that column instead of switching screens.
+        if (narrow) {
+            RailButton(IknaGlyph.STACK, S.t("pc.015"), ui.listOpen, palette) {
+                ui.listOpen = !ui.listOpen
+            }
         }
         RailButton(IknaGlyph.BARS, S.t("stats.001"), ui.pane == Pane.STATS, palette) {
             ui.show(Pane.STATS)
