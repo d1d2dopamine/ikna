@@ -35,6 +35,12 @@ on:
         description: "Attach the result to the catalog release"
         type: boolean
         default: true
+      tag:
+        description: "Release tag to attach the catalogue to"
+        default: "catalog"
+      per_minute:
+        description: "Uploads a minute; GitHub refuses above about 80"
+        default: "30"
 
 # Needed to attach the files to the release.
 permissions:
@@ -172,15 +178,23 @@ jobs:
       # for the latest release to find out whether there is a new version, and a
       # catalogue holding that title would offer people a download with no APK in
       # it.
+      #
+      # Uploaded by a script rather than by the usual release action, because
+      # two hundred-odd files is two hundred-odd requests and GitHub allows
+      # about eighty a minute before it stops answering. The script paces
+      # itself, waits when it is told to, skips what is already attached, and
+      # sends index.json only after every deck it names - so a publish that
+      # fails halfway is incomplete rather than untruthful, and running this
+      # workflow again carries on where it stopped.
       - name: Publish
         if: ${{ inputs.publish }}
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: catalog
-          name: deck catalogue
-          body_path: catalog/TIERS.md
-          files: |
-            catalog/index.json
-            catalog/*.jsonl
-          make_latest: false
-          prerelease: false
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 tools/catalog/publish.py \
+            --dir catalog \
+            --tag "${{ inputs.tag }}" \
+            --title "deck catalogue" \
+            --notes catalog/TIERS.md \
+            --repo "$GITHUB_REPOSITORY" \
+            --per-minute "${{ inputs.per_minute }}"
