@@ -40,6 +40,15 @@ compose.desktop {
     application {
         mainClass = "dev.ikna.desktop.MainKt"
 
+        // createReleaseDistributable does not just package the jars: it shrinks
+        // them with ProGuard first, and ProGuard stops on any warning it was
+        // not told to expect. The rules it needs, and the reason for each one,
+        // are in compose-desktop.pro next to this file. The Compose plugin's
+        // own defaults still apply -- this is added to them, not a replacement.
+        buildTypes.release.proguard {
+            configurationFiles.from(project.file("compose-desktop.pro"))
+        }
+
         nativeDistributions {
             targetFormats(TargetFormat.Msi, TargetFormat.Exe)
             packageName = "Ikna"
