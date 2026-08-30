@@ -37,7 +37,19 @@ class SessionErgonomicsTest {
     }
 
     private fun source(relative: String): String {
-        val roots = listOf(File("app/src/main/java"), File("src/main/java"))
+        // Two modules, because the card stack moved.
+        //
+        // SwipeableCard is now compiled once in :shared and used by both the
+        // phone and the desktop window, so the file it is read from is no
+        // longer under app/. The contract it is read for has not changed: the
+        // accessibility actions still have to depend on whether the card has
+        // been revealed, on whichever machine is showing it.
+        val roots = listOf(
+            File("app/src/main/java"),
+            File("src/main/java"),
+            File("shared/src/jvmShared/kotlin"),
+            File("../shared/src/jvmShared/kotlin")
+        )
         return roots.asSequence()
             .map { File(it, relative) }
             .firstOrNull { it.isFile }

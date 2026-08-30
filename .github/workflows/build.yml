@@ -202,8 +202,20 @@ jobs:
       - name: Self test
         shell: bash
         run: |
-          app="desktop/build/compose/binaries/main-release/app/Ikna"
-          "$app/runtime/bin/java" -cp "$app/app/*" dev.ikna.desktop.MainKt --selftest
+          set -e
+          root="desktop/build/compose/binaries/main-release/app"
+          # The runtime is located rather than spelled out: jpackage decides the
+          # folder name, and on Windows the launcher is java.exe, which a bash
+          # path written without the suffix does not find.
+          java_exe=$(find "$root" -name 'java.exe' -o -name 'java' -type f | head -n 1)
+          if [ -z "$java_exe" ]; then
+            echo "No bundled runtime under $root:"
+            find "$root" -maxdepth 3 -type d
+            exit 1
+          fi
+          appdir=$(dirname "$(dirname "$(dirname "$java_exe")")")
+          echo "Runtime: $java_exe"
+          "$java_exe" -cp "$appdir/app/*" dev.ikna.desktop.MainKt --selftest
 
       # The installer is a convenience, not the deliverable. It needs WiX, which
       # the runner may or may not have, so a failure here must not take the
