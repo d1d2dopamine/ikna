@@ -2,7 +2,11 @@ package dev.ikna.data.update
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -58,33 +62,47 @@ class UpdateCheck(
         }
     }
 
+    // kotlinx.serialization rather than org.json.
+    //
+    // org.json is not a library this build depends on, it is a class the
+    // Android platform happens to carry in android.jar. This file lives in
+    // jvmShared and is therefore compiled twice -- once for Android, where the
+    // class is free, and once for the desktop JVM, where it does not exist at
+    // all. The Windows build failed on the import and nowhere else.
+    //
+    // kotlinx-serialization-json is already an api dependency of this source
+    // set and is what the catalogue is read with, so this adds nothing to
+    // either application. The three readers at the bottom of this file keep the
+    // behaviour of optString/optBoolean/optLong exactly: a field that is
+    // missing, null or of the wrong type is a default, never an exception. The
+    // Android build therefore treats a reply the same way it did before.
     private fun parse(json: String): UpdateRelease? {
-        val root = JSONObject(json)
-        if (root.optBoolean("draft") || root.optBoolean("prerelease")) return null
-        val tag = root.optString("tag_name").trim()
+        val root = JSON.parseToJsonElement(json) as? JsonObject ?: return null
+        if (root.flag("draft") || root.flag("prerelease")) return null
+        val tag = root.text("tag_name").trim()
         if (tag.isEmpty() || !isNewer(installedVersion, tag)) return null
-        val array = root.optJSONArray("assets") ?: return null
-        val assets = ArrayList<UpdateAsset>(array.length())
-        for (i in 0 until array.length()) {
-            val item = array.optJSONObject(i) ?: continue
-            val url = item.optString("browser_download_url")
+        val array = root["assets"] as? JsonArray ?: return null
+        val assets = ArrayList<UpdateAsset>(array.size)
+        for (element in array) {
+            val item = element as? JsonObject ?: continue
+            val url = item.text("browser_download_url")
             if (url.isEmpty()) continue
             assets.add(
                 UpdateAsset(
-                    name = item.optString("name"),
+                    name = item.text("name"),
                     url = url,
-                    sizeBytes = item.optLong("size")
+                    sizeBytes = item.number("size")
                 )
             )
         }
         val asset = pickAsset(assets, has64Bit) ?: return null
         // A release with no notes is still an update; a release with no file is
         // not, which is why the asset is what decides above.
-        val name = root.optString("name").trim()
+        val name = root.text("name").trim()
         return UpdateRelease(
             version = versionLabel(tag, name),
             tag = tag,
-            notes = tidyNotes(root.optString("body")),
+            notes = tidyNotes(root.text("body")),
             apkUrl = asset.url,
             sizeBytes = asset.sizeBytes
         )
@@ -111,5 +129,29 @@ class UpdateCheck(
 
         /** Once a day. A check on every launch is a check nobody asked for. */
         const val CHECK_EVERY_MS: Long = 24L * 60L * 60L * 1000L
+
+        // The reply carries far more than the five fields read above, and a
+        // field the API adds later must not turn a working check into a
+        // failing one.
+        private val JSON = Json { ignoreUnknownKeys = true }
     }
 }
+
+/**
+ * The value of [key] as text, or "" when it is absent, null, or not a scalar.
+ *
+ * This is optString, written out: the caller decides what an empty answer
+ * means, and no reply from the network can throw its way out of here.
+ */
+private fun JsonObject.text(key: String): String {
+    val value = this[key]
+    if (value !is JsonPrimitive || value is JsonNull) return ""
+    return value.content
+}
+
+/** True only where [key] is present and says so; anything else is false. */
+private fun JsonObject.flag(key: String): Boolean =
+    text(key).equals("true", ignoreCase = true)
+
+/** The value of [key] as a whole number, or 0 where it is not one. */
+private fun JsonObject.number(key: String): Long = text(key).toLongOrNull() ?: 0L
