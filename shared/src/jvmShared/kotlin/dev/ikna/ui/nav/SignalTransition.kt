@@ -23,13 +23,13 @@ import dev.ikna.ui.theme.Motion
  * same time. There is no hard edge, full-width shove, scan, crop, blur or spring.
  */
 
-internal fun sharedAxisEnterOffset(forward: Boolean, travelPx: Int): Int =
+fun sharedAxisEnterOffset(forward: Boolean, travelPx: Int): Int =
     if (forward) travelPx else -travelPx
 
-internal fun sharedAxisExitOffset(forward: Boolean, travelPx: Int): Int =
+fun sharedAxisExitOffset(forward: Boolean, travelPx: Int): Int =
     -sharedAxisEnterOffset(forward, travelPx)
 
-internal fun sharedAxisEnter(
+fun sharedAxisEnter(
     enabled: Boolean,
     forward: Boolean,
     travelPx: Int
@@ -52,7 +52,7 @@ internal fun sharedAxisEnter(
     )
 }
 
-internal fun sharedAxisExit(
+fun sharedAxisExit(
     enabled: Boolean,
     forward: Boolean,
     travelPx: Int

@@ -55,6 +55,12 @@ kotlin {
             api(compose.material3)
             api(compose.ui)
 
+            // The shared-axis route change and the card's arrival animation
+            // live in this module now, so the animation artifact is declared
+            // here rather than being inherited from whatever :app happens to
+            // pull in.
+            api(compose.animation)
+
             // Room 2.7.2, deliberately neither 2.8 nor 3.0.
             //
             // 2.7 is the first stable Room that can generate a database for a

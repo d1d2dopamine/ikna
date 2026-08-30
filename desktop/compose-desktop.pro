@@ -108,6 +108,18 @@
 # The settings file is read and written through datastore-preferences-core,
 # which reaches its own generated protobuf classes reflectively.
 # ---------------------------------------------------------------------------
+# DataStore Preferences writes its file through a copy of protobuf-lite that is
+# repackaged inside the artifact. Protobuf-lite reads and writes fields
+# reflectively, through generated schema classes it looks up by name, so there
+# is nothing in the bytecode for ProGuard to follow: shrink it and the first
+# write throws. Its own Unsafe-based fast path is why jdk.unsupported has to be
+# in the runtime image as well (see desktop/build.gradle.kts).
+-keep class androidx.datastore.preferences.protobuf.** { *; }
+-keepclassmembers class androidx.datastore.preferences.protobuf.** { *; }
+-dontwarn androidx.datastore.preferences.protobuf.**
+-dontwarn sun.misc.**
+-keep class sun.misc.Unsafe { *; }
+
 -keep class androidx.datastore.** { *; }
 -dontwarn androidx.datastore.**
 
@@ -124,3 +136,11 @@
 
 # The application's own entry point. jpackage launches it by name.
 -keep class dev.ikna.desktop.MainKt { *; }
+
+# The AWT event thread's crash handler.
+#
+# Swing finds this class by the name in the sun.awt.exception.handler property
+# and calls handle(Throwable) on it reflectively, so nothing in the compiled
+# code refers to either the class or the method. Renamed or removed, a crash
+# inside an event goes back to being a silent one.
+-keep class dev.ikna.desktop.AwtCrashHandler { *; }

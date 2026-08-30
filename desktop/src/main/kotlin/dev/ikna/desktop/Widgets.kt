@@ -1,6 +1,5 @@
 package dev.ikna.desktop
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,21 +11,47 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import dev.ikna.data.prefs.DeckLook
 import dev.ikna.data.repo.DeckSummary
-import dev.ikna.ui.text.S
+import dev.ikna.ui.decks.IknaDeckSeal
+import dev.ikna.ui.theme.IknaGlyph
+import dev.ikna.ui.theme.IknaGlyphIcon
 import dev.ikna.ui.theme.IknaPalette
+import dev.ikna.ui.theme.IknaProgress
+import dev.ikna.ui.theme.Space
+import dev.ikna.ui.theme.deckTintColor
 
 /**
- * The app draws square, bordered, text-only controls. These are the desktop
- * equivalents rather than Material buttons, so the window looks like the phone
- * instead of like a generic Compose sample.
+ * The controls the window is built from.
+ *
+ * Every one of them is the phone's control with a mouse added, not a desktop
+ * lookalike of it: the same square corners, the same one-pixel rule, the same
+ * typography scale out of :shared. What changes is what a pointer needs and a
+ * thumb does not -- a hand cursor over anything clickable, and heights sized for
+ * a mouse rather than for a 44dp finger.
+ */
+
+/** The pointer says "this does something" before anything is pressed. */
+fun Modifier.handCursor(): Modifier = this.pointerHoverIcon(PointerIcon.Hand)
+
+/**
+ * A rectangular action.
+ *
+ * Ink-filled for the one action a screen is for, outlined for everything else --
+ * the same two weights the phone's IknaWideButton has, at desktop height and
+ * hugging its label instead of filling the width.
  */
 @Composable
 fun IknaButton(
@@ -37,21 +62,38 @@ fun IknaButton(
     filled: Boolean = false,
     onClick: () -> Unit
 ) {
-    val ink = if (!enabled) palette.muted else if (filled) palette.background else palette.ink
+    val alpha = if (enabled) 1f else 0.35f
+    val ink = palette.ink.copy(alpha = alpha)
     Box(
         modifier
-            .background(if (filled && enabled) palette.accent else palette.background)
-            .border(BorderStroke(1.dp, palette.line))
+            .height(38.dp)
+            .background(if (filled) ink else Color.Transparent)
+            .border(1.dp, ink)
+            .handCursor()
             .clickable(enabled = enabled) { onClick() }
-            .padding(horizontal = 14.dp, vertical = 9.dp),
+            .padding(horizontal = Space.md),
         contentAlignment = Alignment.Center
     ) {
-        Text(label, color = ink, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = if (filled) palette.background else ink,
+            maxLines = 1
+        )
     }
 }
 
+/**
+ * One destination in the left-hand rail.
+ *
+ * A glyph, and a rule down its inner edge when it is the one being shown. The
+ * phone marks the current destination the same way in its bottom bar; on a
+ * window the bar is vertical, because vertical is where a wide screen has room
+ * to spare and horizontal is where it does not.
+ */
 @Composable
-fun PaneButton(
+fun RailButton(
+    glyph: IknaGlyph,
     label: String,
     selected: Boolean,
     palette: IknaPalette,
@@ -59,61 +101,111 @@ fun PaneButton(
 ) {
     Box(
         Modifier
-            .fillMaxWidth()
-            .background(if (selected) palette.panel else palette.background)
-            .clickable { onClick() }
-            .padding(horizontal = 10.dp, vertical = 8.dp)
+            .size(64.dp)
+            .handCursor()
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
     ) {
-        Text(
-            label,
+        if (selected) {
+            Box(
+                Modifier
+                    .align(Alignment.CenterStart)
+                    .width(2.dp)
+                    .height(28.dp)
+                    .background(palette.accent)
+            )
+        }
+        IknaGlyphIcon(
+            glyph = glyph,
             color = if (selected) palette.ink else palette.muted,
-            fontSize = 12.sp,
-            fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal
+            size = 22.dp,
+            label = label
         )
     }
 }
 
+/**
+ * A deck in the list beside the cards.
+ *
+ * The square is the phone's square, generated by the same seal functions, so a
+ * deck is recognised by the same shape on both machines. Clicking the row starts
+ * a session and the three dots open the deck, which is the arrangement the phone
+ * settled on after the title-as-a-door version confused everyone.
+ */
 @Composable
-fun DeckRow(
+fun DeckListRow(
     deck: DeckSummary,
+    look: DeckLook,
     due: Int,
     selected: Boolean,
     palette: IknaPalette,
     onStudy: () -> Unit,
     onOpen: () -> Unit
 ) {
-    Column(
+    val accent = deckTintColor(look.tint, palette.accent)
+    Row(
         Modifier
             .fillMaxWidth()
-            .background(if (selected) palette.panel else palette.background)
+            .background(if (selected) palette.panel else Color.Transparent)
+            .handCursor()
             .clickable { onStudy() }
-            .padding(horizontal = 10.dp, vertical = 8.dp)
+            .padding(horizontal = Space.sm, vertical = Space.sm),
+        verticalAlignment = Alignment.Top
     ) {
-        Row(Modifier.fillMaxWidth()) {
-            Text(
-                deck.title,
-                color = if (deck.isActive) palette.ink else palette.muted,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1f)
-            )
-            if (due > 0) {
-                Text(due.toString(), color = palette.accent, fontSize = 12.sp)
+        IknaDeckSeal(
+            lang = deck.lang,
+            deckId = deck.id,
+            title = deck.title,
+            label = look.label,
+            owes = due > 0,
+            active = deck.isActive,
+            accent = accent,
+            ink = palette.ink,
+            muted = palette.muted,
+            background = palette.background,
+            line = palette.line,
+            side = 44.dp
+        )
+        Spacer(Modifier.width(Space.md))
+        Column(Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = deck.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (deck.isActive) palette.ink else palette.muted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                if (due > 0) {
+                    Text(
+                        text = due.toString(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = accent
+                    )
+                }
             }
-        }
-        Spacer(Modifier.height(2.dp))
-        Row(Modifier.fillMaxWidth()) {
-            Text(
-                deck.lang.uppercase() + "  " + deck.known + " / " + deck.total,
-                color = palette.muted,
-                fontSize = 10.sp,
-                modifier = Modifier.weight(1f)
+            Spacer(Modifier.height(Space.xs))
+            IknaProgress(
+                fraction = if (deck.total <= 0) 0f else deck.known.toFloat() / deck.total,
+                color = accent,
+                segments = 18
             )
-            Text(
-                S.t("a11y.010"),
-                color = palette.muted,
-                fontSize = 10.sp,
-                modifier = Modifier.clickable { onOpen() }
-            )
+            Spacer(Modifier.height(Space.xs))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = deck.lang.uppercase() + "  " + deck.known + " / " + deck.total,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = palette.muted,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = "\u00b7\u00b7\u00b7",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = palette.muted,
+                    modifier = Modifier.handCursor().clickable { onOpen() }
+                )
+            }
         }
     }
 }
@@ -121,11 +213,11 @@ fun DeckRow(
 @Composable
 fun Centered(text: String, palette: IknaPalette) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text, color = palette.muted, fontSize = 13.sp)
+        Text(text, style = MaterialTheme.typography.bodyMedium, color = palette.muted)
     }
 }
 
 @Composable
 fun SectionTitle(text: String, palette: IknaPalette) {
-    Text(text, color = palette.muted, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+    Text(text, style = MaterialTheme.typography.labelSmall, color = palette.muted)
 }

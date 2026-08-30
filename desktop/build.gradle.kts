@@ -62,6 +62,30 @@ compose.desktop {
             description = "Ikna"
             vendor = "Ikna"
 
+            // jlink builds the bundled runtime from the modules jdeps can see
+            // in the bytecode, and it cannot see a reflective one. DataStore
+            // serialises through a bundled protobuf-lite that reaches for
+            // sun.misc.Unsafe, which lives in jdk.unsupported: without it the
+            // first setting the user changes -- the palette, as it happened --
+            // dies with NoClassDefFoundError and a blank "Error" box.
+            //
+            // The rest are the same kind of invisible dependency:
+            //   jdk.crypto.ec   TLS to api.github.com for the update check
+            //   jdk.localedata  dates and numbers outside the root locale
+            //   java.sql        JDBC types Room's generated code touches
+            //   java.naming     pulled in by java.sql
+            //   java.management runtime hooks used by the coroutines machinery
+            //   jdk.charsets    non-UTF-8 files on import
+            modules(
+                "jdk.unsupported",
+                "jdk.crypto.ec",
+                "jdk.localedata",
+                "java.sql",
+                "java.naming",
+                "java.management",
+                "jdk.charsets"
+            )
+
             windows {
                 menuGroup = "Ikna"
                 shortcut = true

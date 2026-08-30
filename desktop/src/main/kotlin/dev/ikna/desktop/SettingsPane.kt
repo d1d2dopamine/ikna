@@ -43,6 +43,22 @@ fun SettingsPane(
 ) {
     val scope = rememberCoroutineScope()
 
+    // Every setting is written through here.
+    //
+    // Storing a preference is the one thing this screen does, and it is the one
+    // thing that reaches outside the process: a file, a folder, a filesystem
+    // that may be read-only, locked by a backup agent, or -- as it turned out --
+    // served by a runtime image with no sun.misc.Unsafe in it. A raw
+    // scope.launch turns any of that into an uncaught exception on the UI
+    // thread. The choice is either written down or it is not, and the log says
+    // which; the window stays.
+    val save: (suspend () -> Unit) -> Unit = { block ->
+        scope.launch {
+            runCatching { block() }
+                .onFailure { error -> logLine("settings write failed: " + error) }
+        }
+    }
+
     Column(
         Modifier
             .fillMaxSize()
@@ -57,17 +73,17 @@ fun SettingsPane(
         Spacer(Modifier.height(10.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             IknaButton(S.t("set.015"), palette, filled = settings.autoLoad) {
-                scope.launch { container.settings.setAutoLoad(true) }
+                save { container.settings.setAutoLoad(true) }
             }
             IknaButton(S.t("set.016"), palette, filled = !settings.autoLoad) {
-                scope.launch { container.settings.setAutoLoad(false) }
+                save { container.settings.setAutoLoad(false) }
             }
         }
         if (!settings.autoLoad) {
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 IknaButton("-5", palette) {
-                    scope.launch {
+                    save {
                         container.settings.setManualLoad(maxOf(5, settings.manualLoad - 5))
                     }
                 }
@@ -79,7 +95,7 @@ fun SettingsPane(
                     )
                 }
                 IknaButton("+5", palette) {
-                    scope.launch {
+                    save {
                         container.settings.setManualLoad(settings.manualLoad + 5)
                     }
                 }
@@ -91,10 +107,10 @@ fun SettingsPane(
         Spacer(Modifier.height(10.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             IknaButton(S.t("set.101"), palette, filled = settings.theme == ThemeMode.DARK) {
-                scope.launch { container.settings.setTheme(ThemeMode.DARK) }
+                save { container.settings.setTheme(ThemeMode.DARK) }
             }
             IknaButton(S.t("set.102"), palette, filled = settings.theme == ThemeMode.LIGHT) {
-                scope.launch { container.settings.setTheme(ThemeMode.LIGHT) }
+                save { container.settings.setTheme(ThemeMode.LIGHT) }
             }
         }
 
@@ -109,7 +125,7 @@ fun SettingsPane(
                         palette,
                         filled = settings.paletteId == spec.id
                     ) {
-                        scope.launch { container.settings.setPalette(spec.id) }
+                        save { container.settings.setPalette(spec.id) }
                     }
                 }
             }
@@ -120,7 +136,7 @@ fun SettingsPane(
         SectionTitle(S.t("set.092"), palette)
         Spacer(Modifier.height(10.dp))
         IknaButton(S.t("set.020"), palette, filled = settings.animations) {
-            scope.launch { container.settings.setAnimations(!settings.animations) }
+            save { container.settings.setAnimations(!settings.animations) }
         }
 
         Spacer(Modifier.height(28.dp))
@@ -143,7 +159,7 @@ fun SettingsPane(
                         palette,
                         filled = settings.language == pair.first
                     ) {
-                        scope.launch { container.settings.setLanguage(pair.first) }
+                        save { container.settings.setLanguage(pair.first) }
                     }
                 }
             }

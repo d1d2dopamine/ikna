@@ -184,6 +184,27 @@ jobs:
           path: desktop/build/compose/binaries/main-release/app
           if-no-files-found: warn
 
+      # The packaged application, started once, on the runtime image that was
+      # just assembled for it.
+      #
+      # This is the step that would have caught the palette crash on the build
+      # machine instead of on a user's desktop. --selftest opens the database,
+      # installs the bundled deck, writes a setting and builds a session, then
+      # exits with a code; a missing module in the trimmed runtime -- which is
+      # exactly what sun/misc/Unsafe was -- fails here and prints a stack trace
+      # a person can read.
+      #
+      # It runs the bundled runtime's own java rather than Ikna.exe, because a
+      # windowed launcher detaches from the console and returns nothing to the
+      # shell. Same classes, same trimmed runtime, an exit code that can be
+      # believed. It sits after the upload so a failure still leaves an artifact
+      # to look at.
+      - name: Self test
+        shell: bash
+        run: |
+          app="desktop/build/compose/binaries/main-release/app/Ikna"
+          "$app/runtime/bin/java" -cp "$app/app/*" dev.ikna.desktop.MainKt --selftest
+
       # The installer is a convenience, not the deliverable. It needs WiX, which
       # the runner may or may not have, so a failure here must not take the
       # portable build down with it.
