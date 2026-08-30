@@ -1,5 +1,6 @@
 package dev.ikna.desktop
 
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -40,6 +41,11 @@ fun main() {
         Window(
             onCloseRequest = ::exitApplication,
             title = "Ikna",
+            // The icon on the window and in the taskbar of a running instance.
+            // Separate from the .ico jpackage puts on the executable: that one
+            // is what Windows shows before the application starts, this one is
+            // what it shows afterwards, and both have to be set to match.
+            icon = painterResource("icon.png"),
             state = rememberWindowState(size = DpSize(1180.dp, 800.dp))
         ) {
             IknaDesktopApp(container)

@@ -66,6 +66,14 @@ compose.desktop {
                 menuGroup = "Ikna"
                 shortcut = true
                 dirChooser = true
+
+                // Without this jpackage stamps the Compose Multiplatform
+                // default onto the executable, the shortcut and the installer,
+                // which is why the first build shipped with a Kotlin logo.
+                // icon.ico is generated from the same wordmark the phone
+                // launcher icon uses, by tools/make-desktop-icon.py. It has no
+                // source of its own on purpose: the two marks cannot drift.
+                iconFile.set(project.file("icon.ico"))
                 // Fixed for the lifetime of the product: it is how Windows
                 // recognises an installer as an upgrade of what is already
                 // there rather than a second copy of it.

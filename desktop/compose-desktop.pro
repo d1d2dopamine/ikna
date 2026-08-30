@@ -13,6 +13,29 @@
 # ---------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
+# Shrink, but do not optimise.
+#
+# ProGuard's optimiser rewrites method signatures when it can prove a narrower
+# type -- and on okio it proves it wrong. The 0.10.0 build that came out of
+# here started with a dialog reading:
+#
+#   Bad return type
+#   Location: okio/Okio__JvmOkioKt.source$33603375(Ljava/io/File;)Lokio/InputStreamSource;
+#   Reason: Type 'okio/Source' is not assignable to 'okio/InputStreamSource'
+#
+# The $number suffix is the optimiser's own naming for a specialised method. It
+# narrowed the return type to InputStreamSource, left the body returning Source,
+# and the JVM verifier rejected the class the first time anything touched it.
+# The build was green: bytecode this broken is only caught at startup.
+#
+# Shrinking is what makes the distribution small and it stays on -- it only ever
+# deletes whole unused classes, and every reflective use is kept below. The
+# optimiser buys a few percent more and can silently produce a binary that does
+# not run, which is not a trade worth making for an application this size.
+# ---------------------------------------------------------------------------
+-dontoptimize
+
+# ---------------------------------------------------------------------------
 # okio, and a Java that is newer than this build's.
 #
 # okio arrives through androidx.datastore-preferences-core. Its AsyncTimeout
