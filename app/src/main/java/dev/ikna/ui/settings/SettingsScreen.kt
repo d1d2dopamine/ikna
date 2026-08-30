@@ -250,7 +250,7 @@ fun SettingsScreen(
                 runCatching {
                     val stream = context.contentResolver.openInputStream(uri)
                         ?: return@runCatching S.t("set.001")
-                    stream.use { FontStore.install(context, it) }
+                    stream.use { FontStore.install(it) }
                 }.getOrElse { S.t("set.002") }
             }
             if (problem == null) {
@@ -699,7 +699,7 @@ fun SettingsScreen(
                                     onClick = {
                                         scope.launch {
                                             container.settings.setFontName("")
-                                            withContext(Dispatchers.IO) { FontStore.clear(context) }
+                                            withContext(Dispatchers.IO) { FontStore.clear() }
                                             message = S.t("set.046")
                                         }
                                     }

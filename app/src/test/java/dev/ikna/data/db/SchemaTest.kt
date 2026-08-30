@@ -106,7 +106,7 @@ class SchemaTest {
 		// is recomputed, because a chunk installed before this release is
 		// allowed to have no transcription at all. A NOT NULL here would mean
 		// inventing a value for every row already on every phone.
-		val src = source("src/main/java/dev/ikna/data/db/Entities.kt")
+		val src = source("shared/src/jvmShared/kotlin/dev/ikna/data/db/Entities.kt")
 		assertNotNull("Entities.kt was not found from the test's directory.", src)
 		val text = src!!.readText()
 		assertTrue(
@@ -136,7 +136,7 @@ class SchemaTest {
 
 	@Test
 	fun `every step between versions has a migration`() {
-		val src = source("src/main/java/dev/ikna/data/db/Migrations.kt")
+		val src = source("shared/src/jvmShared/kotlin/dev/ikna/data/db/Migrations.kt")
 		assertNotNull("Migrations.kt was not found from the test's directory.", src)
 		val steps = Regex("""Migration\((\d+),\s*(\d+)\)""")
 			.findAll(src!!.readText())
@@ -154,7 +154,7 @@ class SchemaTest {
 
 	@Test
 	fun `the database is the version this test was written for`() {
-		val src = source("src/main/java/dev/ikna/data/db/IknaDatabase.kt")
+		val src = source("shared/src/jvmShared/kotlin/dev/ikna/data/db/IknaDatabase.kt")
 		assertNotNull("IknaDatabase.kt was not found from the test's directory.", src)
 		assertTrue(
 			"IknaDatabase is no longer version $DB_VERSION. Raise DB_VERSION in this " +
@@ -178,5 +178,5 @@ class SchemaTest {
 	 * root finds the same files instead of silently skipping every check.
 	 */
 	private fun find(path: String): File? =
-		listOf(File(path), File("app/$path")).firstOrNull { it.isFile }
+		listOf(File(path), File("app/$path"), File("../$path")).firstOrNull { it.isFile }
 }

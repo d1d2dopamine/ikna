@@ -1,5 +1,8 @@
 package dev.ikna
 
+import dev.ikna.data.db.openIknaDatabase
+import dev.ikna.domain.governor.loadGovernorConfig
+
 import android.content.Context
 import dev.ikna.data.anki.AnkiImportManager
 import dev.ikna.data.anki.AnkiImporter
@@ -42,9 +45,9 @@ class AppContainer(context: Context) {
 
     private val appContext = context.applicationContext
 
-    val config: GovernorConfig = GovernorConfig.load(context)
+    val config: GovernorConfig = loadGovernorConfig(context)
 
-    private val db = IknaDatabase.build(context)
+    private val db = openIknaDatabase(context)
 
     val settings = SettingsStore(context)
 

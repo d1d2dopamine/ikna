@@ -1,0 +1,123 @@
+package dev.ikna.domain.governor
+
+import dev.ikna.platform.Assets
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+
+/**
+ * Loaded from `assets/governor.json`. Intentionally not exposed anywhere in the
+ * UI: a settings screen turns this app into a tuning toy, and tuning is more
+ * interesting than studying.
+ */
+@Serializable
+data class GovernorConfig(
+    val targetDailyReviews: Int = 40,
+    val maxNewPerDay: Int = 6,
+    val maxNewCeiling: Int = 20,
+    val costPerNew: Double = 4.0,
+    val backlogWeight: Double = 0.5,
+    val backlogHardLimit: Int = 120,
+    val minAccuracy: Double = 0.75,
+    /** Below this share of the last week actually used, no new chunks appear. */
+    val minActivityRatio: Double = 0.5,
+    /** Share of the daily norm that already counts as a day fully used. */
+    val idleCreditRatio: Double = 0.3,
+    /** Window for the activity signal, in completed days. */
+    val activityWindowDays: Int = 7,
+    /**
+     * How many days inside that window a normal week is expected to contain.
+     * Four or five, not seven: the norm is weekly on purpose, so an ordinary
+     * week with three quiet days still reads as a week that went fine.
+     */
+    val activeDaysPerWeek: Double = 4.5,
+    /**
+     * After this hour nothing new is introduced today. Only introductions wait;
+     * reviews stay available all night.
+     */
+    val nightCutoffHour: Int = 23,
+    /**
+     * The hour a day rolls over. Not midnight, because midnight is the
+     * middle of the evening for a good share of the people this app is for:
+     * a session finished at 01:30 landed on the next day, showed up as a
+     * hole in the activity map, and built tomorrow's plan as if last night
+     * had never happened.
+     */
+    val dayStartHour: Int = 4,
+    /** Days from the first session during which the load ceiling stays flat. */
+    val settlingDays: Int = 60,
+    val warmupReviewsAfterSkip: Int = 10,
+    val amnestyQuotaRatio: Double = 0.2,
+    val forecastHorizonDays: Int = 3,
+    val recentWindowSize: Int = 100,
+    val safetyValveDays: Int = 7,
+    val accelerateAfterCleanDays: Int = 5,
+    val accelerateStep: Int = 2,
+    val returnModeGapDays: Int = 14,
+    val returnModeDays: Int = 3,
+    val returnModeCapacity: Int = 10,
+    val dailyMinimumCards: Int = 1,
+    val desiredRetention: Double = 0.9,
+    /**
+     * How accurate the recent answers have to be before the ceiling is
+     * allowed to rise.
+     *
+     * This was a `0.9` written inside the governor, two lines away from
+     * [minAccuracy] and [desiredRetention], which are both in this file. Three
+     * numbers with the same meaning and one of them unreachable is how a
+     * tuning session ends up changing nothing.
+     */
+    val accelerateMinAccuracy: Double = 0.9,
+    /**
+     * The share of a day's capacity that may be spent on new material, as a
+     * hard daily ceiling.
+     *
+     * Separate from the headroom arithmetic on purpose. Headroom answers "is
+     * there room today"; this answers "should there be anything left for
+     * tomorrow", and the second question is the one that keeps the day after a
+     * good day from being a wall. A quarter, scaled to the norm rather than a
+     * fixed count: on a fifteen-card norm four new chunks is a different day
+     * than it is on sixty.
+     */
+    val newCeilingShare: Double = 0.25,
+    /**
+     * Reviews past the day's obligation that open one more new chunk inside
+     * the session.
+     *
+     * Deliberately equal to [costPerNew]: a chunk met today costs roughly this
+     * many reviews over the following week, so paying that price up front is
+     * the one way to hand out more today without borrowing from tomorrow.
+     */
+    val earnedNewPerReviews: Int = 4,
+    /**
+     * How far above the median a day has to go before it counts as overheating.
+     */
+    val overheatRatio: Double = 1.6,
+    /** How far accuracy has to fall on such a day for it to count. */
+    val overheatAccuracyDrop: Double = 0.15,
+    /** What is left of the norm on the day after an overheated one. */
+    val overheatCapacityShare: Double = 0.75,
+    /**
+     * How overdue a card has to be before it leaves the visible queue for the
+     * amnesty pool.
+     *
+     * This was a `2` written into the repository, next to the one line that
+     * decides what a returning user sees: every load-bearing number in this app
+     * is in this file, and one of them was not. Two days is unchanged -- it is
+     * long enough that an ordinary evening off does not hide anything, and short
+     * enough that a real absence never comes back as a wall of cards.
+     */
+    val amnestyAfterDays: Int = 2
+) {
+    companion object {
+        // Built once. A Json instance compiles its configuration on creation, so
+        // making a fresh one inside load() paid that cost every call for nothing.
+        // ignoreUnknownKeys is what lets an older build read a governor.json
+        // written by a newer one instead of falling back to the defaults.
+        private val json = Json { ignoreUnknownKeys = true }
+
+        fun load(assets: Assets): GovernorConfig = runCatching {
+            val text = assets.open("governor.json").bufferedReader().use { it.readText() }
+            json.decodeFromString<GovernorConfig>(text)
+        }.getOrElse { GovernorConfig() }
+    }
+}

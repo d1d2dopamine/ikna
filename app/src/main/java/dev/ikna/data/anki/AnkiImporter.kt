@@ -3,7 +3,7 @@ package dev.ikna.data.anki
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
-import androidx.room.withTransaction
+import dev.ikna.data.db.inTransaction
 import com.github.luben.zstd.ZstdInputStream
 import dev.ikna.data.db.ChunkDao
 import dev.ikna.data.db.IknaDatabase
@@ -90,7 +90,7 @@ class AnkiImporter(
         }
     }
 
-    private suspend fun commit(parsed: ParsedPackage): AnkiImportResult = db.withTransaction {
+    private suspend fun commit(parsed: ParsedPackage): AnkiImportResult = db.inTransaction {
         var installed = 0
         for (deck in parsed.decks) {
             // A changed template may produce fewer tokens on re-import. Remove

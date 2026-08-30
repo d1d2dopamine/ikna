@@ -8,7 +8,12 @@ import org.junit.Test
 
 class MotionPolishTest {
     private fun source(relative: String): String {
-        val candidates = listOf(File("src/main/java/$relative"), File("app/src/main/java/$relative"))
+        val candidates = listOf(
+            File("src/main/java/$relative"),
+            File("app/src/main/java/$relative"),
+            File("../shared/src/jvmShared/kotlin/$relative"),
+            File("shared/src/jvmShared/kotlin/$relative")
+        )
         return candidates.firstOrNull(File::isFile)?.readText()
             ?: error("Source was not found: $relative")
     }

@@ -5,6 +5,7 @@ import dev.ikna.ui.text.S
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import dev.ikna.data.prefs.FontStore
 import dev.ikna.work.WorkScheduler
 
 class IknaApp : Application() {
@@ -14,6 +15,8 @@ class IknaApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Before anything can ask the theme for the chosen font.
+        FontStore.baseDir = filesDir
         container = AppContainer(this)
         createReminderChannel()
         WorkScheduler.schedule(this)

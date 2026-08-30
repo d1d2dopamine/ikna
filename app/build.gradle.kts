@@ -43,7 +43,6 @@ plugins {
     // AGP fails configuration as soon as buildFeatures.compose is enabled.
     id("org.jetbrains.kotlin.plugin.compose") version "2.2.20"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
-    id("com.google.devtools.ksp") version "2.2.20-2.0.4"
 }
 
 // ---------------------------------------------------------------------------
@@ -242,31 +241,13 @@ kotlin {
     }
 }
 
-// Room writes its schema history here. Top level, not inside defaultConfig:
-// this configures KSP, not a product flavour, and nesting it only worked by
-// accident of Kotlin scoping.
-//
-// The Room Gradle plugin is deliberately NOT applied, although the Room
-// documentation now leads with it. Applying it moves the schema history into
-// per-variant folders -- schemas/<variant>/dev.ikna.data.db.IknaDatabase/5.json
-// -- and Google's own note says the existing files then have to be copied
-// across by hand. SchemaTest reads schemas/dev.ikna.data.db.IknaDatabase, and
-// the CI step named "Schemas are committed" watches that same path, so the
-// annotation processor argument stays and the folder keeps its shape.
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
-
-    // Room 2.7 generates Kotlin DAO implementations rather than Java, and does
-    // so by default. It is written down instead of left implicit because it
-    // changes what a query returning no rows does: the generated Kotlin throws
-    // where the generated Java returned null. Every single-row query in Daos.kt
-    // already declares a nullable return -- lastAnswer, forDay, latest -- so
-    // there is nothing here for it to break, and if a later one forgets, the
-    // build fails instead of the phone.
-    arg("room.generateKotlin", "true")
-}
-
 dependencies {
+    // The larger half of this application: the scheduler, the database, the
+    // repositories, the settings, the six string tables and the whole theme.
+    // It also supplies Compose, Room, DataStore and the coroutines runtime as
+    // api dependencies, which is why none of those are declared below any more.
+    implementation(project(":shared"))
+
     implementation("androidx.core:core-ktx:1.13.1")
 
     // Walking the folder somebody picked in the file browser. A picked tree is a
@@ -277,31 +258,19 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
 
-    implementation(platform("androidx.compose:compose-bom:2024.09.03"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
+    // No compose-bom here any more. It pins androidx.compose.* to the
+    // 2024.09.03 set, while :shared brings the Compose Multiplatform 1.8.2
+    // artifacts that the desktop build also uses -- two constraints on the same
+    // modules, and the build has to be able to pick one. Compose now arrives
+    // through :shared, so both applications draw with the same version of it.
+    // ui-tooling-preview left with the BOM: this app has no @Preview.
     implementation("androidx.navigation:navigation-compose:2.8.2")
 
-    // Room 2.7.2 rather than 2.6.1, and deliberately neither 2.8 nor 3.0.
-    //
-    // 2.7 is the first stable Room that can generate a database for a target
-    // that is not Android, which is what the Windows build will need. It still
-    // accepts everything this project already does -- the SupportSQLiteDatabase
-    // handed to every migration in Migrations.kt, to the onCreate callback in
-    // IknaDatabase.kt, and to the hand-written virtual table in ChunkFtsIndex.kt.
-    //
-    // Room 3.0 takes that away: SupportSQLiteDatabase is reachable only through
-    // a compatibility wrapper and a driver must be set explicitly. Room 2.8 is
-    // sound but is built against compileSdk 36, which AGP 8.6.1 cannot compile
-    // against, so it would drag the Android plugin along with it. Both are
-    // upgrades for their own day, not for this one.
-    implementation("androidx.room:room-runtime:2.7.2")
-    implementation("androidx.room:room-ktx:2.7.2")
-    ksp("androidx.room:room-compiler:2.7.2")
-
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
+    // Room and DataStore moved to :shared with the code that uses them; the
+    // note about which Room version and why is now in shared/build.gradle.kts.
+    // room-ktx is gone rather than moved -- the one thing this module used from
+    // it, withTransaction, is an Android-only extension, and the replacement is
+    // IknaDatabase.inTransaction() in :shared.
     implementation("androidx.work:work-runtime-ktx:2.9.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")

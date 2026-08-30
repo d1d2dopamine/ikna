@@ -14,7 +14,7 @@ class AnkiBridgeContractTest {
     @Test
     fun `package import is transactional and never executes card code`() {
         val source = File(root, "src/main/java/dev/ikna/data/anki/AnkiImporter.kt").readText()
-        assertTrue(source.contains("db.withTransaction"))
+        assertTrue(source.contains("db.inTransaction"))
         assertTrue(source.contains("SQLiteDatabase.OPEN_READONLY"))
         assertTrue(source.contains("MAX_PACKAGE_BYTES"))
         assertFalse(source.contains("evaluateJavascript"))
@@ -38,7 +38,7 @@ class AnkiBridgeContractTest {
     @Test
     fun `return copy has no recovery countdown`() {
         val files = listOf("Ru", "En", "Pl", "Es", "Fr", "De").map {
-            File(root, "src/main/java/dev/ikna/ui/text/Strings$it.kt")
+            File(root.parentFile, "shared/src/jvmShared/kotlin/dev/ikna/ui/text/Strings$it.kt")
         }
         files.forEach { file ->
             val value = Regex("\"sess\\.027\"\\s+to\\s+\"([^\"]*)\"")

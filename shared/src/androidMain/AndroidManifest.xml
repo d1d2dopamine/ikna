@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Empty on purpose. This library contributes no components, no permissions and
+  no application entries; it exists so that the Android build has a manifest to
+  point at while the library's resources live under src/androidMain/res beside
+  its Kotlin, instead of in a src/main folder that would sit oddly next to the
+  multiplatform source sets.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" />

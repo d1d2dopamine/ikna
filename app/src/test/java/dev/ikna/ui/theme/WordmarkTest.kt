@@ -18,7 +18,7 @@ import java.io.File
  * not carry javax.imageio, so anything that decodes an image here fails to compile
  * on CI while looking perfectly fine in an ordinary JVM project.
  */
-private const val ASSET = "src/main/res/drawable-nodpi/ikna_wordmark.png"
+private const val ASSET = "shared/src/androidMain/res/drawable-nodpi/ikna_wordmark.png"
 private const val ONBOARDING = "src/main/java/dev/ikna/ui/onboarding/OnboardingScreen.kt"
 
 /** PNG signature, then the IHDR chunk: width and height are its first eight bytes. */
@@ -125,5 +125,5 @@ class WordmarkTest {
 		listOf(File(ONBOARDING), File("app/$ONBOARDING")).firstOrNull { it.isFile }
 
 	private fun asset(): File? =
-		listOf(File(ASSET), File("app/$ASSET")).firstOrNull { it.isFile }
+		listOf(File(ASSET), File("../$ASSET")).firstOrNull { it.isFile }
 }

@@ -109,3 +109,68 @@ jobs:
         with:
           files: out/*.apk
           generate_release_notes: true
+
+  # The Windows build, attached to the same release as the APKs.
+  #
+  # A separate job so a Windows runner problem cannot stop the Android release:
+  # softprops/action-gh-release adds files to a release that already exists, so
+  # whichever job finishes second attaches to the first one's release.
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      - name: Pinned starter deck
+        shell: bash
+        run: bash tools/catalog/fetch-bundled-pack.sh
+
+      - name: Build the Windows application
+        run: gradle --no-daemon --stacktrace :desktop:createReleaseDistributable
+
+      # Named after the tag, like the APKs are, so the release page says which
+      # version each file is without anyone having to open it.
+      - name: Name the file after the tag
+        shell: pwsh
+        run: |
+          $app = "desktop/build/compose/binaries/main-release/app/Ikna"
+          if (!(Test-Path $app)) {
+            Get-ChildItem -Recurse desktop/build/compose/binaries | Select-Object -First 60 FullName
+            throw "the distributable is not where it was expected"
+          }
+          New-Item -ItemType Directory -Force -Path out | Out-Null
+          Compress-Archive -Path $app -DestinationPath "out/ikna-$env:GITHUB_REF_NAME-windows-x64.zip" -Force
+
+      - name: Installer
+        continue-on-error: true
+        run: gradle --no-daemon --stacktrace :desktop:packageReleaseMsi
+
+      - name: Collect the installer if there is one
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $msi = Get-ChildItem -Path desktop/build/compose/binaries/main-release/msi -Filter *.msi -ErrorAction SilentlyContinue
+          if ($msi) { Copy-Item $msi[0].FullName "out/ikna-$env:GITHUB_REF_NAME-windows-x64.msi" }
+
+      - name: Publish
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            out/*.zip
+            out/*.msi
+          generate_release_notes: true

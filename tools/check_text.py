@@ -45,6 +45,16 @@ MOJIBAKE = (
     "\u00e2\u20ac\u00a6", "\u00e2\u20ac\u2122", "\u00e2\u20ac\u0153",
     "\u00e2\u20ac\u009d", "\u00ef\u00bb\u00bf",
 )
+# The six localization tables moved to :shared with the rest of the code that
+# is not Android. They are still the only tables, and StringsRu is still the
+# reference the other five are compared against.
+STRINGS_DIR = ROOT / "shared/src/jvmShared/kotlin/dev/ikna/ui/text"
+# Every module that can contain an S.t("key") call.
+KOTLIN_ROOTS = (
+    ROOT / "app/src/main/java",
+    ROOT / "shared/src",
+    ROOT / "desktop/src",
+)
 MAP_KEY = re.compile(r'"([^"]+)"\s+to\s+')
 S_CALL = re.compile(r'S\.t\("([^"]+)"\)')
 
@@ -93,8 +103,7 @@ def inspect_text(path: Path, problems: list[str]) -> str | None:
 
 
 def inspect_localizations(texts: dict[Path, str], problems: list[str]) -> None:
-    folder = ROOT / "app/src/main/java/dev/ikna/ui/text"
-    tables = sorted(folder.glob("Strings??.kt"))
+    tables = sorted(STRINGS_DIR.glob("Strings??.kt"))
     key_sets: dict[str, set[str]] = {}
     for path in tables:
         text = texts.get(path)
@@ -117,11 +126,13 @@ def inspect_localizations(texts: dict[Path, str], problems: list[str]) -> None:
                 f"localization {name}: missing={missing[:12]} extra={extra[:12]}"
             )
     used: set[str] = set()
-    source = ROOT / "app/src/main/java"
-    for path in source.rglob("*.kt"):
-        text = texts.get(path)
-        if text is not None:
-            used.update(S_CALL.findall(text))
+    for source in KOTLIN_ROOTS:
+        if not source.is_dir():
+            continue
+        for path in source.rglob("*.kt"):
+            text = texts.get(path)
+            if text is not None:
+                used.update(S_CALL.findall(text))
     missing_calls = sorted(used - reference)
     if missing_calls:
         problems.append(f"localization: undefined S.t keys: {', '.join(missing_calls)}")
@@ -156,7 +167,7 @@ def main() -> int:
     if problems:
         print("\n".join(problems), file=sys.stderr)
         return 1
-    table_count = len(list((ROOT / "app/src/main/java/dev/ikna/ui/text").glob("Strings??.kt")))
+    table_count = len(list(STRINGS_DIR.glob("Strings??.kt")))
     print(
         f"Repository text is valid UTF-8/NFC; {len(files)} text files and "
         f"{table_count} localization tables passed."

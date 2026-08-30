@@ -6,13 +6,17 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  # The Android application. Every step here is the one that was here
+  # before the desktop build existed.
+  android:
     runs-on: ubuntu-latest
 
-    # A build that cannot finish should say so instead of sitting there. Without
-    # this, a stuck download or an unavailable action holds the runner for six
-    # hours - the default - and the only signal is a spinner.
-    timeout-minutes: 25
+    # A build that cannot finish should say so instead of sitting there.
+    # Without this, a stuck download or an unavailable action holds the
+    # runner for six hours - the default - and the only signal is a spinner.
+    # Thirty rather than twenty-five: the build now compiles :shared twice,
+    # once for Android and once for the desktop target.
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@v5
@@ -118,3 +122,79 @@ jobs:
       # is never pushed onto a commit the release workflow cannot build.
       - name: Release lint
         run: gradle --no-daemon --stacktrace lintVitalRelease
+
+  # ---------------------------------------------------------------------------
+  # The Windows application.
+  #
+  # Runs beside the Android job rather than after it: neither needs anything the
+  # other produces, and a Windows runner is slow enough that chaining them would
+  # roughly double the wait for a result.
+  # ---------------------------------------------------------------------------
+  windows:
+    runs-on: windows-latest
+
+    # Longer than the Android job: a Windows runner is slower, the Gradle cache
+    # is cold, and jpackage has to assemble a Java runtime image.
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Gradle configures every project in settings.gradle.kts, and two of them
+      # apply an Android plugin -- so even a build that only produces an .exe
+      # needs an Android SDK present to configure :app and :shared. The Windows
+      # images have carried one, but not by contract, and "the Windows build
+      # broke because an image changed" is a bad morning. Make it explicit.
+      - name: Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      # The desktop module copies app/src/main/assets onto its classpath, and
+      # the starter deck is downloaded into that folder rather than committed.
+      # Without this the .exe builds and then opens with no decks in it.
+      # shell: bash because this is a shell script and the default here is
+      # PowerShell.
+      - name: Pinned starter deck
+        shell: bash
+        run: bash tools/catalog/fetch-bundled-pack.sh
+
+      # createReleaseDistributable produces the runnable application folder --
+      # Ikna.exe plus a trimmed Java runtime. It needs no WiX, so this is the
+      # step that must succeed.
+      - name: Build the Windows application
+        run: gradle --no-daemon --stacktrace :desktop:createReleaseDistributable
+
+      # Uploaded as a folder: an artifact download is itself a zip, so zipping
+      # here would only produce a zip inside a zip.
+      - name: Windows application
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ikna-windows-portable
+          path: desktop/build/compose/binaries/main-release/app
+          if-no-files-found: warn
+
+      # The installer is a convenience, not the deliverable. It needs WiX, which
+      # the runner may or may not have, so a failure here must not take the
+      # portable build down with it.
+      - name: Installer
+        continue-on-error: true
+        run: gradle --no-daemon --stacktrace :desktop:packageReleaseMsi
+
+      - name: Installer artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ikna-windows-msi
+          path: desktop/build/compose/binaries/main-release/msi/*.msi
+          if-no-files-found: ignore
