@@ -293,6 +293,10 @@ bash tools/catalog/fetch-bundled-pack.sh         # pinned starter catalogue deck
 ./gradlew testReleaseUnitTest                  # the tests CI runs
 ```
 
+The starter deck is pinned by size and SHA-256, so a rebuilt catalogue stops the
+build on purpose. When that is the intended change, run
+`bash tools/catalog/fetch-bundled-pack.sh --update` and commit the pin it writes.
+
 There is one build. The speech runtime is a ten-megabyte `.aar` that this repository
 does not store, so `tools/voice/fetch-voice.sh` has to run once before the first
 build; both workflows run it themselves. No model is fetched and none is shipped —
@@ -528,7 +532,7 @@ ikna учит язык **кусками**: короткая фраза, живо
 [Tatoeba](https://tatoeba.org), фраза на карточке не написана рядом, а вырезана из
 того же предложения, а лицензия и автор видны до скачивания и остаются
 внутри карточек после. Фильтры — что учишь, на каком языке значения, какой
-уровень — работают на телефоне, по одному маленькому списку.
+уровень — работают на телефоне, п�� одному маленькому списку.
 
 **Как скачать колоду на телефоне:** **+** → **Готовая колода** → **ОТКРЫТЬ КАТАЛОГ**,
 дальше выбрать, что учишь и на каком языке должны быть значения. Уже скачанная
@@ -622,7 +626,7 @@ get used to | It takes a while to get used to the noise. | привыкать
 
 Версия здесь — это номер **и слово**: `0.9.0 press`. Слово называет эпоху, к которой
 относится сборка, номер считает релизы внутри неё, а в тегах git пробел заменяется
-дефисом: `v0.9.0-press`.
+дефисо��: `v0.9.0-press`.
 
 Что значат слова, что обещают номера и как собирается `appVersionCode` — в
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
@@ -641,6 +645,10 @@ bash tools/catalog/fetch-bundled-pack.sh         # закреплённая ст
 ./gradlew assembleRelease -Pikna.unsigned=true # без коммитнутого ключа
 ./gradlew testReleaseUnitTest                  # тесты, которые гоняет CI
 ```
+
+Стартовая колода закреплена по размеру и SHA-256, поэтому пересобранный каталог
+намеренно останавливает сборку. Если так и было задумано, выполни
+`bash tools/catalog/fetch-bundled-pack.sh --update` и закоммить новое закрепление.
 
 Сборка одна. Движок озвучки — это `.aar` на десять мегабайт, репозиторий его не
 хранит, так что `tools/voice/fetch-voice.sh` надо один раз запустить перед первой

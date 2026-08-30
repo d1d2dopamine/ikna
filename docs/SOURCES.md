@@ -194,6 +194,13 @@ not fetched by the phone: both build workflows run
 `tools/catalog/fetch-bundled-pack.sh`, which pins the release asset by byte size and
 SHA-256 and validates every line before Gradle packages it.
 
+That pin is expected to break whenever the catalogue is rebuilt: a moved corpus,
+and since 0.10.0 a transcription on every card, make a different file, and the
+build refuses a starter deck nobody has looked at. When the change is the
+intended one, `bash tools/catalog/fetch-bundled-pack.sh --update` fetches the
+published asset, checks every card in it, and writes the new size and hash into
+the script to be committed.
+
 Filters run over the index, on the device, so choosing among decks costs nothing
 and works with the phone in a pocket of a train. The licence and the source of a
 deck are shown **before** it is downloaded, not buried in an about screen, and
