@@ -1,6 +1,5 @@
 package dev.ikna.desktop
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
@@ -169,10 +168,15 @@ fun SessionPane(
                     else -> false
                 }
             }
-            .padding(horizontal = 40.dp, vertical = 24.dp)
+            // Only the header is inset. The card below is the whole pane, edge
+            // to edge, exactly as it is the whole screen on the phone.
+            .padding(vertical = 24.dp)
     ) {
         val header = plan?.deckTitle ?: S.t("deck.004")
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 40.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 text = header,
                 style = MaterialTheme.typography.labelMedium,
@@ -190,7 +194,8 @@ fun SessionPane(
 
         Spacer(Modifier.height(10.dp))
         IknaProgress(
-            fraction = if (cards.isEmpty()) 0f else index.toFloat() / cards.size.toFloat()
+            fraction = if (cards.isEmpty()) 0f else index.toFloat() / cards.size.toFloat(),
+            modifier = Modifier.padding(horizontal = 40.dp)
         )
         Spacer(Modifier.height(18.dp))
 
@@ -221,33 +226,26 @@ fun SessionPane(
             } else {
                 val mode = settings.phoneticsFor(current.chunk.packId)
                 val subject = current.chunk.lang == NO_LANG
-                // A card with the proportions of a card.
+                // The card IS the pane, the way the card IS the screen on the
+                // phone.
                 //
-                // This box used to be 760dp wide and as tall as the pane, which
-                // is not a card, it is a wall. Nothing was wrong with the text:
-                // it was that the box holding it had no shape of its own, so the
-                // words gathered in the middle of a huge rectangle, the rule
-                // under the prompt looked like a line ruled across the centre of
-                // the window, and every edge was far away from anything. A phone
-                // card is portrait and it has a border you can see, so the window
-                // mirrors the shape rather than the pixel count: as tall as the
-                // pane allows, seven tenths of that in width, and drawn with an
-                // outline so the card is an object being moved rather than text
-                // sliding over a background.
-                val cardHeight = maxHeight.coerceAtMost(720.dp)
-                val cardWidth = (cardHeight * 0.70f)
-                    .coerceIn(320.dp, 560.dp)
-                    .coerceAtMost(maxWidth)
-                // The gesture is a share of this card, not a fixed distance.
-                //
-                // The phone's 140 pixels were measured against a screen that IS
-                // the card. Here the card is an object in the middle of a window,
-                // so thirteen percent of its own width keeps the feel identical
-                // at every size, with a floor and a ceiling so a tiny window
-                // cannot grade on a twitch and a huge one cannot demand a shove.
-                val cardWidthPx = with(LocalDensity.current) { cardWidth.toPx() }
+                // Two wrong answers came before this one: a 760dp box in the
+                // middle of a window, and then a portrait box with an outline.
+                // Both of them made the card a small object floating in empty
+                // space, which is not what a card is here -- it is the surface
+                // you drag, so it takes the whole area it lives in. The two
+                // words that appear at the sides sit at the edges of that area,
+                // and the area is clipped, so the card slides and leaves inside
+                // the pane instead of crossing over the deck list or the window
+                // frame.
+                val cardWidthPx = with(LocalDensity.current) { maxWidth.toPx() }
+                // The gesture is a share of the card. The phone's 140 pixels were
+                // measured against a screen that IS the card, and thirteen
+                // percent of the card's own width is the same drag at any window
+                // size, with a floor and a ceiling so a narrow window cannot
+                // grade on a twitch and a wide one cannot demand a shove.
                 val swipeLine = (cardWidthPx * 0.13f).coerceIn(56f, 220f)
-                Box(Modifier.width(cardWidth).height(cardHeight)) {
+                Box(Modifier.fillMaxSize().clipToBounds()) {
                     SwipeableCard(
                         key = current.card.key + ":" + index,
                         revealed = revealed,
@@ -290,9 +288,7 @@ fun SessionPane(
                             progress = progress,
                             onTap = { revealed = true },
                             tapEnabled = !revealed,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .border(1.dp, palette.line)
+                            modifier = Modifier.fillMaxSize()
                         )
                     }
                 }
