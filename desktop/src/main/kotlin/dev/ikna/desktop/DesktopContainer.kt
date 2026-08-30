@@ -40,7 +40,7 @@ class DesktopContainer(val home: File) {
 
     val packLoader = PackLoader(ClasspathAssets, db.chunkDao())
 
-    private val componentRepository = ComponentRepository(
+    val componentRepository = ComponentRepository(
         componentDao = db.componentDao(),
         chunkDao = db.chunkDao(),
         reviewDao = db.reviewDao()

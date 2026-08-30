@@ -61,11 +61,26 @@ const val PEEK_TRAVEL = 16f
  * somebody grading a card, and grading it anyway is how the old four-way version
  * recorded answers nobody meant to give.
  */
-fun decideRating(x: Float, y: Float = 0f, velocityX: Float = 0f): Rating? {
+fun decideRating(
+    x: Float,
+    y: Float = 0f,
+    velocityX: Float = 0f,
+    /**
+     * How far is far enough, in pixels.
+     *
+     * A phone card is the screen, so one fixed distance describes it. In a
+     * window the card is a rectangle inside a much larger surface, and the same
+     * 140 pixels are a third of the way across a narrow card and a twentieth of
+     * the way across a maximised one. The desktop passes a share of the card
+     * width instead; the phone passes nothing and is unchanged.
+     */
+    threshold: Float = SWIPE_THRESHOLD
+): Rating? {
     if (abs(y) > abs(x)) return null
+    val line = if (threshold > 0f) threshold else SWIPE_THRESHOLD
     return when {
-        x <= -SWIPE_THRESHOLD -> Rating.AGAIN
-        x >= SWIPE_THRESHOLD -> Rating.GOOD
+        x <= -line -> Rating.AGAIN
+        x >= line -> Rating.GOOD
         velocityX <= -FLING_SPEED && x <= -FLING_MIN_TRAVEL -> Rating.AGAIN
         velocityX >= FLING_SPEED && x >= FLING_MIN_TRAVEL -> Rating.GOOD
         else -> null
@@ -80,4 +95,5 @@ fun decideRating(x: Float, y: Float = 0f, velocityX: Float = 0f): Rating? {
  * and a promise that fires because the hand is moving fast would be a lie -- the
  * card can still be dragged back.
  */
-fun armedRating(x: Float, y: Float = 0f): Rating? = decideRating(x, y)
+fun armedRating(x: Float, y: Float = 0f, threshold: Float = SWIPE_THRESHOLD): Rating? =
+    decideRating(x, y, 0f, threshold)

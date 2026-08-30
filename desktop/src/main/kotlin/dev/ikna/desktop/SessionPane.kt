@@ -38,6 +38,8 @@ import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.phonetics.Phonetics
 import dev.ikna.domain.session.Ask
 import dev.ikna.domain.session.SessionPlan
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.platform.LocalDensity
 import dev.ikna.ui.session.ChunkCard
 import dev.ikna.ui.session.SwipeableCard
 import dev.ikna.ui.text.S
@@ -65,7 +67,8 @@ fun SessionPane(
     settings: IknaSettings,
     palette: IknaPalette,
     deckId: String?,
-    onChanged: () -> Unit
+    onChanged: () -> Unit,
+    onBack: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
     var plan by remember { mutableStateOf<SessionPlan?>(null) }
@@ -218,13 +221,25 @@ fun SessionPane(
                 // The card keeps the proportions it has on a phone rather than
                 // stretching to the width of a monitor: a line of text two
                 // thousand pixels wide is not a card, it is a paragraph.
-                Box(
+                BoxWithConstraints(
                     Modifier
                         .fillMaxHeight()
                         .widthIn(max = 760.dp)
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
                 ) {
+                    // The gesture is a share of this card, not a fixed distance.
+                    //
+                    // The phone's 140 pixels were measured against a screen that
+                    // IS the card. Here the card is a box in the middle of a
+                    // window: at 760dp that distance is a tenth of it, and in a
+                    // narrow window it is a third. Same hand, same drag, two
+                    // different meanings. Thirteen percent of the card's own width
+                    // keeps the feel identical at every size, with a floor and a
+                    // ceiling so a tiny window cannot grade on a twitch and a huge
+                    // one cannot demand a shove.
+                    val cardWidthPx = with(LocalDensity.current) { maxWidth.toPx() }
+                    val swipeLine = (cardWidthPx * 0.13f).coerceIn(56f, 220f)
                     SwipeableCard(
                         key = current.card.key + ":" + index,
                         revealed = revealed,
@@ -235,7 +250,8 @@ fun SessionPane(
                         // room for them beside the card at any size.
                         railsAtRest = true,
                         onReveal = { revealed = true },
-                        onRate = { rating -> grade(rating) }
+                        onRate = { rating -> grade(rating) },
+                        threshold = swipeLine
                     ) { progress ->
                         ChunkCard(
                             label = askLabel(current.ask, subject),
@@ -283,32 +299,16 @@ fun SessionPane(
             )
         }
 
-        if (current != null) {
-            Spacer(Modifier.height(12.dp))
-            IknaRule(color = palette.line)
-            Spacer(Modifier.height(12.dp))
-            Row(
-                Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                if (!revealed) {
-                    IknaButton(S.t("card.002"), palette, filled = true) { revealed = true }
-                } else {
-                    IknaButton(S.t("card.003"), palette) { grade(Rating.AGAIN) }
-                    IknaButton(S.t("card.004"), palette, filled = true) { grade(Rating.GOOD) }
-                    IknaButton(S.t("sess.044"), palette) { wrong() }
-                }
-                Box(Modifier.weight(1f))
-                IknaButton(S.t("sess.013"), palette) { undo() }
-            }
-            Spacer(Modifier.height(10.dp))
-            Text(
-                text = S.t("pc.014") + "   " + S.t("pc.002"),
-                style = MaterialTheme.typography.labelSmall,
-                color = palette.muted
-            )
-        }
+        // Nothing under the card.
+        //
+        // There was a strip of four buttons here -- reveal, not known, known,
+        // mark wrong -- plus a line of instructions, none of which the phone has.
+        // The card is answered by dragging it, and a control that duplicates the
+        // gesture teaches people to distrust the gesture: if the buttons are the
+        // real way, the swipe is decoration, and if the swipe is the real way, the
+        // buttons are noise. The phone made that choice years ago. Undo lives on
+        // Z, on the keyboard, where the rest of the window's verbs live, and the
+        // list of keys is one press of F1 away.
     }
 }
 

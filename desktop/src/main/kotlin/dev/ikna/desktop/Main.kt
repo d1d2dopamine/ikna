@@ -3,15 +3,14 @@ package dev.ikna.desktop
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-// Wildcard on purpose: Menu and Item are scoped builders of MenuBar and are
-// reached through the same package.
+// Wildcard on purpose: Window, WindowState, application and the rest of the
+// window vocabulary all live in this one package.
 import androidx.compose.ui.window.*
 import dev.ikna.data.prefs.FontStore
 import dev.ikna.ui.text.S
@@ -352,60 +351,12 @@ fun main(args: Array<String>) {
             state = windowState,
             onKeyEvent = { event -> handleWindowKey(event, ui, windowState) }
         ) {
-            MenuBar {
-                Menu(S.t("pc.005")) {
-                    Item(S.t("pc.011"), onClick = { openFolder(home) })
-                    Item(
-                        S.t("pc.008"),
-                        shortcut = KeyShortcut(Key.Q, ctrl = true),
-                        onClick = {
-                            saveGeometry(home, windowState)
-                            exitApplication()
-                        }
-                    )
-                }
-                Menu(S.t("pc.006")) {
-                    Item(
-                        S.t("pc.003"),
-                        shortcut = KeyShortcut(Key.One, ctrl = true),
-                        onClick = { ui.show(Pane.SESSION) }
-                    )
-                    Item(
-                        S.t("pc.015"),
-                        shortcut = KeyShortcut(Key.Two, ctrl = true),
-                        onClick = { ui.show(Pane.DECK) }
-                    )
-                    Item(
-                        S.t("stats.001"),
-                        shortcut = KeyShortcut(Key.Three, ctrl = true),
-                        onClick = { ui.show(Pane.STATS) }
-                    )
-                    Item(
-                        S.t("set.012"),
-                        shortcut = KeyShortcut(Key.Four, ctrl = true),
-                        onClick = { ui.show(Pane.SETTINGS) }
-                    )
-                    Item(
-                        S.t("pc.009"),
-                        shortcut = KeyShortcut(Key.F11),
-                        onClick = { toggleFullScreen(windowState) }
-                    )
-                }
-                Menu(S.t("pc.007")) {
-                    Item(
-                        S.t("pc.010"),
-                        shortcut = KeyShortcut(Key.F1),
-                        onClick = { ui.showShortcuts = true }
-                    )
-                }
-            }
-
             IknaDesktopApp(container, ui)
         }
     }
 }
 
-private fun openFolder(home: File) {
+fun openFolder(home: File) {
     runCatching {
         if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(home)
     }.onFailure { error -> logLine("could not open the data folder: " + error) }

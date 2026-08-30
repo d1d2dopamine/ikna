@@ -26,22 +26,30 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.lookFor
 import dev.ikna.data.repo.DeckSummary
+import dev.ikna.ui.decks.IknaDeckRow
+import dev.ikna.ui.decks.IknaTodayBlock
 import dev.ikna.ui.nav.sharedAxisEnter
 import dev.ikna.ui.nav.sharedAxisExit
 import dev.ikna.ui.text.S
+import dev.ikna.ui.theme.BarHeight
+import dev.ikna.ui.theme.Edge
+import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
+import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaLatticePlaceholder
+import dev.ikna.ui.theme.IknaMemoryField
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaPanel
-import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaTheme
 import dev.ikna.ui.theme.IknaWordmark
@@ -50,19 +58,19 @@ import dev.ikna.ui.theme.Space
 import dev.ikna.ui.theme.paletteFor
 import dev.ikna.ui.theme.rememberContentFont
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Which screen the content area is showing. */
-enum class Pane { SESSION, DECK, STATS, SETTINGS }
+enum class Pane { SESSION, DECK, STATS, SETTINGS, ADD, CATALOG, SEARCH }
 
 /**
- * The state the window agrees on with its menu bar.
+ * The state the window agrees on with its key handler.
  *
- * A plain object rather than composable state hoisted somewhere: the menu bar
- * and the window's key handler are created outside the shell's composition and
- * both have to be able to change the screen. The fields are snapshot state, so
- * changing one from a menu item redraws the shell exactly as a click on the rail
- * would.
+ * A plain object rather than composable state hoisted somewhere: the window's
+ * key handler is created outside the shell's composition and has to be able to
+ * change the screen. The fields are snapshot state, so changing one from a
+ * shortcut redraws the shell exactly as a click would.
  */
 class DesktopUi {
     var pane by mutableStateOf(Pane.SESSION)
@@ -71,15 +79,29 @@ class DesktopUi {
     var showShortcuts by mutableStateOf(false)
 
     /**
-     * Whether the deck column is shown in a window too narrow to keep it.
-     *
-     * In a wide window the list is simply always there, and this is not read.
+     * Whether the deck screen is showing in a window too narrow to keep it
+     * beside the content. In a wide window the list is simply always there.
      */
     var listOpen by mutableStateOf(false)
     var reload by mutableStateOf(0)
 
     fun show(target: Pane) {
         pane = target
+        listOpen = false
+    }
+
+    /** Start or resume the cards, for one deck or for everything due. */
+    fun study(deckId: String?) {
+        sessionDeck = deckId
+        pane = Pane.SESSION
+        listOpen = false
+    }
+
+    /** Open one deck's own screen. */
+    fun openDeckScreen(deckId: String) {
+        openDeck = deckId
+        pane = Pane.DECK
+        listOpen = false
     }
 
     fun refresh() {
@@ -139,18 +161,17 @@ fun IknaDesktopApp(container: DesktopContainer, ui: DesktopUi) {
 /**
  * The window.
  *
- * A phone shows one screen at a time because it has to, and everything it owns
- * hangs off a bar at the bottom under a thumb. A window is wide, is driven by a
- * pointer and a keyboard, and can hold three things side by side: the rail of
- * destinations, the decks, and whatever is being done. That is the whole
- * difference between this file and the phone -- the marks, the rules, the
- * squares and the type are the same objects out of :shared, arranged for a
- * screen that is wider than it is tall.
+ * The phone shows one screen at a time because it has to. A window is wide
+ * enough to keep the deck screen -- the whole deck screen, the pixel field
+ * behind it, the figure for the day, the marks, the bars and the bottom bar --
+ * permanently on the left, with whatever is being done beside it. Nothing here
+ * is a desktop retelling of a phone screen: every piece is the phone's own
+ * object out of :shared, and the only thing this file decides is which of them
+ * are on screen at the same time.
  *
- * Three widths:
- *   under 900dp   rail and content; the deck list becomes a screen of its own
- *   900 to 1400   rail, a 300dp deck list, content
- *   over 1400     the same with a wider list and more air around the content
+ * Two widths:
+ *   under 900dp   one screen at a time, the way a phone does it
+ *   over 900dp    the deck screen and the content side by side
  */
 @Composable
 private fun DesktopShell(
@@ -161,106 +182,32 @@ private fun DesktopShell(
 ) {
     var decks by remember { mutableStateOf<List<DeckSummary>>(emptyList()) }
     var remaining by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
-    var answered by remember { mutableStateOf(0) }
-    var target by remember { mutableStateOf(0) }
 
     LaunchedEffect(ui.reload) {
         decks = runCatching { container.deckRepository.decks() }.getOrDefault(emptyList())
         remaining = runCatching { container.learningRepository.remainingByDeck() }
             .getOrDefault(emptyMap())
-        answered = runCatching { container.learningRepository.answeredToday() }.getOrDefault(0)
-        target = runCatching { container.learningRepository.currentDailyTarget() }.getOrDefault(0)
     }
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        val roomy = maxWidth >= 1400.dp
         val wide = maxWidth >= 900.dp
-        val listWidth = if (roomy) 340.dp else 300.dp
-        val edge = if (roomy) 40.dp else Space.lg
+        val listWidth = if (maxWidth >= 1400.dp) 380.dp else 340.dp
 
-        Row(Modifier.fillMaxSize()) {
-            Rail(palette, settings, ui, narrow = !wide)
-            VerticalRule(palette)
-
-            if (wide || ui.listOpen) {
+        if (wide) {
+            Row(Modifier.fillMaxSize()) {
                 Box(Modifier.width(listWidth).fillMaxHeight()) {
-                    DeckColumn(
-                        settings = settings,
-                        palette = palette,
-                        ui = ui,
-                        decks = decks,
-                        remaining = remaining,
-                        answered = answered,
-                        target = target
-                    )
+                    DecksColumn(container, settings, palette, ui, decks, remaining)
                 }
                 VerticalRule(palette)
-            }
-
-            Column(Modifier.weight(1f).fillMaxHeight()) {
-                ContentHeader(palette, ui, decks, answered, target, wide)
-                IknaRule(color = palette.line)
-                Box(Modifier.weight(1f).fillMaxWidth()) {
-                    PaneContent(
-                        container = container,
-                        settings = settings,
-                        palette = palette,
-                        ui = ui,
-                        decks = decks,
-                        remaining = remaining,
-                        answered = answered,
-                        target = target,
-                        wide = wide,
-                        edge = edge
-                    )
+                Box(Modifier.weight(1f).fillMaxHeight()) {
+                    PaneContent(container, settings, palette, ui, decks, wide = true)
                 }
             }
+        } else if (ui.listOpen) {
+            DecksColumn(container, settings, palette, ui, decks, remaining)
+        } else {
+            PaneContent(container, settings, palette, ui, decks, wide = false)
         }
-    }
-}
-
-/** The destinations, down the left edge. The phone's bottom bar, stood up. */
-@Composable
-private fun Rail(
-    palette: IknaPalette,
-    settings: IknaSettings,
-    ui: DesktopUi,
-    narrow: Boolean
-) {
-    Column(
-        Modifier.width(64.dp).fillMaxHeight(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(Modifier.height(Space.md))
-        if (settings.showWordmark) {
-            IknaWordmark(height = 14.dp, ink = palette.ink, dot = palette.accent)
-        }
-        Spacer(Modifier.height(Space.md))
-
-        RailButton(IknaGlyph.SPARK, S.t("pc.003"), ui.pane == Pane.SESSION, palette) {
-            ui.sessionDeck = null
-            ui.show(Pane.SESSION)
-        }
-        // No button for the decks in a wide window: the list is a permanent
-        // column two centimetres to the right of this rail, and a button that
-        // opens what is already open is a button that does nothing. It comes
-        // back only when the window is too narrow to keep the column, and then
-        // it shows and hides that column instead of switching screens.
-        if (narrow) {
-            RailButton(IknaGlyph.STACK, S.t("pc.015"), ui.listOpen, palette) {
-                ui.listOpen = !ui.listOpen
-            }
-        }
-        RailButton(IknaGlyph.BARS, S.t("stats.001"), ui.pane == Pane.STATS, palette) {
-            ui.show(Pane.STATS)
-        }
-
-        Spacer(Modifier.weight(1f))
-
-        RailButton(IknaGlyph.GEAR, S.t("set.012"), ui.pane == Pane.SETTINGS, palette) {
-            ui.show(Pane.SETTINGS)
-        }
-        Spacer(Modifier.height(Space.sm))
     }
 }
 
@@ -270,121 +217,144 @@ private fun VerticalRule(palette: IknaPalette) {
 }
 
 /**
- * The decks, and what the day asks for.
+ * The phone's deck screen, whole.
  *
- * The one pairing that earns permanent room in a window: the list is how a deck
- * is chosen and how what is left is seen, and on the phone both directions cost
- * a screen change.
+ * Same pixel field behind it, same title, same figure for the day, same rows
+ * with the same squares, percentages and segmented bars, same bottom bar with
+ * the wordmark, the statistics, the settings, the search and the plus. The only
+ * thing the window changes is that this screen no longer has to go away for
+ * something else to be shown.
  */
 @Composable
-private fun DeckColumn(
+private fun DecksColumn(
+    container: DesktopContainer,
     settings: IknaSettings,
     palette: IknaPalette,
     ui: DesktopUi,
     decks: List<DeckSummary>,
-    remaining: Map<String, Int>,
-    answered: Int,
-    target: Int
+    remaining: Map<String, Int>
 ) {
-    Column(Modifier.fillMaxSize().padding(vertical = Space.lg)) {
-        Column(Modifier.padding(horizontal = Space.lg)) {
-            Text(
-                text = S.t("pc.016"),
-                style = MaterialTheme.typography.labelSmall,
-                color = palette.muted
-            )
-            Spacer(Modifier.height(Space.xs))
-            Text(
-                text = answered.toString() + " / " + target,
-                style = MaterialTheme.typography.headlineSmall,
-                color = palette.ink
-            )
-            Spacer(Modifier.height(Space.sm))
-            IknaProgress(
-                fraction = if (target <= 0) 0f else answered.toFloat() / target,
-                color = palette.accent,
-                track = true
-            )
-        }
+    val scope = rememberCoroutineScope()
+    val todayTotal = remaining.values.sum()
 
-        Spacer(Modifier.height(Space.lg))
-        IknaRule(color = palette.line)
-        Spacer(Modifier.height(Space.md))
+    Box(Modifier.fillMaxSize()) {
+        IknaMemoryField(seed = 0x1A4B_7C2D, modifier = Modifier.fillMaxSize())
 
-        Text(
-            text = S.t("pc.015"),
-            style = MaterialTheme.typography.labelSmall,
-            color = palette.muted,
-            modifier = Modifier.padding(horizontal = Space.lg)
-        )
-        Spacer(Modifier.height(Space.sm))
+        Column(Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(BarHeight)
+                    .padding(start = Edge, end = Space.sm),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = S.t("deck.004"),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
 
-        if (decks.isEmpty()) {
-            Text(
-                text = S.t("deck.005"),
-                style = MaterialTheme.typography.bodyMedium,
-                color = palette.muted,
-                modifier = Modifier.padding(horizontal = Space.lg)
-            )
-        } else {
+            Column(Modifier.padding(horizontal = Edge)) {
+                Spacer(Modifier.height(Space.md))
+                IknaTodayBlock(total = todayTotal) { ui.study(null) }
+                Spacer(Modifier.height(Space.xl))
+            }
+
             LazyColumn(
-                modifier = Modifier.padding(horizontal = Space.md),
-                verticalArrangement = Arrangement.spacedBy(Space.xs)
+                modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = Edge),
+                verticalArrangement = Arrangement.spacedBy(Space.lg)
             ) {
                 items(decks, key = { it.id }) { deck ->
-                    DeckListRow(
+                    IknaDeckRow(
                         deck = deck,
                         look = settings.lookFor(deck.id),
-                        due = remaining[deck.id] ?: 0,
-                        selected = ui.openDeck == deck.id && ui.pane == Pane.DECK,
-                        palette = palette,
-                        onStudy = {
-                            ui.sessionDeck = deck.id
-                            ui.show(Pane.SESSION)
-                        },
-                        onOpen = {
-                            ui.openDeck = deck.id
-                            ui.show(Pane.DECK)
+                        dueToday = remaining[deck.id] ?: 0,
+                        perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
+                        onOpen = { ui.study(deck.id) },
+                        onOpenDeck = { ui.openDeckScreen(deck.id) },
+                        onToggle = { on ->
+                            scope.launch {
+                                runCatching {
+                                    container.deckRepository.setActive(deck.id, on)
+                                    container.learningRepository.invalidatePlan()
+                                }.onFailure { error -> logLine("deck toggle failed: " + error) }
+                                ui.refresh()
+                            }
                         }
                     )
                 }
+                if (decks.isEmpty()) {
+                    item {
+                        Column {
+                            Text(
+                                text = S.t("deck.005"),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = palette.muted
+                            )
+                            Spacer(Modifier.height(Space.lg))
+                            IknaLatticePlaceholder()
+                        }
+                    }
+                }
+                item { Spacer(Modifier.height(Space.lg)) }
             }
-        }
-    }
-}
 
-/** The title of what is on screen, and the day's figure when there is no list. */
-@Composable
-private fun ContentHeader(
-    palette: IknaPalette,
-    ui: DesktopUi,
-    decks: List<DeckSummary>,
-    answered: Int,
-    target: Int,
-    wide: Boolean
-) {
-    val title = when (ui.pane) {
-        Pane.SESSION -> decks.firstOrNull { it.id == ui.sessionDeck }?.title ?: S.t("pc.003")
-        Pane.DECK -> decks.firstOrNull { it.id == ui.openDeck }?.title ?: S.t("pc.015")
-        Pane.STATS -> S.t("stats.001")
-        Pane.SETTINGS -> S.t("set.012")
-    }
-    Row(
-        Modifier.fillMaxWidth().height(52.dp).padding(horizontal = Space.lg),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            color = palette.ink,
-            modifier = Modifier.weight(1f)
-        )
-        if (!wide) {
-            Text(
-                text = S.t("pc.016") + "  " + answered + " / " + target,
-                style = MaterialTheme.typography.labelSmall,
-                color = palette.muted
-            )
+            Spacer(Modifier.height(Space.md))
+
+            IknaBottomBar {
+                if (settings.leftHanded) {
+                    IknaIconButton(
+                        glyph = IknaGlyph.PLUS,
+                        onClick = { ui.show(Pane.ADD) },
+                        label = S.t("a11y.004")
+                    )
+                    IknaIconButton(
+                        glyph = IknaGlyph.SEARCH,
+                        onClick = { ui.show(Pane.SEARCH) },
+                        label = S.t("a11y.011")
+                    )
+                    Spacer(Modifier.weight(1f))
+                    IknaIconButton(
+                        glyph = IknaGlyph.GEAR,
+                        onClick = { ui.show(Pane.SETTINGS) },
+                        label = S.t("a11y.002")
+                    )
+                    IknaIconButton(
+                        glyph = IknaGlyph.BARS,
+                        onClick = { ui.show(Pane.STATS) },
+                        label = S.t("a11y.003")
+                    )
+                    if (settings.showWordmark) {
+                        IknaWordmark(modifier = Modifier.padding(start = Space.md))
+                    }
+                } else {
+                    if (settings.showWordmark) {
+                        IknaWordmark(modifier = Modifier.padding(start = Space.md))
+                    }
+                    IknaIconButton(
+                        glyph = IknaGlyph.BARS,
+                        onClick = { ui.show(Pane.STATS) },
+                        label = S.t("a11y.003")
+                    )
+                    IknaIconButton(
+                        glyph = IknaGlyph.GEAR,
+                        onClick = { ui.show(Pane.SETTINGS) },
+                        label = S.t("a11y.002")
+                    )
+                    Spacer(Modifier.weight(1f))
+                    IknaIconButton(
+                        glyph = IknaGlyph.SEARCH,
+                        onClick = { ui.show(Pane.SEARCH) },
+                        label = S.t("a11y.011")
+                    )
+                    IknaIconButton(
+                        glyph = IknaGlyph.PLUS,
+                        onClick = { ui.show(Pane.ADD) },
+                        label = S.t("a11y.004")
+                    )
+                }
+            }
         }
     }
 }
@@ -396,14 +366,21 @@ private fun PaneContent(
     palette: IknaPalette,
     ui: DesktopUi,
     decks: List<DeckSummary>,
-    remaining: Map<String, Int>,
-    answered: Int,
-    target: Int,
-    wide: Boolean,
-    edge: androidx.compose.ui.unit.Dp
+    wide: Boolean
 ) {
     val travel = with(LocalDensity.current) { Motion.sharedAxisTravel.roundToPx() }
     val motion = settings.animations
+
+    // In a wide window the deck screen never leaves, so the way back out of a
+    // pane is the cards. In a narrow one there is only ever one screen, and back
+    // means the deck screen, exactly as it does on a phone.
+    val back: () -> Unit = {
+        if (wide) {
+            ui.show(Pane.SESSION)
+        } else {
+            ui.listOpen = true
+        }
+    }
 
     AnimatedContent(
         targetState = ui.pane,
@@ -420,7 +397,8 @@ private fun PaneContent(
                 settings = settings,
                 palette = palette,
                 deckId = ui.sessionDeck,
-                onChanged = { ui.refresh() }
+                onChanged = { ui.refresh() },
+                onBack = back
             )
 
             Pane.DECK -> {
@@ -434,35 +412,42 @@ private fun PaneContent(
                         onChanged = { ui.refresh() },
                         onDeleted = {
                             ui.openDeck = null
-                            ui.show(Pane.SESSION)
                             ui.refresh()
-                        }
+                            back()
+                        },
+                        onBack = back
                     )
-                } else if (wide) {
-                    Centered(S.t("pc.004"), palette)
                 } else {
-                    // No room for the permanent list, so the list is the screen.
-                    DeckColumn(
-                        settings = settings,
-                        palette = palette,
-                        ui = ui,
-                        decks = decks,
-                        remaining = remaining,
-                        answered = answered,
-                        target = target
-                    )
+                    Centered(S.t("pc.004"), palette)
                 }
             }
 
-            Pane.STATS -> Box(Modifier.fillMaxSize().padding(horizontal = edge)) {
-                StatsPane(container, palette)
-            }
+            Pane.STATS -> StatsPane(container, palette, back)
 
-            Pane.SETTINGS -> Box(Modifier.fillMaxSize().padding(horizontal = edge)) {
-                Box(Modifier.widthIn(max = 720.dp)) {
-                    SettingsPane(container, settings, palette)
-                }
-            }
+            Pane.SETTINGS -> SettingsPane(container, settings, palette, back)
+
+            Pane.ADD -> AddDeckPane(
+                container = container,
+                palette = palette,
+                onChanged = { ui.refresh() },
+                onOpenCatalog = { ui.show(Pane.CATALOG) },
+                onBack = back
+            )
+
+            Pane.CATALOG -> CatalogPane(
+                container = container,
+                palette = palette,
+                onChanged = { ui.refresh() },
+                onBack = { ui.show(Pane.ADD) }
+            )
+
+            Pane.SEARCH -> SearchPane(
+                container = container,
+                palette = palette,
+                decks = decks,
+                onOpenDeck = { id -> ui.openDeckScreen(id) },
+                onBack = back
+            )
         }
     }
 }
@@ -482,8 +467,8 @@ private fun ShortcutsOverlay(palette: IknaPalette, onClose: () -> Unit) {
                     color = palette.ink
                 )
                 Spacer(Modifier.height(Space.sm))
-                ShortcutLine("Ctrl + 1", S.t("pc.003"), palette)
-                ShortcutLine("Ctrl + 2", S.t("pc.015"), palette)
+                ShortcutLine("Ctrl + 1", S.t("deck.007"), palette)
+                ShortcutLine("Ctrl + 2", S.t("deck.004"), palette)
                 ShortcutLine("Ctrl + 3", S.t("stats.001"), palette)
                 ShortcutLine("Ctrl + 4", S.t("set.012"), palette)
                 ShortcutLine("F11", S.t("pc.009"), palette)
@@ -491,11 +476,6 @@ private fun ShortcutsOverlay(palette: IknaPalette, onClose: () -> Unit) {
                 Spacer(Modifier.height(Space.sm))
                 Text(
                     text = S.t("pc.002"),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = palette.muted
-                )
-                Text(
-                    text = S.t("pc.014"),
                     style = MaterialTheme.typography.bodyMedium,
                     color = palette.muted
                 )

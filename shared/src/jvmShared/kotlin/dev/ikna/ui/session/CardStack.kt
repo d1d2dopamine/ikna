@@ -105,6 +105,14 @@ fun SwipeableCard(
     railsAtRest: Boolean,
     onReveal: () -> Unit,
     onRate: (Rating) -> Unit,
+    /**
+     * How far the card has to travel to become an answer, in pixels.
+     *
+     * Left at the default on a phone, where the card is the screen. A window
+     * passes a share of the card own width, so the gesture stays in the same
+     * proportion to the card whatever size the window is.
+     */
+    threshold: Float = SWIPE_THRESHOLD,
     content: @Composable (progress: () -> Float) -> Unit
 ) {
     val offsetX = remember(key) { Animatable(0f) }
@@ -129,7 +137,8 @@ fun SwipeableCard(
         if (animations) arrival.animateTo(1f, Motion.arrive) else arrival.snapTo(1f)
     }
 
-    val progress: () -> Float = { (offsetX.value / SWIPE_THRESHOLD).coerceIn(-1f, 1f) }
+    val line = if (threshold > 0f) threshold else SWIPE_THRESHOLD
+    val progress: () -> Float = { (offsetX.value / line).coerceIn(-1f, 1f) }
 
     val revealAction = S.t("card.002")
     val missAction = S.t("a11y.008")
@@ -183,7 +192,7 @@ fun SwipeableCard(
                         if (gradable.value) {
                             // One tick when the gesture becomes an answer, one when
                             // it stops being one. Never a stream of them.
-                            val candidate = armedRating(next)
+                            val candidate = armedRating(next, 0f, line)
                             if (candidate != armed.value) {
                                 if (candidate != null && haptics) {
                                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -201,7 +210,7 @@ fun SwipeableCard(
                     onDragEnd = {
                         val velocity = tracker.calculateVelocity()
                         val rating =
-                            if (gradable.value) decideRating(offsetX.value, 0f, velocity.x) else null
+                            if (gradable.value) decideRating(offsetX.value, 0f, velocity.x, line) else null
                         armed.value = null
                         if (rating == null) {
                             scope.launch { settle(offsetX, animations, velocity) }
