@@ -191,14 +191,30 @@ grapheme-to-phoneme system rather than a model, and it covers six of the eight
 languages directly: German, French, Spanish, Italian, Portuguese and Polish. For
 those, transcription is deterministic and needs no dictionary.
 
-**Portuguese is Brazilian** — `por-Latn-bz`. Two decisions had to be made and
-they are not obvious. European Portuguese reduces unstressed vowels heavily
-(`obrigado` ends closer to a swallowed sound than an open one) while Brazilian
-keeps them open; the two are audibly different languages to a beginner. Brazilian
-was chosen because it has far more speakers, because it is what most learners
-encounter first, and because its fuller vowels survive the trip through an
-English respelling much better — a reduced European vowel respells to `uh`,
-which tells the reader almost nothing.
+**Portuguese wants to be Brazilian, and cannot fully be.** European Portuguese
+reduces unstressed vowels heavily (`obrigado` ends closer to a swallowed sound
+than an open one) while Brazilian keeps them open; to a beginner the two are
+audibly different languages. Brazilian is what this project wants: it has far
+more speakers, it is what most learners meet first, and its fuller vowels
+survive the trip through an English respelling, whereas a reduced European vowel
+respells to `uh` and tells the reader almost nothing.
+
+Epitran, however, ships exactly one Portuguese map, `por-Latn`, and it is a
+compromise between the varieties rather than a Brazilian one. There is no
+`por-Latn-bz`. This is worth stating plainly because the earlier version of this
+file claimed that code, and asking Epitran for a map that does not exist is not
+quietly ignored — it raises `FileNotFoundError` when the map loads, which failed
+the catalogue run outright.
+
+So the pipeline names the map that ships and keeps the Brazilian preference in
+two places that cost nothing: `PREFERRED_EPITRAN_CODES` in `g2p.py`, which tries
+a Brazilian code first and silently falls back, so the day Epitran adds one it is
+picked up without a change here; and the espeak-ng cross-check, which really does
+distinguish `pt-br`, so a drift between the compromise map and Brazilian
+pronunciation shows up as a rising disagreement rate rather than as a silent
+shipped mistake. The honest summary: Portuguese transcription is currently a
+compromise variety, closer to Brazilian in the consonants than in the unstressed
+vowels.
 
 **English needs a dictionary**, not rules. English spelling does not determine
 pronunciation, so `CMUdict` (BSD-licensed) is used for lookup, with the phrase

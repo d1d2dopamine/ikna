@@ -43,7 +43,7 @@ python3 tools/catalog/build_catalog.py --tatoeba corpus --out catalog --phonetic
 | Language | Engine | Licence |
 | --- | --- | --- |
 | de, fr, es, it, pl | Epitran, rules | MIT |
-| pt | Epitran, `por-Latn-bz` — **Brazilian** | MIT |
+| pt | Epitran, `por-Latn` — a compromise variety, not Brazilian | MIT |
 | en | CMUdict, lookup | BSD |
 | ru | stress dictionary, then rules in this file | — |
 | — | espeak-ng, cross-check only, never shipped | GPL-3 |
