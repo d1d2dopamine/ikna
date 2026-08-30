@@ -30,25 +30,16 @@ import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaRule
-import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.awt.Toolkit
-import java.awt.datatransfer.StringSelection
 import java.io.File
 import javax.swing.JFileChooser
 
 /** A deck file that is larger than this is not a deck; it is a mistake. */
 private const val MAX_FILE_BYTES = 4L * 1024L * 1024L
-
-/** What the saved prompt is called when it lands in your folder. */
-private const val PROMPT_FILE = "ikna-deck-prompt.txt"
-
-/** Marker for reading the bundled prompt out of the jar. */
-private object AddDeckAssets
 
 /**
  * Everything behind the plus, which the window did not have at all.
@@ -70,7 +61,6 @@ fun AddDeckPane(
     var pasted by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
     var note by remember { mutableStateOf<String?>(null) }
-    var promptOpen by remember { mutableStateOf(false) }
 
     fun describe(report: DeckImport): String {
         val seen = report.installed + report.skipped
@@ -121,8 +111,6 @@ fun AddDeckPane(
         val stem = file.name.substringBeforeLast('.')
         install(file.name, text, if (stem.isBlank()) S.t("add.001") else stem)
     }
-
-    val promptText = remember { addReadAsset("prompt/deck_prompt.txt") }
 
     Column(
         modifier = Modifier
@@ -227,40 +215,14 @@ fun AddDeckPane(
                 color = palette.muted
             )
 
-            Spacer(Modifier.height(Space.lg))
-            IknaRule(color = palette.line)
-            Spacer(Modifier.height(Space.lg))
-
-            IknaTextButton(
-                label = if (promptOpen) S.t("add.037") else S.t("add.036"),
-                onClick = { promptOpen = !promptOpen }
-            )
-            if (promptOpen && promptText.isNotBlank()) {
-                Spacer(Modifier.height(Space.md))
-                Text(
-                    text = promptText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = palette.muted
-                )
-                Spacer(Modifier.height(Space.md))
-                IknaWideButton(
-                    label = S.t("add.007"),
-                    onClick = { addWriteClipboard(promptText) },
-                    modifier = Modifier.widthIn(max = 320.dp)
-                )
-                Spacer(Modifier.height(Space.sm))
-                IknaWideButton(
-                    label = S.t("add.008"),
-                    onClick = {
-                        val target = addPickFileForSave(PROMPT_FILE)
-                        if (target != null) {
-                            runCatching { target.writeText(promptText) }
-                                .onFailure { error -> logLine("prompt save failed: " + error) }
-                        }
-                    },
-                    modifier = Modifier.widthIn(max = 320.dp)
-                )
-            }
+            // Nothing here about the prompt.
+            //
+            // The phone keeps the model prompt behind a "how this works" line
+            // because a phone has nowhere else to put it. In a window that read
+            // as a page of instructions followed by two buttons about a text
+            // file, on the one screen whose whole job is to add a deck. The
+            // prompt still ships inside the app for whoever wants the file; it
+            // is simply not part of this screen any more.
         }
     }
 }
@@ -272,24 +234,3 @@ private fun addPickFileForRead(): File? {
     return if (answer == JFileChooser.APPROVE_OPTION) chooser.selectedFile else null
 }
 
-/** Ask where to put a file, with the platform dialog. */
-private fun addPickFileForSave(suggested: String): File? {
-    val chooser = JFileChooser()
-    chooser.selectedFile = File(suggested)
-    val answer = chooser.showSaveDialog(null)
-    return if (answer == JFileChooser.APPROVE_OPTION) chooser.selectedFile else null
-}
-
-/** Put text on the clipboard, which is how a prompt reaches a model. */
-private fun addWriteClipboard(text: String) {
-    runCatching {
-        Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(text), null)
-    }.onFailure { error -> logLine("clipboard write failed: " + error) }
-}
-
-/** Read a bundled text asset out of the jar. */
-private fun addReadAsset(path: String): String {
-    val loader = AddDeckAssets::class.java.classLoader ?: return ""
-    val stream = loader.getResourceAsStream(path) ?: return ""
-    return runCatching { stream.bufferedReader().use { reader -> reader.readText() } }.getOrDefault("")
-}

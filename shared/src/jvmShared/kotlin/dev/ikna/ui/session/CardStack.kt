@@ -116,6 +116,19 @@ fun SwipeableCard(
     content: @Composable (progress: () -> Float) -> Unit
 ) {
     val offsetX = remember(key) { Animatable(0f) }
+    // Where the pointer has taken the card, held in a plain state.
+    //
+    // This used to be a coroutine per pointer event -- scope.launch { snapTo }
+    // on every single move. A thumb can just about afford that; a mouse cannot.
+    // A mouse reports hundreds of moves a second, and each one allocated a
+    // coroutine and queued it on the UI thread before a single pixel moved,
+    // which is exactly what a card that will not keep up with the cursor feels
+    // like. The card now follows the pointer synchronously, and the Animatable
+    // is left to the two things that really are animations: the spring back and
+    // the throw off screen.
+    val drag = remember(key) { mutableStateOf(0f) }
+    val flying = remember(key) { mutableStateOf(false) }
+    val shift: () -> Float = { if (flying.value) offsetX.value else drag.value }
     // 0 while the card is still arriving, 1 once it has taken its place.
     val arrival = remember(key) { Animatable(if (animations) 0f else 1f) }
     val armed = remember(key) { mutableStateOf<Rating?>(null) }
@@ -138,7 +151,7 @@ fun SwipeableCard(
     }
 
     val line = if (threshold > 0f) threshold else SWIPE_THRESHOLD
-    val progress: () -> Float = { (offsetX.value / line).coerceIn(-1f, 1f) }
+    val progress: () -> Float = { (shift() / line).coerceIn(-1f, 1f) }
 
     val revealAction = S.t("card.002")
     val missAction = S.t("a11y.008")
@@ -187,8 +200,8 @@ fun SwipeableCard(
                     },
                     onDrag = { change, delta ->
                         tracker.addPosition(change.uptimeMillis, change.position)
-                        val next = offsetX.value + delta.x
-                        scope.launch { offsetX.snapTo(next) }
+                        val next = drag.value + delta.x
+                        drag.value = next
                         if (gradable.value) {
                             // One tick when the gesture becomes an answer, one when
                             // it stops being one. Never a stream of them.
@@ -205,21 +218,37 @@ fun SwipeableCard(
                     },
                     onDragCancel = {
                         armed.value = null
-                        scope.launch { settle(offsetX, animations) }
+                        scope.launch {
+                            flying.value = true
+                            offsetX.snapTo(drag.value)
+                            settle(offsetX, animations)
+                            drag.value = 0f
+                            flying.value = false
+                        }
                     },
                     onDragEnd = {
                         val velocity = tracker.calculateVelocity()
                         val rating =
-                            if (gradable.value) decideRating(offsetX.value, 0f, velocity.x, line) else null
+                            if (gradable.value) decideRating(drag.value, 0f, velocity.x, line) else null
                         armed.value = null
                         if (rating == null) {
-                            scope.launch { settle(offsetX, animations, velocity) }
+                            scope.launch {
+                                flying.value = true
+                                offsetX.snapTo(drag.value)
+                                settle(offsetX, animations, velocity)
+                                drag.value = 0f
+                                flying.value = false
+                            }
                         } else {
                             if (haptics) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             scope.launch {
+                                flying.value = true
+                                offsetX.snapTo(drag.value)
                                 if (animations) throwOut(offsetX, rating, velocity)
                                 rateNow.value(rating)
                                 offsetX.snapTo(0f)
+                                drag.value = 0f
+                                flying.value = false
                             }
                         }
                     }
@@ -232,9 +261,10 @@ fun SwipeableCard(
                 .fillMaxSize()
                 .graphicsLayer {
                     val landed = arrival.value.coerceIn(0f, 1f)
-                    translationX = offsetX.value
+                    val travelled = shift()
+                    translationX = travelled
                     translationY = (1f - landed) * 16.dp.toPx()
-                    rotationZ = offsetX.value / ROTATION_DIVISOR
+                    rotationZ = travelled / ROTATION_DIVISOR
                     val grow = 0.972f + 0.028f * landed
                     scaleX = grow
                     scaleY = grow

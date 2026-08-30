@@ -1,6 +1,8 @@
 package dev.ikna.desktop
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -25,11 +25,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.dp
 import dev.ikna.data.repo.StatsDigest
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
+import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.Space
@@ -108,10 +111,8 @@ fun StatsPane(
                 return@Column
             }
 
-            StatsBlock(S.t("stats.002"), palette) {
+            StatsBlock(S.t("stats.002"), palette, note = S.t("stats.003")) {
                 StatsActivityMap(days, palette)
-                Spacer(Modifier.height(Space.sm))
-                StatsLabel(S.t("stats.003"), palette)
             }
 
             StatsDividerLine(palette)
@@ -137,16 +138,17 @@ fun StatsPane(
                 )
             }
             Spacer(Modifier.height(Space.sm))
-            StatsLabel(if (measured) S.t("stats.005") else S.t("stats.006"), palette)
-            Spacer(Modifier.height(Space.xs))
-            StatsLabel(S.t("stats.009"), palette)
+            StatsBlock(
+                title = null,
+                palette = palette,
+                note = (if (measured) S.t("stats.005") else S.t("stats.006")) + "\n" +
+                    S.t("stats.009")
+            ) {}
 
             StatsDividerLine(palette)
 
-            StatsBlock(S.t("stats.010"), palette) {
+            StatsBlock(S.t("stats.010"), palette, note = S.t("stats.011")) {
                 StatsForecastBars(forecast, palette)
-                Spacer(Modifier.height(Space.sm))
-                StatsLabel(S.t("stats.011"), palette)
             }
 
             val measuredDigest = digest
@@ -166,21 +168,68 @@ fun StatsPane(
     }
 }
 
-/** A titled block, spelled the way the phone spells it. */
+/**
+ * One figure, and the reason for it kept behind a tap.
+ *
+ * The window printed every sentence at once, so a screen the phone reads as six
+ * numbers read here as six paragraphs of explanation. The phone puts the
+ * sentence behind a mark at the end of the title -- "?" when there is something
+ * to read, "\u2212" while it is open -- and the whole block is the target, not the
+ * mark itself. Same block, same mark, same place in every one of them.
+ */
 @Composable
 private fun StatsBlock(
-    title: String,
+    title: String?,
     palette: IknaPalette,
+    note: String? = null,
     content: @Composable () -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.labelMedium,
-            color = palette.muted
-        )
-        Spacer(Modifier.height(Space.sm))
+    var open by remember { mutableStateOf(false) }
+    val explained = note != null && note.isNotBlank()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(
+                if (explained) {
+                    Modifier.clickable(onClickLabel = S.t("a11y.007")) { open = !open }
+                } else {
+                    Modifier
+                }
+            )
+    ) {
+        if (title != null || explained) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (title != null) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = palette.muted
+                    )
+                }
+                Spacer(Modifier.weight(1f))
+                if (explained) {
+                    Text(
+                        text = if (open) "\u2212" else "?",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = palette.muted
+                    )
+                }
+            }
+            Spacer(Modifier.height(Space.sm))
+        }
         content()
+        if (open && note != null) {
+            Spacer(Modifier.height(Space.sm))
+            Text(
+                text = note,
+                style = MaterialTheme.typography.bodySmall,
+                color = palette.muted
+            )
+        }
     }
 }
 
@@ -189,15 +238,6 @@ private fun StatsDividerLine(palette: IknaPalette) {
     Spacer(Modifier.height(Space.lg))
     IknaRule(color = palette.line)
     Spacer(Modifier.height(Space.lg))
-}
-
-@Composable
-private fun StatsLabel(text: String, palette: IknaPalette) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodySmall,
-        color = palette.muted
-    )
 }
 
 /** A caption and a number, in the type sizes the phone uses. */
@@ -223,20 +263,41 @@ private fun StatsFigure(
     }
 }
 
-/** The month as a row of cells: filled on days you answered, hollow on days you did not. */
+/**
+ * Thirty marks in a row, oldest on the left, today on the right.
+ *
+ * This used to be fourteen-pixel squares with four pixels between them, which on
+ * a monitor is a short strip of tiles that stops nowhere near the width of
+ * anything else on the screen. The phone draws the month as one canvas: thirty
+ * columns share the full width, a day with a session is full height, a day
+ * without one is a low mark on the same centre line. Nothing is red, nothing is
+ * counted out loud.
+ */
 @Composable
 private fun StatsActivityMap(days: List<Boolean>, palette: IknaPalette) {
-    Row(
-        modifier = Modifier.fillMaxWidth().height(36.dp),
-        verticalAlignment = Alignment.CenterVertically
+    // The repository hands back the most recent day first; drawing runs the
+    // other way round, so today lands on the right where the phone puts it.
+    val ordered = days.reversed()
+    val accent = palette.accent
+    val idle = palette.line
+
+    Canvas(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(36.dp)
     ) {
-        days.forEach { active ->
-            Box(
-                modifier = Modifier
-                    .size(14.dp)
-                    .background(if (active) palette.accent else palette.line)
+        val count = 30
+        val gap = size.width * 0.012f
+        val cell = (size.width - gap * (count - 1)) / count
+        for (index in 0 until count) {
+            val active = ordered.getOrNull(index) == true
+            val markHeight = if (active) size.height else size.height * 0.28f
+            val top = (size.height - markHeight) / 2f
+            drawRect(
+                color = if (active) accent else idle,
+                topLeft = Offset(index * (cell + gap), top),
+                size = Size(cell, markHeight)
             )
-            Spacer(Modifier.width(4.dp))
         }
     }
 }
@@ -275,32 +336,38 @@ private fun StatsForecastBars(forecast: List<Int>, palette: IknaPalette) {
 /** Retention, and the sample size that earns the right to print it. */
 @Composable
 private fun StatsRetention(digest: StatsDigest, palette: IknaPalette) {
-    StatsBlock(S.t("stats.012"), palette) {
-        val value = digest.retention
-        if (value == null || digest.retentionSample < 20) {
-            StatsLabel(S.t("stats.013") + digest.retentionSample.toString(), palette)
-            return@StatsBlock
+    val value = digest.retention
+    if (value == null || digest.retentionSample < 20) {
+        StatsBlock(
+            title = S.t("stats.012"),
+            palette = palette,
+            note = S.t("stats.013") + digest.retentionSample.toString()
+        ) {
+            // The same unfinished lattice the phone draws. A dash reads as a
+            // number that failed to load; this reads as not enough answers yet.
+            IknaLatticePlaceholder()
         }
-        val percent = (value * 100.0).roundToInt()
+        return
+    }
+
+    val percent = (value * 100.0).roundToInt()
+    val verdict = when {
+        percent < 80 -> S.t("stats.017")
+        percent > 95 -> S.t("stats.018")
+        else -> S.t("stats.019")
+    }
+
+    // The sample size and the verdict are one thought, so they open together.
+    StatsBlock(
+        title = S.t("stats.012"),
+        palette = palette,
+        note = S.t("stats.014") + digest.retentionSample.toString() +
+            S.t("stats.015") + percent.toString() + S.t("stats.016") + "\n" + verdict
+    ) {
         Text(
             text = percent.toString() + "%",
             style = MaterialTheme.typography.headlineMedium,
             color = palette.ink
-        )
-        Spacer(Modifier.height(Space.sm))
-        StatsLabel(
-            S.t("stats.014") + digest.retentionSample.toString() +
-                S.t("stats.015") + percent.toString() + S.t("stats.016"),
-            palette
-        )
-        Spacer(Modifier.height(Space.xs))
-        StatsLabel(
-            when {
-                percent < 80 -> S.t("stats.017")
-                percent > 95 -> S.t("stats.018")
-                else -> S.t("stats.019")
-            },
-            palette
         )
     }
 }
@@ -334,16 +401,25 @@ private fun StatsMinutes(digest: StatsDigest, palette: IknaPalette) {
 /** When recall goes best -- silent until an hour has enough answers to mean it. */
 @Composable
 private fun StatsBestHours(digest: StatsDigest, palette: IknaPalette) {
-    StatsBlock(S.t("stats.025"), palette) {
-        val best = digest.bestHour
-        val confident = digest.hours.any { it.answers >= HOUR_CONFIDENT }
-        if (best == null || !confident) {
-            StatsLabel(S.t("stats.028"), palette)
-            return@StatsBlock
+    val best = digest.bestHour
+    val confident = digest.hours.any { it.answers >= HOUR_CONFIDENT }
+    if (best == null || !confident) {
+        StatsBlock(
+            title = S.t("stats.025"),
+            palette = palette,
+            note = S.t("stats.028")
+        ) {
+            IknaLatticePlaceholder()
         }
+        return
+    }
+
+    StatsBlock(
+        title = S.t("stats.025"),
+        palette = palette,
+        note = S.t("stats.026") + statsHourText(best) + S.t("stats.027")
+    ) {
         StatsHourBars(digest, palette)
-        Spacer(Modifier.height(Space.sm))
-        StatsLabel(S.t("stats.026") + statsHourText(best) + S.t("stats.027"), palette)
     }
 }
 
@@ -378,7 +454,7 @@ private fun StatsHourBars(digest: StatsDigest, palette: IknaPalette) {
 /** The cards that will not stick, named plainly. */
 @Composable
 private fun StatsLeeches(digest: StatsDigest, palette: IknaPalette) {
-    StatsBlock(S.t("stats.029"), palette) {
+    StatsBlock(S.t("stats.029"), palette, note = S.t("stats.031")) {
         digest.leeches.forEach { item ->
             Text(
                 text = item.text,
@@ -402,7 +478,6 @@ private fun StatsLeeches(digest: StatsDigest, palette: IknaPalette) {
             )
             Spacer(Modifier.height(Space.md))
         }
-        StatsLabel(S.t("stats.031"), palette)
     }
 }
 

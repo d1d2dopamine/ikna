@@ -1,17 +1,17 @@
 package dev.ikna.desktop
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -194,7 +194,10 @@ fun SessionPane(
         )
         Spacer(Modifier.height(18.dp))
 
-        Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+        BoxWithConstraints(
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
             if (loading) {
                 Text(
                     text = S.t("sess.001"),
@@ -218,28 +221,33 @@ fun SessionPane(
             } else {
                 val mode = settings.phoneticsFor(current.chunk.packId)
                 val subject = current.chunk.lang == NO_LANG
-                // The card keeps the proportions it has on a phone rather than
-                // stretching to the width of a monitor: a line of text two
-                // thousand pixels wide is not a card, it is a paragraph.
-                BoxWithConstraints(
-                    Modifier
-                        .fillMaxHeight()
-                        .widthIn(max = 760.dp)
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                ) {
-                    // The gesture is a share of this card, not a fixed distance.
-                    //
-                    // The phone's 140 pixels were measured against a screen that
-                    // IS the card. Here the card is a box in the middle of a
-                    // window: at 760dp that distance is a tenth of it, and in a
-                    // narrow window it is a third. Same hand, same drag, two
-                    // different meanings. Thirteen percent of the card's own width
-                    // keeps the feel identical at every size, with a floor and a
-                    // ceiling so a tiny window cannot grade on a twitch and a huge
-                    // one cannot demand a shove.
-                    val cardWidthPx = with(LocalDensity.current) { maxWidth.toPx() }
-                    val swipeLine = (cardWidthPx * 0.13f).coerceIn(56f, 220f)
+                // A card with the proportions of a card.
+                //
+                // This box used to be 760dp wide and as tall as the pane, which
+                // is not a card, it is a wall. Nothing was wrong with the text:
+                // it was that the box holding it had no shape of its own, so the
+                // words gathered in the middle of a huge rectangle, the rule
+                // under the prompt looked like a line ruled across the centre of
+                // the window, and every edge was far away from anything. A phone
+                // card is portrait and it has a border you can see, so the window
+                // mirrors the shape rather than the pixel count: as tall as the
+                // pane allows, seven tenths of that in width, and drawn with an
+                // outline so the card is an object being moved rather than text
+                // sliding over a background.
+                val cardHeight = maxHeight.coerceAtMost(720.dp)
+                val cardWidth = (cardHeight * 0.70f)
+                    .coerceIn(320.dp, 560.dp)
+                    .coerceAtMost(maxWidth)
+                // The gesture is a share of this card, not a fixed distance.
+                //
+                // The phone's 140 pixels were measured against a screen that IS
+                // the card. Here the card is an object in the middle of a window,
+                // so thirteen percent of its own width keeps the feel identical
+                // at every size, with a floor and a ceiling so a tiny window
+                // cannot grade on a twitch and a huge one cannot demand a shove.
+                val cardWidthPx = with(LocalDensity.current) { cardWidth.toPx() }
+                val swipeLine = (cardWidthPx * 0.13f).coerceIn(56f, 220f)
+                Box(Modifier.width(cardWidth).height(cardHeight)) {
                     SwipeableCard(
                         key = current.card.key + ":" + index,
                         revealed = revealed,
@@ -282,7 +290,9 @@ fun SessionPane(
                             progress = progress,
                             onTap = { revealed = true },
                             tapEnabled = !revealed,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .border(1.dp, palette.line)
                         )
                     }
                 }
