@@ -17,8 +17,8 @@ set -euo pipefail
 #   bash tools/catalog/fetch-bundled-pack.sh --update   # re-pin to what is published
 url="https://github.com/d1d2dopamine/ikna/releases/download/catalog/en-ru-beginner.jsonl"
 dest="app/src/main/assets/packs/en-ru-beginner.jsonl"
-expected_size="1066608"
-expected_sha256="1a60305e630e75fbd86e449173f9bd1b9cc5ac5fb6822f85d00163b2aed32d9b"
+expected_size="1196978"
+expected_sha256="70a84018057208aae631ce00f16b4c1d7be009660a9b75fee39dfa167530f8f7"
 
 mode="verify"
 case "${1:-}" in
