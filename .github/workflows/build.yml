@@ -194,28 +194,38 @@ jobs:
       # exactly what sun/misc/Unsafe was -- fails here and prints a stack trace
       # a person can read.
       #
-      # It runs the bundled runtime's own java rather than Ikna.exe, because a
-      # windowed launcher detaches from the console and returns nothing to the
-      # shell. Same classes, same trimmed runtime, an exit code that can be
-      # believed. It sits after the upload so a failure still leaves an artifact
-      # to look at.
+      # It runs Ikna.exe itself. The runtime image jpackage assembles has its
+      # launchers stripped out -- runtime/bin holds libraries and no java.exe --
+      # so the application's own executable is the only way in. That executable
+      # is a windowed program with no console attached, so the console stays
+      # empty and the answer is read from the exit code and from the log the
+      # test writes into a folder named here. The step sits after the upload, so
+      # a failure still leaves an artifact to look at.
       - name: Self test
         shell: bash
+        env:
+          IKNA_SELFTEST_HOME: selftest-home
         run: |
           set -e
           root="desktop/build/compose/binaries/main-release/app"
-          # The runtime is located rather than spelled out: jpackage decides the
-          # folder name, and on Windows the launcher is java.exe, which a bash
-          # path written without the suffix does not find.
-          java_exe=$(find "$root" -name 'java.exe' -o -name 'java' -type f | head -n 1)
-          if [ -z "$java_exe" ]; then
-            echo "No bundled runtime under $root:"
-            find "$root" -maxdepth 3 -type d
+          exe=$(find "$root" -name 'Ikna.exe' -o -name 'Ikna' -type f | head -n 1)
+          if [ -z "$exe" ]; then
+            echo "No application launcher under $root:"
+            find "$root" -maxdepth 3
             exit 1
           fi
-          appdir=$(dirname "$(dirname "$(dirname "$java_exe")")")
-          echo "Runtime: $java_exe"
-          "$java_exe" -cp "$appdir/app/*" dev.ikna.desktop.MainKt --selftest
+          echo "Launcher: $exe"
+          code=0
+          timeout 300 "$exe" --selftest || code=$?
+          log="$IKNA_SELFTEST_HOME/logs/ikna-desktop.log"
+          if [ -f "$log" ]; then
+            echo "----- self test log -----"
+            cat "$log"
+            echo "-------------------------"
+          else
+            echo "The self test wrote no log at $log"
+          fi
+          exit $code
 
       # The installer is a convenience, not the deliverable. It needs WiX, which
       # the runner may or may not have, so a failure here must not take the

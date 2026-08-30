@@ -230,12 +230,22 @@ private fun saveGeometry(home: File, state: WindowState) {
 // would have caught it on the build machine, in the job that produced it.
 // ---------------------------------------------------------------------------
 
+/**
+ * Said twice: once to the console for a person running this by hand, once to
+ * the log for the packaged launcher, which has no console to say it to.
+ */
+private fun say(text: String) {
+    println(text)
+    logLine(text)
+}
+
 private fun selfTest(home: File): Int = try {
+    logHome = home
     // The class that was missing. Named here so a broken runtime image fails
     // with a sentence rather than with a message box the CI machine has nobody
     // to show to.
     Class.forName("sun.misc.Unsafe")
-    println("selftest: sun.misc.Unsafe present")
+    say("selftest: sun.misc.Unsafe present")
 
     runBlocking {
         val container = DesktopContainer(home)
@@ -250,23 +260,31 @@ private fun selfTest(home: File): Int = try {
 
         val decks = container.deckRepository.decks()
         val plan = container.learningRepository.buildSession(deckId = null)
-        println(
+        say(
             "selftest: decks=" + decks.size +
                 " cards=" + plan.cards.size +
                 " palette=" + after.paletteId
         )
     }
-    println("selftest: ok")
+    say("selftest: ok")
     0
 } catch (error: Throwable) {
     System.err.println("selftest: FAILED")
     error.printStackTrace()
+    logLine("selftest: FAILED\n" + traceOf(error))
     1
 }
 
 fun main(args: Array<String>) {
     if (args.any { it == "--selftest" }) {
-        val sandbox = File(System.getProperty("java.io.tmpdir"), "ikna-selftest")
+        // Where the test runs is an input, because the packaged launcher is a
+        // windowed program: nothing it prints reaches a console, so the build
+        // machine reads the result out of the log file and has to be told where
+        // that file will be.
+        val chosen = System.getenv("IKNA_SELFTEST_HOME")?.takeIf { it.isNotBlank() }
+        val sandbox =
+            if (chosen != null) File(chosen)
+            else File(System.getProperty("java.io.tmpdir"), "ikna-selftest")
         sandbox.mkdirs()
         FontStore.baseDir = sandbox
         exitProcess(selfTest(sandbox))
