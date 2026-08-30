@@ -293,7 +293,17 @@ def load_russian_stress(path=None):
     """
     table = {}
     if not path:
-        return lambda word: table.get(word)
+        # A one-vowel word is unambiguous even without a dictionary. Keep this
+        # path consistent with lookup() below instead of returning table.get:
+        # the old early return accidentally made even `да` unknown.
+        def lookup_unambiguous(word):
+            vowels = [
+                i for i, c in enumerate(word)
+                if c in RussianEngine.VOWELS
+            ]
+            return vowels[0] if len(vowels) == 1 else None
+
+        return lookup_unambiguous
 
     with open(path, encoding="utf-8") as fh:
         for line in fh:
@@ -450,7 +460,17 @@ SELFTEST = {
 
 
 def selftest(lang, russian_stress=None):
-    tr = transcriber_for(lang, russian_stress)
+    if lang == "ru" and not russian_stress:
+        # The catalogue correctly refuses multi-vowel Russian words when no
+        # stress dictionary was supplied. A self-test has a different job: it
+        # must test the Russian letter-to-sound rules in a clean checkout,
+        # without pretending that a production stress dictionary exists.
+        # These two indices belong only to the two fixed test words above and
+        # never enter a generated deck.
+        selftest_stress = {"спасибо": 4, "да": 1}
+        tr = Transcriber("ru", RussianEngine(selftest_stress.get))
+    else:
+        tr = transcriber_for(lang, russian_stress)
     if tr is None:
         print("no transcriber for %s" % lang)
         return 1
