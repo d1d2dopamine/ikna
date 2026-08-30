@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 // ---------------------------------------------------------------------------
 // Plugin ids and versions are written out in full, on purpose.
 //
@@ -9,14 +11,39 @@
 // does not need the indirection, and this way the build depends on this file
 // alone.
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Why Kotlin 2.2.20 and not the 2.0.20 that shipped every release up to 0.10.0.
+//
+// The Windows build described in docs/DESKTOP.md is Compose Multiplatform, and
+// every Compose Multiplatform release from 1.8 onwards refuses to configure on
+// a Kotlin older than 2.1.0. Raising the compiler is therefore not part of the
+// desktop work, it is the precondition for it -- and it is done here, alone,
+// with nothing else in the change, so that a compiler upgrade and a source tree
+// reorganisation can never fail in the same build and be mistaken for each
+// other.
+//
+// The four numbers below are not independent choices:
+//
+//   AGP 8.6.1     unchanged. JetBrains publishes the window each Kotlin Gradle
+//                 plugin is tested against; 2.2.20 covers AGP 7.3.1-8.11.1 and
+//                 Gradle 7.6.3-8.14, which contains this AGP and the 8.10.2
+//                 pinned in .github/workflows/build.yml. Neither has to move,
+//                 and compileSdk stays at 35.
+//   Kotlin 2.2.20  the compiler, the Compose compiler plugin and the
+//                 serialization plugin are one release train and must carry the
+//                 same number.
+//   KSP 2.2.20-2.0.4   KSP tracks the compiler exactly. The suffix is not cosmetic:
+//                 any other one fails the build with "ksp ... is too old for
+//                 kotlin ...".
+// ---------------------------------------------------------------------------
 plugins {
     id("com.android.application") version "8.6.1"
-    id("org.jetbrains.kotlin.android") version "2.0.20"
+    id("org.jetbrains.kotlin.android") version "2.2.20"
     // Compose compiler is a separate Gradle plugin since Kotlin 2.0; without it
     // AGP fails configuration as soon as buildFeatures.compose is enabled.
-    id("org.jetbrains.kotlin.plugin.compose") version "2.0.20"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.20"
-    id("com.google.devtools.ksp") version "2.0.20-1.0.25"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.2.20"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
+    id("com.google.devtools.ksp") version "2.2.20-2.0.4"
 }
 
 // ---------------------------------------------------------------------------
@@ -192,7 +219,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
 
     testOptions {
         unitTests {
@@ -206,10 +232,39 @@ android {
     packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
 }
 
+// The JVM bytecode level, in the block that replaced android.kotlinOptions.
+// That older DSL is deprecated from Kotlin 2.1 and scheduled for removal, and
+// this is the same setting said the way the desktop module will have to say it,
+// so both halves of the build will eventually read alike.
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+    }
+}
+
 // Room writes its schema history here. Top level, not inside defaultConfig:
 // this configures KSP, not a product flavour, and nesting it only worked by
 // accident of Kotlin scoping.
-ksp { arg("room.schemaLocation", "$projectDir/schemas") }
+//
+// The Room Gradle plugin is deliberately NOT applied, although the Room
+// documentation now leads with it. Applying it moves the schema history into
+// per-variant folders -- schemas/<variant>/dev.ikna.data.db.IknaDatabase/5.json
+// -- and Google's own note says the existing files then have to be copied
+// across by hand. SchemaTest reads schemas/dev.ikna.data.db.IknaDatabase, and
+// the CI step named "Schemas are committed" watches that same path, so the
+// annotation processor argument stays and the folder keeps its shape.
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+
+    // Room 2.7 generates Kotlin DAO implementations rather than Java, and does
+    // so by default. It is written down instead of left implicit because it
+    // changes what a query returning no rows does: the generated Kotlin throws
+    // where the generated Java returned null. Every single-row query in Daos.kt
+    // already declares a nullable return -- lastAnswer, forDay, latest -- so
+    // there is nothing here for it to break, and if a later one forgets, the
+    // build fails instead of the phone.
+    arg("room.generateKotlin", "true")
+}
 
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
@@ -229,9 +284,22 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.navigation:navigation-compose:2.8.2")
 
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
+    // Room 2.7.2 rather than 2.6.1, and deliberately neither 2.8 nor 3.0.
+    //
+    // 2.7 is the first stable Room that can generate a database for a target
+    // that is not Android, which is what the Windows build will need. It still
+    // accepts everything this project already does -- the SupportSQLiteDatabase
+    // handed to every migration in Migrations.kt, to the onCreate callback in
+    // IknaDatabase.kt, and to the hand-written virtual table in ChunkFtsIndex.kt.
+    //
+    // Room 3.0 takes that away: SupportSQLiteDatabase is reachable only through
+    // a compatibility wrapper and a driver must be set explicitly. Room 2.8 is
+    // sound but is built against compileSdk 36, which AGP 8.6.1 cannot compile
+    // against, so it would drag the Android plugin along with it. Both are
+    // upgrades for their own day, not for this one.
+    implementation("androidx.room:room-runtime:2.7.2")
+    implementation("androidx.room:room-ktx:2.7.2")
+    ksp("androidx.room:room-compiler:2.7.2")
 
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("androidx.work:work-runtime-ktx:2.9.1")

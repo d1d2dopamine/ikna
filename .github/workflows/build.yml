@@ -27,7 +27,7 @@ jobs:
           java-version: "17"
 
       # No wrapper jar is committed, so the Gradle version is pinned here.
-      # 8.10.2 is the version this project's AGP 8.6.1 / Kotlin 2.0.20 pair is
+      # 8.10.2 is the version this project's AGP 8.6.1 / Kotlin 2.2.20 pair is
       # tested against; letting the action pick "latest" silently changes the
       # toolchain under the build.
       - name: Gradle
