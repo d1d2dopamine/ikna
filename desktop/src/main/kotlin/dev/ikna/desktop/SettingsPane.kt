@@ -754,3 +754,27 @@ private suspend fun diagnosticsText(container: DesktopContainer): String {
         append("font: " + (if (FontStore.exists()) "file" else "system"))
     }
 }
+
+private fun pickFileForRead(title: String): java.io.File? {
+    val chooser = javax.swing.JFileChooser()
+    chooser.dialogTitle = title
+    chooser.fileSelectionMode = javax.swing.JFileChooser.FILES_ONLY
+    chooser.isMultiSelectionEnabled = false
+    val answer = chooser.showOpenDialog(null)
+    if (answer != javax.swing.JFileChooser.APPROVE_OPTION) return null
+    val picked: java.io.File = chooser.selectedFile ?: return null
+    return if (picked.isFile) picked else null
+}
+
+private fun fileNameFor(title: String): String {
+    val cleaned = title.trim().map { ch -> if (ch.isLetterOrDigit()) ch else '-' }.joinToString("")
+    val trimmed = cleaned.trim('-').take(48)
+    return (if (trimmed.isEmpty()) "deck" else trimmed) + ".txt"
+}
+
+private fun writeClipboardText(text: String) {
+    runCatching {
+        val selection = java.awt.datatransfer.StringSelection(text)
+        java.awt.Toolkit.getDefaultToolkit().systemClipboard.setContents(selection, selection)
+    }.onFailure { error -> logLine("clipboard failed: " + error) }
+}
