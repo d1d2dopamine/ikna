@@ -11,6 +11,13 @@
 # opinion only, and it is installed there with apt rather than pinned here, so
 # that nothing it produces can end up inside a published deck by accident.
 
+# PanPhon 0.21.2 still imports pkg_resources at runtime. setuptools removed
+# that compatibility module in 81, so an unbounded runner silently upgrades
+# into an environment where Epitran installs but cannot be imported. 80.10.2 is
+# the last release before the removal. Remove this pin when PanPhon stops using
+# pkg_resources, not merely when a newer setuptools exists.
+setuptools==80.10.2
+
 # Rule-based grapheme-to-phoneme. MIT. Covers de, fr, es, it, pl and pt-BR
 # without a dictionary, deterministically and offline.
 epitran==1.25.1
