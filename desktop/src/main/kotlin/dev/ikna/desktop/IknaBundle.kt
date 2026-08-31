@@ -177,7 +177,7 @@ object IknaBundle {
     suspend fun read(container: DesktopContainer, source: File): BundleRead {
         val head = runCatching {
             source.inputStream().use { it.readNBytes(2) }
-        }.getOrNull().orEmpty()
+        }.getOrNull() ?: ByteArray(0)
         val isZip = head.size == 2 &&
             head[0] == 'P'.code.toByte() &&
             head[1] == 'K'.code.toByte()

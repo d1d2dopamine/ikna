@@ -140,7 +140,7 @@ fun BackupPane(
 
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Row(modifier = Modifier.fillMaxWidth().padding(Space.md)) {
-            IknaIconButton(glyph = IknaGlyph.BACK, palette = palette, onClick = onBack)
+            IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
         }
         Spacer(Modifier.height(Space.md))
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Space.lg)) {
