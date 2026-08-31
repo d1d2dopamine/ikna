@@ -22,6 +22,10 @@ dependencies {
     implementation(project(":shared"))
     implementation(compose.desktop.currentOs)
     implementation("androidx.sqlite:sqlite-bundled:2.5.2")
+    // Anki writes its newest collections compressed. The phone reads them
+    // through the same library; the window needs its own copy because
+    // :desktop does not depend on :app.
+    implementation("com.github.luben:zstd-jni:1.5.6-8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
 }
 

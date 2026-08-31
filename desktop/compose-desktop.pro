@@ -144,3 +144,9 @@
 # code refers to either the class or the method. Renamed or removed, a crash
 # inside an event goes back to being a silent one.
 -keep class dev.ikna.desktop.AwtCrashHandler { *; }
+
+# Zstandard, for reading collections exported by a current Anki. The library
+# loads a native component by reflection, so its own classes and the JNI entry
+# points have to keep their names.
+-keep class com.github.luben.zstd.** { *; }
+-dontwarn com.github.luben.zstd.**

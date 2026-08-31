@@ -3,6 +3,7 @@ package dev.ikna.desktop
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.ikna.data.repo.StatsDigest
 import dev.ikna.ui.text.S
@@ -117,7 +119,19 @@ fun StatsPane(
 
             StatsDividerLine(palette)
 
-            Row(modifier = Modifier.fillMaxWidth()) {
+            // Three numbers that stay level with each other.
+            //
+            // The captions above them are not the same length in any language,
+            // so in a narrow window one wrapped onto two lines and another did
+            // not, and the numbers ended up at different heights -- the shifting
+            // interface. Aligned to the bottom, the numbers sit on one line
+            // whatever the captions do above them, and the gap between the
+            // columns keeps the words from meeting.
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Space.md),
+                verticalAlignment = Alignment.Bottom
+            ) {
                 StatsFigure(
                     caption = S.t("stats.004"),
                     value = target.toString(),
@@ -252,7 +266,9 @@ private fun StatsFigure(
         Text(
             text = caption,
             style = MaterialTheme.typography.labelMedium,
-            color = palette.muted
+            color = palette.muted,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
         Spacer(Modifier.height(Space.xs))
         Text(

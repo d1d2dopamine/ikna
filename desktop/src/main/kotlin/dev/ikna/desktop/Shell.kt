@@ -191,7 +191,19 @@ private fun DesktopShell(
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= 900.dp
-        val listWidth = if (maxWidth >= 1400.dp) 380.dp else 340.dp
+        // The deck column keeps a proportion, not a pixel count.
+        //
+        // A fixed 340dp is a third of a small window and a seventh of a large
+        // one, and at the small end it was taking the width the pane beside it
+        // needed, which is where the numbers started wrapping and moving. Three
+        // steps instead: 300dp is the narrowest the bottom bar's five buttons
+        // and the wordmark sit in without touching, and it is only used when the
+        // window is near its floor.
+        val listWidth = when {
+            maxWidth >= 1400.dp -> 380.dp
+            maxWidth >= 1180.dp -> 340.dp
+            else -> 300.dp
+        }
 
         if (wide) {
             Row(Modifier.fillMaxSize()) {

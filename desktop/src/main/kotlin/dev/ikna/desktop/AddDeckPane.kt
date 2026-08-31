@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +56,7 @@ fun AddDeckPane(
     palette: IknaPalette,
     onChanged: () -> Unit,
     onOpenCatalog: () -> Unit,
+    onOpenAnki: () -> Unit,
     onBack: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
@@ -110,6 +112,30 @@ fun AddDeckPane(
         }
         val stem = file.name.substringBeforeLast('.')
         install(file.name, text, if (stem.isBlank()) S.t("add.001") else stem)
+    }
+
+    // A deck file dropped on the window is the same request as choosing one
+    // from the dialog, so it is not asked about twice. Packages are not claimed
+    // here -- the Anki screen takes those, and Shell has already opened it.
+    LaunchedEffect(DesktopDrop.pending) {
+        val dropped = DesktopDrop.pending
+        val package_ = dropped != null && (
+            dropped.name.endsWith(".apkg", ignoreCase = true) ||
+                dropped.name.endsWith(".colpkg", ignoreCase = true)
+            )
+        if (!busy && dropped != null && !package_) {
+            DesktopDrop.pending = null
+            val text = if (dropped.length() > MAX_FILE_BYTES) null
+            else runCatching { dropped.readText() }.getOrNull()
+            when {
+                dropped.length() > MAX_FILE_BYTES -> note = S.t("add.018")
+                text == null -> note = S.t("add.019")
+                else -> {
+                    val stem = dropped.name.substringBeforeLast('.')
+                    install(dropped.name, text, if (stem.isBlank()) S.t("add.001") else stem)
+                }
+            }
+        }
     }
 
     Column(
@@ -204,14 +230,14 @@ fun AddDeckPane(
 
             IknaWideButton(
                 label = S.t("anki.001"),
-                onClick = {},
+                onClick = onOpenAnki,
                 modifier = Modifier.widthIn(max = 320.dp),
-                enabled = false
+                enabled = !busy
             )
             Spacer(Modifier.height(Space.sm))
             Text(
-                text = S.t("pc.001"),
-                style = MaterialTheme.typography.labelMedium,
+                text = S.t("anki.026"),
+                style = MaterialTheme.typography.bodySmall,
                 color = palette.muted
             )
 

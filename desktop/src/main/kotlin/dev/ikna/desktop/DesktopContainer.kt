@@ -9,6 +9,8 @@ import dev.ikna.data.prefs.suppressedOf
 import dev.ikna.data.repo.ComponentRepository
 import dev.ikna.data.repo.DeckRepository
 import dev.ikna.data.repo.LearningRepository
+import dev.ikna.data.repo.RestoreRepository
+import dev.ikna.desktop.anki.AnkiImporter
 import dev.ikna.domain.fsrs.FsrsParams
 import dev.ikna.domain.fsrs.Scheduler
 import dev.ikna.domain.governor.ChunkSelector
@@ -21,8 +23,11 @@ import java.io.File
  * The desktop dependency container.
  *
  * The same graph AppContainer builds on Android, minus the parts that are an
- * Android implementation rather than a feature: speech, Anki import, the
- * reminder scheduler and the widget. Everything that decides what a card is and
+ * Android implementation rather than a feature: speech, the reminder scheduler
+ * and the widget. Anki import is no longer on that list -- it was there because
+ * the reader was written against android.database, not because importing a file
+ * is a phone activity, and an .apkg is nearly always already on a computer.
+ * Everything that decides what a card is and
  * when it comes back is the identical object on both platforms, which is the
  * point of the module split -- the scheduler cannot drift between the phone and
  * the computer because there is only one of it.
@@ -34,7 +39,7 @@ class DesktopContainer(val home: File) {
 
     val config: GovernorConfig = GovernorConfig.load(ClasspathAssets)
 
-    private val db = openIknaDatabase(File(home, "ikna.db"))
+    internal val db = openIknaDatabase(File(home, "ikna.db"))
 
     val settings = SettingsStore(createSettingsDataStore(File(home, SETTINGS_DATASTORE_FILE)))
 
@@ -67,6 +72,35 @@ class DesktopContainer(val home: File) {
     val deckRepository = DeckRepository(
         chunkDao = db.chunkDao(),
         packLoader = packLoader
+    )
+
+    /**
+     * Replaying a review log, which an Anki import is a special case of.
+     *
+     * Anki's own intervals are not carried across -- its scheduler is not this
+     * one -- so the history is replayed through ikna's scheduler instead, and
+     * the schedule that comes out is the schedule this app would have produced
+     * had the answers been given here.
+     */
+    val restoreRepository = RestoreRepository(
+        cardDao = db.cardDao(),
+        reviewDao = db.reviewDao(),
+        statsDao = db.statsDao(),
+        planDao = db.planDao(),
+        components = componentRepository,
+        scheduler = scheduler,
+        config = config
+    )
+
+    val ankiImporter = AnkiImporter(
+        db = db,
+        chunkDao = db.chunkDao(),
+        packs = packLoader,
+        restore = restoreRepository,
+        // Unpacked next to the database rather than in the system temporary
+        // folder: a 300 MB package should fail on the disk the user chose for
+        // ikna's data, not on whichever partition holds /tmp.
+        cache = File(home, "cache").also { it.mkdirs() }
     )
 
     init {

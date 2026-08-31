@@ -1,5 +1,6 @@
 package dev.ikna.desktop
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -16,6 +17,13 @@ import dev.ikna.data.prefs.FontStore
 import dev.ikna.ui.text.S
 import kotlinx.coroutines.runBlocking
 import java.awt.Desktop
+import java.awt.Dimension
+import java.awt.Component
+import java.awt.datatransfer.DataFlavor
+import java.awt.dnd.DnDConstants
+import java.awt.dnd.DropTarget
+import java.awt.dnd.DropTargetAdapter
+import java.awt.dnd.DropTargetDropEvent
 import java.io.File
 import java.io.PrintWriter
 import java.io.RandomAccessFile
@@ -163,6 +171,17 @@ private fun claimSingleInstance(home: File): Boolean = runCatching {
 // it was made is a decision the user already took.
 // ---------------------------------------------------------------------------
 
+// The floor of the window, in the same units the window state is written in.
+//
+// Not a taste: it is the width at which every part still has the room its own
+// content needs -- 300dp for the deck column and its bottom bar of five
+// buttons, one for the rule, and what is left for the pane beside it, which is
+// never less than the 720dp column the panes cap themselves at minus their
+// insets. The height is the header, the progress line, a card worth drawing and
+// the bottom bar, with nothing pushed off the bottom edge.
+private const val MIN_WINDOW_WIDTH = 1000
+private const val MIN_WINDOW_HEIGHT = 660
+
 private class Geometry(
     val size: DpSize,
     val position: WindowPosition,
@@ -190,7 +209,10 @@ private fun loadGeometry(home: File): Geometry {
         Geometry(
             // Clamped: a window restored at 200 by 100, or at a position on a
             // screen that is no longer attached, is a window nobody can use.
-            size = DpSize(width.coerceIn(720f, 6000f).dp, height.coerceIn(560f, 4000f).dp),
+            size = DpSize(
+                width.coerceIn(MIN_WINDOW_WIDTH.toFloat(), 6000f).dp,
+                height.coerceIn(MIN_WINDOW_HEIGHT.toFloat(), 4000f).dp
+            ),
             position = if (x == null || y == null || x < -3000f || y < -3000f) {
                 WindowPosition.PlatformDefault
             } else {
@@ -351,9 +373,65 @@ fun main(args: Array<String>) {
             state = windowState,
             onKeyEvent = { event -> handleWindowKey(event, ui, windowState) }
         ) {
+            // Compose has no minimum size of its own: the window state only says
+            // how big the window opens, and after that the frame can be dragged
+            // down to a strip in which the deck column, the rule and the pane
+            // divide two hundred pixels between them, every caption wraps onto
+            // three lines and every number moves. AWT holds the limit, so the
+            // layout is never asked to draw itself smaller than it can be drawn.
+            LaunchedEffect(window) {
+                window.minimumSize = Dimension(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT)
+                installDropTarget(window, ui)
+            }
             IknaDesktopApp(container, ui)
         }
     }
+}
+
+/**
+ * Dropping a file on the window.
+ *
+ * The alternative is finding the same file twice: once in the folder you dragged
+ * it from, and again in a file dialog. Handled through AWT rather than Compose
+ * because the window is an AWT frame underneath and the drop carries a real
+ * java.io.File -- Compose's own drag target would hand back a transferable to
+ * unwrap anyway.
+ *
+ * The drop only names the file and opens the screen that knows what to do with
+ * it; the import itself belongs to that screen, which is where its report and
+ * its refusals already live. Nothing is imported without a screen showing it.
+ */
+private fun installDropTarget(frame: Component, ui: DesktopUi) {
+    runCatching {
+        DropTarget(frame, DnDConstants.ACTION_COPY, object : DropTargetAdapter() {
+            override fun drop(event: DropTargetDropEvent) {
+                runCatching {
+                    event.acceptDrop(DnDConstants.ACTION_COPY)
+                    val dropped = event.transferable
+                        .getTransferData(DataFlavor.javaFileListFlavor) as? List<*>
+                    // The first file of a kind there is a screen for. Dropping a
+                    // folder of forty files is not a request for forty imports.
+                    val file = dropped.orEmpty()
+                        .filterIsInstance<File>()
+                        .firstOrNull { it.isFile && DesktopDrop.accepts(it) }
+                    if (file != null) {
+                        DesktopDrop.pending = file
+                        val name = file.name.lowercase()
+                        val target = if (name.endsWith(".apkg") || name.endsWith(".colpkg")) {
+                            Pane.ANKI
+                        } else {
+                            Pane.ADD
+                        }
+                        ui.show(target)
+                    }
+                    event.dropComplete(true)
+                }.onFailure { error ->
+                    logLine("drop failed: " + error)
+                    runCatching { event.dropComplete(false) }
+                }
+            }
+        })
+    }.onFailure { error -> logLine("drop target unavailable: " + error) }
 }
 
 fun openFolder(home: File) {
