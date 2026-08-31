@@ -62,7 +62,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Which screen the content area is showing. */
-enum class Pane { SESSION, DECK, STATS, SETTINGS, ADD, CATALOG, SEARCH }
+enum class Pane { SESSION, DECK, STATS, SETTINGS, ADD, CATALOG, SEARCH, ANKI }
 
 /**
  * The state the window agrees on with its key handler.
@@ -443,7 +443,17 @@ private fun PaneContent(
                 palette = palette,
                 onChanged = { ui.refresh() },
                 onOpenCatalog = { ui.show(Pane.CATALOG) },
+                onOpenAnki = { ui.show(Pane.ANKI) },
                 onBack = back
+            )
+
+            // Reached from the add screen or from a dropped package, so back
+            // means the add screen, not the deck list.
+            Pane.ANKI -> AnkiPane(
+                container = container,
+                palette = palette,
+                onChanged = { ui.refresh() },
+                onBack = { ui.show(Pane.ADD) }
             )
 
             Pane.CATALOG -> CatalogPane(
