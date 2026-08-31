@@ -68,6 +68,7 @@ fun SettingsPane(
     container: DesktopContainer,
     settings: IknaSettings,
     palette: IknaPalette,
+    onOpenBackup: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
@@ -394,6 +395,11 @@ fun SettingsPane(
             IknaButton(label = S.t("pc.011"), palette = palette) {
                 openFolder(container.home)
             }
+        }
+
+        Spacer(Modifier.height(10.dp))
+        IknaButton(label = S.t("bk.001"), palette = palette) {
+            onOpenBackup()
         }
 
         val hidden = settings.suppressed.split(",").count { it.isNotBlank() }

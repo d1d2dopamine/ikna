@@ -30,5 +30,5 @@ object DesktopDrop {
     // deliberately absent: the deck parser splits on pipes and tabs, so a .csv
     // would be accepted and then reported as unreadable, which is worse than
     // not being accepted.
-    private val KNOWN = listOf(".apkg", ".colpkg", ".txt", ".tsv", ".jsonl")
+    private val KNOWN = listOf(".apkg", ".colpkg", ".txt", ".tsv", ".jsonl", ".ikna")
 }

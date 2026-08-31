@@ -417,10 +417,15 @@ private fun installDropTarget(frame: Component, ui: DesktopUi) {
                     if (file != null) {
                         DesktopDrop.pending = file
                         val name = file.name.lowercase()
-                        val target = if (name.endsWith(".apkg") || name.endsWith(".colpkg")) {
-                            Pane.ANKI
-                        } else {
-                            Pane.ADD
+                        val target = when {
+                            name.endsWith(".apkg") || name.endsWith(".colpkg") ->
+                                Pane.ANKI
+                            // A saved bundle restores. A .jsonl stays
+                            // with the deck importer: that is what it
+                            // usually is, and the restore screen has a
+                            // picker of its own for the other case.
+                            name.endsWith(IknaBundle.EXTENSION) -> Pane.BACKUP
+                            else -> Pane.ADD
                         }
                         ui.show(target)
                     }

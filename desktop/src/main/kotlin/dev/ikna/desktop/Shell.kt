@@ -62,7 +62,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Which screen the content area is showing. */
-enum class Pane { SESSION, DECK, STATS, SETTINGS, ADD, CATALOG, SEARCH, ANKI }
+enum class Pane { SESSION, DECK, STATS, SETTINGS, ADD, CATALOG, SEARCH, ANKI, BACKUP }
 
 /**
  * The state the window agrees on with its key handler.
@@ -436,7 +436,13 @@ private fun PaneContent(
 
             Pane.STATS -> StatsPane(container, palette, back)
 
-            Pane.SETTINGS -> SettingsPane(container, settings, palette, back)
+            Pane.SETTINGS -> SettingsPane(
+                container = container,
+                settings = settings,
+                palette = palette,
+                onOpenBackup = { ui.show(Pane.BACKUP) },
+                onBack = back
+            )
 
             Pane.ADD -> AddDeckPane(
                 container = container,
@@ -461,6 +467,16 @@ private fun PaneContent(
                 palette = palette,
                 onChanged = { ui.refresh() },
                 onBack = { ui.show(Pane.ADD) }
+            )
+
+            // Back goes to settings rather than the deck list, because
+            // that is where this screen is reached from. A dropped file
+            // lands here too, and settings is still the nearest place.
+            Pane.BACKUP -> BackupPane(
+                container = container,
+                palette = palette,
+                onChanged = { ui.refresh() },
+                onBack = { ui.show(Pane.SETTINGS) }
             )
 
             Pane.SEARCH -> SearchPane(
