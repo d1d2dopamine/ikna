@@ -1,12 +1,19 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 // ---------------------------------------------------------------------------
-// The Windows application.
+// The desktop application: Windows, and now Linux.
 //
 // A plain Kotlin/JVM module rather than a second multiplatform one: it builds
 // for exactly one thing, and :shared already publishes a jvm variant for it to
 // resolve. Everything it draws comes from :shared, so the two applications
 // cannot drift apart in the scheduler, the database or the wording.
+//
+// Linux added no source set, no second main() and no screen of its own. The
+// JVM is the JVM: createReleaseDistributable asks jpackage for an application
+// image for whatever machine it is running on, so the Linux half of this file
+// is one block of packaging metadata. The single file a person downloads --
+// the .AppImage -- is assembled from that application image afterwards by
+// tools/appimage/build-appimage.sh, because no jpackage format is an AppImage.
 // ---------------------------------------------------------------------------
 plugins {
     id("org.jetbrains.kotlin.jvm") version "2.2.20"
@@ -89,6 +96,31 @@ compose.desktop {
                 "java.management",
                 "jdk.charsets"
             )
+
+            // Linux, where the deliverable is one .AppImage file.
+            //
+            // targetFormats above is left alone on purpose. Msi and Exe are
+            // Windows formats and jpackage can produce neither of them here;
+            // an AppImage is not a jpackage format at all. What a Linux build
+            // needs from Gradle is createReleaseDistributable -- the
+            // application image every packager starts from -- and that task
+            // does not read targetFormats, which is why adding Deb and Rpm
+            // would buy nothing. They would also have to be built on the
+            // distribution they are for, and one file that runs on any of
+            // them is the point of the exercise.
+            linux {
+                // jpackage refuses an .ico here, and it copies whatever this
+                // names into the application image as lib/Ikna.png -- which
+                // is the first place build-appimage.sh looks for the icon.
+                // The same 512px mark the running window loads from
+                // resources, so the file on a Fedora dock, the window and the
+                // phone launcher cannot drift apart.
+                iconFile.set(project.file("src/main/resources/icon.png"))
+
+                // What a desktop menu files it under, for the day somebody
+                // integrates the AppImage into one.
+                appCategory = "Education"
+            }
 
             windows {
                 menuGroup = "Ikna"

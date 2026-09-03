@@ -1,0 +1,20 @@
+# The desktop entry that travels inside the AppImage.
+#
+# Copied into the AppDir by tools/appimage/build-appimage.sh, which rewrites
+# Exec to whatever the packaged launcher is actually called so the two cannot
+# drift if packageName ever changes in desktop/build.gradle.kts.
+#
+# An AppImage has to carry one of these at the root of its AppDir: it is where
+# a desktop reads the name and the icon from, and appimagetool refuses to build
+# without it. Icon has no extension on purpose -- it names ikna.png beside this
+# file, it is not a path.
+[Desktop Entry]
+Type=Application
+Name=Ikna
+GenericName=Spaced repetition
+Comment=Chunks, not words. The system feeds you.
+Exec=Ikna
+Icon=ikna
+Terminal=false
+Categories=Education;Languages;
+Keywords=flashcards;spaced repetition;language;chunks;

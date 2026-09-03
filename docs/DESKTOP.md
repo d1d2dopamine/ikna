@@ -200,3 +200,114 @@ So the first run shows SmartScreen's blue "Windows protected your PC" panel,
 and getting past it means More info, then Run anyway. That is not a bug and it
 will not go away by rebuilding. It is the honest cost of a personal app that
 nobody is paying a certificate authority for.
+
+## Linux
+
+Everything above is about Windows, and none of it had to change. This section
+is the whole of Linux, and it is packaging rather than a port: no Linux source
+set, no second `main()`, no screen drawn twice, not one line of Kotlin. The
+nine places the app touches Android are the same nine places, already answered
+by `:shared`'s `jvmShared` source set. `:desktop` is a plain Kotlin/JVM module,
+`createReleaseDistributable` asks `jpackage` for an application image, and
+`jpackage` builds one for whatever machine it is running on. The Ubuntu runner
+was already building `:desktop` on every push -- it just threw the folder away.
+
+### What you download
+
+One file: `ikna-<version>-linux-x86_64.AppImage`, somewhere around 100 MB, the
+same shrunk jars and cut-down Java runtime that are inside the Windows zip.
+Nothing to install, no Java needed, and uninstalling is deleting the file.
+
+```
+chmod +x ikna-v0.10.0-press-linux-x86_64.AppImage
+./ikna-v0.10.0-press-linux-x86_64.AppImage
+```
+
+On Fedora that needs FUSE 2, which Fedora has not shipped by default since 40:
+
+```
+sudo dnf install fuse-libs
+```
+
+Without it the file says so rather than failing quietly. If installing a
+library to run one file is not the trade you want, the runtime can unpack
+itself into a temporary folder instead, at the cost of a slower start:
+
+```
+./ikna-v0.10.0-press-linux-x86_64.AppImage --appimage-extract-and-run
+```
+
+There is one file rather than the Windows two because the second Windows file
+answers a question Linux does not ask: an `.msi` exists so the app can live in
+Program Files with a Start menu entry, and an AppImage in `~/Downloads` is
+already a program you can run and delete. No `.deb` and no `.rpm`, which
+`jpackage` will happily produce, because both are installers tied to the
+distribution that built them -- a `.deb` built on the Ubuntu runner is a
+promise about Fedora that nobody checked. `app-image`, the third `jpackage`
+option, is a folder. An AppImage is that folder squashed into one executable
+file, which is why it is assembled after Gradle rather than by it.
+
+It is not signed, for the same reason the `.exe` is not. Linux does not put a
+blue panel in front of it.
+
+### How it is built
+
+`tools/appimage/build-appimage.sh`, which compiles nothing. It reads the
+application image Gradle left in
+`desktop/build/compose/binaries/main-release/app`, copies it whole into an
+AppDir under `usr/` -- whole, because the `jpackage` launcher finds its runtime
+and its jars relative to itself, and splitting them is how an AppImage that
+starts on the build machine dies on somebody's desktop -- writes an `AppRun`
+that resolves the launcher through `readlink` rather than an absolute path,
+adds `tools/appimage/ikna.desktop` and the 512px icon, and hands the folder to
+`appimagetool`.
+
+```
+gradle :desktop:createReleaseDistributable
+bash tools/appimage/build-appimage.sh
+```
+
+writes `build/appimage/ikna-x86_64.AppImage`. `--appdir-only` stops before the
+packing step, for looking at what is about to be shipped. `appimagetool` is
+pinned to release 13 and fetched into `build/`, or supplied through
+`IKNA_APPIMAGETOOL` on a machine that already has it.
+
+Building it on Fedora yourself works, with one thing worth knowing: Gradle has
+to configure `:app` and `:shared` before it can build `:desktop`, so an Android
+SDK has to exist even though no APK is being made. That is what `ANDROID_HOME`
+or `sdk.dir` in `local.properties` is for.
+
+### Build
+
+`build.yml` has a third job, `linux` on `ubuntu-latest`, beside `android` and
+`windows` and needing nothing from either. It fetches the pinned starter deck,
+runs the same `createReleaseDistributable` the Windows job runs, packs the
+AppImage, uploads it as `ikna-linux-appimage`, and then starts the packaged
+file once with `--selftest` -- through the AppImage, not beside it, so what is
+tested is the file that gets published. `release.yml` has the matching job,
+attaching `ikna-<tag>-linux-x86_64.AppImage` to the same release as the APKs
+and the Windows files.
+
+Two details in those jobs are worth the sentence they cost. The runner has no
+`libfuse.so.2`, so both jobs set `APPIMAGE_EXTRACT_AND_RUN=1`, which is also
+how `appimagetool` -- itself an AppImage -- manages to run at all. And there is
+no `setup-android` step, unlike the Windows job: the Ubuntu image carries the
+SDK that the `android` job above builds a real APK with, which is a stronger
+guarantee than any action could add.
+
+Nothing in the trimmed runtime is compiled on the runner. The launcher, the
+JVM, Skia, SQLite and zstd all arrive as prebuilt binaries from Temurin and
+from jars, built against a glibc far older than Fedora's, so a build from
+Ubuntu is not a build that only runs on Ubuntu.
+
+### Where it keeps things
+
+`~/.ikna`, the branch `iknaHome()` already had for anything that is not
+Windows: the database, the settings, the window position, `ikna.lock`, and the
+log at `~/.ikna/logs/ikna-desktop.log`. Nothing is written next to the
+AppImage, so the file can be moved or deleted without touching a single card.
+
+The omissions are the Windows omissions, unchanged: no voice, no widget, no
+reminders, and the update check opens the release page rather than replacing
+anything. If the window comes up blank on a machine with an unhappy GL driver,
+`SKIKO_RENDER_API=SOFTWARE` in front of the command is the first thing to try.
