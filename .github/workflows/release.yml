@@ -174,3 +174,78 @@ jobs:
             out/*.zip
             out/*.msi
           generate_release_notes: true
+
+  # ---------------------------------------------------------------------------
+  # The Linux file on the release page.
+  #
+  # Same build as the Windows job, same task, different runner: jpackage makes
+  # an application image for the machine it runs on. The single file people
+  # download -- the .AppImage -- is assembled from that image afterwards by
+  # tools/appimage/build-appimage.sh, because no jpackage format is one file on
+  # Linux.
+  #
+  # A separate job for the reason the Windows one is separate: whichever of the
+  # three finishes second and third attaches its files to the release the first
+  # one created.
+  # ---------------------------------------------------------------------------
+  linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      # The deck the application opens with, downloaded into the assets folder
+      # :desktop puts on its classpath.
+      - name: Pinned starter deck
+        run: bash tools/catalog/fetch-bundled-pack.sh
+
+      - name: Build the Linux application
+        run: gradle --no-daemon --stacktrace :desktop:createReleaseDistributable
+
+      # Named after the tag, like every other file on the page, so a download
+      # in somebody's folder still says which version it is.
+      - name: AppImage
+        run: |
+          bash tools/appimage/build-appimage.sh \
+            "out/ikna-${GITHUB_REF_NAME}-linux-x86_64.AppImage"
+
+      # The same start-once check the build workflow runs, on the exact file
+      # about to be published. A release nobody can open is worse than a late
+      # release.
+      - name: Self test
+        run: |
+          set -e
+          export IKNA_SELFTEST_HOME="$GITHUB_WORKSPACE/selftest-home"
+          export APPIMAGE_EXTRACT_AND_RUN=1
+          image="out/ikna-${GITHUB_REF_NAME}-linux-x86_64.AppImage"
+          code=0
+          if command -v xvfb-run >/dev/null 2>&1; then
+            timeout 300 xvfb-run -a "./$image" --selftest || code=$?
+          else
+            timeout 300 "./$image" --selftest || code=$?
+          fi
+          log="$IKNA_SELFTEST_HOME/logs/ikna-desktop.log"
+          if [ -f "$log" ]; then
+            echo "----- self test log -----"
+            cat "$log"
+            echo "-------------------------"
+          fi
+          exit $code
+
+      - name: Publish
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*.AppImage
+          generate_release_notes: true

@@ -241,3 +241,122 @@ jobs:
           name: ikna-windows-msi
           path: desktop/build/compose/binaries/main-release/msi/*.msi
           if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------------
+  # The Linux application.
+  #
+  # The same module and the same Gradle task as the Windows job.
+  # createReleaseDistributable is not a Windows task: it asks jpackage for an
+  # application image, and jpackage builds one for the machine it is running
+  # on. Nothing is ported here and no screen is drawn twice -- the difference
+  # between the two jobs is which runner they ask and what is done with the
+  # folder that comes out.
+  #
+  # What comes out is a folder, and no jpackage format turns it into one file:
+  # app-image is that folder, deb and rpm are installers tied to the
+  # distribution that builds them, so a .deb built here would be a promise
+  # about Fedora that nobody checked. The folder is therefore packed into an
+  # .AppImage -- one executable file that runs on any x86_64 desktop with
+  # nothing installed and nothing to uninstall.
+  #
+  # Beside the other two jobs rather than after them: none of the three needs
+  # anything another one produces.
+  # ---------------------------------------------------------------------------
+  linux:
+    runs-on: ubuntu-latest
+
+    # Longer than the Android job on the same image: jpackage has to assemble a
+    # Java runtime image and appimagetool has to squash it.
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # No setup-android step, unlike the Windows job. Gradle still has to
+      # configure :app and :shared to build :desktop, so an SDK still has to be
+      # present -- but this is the image the android job above builds an APK
+      # on, which is a stronger guarantee than any action could add.
+      - name: Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      # :desktop copies app/src/main/assets onto its classpath and the starter
+      # deck is downloaded into that folder rather than committed. Without this
+      # the application builds and then opens with no decks in it.
+      - name: Pinned starter deck
+        run: bash tools/catalog/fetch-bundled-pack.sh
+
+      - name: Build the Linux application
+        run: gradle --no-daemon --stacktrace :desktop:createReleaseDistributable
+
+      - name: AppImage
+        run: bash tools/appimage/build-appimage.sh build/appimage/ikna-x86_64.AppImage
+
+      # Uploaded before the self test runs, for the same reason the Windows
+      # folder is: a run that goes red should still leave something to install.
+      - name: AppImage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ikna-linux-appimage
+          path: build/appimage/*.AppImage
+          if-no-files-found: warn
+
+      # The packaged application, started once, on the runtime image that was
+      # just assembled for it -- and through the AppImage rather than beside
+      # it, so what is tested is the file that gets published.
+      #
+      # --selftest opens the database, installs the bundled deck, writes a
+      # setting and builds a session, then exits with a code. A module missing
+      # from the trimmed runtime -- which is exactly what sun/misc/Unsafe was
+      # on Windows -- fails here, on the machine that produced the file, and
+      # prints a stack trace a person can read.
+      #
+      # APPIMAGE_EXTRACT_AND_RUN because mounting an AppImage needs
+      # libfuse.so.2 and the runner does not have it; the runtime unpacks
+      # itself into a temporary folder instead. xvfb-run when the image has it:
+      # the self test opens no window, but a JVM given an empty display is a
+      # smaller surprise than a JVM given none.
+      - name: Self test
+        run: |
+          set -e
+          export IKNA_SELFTEST_HOME="$GITHUB_WORKSPACE/selftest-home"
+          export APPIMAGE_EXTRACT_AND_RUN=1
+          image="build/appimage/ikna-x86_64.AppImage"
+          if [ ! -f "$image" ]; then
+            echo "No AppImage at $image"
+            exit 1
+          fi
+          code=0
+          if command -v xvfb-run >/dev/null 2>&1; then
+            timeout 300 xvfb-run -a "./$image" --selftest || code=$?
+          else
+            timeout 300 "./$image" --selftest || code=$?
+          fi
+          log="$IKNA_SELFTEST_HOME/logs/ikna-desktop.log"
+          if [ -f "$log" ]; then
+            echo "----- self test log -----"
+            cat "$log"
+            echo "-------------------------"
+          else
+            echo "The self test wrote no log at $log"
+          fi
+          exit $code
+
+      # Only when something went wrong. It is a hundred megabytes of runtime
+      # image, and the only reason to download it is to find out why the file
+      # above is missing or does not start.
+      - name: Application image, if this job failed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ikna-linux-app-image
+          path: desktop/build/compose/binaries/main-release/app
+          if-no-files-found: ignore
