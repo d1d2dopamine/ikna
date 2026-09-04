@@ -269,8 +269,13 @@ bash tools/appimage/build-appimage.sh
 
 writes `build/appimage/ikna-x86_64.AppImage`. `--appdir-only` stops before the
 packing step, for looking at what is about to be shipped. `appimagetool` is
-pinned to release 13 and fetched into `build/`, or supplied through
-`IKNA_APPIMAGETOOL` on a machine that already has it.
+pinned to release 1.9.1 and fetched into `build/`, or supplied through
+`IKNA_APPIMAGETOOL` on a machine that already has it. The pinned release is
+tried first, then the rolling `continuous` build, then the renamed legacy
+asset in the old AppImageKit repository: upstream moved the tool once already
+and a single address is what turns that move into a failed build. The packer
+itself needs `mksquashfs`, which recent versions no longer carry inside
+themselves, so a local build wants `sudo dnf install squashfs-tools`.
 
 Building it on Fedora yourself works, with one thing worth knowing: Gradle has
 to configure `:app` and `:shared` before it can build `:desktop`, so an Android

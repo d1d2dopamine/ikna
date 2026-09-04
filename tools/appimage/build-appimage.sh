@@ -85,9 +85,19 @@ appdir="$work/Ikna.AppDir"
 
 # The version of the packer, pinned. "continuous" is a moving target and a
 # build that packs itself differently on Tuesday is a build nobody can debug.
-appimagetool_release="13"
-appimagetool_base="https://github.com/AppImage/AppImageKit/releases/download"
-appimagetool_url="${appimagetool_base}/${appimagetool_release}/appimagetool-x86_64.AppImage"
+#
+# One URL used to be enough. It is not: appimagetool moved out of the
+# AppImageKit repository into its own, and the old release-13 assets were
+# renamed to obsolete-*, so the address that worked for years now answers 404
+# and takes the build down with it. A pinned tag is still tried first; the
+# rolling build and the renamed legacy asset are there so that one more move
+# upstream costs a slower download instead of a red run.
+appimagetool_release="1.9.1"
+appimagetool_urls="
+https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage
+https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+https://github.com/AppImage/AppImageKit/releases/download/13/obsolete-appimagetool-x86_64.AppImage
+"
 
 if [ ! -d "$dist" ]; then
 	echo "No application image at $dist." >&2
@@ -200,9 +210,25 @@ if [ -z "$tool" ]; then
 	mkdir -p "$work"
 	tool="$work/appimagetool-${appimagetool_release}-x86_64.AppImage"
 	if [ ! -f "$tool" ]; then
-		echo "Fetching appimagetool ${appimagetool_release}"
-		curl -fL --retry 3 --retry-all-errors --connect-timeout 20 --max-time 300 \
-			"$appimagetool_url" -o "$tool.part"
+		fetched=0
+		for url in $appimagetool_urls; do
+			echo "Fetching appimagetool from $url"
+			if curl -fL --retry 2 --retry-all-errors --connect-timeout 20 \
+				--max-time 300 "$url" -o "$tool.part"; then
+				fetched=1
+				break
+			fi
+			echo "  unavailable, trying the next source"
+			rm -f "$tool.part"
+		done
+		if [ "$fetched" != 1 ]; then
+			echo "" >&2
+			echo "Could not download appimagetool from any known source." >&2
+			echo "Supply one instead:" >&2
+			echo "  IKNA_APPIMAGETOOL=/path/to/appimagetool-x86_64.AppImage \\" >&2
+			echo "    bash tools/appimage/build-appimage.sh" >&2
+			exit 1
+		fi
 		mv "$tool.part" "$tool"
 	fi
 fi
@@ -234,9 +260,18 @@ rm -f "$output"
 # it cannot see an ELF it recognises. --no-appstream because this project ships
 # no AppStream metadata: the alternative is a validator failing a build over a
 # file that exists for software centres, and the AppImage is downloaded from a
-# release page.
+# release page. The flag is passed only when the packer admits to having it,
+# because versions disagree and an unknown option is a failed build.
+appstream_flag=""
+if APPIMAGE_EXTRACT_AND_RUN=1 "$tool" --help 2>&1 | grep -q -- "--no-appstream"; then
+	appstream_flag="--no-appstream"
+fi
+
+# Unquoted on purpose: an empty flag must disappear rather than become an
+# empty argument that the packer would read as a path.
+# shellcheck disable=SC2086
 ARCH="${ARCH:-x86_64}" APPIMAGE_EXTRACT_AND_RUN=1 \
-	"$tool" --no-appstream "$appdir" "$output"
+	"$tool" $appstream_flag "$appdir" "$output"
 
 if [ ! -f "$output" ]; then
 	echo "appimagetool reported success but wrote no file at $output" >&2

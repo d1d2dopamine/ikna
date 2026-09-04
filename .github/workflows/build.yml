@@ -296,6 +296,14 @@ jobs:
       - name: Build the Linux application
         run: gradle --no-daemon --stacktrace :desktop:createReleaseDistributable
 
+      # appimagetool 1.9 dropped the mksquashfs it used to carry inside itself
+      # and calls the system one instead. Installing it here keeps a missing
+      # packaging dependency from looking like a packaging bug.
+      - name: Packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y squashfs-tools
+
       - name: AppImage
         run: bash tools/appimage/build-appimage.sh build/appimage/ikna-x86_64.AppImage
 
