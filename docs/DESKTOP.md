@@ -316,3 +316,29 @@ The omissions are the Windows omissions, unchanged: no voice, no widget, no
 reminders, and the update check opens the release page rather than replacing
 anything. If the window comes up blank on a machine with an unhappy GL driver,
 `SKIKO_RENDER_API=SOFTWARE` in front of the command is the first thing to try.
+
+### The locale the JVM is started in
+
+`AppRun` starts the application in `C.UTF-8` rather than in the locale it
+found. The SQLite that Room talks to is compiled into the application and
+brings its own copy of the C++ standard library; under a national locale on a
+recent glibc -- Fedora 44 with glibc 2.43 is the machine that found this --
+that copy's locale facets come up empty and the first statement dies with
+SIGSEGV a second after launch, in `sqlite3_step` under
+`PackLoader.installBundledPacks`, before a window appears and leaving an
+`hs_err_pid*.log` next to the file. `C.UTF-8` is built into glibc and reads no
+locale data at all, which is what steps around it.
+
+The interface does not change with it. The locale that was in effect is handed
+to the JVM as `user.language` and `user.country`, which is what `Strings.kt`
+reads when the language setting is `system`, so a Russian desktop still shows
+a Russian interface. `C.UTF-8` and not `C` for the sake of file names: under
+`C` the JVM reads paths as ASCII, `sun.jnu.encoding` cannot be argued out of
+it from the command line, and a deck sitting in a folder with a national name
+becomes unopenable.
+
+`IKNA_KEEP_LOCALE=1` starts with the locale untouched, which is how to check
+whether a newer `sqlite-bundled` has made all of this unnecessary, and
+`IKNA_NATIVE_LOCALE=<locale>` names a different one. The `linux` job runs the
+self test twice, once as the runner comes and once under `ru_RU.UTF-8`, so the
+path through `AppRun` is exercised on every build.

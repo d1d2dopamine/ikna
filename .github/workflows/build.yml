@@ -358,6 +358,48 @@ jobs:
           fi
           exit $code
 
+      # The pass above runs in the runner's C locale, and the crash this step
+      # exists for needs a national one: the SQLite compiled into the app
+      # carries its own C++ standard library, whose locale facets come up empty
+      # on a recent glibc, and the first statement segfaults before the window
+      # opens. AppRun answers that by giving native code C.UTF-8 and handing
+      # the language to the JVM, so this pass starts the same published file
+      # with LANG set and proves that path still reaches the database.
+      - name: Self test in a national locale
+        run: |
+          set -e
+          export IKNA_SELFTEST_HOME="$GITHUB_WORKSPACE/selftest-home-national"
+          export APPIMAGE_EXTRACT_AND_RUN=1
+          image="build/appimage/ikna-x86_64.AppImage"
+          if [ ! -f "$image" ]; then
+            echo "No AppImage at $image"
+            exit 1
+          fi
+          if ! locale -a 2>/dev/null | grep -q -i '^ru_RU.utf'; then
+            sudo locale-gen ru_RU.UTF-8 >/dev/null 2>&1 || true
+          fi
+          if ! locale -a 2>/dev/null | grep -q -i '^ru_RU.utf'; then
+            echo "This runner has no ru_RU.UTF-8; skipping the national locale pass"
+            exit 0
+          fi
+          export LANG=ru_RU.UTF-8
+          export LC_ALL=ru_RU.UTF-8
+          code=0
+          if command -v xvfb-run >/dev/null 2>&1; then
+            timeout 300 xvfb-run -a "./$image" --selftest || code=$?
+          else
+            timeout 300 "./$image" --selftest || code=$?
+          fi
+          log="$IKNA_SELFTEST_HOME/logs/ikna-desktop.log"
+          if [ -f "$log" ]; then
+            echo "----- self test log, ru_RU.UTF-8 -----"
+            cat "$log"
+            echo "--------------------------------------"
+          else
+            echo "The self test wrote no log at $log"
+          fi
+          exit $code
+
       # Only when something went wrong. It is a hundred megabytes of runtime
       # image, and the only reason to download it is to find out why the file
       # above is missing or does not start.
