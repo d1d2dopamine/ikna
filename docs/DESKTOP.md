@@ -342,3 +342,69 @@ whether a newer `sqlite-bundled` has made all of this unnecessary, and
 `IKNA_NATIVE_LOCALE=<locale>` names a different one. The `linux` job runs the
 self test twice, once as the runner comes and once under `ru_RU.UTF-8`, so the
 path through `AppRun` is exercised on every build.
+
+### Two C++ runtimes in one process
+
+The Linux build crashed at startup with `SIGSEGV` about a second in, inside
+`androidx_sqliteJni`, while `--selftest` -- which opens the same database,
+installs the same decks and runs the same queries -- passed on the same
+machine. The difference between them is the window.
+
+`sqlite-bundled` ships a prebuilt native library with a whole C++ standard
+library compiled into it, and an old one: the symbols in the crash are
+`std::string::_Rep` and `std::ctype<wchar_t>`, the copy-on-write string layout
+gcc stopped using in 2015. It declares no dependency on `libstdc++` at all --
+`readelf -d` lists only `libdl`, `libm`, `libpthread`, `libgcc_s`, `libc` and
+the loader -- so on its own it answers every C++ call itself, which is what
+happens under `--selftest`.
+
+Drawing a window loads Skia, Skia depends on the system `libstdc++`, and from
+then on the process holds two implementations of the same symbols. The linker
+may bind a call inside the SQLite library to the system copy, an object built
+by one implementation is then destroyed by the other, and the pointer it
+follows is garbage: the second crash log wrote into the library's own
+read-only code page. Nothing about this is a bug in the application, and
+nothing about it is visible on the Ubuntu image CI builds on, whose
+`libstdc++` is close enough to the one the library was compiled against.
+
+Two lines fix it, and both are about ordering rather than about SQLite:
+
+- `Main.kt` installs the decks before Compose is touched, so the database is
+  opened while the SQLite library is the only C++ runtime in the process.
+- `AppRun` exports `LD_BIND_NOW=1`, so the symbols it resolves then are
+  resolved for good instead of being looked up again at the first call, after
+  Skia has arrived.
+
+`IKNA_LAZY_BIND=1` turns the second one off, which is how to check whether a
+newer `sqlite-bundled` has made all of this unnecessary.
+
+### What a Linux machine has to have
+
+An AppImage carries the application, the Java runtime image and every native
+library -- but never glibc, which always comes from the distribution. So the
+only real requirement is a glibc version, and `tools/appimage/check-portability.sh`
+reads it out of the finished build:
+
+```
+bash tools/appimage/check-portability.sh
+```
+
+It prints the highest `GLIBC`, `GLIBCXX` and `GCC` version any library inside
+asks for, and which library asks. The `linux` job runs it on every build and
+writes the result into the run summary, so the number for a release can be
+copied from there into the release notes. It is a report by default;
+`IKNA_GLIBC_LIMIT=2.35` makes it fail when the floor rises above a ceiling.
+
+Nothing in this repository is compiled against the runner's glibc -- jpackage
+copies a launcher the JDK was shipped with -- so the floor is decided by
+Temurin and Skia and does not move when GitHub changes its image.
+
+Two things that are not glibc and still stop a download from opening:
+
+- The execute bit does not survive a zip file. `chmod +x ikna-x86_64.AppImage`
+  first; a double click on a file without it can be routed to the disk image
+  writer, which is not what anybody wants.
+- The AppImage runtime mounts itself with FUSE. On a machine without it the
+  file refuses to start with a message about `libfuse`, and
+  `./ikna-x86_64.AppImage --appimage-extract-and-run` works anyway -- as does
+  installing `fuse` or `fuse-libs` from the distribution.

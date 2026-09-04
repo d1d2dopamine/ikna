@@ -206,6 +206,21 @@ if [ -z "\${IKNA_KEEP_LOCALE:-}" ]; then
 	export LANG LC_ALL
 fi
 
+# Symbols are resolved when a library is loaded instead of at its first call.
+# The application carries two C++ runtimes it never chose to carry: one
+# compiled into the prebuilt SQLite library Room uses, one loaded from the
+# system by Skia. With lazy binding the linker is free to answer a call in the
+# first with the implementation from the second, and the two do not agree about
+# how a std::string is laid out, so the process dies rather than misbehaves.
+# The application opens its database before it draws anything, so with
+# immediate binding the SQLite library is resolved against itself and stays
+# that way for the rest of the run. IKNA_LAZY_BIND=1 restores the default for
+# anyone bisecting this again.
+if [ -z "\${IKNA_LAZY_BIND:-}" ]; then
+	LD_BIND_NOW=1
+	export LD_BIND_NOW
+fi
+
 exec "\$here/usr/bin/${launcher}" "\$@"
 APPRUN
 chmod +x "$appdir/AppRun"

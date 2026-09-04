@@ -116,8 +116,15 @@ class DesktopContainer(val home: File) {
         }
     }
 
+    // Main installs the decks before the window opens and the shell asks again
+    // from the composition. The second ask is a no-op rather than a second
+    // pass over the manifest.
+    private var installed = false
+
     /** Installs the decks shipped inside the application. Safe to call twice. */
     suspend fun install() {
+        if (installed) return
         packLoader.installBundledPacks()
+        installed = true
     }
 }

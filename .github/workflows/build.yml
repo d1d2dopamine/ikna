@@ -307,6 +307,17 @@ jobs:
       - name: AppImage
         run: bash tools/appimage/build-appimage.sh build/appimage/ikna-x86_64.AppImage
 
+      # Which Linux versions the file that was just built can be opened on.
+      # Never fatal: the floor comes from the JDK runtime image and from Skia,
+      # not from anything here, so a number that moves belongs in the release
+      # notes rather than in a red build.
+      - name: Portability audit
+        continue-on-error: true
+        run: |
+          bash tools/appimage/check-portability.sh \
+            desktop/build/compose/binaries/main-release/app/Ikna |
+            tee -a "$GITHUB_STEP_SUMMARY"
+
       # Uploaded before the self test runs, for the same reason the Windows
       # folder is: a run that goes red should still leave something to install.
       - name: AppImage artifact

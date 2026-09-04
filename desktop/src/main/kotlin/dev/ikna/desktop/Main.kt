@@ -345,6 +345,29 @@ fun main(args: Array<String>) {
     FontStore.baseDir = home
 
     val container = DesktopContainer(home)
+
+    // The database is opened here, before Compose is touched and before a
+    // window exists. That ordering is a fix, not a preference.
+    //
+    // The SQLite that Room talks to is a prebuilt native library with its own
+    // copy of the C++ standard library compiled into it. Skia loads the
+    // system libstdc++ into the same process while the first frame is being
+    // prepared, and from that moment the dynamic linker is free to answer the
+    // SQLite library's own calls with the system implementation instead. The
+    // two disagree about how a std::string is laid out, so the next statement
+    // executed dies with SIGSEGV inside the SQLite library about a second
+    // after launch -- which is the crash Linux users saw, and the reason
+    // --selftest, which never opens a window, always passed.
+    //
+    // Opening the database while it is still the only C++ runtime in the
+    // process resolves its symbols against itself; AppRun sets LD_BIND_NOW so
+    // that resolution is final rather than deferred to the first call. The
+    // deck installation also stops competing with the first frame, which is
+    // where it never belonged.
+    runBlocking {
+        runCatching { container.install() }
+            .onFailure { error -> logLine("install failed: " + error) }
+    }
     // Plain object rather than remembered state: it is created once, before the
     // composition exists, because the menu bar and the window's key handler both
     // need to reach the same screen state the shell is drawing from.
