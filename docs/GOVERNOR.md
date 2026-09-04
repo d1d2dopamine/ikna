@@ -227,3 +227,37 @@ touch card state, the review log and the day counter now go through a single mut
 ## Return language in 0.9.0
 
 Return mode remains a scheduler decision, not a promise that learning pauses for a number of days. Ordinary UI says that the plan for today was adapted and bounded. It does not show debt, backlog, missed-day or recovery-countdown language. New material may continue only when the existing governor considers it safe; the current release does not add a second scheduler or a persistent multi-day recovery target.
+
+## A plan rebuilt during the day
+
+Today's plan is stored, and while it is stored it is authoritative: the day's
+questions are decided once. But the row is deliberately dropped whenever the
+content under it changes -- a deck switched off or on, a deck imported, a backup
+restored -- so that the next screen rebuilds it against the content that now
+exists.
+
+That rebuild used to be a second helping. It ruled afresh and introduced
+`allowedNew` new chunks again, so this sequence on the deck list grew the day by
+a handful of cards every time it was repeated:
+
+1. switch a deck off
+2. open "today"
+3. switch the deck back on
+
+Two records outlive the plan row, and the rebuild reads both:
+
+- `governor_log`, the first row of the day, for what the day was first allowed;
+- `daily_stats.newIntroduced`, for how much new material has already gone out,
+  whether as chunks introduced with the plan or as cards promoted while
+  answering.
+
+From those, `ruledOnceToday` and `dailyNewRoom` (both in `LoadGovernor.kt`, both
+covered by `DailyBudgetTest`) give the rule: **the earliest ruling of the day is
+a ceiling, a later ruling may lower it but never raise it, and only what the day
+has not yet spent may still be handed out.** The same ceiling is applied to the
+day's card capacity, so the number at the top of the screen cannot climb because
+a switch was flicked.
+
+The governor log still records what the model computed, untouched. The clamp is
+applied to the plan, not to the diagnostics, so "what did the governor think at
+noon" stays a question the log can answer.

@@ -527,6 +527,18 @@ interface GovernorDao {
 
     @Query("SELECT * FROM governor_log WHERE day = :day ORDER BY ts DESC LIMIT 1")
     suspend fun forDay(day: String): GovernorLogEntity?
+
+    /**
+     * The FIRST ruling of the day rather than the last one.
+     *
+     * The day's load is decided once in the morning, and the plan row is what
+     * normally remembers it -- but that row is dropped whenever the content
+     * changes underneath it: a deck switched off or on, an import, a restore.
+     * This row is not dropped, so it is what a plan rebuilt at noon reads to
+     * find out what the day was already allowed to spend.
+     */
+    @Query("SELECT * FROM governor_log WHERE day = :day ORDER BY ts ASC LIMIT 1")
+    suspend fun firstForDay(day: String): GovernorLogEntity?
 }
 
 @Dao

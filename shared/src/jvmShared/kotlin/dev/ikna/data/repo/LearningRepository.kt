@@ -23,6 +23,8 @@ import dev.ikna.domain.governor.GovernorDecision
 import dev.ikna.domain.governor.GovernorReason
 import dev.ikna.domain.governor.GovernorSignals
 import dev.ikna.domain.governor.LoadGovernor
+import dev.ikna.domain.governor.dailyNewRoom
+import dev.ikna.domain.governor.ruledOnceToday
 import dev.ikna.domain.session.Level
 import dev.ikna.domain.session.SessionBuilder
 import dev.ikna.domain.session.SessionCard
@@ -189,6 +191,38 @@ class LearningRepository(
         val signals = collectSignals(now)
         val decision = withNightRule(governor().decide(signals), now)
 
+        // The day's load belongs to the day, not to the plan row.
+        //
+        // This is the fix for a bug that could be triggered from the deck list
+        // in about three seconds: switch a deck off, open "today", switch the
+        // deck back on, and the day had grown by a handful of cards. Each of
+        // those three actions drops the plan row (invalidatePlan), the next
+        // screen rebuilds it, and the rebuild used to rule afresh and introduce
+        // `allowedNew` new chunks all over again. The governor had decided the
+        // day's dose once; the user was handed it three times, the ceiling that
+        // protects tomorrow was bypassed, and the number at the top of the
+        // screen climbed while nothing had been answered.
+        //
+        // Two facts outlive the plan row, and both are read here: the governor
+        // log knows what the day was first ruled, and the daily statistics know
+        // how much new material has already gone out. A rebuild is therefore a
+        // top-up to the same ceiling rather than a second allowance -- and when
+        // nothing is left, it is a re-pick of the same day with no new cards in
+        // it at all.
+        //
+        // Read before the row below is written, or the day would find itself.
+        val ruledEarlier = governorDao.firstForDay(day)
+        val authorisedNew = ruledOnceToday(ruledEarlier?.allowedNew, decision.allowedNew)
+        val authorisedCapacity = ruledOnceToday(ruledEarlier?.capacity, decision.capacity)
+        val roomNew = dailyNewRoom(authorisedNew, statsDao.day(day)?.newIntroduced ?: 0)
+        // What the plan is actually built from. The governor's own numbers are
+        // still logged untouched below, so the log keeps saying what the model
+        // computed and the plan keeps to what the day may spend.
+        val authorised = decision.copy(
+            capacity = authorisedCapacity,
+            allowedNew = authorisedNew
+        )
+
         governorDao.insert(
             GovernorLogEntity(
                 ts = now,
@@ -226,8 +260,9 @@ class LearningRepository(
         )
 
         // New chunks are introduced exactly once per day, here and nowhere else.
-        val introduced =
-            if (decision.allowedNew > 0) introduce(decision.allowedNew, now) else emptyList()
+        // `roomNew`, not the fresh ruling: a plan rebuilt later in the day may
+        // only spend what the morning left unspent.
+        val introduced = if (roomNew > 0) introduce(roomNew, now) else emptyList()
 
         // The introductions are handed to the builder rather than left for it to
         // find. A fresh card is written with dueAt = now, so a "soonest first"
@@ -236,7 +271,7 @@ class LearningRepository(
         // counter recorded that new material had arrived — which is what closes
         // the safety valve for a week — and the user was shown none of it.
         // A card marked wrong never reaches a plan again, on any day.
-        val picked = builder().pickForDay(decision, now, introduced)
+        val picked = builder().pickForDay(authorised, now, introduced)
             .filterNot { it.chunkId in suppressedNow() }
         val plannedKeys = picked.map { it.key }.toSet()
 
@@ -255,8 +290,10 @@ class LearningRepository(
         return storePlan(
             day = day,
             ids = ids,
-            capacity = decision.capacity,
-            allowedNew = decision.allowedNew,
+            capacity = authorised.capacity,
+            // The day's authorisation, so that a promotion asking
+            // `newRoomToday` later gets the same answer a rebuild would.
+            allowedNew = authorised.allowedNew,
             amnestyQuota = decision.amnestyQuota,
             reason = decision.reason,
             now = now
@@ -1148,8 +1185,20 @@ class LearningRepository(
         planDao.clear()
     }
 
-    /** Drops today's plan so the next session rebuilds it. Used after imports. */
-    suspend fun invalidatePlan() = planDao.clear()
+    /**
+     * Drops today's plan so the next session rebuilds it, after the content
+     * under it changed: an import, a deck switched off or on, a restore.
+     *
+     * Rebuilding is safe, which was not always true. The day's new-material
+     * budget is held by the governor log and the daily statistics, not by this
+     * row, so the rebuild tops the day up to the same ceiling instead of
+     * granting a second one -- see the comment in `ensureDailyPlanLocked`.
+     *
+     * Under the same lock as the build itself. Without it a deck switch could
+     * land between a plan being picked and being stored, and the plan that
+     * survived was the one for the deck set that no longer existed.
+     */
+    suspend fun invalidatePlan() = writeLock.withLock { planDao.clear() }
 
     // ---- stats ------------------------------------------------------------
 

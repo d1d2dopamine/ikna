@@ -4,6 +4,37 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
+/**
+ * What the day was already allowed, when the plan is being built a second time.
+ *
+ * The governor rules once a day. Everything that reads that ruling used to read
+ * it from the plan row, which works right up to the moment the row is deleted --
+ * and it is deleted on purpose every time the content changes: turning a deck
+ * off, turning it back on, importing a deck, restoring a backup. The rebuild
+ * then ruled afresh and handed out a whole day's new material again, so a user
+ * flicking a deck switch twice was given cards the governor had already paid
+ * for. This is the rule that makes a rebuild honest: the earliest ruling of the
+ * day is a ceiling, and a later ruling may lower it but never raise it.
+ *
+ * @param earlier what the day was ruled earlier, or null on the first plan of
+ *   the day, when there is nothing to be bound by.
+ * @param now what the governor rules at this moment.
+ */
+fun ruledOnceToday(earlier: Int?, now: Int): Int =
+    if (earlier == null) now else min(earlier, now)
+
+/**
+ * How much of the day's new-material budget is still unspent.
+ *
+ * Counted from the daily statistics rather than from the plan, for the same
+ * reason as [ruledOnceToday]: the statistics row survives a plan being dropped,
+ * and it already counts both kinds of new material -- chunks introduced when the
+ * plan was built and cards promoted while answering. Never negative: a day that
+ * overspent through a promotion owes nothing, it just gets nothing more.
+ */
+fun dailyNewRoom(budget: Int, introducedToday: Int): Int =
+    max(0, budget - max(0, introducedToday))
+
 data class GovernorSignals(
     val dueToday: Int,
     val forecastAvg3d: Double,
