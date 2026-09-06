@@ -161,6 +161,35 @@ object IknaMigrations {
         }
     }
 
+    /**
+     * v5 -> v6: additive observations for GRADING.md, step 1 only. No backfill:
+     * an old answer did not measure these signals. No schedule or rating changes.
+     */
+    private val MIGRATION_5_6 = object : Migration(5, 6) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("ALTER TABLE reviews ADD COLUMN latencyMs INTEGER")
+            connection.execSQL("ALTER TABLE reviews ADD COLUMN swipeVelocityX REAL")
+            connection.execSQL("ALTER TABLE reviews ADD COLUMN peeked INTEGER")
+            connection.execSQL("ALTER TABLE reviews ADD COLUMN timingDiscardReason TEXT")
+        }
+    }
+
+    private val MIGRATION_6_7 = object : Migration(6, 7) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("ALTER TABLE reviews ADD COLUMN inputRating INTEGER")
+            connection.execSQL("ALTER TABLE reviews ADD COLUMN gradingVersion INTEGER")
+            connection.execSQL("ALTER TABLE reviews ADD COLUMN gradingReason TEXT")
+            connection.execSQL("ALTER TABLE reviews ADD COLUMN presentationLength INTEGER")
+            connection.execSQL("ALTER TABLE reviews ADD COLUMN inputMethod TEXT")
+            connection.execSQL("ALTER TABLE reviews ADD COLUMN peekSemantics TEXT")
+        }
+    }
+
+    private val MIGRATION_7_8 = object : Migration(7, 8) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("ALTER TABLE reviews ADD COLUMN fsrsParameters TEXT")
+        }
+    }
     val ALL: Array<Migration> =
-        arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+        arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
 }

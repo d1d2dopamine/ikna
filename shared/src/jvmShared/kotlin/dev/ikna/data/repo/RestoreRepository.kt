@@ -53,12 +53,21 @@ class RestoreRepository(
             val rec = runCatching {
                 ReviewRecord.json.decodeFromString(ReviewRecord.serializer(), line)
             }.getOrNull()
-            if (rec == null) {
+            if (rec == null || rec.synthetic) {
                 skipped++
                 continue
             }
+            require(rec.gradingVersion == null || rec.gradingVersion == 1) {
+                "Unsupported derived grading version: ${rec.gradingVersion}"
+            }
+            require(rec.gradingVersion != 1 || (rec.inputRating == 3 && rec.rating in listOf(2, 4))) {
+                "Invalid derived grading record"
+            }
+            rec.fsrsParameters?.let(dev.ikna.domain.fsrs.FsrsSnapshotCodec::decode)
             records += rec
         }
+
+        if (records.isEmpty()) return RestoreResult(imported = 0, skipped = skipped, replayed = 0)
 
         // Signature -> the id that answer has *here*. Seeded with what is
         // already stored, so importing the same file twice is a no-op.
@@ -180,14 +189,14 @@ class RestoreRepository(
                 isNew = r.prevIsNew ?: true
             )
             val firstTime = !cards.containsKey(key)
-            cards[key] = scheduler.apply(card, ratingOf(r.rating), r.ts).card
+            cards[key] = scheduler.applyRecordedReview(card, r).card
 
             // Same boundary as the live counters, or a restore would rebuild
             // stats that disagree with the app that wrote them.
             val day = boundary.key(r.ts)
             val stat = days[day] ?: DailyStatEntity(day, 0, 0, 0L, 1.0, false)
             val done = stat.reviewsDone + 1
-            val correct = stat.correctCount + if (r.rating >= 3) 1 else 0
+            val correct = stat.correctCount + if (r.outcomeRating >= 3) 1 else 0
             days[day] = stat.copy(
                 reviewsDone = done,
                 correctCount = correct,

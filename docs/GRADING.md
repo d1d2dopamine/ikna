@@ -1,16 +1,16 @@
 # Grading
 
-**Status as of the `press` epoch: still decided, still not implemented.** This
-file records a design decision taken during the `proof` epoch so it does not have
-to be re-argued, and the decision has held: nothing described under "Derived
-grades" ships yet. What ships today is the binary swipe described in the first
-section.
+**Implementation status: the complete experimental pipeline is implemented and
+OFF by default.** Raw recording, rolling local calibration, conservative derived
+grading, a versioned 30% schedule bound, synthetic fixtures, paired evaluation,
+replay tests and GitHub CI gates are included. This is a source implementation,
+not a claim of measured benefit for a real person.
 
-Step 1 below — recording the gesture detail the derivation would need, without
-using it for anything — has not been taken either. It is the cheap half and the
-one that has to happen first: the columns cost a migration and nothing else, and
-until they exist there is no data with which to check whether derived grades
-would have been any good.
+Synthetic histories exercise the pipeline and are explicitly labelled and
+excluded from app restore. They do not replace weeks of actual on-device logs.
+The required-reveal UI remains unchanged: its ambiguous peek signal cannot
+produce automatic EASY. See [GRADING-IMPLEMENTATION.md](GRADING-IMPLEMENTATION.md)
+for the native guard, data contract, CI commands and outstanding empirical gate.
 
 ## What ships today
 
@@ -18,9 +18,10 @@ One axis. Left is `AGAIN`, right is `GOOD`. Vertical movement springs the card
 back and grades nothing. See `ui/session/SwipeDecision.kt`.
 
 FSRS-6 accepts four grades and the `Rating` enum already carries all four.
-`HARD` and `GOOD` differ by `w[15]`, `EASY` by `w[16]`. Two of the four are
-currently unreachable from the UI: the scheduler can use them, nothing produces
-them.
+`HARD` and `GOOD` differ by `w[15]`, `EASY` by `w[16]`. The mobile gesture remains binary with the experiment off. The desktop's
+existing number keys can explicitly produce all four grades. With opt-in,
+clear slow native swipes may become bounded HARD; automatic EASY requires a
+meaningful optional-peek protocol rather than the existing mandatory reveal.
 
 ## Why there are not four directions
 
@@ -165,12 +166,14 @@ exists, at which point the mismatch resolves itself.
 
 ## Order of work
 
-1. Record latency, velocity, peek and discard reason in `reviews`. Behaviour
-   unchanged, nothing visible to the user. Small.
-2. Accumulate real logs. Weeks, not a sprint.
-3. Run the comparison above.
-4. Only then, if the numbers agree, implement grading and ship it off by
-   default.
+1. **Implemented:** raw observations and immutable decision context in `reviews`.
+2. **Synthetic fixtures implemented; real collection still required:** weeks of
+   on-device answers remain the empirical gate, not something generated data proves.
+3. **Implemented:** paired prequential binary/derived comparison and holdout
+   metrics, runnable locally or on synthetic data in GitHub CI.
+4. **Implemented as an explicit off-by-default experiment:** conservative grading,
+   bounded versioned schedules, restore/undo round-trip tests and CI release gates.
+   Synthetic results never turn it on or claim real-person improvement.
 
-Step 1 is the only part that belongs to the `proof` epoch. Steps 3 and 4 are not
-scheduled and do not have to be.
+This extends the original proof-epoch recording-only scope at the user's request.
+Empirical effectiveness is still unverified; the safety rules above still apply.

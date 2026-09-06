@@ -29,12 +29,19 @@ data class ScheduleResult(
  */
 class Scheduler(
     private val params: FsrsParams = FsrsParams(),
-    dayStartHour: Int? = null
+    private val dayStartHour: Int? = null,
+    private val paramsProvider: (() -> FsrsParams)? = null
 ) {
 
     private val boundary = dayStartHour?.let { DayBoundary(it) }
 
+    fun currentParameters(): FsrsParams = paramsProvider?.invoke() ?: params
+    fun snapshot(): Scheduler = if (paramsProvider == null) this else withParameters(currentParameters())
+    fun defaultSnapshot(): Scheduler = if (paramsProvider == null) this else Scheduler(params, dayStartHour)
+    fun withParameters(parameters: FsrsParams): Scheduler = Scheduler(parameters, dayStartHour)
+
     fun apply(card: CardEntity, rating: Rating, now: Long): ScheduleResult {
+        if (paramsProvider != null) return snapshot().apply(card, rating, now)
         val before = MemoryState(card.stability, card.difficulty)
         val elapsedDays = card.lastReviewAt
             ?.let { (now - it).toDouble() / DAY_MS }
@@ -64,6 +71,38 @@ class Scheduler(
         return ScheduleResult(updated, elapsedDays, before, after)
     }
 
+    /** Predicted recall BEFORE consuming the next outcome. */
+    fun predictRecall(card: CardEntity, now: Long): Double {
+        if (paramsProvider != null) return snapshot().predictRecall(card, now)
+        val elapsed = card.lastReviewAt?.let { (now - it).toDouble() / DAY_MS } ?: 0.0
+        return Fsrs.retrievability(elapsed.coerceAtLeast(0.0), card.stability, params)
+    }
+
+    /**
+     * Version 1's bounded refinement. Cap stability AND the actual due delay
+     * against GOOD from the same before-state. Day-boundary rounding may make
+     * a small refinement impossible; in that case keep GOOD's due date rather
+     * than breaking either the 30% limit or the study-day boundary.
+     */
+    fun applyDerivedV1(card: CardEntity, rating: Rating, now: Long): ScheduleResult {
+        if (paramsProvider != null) return snapshot().applyDerivedV1(card, rating, now)
+        require(rating == Rating.HARD || rating == Rating.EASY)
+        val good = apply(card, Rating.GOOD, now)
+        val raw = apply(card, rating, now)
+        val low = if (rating == Rating.HARD) 0.7 else 1.0
+        val high = if (rating == Rating.EASY) 1.3 else 1.0
+        val after = boundDerivedMemoryV1(good.after, raw.after, rating)
+        val stability = after.stability
+        val interval = Fsrs.intervalDays(stability, params.desiredRetention, params)
+        val candidate = dueAt(now, interval)
+        val baseDelay = (good.card.dueAt - now).coerceAtLeast(0L)
+        val minDelay = kotlin.math.ceil(baseDelay * low).toLong()
+        val maxDelay = kotlin.math.floor(baseDelay * high).toLong()
+        val delay = candidate - now
+        val boundedDue = if (delay in minDelay..maxDelay) candidate else good.card.dueAt
+        return raw.copy(after = after, card = raw.card.copy(stability = stability, dueAt = boundedDue))
+    }
+
     /**
      * Creates a card for a freshly introduced chunk, seeded from the component
      * layer. A chunk whose words are already known starts with a real interval
@@ -76,6 +115,7 @@ class Scheduler(
         componentPrior: ComponentPrior,
         now: Long
     ): CardEntity {
+        if (paramsProvider != null) return snapshot().introduce(chunkId, level, componentPrior, now)
         val baseS = Fsrs.initialStability(Rating.GOOD, params)
         val stability = baseS * (1.0 + componentPrior.knownRatio * 2.0)
         val difficulty = min(

@@ -3,6 +3,7 @@ package dev.ikna.data.export
 import dev.ikna.data.db.ReviewEntity
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -80,6 +81,45 @@ class ReviewRecordTest {
         )
         assertFalse(plain.contains("undoOf"))
         assertFalse(plain.contains("prevStability"))
+    }
+
+    @Test
+    fun `raw observations survive export and restore including discarded timing`() {
+        for (reason in listOf(null, "focus_lost", "timeout", "future_reason")) {
+            val original = entity().copy(
+                latencyMs = 70_123L,
+                swipeVelocityX = -1_234.5f,
+                peeked = true,
+                timingDiscardReason = reason
+            )
+            assertEquals(original, roundTrip(original).toEntity(id = original.id))
+        }
+    }
+
+    @Test
+    fun `legacy and Anki records retain unknown rather than invented observations`() {
+        val line = """{"chunkId":"a:1","ts":1,"rating":3,"durationMs":1200}"""
+        val restored = ReviewRecord.json.decodeFromString(ReviewRecord.serializer(), line).toEntity()
+        assertNull(restored.latencyMs)
+        assertNull(restored.swipeVelocityX)
+        assertNull(restored.peeked)
+        assertNull(restored.timingDiscardReason)
+        assertEquals(1200L, restored.durationMs)
+    }
+
+    @Test
+    fun `measured false and zero survive and are not confused with unknown`() {
+        val original = entity().copy(latencyMs = 0L, swipeVelocityX = 0f, peeked = false)
+        assertEquals(original, roundTrip(original).toEntity(id = original.id))
+    }
+
+    @Test
+    fun `remapping ids and undo does not lose observations`() {
+        val original = entity(undoOf = 4L).copy(
+            latencyMs = 700L, swipeVelocityX = 42f, peeked = true
+        )
+        val restored = roundTrip(original).toEntity(id = 100L, undoOf = 99L)
+        assertEquals(original.copy(id = 100L, undoOf = 99L), restored)
     }
 
     /** An older file must still read after a field is added. */

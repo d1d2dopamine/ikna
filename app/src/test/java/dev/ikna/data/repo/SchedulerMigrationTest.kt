@@ -1,5 +1,6 @@
 package dev.ikna.data.repo
 
+import dev.ikna.data.export.ReviewRecord
 import dev.ikna.data.db.CardEntity
 import dev.ikna.data.db.ReviewEntity
 import dev.ikna.domain.fsrs.Scheduler
@@ -54,6 +55,32 @@ class SchedulerMigrationTest {
         val second = replayCardsForFsrs6(first, answers, scheduler).cards
 
         assertEquals(first, second)
+    }
+
+    @Test
+    fun `signals and JSONL round trip cannot change the replayed schedule`() {
+        val ts = 1_700_000_000_000L
+        val current = listOf(card("one", isNew = false, reps = 4))
+        val original = listOf(3, 1, 3, 3).mapIndexed { index, rating ->
+            answer("one", ts + index * 86_400_000L, rating, wasNew = index == 0)
+        }
+        val recorded = original.mapIndexed { index, row ->
+            row.copy(
+                latencyMs = if (index == 0) null else index * 40_000L,
+                swipeVelocityX = if (index % 2 == 0) 2_000f else -950f,
+                peeked = true,
+                timingDiscardReason = if (index > 1) "timeout" else null
+            )
+        }
+        val restored = recorded.map { row ->
+            val line = ReviewRecord.json.encodeToString(ReviewRecord.serializer(), ReviewRecord.of(row))
+            ReviewRecord.json.decodeFromString(ReviewRecord.serializer(), line).toEntity(id = row.id)
+        }
+        val scheduler = Scheduler()
+        val binary = replayCardsForFsrs6(current, original, scheduler)
+        assertEquals(recorded, restored)
+        assertEquals(binary, replayCardsForFsrs6(current, recorded, scheduler))
+        assertEquals(binary, replayCardsForFsrs6(current, restored, scheduler))
     }
 
     private fun card(chunkId: String, isNew: Boolean, reps: Int) = CardEntity(

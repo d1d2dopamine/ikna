@@ -363,6 +363,14 @@ fun SettingsScreen(
             ) {
                 item(key = ID_LOAD, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
                     Section(S.t("set.013"), null) {
+                        ToggleRow(
+                            title = S.t("grading.001"),
+                            subtitle = S.t("grading.002"),
+                            checked = settings.derivedGrading,
+                            onCheckedChange = { on ->
+                                scope.launch { container.settings.setDerivedGrading(on) }
+                            }
+                        )
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             IknaChip(
                                 label = S.t("set.015"),
@@ -402,7 +410,8 @@ fun SettingsScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-
+                        Spacer(Modifier.height(22.dp))
+                        LocalOptimizerPanel(container.optimizer)
                     }
                 }
 

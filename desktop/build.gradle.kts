@@ -27,6 +27,7 @@ kotlin {
 
 dependencies {
     implementation(project(":shared"))
+    testImplementation("junit:junit:4.13.2")
     implementation(compose.desktop.currentOs)
     implementation("androidx.sqlite:sqlite-bundled:2.5.2")
     // Anki writes its newest collections compressed. The phone reads them
@@ -140,5 +141,29 @@ compose.desktop {
                 upgradeUuid = "6f3c9c1e-4f2a-4b8d-9a1e-2d7b5c8e3a04"
             }
         }
+    }
+}
+
+// The experiment is tested on a plain JVM as well as in Android's unit target.
+kotlin.sourceSets.named("test") {
+    kotlin.srcDir(rootProject.file("app/src/test/java/dev/ikna/domain/grading"))
+    kotlin.srcDir(rootProject.file("app/src/test/java/dev/ikna/domain/fsrs"))
+    kotlin.srcDir(rootProject.file("app/src/test/java/dev/ikna/domain/optimizer"))
+}
+
+tasks.register<JavaExec>("gradingLab") {
+    dependsOn("classes")
+    group = "verification"
+    description = "Evaluate an explicit local JSONL log; never connects to a server"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("dev.ikna.desktop.grading.GradingLabKt")
+    workingDir = rootProject.projectDir
+    val input = providers.gradleProperty("grading.input")
+    val output = providers.gradleProperty("grading.output")
+        .orElse("build/grading/report.txt")
+    // An explicit path is mandatory; real data is never searched for implicitly.
+    doFirst {
+        require(input.isPresent) { "Pass -Pgrading.input=path/to/log.jsonl" }
+        args(input.get(), output.get())
     }
 }

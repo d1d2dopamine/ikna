@@ -111,6 +111,7 @@ fun SessionScreen(
     val settings by container.settings.flow.collectAsState(initial = IknaSettings())
 
     val card = state.current
+    ObserveReviewInterruptions(vm.reviewSignals)
 
     // A review is one of the few places where no touch for a minute can mean
     // concentration rather than absence. Keep the display awake only while an
@@ -152,7 +153,8 @@ fun SessionScreen(
                     // disappears under a thumb that is already moving.
                     railsAtRest = !state.swipeFluent,
                     onReveal = vm::reveal,
-                    onRate = { rating -> vm.rate(rating, viaSwipe = true) }
+                    signals = vm.reviewSignals,
+                    onRate = { rating, signals -> vm.rate(rating, viaSwipe = true, signals = signals) }
                 ) { progress ->
                     ChunkCard(
                         label = askLabel(card.ask, card.chunk.lang == NO_LANG),

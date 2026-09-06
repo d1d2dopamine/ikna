@@ -32,8 +32,8 @@ class SessionErgonomicsTest {
         assertTrue(stack.contains("CustomAccessibilityAction(revealAction)"))
         assertTrue(stack.contains("val canReveal = !revealedNow.value"))
         assertTrue(stack.contains("val canRate = revealedNow.value"))
-        assertTrue(stack.contains("rateNow.value(Rating.GOOD)"))
-        assertTrue(stack.contains("rateNow.value(Rating.AGAIN)"))
+        assertTrue(stack.contains("rateNow.value(Rating.GOOD, signals.snapshot())"))
+        assertTrue(stack.contains("rateNow.value(Rating.AGAIN, signals.snapshot())"))
     }
 
     private fun source(relative: String): String {

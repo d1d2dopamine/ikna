@@ -18,10 +18,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +36,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
@@ -45,6 +49,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import dev.ikna.domain.fsrs.Rating
+import dev.ikna.domain.session.ReviewSignalTracker
+import dev.ikna.domain.session.ReviewSignals
+import dev.ikna.domain.session.TimingDiscardReason
 import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.theme.Space
 import kotlinx.coroutines.launch
@@ -104,7 +111,8 @@ fun SwipeableCard(
     haptics: Boolean,
     railsAtRest: Boolean,
     onReveal: () -> Unit,
-    onRate: (Rating) -> Unit,
+    onRate: (Rating, ReviewSignals) -> Unit,
+    signals: ReviewSignalTracker,
     /**
      * How far the card has to travel to become an answer, in pixels.
      *
@@ -145,6 +153,17 @@ fun SwipeableCard(
     val revealedNow = rememberUpdatedState(revealed)
     val revealNow = rememberUpdatedState(onReveal)
     val rateNow = rememberUpdatedState(onRate)
+    val windowInfo = LocalWindowInfo.current
+
+    // Observation only: neither focus nor timing is allowed to block an answer.
+    LaunchedEffect(signals, windowInfo) {
+        snapshotFlow { windowInfo.isWindowFocused }.collect { focused ->
+            if (!focused) signals.interrupt(TimingDiscardReason.FOCUS_LOST)
+        }
+    }
+    DisposableEffect(signals) {
+        onDispose { signals.interrupt(TimingDiscardReason.PRESENTATION_INTERRUPTED) }
+    }
 
     LaunchedEffect(key, animations) {
         if (animations) arrival.animateTo(1f, Motion.arrive) else arrival.snapTo(1f)
@@ -160,6 +179,7 @@ fun SwipeableCard(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .onGloballyPositioned { signals.shown() }
             .semantics {
                 // TalkBack follows the same two-step contract as a finger. The
                 // old semantics exposed both grades on the front, so a screen-
@@ -169,12 +189,12 @@ fun SwipeableCard(
                     listOf(
                         CustomAccessibilityAction(keepAction) {
                             val canRate = revealedNow.value
-                            if (canRate) rateNow.value(Rating.GOOD)
+                            if (canRate) rateNow.value(Rating.GOOD, signals.snapshot())
                             canRate
                         },
                         CustomAccessibilityAction(missAction) {
                             val canRate = revealedNow.value
-                            if (canRate) rateNow.value(Rating.AGAIN)
+                            if (canRate) rateNow.value(Rating.AGAIN, signals.snapshot())
                             canRate
                         }
                     )
@@ -191,9 +211,10 @@ fun SwipeableCard(
             // On the whole screen rather than on the card: the card moves, and a
             // touch area that moves with it stops accepting the second half of a
             // long drag.
-            .pointerInput(key) {
+            .pointerInput(key, signals) {
                 detectDragGestures(
                     onDragStart = {
+                        signals.dragStarted()
                         tracker.resetTracking()
                         armed.value = null
                         gradable.value = revealedNow.value
@@ -240,12 +261,15 @@ fun SwipeableCard(
                                 flying.value = false
                             }
                         } else {
+                            // Freeze before animation: its duration and any later
+                            // queued disk work are not retrieval latency.
+                            val observation = signals.snapshot(velocity.x)
                             if (haptics) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             scope.launch {
                                 flying.value = true
                                 offsetX.snapTo(drag.value)
                                 if (animations) throwOut(offsetX, rating, velocity)
-                                rateNow.value(rating)
+                                rateNow.value(rating, observation)
                                 offsetX.snapTo(0f)
                                 drag.value = 0f
                                 flying.value = false

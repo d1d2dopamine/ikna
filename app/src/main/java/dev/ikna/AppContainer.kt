@@ -50,6 +50,10 @@ class AppContainer(context: Context) {
     private val db = openIknaDatabase(context)
 
     val settings = SettingsStore(context)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    val optimizer = dev.ikna.data.repo.LocalOptimizer(settings,
+        FsrsParams(desiredRetention = config.desiredRetention), scope,
+        loadHistory = { db.reviewDao().optimizerHistory(dev.ikna.domain.fsrs.FsrsOptimizer.MAX_ANSWERS, System.currentTimeMillis()) })
 
     val packLoader = PackLoader(context, db.chunkDao())
 
@@ -64,7 +68,8 @@ class AppContainer(context: Context) {
     // Scheduler.dueAt.
     private val scheduler = Scheduler(
         FsrsParams(desiredRetention = config.desiredRetention),
-        dayStartHour = config.dayStartHour
+        dayStartHour = config.dayStartHour,
+        paramsProvider = optimizer::parameters
     )
 
     val learningRepository = LearningRepository(
@@ -152,7 +157,6 @@ class AppContainer(context: Context) {
      */
     val voiceInstaller = VoiceInstaller(voiceModels)
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val _schedulerMigration = MutableStateFlow<SchedulerMigrationState>(
         SchedulerMigrationState.Running
     )
@@ -180,6 +184,7 @@ class AppContainer(context: Context) {
         }
         learningRepository.onSuppress = { chunkId -> settings.suppressChunk(chunkId) }
 
+        learningRepository.derivedGradingEnabled = { settings.current().derivedGrading }
         learningRepository.loadSettings = {
             val stored = settings.flow.first()
             LearningRepository.LoadSetting(
@@ -222,7 +227,7 @@ class AppContainer(context: Context) {
         if (schedulerMigrationJob?.isActive == true) return
         _schedulerMigration.value = SchedulerMigrationState.Running
         schedulerMigrationJob = scope.launch(Dispatchers.IO) {
-            _schedulerMigration.value = runCatching { schedulerMigrator.runIfNeeded() }
+            _schedulerMigration.value = runCatching { optimizer.initialize(); schedulerMigrator.runIfNeeded() }
                 .fold(
                     onSuccess = { SchedulerMigrationState.Ready(it.migratedCards) },
                     onFailure = {

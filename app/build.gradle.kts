@@ -105,6 +105,8 @@ val signWithFixedKey = hasFixedKey && !unsignedBuild
 // and published beside it. The ndk block below says why there are two files
 // instead of one that fits everything.
 val legacyAbi = (project.findProperty("ikna.abi") as String?) == "legacy32"
+// Only CI's on-device migration tests request x86_64. Published defaults stay arm64.
+val emulatorAbi = (project.findProperty("ikna.abi") as String?) == "emulator"
 
 android {
     namespace = "dev.ikna"
@@ -139,7 +141,11 @@ android {
         // -------------------------------------------------------------------
         ndk {
             abiFilters.clear()
-            abiFilters += if (legacyAbi) "armeabi-v7a" else "arm64-v8a"
+            abiFilters += when {
+                legacyAbi -> "armeabi-v7a"
+                emulatorAbi -> "x86_64"
+                else -> "arm64-v8a"
+            }
         }
 
         // The six languages the interface is actually translated into, in

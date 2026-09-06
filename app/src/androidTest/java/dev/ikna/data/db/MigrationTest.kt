@@ -2,9 +2,9 @@ package dev.ikna.data.db
 
 import android.content.Context
 import androidx.room.Room
-import androidx.sqlite.db.SupportSQLiteDatabase
-import androidx.sqlite.db.SupportSQLiteOpenHelper
-import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
+import kotlinx.coroutines.runBlocking
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.After
@@ -125,6 +125,26 @@ private val V4_DDL = V3_DDL + listOf(
         "VALUES (NEW.rowid, NEW.text, NEW.contextSentence, NEW.translation); END"
 )
 
+private val V5_DDL = V4_DDL + listOf(
+    "ALTER TABLE chunks ADD COLUMN ipa TEXT",
+    "ALTER TABLE chunks ADD COLUMN ipaContext TEXT"
+)
+
+private val V6_DDL = V5_DDL + listOf(
+    "ALTER TABLE reviews ADD COLUMN latencyMs INTEGER",
+    "ALTER TABLE reviews ADD COLUMN swipeVelocityX REAL",
+    "ALTER TABLE reviews ADD COLUMN peeked INTEGER",
+    "ALTER TABLE reviews ADD COLUMN timingDiscardReason TEXT"
+)
+
+private val V7_DDL = V6_DDL + listOf(
+    "ALTER TABLE reviews ADD COLUMN inputRating INTEGER",
+    "ALTER TABLE reviews ADD COLUMN gradingVersion INTEGER",
+    "ALTER TABLE reviews ADD COLUMN gradingReason TEXT",
+    "ALTER TABLE reviews ADD COLUMN presentationLength INTEGER",
+    "ALTER TABLE reviews ADD COLUMN inputMethod TEXT",
+    "ALTER TABLE reviews ADD COLUMN peekSemantics TEXT"
+)
 private const val DB_NAME = "ikna-migration-test.db"
 
 /**
@@ -412,9 +432,85 @@ class MigrationTest {
     }
 
     @Test
+    fun `version 5 gains observations without rewriting reviews or undo`() {
+        createOldDatabase(5, V5_DDL) { db ->
+            db.execSQL(
+                "INSERT INTO reviews (id, chunkId, level, ts, rating, elapsedDays, " +
+                    "stabilityBefore, stabilityAfter, difficultyBefore, difficultyAfter, " +
+                    "durationMs, wasAmnesty, prevReps) VALUES " +
+                    "(41, 'kept', 1, 1700000000000, 3, 1.5, 2.0, 4.0, 5.0, 5.1, 4200, 0, 7)"
+            )
+            db.execSQL(
+                "INSERT INTO reviews (id, chunkId, level, ts, rating, elapsedDays, " +
+                    "stabilityBefore, stabilityAfter, difficultyBefore, difficultyAfter, " +
+                    "durationMs, wasAmnesty, undoOf) VALUES " +
+                    "(42, 'kept', 1, 1700000000001, 0, 0, 0, 0, 0, 0, 0, 0, 41)"
+            )
+        }
+        withMigratedDatabase { db ->
+            assertEquals(IKNA_DATABASE_VERSION, count(db, "PRAGMA user_version"))
+            assertEquals(2, count(db, "SELECT COUNT(*) FROM reviews"))
+            assertEquals(3, count(db, "SELECT rating FROM reviews WHERE id = 41"))
+            assertEquals(4200, count(db, "SELECT durationMs FROM reviews WHERE id = 41"))
+            assertEquals(7, count(db, "SELECT prevReps FROM reviews WHERE id = 41"))
+            assertEquals(41, count(db, "SELECT undoOf FROM reviews WHERE id = 42"))
+            assertEquals(2, count(db,
+                "SELECT COUNT(*) FROM reviews WHERE latencyMs IS NULL " +
+                    "AND swipeVelocityX IS NULL AND peeked IS NULL AND timingDiscardReason IS NULL"
+            ))
+            db.execSQL(
+                "INSERT INTO reviews (chunkId, level, ts, rating, elapsedDays, " +
+                    "stabilityBefore, stabilityAfter, difficultyBefore, difficultyAfter, " +
+                    "durationMs, wasAmnesty, latencyMs, swipeVelocityX, peeked, timingDiscardReason) " +
+                    "VALUES ('new', 0, 1700000000002, 1, 0, 1, 1, 5, 5, 4000, 0, " +
+                    "900, -1250.5, 1, 'focus_lost')"
+            )
+            assertEquals(43, count(db, "SELECT id FROM reviews WHERE chunkId = 'new'"))
+            assertEquals(1, count(db,
+                "SELECT COUNT(*) FROM reviews WHERE latencyMs = 900 AND swipeVelocityX = -1250.5 " +
+                    "AND peeked = 1 AND timingDiscardReason = 'focus_lost'"
+            ))
+        }
+    }
+
+    @Test
+    fun `version six raw signals survive the versioned-grading migration`() {
+        createOldDatabase(6, V6_DDL) { db ->
+            db.execSQL(
+                "INSERT INTO reviews (id, chunkId, level, ts, rating, elapsedDays, " +
+                    "stabilityBefore, stabilityAfter, difficultyBefore, difficultyAfter, " +
+                    "durationMs, wasAmnesty, latencyMs, swipeVelocityX, peeked, timingDiscardReason) " +
+                    "VALUES (51, 'kept', 1, 1700000000000, 3, 1, 2, 4, 5, 5, 6000, 0, " +
+                    "900, -1250.5, 1, 'focus_lost')"
+            )
+        }
+        withMigratedDatabase { db ->
+            assertEquals(IKNA_DATABASE_VERSION, count(db, "PRAGMA user_version"))
+            assertEquals(1, count(db,
+                "SELECT COUNT(*) FROM reviews WHERE id = 51 AND rating = 3 " +
+                    "AND latencyMs = 900 AND swipeVelocityX = -1250.5 " +
+                    "AND peeked = 1 AND timingDiscardReason = 'focus_lost' " +
+                    "AND inputRating IS NULL AND gradingVersion IS NULL AND gradingReason IS NULL " +
+                    "AND presentationLength IS NULL AND inputMethod IS NULL AND peekSemantics IS NULL"
+            ))
+        }
+    }
+
+    @Test
+    fun `version seven preserves grading history and adds nullable parameter snapshots`() {
+        createOldDatabase(7, V7_DDL) { db ->
+            db.execSQL("INSERT INTO reviews (id,chunkId,level,ts,rating,elapsedDays,stabilityBefore,stabilityAfter,difficultyBefore,difficultyAfter,durationMs,wasAmnesty,inputRating,gradingVersion,gradingReason) VALUES (81,'kept',1,1700000000000,2,1,2,4,5,5,6000,0,3,1,'slow')")
+        }
+        withMigratedDatabase { db ->
+            assertEquals(8, count(db, "PRAGMA user_version"))
+            assertEquals(1, count(db, "SELECT COUNT(*) FROM reviews WHERE id=81 AND rating=2 AND inputRating=3 AND gradingVersion=1 AND gradingReason='slow' AND fsrsParameters IS NULL"))
+        }
+    }
+
+    @Test
     fun `a fresh install opens at the current version`() {
         withMigratedDatabase { db ->
-            assertEquals(5, count(db, "PRAGMA user_version"))
+            assertEquals(IKNA_DATABASE_VERSION, count(db, "PRAGMA user_version"))
             assertTrue(
                 "correctCount is missing from a freshly created database.",
                 count(db, "SELECT COUNT(*) FROM daily_stats") == 0
@@ -429,27 +525,18 @@ class MigrationTest {
     private fun createOldDatabase(
         version: Int,
         ddl: List<String>,
-        seed: (SupportSQLiteDatabase) -> Unit
+        seed: (SQLiteConnection) -> Unit
     ) {
-        val callback = object : SupportSQLiteOpenHelper.Callback(version) {
-            override fun onCreate(db: SupportSQLiteDatabase) {
-                ddl.forEach { db.execSQL(it) }
-                seed(db)
-            }
-
-            override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
-                // Nothing to do: this helper only ever creates.
-            }
+        val file = context.getDatabasePath(DB_NAME)
+        file.parentFile?.mkdirs()
+        val connection = iknaSqliteDriver().open(file.absolutePath)
+        try {
+            ddl.forEach { connection.execSQL(it) }
+            seed(connection)
+            connection.execSQL("PRAGMA user_version = $version")
+        } finally {
+            connection.close()
         }
-        val helper = FrameworkSQLiteOpenHelperFactory().create(
-            SupportSQLiteOpenHelper.Configuration.builder(context)
-                .name(DB_NAME)
-                .callback(callback)
-                .build()
-        )
-        // Opening it for writing is what runs onCreate.
-        helper.writableDatabase
-        helper.close()
     }
 
     /**
@@ -458,20 +545,27 @@ class MigrationTest {
      * migration that produces the wrong shape throws here rather than being
      * discovered by a user whose app stopped opening.
      */
-    private fun withMigratedDatabase(assertions: (SupportSQLiteDatabase) -> Unit) {
-        val room = Room.databaseBuilder(context, IknaDatabase::class.java, DB_NAME)
-            .addMigrations(*IknaMigrations.ALL)
-            .build()
+    private fun withMigratedDatabase(assertions: (SQLiteConnection) -> Unit) {
+        val room = buildIknaDatabase(
+            Room.databaseBuilder<IknaDatabase>(context, context.getDatabasePath(DB_NAME).absolutePath)
+        )
         try {
-            assertions(room.openHelper.writableDatabase)
+            // A DAO read opens Room and validates both fresh and migrated schemas.
+            runBlocking { room.reviewDao().all() }
         } finally {
             room.close()
         }
+        val connection = iknaSqliteDriver().open(context.getDatabasePath(DB_NAME).absolutePath)
+        try {
+            assertions(connection)
+        } finally {
+            connection.close()
+        }
     }
 
-    private fun count(db: SupportSQLiteDatabase, query: String): Int =
-        db.query(query).use { cursor ->
-            assertTrue("Query returned no rows: $query", cursor.moveToFirst())
-            cursor.getInt(0)
+    private fun count(db: SQLiteConnection, query: String): Int =
+        db.prepare(query).use { statement ->
+            assertTrue("Query returned no rows: $query", statement.step())
+            statement.getLong(0).toInt()
         }
 }

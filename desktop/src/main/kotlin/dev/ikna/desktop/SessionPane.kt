@@ -37,6 +37,8 @@ import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.phonetics.Phonetics
 import dev.ikna.domain.session.Ask
 import dev.ikna.domain.session.SessionPlan
+import dev.ikna.domain.session.ReviewSignalTracker
+import dev.ikna.domain.session.ReviewSignals
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.ui.platform.LocalDensity
 import dev.ikna.ui.session.ChunkCard
@@ -91,6 +93,13 @@ fun SessionPane(
 
     val cards = plan?.cards.orEmpty()
     val current = cards.getOrNull(index)
+    val reviewSignals = remember(deckId, reload, index, current?.card?.key, loading) {
+        ReviewSignalTracker()
+    }
+    val reveal: () -> Unit = {
+        reviewSignals.reveal()
+        revealed = true
+    }
 
     val advance: () -> Unit = {
         revealed = false
@@ -99,7 +108,7 @@ fun SessionPane(
         onChanged()
     }
 
-    val grade: (Rating) -> Unit = { rating ->
+    val gradeWithSignals: (Rating, ReviewSignals) -> Unit = { rating, signals ->
         val card = current
         if (card != null) {
             val took = System.currentTimeMillis() - shownAt
@@ -109,13 +118,18 @@ fun SessionPane(
                         sessionCard = card,
                         rating = rating,
                         durationMs = took,
-                        now = System.currentTimeMillis()
+                        now = System.currentTimeMillis(),
+                        signals = signals
                     )
                 }.onFailure { error -> logLine("answer failed: " + error) }
                 note = null
                 advance()
             }
         }
+    }
+
+    val grade: (Rating) -> Unit = { rating ->
+        gradeWithSignals(rating, reviewSignals.snapshot(inputMethod = "keyboard"))
     }
 
     val undo: () -> Unit = {
@@ -156,7 +170,7 @@ fun SessionPane(
                     false
                 } else when (event.key) {
                     Key.Spacebar, Key.Enter -> {
-                        if (current != null && !revealed) { revealed = true; true } else false
+                        if (current != null && !revealed) { reveal(); true } else false
                     }
                     Key.DirectionLeft -> if (revealed) { grade(Rating.AGAIN); true } else false
                     Key.DirectionRight -> if (revealed) { grade(Rating.GOOD); true } else false
@@ -255,8 +269,9 @@ fun SessionPane(
                         // pointer has no muscle memory to build, and there is
                         // room for them beside the card at any size.
                         railsAtRest = true,
-                        onReveal = { revealed = true },
-                        onRate = { rating -> grade(rating) },
+                        onReveal = reveal,
+                        onRate = gradeWithSignals,
+                        signals = reviewSignals,
                         threshold = swipeLine
                     ) { progress ->
                         ChunkCard(
@@ -286,7 +301,7 @@ fun SessionPane(
                             revealed = revealed,
                             showTapHint = !revealed && index == 0,
                             progress = progress,
-                            onTap = { revealed = true },
+                            onTap = reveal,
                             tapEnabled = !revealed,
                             modifier = Modifier.fillMaxSize()
                         )

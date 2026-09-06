@@ -163,6 +163,9 @@ object SettingsBackup {
      * it was restored.
      */
     suspend fun apply(store: SettingsStore, snapshot: SettingsSnapshot) {
+        // Experiments require consent on this installation, never in a backup.
+        store.setDerivedGrading(false)
+        store.disableLocalOptimizer()
         val theme = runCatching { ThemeMode.valueOf(snapshot.theme) }.getOrDefault(ThemeMode.DARK)
 
         store.setCustomColors(

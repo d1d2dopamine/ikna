@@ -12,6 +12,8 @@ import dev.ikna.domain.governor.GovernorReason
 import dev.ikna.domain.session.Ask
 import dev.ikna.domain.session.Level
 import dev.ikna.domain.session.SessionCard
+import dev.ikna.domain.session.ReviewSignals
+import dev.ikna.domain.session.ReviewSignalTracker
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -136,6 +138,9 @@ class SessionViewModel(
 
     private var shownAt = 0L
 
+    var reviewSignals = ReviewSignalTracker()
+        private set
+
     /**
      * Which languages can be spoken at all. Asked once each: the first answer is
      * where the model is read into memory, and it is needed on every card.
@@ -234,6 +239,7 @@ class SessionViewModel(
      * makes the card wait.
      */
     private fun onCardShown() {
+        reviewSignals = ReviewSignalTracker()
         viewModelScope.launch {
             val s = _state.value
             val card = s.current ?: return@launch
@@ -343,6 +349,7 @@ class SessionViewModel(
     fun reveal() {
         val s = _state.value
         if (s.revealed || s.current == null) return
+        reviewSignals.reveal()
         _state.value = s.copy(revealed = true, showRevealHint = false)
         if (hintsShown < HINT_LIMIT) {
             hintsShown++
@@ -412,7 +419,11 @@ class SessionViewModel(
         serially { repo.markWrong(card) }
     }
 
-    fun rate(rating: Rating, viaSwipe: Boolean = false) {
+    fun rate(
+        rating: Rating,
+        viaSwipe: Boolean = false,
+        signals: ReviewSignals = reviewSignals.snapshot()
+    ) {
         val s = _state.value
         val card = s.current ?: return
         val now = System.currentTimeMillis()
@@ -464,7 +475,7 @@ class SessionViewModel(
         shownAt = now
         onCardShown()
 
-        serially { repo.answer(card, rating, duration, now) }
+        serially { repo.answer(card, rating, duration, now, signals) }
         viewModelScope.launch {
             delay(UNDO_WINDOW_MS)
             if (token == undoToken) _state.value = _state.value.copy(undoVisible = false)

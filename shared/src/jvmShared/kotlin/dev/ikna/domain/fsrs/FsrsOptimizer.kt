@@ -13,7 +13,9 @@ import kotlin.math.min
 data class ReviewSample(
     val cardKey: String,
     val ts: Long,
-    val rating: Rating
+    val rating: Rating,
+    val inputRating: Rating? = null,
+    val gradingVersion: Int? = null
 )
 
 /**
@@ -112,7 +114,7 @@ object FsrsOptimizer {
     const val REGULARISATION = 0.1
 
     private const val MAX_PASSES = 6
-    private const val MAX_ANSWERS = 20_000
+    const val MAX_ANSWERS = 20_000
     private const val EPS = 1e-6
     private const val FIRST_STEP = 0.08
 
@@ -168,8 +170,11 @@ object FsrsOptimizer {
      */
     fun optimise(
         samples: List<ReviewSample>,
-        desiredRetention: Double = FsrsParams().desiredRetention
+        desiredRetention: Double = FsrsParams().desiredRetention,
+        checkCancelled: () -> Unit = {}
     ): Optimisation {
+        checkCancelled()
+        require(desiredRetention.isFinite() && desiredRetention > 0 && desiredRetention < 1)
         val histories = histories(samples)
         val scored = scoredTimestamps(histories)
 
@@ -185,10 +190,10 @@ object FsrsOptimizer {
 
         val cut = heldOutCut(scored)
         val defaults = FsrsParams(desiredRetention = desiredRetention)
-        val fitted = descend(histories, cut, desiredRetention)
+        val fitted = descend(histories, cut, desiredRetention, checkCancelled)
 
-        val lossDefaults = logLoss(defaults, histories, cut, null).mean
-        val lossFitted = logLoss(fitted, histories, cut, null).mean
+        val lossDefaults = logLoss(defaults, histories, cut, null, checkCancelled).mean
+        val lossFitted = logLoss(fitted, histories, cut, null, checkCancelled).mean
         val better = lossFitted < lossDefaults - MIN_IMPROVEMENT
 
         return Optimisation(
@@ -238,20 +243,24 @@ object FsrsOptimizer {
         params: FsrsParams,
         histories: List<List<ReviewSample>>,
         from: Long?,
-        until: Long?
+        until: Long?,
+        checkCancelled: () -> Unit = {}
     ): Loss {
         var total = 0.0
         var count = 0
 
         for (history in histories) {
+            checkCancelled()
             var state: MemoryState? = null
             var last = 0L
             for (sample in history) {
+                checkCancelled()
+                if (until != null && sample.ts >= until) break
                 val previous = state
                 if (previous == null) {
                     // The first answer establishes the memory; there is nothing
                     // to have predicted about it.
-                    state = Fsrs.initial(sample.rating, params)
+                    state = replayState(null, 0.0, sample, params)
                     last = sample.ts
                     continue
                 }
@@ -265,7 +274,7 @@ object FsrsOptimizer {
                     val predicted =
                         Fsrs.retrievability(elapsedDays, previous.stability, params)
                             .coerceIn(EPS, 1.0 - EPS)
-                    total += if (sample.rating == Rating.AGAIN) {
+                    total += if ((sample.inputRating ?: sample.rating) == Rating.AGAIN) {
                         -ln(1.0 - predicted)
                     } else {
                         -ln(predicted)
@@ -273,7 +282,7 @@ object FsrsOptimizer {
                     count++
                 }
 
-                state = Fsrs.next(previous, elapsedDays, sample.rating, params)
+                state = replayState(previous, elapsedDays, sample, params)
                 last = sample.ts
             }
         }
@@ -281,6 +290,16 @@ object FsrsOptimizer {
         return Loss(if (count == 0) Double.NaN else total / count, count)
     }
 
+    /** Same bounded memory transition as the shipping scheduler; no duplicate formulas. */
+    fun replayState(previous: MemoryState?, elapsedDays: Double, sample: ReviewSample, params: FsrsParams): MemoryState {
+        require(sample.gradingVersion == null || sample.gradingVersion == 1)
+        fun next(rating: Rating) = if (previous == null) Fsrs.initial(rating, params)
+            else Fsrs.next(previous, elapsedDays, rating, params)
+        val raw = next(sample.rating)
+        if (sample.gradingVersion == null) return raw
+        require(sample.inputRating == Rating.GOOD && sample.rating in listOf(Rating.HARD, Rating.EASY))
+        return boundDerivedMemoryV1(next(Rating.GOOD), raw, sample.rating)
+    }
     data class Loss(val mean: Double, val count: Int)
 
     /** Timestamps of the answers that can be scored at all, in order. */
@@ -327,13 +346,15 @@ object FsrsOptimizer {
     private fun descend(
         histories: List<List<ReviewSample>>,
         cut: Long,
-        desiredRetention: Double
+        desiredRetention: Double,
+        checkCancelled: () -> Unit
     ): FsrsParams {
         val w = FsrsParams.DEFAULT_W.toMutableList()
-        var best = objective(w, histories, cut, desiredRetention)
+        var best = objective(w, histories, cut, desiredRetention, checkCancelled)
         var step = FIRST_STEP
 
         repeat(MAX_PASSES) {
+            checkCancelled()
             var moved = false
             for (index in w.indices) {
                 val range = BOUNDS[index]
@@ -343,7 +364,7 @@ object FsrsOptimizer {
                     val candidate = clamp(current + scale * span, range)
                     if (candidate == current) continue
                     w[index] = candidate
-                    val score = objective(w, histories, cut, desiredRetention)
+                    val score = objective(w, histories, cut, desiredRetention, checkCancelled)
                     if (score < best) {
                         best = score
                         moved = true
@@ -363,9 +384,10 @@ object FsrsOptimizer {
         w: List<Double>,
         histories: List<List<ReviewSample>>,
         cut: Long,
-        desiredRetention: Double
+        desiredRetention: Double,
+        checkCancelled: () -> Unit
     ): Double {
-        val loss = logLoss(FsrsParams(w.toList(), desiredRetention), histories, null, cut)
+        val loss = logLoss(FsrsParams(w.toList(), desiredRetention), histories, null, cut, checkCancelled)
         return if (loss.count == 0) Double.MAX_VALUE else loss.mean + penalty(w)
     }
 

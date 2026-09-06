@@ -148,7 +148,23 @@ data class ReviewEntity(
      * 0 on these rows, which is not a valid FSRS rating, so old readers that
      * are unaware of undo cannot mistake one for a real answer.
      */
-    val undoOf: Long? = null
+    val undoOf: Long? = null,
+
+    // v6: raw gesture observations only. Old/imported rows remain unknown.
+    val latencyMs: Long? = null,
+    val swipeVelocityX: Float? = null,
+    val peeked: Boolean? = null,
+    val timingDiscardReason: String? = null,
+
+    // v7: original input and versioned decision/replay context.
+    val inputRating: Int? = null,
+    val gradingVersion: Int? = null,
+    val gradingReason: String? = null,
+    val presentationLength: Int? = null,
+    val inputMethod: String? = null,
+    val peekSemantics: String? = null,
+    /** v8: exact parameters for portable replay. */
+    val fsrsParameters: String? = null
 )
 
 // ---------------------------------------------------------------------------

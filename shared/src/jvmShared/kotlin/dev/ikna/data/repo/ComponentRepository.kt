@@ -115,7 +115,7 @@ class ComponentRepository(
 
         val acc = HashMap<ComponentKey, ComponentEntity>()
         for (r in answers) {
-            val success = if (r.rating >= 3) 1.0 else 0.0
+            val success = if (r.outcomeRating >= 3) 1.0 else 0.0
             for (t in tokens[r.chunkId].orEmpty()) {
                 val key = ComponentKey(t.lemma, t.pos)
                 val prev = acc[key]

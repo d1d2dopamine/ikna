@@ -1,0 +1,105 @@
+name: grading-validation
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  jvm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - name: JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Android SDK
+        uses: android-actions/setup-android@v4
+      - name: Gradle 8.10.2
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+      - name: Verify text, fixtures and additive migrations
+        run: |
+          python3 tools/check_text.py
+          python3 tools/grading/generate_synthetic.py --check
+          python3 tools/check_grading.py
+          python3 tools/grading/check_full.py
+          python3 tools/check_optimizer.py
+      - name: Existing build assets
+        run: |
+          bash tools/voice/fetch-voice.sh
+          bash tools/catalog/fetch-bundled-pack.sh
+      - name: Compile both targets and run JVM regression suites
+        run: gradle --no-daemon --stacktrace :desktop:test :app:testReleaseUnitTest :app:assembleDebug
+      - name: Paired replay of synthetic scenarios using production Kotlin
+        shell: bash
+        run: |
+          for scenario in optional required noise; do
+            gradle --no-daemon :desktop:gradingLab \
+              -Pgrading.input="tools/grading/fixtures/synthetic-$scenario.jsonl" \
+              -Pgrading.output="build/grading/$scenario.txt"
+          done
+          python3 tools/grading/check_reports.py build/grading
+      - name: Room output agrees with committed schema
+        run: |
+          changes=$(git status --porcelain app/schemas)
+          if [ -n "$changes" ]; then
+            echo "$changes"
+            echo "::error::Commit the compiler-generated Room schema before release."
+            exit 1
+          fi
+      - name: Test reports and compiler schemas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: grading-jvm-reports
+          path: |
+            build/grading/
+            desktop/build/reports/tests/test/
+            app/build/reports/tests/testReleaseUnitTest/
+            app/schemas/
+          if-no-files-found: warn
+
+  migrations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+      - name: Existing build assets
+        run: |
+          bash tools/voice/fetch-voice.sh
+          bash tools/catalog/fetch-bundled-pack.sh
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Real Android SQLite migration validation
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          script: gradle --no-daemon --stacktrace :app:connectedDebugAndroidTest -Pikna.abi=emulator
+      - name: Instrumented migration report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: grading-migration-reports
+          path: app/build/reports/androidTests/
+          if-no-files-found: warn

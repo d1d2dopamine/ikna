@@ -447,6 +447,22 @@ interface ReviewDao {
     )
     suspend fun recentDurations(limit: Int): List<Long>
 
+    /** All input modes, newest valid answers in one bounded SQLite snapshot. */
+    @Query("SELECT * FROM reviews WHERE " + NOT_RETRACTED +
+        " AND rating BETWEEN 1 AND 4 AND ts BETWEEN 1 AND :beforeTs" +
+        " ORDER BY ts DESC, id DESC LIMIT :limit")
+    suspend fun optimizerHistory(limit: Int, beforeTs: Long): List<ReviewEntity>
+
+    /** Latest usable native swipe timings, across sessions, excluding undo. */
+    @Query(
+        "SELECT * FROM reviews WHERE " + NOT_RETRACTED +
+            " AND ts <= :beforeTs AND inputMethod = 'swipe' AND inputRating IN (1, 3)" +
+            " AND latencyMs BETWEEN 1 AND 60000 AND timingDiscardReason IS NULL AND swipeVelocityX IS NOT NULL" +
+            " AND presentationLength BETWEEN 1 AND 4000 AND level BETWEEN 0 AND 2" +
+            " ORDER BY ts DESC, id DESC LIMIT :limit"
+    )
+    suspend fun recentGradingTimings(limit: Int, beforeTs: Long): List<ReviewEntity>
+
     /** Identity used to skip duplicates when restoring from an export file. */
     @Query("SELECT chunkId || ':' || level || ':' || ts FROM reviews")
     suspend fun signatures(): List<String>

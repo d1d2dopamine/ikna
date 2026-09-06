@@ -42,6 +42,10 @@ class DesktopContainer(val home: File) {
     internal val db = openIknaDatabase(File(home, "ikna.db"))
 
     val settings = SettingsStore(createSettingsDataStore(File(home, SETTINGS_DATASTORE_FILE)))
+    private val optimizerScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default)
+    val optimizer = dev.ikna.data.repo.LocalOptimizer(settings,
+        FsrsParams(desiredRetention = config.desiredRetention), optimizerScope,
+        loadHistory = { db.reviewDao().optimizerHistory(dev.ikna.domain.fsrs.FsrsOptimizer.MAX_ANSWERS, System.currentTimeMillis()) })
 
     val packLoader = PackLoader(ClasspathAssets, db.chunkDao())
 
@@ -53,7 +57,8 @@ class DesktopContainer(val home: File) {
 
     private val scheduler = Scheduler(
         FsrsParams(desiredRetention = config.desiredRetention),
-        dayStartHour = config.dayStartHour
+        dayStartHour = config.dayStartHour,
+        paramsProvider = optimizer::parameters
     )
 
     val learningRepository = LearningRepository(
@@ -110,6 +115,7 @@ class DesktopContainer(val home: File) {
             suppressedOf(settings.flow.first().suppressed).toSet()
         }
         learningRepository.onSuppress = { chunkId -> settings.suppressChunk(chunkId) }
+        learningRepository.derivedGradingEnabled = { settings.current().derivedGrading }
         learningRepository.loadSettings = {
             val s = settings.flow.first()
             LearningRepository.LoadSetting(auto = s.autoLoad, manual = s.manualLoad)
@@ -124,6 +130,7 @@ class DesktopContainer(val home: File) {
     /** Installs the decks shipped inside the application. Safe to call twice. */
     suspend fun install() {
         if (installed) return
+        optimizer.initialize()
         packLoader.installBundledPacks()
         installed = true
     }

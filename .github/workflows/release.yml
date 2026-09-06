@@ -20,7 +20,11 @@ permissions:
   contents: write
 
 jobs:
+  grading:
+    uses: ./.github/workflows/grading.yml
+
   apk:
+    needs: grading
     runs-on: ubuntu-latest
 
     # Same reason as in build.yml: fail loudly rather than hang for six hours.
@@ -116,6 +120,7 @@ jobs:
   # softprops/action-gh-release adds files to a release that already exists, so
   # whichever job finishes second attaches to the first one's release.
   windows:
+    needs: grading
     runs-on: windows-latest
     timeout-minutes: 45
 
@@ -189,6 +194,7 @@ jobs:
   # one created.
   # ---------------------------------------------------------------------------
   linux:
+    needs: grading
     runs-on: ubuntu-latest
     timeout-minutes: 45
 

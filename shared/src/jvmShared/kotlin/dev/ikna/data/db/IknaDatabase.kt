@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 
-const val IKNA_DATABASE_VERSION = 5
+const val IKNA_DATABASE_VERSION = 8
 
 @Database(
     entities = [
@@ -26,9 +26,12 @@ const val IKNA_DATABASE_VERSION = 5
     //     full-text index over `chunks` (see ChunkFtsIndex -- it is not a Room
     //     entity on purpose).
     // v5: the two transcription columns on `chunks`.
+    // v6: nullable gesture observations on `reviews`; no scheduling change.
+    // v7: original input, measurement context and versioned derived decision.
+    // v8: immutable FSRS parameter snapshots, without rescheduling existing cards.
     // Kept as a literal because SchemaTest deliberately reads this source line:
     // changing it must force a migration and a committed Room schema.
-    version = 5,
+    version = 8,
     // KSP writes the schema history into app/schemas (see the ksp block in
     // shared/build.gradle.kts -- it stays under app/ so that the workflow step
     // that uploads it and the one that checks it is committed do not move).

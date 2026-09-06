@@ -7,11 +7,14 @@ needed to do better for one person -- a timestamp and a grade per answer, never
 deleted -- so the fitting happens on the phone, and the log stays where
 `PRIVACY.md` says it stays.
 
-`FsrsOptimizer` is that fitting. **It is an estimator and nothing else.** Nothing
-reads its output yet: it is not wired into settings, not scheduled, and not
-applied to any card. That is on purpose -- the estimate had to be shown to be
-worth trusting before anything was allowed to depend on it, and the section on
-parameter recovery below is the reason that order matters.
+`FsrsOptimizer` remains pure, but its output is now connected to a local
+background worker and shared Android/desktop settings. Accepted candidates retain
+their evidence, require explicit application and can be switched off immediately.
+See [FSRS-OPTIMIZER-INTEGRATION.md](FSRS-OPTIMIZER-INTEGRATION.md) for the runtime,
+parameter snapshots, cancellation, monthly limit and executable CI gates.
+
+The figures below are the original prototype's results, not new benchmarks from
+this integration or a claim of benefit for an individual installation.
 
 ## How it works
 
@@ -109,9 +112,9 @@ do not support.
 which is a decision, not a measurement -- and the load governor already owns how
 much work a day is allowed to be. See `docs/GOVERNOR.md`.
 
-## If it is ever wired in
+## Integration requirements (implemented)
 
-In roughly this order, and no further than the user has asked to go:
+The integration follows these requirements:
 
 1. Run it in a worker, never on the answer path. Seconds of arithmetic.
 2. Store the fit next to the log, not in place of the defaults, and keep the
@@ -124,3 +127,6 @@ In roughly this order, and no further than the user has asked to go:
    normal outcomes, and the second one is not a failure of the user.
 5. Re-fit rarely -- monthly is plenty -- because a schedule that quietly changes
    every day is a schedule nobody can plan around.
+
+Full re-fits are manually requested and limited to once every 30 days. Existing
+card schedules are not bulk-rewritten when accepting or disabling a result.

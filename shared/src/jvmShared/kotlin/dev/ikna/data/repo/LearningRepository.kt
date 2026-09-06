@@ -14,6 +14,9 @@ import dev.ikna.data.db.ReviewEntity
 import dev.ikna.data.db.StatsDao
 import dev.ikna.domain.fsrs.ComponentPrior
 import dev.ikna.domain.fsrs.DAY_MS
+import dev.ikna.domain.grading.DerivedGrading
+import dev.ikna.domain.grading.DERIVED_GRADING_VERSION
+import dev.ikna.domain.grading.GRADING_WINDOW_SIZE
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.fsrs.Scheduler
 import dev.ikna.domain.governor.ChunkSelector
@@ -27,6 +30,7 @@ import dev.ikna.domain.governor.dailyNewRoom
 import dev.ikna.domain.governor.ruledOnceToday
 import dev.ikna.domain.session.Level
 import dev.ikna.domain.session.SessionBuilder
+import dev.ikna.domain.session.ReviewSignals
 import dev.ikna.domain.session.SessionCard
 import dev.ikna.domain.session.SessionPlan
 import dev.ikna.domain.session.Shapes
@@ -52,6 +56,9 @@ class LearningRepository(
     private val selector: ChunkSelector,
     private val baseConfig: GovernorConfig
 ) {
+
+    /** Null/unwired means OFF. Read at the answer, not from a stale UI mirror. */
+    @Volatile var derivedGradingEnabled: (suspend () -> Boolean)? = null
 
     /** The load switch as stored, read on demand. See [loadSettings]. */
     data class LoadSetting(val auto: Boolean, val manual: Int)
@@ -450,7 +457,7 @@ class LearningRepository(
 
         val recent = reviewDao.recent(config.recentWindowSize)
         val accuracy = if (recent.isEmpty()) 1.0
-        else recent.count { it.rating >= 3 }.toDouble() / recent.size
+        else recent.count { it.outcomeRating >= 3 }.toDouble() / recent.size
 
         val lastTs = reviewDao.lastReviewTs()
         val daysSince = if (lastTs == null) 0
@@ -897,20 +904,36 @@ class LearningRepository(
         }
     }
 
-    suspend fun answer(sessionCard: SessionCard, rating: Rating, durationMs: Long, now: Long) =
-        writeLock.withLock { answerLocked(sessionCard, rating, durationMs, now) }
+    suspend fun answer(
+        sessionCard: SessionCard,
+        rating: Rating,
+        durationMs: Long,
+        now: Long,
+        signals: ReviewSignals = ReviewSignals()
+    ) = writeLock.withLock { answerLocked(sessionCard, rating, durationMs, now, signals) }
 
     private suspend fun answerLocked(
         sessionCard: SessionCard,
         rating: Rating,
         durationMs: Long,
-        now: Long
+        now: Long,
+        signals: ReviewSignals
     ) {
         // Read the row instead of trusting the copy the UI holds: a card that
         // was rated "again" earlier in the same session is shown again from an
         // in-memory copy, and that copy is stale.
         val before = cardDao.card(sessionCard.chunk.id, sessionCard.level.value) ?: sessionCard.card
-        val result = scheduler.apply(before, rating, now)
+        val length = sessionCard.prompt.codePointCount(0, sessionCard.prompt.length)
+        val window = gradingWindowFromReviews(reviewDao.recentGradingTimings(GRADING_WINDOW_SIZE, now).asReversed())
+        val decision = DerivedGrading.decide(
+            rating, signals, sessionCard.level.value, length, window,
+            enabled = derivedGradingEnabled?.invoke() == true
+        )
+        val version = if (decision.rating != rating) DERIVED_GRADING_VERSION else null
+        val answerScheduler = scheduler.snapshot()
+        val parameterSnapshot = dev.ikna.domain.fsrs.FsrsSnapshotCodec.encode(answerScheduler.currentParameters())
+        val result = if (version != null) answerScheduler.applyDerivedV1(before, decision.rating, now)
+        else answerScheduler.apply(before, rating, now)
         cardDao.upsert(result.card)
 
         reviewDao.insert(
@@ -918,7 +941,14 @@ class LearningRepository(
                 chunkId = sessionCard.chunk.id,
                 level = sessionCard.level.value,
                 ts = now,
-                rating = rating.value,
+                rating = decision.rating.value,
+                inputRating = rating.value,
+                gradingVersion = version,
+                fsrsParameters = parameterSnapshot,
+                gradingReason = decision.reason,
+                presentationLength = length,
+                inputMethod = signals.inputMethod,
+                peekSemantics = signals.peekSemantics,
                 elapsedDays = result.elapsedDays,
                 stabilityBefore = result.before.stability,
                 stabilityAfter = result.after.stability,
@@ -926,6 +956,10 @@ class LearningRepository(
                 difficultyAfter = result.after.difficulty,
                 durationMs = durationMs,
                 wasAmnesty = sessionCard.fromAmnesty,
+                latencyMs = signals.latencyMs,
+                swipeVelocityX = signals.swipeVelocityX,
+                peeked = signals.peeked,
+                timingDiscardReason = decision.timingDiscardReason,
                 // Snapshot for undo. Restoring a saved state is the only honest
                 // way back: FSRS is not invertible.
                 prevStability = before.stability,
@@ -1135,7 +1169,7 @@ class LearningRepository(
         val day = dayKey(review.ts)
         val prev = statsDao.day(day) ?: return
         val done = (prev.reviewsDone - 1).coerceAtLeast(0)
-        val correct = (prev.correctCount - if (review.rating >= 3) 1 else 0).coerceAtLeast(0)
+        val correct = (prev.correctCount - if (review.outcomeRating >= 3) 1 else 0).coerceAtLeast(0)
         statsDao.upsert(
             prev.copy(
                 reviewsDone = done,

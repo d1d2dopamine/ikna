@@ -143,7 +143,7 @@ fun replayCardsForFsrs6(
         )
 
         for (answer in history) {
-            card = scheduler.apply(card, Rating.of(answer.rating), answer.ts).card
+            card = scheduler.applyRecordedReview(card, answer).card
             replayedAnswers++
         }
         rebuilt += card

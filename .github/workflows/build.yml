@@ -6,9 +6,13 @@ on:
   workflow_dispatch:
 
 jobs:
+  grading:
+    uses: ./.github/workflows/grading.yml
+
   # The Android application. Every step here is the one that was here
   # before the desktop build existed.
   android:
+    needs: grading
     runs-on: ubuntu-latest
 
     # A build that cannot finish should say so instead of sitting there.
@@ -131,6 +135,7 @@ jobs:
   # roughly double the wait for a result.
   # ---------------------------------------------------------------------------
   windows:
+    needs: grading
     runs-on: windows-latest
 
     # Longer than the Android job: a Windows runner is slower, the Gradle cache
@@ -263,6 +268,7 @@ jobs:
   # anything another one produces.
   # ---------------------------------------------------------------------------
   linux:
+    needs: grading
     runs-on: ubuntu-latest
 
     # Longer than the Android job on the same image: jpackage has to assemble a

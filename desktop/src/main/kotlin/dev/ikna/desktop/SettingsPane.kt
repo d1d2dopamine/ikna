@@ -160,6 +160,19 @@ fun SettingsPane(
             }
         }
 
+        Spacer(Modifier.height(14.dp))
+        ToggleRow(S.t("grading.001"), settings.derivedGrading, palette) {
+            save { container.settings.setDerivedGrading(it) }
+        }
+        Text(
+            text = S.t("grading.002"),
+            style = MaterialTheme.typography.bodySmall,
+            color = palette.muted
+        )
+
+        Spacer(Modifier.height(22.dp))
+        dev.ikna.ui.settings.LocalOptimizerPanel(container.optimizer)
+
         // -- look -------------------------------------------------------------
         Spacer(Modifier.height(30.dp))
         SectionTitle(S.t("set.019"), palette)

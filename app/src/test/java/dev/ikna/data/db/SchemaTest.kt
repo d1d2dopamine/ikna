@@ -26,7 +26,7 @@ import java.io.File
  * on disk agrees with the migration that is supposed to produce it, and that
  * every version step has a migration at all.
  */
-private const val DB_VERSION = 5
+private const val DB_VERSION = 8
 
 private const val SCHEMA_DIR = "schemas/dev.ikna.data.db.IknaDatabase"
 
@@ -97,6 +97,30 @@ class SchemaTest {
 					"that runs on other people's phones.",
 				text.contains(column)
 			)
+		}
+	}
+
+	@Test
+	fun `gesture columns are additive nullable observations`() {
+		val old = schema(5)!!.readText()
+		val current = schema(6)!!.readText()
+		val source = source("shared/src/jvmShared/kotlin/dev/ikna/data/db/Entities.kt")!!.readText()
+		for ((name, type) in listOf(
+			"latencyMs" to "Long", "swipeVelocityX" to "Float",
+			"peeked" to "Boolean", "timingDiscardReason" to "String"
+		)) {
+			assertFalse("$name must not be backfilled into the old schema", old.contains(name))
+			assertTrue("$name is missing from v6", current.contains(name))
+			assertTrue("$name must default to unknown", source.contains("val $name: $type? = null"))
+		}
+	}
+
+	@Test
+	fun `the grading context columns are committed in schema seven`() {
+		val text = schema(7)!!.readText()
+		for (name in listOf("inputRating", "gradingVersion", "gradingReason", "presentationLength", "inputMethod", "peekSemantics")) {
+			assertTrue(text.contains(name))
+			assertFalse(schema(6)!!.readText().contains(name))
 		}
 	}
 

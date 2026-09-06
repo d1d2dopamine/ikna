@@ -119,6 +119,8 @@ data class IknaSettings(
     val haptics: Boolean = true,
     val animations: Boolean = true,
     val autoExport: Boolean = true,
+    /** Explicit local experiment; never automatically enabled or restored. */
+    val derivedGrading: Boolean = false,
     /**
      * Speech, through the engine already installed on the phone. **Off by
      * default, and marked beta in settings.**
@@ -261,8 +263,24 @@ data class IknaSettings(
 )
 
 class SettingsStore(private val store: DataStore<Preferences>) {
+    @Volatile var onOptimizerReset: (() -> Unit)? = null
+    val optimizerRaw: Flow<String?> = store.data.map { it[Keys.optimizer] }
+    suspend fun updateOptimizer(update: (dev.ikna.domain.optimizer.StoredOptimizer) -> dev.ikna.domain.optimizer.StoredOptimizer): dev.ikna.domain.optimizer.StoredOptimizer {
+        var saved = dev.ikna.domain.optimizer.StoredOptimizer()
+        store.edit { prefs ->
+            val old = dev.ikna.domain.optimizer.OptimizerStateCodec.decode(prefs[Keys.optimizer])
+                ?: dev.ikna.domain.optimizer.StoredOptimizer()
+            saved = update(old)
+            prefs[Keys.optimizer] = dev.ikna.domain.optimizer.OptimizerStateCodec.encode(saved)
+        }
+        return saved
+    }
+    suspend fun disableLocalOptimizer() {
+        onOptimizerReset?.invoke(); updateOptimizer { it.copy(enabled = false) }
+    }
 
     private object Keys {
+        val optimizer = stringPreferencesKey("localFsrsOptimizerV1")
         val theme = stringPreferencesKey("theme")
         val paletteId = stringPreferencesKey("paletteId")
         val customBackground = intPreferencesKey("customBackground")
@@ -279,6 +297,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val haptics = booleanPreferencesKey("haptics")
         val animations = booleanPreferencesKey("animations")
         val autoExport = booleanPreferencesKey("autoExport")
+        val derivedGrading = booleanPreferencesKey("derivedGrading")
         val speechEnabled = booleanPreferencesKey("speechEnabled")
         val phoneVoice = booleanPreferencesKey("phoneVoice")
         val autoSpeakEvery = booleanPreferencesKey("autoSpeakEvery")
@@ -323,6 +342,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             haptics = p[Keys.haptics] ?: defaults.haptics,
             animations = p[Keys.animations] ?: defaults.animations,
             autoExport = p[Keys.autoExport] ?: defaults.autoExport,
+            derivedGrading = p[Keys.derivedGrading] ?: false,
             speechEnabled = p[Keys.speechEnabled] ?: defaults.speechEnabled,
             // A file written by an older build still carries a speed, a pitch
             // and a voice per language. They are not read and not migrated:
@@ -347,6 +367,8 @@ class SettingsStore(private val store: DataStore<Preferences>) {
     }
 
     suspend fun current(): IknaSettings = flow.first()
+
+    suspend fun setDerivedGrading(on: Boolean) = put { it[Keys.derivedGrading] = on }
 
     suspend fun setTheme(mode: ThemeMode) = put { it[Keys.theme] = mode.name }
 
@@ -503,7 +525,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
      * Used by "стереть всё" in settings: a wipe that leaves the app thinking
      * it is already set up is not a wipe, it is a bug factory.
      */
-    suspend fun clearAll() = put { it.clear() }
+    suspend fun clearAll() { onOptimizerReset?.invoke(); put { it.clear() } }
 
     private suspend fun put(block: (androidx.datastore.preferences.core.MutablePreferences) -> Unit) {
         store.edit { block(it) }

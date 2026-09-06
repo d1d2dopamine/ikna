@@ -49,7 +49,25 @@ data class ReviewRecord(
     val prevLapses: Int? = null,
     val prevIsNew: Boolean? = null,
     val prevInAmnesty: Boolean? = null,
-    val undoOf: Long? = null
+    val undoOf: Long? = null,
+
+    // v6: raw gesture observations only. Old/imported rows remain unknown.
+    val latencyMs: Long? = null,
+    val swipeVelocityX: Float? = null,
+    val peeked: Boolean? = null,
+    val timingDiscardReason: String? = null,
+
+    // v7: original input and versioned decision/replay context.
+    val inputRating: Int? = null,
+    val gradingVersion: Int? = null,
+    val gradingReason: String? = null,
+    val presentationLength: Int? = null,
+    val inputMethod: String? = null,
+    val peekSemantics: String? = null,
+    /** v8: immutable parameters actually used for this answer. */
+    val fsrsParameters: String? = null,
+    /** Reserved for test/lab files: restore must never install synthetic history. */
+    val synthetic: Boolean = false
 ) {
     /** Identity of an answer, independent of which phone stored it. */
     val signature: String get() = chunkId + ":" + level + ":" + ts
@@ -80,7 +98,18 @@ data class ReviewRecord(
         prevLapses = prevLapses,
         prevIsNew = prevIsNew,
         prevInAmnesty = prevInAmnesty,
-        undoOf = undoOf
+        undoOf = undoOf,
+        latencyMs = latencyMs,
+        swipeVelocityX = swipeVelocityX,
+        peeked = peeked,
+        inputRating = inputRating,
+        gradingVersion = gradingVersion,
+        gradingReason = gradingReason,
+        presentationLength = presentationLength,
+        inputMethod = inputMethod,
+        peekSemantics = peekSemantics,
+        fsrsParameters = fsrsParameters,
+        timingDiscardReason = timingDiscardReason
     )
 
     companion object {
@@ -105,7 +134,18 @@ data class ReviewRecord(
             prevLapses = r.prevLapses,
             prevIsNew = r.prevIsNew,
             prevInAmnesty = r.prevInAmnesty,
-            undoOf = r.undoOf
+            undoOf = r.undoOf,
+            latencyMs = r.latencyMs,
+            swipeVelocityX = r.swipeVelocityX,
+            peeked = r.peeked,
+            inputRating = r.inputRating,
+            gradingVersion = r.gradingVersion,
+            gradingReason = r.gradingReason,
+            presentationLength = r.presentationLength,
+            inputMethod = r.inputMethod,
+            peekSemantics = r.peekSemantics,
+            fsrsParameters = r.fsrsParameters,
+            timingDiscardReason = r.timingDiscardReason
         )
 
         /**
