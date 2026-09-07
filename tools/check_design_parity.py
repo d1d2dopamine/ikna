@@ -151,6 +151,32 @@ class DesignContracts(unittest.TestCase):
                         self.assertTrue(qualified in imports or package_wildcard in imports,
                                         f'{path.relative_to(ROOT)} uses {symbol} without importing {qualified}')
 
+    def test_junit_settings_contracts_use_the_same_executable_preflight(self):
+        helper_path = 'app/src/test/java/dev/ikna/ui/SettingsSourceContracts.java'
+        helper = read(ROOT, helper_path)
+        cases = {
+            'settings/SettingsLazyLayoutTest.kt': [
+                'offscreenSettingsAreNotComposedEagerly',
+                'jumpStripTargetsLazyItemsWithoutGlobalSectionMeasurement',
+                'speechEngineWaitsUntilItsSectionIsVisible'],
+            'theme/MotionPolishTest.kt': [
+                'fastSettingsFlingDoesNotStartACompetingJumpAnimation',
+                'autoLoadTargetIsPublishedOnlyAfterMeasurementIsKnown',
+                'microMotionIsShortLocalAndObeysTheExistingSwitch'],
+        }
+        for name, methods in cases.items():
+            wrapper = read(ROOT, 'app/src/test/java/dev/ikna/ui/' + name)
+            self.assertEqual(wrapper.count('@Test'), 3)
+            self.assertNotIn('@Ignore', wrapper)
+            for method in methods:
+                self.assertIn('contracts.' + method + '()', wrapper)
+                self.assertIn('public void ' + method + '()', helper)
+        self.assertIn('ui/settings/SettingsChrome.kt', helper)
+        self.assertIn('throw new AssertionError', helper)
+        ci = read(ROOT, '.github/workflows/grading.yml')
+        self.assertIn('java --source 17 ' + helper_path, ci)
+        self.assertIn('jvm-build.log --continue :desktop:test :app:testReleaseUnitTest :app:assembleDebug', ci)
+
     def test_ci_keeps_real_build_and_migration_gates(self):
         source = read(ROOT, '.github/workflows/grading.yml')
         for required in ['tools/check_design_parity.py', ':desktop:test', ':app:testReleaseUnitTest', ':app:assembleDebugAndroidTest', ':app:connectedDebugAndroidTest']:

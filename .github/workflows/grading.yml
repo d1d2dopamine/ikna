@@ -35,12 +35,14 @@ jobs:
           python3 tools/check_design_parity.py
           python3 tools/check_android_ci.py --self-test
           python3 tools/check_android_ci.py
+      - name: Settings source contracts (same assertions as JUnit)
+        run: java --source 17 app/src/test/java/dev/ikna/ui/SettingsSourceContracts.java
       - name: Existing build assets
         run: |
           bash tools/voice/fetch-voice.sh
           bash tools/catalog/fetch-bundled-pack.sh
       - name: Compile both targets and run JVM regression suites
-        run: bash tools/ci/run-gradle.sh ci-logs/jvm-build.log :desktop:test :app:testReleaseUnitTest :app:assembleDebug
+        run: bash tools/ci/run-gradle.sh ci-logs/jvm-build.log --continue :desktop:test :app:testReleaseUnitTest :app:assembleDebug
       - name: Paired replay of synthetic scenarios using production Kotlin
         shell: bash
         run: |
