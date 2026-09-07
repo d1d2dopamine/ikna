@@ -209,4 +209,69 @@ class LocalOptimizerTest {
         assertEquals(FsrsOptimizer.logLoss(fitted,listOf(listOf(a,b,c)),null,cut),
             FsrsOptimizer.logLoss(fitted,listOf(listOf(a,b,c.copy(rating=Rating.EASY))),null,cut))
     }
+    @Test fun automaticPolicyAppliesOnlyAcceptedResultsAndHonoursMonthlyLimit() = runBlocking {
+        val f = Fixture()
+        try {
+            f.init(); f.controller.runAutomaticCycle()
+            assertEquals(fitted, f.controller.parameters())
+            assertTrue(f.controller.state.value.usingOptimized)
+            f.controller.runAutomaticCycle(); assertEquals(1, f.calls.get())
+            f.now += OPTIMIZER_REFIT_MS + 1
+            f.controller.runAutomaticCycle(); assertEquals(2, f.calls.get())
+        } finally { f.close() }
+    }
+    @Test fun automaticEligibilityIsQuietAndInsufficientHistoryKeepsDefaults() = runBlocking {
+        val f = Fixture(fitting = { _, _, _ -> Optimisation(null, 12, Double.NaN, Double.NaN, Verdict.TOO_FEW_ANSWERS) })
+        try {
+            f.init(); f.controller.runAutomaticCycle(); f.controller.runAutomaticCycle()
+            assertEquals(1, f.calls.get()); assertEquals(FsrsParams(), f.controller.parameters())
+            f.now += AutomaticLearningPolicy.ELIGIBILITY_RECHECK_MS + 1
+            f.controller.runAutomaticCycle(); assertEquals(2, f.calls.get())
+        } finally { f.close() }
+    }
+    @Test fun automaticRefusalNeverReplacesTheCurrentModel() = runBlocking {
+        val f = Fixture(fitting = { _, _, _ -> Optimisation(null, 600, 0.4, 0.41, Verdict.NO_IMPROVEMENT) })
+        try {
+            f.init(); f.controller.runAutomaticCycle()
+            assertEquals(FsrsParams(), f.controller.parameters())
+            assertFalse(f.controller.state.value.usingOptimized)
+        } finally { f.close() }
+    }
+
+    @Test fun automaticFailuresBackOffInsteadOfFittingAfterEveryAnswer() = runBlocking {
+        val f = Fixture(fitting = { _, _, _ -> error("simulated local fitting failure") })
+        try {
+            f.init(); f.controller.runAutomaticCycle(); f.controller.runAutomaticCycle()
+            assertEquals(1, f.calls.get()); assertEquals(FsrsParams(), f.controller.parameters())
+            f.now += 3_600_001L
+            f.controller.runAutomaticCycle(); assertEquals(2, f.calls.get())
+        } finally { f.close() }
+    }
+    @Test fun automaticActivationCannotReviveAProfileAfterReset() = runBlocking {
+        val entered = CountDownLatch(1)
+        val release = CountDownLatch(1)
+        val f = Fixture(fitting = { _, _, check ->
+            entered.countDown()
+            kotlin.check(release.await(5, java.util.concurrent.TimeUnit.SECONDS))
+            check(); accepted()
+        })
+        try {
+            f.init()
+            val cycle = async(Dispatchers.Default) { f.controller.runAutomaticCycle() }
+            assertTrue(entered.await(5, java.util.concurrent.TimeUnit.SECONDS))
+            f.controller.restoreDefaults(); release.countDown(); cycle.await()
+            assertEquals(FsrsParams(), f.controller.parameters())
+            assertFalse(f.controller.state.value.usingOptimized)
+        } finally { release.countDown(); f.close() }
+    }
+    @Test fun automaticObserverIsIdempotentAndOwnedByApplicationScope() = runBlocking {
+        val f = Fixture()
+        try {
+            f.init()
+            val first = f.controller.startAutomatic(emptyFlow())
+            val second = f.controller.startAutomatic(emptyFlow())
+            assertSame(first, second); assertEquals(0, f.calls.get())
+        } finally { f.close() }
+    }
+
 }

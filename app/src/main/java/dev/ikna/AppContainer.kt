@@ -6,7 +6,6 @@ import dev.ikna.domain.governor.loadGovernorConfig
 import android.content.Context
 import dev.ikna.data.anki.AnkiImportManager
 import dev.ikna.data.anki.AnkiImporter
-import dev.ikna.data.db.IknaDatabase
 import dev.ikna.audio.Speaker
 import dev.ikna.audio.VoiceInstaller
 import dev.ikna.audio.VoiceModelStore
@@ -184,7 +183,7 @@ class AppContainer(context: Context) {
         }
         learningRepository.onSuppress = { chunkId -> settings.suppressChunk(chunkId) }
 
-        learningRepository.derivedGradingEnabled = { settings.current().derivedGrading }
+        learningRepository.derivedGradingEnabled = { dev.ikna.domain.optimizer.AutomaticLearningPolicy.DERIVED_WHEN_READY }
         learningRepository.loadSettings = {
             val stored = settings.flow.first()
             LearningRepository.LoadSetting(
@@ -227,7 +226,12 @@ class AppContainer(context: Context) {
         if (schedulerMigrationJob?.isActive == true) return
         _schedulerMigration.value = SchedulerMigrationState.Running
         schedulerMigrationJob = scope.launch(Dispatchers.IO) {
-            _schedulerMigration.value = runCatching { optimizer.initialize(); schedulerMigrator.runIfNeeded() }
+            _schedulerMigration.value = runCatching {
+                optimizer.initialize()
+                schedulerMigrator.runIfNeeded().also {
+                    optimizer.startAutomatic(db.reviewDao().observeOptimizerChanges())
+                }
+            }
                 .fold(
                     onSuccess = { SchedulerMigrationState.Ready(it.migratedCards) },
                     onFailure = {

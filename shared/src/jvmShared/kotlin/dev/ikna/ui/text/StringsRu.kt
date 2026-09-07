@@ -646,4 +646,5 @@ val STRINGS_RU: Map<String, String> = mapOf(
     "optimizer.023" to "Применён расчёт от {date}.",
     "optimizer.024" to "Полный расчёт доступен не чаще раза в 30 дней.",
     "optimizer.025" to "Сохранён принятый проверкой расчёт от {date}.",
+    "file.001" to "Заменить существующий файл?",
 )

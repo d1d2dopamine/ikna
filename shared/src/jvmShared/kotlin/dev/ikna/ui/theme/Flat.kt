@@ -280,7 +280,8 @@ fun IknaWideButton(
     filled: Boolean = false,
     quiet: Boolean = false,
     enabled: Boolean = true,
-    height: Dp = 56.dp
+    height: Dp = 56.dp,
+    fillWidth: Boolean = true
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
     val paper = MaterialTheme.colorScheme.background
@@ -297,11 +298,12 @@ fun IknaWideButton(
 
     Box(
         modifier = modifier
-            .fillMaxWidth()
+            .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier)
             .height(height)
             .background(if (filled) ink.copy(alpha = alpha) else Color.Transparent)
             .border(1.dp, ink.copy(alpha = alpha))
-            .clickable(enabled = enabled, onClick = onClick),
+            .clickable(enabled = enabled, onClick = onClick)
+            .then(if (fillWidth) Modifier else Modifier.padding(horizontal = Space.md)),
         contentAlignment = Alignment.Center
     ) {
         Text(

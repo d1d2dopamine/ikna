@@ -15,14 +15,9 @@ import android.provider.OpenableColumns
 import android.speech.tts.TextToSpeech
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,30 +30,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
 import dev.ikna.MainActivity
@@ -76,9 +65,6 @@ import dev.ikna.ui.update.rememberUpdateDownload
 import dev.ikna.data.prefs.FontStore
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.LANGUAGE_SYSTEM
-import dev.ikna.data.prefs.MANUAL_LOAD_MAX
-import dev.ikna.data.prefs.MANUAL_LOAD_MIN
-import dev.ikna.data.prefs.MANUAL_LOAD_STEP
 import dev.ikna.data.prefs.ThemeMode
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.IknaChip
@@ -90,7 +76,6 @@ import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaSwatch
 import dev.ikna.ui.theme.IknaPalettes
-import dev.ikna.ui.theme.LocalIknaMotionEnabled
 import dev.ikna.ui.theme.MIN_READABLE_CONTRAST
 import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.theme.contrastRatio
@@ -99,7 +84,6 @@ import dev.ikna.ui.theme.hexOf
 import dev.ikna.ui.theme.parseHexColor
 import dev.ikna.ui.theme.ratioText
 import dev.ikna.ui.theme.IknaTextButton
-import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.work.WorkScheduler
 import kotlinx.coroutines.Dispatchers
@@ -107,7 +91,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
-import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 
 /**
@@ -332,7 +315,8 @@ fun SettingsScreen(
             // Lazy item indices replace measured pixel anchors. Only visible
             // sections exist, and the first visible item tells the jump strip which
             // section is active without measuring the full settings document.
-            SettingsJumpRow(
+            IknaSettingsJumpRow(
+                sections = JUMPS,
                 listState = listState,
                 animations = settings.animations,
                 settled = routeSettled
@@ -362,15 +346,7 @@ fun SettingsScreen(
                 contentPadding = PaddingValues(horizontal = 20.dp)
             ) {
                 item(key = ID_LOAD, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
-                    Section(S.t("set.013"), null) {
-                        ToggleRow(
-                            title = S.t("grading.001"),
-                            subtitle = S.t("grading.002"),
-                            checked = settings.derivedGrading,
-                            onCheckedChange = { on ->
-                                scope.launch { container.settings.setDerivedGrading(on) }
-                            }
-                        )
+                    IknaSettingsSection(S.t("set.013"), null) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             IknaChip(
                                 label = S.t("set.015"),
@@ -396,7 +372,7 @@ fun SettingsScreen(
                             )
                         } else {
                             Spacer(Modifier.height(16.dp))
-                            Stepper(
+                            IknaSettingsStepper(
                                 value = settings.manualLoad,
                                 enabled = !busy,
                                 onChange = { next ->
@@ -410,13 +386,11 @@ fun SettingsScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Spacer(Modifier.height(22.dp))
-                        LocalOptimizerPanel(container.optimizer)
                     }
                 }
 
                 item(key = ID_LOOK, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
-                    Section(S.t("set.019"), null) {
+                    IknaSettingsSection(S.t("set.019"), null) {
                         // Which palette, then how it is lit. In that order, because
                         // the palette is the app's face and the mode is only the lamp
                         // pointed at it — and because the tiles below are the answer to
@@ -475,26 +449,26 @@ fun SettingsScreen(
                             )
                         }
                         Spacer(Modifier.height(12.dp))
-                        ToggleRow(
+                        IknaSettingsToggleRow(
                             title = S.t("set.020"),
                             subtitle = null,
                             checked = settings.animations,
                             onCheckedChange = { scope.launch { container.settings.setAnimations(it) } }
                         )
-                        ToggleRow(
+                        IknaSettingsToggleRow(
                             title = S.t("set.022"),
                             subtitle = null,
                             checked = settings.haptics,
                             onCheckedChange = { scope.launch { container.settings.setHaptics(it) } }
                         )
 
-                        ToggleRow(
+                        IknaSettingsToggleRow(
                             title = S.t("bar.001"),
                             subtitle = null,
                             checked = settings.showWordmark,
                             onCheckedChange = { scope.launch { container.settings.setShowWordmark(it) } }
                         )
-                        ToggleRow(
+                        IknaSettingsToggleRow(
                             title = S.t("bar.003"),
                             subtitle = null,
                             checked = settings.leftHanded,
@@ -504,7 +478,7 @@ fun SettingsScreen(
                 }
 
                 item(key = ID_LANGUAGE, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
-                    Section(S.t("set.024"), null) {
+                    IknaSettingsSection(S.t("set.024"), null) {
                         // Two chips to a row rather than one full-width chip per
                         // language. A section that grows by a row of forty-four
                         // points for every language added is a section that becomes a
@@ -547,7 +521,7 @@ fun SettingsScreen(
                 }
 
                 item(key = ID_SPEECH, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
-                    Section(
+                    IknaSettingsSection(
                         // Marked beta in the heading and off by default. The feature
                         // works, but how good it sounds is decided by an engine this
                         // app did not write and cannot inspect, so it is offered
@@ -555,7 +529,7 @@ fun SettingsScreen(
                         S.t("set.026") + " · " + S.t("set.123"),
                         S.t("set.124") + " " + S.t("set.027")
                     ) {
-                        ToggleRow(
+                        IknaSettingsToggleRow(
                             title = S.t("set.028"),
                             subtitle = S.t("set.029"),
                             checked = settings.speechEnabled,
@@ -586,7 +560,7 @@ fun SettingsScreen(
                             // a session silent. A model of one's own keeps its own
                             // speed, on the voice screen, where it belongs.
                             Spacer(Modifier.height(12.dp))
-                            ToggleRow(
+                            IknaSettingsToggleRow(
                                 title = S.t("set.130"),
                                 subtitle = S.t("set.131"),
                                 checked = settings.phoneVoice,
@@ -600,7 +574,7 @@ fun SettingsScreen(
                                     }
                                 }
                             )
-                            ToggleRow(
+                            IknaSettingsToggleRow(
                                 title = S.t("set.132"),
                                 subtitle = if (settings.autoSpeakEvery) S.t("set.133")
                                 else S.t("set.134"),
@@ -680,7 +654,7 @@ fun SettingsScreen(
                 }
 
                 item(key = ID_FONT, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
-                    Section(
+                    IknaSettingsSection(
                         S.t("set.040"),
                         S.t("set.041")
                     ) {
@@ -719,8 +693,8 @@ fun SettingsScreen(
                 }
 
                 item(key = ID_REMINDER, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
-                    Section(S.t("set.047"), null) {
-                        ToggleRow(
+                    IknaSettingsSection(S.t("set.047"), null) {
+                        IknaSettingsToggleRow(
                             title = S.t("set.049"),
                             subtitle = if (settings.reminderEnabled)
                                 S.t("set.050") + timeText(settings.reminderHour, settings.reminderMinute)
@@ -776,7 +750,7 @@ fun SettingsScreen(
                 // check lives here, on demand, and here the skipped version is
                 // ignored -- pressing the button is the change of mind.
                 item(key = ID_UPDATE, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
-                    Section(S.t("set.138"), S.t("set.139")) {
+                    IknaSettingsSection(S.t("set.138"), S.t("set.139")) {
                         Text(
                             text = S.t("upd.011") + installedVersion(context),
                             style = MaterialTheme.typography.bodySmall,
@@ -791,7 +765,7 @@ fun SettingsScreen(
                             )
                         }
                         Spacer(Modifier.height(12.dp))
-                        ToggleRow(
+                        IknaSettingsToggleRow(
                             title = S.t("upd.008"),
                             subtitle = S.t("upd.009"),
                             checked = settings.updateCheck,
@@ -874,11 +848,11 @@ fun SettingsScreen(
                 }
 
                 item(key = ID_DATA, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
-                    Section(
+                    IknaSettingsSection(
                         S.t("set.052"),
                         S.t("set.053")
                     ) {
-                        ToggleRow(
+                        IknaSettingsToggleRow(
                             title = S.t("set.054"),
                             subtitle = S.t("set.055"),
                             checked = settings.autoExport,
@@ -1025,7 +999,7 @@ fun SettingsScreen(
                 }
 
                 item(key = ID_ADVANCED, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
-                    Section(S.t("set.063"), null) {
+                    IknaSettingsSection(S.t("set.063"), null) {
                         IknaTextButton(
                             label = if (advancedOpen) S.t("set.065") else S.t("set.066"),
                             onClick = { advancedOpen = !advancedOpen },
@@ -1177,29 +1151,7 @@ fun SettingsScreen(
  * Reads scroll state in a small restart scope. A fast fling can change the first
  * visible section several times without recomposing the settings document.
  */
-@Composable
-private fun SettingsJumpRow(
-    listState: LazyListState,
-    animations: Boolean,
-    settled: Boolean,
-    onJump: (String) -> Unit
-) {
-    val activeId by remember(listState) {
-        derivedStateOf {
-            JUMPS[listState.firstVisibleItemIndex.coerceIn(0, JUMPS.lastIndex)].first
-        }
-    }
-    val verticalScrolling by remember(listState) {
-        derivedStateOf { listState.isScrollInProgress }
-    }
-    JumpRow(
-        activeId = activeId,
-        animations = animations,
-        settled = settled,
-        verticalScrolling = verticalScrolling,
-        onJump = onJump
-    )
-}
+
 
 /**
  * The pinned row of jumps.
@@ -1209,91 +1161,7 @@ private fun SettingsJumpRow(
  * to remember which drawer a switch was filed in. Nothing is hidden behind it,
  * so scrolling still works for anyone who would rather scroll.
  */
-@Composable
-private fun JumpRow(
-    activeId: String,
-    animations: Boolean,
-    settled: Boolean,
-    verticalScrolling: Boolean,
-    onJump: (String) -> Unit
-) {
-    val row = rememberScrollState()
 
-    // Where each label sits inside the row, measured the way the sections below
-    // measure themselves. Centring needs the width of the label as well as its
-    // position, so this stores the span rather than the left edge.
-    val spots = remember { mutableStateMapOf<String, IntRange>() }
-    var rowWidth by remember { mutableStateOf(0) }
-
-    // The turn. Not a jump to the edge: the label of the section being read ends
-    // up in the middle, which is the only position that reads as "you are here"
-    // rather than "here is a list".
-    LaunchedEffect(activeId, rowWidth, animations, settled, verticalScrolling) {
-        // Do not run a second scroll animation while the main list is moving.
-        // When it settles, verticalScrolling becomes false and this effect
-        // recentres the final active label once.
-        if (!settled || verticalScrolling || rowWidth == 0) return@LaunchedEffect
-        val spot = spots[activeId] ?: return@LaunchedEffect
-        val middle = spot.first + (spot.last - spot.first) / 2
-        val target = (middle - rowWidth / 2).coerceIn(0, row.maxValue)
-        if (animations) {
-            row.animateScrollTo(
-                target,
-                animationSpec = tween(
-                    durationMillis = Motion.sectionScrollDurationMillis,
-                    easing = LinearOutSlowInEasing
-                )
-            )
-        } else {
-            row.scrollTo(target)
-        }
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .onGloballyPositioned { rowWidth = it.size.width }
-            .horizontalScroll(row)
-            .padding(horizontal = 20.dp),
-        horizontalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-        JUMPS.forEach { jump ->
-            val here = jump.first == activeId
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.onGloballyPositioned { coords ->
-                    val x = coords.parentLayoutCoordinates
-                        ?.localPositionOf(coords, Offset.Zero)
-                        ?.x
-                        ?: 0f
-                    val left = x.roundToInt()
-                    spots[jump.first] = left..(left + coords.size.width)
-                }
-            ) {
-                IknaTextButton(
-                    label = S.t(jump.second),
-                    onClick = { onJump(jump.first) },
-                    color = if (here) MaterialTheme.colorScheme.onBackground
-                    else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                    repeat(3) { index ->
-                        Box(
-                            modifier = Modifier
-                                .width(6.dp)
-                                .height(2.dp)
-                                .background(
-                                    if (here) MaterialTheme.colorScheme.primary.copy(
-                                        alpha = if (index == 1) 1f else 0.52f
-                                    ) else Color.Transparent
-                                )
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
 
 /**
  * Minus, number, plus.
@@ -1302,111 +1170,11 @@ private fun JumpRow(
  * precise drag to land on a number, it has no idea what a sensible step is, and
  * it invites fiddling with a figure that only matters in steps of five.
  */
-@Composable
-private fun Stepper(
-    value: Int,
-    enabled: Boolean,
-    min: Int = MANUAL_LOAD_MIN,
-    max: Int = MANUAL_LOAD_MAX,
-    step: Int = MANUAL_LOAD_STEP,
-    onChange: (Int) -> Unit
-) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        IknaWideButton(
-            label = "-",
-            modifier = Modifier.width(72.dp),
-            height = 52.dp,
-            enabled = enabled && value > min,
-            onClick = { onChange((value - step).coerceAtLeast(min)) }
-        )
-        Text(
-            text = value.toString(),
-            style = MaterialTheme.typography.displaySmall,
-            color = MaterialTheme.colorScheme.onBackground,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 16.dp)
-        )
-        IknaWideButton(
-            label = "+",
-            modifier = Modifier.width(72.dp),
-            height = 52.dp,
-            enabled = enabled && value < max,
-            onClick = { onChange((value + step).coerceAtMost(max)) }
-        )
-    }
-}
 
-@Composable
-private fun Section(
-    title: String,
-    subtitle: String?,
-    content: @Composable () -> Unit
-) {
-    Spacer(Modifier.height(24.dp))
-    IknaRule(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.18f))
-    Spacer(Modifier.height(16.dp))
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Medium
-    )
-    if (subtitle != null) {
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-    Spacer(Modifier.height(12.dp))
-    val motionEnabled = LocalIknaMotionEnabled.current
-    Column(
-        modifier = Modifier.animateContentSize(
-            animationSpec = if (motionEnabled) tween(
-                durationMillis = Motion.contentChangeDurationMillis,
-                easing = LinearOutSlowInEasing
-            ) else snap()
-        )
-    ) {
-        content()
-    }
-}
 
-@Composable
-private fun ToggleRow(
-    title: String,
-    subtitle: String?,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge)
-            if (subtitle != null) {
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-        // The row's own title is what the switch is called. A screen reader
-        // treats the switch as a separate stop, so without this it would be
-        // announced as an anonymous "switch, on" after the text has been read.
-        IknaToggle(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            label = title
-        )
-    }
-}
+
+
+
 
 /**
  * Four colours, typed, with their contrast printed underneath.
@@ -1610,8 +1378,8 @@ private val JUMPS = listOf(
     ID_SPEECH to "set.094",
     ID_FONT to "set.095",
     ID_REMINDER to "set.096",
-    ID_DATA to "set.097",
     ID_UPDATE to "set.140",
+    ID_DATA to "set.097",
     ID_ADVANCED to "set.098"
 )
 

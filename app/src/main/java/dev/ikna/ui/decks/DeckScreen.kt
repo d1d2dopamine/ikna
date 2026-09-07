@@ -5,9 +5,7 @@ import dev.ikna.ui.text.S
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,11 +33,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
 import dev.ikna.data.prefs.IknaSettings
-import dev.ikna.data.prefs.NO_TINT
 import dev.ikna.data.prefs.lookFor
 import dev.ikna.data.prefs.phoneticsFor
 import dev.ikna.data.repo.DeckRepository
@@ -47,7 +43,6 @@ import dev.ikna.data.repo.DeckSummary
 import dev.ikna.domain.phonetics.Phonetics
 import dev.ikna.domain.phonetics.PhoneticsMode
 import dev.ikna.ui.theme.BarHeight
-import dev.ikna.ui.theme.DeckTints
 import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaChip
@@ -58,7 +53,6 @@ import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.Space
-import dev.ikna.ui.theme.deckTintColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -366,109 +360,9 @@ fun DeckScreen(
                     // are not part of what the deck teaches, and a deck sent to
                     // somebody else should arrive as cards rather than as somebody
                     // else's taste. So this is stored in settings, beside the theme.
-                    val look = settings.lookFor(deckId)
-
-                    Text(
-                        text = S.t("look.001"),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Spacer(Modifier.height(Space.xs))
-                    Text(
-                        text = S.t("look.002"),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = muted
-                    )
-                    Spacer(Modifier.height(Space.md))
-
-                    // Two characters, typed, rather than a grid of emoji.
-                    //
-                    // The grid was here until 0.2.0 and it was the wrong offer: the
-                    // phone draws emoji in its own full-colour style, which sits on
-                    // this app's flat marks like a sticker on a blueprint. A field
-                    // is also smaller than the grid it replaces, and it accepts the
-                    // things people actually want in that square -- initials, a
-                    // language pair, a number -- none of which a fixed set of
-                    // pictures could have guessed.
-                    //
-                    // Left empty, the square keeps working out its own letters, so
-                    // there is nothing to undo and no third state to explain.
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(Space.md)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(52.dp)
-                                .border(Space.hair, MaterialTheme.colorScheme.outline),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            BasicTextField(
-                                value = look.label,
-                                onValueChange = { typed ->
-                                    scope.launch {
-                                        container.settings.setDeckLook(
-                                            packId = deckId,
-                                            label = typed,
-                                            tint = look.tint
-                                        )
-                                    }
-                                },
-                                textStyle = MaterialTheme.typography.titleMedium.copy(
-                                    color = MaterialTheme.colorScheme.onBackground,
-                                    textAlign = TextAlign.Center
-                                ),
-                                singleLine = true,
-                                cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        Text(
-                            text = S.t("look.004"),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = muted
-                        )
+                    IknaDeckAppearance(settings.lookFor(deckId)) { label, tint ->
+                        scope.launch { container.settings.setDeckLook(deckId, label, tint) }
                     }
-
-                    Spacer(Modifier.height(Space.sm))
-                    Text(
-                        text = S.t("look.003"),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = muted
-                    )
-                    Spacer(Modifier.height(Space.sm))
-
-                    // Eight fixed colours, no colour picker. The square has to stay
-                    // legible against twelve palettes in two lighting modes, and a
-                    // free hex field is one slider away from a deck nobody can see.
-                    Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
-                        DeckTints.forEachIndexed { index, colour ->
-                            val picked = look.tint == index
-                            Box(
-                                modifier = Modifier
-                                    .size(30.dp)
-                                    .background(colour)
-                                    .border(
-                                        if (picked) 2.dp else Space.hair,
-                                        if (picked) MaterialTheme.colorScheme.onBackground
-                                        else MaterialTheme.colorScheme.outline
-                                    )
-                                    .clickable {
-                                        scope.launch {
-                                            container.settings.setDeckLook(
-                                                packId = deckId,
-                                                label = look.label,
-                                                tint = if (picked) NO_TINT else index
-                                            )
-                                        }
-                                    }
-                            )
-                        }
-                    }
-
-                    Spacer(Modifier.height(Space.lg))
-                    IknaRule()
-                    Spacer(Modifier.height(Space.lg))
 
                     IknaWideButton(
                         label = if (adding) S.t("dp.011") else S.t("dp.010"),

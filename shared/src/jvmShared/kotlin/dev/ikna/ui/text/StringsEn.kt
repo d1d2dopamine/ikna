@@ -37,7 +37,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"stats.001" to "Statistics",
 	// ПОСЛЕДНИЕ 30 ДНЕЙ
 	"stats.002" to "LAST 30 DAYS",
-	// Каждая метка — день с занятием, справа сегодня. Пропуск ничего не обнуляет и не обрывает: 
+	// Каждая метка — день с занятием, справа сегодня. Пропуск ничего не обнуляет и не обрывает:
 	"stats.003" to "Each mark is a day with a session, today on the right. A skip zeroes nothing and breaks nothing: there is no streak here, nothing to break.",
 	// НОРМА ДНЯ
 	"stats.004" to "DAILY NORM",
@@ -57,11 +57,11 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"stats.011" to "How many cards fall due. If a mountain grows somewhere, new chunks will not be added on those days.",
 	// УДЕРЖАНИЕ
 	"stats.012" to "RETENTION",
-	// Нужно хотя бы 20 повторений, чтобы это была цифра, а не догадка. Сейчас их 
+	// Нужно хотя бы 20 повторений, чтобы это была цифра, а не догадка. Сейчас их
 	"stats.013" to "At least 20 reviews are needed for this to be a figure rather than a guess. So far there are ",
-	// Из 
+	// Из
 	"stats.014" to "Of ",
-	//  повторений за месяц вспомнилось 
+	//  повторений за месяц вспомнилось
 	"stats.015" to " reviews this month, recalled ",
 	// %. Считаются только повторения — первую встречу забыть нельзя.
 	"stats.016" to "%. Only reviews count — a first meeting cannot be forgotten.",
@@ -83,7 +83,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"stats.024" to "Only time with a card on screen counts: pauses with the phone put down do not get in here.",
 	// КОГДА ИДЁТ ЛУЧШЕ
 	"stats.025" to "WHEN IT GOES BEST",
-	// Лучше всего вспоминается около 
+	// Лучше всего вспоминается около
 	"stats.026" to "Recall works best around ",
 	// . Это не приказ заниматься именно тогда — просто в этот час тебе дешевле, и напоминание ра
 	"stats.027" to ". This is not an order to study exactly then — it is simply cheaper for you at that hour, and a reminder is sensibly set an hour before it.",
@@ -101,7 +101,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"set.001" to "Could not open the file",
 	// Не удалось открыть файл
 	"set.002" to "Could not open the file",
-	// Шрифт применён: 
+	// Шрифт применён:
 	"set.003" to "Font applied: ",
 	// Без разрешения на уведомления напоминание не придёт
 	"set.004" to "Without permission for notifications the reminder will not arrive",
@@ -113,11 +113,11 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"set.007" to "Settings restored. The font «",
 	// » нужно выбрать заново — сам файл шрифта твой, и в бэкап он не кладётся.
 	"set.008" to "» has to be picked again — the font file is yours, and it is not put into the backup.",
-	// Добавлено ответов: 
+	// Добавлено ответов:
 	"set.009" to "Answers added: ",
-	//  · пересчитано 
+	//  · пересчитано
 	"set.010" to " · recalculated ",
-	//  · пропущено 
+	//  · пропущено
 	"set.011" to " · skipped ",
 	// Настройки
 	"set.012" to "Settings",
@@ -128,7 +128,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"set.015" to "AUTO",
 	// РУЧНОЙ
 	"set.016" to "MANUAL",
-	// СЕЙЧАС · 
+	// СЕЙЧАС ·
 	"set.017" to "NOW · ",
 	// КАРТОЧЕК В ДЕНЬ
 	"set.018" to "CARDS A DAY",
@@ -159,7 +159,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"set.032" to "SPEECH ENGINE SETTINGS",
 	// Не нашёл этот раздел в настройках телефона
 	"set.033" to "Could not find that section in the phone settings",
-	// Движок есть, но офлайн-голосов для этих языков в нём нет. Их надо доставить — один раз, и 
+	// Движок есть, но офлайн-голосов для этих языков в нём нет. Их надо доставить — один раз, и
 	"set.034" to "There is an engine, but it has no offline voices for these languages. They have to be fetched — once, and after that they work without the network.",
 	// ДОУСТАНОВИТЬ ГОЛОСА
 	"set.035" to "INSTALL VOICES",
@@ -169,7 +169,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"set.037" to "no offline voices for this language",
 	// ПО УМОЛЧАНИЮ
 	"set.038" to "DEFAULT",
-	// Первый звук после запуска может задуматься на пару секунд — движок просыпается. Следующая 
+	// Первый звук после запуска может задуматься на пару секунд — движок просыпается. Следующая
 	"set.039" to "The first sound after launch may take a second - the engine is waking up.",
 	// Шрифт
 	"set.040" to "Font",
@@ -177,7 +177,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"set.041" to "Your own .ttf or .otf for card text. The file is checked before it is applied.",
 	// СЕЙЧАС · СИСТЕМНЫЙ
 	"set.042" to "NOW · SYSTEM",
-	// СЕЙЧАС · 
+	// СЕЙЧАС ·
 	"set.043" to "NOW · ",
 	// ВЫБРАТЬ ФАЙЛ
 	"set.044" to "PICK A FILE",
@@ -190,7 +190,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// Одно в день, и только если минимум ещё не сделан. Никаких серий и укоров.
 	// Напоминать
 	"set.049" to "Remind me",
-	// в 
+	// в
 	"set.050" to "at ",
 	// выключено
 	"set.051" to "off",
@@ -213,7 +213,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// ВОССТАНОВИТЬ
 	"set.060" to "RESTORE",
 	// Перерывы
-	// Настраивать нечего и включать нечего. Приложение смотрит, сколько ты реально занимался, и 
+	// Настраивать нечего и включать нечего. Приложение смотрит, сколько ты реально занимался, и
 	// Редкое
 	"set.063" to "Rare",
 	// То, что нужно раз в год или ни разу. Спрятано не потому, что сложно, а чтобы не нажать слу
@@ -261,11 +261,11 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"set.085" to "MUTED",
 	// АКЦЕНТ
 	"set.086" to "ACCENT",
-	// КОНТРАСТ · ТЕКСТ 
+	// КОНТРАСТ · ТЕКСТ
 	"set.087" to "CONTRAST · TEXT ",
-	//   ·  ПРИГЛУШЁННЫЙ 
+	//   ·  ПРИГЛУШЁННЫЙ
 	"set.088" to "  ·  MUTED ",
-	//   ·  АКЦЕНТ 
+	//   ·  АКЦЕНТ
 	"set.089" to "  ·  ACCENT ",
 	// что-то из этого плохо читается на своём фоне — цвет всё равно применён
 	"set.090" to "something here reads badly on its own background — the colour is applied anyway",
@@ -383,9 +383,9 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"dbg.015" to "  headroom=",
 	// Не получилось прочитать ни одной строки
 	"deck.001" to "Could not read a single line",
-	// Добавлено чанков: 
+	// Добавлено чанков:
 	"deck.002" to "Chunks added: ",
-	// , пропущено 
+	// , пропущено
 	"deck.003" to ", skipped ",
 	// Колоды
 	"deck.004" to "Decks",
@@ -397,13 +397,13 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"deck.007" to "TODAY",
 	// ничего не ждёт
 	"deck.008" to "nothing waiting",
-	// сегодня 
+	// сегодня
 	"deck.009" to "today ",
 	// на сегодня нет
 	"deck.010" to "nothing for today",
-	// введено 
-	//  из 
-	//  · знаешь 
+	// введено
+	//  из
+	//  · знаешь
 	// карточек
 	"deck.014" to "cards",
 	// карточка
@@ -574,11 +574,11 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"sess.028" to "I will add at least one new chunk so we do not stand still.",
 	// Новых чанков здесь больше нет — все уже знакомы. Повторения продолжат приходить по срокам,
 	"sess.029" to "There are no new chunks here any more — all of them are familiar. Reviews will keep coming on their dates, and new material needs one more deck.",
-	// следующие — сегодня в 
+	// следующие — сегодня в
 	"sess.030" to "next — today at ",
-	// следующие — завтра в 
+	// следующие — завтра в
 	"sess.031" to "next — tomorrow at ",
-	// следующие — через 
+	// следующие — через
 	"sess.032" to "next — in ",
 	// дней
 	"sess.033" to "days",
@@ -615,7 +615,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"onb.004" to "A missed week leaves no pile at the door: the old comes back little by little.",
 	// Минимум — одна карточка
 	"onb.005" to "The minimum is one card",
-	// Одна карточка закрывает день целиком. Захочется больше — есть кнопка «ещё немного», и она 
+	// Одна карточка закрывает день целиком. Захочется больше — есть кнопка «ещё немного», и она
 	"onb.006" to "One card closes the whole day. If you want more, there is an «a bit more» button, and it will not make tomorrow heavier.",
 	// ГОТОВЛЮ КАРТОЧКИ…
 	"onb.007" to "PREPARING CARDS…",
@@ -691,7 +691,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"voice.016" to "This build has no engine. Your own model will not work here — take the build marked voice.",
 	// Заменить модель
 	"voice.017" to "Add another model",
-	// Копирую файлы: 
+	// Копирую файлы:
 	"voice.018" to "Files copied: ",
 	// Это не похоже на модель: в папке нет файла .onnx
 	"voice.019" to "This does not look like a model: no .onnx file in the folder",
@@ -701,7 +701,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"voice.021" to "Several models in one folder. Leave one",
 	// Нет файла tokens.txt. Нужна сборка модели для sherpa-onnx, а не файлы Piper как есть
 	"voice.022" to "No tokens.txt. Take the sherpa-onnx build of the model, not the raw Piper files",
-	// Не удалось скопировать: 
+	// Не удалось скопировать:
 	"voice.023" to "Could not copy: ",
 	// Модель добавлена
 	"voice.024" to "Model added",
@@ -952,4 +952,5 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "optimizer.023" to "Applied result calculated on {date}.",
     "optimizer.024" to "Full fits are limited to once per 30 days.",
     "optimizer.025" to "Saved accepted candidate from {date}.",
+    "file.001" to "Replace the existing file?",
 )

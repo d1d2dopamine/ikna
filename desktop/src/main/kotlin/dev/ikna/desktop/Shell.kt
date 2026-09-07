@@ -1,4 +1,7 @@
 package dev.ikna.desktop
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.LazyListState
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.togetherWith
@@ -50,7 +53,6 @@ import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaMemoryField
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaPanel
-import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaTheme
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Motion
@@ -180,6 +182,7 @@ private fun DesktopShell(
     palette: IknaPalette,
     ui: DesktopUi
 ) {
+    val deckListState = rememberLazyListState()
     var decks by remember { mutableStateOf<List<DeckSummary>>(emptyList()) }
     var remaining by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
 
@@ -208,7 +211,7 @@ private fun DesktopShell(
         if (wide) {
             Row(Modifier.fillMaxSize()) {
                 Box(Modifier.width(listWidth).fillMaxHeight()) {
-                    DecksColumn(container, settings, palette, ui, decks, remaining)
+                    DecksColumn(container, settings, palette, ui, decks, remaining, deckListState)
                 }
                 VerticalRule(palette)
                 Box(Modifier.weight(1f).fillMaxHeight()) {
@@ -216,7 +219,7 @@ private fun DesktopShell(
                 }
             }
         } else if (ui.listOpen) {
-            DecksColumn(container, settings, palette, ui, decks, remaining)
+            DecksColumn(container, settings, palette, ui, decks, remaining, deckListState)
         } else {
             PaneContent(container, settings, palette, ui, decks, wide = false)
         }
@@ -244,7 +247,8 @@ private fun DecksColumn(
     palette: IknaPalette,
     ui: DesktopUi,
     decks: List<DeckSummary>,
-    remaining: Map<String, Int>
+    remaining: Map<String, Int>,
+    listState: LazyListState
 ) {
     val scope = rememberCoroutineScope()
     val todayTotal = remaining.values.sum()
@@ -274,6 +278,7 @@ private fun DecksColumn(
             }
 
             LazyColumn(
+                state = listState,
                 modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = Edge),
                 verticalArrangement = Arrangement.spacedBy(Space.lg)
             ) {
@@ -395,6 +400,7 @@ private fun PaneContent(
     }
 
     AnimatedContent(
+        modifier = Modifier.fillMaxSize().background(palette.background).clipToBounds(),
         targetState = ui.pane,
         transitionSpec = {
             val forward = targetState.ordinal >= initialState.ordinal

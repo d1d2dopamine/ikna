@@ -114,13 +114,13 @@ class FullGradingChecks(unittest.TestCase):
         for name in ("RestoreRepository", "SchedulerMigration"):
             self.assertIn("scheduler.applyRecordedReview", (SHARED / f"data/repo/{name}.kt").read_text())
 
-    def test_settings_default_off_and_do_not_restore_opt_in(self):
+    def test_legacy_preference_cannot_override_automatic_policy(self):
         settings = (SHARED / "data/prefs/SettingsStore.kt").read_text()
         self.assertIn("val derivedGrading: Boolean = false", settings)
         self.assertIn("derivedGrading = p[Keys.derivedGrading] ?: false", settings)
         self.assertIn("store.setDerivedGrading(false)", (SHARED / "data/export/SettingsBackup.kt").read_text())
         for path in ("app/src/main/java/dev/ikna/AppContainer.kt", "desktop/src/main/kotlin/dev/ikna/desktop/DesktopContainer.kt"):
-            self.assertIn("derivedGradingEnabled = { settings.current().derivedGrading }", (ROOT / path).read_text())
+            self.assertIn("derivedGradingEnabled = { dev.ikna.domain.optimizer.AutomaticLearningPolicy.DERIVED_WHEN_READY }", (ROOT / path).read_text())
 
     def test_ci_runs_production_kotlin_and_real_android_migrations(self):
         workflow = (ROOT / ".github/workflows/grading.yml").read_text()

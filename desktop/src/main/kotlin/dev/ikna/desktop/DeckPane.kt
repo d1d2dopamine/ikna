@@ -1,18 +1,23 @@
 package dev.ikna.desktop
+import dev.ikna.ui.decks.IknaDeckAppearance
+import dev.ikna.ui.decks.LangChips
+import dev.ikna.data.prefs.lookFor
+import dev.ikna.domain.phonetics.Phonetics
+import dev.ikna.ui.theme.IknaChip
+import dev.ikna.ui.theme.IknaRule
+import dev.ikna.ui.theme.IknaTextButton
+import dev.ikna.ui.theme.IknaWideButton
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.SolidColor
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,16 +32,12 @@ import androidx.compose.ui.unit.dp
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.phoneticsFor
 import dev.ikna.data.repo.DeckSummary
-import dev.ikna.data.repo.NO_LANG
 import dev.ikna.domain.phonetics.PhoneticsMode
 import dev.ikna.ui.decks.iknaCardWord
 import dev.ikna.ui.decks.iknaPercentDone
 import dev.ikna.ui.text.S
-import dev.ikna.ui.theme.IknaGlyph
-import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaProgress
-import dev.ikna.ui.theme.IknaTextField
 import dev.ikna.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -90,14 +91,7 @@ fun DeckPane(
 
     val mode = settings.phoneticsFor(current.id)
 
-    fun commitRename() {
-        scope.launch {
-            runCatching { container.deckRepository.rename(current.id, title) }
-                .onFailure { error -> logLine("rename failed: " + error) }
-            reload += 1
-            onChanged()
-        }
-    }
+
 
     // Adding to a deck that exists, which the phone can do and the window could not.
     fun addCards() {
@@ -165,26 +159,7 @@ fun DeckPane(
         }
     }
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(40.dp)
-            .widthIn(max = 720.dp)
-    ) {
-        Row(Modifier.fillMaxWidth()) {
-            IknaIconButton(
-                glyph = IknaGlyph.BACK,
-                onClick = onBack,
-                label = S.t("dp.013")
-            )
-        }
-        Spacer(Modifier.height(Space.md))
-        Text(
-            text = current.title,
-            style = MaterialTheme.typography.headlineSmall,
-            color = palette.ink
-        )
+    DesktopScrollablePane(current.title, onBack) {
         Spacer(Modifier.height(Space.xs))
         Text(
             text = current.total.toString() + " " + iknaCardWord(current.total) +
@@ -202,17 +177,17 @@ fun DeckPane(
 
         SectionTitle(S.t("dp.013"), palette)
         Spacer(Modifier.height(8.dp))
-        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-            IknaTextField(
-                value = title,
-                onValueChange = { title = it },
-                placeholder = S.t("add.001"),
-                onSearch = { commitRename() },
-                modifier = Modifier.weight(1f),
-                maxLength = 60
-            )
-            Spacer(Modifier.width(10.dp))
-            IknaButton(S.t("sess.014"), palette) { commitRename() }
+        Box(Modifier.fillMaxWidth().border(Space.hair, palette.line).padding(Space.md)) {
+            BasicTextField(value = title, onValueChange = { raw ->
+                val value = raw.take(dev.ikna.data.repo.DeckRepository.MAX_TITLE)
+                title = value; deck = deck?.copy(title = value)
+                scope.launch {
+                    runCatching { container.deckRepository.rename(deckId, value) }
+                        .onFailure { logLine("rename failed: " + it) }
+                    onChanged()
+                }
+            }, singleLine = true, textStyle = MaterialTheme.typography.titleMedium.copy(color = palette.ink),
+                cursorBrush = SolidColor(palette.ink), modifier = Modifier.fillMaxWidth())
         }
 
         Spacer(Modifier.height(28.dp))
@@ -221,75 +196,99 @@ fun DeckPane(
         Spacer(Modifier.height(4.dp))
         Text(S.t("dp.004"), color = palette.muted, style = MaterialTheme.typography.labelMedium)
         Spacer(Modifier.height(10.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            for (code in DECK_LANGS) {
-                IknaButton(code.uppercase(), palette, filled = current.lang == code) {
-                    scope.launch {
-                        runCatching { container.deckRepository.setLang(current.id, code) }
-                        reload += 1
-                        onChanged()
+        LangChips(current.lang) { code ->
+            scope.launch {
+                container.deckRepository.setLang(current.id, code)
+                reload += 1; onChanged()
+            }
+        }
+        Spacer(Modifier.height(Space.lg)); IknaRule(); Spacer(Modifier.height(Space.lg))
+        val muted = palette.muted
+        if (current.hasPhonetics && current.lang in Phonetics.SUPPORTED) {
+            val mode = settings.phoneticsFor(deckId)
+
+            Text(
+                text = S.t("dp.014"),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(Modifier.height(Space.xs))
+            Text(
+                text = S.t("dp.015"),
+                style = MaterialTheme.typography.bodySmall,
+                color = muted
+            )
+            Spacer(Modifier.height(Space.md))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+                IknaChip(
+                    label = S.t("dp.016"),
+                    selected = mode == PhoneticsMode.RESPELL,
+                    onClick = {
+                        scope.launch {
+                            container.settings.setDeckPhonetic(
+                                deckId,
+                                PhoneticsMode.RESPELL
+                            )
+                        }
                     }
-                }
+                )
+                IknaChip(
+                    label = S.t("dp.017"),
+                    selected = mode == PhoneticsMode.IPA,
+                    onClick = {
+                        scope.launch {
+                            container.settings.setDeckPhonetic(
+                                deckId,
+                                PhoneticsMode.IPA
+                            )
+                        }
+                    }
+                )
+                IknaChip(
+                    label = S.t("dp.018"),
+                    selected = mode == PhoneticsMode.OFF,
+                    onClick = {
+                        scope.launch {
+                            container.settings.setDeckPhonetic(
+                                deckId,
+                                PhoneticsMode.OFF
+                            )
+                        }
+                    }
+                )
             }
+
+            Spacer(Modifier.height(Space.md))
+
+            // What the choice looks like, drawn by the same renderer
+            // the card uses rather than typed out beside it. A
+            // sample written by hand drifts out of agreement with
+            // the code; one that goes through the same function
+            // cannot.
+            Text(
+                text = Phonetics.sample(current.lang, mode)
+                    ?: S.t("dp.019"),
+                style = MaterialTheme.typography.bodySmall,
+                color = muted
+            )
+
+            Spacer(Modifier.height(Space.lg))
+            IknaRule()
+            Spacer(Modifier.height(Space.lg))
         }
-        Spacer(Modifier.height(6.dp))
-        IknaButton(S.t("add.057"), palette, filled = current.lang == NO_LANG) {
-            scope.launch {
-                runCatching { container.deckRepository.setLang(current.id, NO_LANG) }
-                reload += 1
-                onChanged()
-            }
+        IknaDeckAppearance(settings.lookFor(deckId)) { label, tint ->
+            scope.launch { container.settings.setDeckLook(deckId, label, tint) }
         }
-
-        Spacer(Modifier.height(28.dp))
-
-        SectionTitle(S.t("dp.014"), palette)
-        Spacer(Modifier.height(4.dp))
-        Text(S.t("dp.015"), color = palette.muted, style = MaterialTheme.typography.labelMedium)
-        Spacer(Modifier.height(10.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            IknaButton(S.t("dp.016"), palette, filled = mode == PhoneticsMode.RESPELL) {
-                scope.launch { container.settings.setDeckPhonetic(current.id, PhoneticsMode.RESPELL) }
-            }
-            IknaButton(S.t("dp.017"), palette, filled = mode == PhoneticsMode.IPA) {
-                scope.launch { container.settings.setDeckPhonetic(current.id, PhoneticsMode.IPA) }
-            }
-            IknaButton(S.t("dp.018"), palette, filled = mode == PhoneticsMode.OFF) {
-                scope.launch { container.settings.setDeckPhonetic(current.id, PhoneticsMode.OFF) }
-            }
-        }
-        if (!current.hasPhonetics) {
-            Spacer(Modifier.height(8.dp))
-            Text(S.t("dp.019"), color = palette.muted, style = MaterialTheme.typography.labelMedium)
-        }
-
-        Spacer(Modifier.height(28.dp))
-
-        SectionTitle(S.t("a11y.006"), palette)
-        Spacer(Modifier.height(10.dp))
-        IknaButton(
-            if (current.isActive) S.t("dp.001") else S.t("dp.002"),
-            palette,
-            filled = current.isActive
-        ) {
-            scope.launch {
-                runCatching { container.deckRepository.setActive(current.id, !current.isActive) }
-                reload += 1
-                onChanged()
-            }
-        }
-
-        Spacer(Modifier.height(28.dp))
-
         SectionTitle(S.t("dp.010"), palette)
         Spacer(Modifier.height(10.dp))
-        IknaButton(if (adding) S.t("dp.011") else S.t("dp.010"), palette) { addCards() }
+        IknaWideButton(if (adding) S.t("dp.011") else S.t("dp.010"), enabled = !adding, onClick = { addCards() })
 
         Spacer(Modifier.height(28.dp))
 
         SectionTitle(S.t("dp.006"), palette)
         Spacer(Modifier.height(10.dp))
-        IknaButton(S.t("dp.006"), palette) { exportDeck() }
+        IknaWideButton(S.t("dp.006"), onClick = { exportDeck() })
 
         val outcome = note
         if (outcome != null) {
@@ -303,22 +302,25 @@ fun DeckPane(
 
         Spacer(Modifier.height(36.dp))
 
-        IknaButton(if (confirmDelete) S.t("dp.008") else S.t("dp.007"), palette) {
+        IknaTextButton(if (confirmDelete) S.t("dp.008") else S.t("dp.007"), color = palette.accent, onClick = {
             if (!confirmDelete) {
                 confirmDelete = true
             } else {
                 scope.launch {
-                    runCatching { container.deckRepository.delete(current.id) }
-                    onDeleted()
+                    runCatching {
+                        container.deckRepository.delete(current.id)
+                        container.learningRepository.invalidatePlan()
+                    }.onSuccess { onDeleted() }.onFailure { note = S.t("set.057") }
                 }
             }
-        }
+        })
         if (confirmDelete) {
             Spacer(Modifier.height(8.dp))
             Text(S.t("dp.009"), color = palette.muted, style = MaterialTheme.typography.labelMedium)
         }
 
         Spacer(Modifier.height(40.dp))
+
     }
 }
 

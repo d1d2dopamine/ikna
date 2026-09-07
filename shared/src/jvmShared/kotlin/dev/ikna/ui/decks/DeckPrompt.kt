@@ -18,7 +18,7 @@ import dev.ikna.data.repo.NO_LANG
  * asset addressed to a model, not interface text, and if a line ever changes
  * name here nothing breaks -- an answer with nowhere to go is simply dropped.
  */
-internal fun fillPrompt(
+fun fillPrompt(
 	base: String,
 	learning: String,
 	meanings: String,
@@ -52,7 +52,7 @@ internal fun fillPrompt(
  * form somebody forgot to fill in, which is exactly the state that makes a model
  * ask a question back instead of writing a deck.
  */
-internal fun fillSubjectPrompt(
+fun fillSubjectPrompt(
 	base: String,
 	cardsLang: String,
 	count: Int,
@@ -73,7 +73,7 @@ internal fun fillSubjectPrompt(
 }
 
 /** English names, because the prompt is in English and the model reads it. */
-internal fun languageName(code: String): String = when (code) {
+fun languageName(code: String): String = when (code) {
 	"en" -> "English"
 	"pl" -> "Polish"
 	"ru" -> "Russian"
@@ -95,31 +95,31 @@ internal fun languageName(code: String): String = when (code) {
  * pads the rest, and the app only lets a handful of them out per day anyway.
  * Asking twice for two hundred good cards beats asking once for four hundred.
  */
-internal val PROMPT_COUNTS = listOf(50, 100, 200, 300)
+val PROMPT_COUNTS = listOf(50, 100, 200, 300)
 
 /** The wordings the prompt itself offers. Sent as written, in English. */
-internal const val LEVEL_BEGINNER = "beginner"
-internal const val LEVEL_TALKING = "can hold a conversation"
-internal const val LEVEL_ADVANCED = "advanced"
+const val LEVEL_BEGINNER = "beginner"
+const val LEVEL_TALKING = "can hold a conversation"
+const val LEVEL_ADVANCED = "advanced"
 
-internal val PROMPT_LEVELS = listOf(LEVEL_BEGINNER, LEVEL_TALKING, LEVEL_ADVANCED)
+val PROMPT_LEVELS = listOf(LEVEL_BEGINNER, LEVEL_TALKING, LEVEL_ADVANCED)
 
 /**
  * The middle level of a subject deck. "Can hold a conversation" is a sentence
  * about a language and says nothing about someone halfway through a course.
  */
-internal const val LEVEL_SOME_BACKGROUND = "some background"
+const val LEVEL_SOME_BACKGROUND = "some background"
 
-internal val SUBJECT_LEVELS =
+val SUBJECT_LEVELS =
 	listOf(LEVEL_BEGINNER, LEVEL_SOME_BACKGROUND, LEVEL_ADVANCED)
 
-internal const val PROMPT_LEARNING = "Language I am learning:"
-internal const val PROMPT_MEANINGS = "Language of the translations:"
-internal const val PROMPT_COUNT = "Number of cards:"
-internal const val PROMPT_TOPIC = "Topic or situation:"
-internal const val PROMPT_LEVEL = "My level ("
-internal const val PROMPT_SUBJECT = "Subject:"
-internal const val PROMPT_CARDS_LANG = "Language of the cards:"
+const val PROMPT_LEARNING = "Language I am learning:"
+const val PROMPT_MEANINGS = "Language of the translations:"
+const val PROMPT_COUNT = "Number of cards:"
+const val PROMPT_TOPIC = "Topic or situation:"
+const val PROMPT_LEVEL = "My level ("
+const val PROMPT_SUBJECT = "Subject:"
+const val PROMPT_CARDS_LANG = "Language of the cards:"
 
 /** The deck languages minus the honest "no voice", which is not a language. */
-internal val MEANING_LANGS = DECK_LANGS.filter { it != NO_LANG }
+val MEANING_LANGS = DECK_LANGS.filter { it != NO_LANG }

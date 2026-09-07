@@ -12,8 +12,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,9 +40,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
-import dev.ikna.data.pack.SeedProblem
-import dev.ikna.data.pack.SeedWarning
-import dev.ikna.data.repo.DeckImport
 import dev.ikna.data.repo.NO_LANG
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
@@ -753,51 +748,9 @@ fun AddDeckScreen(
  * scrolls sideways hides half of its options behind a gesture nobody is told
  * about.
  */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun PromptChoice(
-	options: List<String>,
-	label: (String) -> String,
-	current: String,
-	onPick: (String) -> Unit
-) {
-	// Four chips to a row was a guess about how wide a word is, and the guess
-	// was wrong in Russian: «продвинутый» is wider than a quarter of the screen and the
-	// last chip in the row lost its final letters inside its own border. The row
-	// wraps by measured width now, so the layout is a question for the text and
-	// the screen instead of a number typed here, in all three languages.
-	FlowRow(
-		modifier = Modifier.fillMaxWidth(),
-		horizontalArrangement = Arrangement.spacedBy(Space.sm),
-		verticalArrangement = Arrangement.spacedBy(Space.sm)
-	) {
-		options.forEach { option ->
-			IknaChip(
-				label = label(option),
-				selected = current == option,
-				onClick = { onPick(option) }
-			)
-		}
-	}
-}
 
 /** One line of the four-line instruction, with the bar the rest of the app uses. */
-@Composable
-private fun Step(text: String) {
-	Row(modifier = Modifier.padding(bottom = Space.sm)) {
-		Text(
-			text = "\u25AA",
-			style = MaterialTheme.typography.bodyMedium,
-			color = MaterialTheme.colorScheme.primary
-		)
-		Spacer(Modifier.padding(start = Space.sm))
-		Text(
-			text = text,
-			style = MaterialTheme.typography.bodyMedium,
-			modifier = Modifier.padding(start = Space.sm)
-		)
-	}
-}
+
 
 /**
  * The import, said out loud.
@@ -807,61 +760,6 @@ private fun Step(text: String) {
  * it now names the line and what was wrong with it, which is usually enough to
  * see that a model added a heading row or answered in two columns.
  */
-internal fun describe(report: DeckImport): String {
-	if (report.installed == 0) {
-		val problem = report.firstProblem
-			?: return S.t("add.025")
-		return S.t("add.025") + "\n" + S.t("add.023") + problem.line +
-			S.t("add.024") + reason(problem.problem)
-	}
-	val head = S.t("add.021") + report.installed
-	val flagged = flagged(report)
-	if (report.skipped == 0) return head + flagged
-	val problem = report.firstProblem
-		?: return head + S.t("add.022") + report.skipped + flagged
-	return head + S.t("add.022") + report.skipped + "\n" +
-		S.t("add.023") + problem.line + S.t("add.024") + reason(problem.problem) + flagged
-}
-
-/**
- * What landed and is still worth reading before it is learned.
- *
- * Not an error and not a refusal: the deck is installed. It is the only honest
- * thing an app with no network can say about a deck a model wrote in thirty
- * seconds -- these lines look like they were written to reach a number.
- */
-private fun flagged(report: DeckImport): String {
-	val warning = report.firstWarning ?: return ""
-	return "\n" + S.t("add.050") + report.flagged + "\n" +
-		S.t("add.023") + warning.line + S.t("add.024") + warningReason(warning.warning)
-}
-
-private fun warningReason(warning: SeedWarning): String = when (warning) {
-	SeedWarning.DEFINITION_REPEATS_TERM -> S.t("add.051")
-	SeedWarning.HEDGED -> S.t("add.052")
-	SeedWarning.SAME_MEANING -> S.t("add.053")
-	SeedWarning.HAS_NUMBERS -> S.t("add.054")
-}
-
-/**
- * A paste that lost its line breaks: one line carrying a whole deck's worth of
- * separators. A statement about the shape of the text, never about its content.
- */
-private fun glued(text: String): Boolean {
-	if (text.isBlank()) return false
-	if (text.lineSequence().count { it.isNotBlank() } > 1) return false
-	return text.count { it == '|' } >= 6 || text.count { it == '\t' } >= 6
-}
-
-private fun reason(problem: SeedProblem): String = when (problem) {
-	SeedProblem.NOT_THREE_COLUMNS -> S.t("add.031")
-	SeedProblem.EMPTY_FIELD -> S.t("add.032")
-	SeedProblem.PHRASE_NOT_IN_SENTENCE -> S.t("add.033")
-	SeedProblem.TOO_LONG -> S.t("add.034")
-	SeedProblem.DUPLICATE -> S.t("add.035")
-	SeedProblem.ONE_LONG_LINE -> S.t("add.070")
-}
-
 internal fun displayName(context: Context, uri: Uri): String {
 	context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
 		val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)

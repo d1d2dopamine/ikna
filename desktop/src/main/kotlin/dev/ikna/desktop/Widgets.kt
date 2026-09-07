@@ -1,7 +1,8 @@
 package dev.ikna.desktop
+import dev.ikna.ui.theme.IknaWideButton
+import androidx.compose.ui.text.font.FontWeight
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,25 +63,8 @@ fun IknaButton(
     filled: Boolean = false,
     onClick: () -> Unit
 ) {
-    val alpha = if (enabled) 1f else 0.35f
-    val ink = palette.ink.copy(alpha = alpha)
-    Box(
-        modifier
-            .height(38.dp)
-            .background(if (filled) ink else Color.Transparent)
-            .border(1.dp, ink)
-            .handCursor()
-            .clickable(enabled = enabled) { onClick() }
-            .padding(horizontal = Space.md),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = if (filled) palette.background else ink,
-            maxLines = 1
-        )
-    }
+    IknaWideButton(label, onClick, modifier = modifier.handCursor(), enabled = enabled,
+        filled = filled, height = 38.dp, fillWidth = false)
 }
 
 /**
@@ -219,5 +203,5 @@ fun Centered(text: String, palette: IknaPalette) {
 
 @Composable
 fun SectionTitle(text: String, palette: IknaPalette) {
-    Text(text, style = MaterialTheme.typography.labelSmall, color = palette.muted)
+    Text(text, style = MaterialTheme.typography.titleMedium, color = palette.ink, fontWeight = FontWeight.Medium)
 }

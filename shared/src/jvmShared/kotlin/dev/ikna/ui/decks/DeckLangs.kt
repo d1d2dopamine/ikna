@@ -20,7 +20,7 @@ import dev.ikna.ui.theme.Space
  * for a deck that is a list of chemistry terms and should not be read aloud at
  * all.
  */
-internal val DECK_LANGS = listOf(
+val DECK_LANGS = listOf(
     "en", "pl", "ru", "es",
     "fr", "de", "it", "pt",
     "zh", "ja", NO_LANG
@@ -41,7 +41,7 @@ internal val DECK_LANGS = listOf(
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun LangChips(current: String, onPick: (String) -> Unit) {
+fun LangChips(current: String, onPick: (String) -> Unit) {
     // Four chips to a row was a guess about how wide a word is, and the guess
     // was wrong in Russian: «продвинутый» is wider than a quarter of the screen and the
     // last chip in the row lost its final letters inside its own border. The row

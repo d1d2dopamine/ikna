@@ -1,15 +1,8 @@
 package dev.ikna.desktop
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,8 +15,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.ikna.ui.text.S
-import dev.ikna.ui.theme.IknaGlyph
-import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaWideButton
@@ -138,83 +129,78 @@ fun BackupPane(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        Row(modifier = Modifier.fillMaxWidth().padding(Space.md)) {
-            IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
-        }
-        Spacer(Modifier.height(Space.md))
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Space.lg)) {
-            SectionTitle(S.t("bk.001"), palette)
-            Spacer(Modifier.height(Space.md))
-            BackupNote(S.t("bk.016"), palette)
-            Spacer(Modifier.height(Space.lg))
+    DesktopScrollablePane(S.t("bk.001"), onBack) {
 
-            IknaWideButton(
-                label = if (busy) S.t("bk.005") else S.t("bk.002"),
-                onClick = { save() },
-                modifier = Modifier.widthIn(max = 360.dp),
-                filled = true,
-                enabled = !busy
-            )
-            Spacer(Modifier.height(Space.sm))
-            IknaWideButton(
-                label = S.t("bk.003"),
-                onClick = {
-                    val picked = chooseRestoreSource()
-                    if (picked != null) restore(picked)
-                },
-                modifier = Modifier.widthIn(max = 360.dp),
-                enabled = !busy
-            )
-            Spacer(Modifier.height(Space.sm))
-            IknaWideButton(
-                label = S.t("bk.004"),
-                onClick = { forPhone() },
-                modifier = Modifier.widthIn(max = 360.dp),
-                quiet = true,
-                enabled = !busy
-            )
+Spacer(Modifier.height(Space.md))
+BackupNote(S.t("bk.016"), palette)
+Spacer(Modifier.height(Space.lg))
 
-            if (failure.isNotBlank()) {
-                Spacer(Modifier.height(Space.md))
-                BackupLine(failure, palette)
-            }
+IknaWideButton(
+    label = if (busy) S.t("bk.005") else S.t("bk.002"),
+    onClick = { save() },
+    modifier = Modifier.widthIn(max = 360.dp),
+    filled = true,
+    enabled = !busy
+)
+Spacer(Modifier.height(Space.sm))
+IknaWideButton(
+    label = S.t("bk.003"),
+    onClick = {
+        val picked = chooseRestoreSource()
+        if (picked != null) restore(picked)
+    },
+    modifier = Modifier.widthIn(max = 360.dp),
+    enabled = !busy
+)
+Spacer(Modifier.height(Space.sm))
+IknaWideButton(
+    label = S.t("bk.004"),
+    onClick = { forPhone() },
+    modifier = Modifier.widthIn(max = 360.dp),
+    quiet = true,
+    enabled = !busy
+)
 
-            val done = saved
-            if (done != null) {
-                Spacer(Modifier.height(Space.md))
-                BackupLine(S.t("bk.006") + done.path, palette)
-                BackupLine(S.t("bk.007") + done.reviews, palette)
-                BackupLine(S.t("bk.008") + done.decks, palette)
-                BackupLine(S.t("bk.024") + megabytesOf(done.bytes), palette)
-            }
+if (failure.isNotBlank()) {
+    Spacer(Modifier.height(Space.md))
+    BackupLine(failure, palette)
+}
 
-            val back = loaded
-            if (back != null) {
-                Spacer(Modifier.height(Space.md))
-                BackupLine(kindLabel(back.kind), palette)
-                if (back.imported > 0) BackupLine(S.t("bk.009") + back.imported, palette)
-                if (back.skipped > 0) BackupLine(S.t("bk.010") + back.skipped, palette)
-                if (back.replayed > 0) BackupLine(S.t("bk.011") + back.replayed, palette)
-                if (back.decks > 0) BackupLine(S.t("bk.008") + back.decks, palette)
-                if (back.settings) BackupLine(S.t("bk.012"), palette)
-            }
+val done = saved
+if (done != null) {
+    Spacer(Modifier.height(Space.md))
+    BackupLine(S.t("bk.006") + done.path, palette)
+    BackupLine(S.t("bk.007") + done.reviews, palette)
+    BackupLine(S.t("bk.008") + done.decks, palette)
+    BackupLine(S.t("bk.024") + megabytesOf(done.bytes), palette)
+}
 
-            if (phone.isNotEmpty()) {
-                Spacer(Modifier.height(Space.md))
-                for (name in phone) BackupLine(S.t("bk.023") + name, palette)
-                Spacer(Modifier.height(Space.xs))
-                BackupNote(S.t("bk.019"), palette)
-            }
+val back = loaded
+if (back != null) {
+    Spacer(Modifier.height(Space.md))
+    BackupLine(kindLabel(back.kind), palette)
+    if (back.imported > 0) BackupLine(S.t("bk.009") + back.imported, palette)
+    if (back.skipped > 0) BackupLine(S.t("bk.010") + back.skipped, palette)
+    if (back.replayed > 0) BackupLine(S.t("bk.011") + back.replayed, palette)
+    if (back.decks > 0) BackupLine(S.t("bk.008") + back.decks, palette)
+    if (back.settings) BackupLine(S.t("bk.012"), palette)
+}
 
-            Spacer(Modifier.height(Space.lg))
-            IknaRule(color = palette.line)
-            Spacer(Modifier.height(Space.lg))
-            SectionTitle(S.t("bk.017"), palette)
-            Spacer(Modifier.height(Space.md))
-            BackupNote(S.t("bk.018"), palette)
-            Spacer(Modifier.height(Space.lg))
-        }
+if (phone.isNotEmpty()) {
+    Spacer(Modifier.height(Space.md))
+    for (name in phone) BackupLine(S.t("bk.023") + name, palette)
+    Spacer(Modifier.height(Space.xs))
+    BackupNote(S.t("bk.019"), palette)
+}
+
+Spacer(Modifier.height(Space.lg))
+IknaRule(color = palette.line)
+Spacer(Modifier.height(Space.lg))
+SectionTitle(S.t("bk.017"), palette)
+Spacer(Modifier.height(Space.md))
+BackupNote(S.t("bk.018"), palette)
+Spacer(Modifier.height(Space.lg))
+
     }
 }
 

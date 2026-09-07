@@ -37,7 +37,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"stats.001" to "Statystyka",
 	// ПОСЛЕДНИЕ 30 ДНЕЙ
 	"stats.002" to "OSTATNIE 30 DNI",
-	// Каждая метка — день с занятием, справа сегодня. Пропуск ничего не обнуляет и не обрывает: 
+	// Каждая метка — день с занятием, справа сегодня. Пропуск ничего не обнуляет и не обрывает:
 	"stats.003" to "Każdy znacznik to dzień z nauką, dziś po prawej. Przerwa niczego nie zeruje i nie przerywa: nie ma tu serii, nie ma czego łamać.",
 	// НОРМА ДНЯ
 	"stats.004" to "NORMA DNIA",
@@ -57,11 +57,11 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"stats.011" to "Ile kart przypadnie na termin. Jeśli gdzieś rośnie góra — w te dni nowe chunki nie dojdą.",
 	// УДЕРЖАНИЕ
 	"stats.012" to "UTRZYMANIE",
-	// Нужно хотя бы 20 повторений, чтобы это была цифра, а не догадка. Сейчас их 
+	// Нужно хотя бы 20 повторений, чтобы это была цифра, а не догадка. Сейчас их
 	"stats.013" to "Potrzeba co najmniej 20 powtórek, żeby to była liczba, a nie zgadywanie. Na razie jest ich ",
-	// Из 
+	// Из
 	"stats.014" to "Z ",
-	//  повторений за месяц вспомнилось 
+	//  повторений за месяц вспомнилось
 	"stats.015" to " powtórek w miesiącu przypomniało się ",
 	// %. Считаются только повторения — первую встречу забыть нельзя.
 	"stats.016" to "%. Liczą się tylko powtórki — pierwszego spotkania nie da się zapomnieć.",
@@ -83,7 +83,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"stats.024" to "Liczy się tylko czas z kartą na ekranie: przerwy, gdy telefon leży, tu nie wchodzą.",
 	// КОГДА ИДЁТ ЛУЧШЕ
 	"stats.025" to "KIEDY IDZIE LEPIEJ",
-	// Лучше всего вспоминается около 
+	// Лучше всего вспоминается около
 	"stats.026" to "Najlepiej przypomina się około ",
 	// . Это не приказ заниматься именно тогда — просто в этот час тебе дешевле, и напоминание ра
 	"stats.027" to ". To nie nakaz nauki właśnie wtedy — po prostu o tej godzinie jest ci taniej, a przypomnienie rozsądnie ustawić godzinę wcześniej.",
@@ -101,7 +101,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"set.001" to "Nie udało się otworzyć pliku",
 	// Не удалось открыть файл
 	"set.002" to "Nie udało się otworzyć pliku",
-	// Шрифт применён: 
+	// Шрифт применён:
 	"set.003" to "Czcionka zastosowana: ",
 	// Без разрешения на уведомления напоминание не придёт
 	"set.004" to "Bez zgody na powiadomienia przypomnienie nie przyjdzie",
@@ -113,11 +113,11 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"set.007" to "Ustawienia przywrócone. Czcionkę «",
 	// » нужно выбрать заново — сам файл шрифта твой, и в бэкап он не кладётся.
 	"set.008" to "» trzeba wybrać na nowo — plik czcionki jest twój i nie trafia do kopii.",
-	// Добавлено ответов: 
+	// Добавлено ответов:
 	"set.009" to "Dodano odpowiedzi: ",
-	//  · пересчитано 
+	//  · пересчитано
 	"set.010" to " · przeliczono ",
-	//  · пропущено 
+	//  · пропущено
 	"set.011" to " · pominięto ",
 	// Настройки
 	"set.012" to "Ustawienia",
@@ -128,7 +128,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"set.015" to "AUTO",
 	// РУЧНОЙ
 	"set.016" to "RĘCZNY",
-	// СЕЙЧАС · 
+	// СЕЙЧАС ·
 	"set.017" to "TERAZ · ",
 	// КАРТОЧЕК В ДЕНЬ
 	"set.018" to "KART DZIENNIE",
@@ -159,7 +159,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"set.032" to "USTAWIENIA SYNTEZY MOWY",
 	// Не нашёл этот раздел в настройках телефона
 	"set.033" to "Nie znalazłem tej sekcji w ustawieniach telefonu",
-	// Движок есть, но офлайн-голосов для этих языков в нём нет. Их надо доставить — один раз, и 
+	// Движок есть, но офлайн-голосов для этих языков в нём нет. Их надо доставить — один раз, и
 	"set.034" to "Silnik jest, ale nie ma w nim głosów offline dla tych języków. Trzeba je dociągnąć — raz, a potem działają bez sieci.",
 	// ДОУСТАНОВИТЬ ГОЛОСА
 	"set.035" to "DOINSTALUJ GŁOSY",
@@ -169,7 +169,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"set.037" to "brak głosów offline dla tego języka",
 	// ПО УМОЛЧАНИЮ
 	"set.038" to "DOMYŚLNY",
-	// Первый звук после запуска может задуматься на пару секунд — движок просыпается. Следующая 
+	// Первый звук после запуска может задуматься на пару секунд — движок просыпается. Следующая
 	"set.039" to "Pierwszy dźwięk po starcie może chwilę pomyśleć — silnik się budzi.",
 	// Шрифт
 	"set.040" to "Czcionka",
@@ -177,7 +177,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"set.041" to "Własny plik .ttf lub .otf do tekstu fiszek. Plik jest sprawdzany przed użyciem.",
 	// СЕЙЧАС · СИСТЕМНЫЙ
 	"set.042" to "TERAZ · SYSTEMOWA",
-	// СЕЙЧАС · 
+	// СЕЙЧАС ·
 	"set.043" to "TERAZ · ",
 	// ВЫБРАТЬ ФАЙЛ
 	"set.044" to "WYBIERZ PLIK",
@@ -190,7 +190,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// Одно в день, и только если минимум ещё не сделан. Никаких серий и укоров.
 	// Напоминать
 	"set.049" to "Przypominaj",
-	// в 
+	// в
 	"set.050" to "o ",
 	// выключено
 	"set.051" to "wyłączone",
@@ -213,7 +213,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// ВОССТАНОВИТЬ
 	"set.060" to "PRZYWRÓĆ",
 	// Перерывы
-	// Настраивать нечего и включать нечего. Приложение смотрит, сколько ты реально занимался, и 
+	// Настраивать нечего и включать нечего. Приложение смотрит, сколько ты реально занимался, и
 	// Редкое
 	"set.063" to "Rzadkie",
 	// То, что нужно раз в год или ни разу. Спрятано не потому, что сложно, а чтобы не нажать слу
@@ -261,11 +261,11 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"set.085" to "STONOWANY",
 	// АКЦЕНТ
 	"set.086" to "AKCENT",
-	// КОНТРАСТ · ТЕКСТ 
+	// КОНТРАСТ · ТЕКСТ
 	"set.087" to "KONTRAST · TEKST ",
-	//   ·  ПРИГЛУШЁННЫЙ 
+	//   ·  ПРИГЛУШЁННЫЙ
 	"set.088" to "  ·  STONOWANY ",
-	//   ·  АКЦЕНТ 
+	//   ·  АКЦЕНТ
 	"set.089" to "  ·  AKCENT ",
 	// что-то из этого плохо читается на своём фоне — цвет всё равно применён
 	"set.090" to "coś z tego źle się czyta na swoim tle — kolor i tak zastosowany",
@@ -383,9 +383,9 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"dbg.015" to "  zapas=",
 	// Не получилось прочитать ни одной строки
 	"deck.001" to "Nie udało się odczytać ani jednej linii",
-	// Добавлено чанков: 
+	// Добавлено чанков:
 	"deck.002" to "Dodano chunków: ",
-	// , пропущено 
+	// , пропущено
 	"deck.003" to ", pominięto ",
 	// Колоды
 	"deck.004" to "Talie",
@@ -397,13 +397,13 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"deck.007" to "DZIŚ",
 	// ничего не ждёт
 	"deck.008" to "nic nie czeka",
-	// сегодня 
+	// сегодня
 	"deck.009" to "dziś ",
 	// на сегодня нет
 	"deck.010" to "na dziś nic",
-	// введено 
-	//  из 
-	//  · знаешь 
+	// введено
+	//  из
+	//  · знаешь
 	// карточек
 	"deck.014" to "kart",
 	// карточка
@@ -574,11 +574,11 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"sess.028" to "Dodam choć jeden nowy chunk, żeby nie stać w miejscu.",
 	// Новых чанков здесь больше нет — все уже знакомы. Повторения продолжат приходить по срокам,
 	"sess.029" to "Nowych chunków tu już nie ma — wszystkie są znajome. Powtórki będą przychodzić w swoich terminach, a po nowy materiał potrzebna jest kolejna talia.",
-	// следующие — сегодня в 
+	// следующие — сегодня в
 	"sess.030" to "następne — dziś o ",
-	// следующие — завтра в 
+	// следующие — завтра в
 	"sess.031" to "następne — jutro o ",
-	// следующие — через 
+	// следующие — через
 	"sess.032" to "następne — za ",
 	// дней
 	"sess.033" to "dni",
@@ -615,7 +615,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"onb.004" to "Opuszczony tydzień nie zostawi zatoru: stare wraca po trochu.",
 	// Минимум — одна карточка
 	"onb.005" to "Minimum to jedna karta",
-	// Одна карточка закрывает день целиком. Захочется больше — есть кнопка «ещё немного», и она 
+	// Одна карточка закрывает день целиком. Захочется больше — есть кнопка «ещё немного», и она
 	"onb.006" to "Jedna karta zamyka cały dzień. Zechcesz więcej — jest przycisk «jeszcze trochę», i nie obciąży jutra.",
 	// ГОТОВЛЮ КАРТОЧКИ…
 	"onb.007" to "PRZYGOTOWUJĘ KARTY…",
@@ -691,7 +691,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"voice.016" to "To wersja bez silnika. Własny model tu nie zadziała — potrzebna wersja z oznaczeniem voice.",
 	// Заменить модель
 	"voice.017" to "Dodaj kolejny model",
-	// Копирую файлы: 
+	// Копирую файлы:
 	"voice.018" to "Skopiowane pliki: ",
 	// Это не похоже на модель: в папке нет файла .onnx
 	"voice.019" to "To nie wygląda na model: w folderze nie ma pliku .onnx",
@@ -701,7 +701,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"voice.021" to "W folderze jest kilka modeli. Zostaw jeden",
 	// Нет файла tokens.txt. Нужна сборка модели для sherpa-onnx, а не файлы Piper как есть
 	"voice.022" to "Brak pliku tokens.txt. Potrzebna wersja modelu dla sherpa-onnx, a nie surowe pliki Piper",
-	// Не удалось скопировать: 
+	// Не удалось скопировать:
 	"voice.023" to "Nie udało się skopiować: ",
 	// Модель добавлена
 	"voice.024" to "Model dodany",
@@ -952,4 +952,5 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "optimizer.023" to "Zastosowano wynik z {date}.",
     "optimizer.024" to "Pełne obliczenia raz na 30 dni.",
     "optimizer.025" to "Zapisany zaakceptowany wynik z {date}.",
+    "file.001" to "Nadpisać istniejący plik?",
 )

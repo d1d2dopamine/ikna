@@ -1,10 +1,23 @@
 package dev.ikna.desktop
+import dev.ikna.ui.session.SessionUiState
+import dev.ikna.ui.session.IknaSessionTopBar
+import dev.ikna.ui.session.IknaSessionEmptyState
+import dev.ikna.ui.session.IknaSessionUndoBar
+import dev.ikna.ui.theme.IknaBottomBar
+import dev.ikna.ui.theme.IknaIconButton
+import dev.ikna.ui.theme.IknaGlyph
+import dev.ikna.ui.theme.IknaTextButton
+import dev.ikna.ui.theme.IknaDialog
+import dev.ikna.data.catalog.catalogCardReport
+import dev.ikna.data.catalog.tatoebaSentenceUrl
+import dev.ikna.domain.session.SessionCard
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import kotlinx.coroutines.delay
 
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,7 +59,6 @@ import dev.ikna.ui.session.SwipeableCard
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaProgress
-import dev.ikna.ui.theme.IknaRule
 import kotlinx.coroutines.launch
 
 /**
@@ -80,11 +92,27 @@ fun SessionPane(
     var reload by remember { mutableStateOf(0) }
     var note by remember { mutableStateOf<String?>(null) }
     val focus = remember { FocusRequester() }
+    val clipboard = LocalClipboardManager.current
+    var saving by remember { mutableStateOf(false) }
+    var answeredHere by remember { mutableStateOf(0) }
+    var undoVisible by remember { mutableStateOf(false) }
+    var undoFailed by remember { mutableStateOf(false) }
+    var undoToken by remember { mutableStateOf(0) }
+    var wrongMarked by remember { mutableStateOf(false) }
+    var wrongSourceId by remember { mutableStateOf<String?>(null) }
+    var reportCopied by remember { mutableStateOf(false) }
+    var reportCard by remember { mutableStateOf<SessionCard?>(null) }
+    var noMoreExtra by remember { mutableStateOf(false) }
+    val swipeFluent = remember(deckId, reload) { settings.swipesDone >= 12 }
+    LaunchedEffect(undoToken) {
+        if (undoVisible) { delay(6_000L); undoVisible = false }
+    }
 
     LaunchedEffect(deckId, reload) {
         loading = true
         plan = runCatching { container.learningRepository.buildSession(deckId = deckId) }.getOrNull()
         index = 0
+        answeredHere = 0
         revealed = false
         shownAt = System.currentTimeMillis()
         loading = false
@@ -110,20 +138,28 @@ fun SessionPane(
 
     val gradeWithSignals: (Rating, ReviewSignals) -> Unit = { rating, signals ->
         val card = current
-        if (card != null) {
+        if (card != null && !loading && !saving && reportCard == null) {
+            saving = true
             val took = System.currentTimeMillis() - shownAt
             scope.launch {
-                runCatching {
-                    container.learningRepository.answer(
-                        sessionCard = card,
-                        rating = rating,
-                        durationMs = took,
-                        now = System.currentTimeMillis(),
-                        signals = signals
-                    )
-                }.onFailure { error -> logLine("answer failed: " + error) }
-                note = null
-                advance()
+                val result = runCatching {
+                    container.learningRepository.answer(card, rating, took,
+                        now = System.currentTimeMillis(), signals = signals)
+                }
+                if (result.isSuccess) {
+                    if (signals.inputMethod == "swipe") runCatching { container.settings.bumpSwipe() }
+                    answeredHere += 1
+                    wrongMarked = false
+                    undoFailed = false
+                    undoVisible = true
+                    undoToken += 1
+                    note = null
+                    advance()
+                } else {
+                    logLine("answer failed: " + result.exceptionOrNull())
+                    note = S.t("set.057")
+                }
+                saving = false
             }
         }
     }
@@ -133,32 +169,58 @@ fun SessionPane(
     }
 
     val undo: () -> Unit = {
-        scope.launch {
-            val message = runCatching { container.learningRepository.undoLast() }.getOrNull()
-            note = message ?: S.t("sess.011")
-            reload += 1
-            onChanged()
+        if (!loading && !saving) {
+            saving = true
+            scope.launch {
+                val restored = runCatching { container.learningRepository.undoLast() }.getOrNull()
+                undoFailed = restored == null
+                undoVisible = false
+                wrongMarked = false
+                if (restored != null) { reload += 1; onChanged() }
+                saving = false
+            }
         }
     }
 
     val addMore: () -> Unit = {
-        scope.launch {
-            runCatching { container.learningRepository.addExtra(count = 5, deckId = deckId) }
-            reload += 1
-            onChanged()
+        if (!loading && !saving) {
+            saving = true
+            scope.launch {
+                val added = runCatching { container.learningRepository.addExtra(count = 5, deckId = deckId) }.getOrDefault(0)
+                noMoreExtra = added == 0
+                reload += 1
+                onChanged()
+                saving = false
+            }
         }
     }
 
     val wrong: () -> Unit = {
         val card = current
-        if (card != null) {
+        if (card != null && !loading && !saving) {
+            saving = true
             scope.launch {
-                runCatching { container.learningRepository.markWrong(card) }
-                note = S.t("sess.045")
-                advance()
+                val result = runCatching { container.learningRepository.markWrong(card) }
+                if (result.isSuccess) {
+                    wrongMarked = true
+                    wrongSourceId = card.sourceId
+                    undoVisible = false
+                    reload += 1
+                    onChanged()
+                } else note = S.t("set.057")
+                saving = false
             }
         }
     }
+    val presentation = SessionUiState(loading = loading, queue = cards, index = index,
+        revealed = revealed, remaining = (cards.size - index).coerceAtLeast(0),
+        answeredToday = (plan?.answeredToday ?: 0) + answeredHere,
+        dailyMinimum = container.learningRepository.dailyMinimum(),
+        sessionDone = (plan?.sessionDone ?: 0) + index, sessionTotal = plan?.sessionTotal ?: 0,
+        deckTitle = plan?.deckTitle, perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
+        reason = plan?.reason ?: dev.ikna.domain.governor.GovernorReason.OK,
+        nextDueAt = plan?.nextDueAt, noMoreExtra = noMoreExtra)
+
 
     Column(
         Modifier
@@ -166,7 +228,7 @@ fun SessionPane(
             .focusRequester(focus)
             .focusable()
             .onPreviewKeyEvent { event ->
-                if (event.type != KeyEventType.KeyDown) {
+                if (loading || saving || reportCard != null || event.type != KeyEventType.KeyDown) {
                     false
                 } else when (event.key) {
                     Key.Spacebar, Key.Enter -> {
@@ -184,34 +246,10 @@ fun SessionPane(
             }
             // Only the header is inset. The card below is the whole pane, edge
             // to edge, exactly as it is the whole screen on the phone.
-            .padding(vertical = 24.dp)
+            .padding(vertical = 0.dp)
     ) {
-        val header = plan?.deckTitle ?: S.t("deck.004")
-        Row(
-            Modifier.fillMaxWidth().padding(horizontal = 40.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = header,
-                style = MaterialTheme.typography.labelMedium,
-                color = palette.muted,
-                modifier = Modifier.weight(1f)
-            )
-            if (cards.isNotEmpty()) {
-                Text(
-                    text = (index + 1).toString() + " / " + cards.size,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = palette.muted
-                )
-            }
-        }
-
-        Spacer(Modifier.height(10.dp))
-        IknaProgress(
-            fraction = if (cards.isEmpty()) 0f else index.toFloat() / cards.size.toFloat(),
-            modifier = Modifier.padding(horizontal = 40.dp)
-        )
-        Spacer(Modifier.height(18.dp))
+        IknaSessionTopBar(presentation)
+        IknaProgress(fraction = presentation.progress)
 
         BoxWithConstraints(
             modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -224,19 +262,7 @@ fun SessionPane(
                     color = palette.muted
                 )
             } else if (current == null) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    val answeredToday = plan?.answeredToday ?: 0
-                    Text(
-                        text = if (answeredToday > 0) S.t("sess.005") else S.t("sess.006"),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = palette.ink
-                    )
-                    Spacer(Modifier.height(18.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        IknaButton(S.t("sess.009"), palette, filled = true) { addMore() }
-                        IknaButton(S.t("sess.008"), palette) { reload += 1 }
-                    }
-                }
+                IknaSessionEmptyState(presentation, settings.animations, onExtra = addMore)
             } else {
                 val mode = settings.phoneticsFor(current.chunk.packId)
                 val subject = current.chunk.lang == NO_LANG
@@ -265,10 +291,9 @@ fun SessionPane(
                         revealed = revealed,
                         animations = settings.animations,
                         haptics = settings.haptics,
-                        // The two words at the edges stay put in a window: a
-                        // pointer has no muscle memory to build, and there is
-                        // room for them beside the card at any size.
-                        railsAtRest = true,
+                        // The same learned, quiet rails as Android. Pointer distance
+                        // remains proportional to the actual desktop pane.
+                        railsAtRest = !swipeFluent,
                         onReveal = reveal,
                         onRate = gradeWithSignals,
                         signals = reviewSignals,
@@ -298,6 +323,8 @@ fun SessionPane(
                             } else {
                                 null
                             },
+                            sourceLabel = current.sourceId?.let { S.t("src.001") + "Tatoeba #" + it },
+                            onSource = current.sourceId?.let { id -> { tatoebaSentenceUrl(id)?.let(::openInBrowser); Unit } },
                             revealed = revealed,
                             showTapHint = !revealed && index == 0,
                             progress = progress,
@@ -320,17 +347,32 @@ fun SessionPane(
             )
         }
 
-        // Nothing under the card.
-        //
-        // There was a strip of four buttons here -- reveal, not known, known,
-        // mark wrong -- plus a line of instructions, none of which the phone has.
-        // The card is answered by dragging it, and a control that duplicates the
-        // gesture teaches people to distrust the gesture: if the buttons are the
-        // real way, the swipe is decoration, and if the swipe is the real way, the
-        // buttons are noise. The phone made that choice years ago. Undo lives on
-        // Z, on the keyboard, where the rest of the window's verbs live, and the
-        // list of keys is one press of F1 away.
+        IknaSessionUndoBar(undoVisible, undoFailed, wrongMarked, wrongSourceId, reportCopied,
+            onUndo = undo, onDismiss = { undoVisible = false },
+            onOpenSource = { id -> tatoebaSentenceUrl(id)?.let(::openInBrowser) })
+        IknaBottomBar {
+            IknaIconButton(IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
+            Spacer(Modifier.weight(1f))
+            if (current != null && revealed && !saving) {
+                IknaTextButton(S.t("sess.044"), onClick = {
+                    reportCopied = false
+                    if (catalogCardReport(current.chunk) != null) reportCard = current else wrong()
+                }, color = palette.muted)
+            }
+        }
     }
+    reportCard?.let { pending ->
+        IknaDialog(S.t("src.002"), S.t("src.003"), S.t("src.004"),
+            onConfirm = {
+                reportCopied = runCatching {
+                    val text = catalogCardReport(pending.chunk) ?: return@runCatching false
+                    clipboard.setText(AnnotatedString(text)); true
+                }.getOrDefault(false)
+                reportCard = null
+                wrong()
+            }, dismissLabel = S.t("src.005"), onDismiss = { reportCard = null })
+    }
+
 }
 
 /** What the card is asking, in the phone's own words. */

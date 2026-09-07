@@ -377,6 +377,10 @@ interface CardDao {
 
 @Dao
 interface ReviewDao {
+    /** Invalidated by append/undo/import/reset; no timing data or settings UI needed. */
+    @Query("SELECT COUNT(*) FROM reviews")
+    fun observeOptimizerChanges(): Flow<Long>
+
     // Deliberately INSERT-only: no update, no delete, anywhere in the codebase.
     // Undo is itself an insert (see ReviewEntity.undoOf).
     @Insert(onConflict = OnConflictStrategy.ABORT)

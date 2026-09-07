@@ -1,6 +1,13 @@
 package dev.ikna.desktop
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.LaunchedEffect
+import dev.ikna.ui.settings.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,9 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,18 +33,13 @@ import androidx.compose.ui.unit.dp
 import dev.ikna.data.prefs.FontStore
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.LANGUAGE_SYSTEM
-import dev.ikna.data.prefs.MANUAL_LOAD_MAX
-import dev.ikna.data.prefs.MANUAL_LOAD_MIN
-import dev.ikna.data.prefs.MANUAL_LOAD_STEP
 import dev.ikna.data.prefs.ThemeMode
 import dev.ikna.data.update.UpdateCheck
-import dev.ikna.ui.settings.IknaPaletteTiles
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaChip
 import dev.ikna.ui.theme.IknaHexField
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaSwatch
-import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.MIN_READABLE_CONTRAST
 import dev.ikna.ui.theme.contrastRatio
 import dev.ikna.ui.theme.hexOf
@@ -63,6 +62,7 @@ import java.io.File
  * are not available on the desktop yet. Leaving them out entirely would read as
  * "this build has fewer features and does not say which".
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsPane(
     container: DesktopContainer,
@@ -99,544 +99,478 @@ fun SettingsPane(
     var diagOpen by remember { mutableStateOf(false) }
     var diagText by remember { mutableStateOf("") }
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(40.dp)
-            .widthIn(max = 720.dp)
-    ) {
-        Text(
-            text = S.t("set.012"),
-            style = MaterialTheme.typography.titleLarge,
-            color = palette.ink
-        )
-
-        // -- load ------------------------------------------------------------
-        Spacer(Modifier.height(28.dp))
-        SectionTitle(S.t("set.091"), palette)
-        Spacer(Modifier.height(12.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IknaChip(
-                label = S.t("set.015"),
-                selected = settings.autoLoad,
-                onClick = { save { container.settings.setAutoLoad(true) } }
-            )
-            IknaChip(
-                label = S.t("set.016"),
-                selected = !settings.autoLoad,
-                onClick = { save { container.settings.setAutoLoad(false) } }
-            )
-        }
-        if (!settings.autoLoad) {
-            Spacer(Modifier.height(14.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IknaButton("-", palette, enabled = settings.manualLoad > MANUAL_LOAD_MIN) {
-                    save {
-                        container.settings.setManualLoad(
-                            (settings.manualLoad - MANUAL_LOAD_STEP).coerceAtLeast(MANUAL_LOAD_MIN)
-                        )
-                    }
-                }
-                Text(
-                    text = settings.manualLoad.toString(),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = palette.ink,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-                IknaButton("+", palette, enabled = settings.manualLoad < MANUAL_LOAD_MAX) {
-                    save {
-                        container.settings.setManualLoad(
-                            (settings.manualLoad + MANUAL_LOAD_STEP).coerceAtMost(MANUAL_LOAD_MAX)
-                        )
-                    }
-                }
-                Spacer(Modifier.width(14.dp))
-                Text(
-                    text = S.t("set.018"),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = palette.muted
-                )
+    val listState = rememberLazyListState()
+    var measuredNorm by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(settings.autoLoad) {
+        measuredNorm = runCatching {
+            if (container.learningRepository.normIsMeasured()) container.learningRepository.currentDailyTarget() else null
+        }.getOrNull()
+    }
+    val sections = listOf("load" to "set.091", "look" to "set.092", "language" to "set.093",
+        "speech" to "set.094", "font" to "set.095", "reminder" to "set.096",
+        "update" to "set.140", "data" to "set.097", "advanced" to "set.098")
+    DesktopPaneFrame(S.t("set.012"), onBack, MaterialTheme.typography.headlineSmall) {
+        IknaSettingsJumpRow(sections, listState, settings.animations, settled = true) { id ->
+            val index = sections.indexOfFirst { it.first == id }
+            if (index >= 0) scope.launch {
+                if (settings.animations) listState.animateScrollToItem(index) else listState.scrollToItem(index)
             }
         }
-
-        Spacer(Modifier.height(14.dp))
-        ToggleRow(S.t("grading.001"), settings.derivedGrading, palette) {
-            save { container.settings.setDerivedGrading(it) }
-        }
-        Text(
-            text = S.t("grading.002"),
-            style = MaterialTheme.typography.bodySmall,
-            color = palette.muted
-        )
-
-        Spacer(Modifier.height(22.dp))
-        dev.ikna.ui.settings.LocalOptimizerPanel(container.optimizer)
-
-        // -- look -------------------------------------------------------------
-        Spacer(Modifier.height(30.dp))
-        SectionTitle(S.t("set.019"), palette)
-        Spacer(Modifier.height(14.dp))
-        Text(
-            text = S.t("set.114"),
-            style = MaterialTheme.typography.labelMedium,
-            color = palette.muted
-        )
-        Spacer(Modifier.height(12.dp))
-        // Four to a row rather than the phone's three: the window is wider, and
-        // twelve tiles at three to a row would need scrolling to be compared,
-        // which is the one thing a grid of colours exists to avoid.
-        IknaPaletteTiles(
-            selectedId = settings.paletteId,
-            // Drawn in the lighting the window is in right now, read off the
-            // background rather than asked of the system: with a custom scheme
-            // the two can disagree, and what matters is what the eye is
-            // currently adapted to.
-            light = isLight(palette.background),
-            columns = 4,
-            onPick = { id -> save { container.settings.setPalette(id) } }
-        )
-
-        Spacer(Modifier.height(22.dp))
-        Text(
-            text = S.t("set.122"),
-            style = MaterialTheme.typography.labelMedium,
-            color = palette.muted
-        )
-        Spacer(Modifier.height(12.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            ThemeMode.entries.chunked(2).forEach { pair ->
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    pair.forEach { mode ->
+        dev.ikna.ui.theme.IknaRule()
+        LazyColumn(state = listState, modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 40.dp, end = 40.dp, bottom = 32.dp)) {
+            item(key = "load", contentType = "settings-section") {
+                IknaSettingsSection(S.t("set.013"), null) {
+                    Spacer(Modifier.height(12.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         IknaChip(
-                            label = themeLabel(mode),
-                            selected = settings.theme == mode,
-                            modifier = Modifier.width(180.dp),
-                            onClick = { save { container.settings.setTheme(mode) } }
+                            label = S.t("set.015"),
+                            selected = settings.autoLoad,
+                            onClick = { save { container.settings.setAutoLoad(true) } }
                         )
-                    }
-                }
-            }
-        }
-
-        if (settings.theme == ThemeMode.CUSTOM) {
-            Spacer(Modifier.height(16.dp))
-            CustomColors(settings = settings, palette = palette) { bg, ink, muted, accent ->
-                save { container.settings.setCustomColors(bg, ink, muted, accent) }
-            }
-        }
-
-        Spacer(Modifier.height(18.dp))
-        ToggleRow(S.t("set.020"), settings.animations, palette) {
-            save { container.settings.setAnimations(it) }
-        }
-        ToggleRow(S.t("bar.001"), settings.showWordmark, palette) {
-            save { container.settings.setShowWordmark(it) }
-        }
-
-        // -- language ----------------------------------------------------------
-        Spacer(Modifier.height(30.dp))
-        SectionTitle(S.t("set.024"), palette)
-        Spacer(Modifier.height(12.dp))
-        val languages = listOf(
-            LANGUAGE_SYSTEM to "set.099",
-            "ru" to "set.105",
-            "en" to "set.106",
-            "pl" to "set.104",
-            "es" to "set.108",
-            "fr" to "set.109",
-            "de" to "set.107"
-        )
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            languages.chunked(4).forEach { row ->
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    row.forEach { pair ->
                         IknaChip(
-                            label = S.t(pair.second),
-                            selected = settings.language == pair.first,
-                            modifier = Modifier.width(140.dp),
-                            onClick = { save { container.settings.setLanguage(pair.first) } }
+                            label = S.t("set.016"),
+                            selected = !settings.autoLoad,
+                            onClick = { save { container.settings.setAutoLoad(false) } }
                         )
                     }
-                }
-            }
-        }
-
-        // -- font ------------------------------------------------------------
-        Spacer(Modifier.height(30.dp))
-        SectionTitle(S.t("set.040"), palette)
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = S.t("set.041"),
-            style = MaterialTheme.typography.labelMedium,
-            color = palette.muted
-        )
-        Spacer(Modifier.height(10.dp))
-        Text(
-            text = if (settings.fontName.isEmpty()) S.t("set.042")
-            else S.t("set.043") + settings.fontName,
-            style = MaterialTheme.typography.labelSmall,
-            color = palette.muted
-        )
-        Spacer(Modifier.height(10.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IknaButton(label = S.t("set.044"), palette = palette) {
-                val picked = pickFileForRead(S.t("set.040"))
-                if (picked != null) {
-                    val problem = runCatching {
-                        picked.inputStream().use { stream -> FontStore.install(stream) }
-                    }.getOrElse { S.t("set.057") }
-                    if (problem == null) {
-                        save { container.settings.setFontName(picked.name) }
-                        dataNote = null
+                    if (settings.autoLoad) {
+                        Spacer(Modifier.height(12.dp))
+                        Text(measuredNorm?.let { S.t("set.017") + it } ?: " ",
+                            style = MaterialTheme.typography.labelMedium, color = palette.muted)
                     } else {
-                        dataNote = problem
-                    }
-                }
-            }
-            IknaButton(label = S.t("set.045"), palette = palette) {
-                FontStore.clear()
-                save { container.settings.setFontName("") }
-                dataNote = S.t("set.046")
-            }
-        }
-
-        // -- updates ---------------------------------------------------------
-        Spacer(Modifier.height(30.dp))
-        SectionTitle(S.t("set.138"), palette)
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = S.t("set.139"),
-            style = MaterialTheme.typography.labelMedium,
-            color = palette.muted
-        )
-        Spacer(Modifier.height(10.dp))
-        ToggleRow(S.t("upd.008"), settings.updateCheck, palette) {
-            save { container.settings.setUpdateCheck(it) }
-        }
-        Text(
-            text = S.t("upd.009"),
-            style = MaterialTheme.typography.labelSmall,
-            color = palette.muted
-        )
-        Spacer(Modifier.height(10.dp))
-        Text(
-            text = S.t("upd.011") + APP_VERSION,
-            style = MaterialTheme.typography.labelSmall,
-            color = palette.muted
-        )
-        if (settings.updateSkipped.isNotEmpty()) {
-            Text(
-                text = S.t("upd.015") + settings.updateSkipped,
-                style = MaterialTheme.typography.labelSmall,
-                color = palette.muted
-            )
-        }
-        Spacer(Modifier.height(10.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IknaButton(
-                label = if (checking) S.t("upd.014") else S.t("upd.010"),
-                palette = palette,
-                enabled = !checking
-            ) {
-                scope.launch {
-                    checking = true
-                    val release = runCatching {
-                        UpdateCheck(APP_VERSION, true).latest()
-                    }.getOrNull()
-                    checking = false
-                    save { container.settings.markUpdateChecked(System.currentTimeMillis()) }
-                    updateNote = if (release == null) S.t("upd.012")
-                    else S.t("upd.016") + release.version
-                }
-            }
-            IknaButton(label = S.t("upd.013"), palette = palette) {
-                openInBrowser(UpdateCheck.RELEASES_PAGE)
-            }
-        }
-        updateNote?.let { line ->
-            Spacer(Modifier.height(10.dp))
-            Text(
-                text = line,
-                style = MaterialTheme.typography.labelMedium,
-                color = palette.ink
-            )
-        }
-
-        // -- data ------------------------------------------------------------
-        Spacer(Modifier.height(30.dp))
-        SectionTitle(S.t("set.052"), palette)
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = S.t("set.053"),
-            style = MaterialTheme.typography.labelMedium,
-            color = palette.muted
-        )
-        Spacer(Modifier.height(10.dp))
-        ToggleRow(S.t("set.054"), settings.autoExport, palette) {
-            save { container.settings.setAutoExport(it) }
-        }
-        Text(
-            text = container.home.absolutePath,
-            style = MaterialTheme.typography.labelSmall,
-            color = palette.muted
-        )
-        Spacer(Modifier.height(10.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IknaButton(label = S.t("set.056"), palette = palette) {
-                scope.launch {
-                    val target = File(container.home, "export")
-                    val written = runCatching {
-                        target.mkdirs()
-                        var count = 0
-                        container.deckRepository.decks().forEach { deck ->
-                            val body = container.deckRepository.exportText(deck.id)
-                            if (body.isNotBlank()) {
-                                File(target, fileNameFor(deck.title)).writeText(body)
-                                count += 1
-                            }
+                        Spacer(Modifier.height(14.dp))
+                        IknaSettingsStepper(settings.manualLoad, enabled = true) { value ->
+                            save { container.settings.setManualLoad(value) }
                         }
-                        count
-                    }.getOrNull()
-                    dataNote = when {
-                        written == null -> S.t("set.057")
-                        written == 0 -> S.t("set.058")
-                        else -> target.absolutePath
+                        Text(S.t("set.018"), style = MaterialTheme.typography.labelMedium, color = palette.muted)
                     }
                 }
             }
-            IknaButton(label = S.t("pc.011"), palette = palette) {
-                openFolder(container.home)
-            }
-        }
+            item(key = "look", contentType = "settings-section") {
+                IknaSettingsSection(S.t("set.019"), null) {
+                    Spacer(Modifier.height(14.dp))
+                    Text(
+                        text = S.t("set.114"),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = palette.muted
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    // Four to a row rather than the phone's three: the window is wider, and
+                    // twelve tiles at three to a row would need scrolling to be compared,
+                    // which is the one thing a grid of colours exists to avoid.
+                    IknaPaletteTiles(
+                        selectedId = settings.paletteId,
+                        // Drawn in the lighting the window is in right now, read off the
+                        // background rather than asked of the system: with a custom scheme
+                        // the two can disagree, and what matters is what the eye is
+                        // currently adapted to.
+                        light = isLight(palette.background),
+                        columns = 4,
+                        onPick = { id -> save { container.settings.setPalette(id) } }
+                    )
 
-        Spacer(Modifier.height(10.dp))
-        IknaButton(label = S.t("bk.001"), palette = palette) {
-            onOpenBackup()
-        }
-
-        val hidden = settings.suppressed.split(",").count { it.isNotBlank() }
-        if (hidden > 0) {
-            Spacer(Modifier.height(12.dp))
-            Text(
-                text = S.t("set.135") + hidden,
-                style = MaterialTheme.typography.labelSmall,
-                color = palette.muted
-            )
-            Spacer(Modifier.height(8.dp))
-            IknaButton(label = S.t("set.136"), palette = palette) {
-                save { container.settings.clearSuppressed() }
-                dataNote = S.t("set.137")
-            }
-        }
-
-        // -- diagnostics -----------------------------------------------------
-        Spacer(Modifier.height(22.dp))
-        SectionTitle(S.t("diag.001"), palette)
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = S.t("diag.002"),
-            style = MaterialTheme.typography.labelMedium,
-            color = palette.muted
-        )
-        Spacer(Modifier.height(10.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IknaButton(
-                label = if (diagOpen) S.t("diag.004") else S.t("diag.003"),
-                palette = palette
-            ) {
-                if (diagOpen) {
-                    diagOpen = false
-                } else {
-                    diagOpen = true
-                    diagText = S.t("diag.005")
-                    scope.launch {
-                        diagText = runCatching { diagnosticsText(container) }
-                            .getOrElse { S.t("diag.008") }
-                    }
-                }
-            }
-            if (diagOpen) {
-                IknaButton(label = S.t("diag.006"), palette = palette) {
-                    writeClipboardText(diagText)
-                    dataNote = S.t("diag.007")
-                }
-            }
-        }
-        if (diagOpen) {
-            Spacer(Modifier.height(10.dp))
-            Text(
-                text = diagText,
-                style = MaterialTheme.typography.labelSmall,
-                color = palette.muted
-            )
-        }
-
-        // -- rare ------------------------------------------------------------
-        Spacer(Modifier.height(30.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            SectionTitle(S.t("set.063"), palette)
-            Spacer(Modifier.width(12.dp))
-            IknaButton(
-                label = if (advancedOpen) S.t("set.065") else S.t("set.066"),
-                palette = palette
-            ) { advancedOpen = !advancedOpen }
-        }
-
-        if (advancedOpen) {
-            Spacer(Modifier.height(12.dp))
-            IknaButton(label = S.t("set.067"), palette = palette) {
-                scope.launch {
-                    runCatching { container.componentRepository.rebuildFromReviews() }
-                        .onFailure { error -> logLine("rebuild failed: " + error) }
-                    dataNote = S.t("set.068")
-                }
-            }
-
-            Spacer(Modifier.height(18.dp))
-            if (!resetAsking) {
-                IknaButton(label = S.t("set.070"), palette = palette) { resetAsking = true }
-            } else {
-                Text(
-                    text = S.t("set.078"),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = palette.ink
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = S.t("set.079"),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = palette.muted
-                )
-                Spacer(Modifier.height(10.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    IknaButton(label = S.t("set.080"), palette = palette, filled = true) {
-                        scope.launch {
-                            runCatching { container.learningRepository.resetProgress() }
-                                .onFailure { error -> logLine("reset failed: " + error) }
-                            resetAsking = false
-                            dataNote = S.t("set.081")
-                        }
-                    }
-                    IknaButton(label = S.t("set.082"), palette = palette) { resetAsking = false }
-                }
-            }
-        }
-
-        if (advancedOpen) {
-            Spacer(Modifier.height(20.dp))
-            Text(
-                text = S.t("set.071"),
-                style = MaterialTheme.typography.labelMedium,
-                color = palette.ink
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = S.t("set.072"),
-                style = MaterialTheme.typography.labelSmall,
-                color = palette.muted
-            )
-            Spacer(Modifier.height(10.dp))
-            IknaButton(
-                label = if (wipeArmed) S.t("set.073") else S.t("set.074"),
-                palette = palette
-            ) {
-                if (!wipeArmed) {
-                    wipeArmed = true
-                    dataNote = S.t("set.075")
-                } else {
-                    scope.launch {
-                        runCatching {
-                            val target = File(container.home, "export")
-                            target.mkdirs()
-                            container.deckRepository.decks().forEach { deck ->
-                                val body = container.deckRepository.exportText(deck.id)
-                                if (body.isNotBlank()) {
-                                    File(target, fileNameFor(deck.title)).writeText(body)
+                    Spacer(Modifier.height(22.dp))
+                    Text(
+                        text = S.t("set.122"),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = palette.muted
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        ThemeMode.entries.chunked(2).forEach { pair ->
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                pair.forEach { mode ->
+                                    IknaChip(
+                                        label = themeLabel(mode),
+                                        selected = settings.theme == mode,
+                                        modifier = Modifier.weight(1f),
+                                        onClick = { save { container.settings.setTheme(mode) } }
+                                    )
                                 }
                             }
-                            container.deckRepository.decks().forEach { deck ->
-                                container.deckRepository.delete(deck.id)
-                            }
-                            container.componentRepository.clearAll()
-                            container.learningRepository.invalidatePlan()
-                            container.settings.clearAll()
-                        }.onFailure { error -> logLine("wipe failed: " + error) }
-                        wipeArmed = false
-                        dataNote = null
+                        }
+                    }
+
+                    if (settings.theme == ThemeMode.CUSTOM) {
+                        Spacer(Modifier.height(16.dp))
+                        CustomColors(settings = settings, palette = palette) { bg, ink, muted, accent ->
+                            save { container.settings.setCustomColors(bg, ink, muted, accent) }
+                        }
+                    }
+
+                    Spacer(Modifier.height(18.dp))
+                    ToggleRow(S.t("set.020"), settings.animations, palette) {
+                        save { container.settings.setAnimations(it) }
+                    }
+                    ToggleRow(S.t("bar.001"), settings.showWordmark, palette) {
+                        save { container.settings.setShowWordmark(it) }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    ToggleRow(S.t("bar.003"), settings.leftHanded, palette) {
+                        save { container.settings.setLeftHanded(it) }
                     }
                 }
             }
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = if (wipeArmed) S.t("set.076") else S.t("set.077"),
-                style = MaterialTheme.typography.labelSmall,
-                color = palette.muted
-            )
+            item(key = "language", contentType = "settings-section") {
+                IknaSettingsSection(S.t("set.024"), null) {
+                    val languages = listOf(LANGUAGE_SYSTEM to "set.099", "ru" to "set.105", "en" to "set.106",
+                        "pl" to "set.104", "es" to "set.108", "fr" to "set.109", "de" to "set.107")
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        languages.forEach { (code, label) ->
+                            IknaChip(S.t(label), selected = settings.language == code,
+                                onClick = { save { container.settings.setLanguage(code) } })
+                        }
+                    }
+                }
+            }
+            item(key = "speech", contentType = "settings-section") {
+                IknaSettingsSection(S.t("set.094"), null) {
+                    Text(S.t("pc.001"), style = MaterialTheme.typography.bodySmall, color = palette.muted)
+                }
+            }
+            item(key = "font", contentType = "settings-section") {
+                IknaSettingsSection(S.t("set.040"), null) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = S.t("set.041"),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = palette.muted
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        text = if (settings.fontName.isEmpty()) S.t("set.042")
+                        else S.t("set.043") + settings.fontName,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = palette.muted
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        IknaButton(label = S.t("set.044"), palette = palette) {
+                            val picked = pickFileForRead(S.t("set.040"))
+                            if (picked != null) {
+                                val problem = runCatching {
+                                    picked.inputStream().use { stream -> FontStore.install(stream) }
+                                }.getOrElse { S.t("set.057") }
+                                if (problem == null) {
+                                    save { container.settings.setFontName(picked.name) }
+                                    dataNote = null
+                                } else {
+                                    dataNote = problem
+                                }
+                            }
+                        }
+                        IknaButton(label = S.t("set.045"), palette = palette) {
+                            FontStore.clear()
+                            save { container.settings.setFontName("") }
+                            dataNote = S.t("set.046")
+                        }
+                    }
+                }
+            }
+            item(key = "reminder", contentType = "settings-section") {
+                IknaSettingsSection(S.t("set.096"), null) {
+                    Text(S.t("pc.001"), style = MaterialTheme.typography.bodySmall, color = palette.muted)
+                }
+            }
+            item(key = "update", contentType = "settings-section") {
+                IknaSettingsSection(S.t("set.138"), null) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = S.t("set.139"),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = palette.muted
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    ToggleRow(S.t("upd.008"), settings.updateCheck, palette) {
+                        save { container.settings.setUpdateCheck(it) }
+                    }
+                    Text(
+                        text = S.t("upd.009"),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = palette.muted
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        text = S.t("upd.011") + APP_VERSION,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = palette.muted
+                    )
+                    if (settings.updateSkipped.isNotEmpty()) {
+                        Text(
+                            text = S.t("upd.015") + settings.updateSkipped,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.muted
+                        )
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        IknaButton(
+                            label = if (checking) S.t("upd.014") else S.t("upd.010"),
+                            palette = palette,
+                            enabled = !checking
+                        ) {
+                            scope.launch {
+                                checking = true
+                                val release = runCatching {
+                                    UpdateCheck(APP_VERSION, true).latest()
+                                }.getOrNull()
+                                checking = false
+                                save { container.settings.markUpdateChecked(System.currentTimeMillis()) }
+                                updateNote = if (release == null) S.t("upd.012")
+                                else S.t("upd.016") + release.version
+                            }
+                        }
+                        IknaButton(label = S.t("upd.013"), palette = palette) {
+                            openInBrowser(UpdateCheck.RELEASES_PAGE)
+                        }
+                    }
+                    updateNote?.let { line ->
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            text = line,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = palette.ink
+                        )
+                    }
+                }
+            }
+            item(key = "data", contentType = "settings-section") {
+                IknaSettingsSection(S.t("set.052"), null) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = S.t("set.053"),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = palette.muted
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    ToggleRow(S.t("set.054"), settings.autoExport, palette) {
+                        save { container.settings.setAutoExport(it) }
+                    }
+                    Text(
+                        text = container.home.absolutePath,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = palette.muted
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        IknaButton(label = S.t("set.056"), palette = palette) {
+                            scope.launch {
+                                val target = File(container.home, "export")
+                                val written = runCatching {
+                                    target.mkdirs()
+                                    var count = 0
+                                    container.deckRepository.decks().forEach { deck ->
+                                        val body = container.deckRepository.exportText(deck.id)
+                                        if (body.isNotBlank()) {
+                                            File(target, fileNameFor(deck.title)).writeText(body)
+                                            count += 1
+                                        }
+                                    }
+                                    count
+                                }.getOrNull()
+                                dataNote = when {
+                                    written == null -> S.t("set.057")
+                                    written == 0 -> S.t("set.058")
+                                    else -> target.absolutePath
+                                }
+                            }
+                        }
+                        IknaButton(label = S.t("pc.011"), palette = palette) {
+                            openFolder(container.home)
+                        }
+                    }
+
+                    Spacer(Modifier.height(10.dp))
+                    IknaButton(label = S.t("bk.001"), palette = palette) {
+                        onOpenBackup()
+                    }
+
+                    val hidden = settings.suppressed.split(",").count { it.isNotBlank() }
+                    if (hidden > 0) {
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            text = S.t("set.135") + hidden,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.muted
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        IknaButton(label = S.t("set.136"), palette = palette) {
+                            save { container.settings.clearSuppressed() }
+                            dataNote = S.t("set.137")
+                        }
+                    }
+                    Spacer(Modifier.height(22.dp))
+                            SectionTitle(S.t("diag.001"), palette)
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = S.t("diag.002"),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = palette.muted
+                            )
+                            Spacer(Modifier.height(10.dp))
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                IknaButton(
+                                    label = if (diagOpen) S.t("diag.004") else S.t("diag.003"),
+                                    palette = palette
+                                ) {
+                                    if (diagOpen) {
+                                        diagOpen = false
+                                    } else {
+                                        diagOpen = true
+                                        diagText = S.t("diag.005")
+                                        scope.launch {
+                                            diagText = runCatching { diagnosticsText(container) }
+                                                .getOrElse { S.t("diag.008") }
+                                        }
+                                    }
+                                }
+                                if (diagOpen) {
+                                    IknaButton(label = S.t("diag.006"), palette = palette) {
+                                        writeClipboardText(diagText)
+                                        dataNote = S.t("diag.007")
+                                    }
+                                }
+                            }
+                            if (diagOpen) {
+                                Spacer(Modifier.height(10.dp))
+                                Text(
+                                    text = diagText,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = palette.muted
+                                )
+                            }
+                }
+            }
+            item(key = "advanced", contentType = "settings-section") {
+                IknaSettingsSection(S.t("set.063"), null) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+
+                        Spacer(Modifier.width(12.dp))
+                        IknaButton(
+                            label = if (advancedOpen) S.t("set.065") else S.t("set.066"),
+                            palette = palette
+                        ) { advancedOpen = !advancedOpen }
+                    }
+
+                    if (advancedOpen) {
+                        Spacer(Modifier.height(12.dp))
+                        IknaButton(label = S.t("set.067"), palette = palette) {
+                            scope.launch {
+                                runCatching { container.componentRepository.rebuildFromReviews() }
+                                    .onFailure { error -> logLine("rebuild failed: " + error) }
+                                dataNote = S.t("set.068")
+                            }
+                        }
+
+                        Spacer(Modifier.height(18.dp))
+                        if (!resetAsking) {
+                            IknaButton(label = S.t("set.070"), palette = palette) { resetAsking = true }
+                        } else {
+                            Text(
+                                text = S.t("set.078"),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = palette.ink
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                text = S.t("set.079"),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = palette.muted
+                            )
+                            Spacer(Modifier.height(10.dp))
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                IknaButton(label = S.t("set.080"), palette = palette, filled = true) {
+                                    scope.launch {
+                                        runCatching { container.learningRepository.resetProgress() }
+                                            .onFailure { error -> logLine("reset failed: " + error) }
+                                        resetAsking = false
+                                        dataNote = S.t("set.081")
+                                    }
+                                }
+                                IknaButton(label = S.t("set.082"), palette = palette) { resetAsking = false }
+                            }
+                        }
+                    }
+
+                    if (advancedOpen) {
+                        Spacer(Modifier.height(20.dp))
+                        Text(
+                            text = S.t("set.071"),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = palette.ink
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = S.t("set.072"),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.muted
+                        )
+                        Spacer(Modifier.height(10.dp))
+                        IknaButton(
+                            label = if (wipeArmed) S.t("set.073") else S.t("set.074"),
+                            palette = palette
+                        ) {
+                            if (!wipeArmed) {
+                                wipeArmed = true
+                                dataNote = S.t("set.075")
+                            } else {
+                                scope.launch {
+                                    runCatching {
+                                        val target = File(container.home, "export")
+                                        target.mkdirs()
+                                        container.deckRepository.decks().forEach { deck ->
+                                            val body = container.deckRepository.exportText(deck.id)
+                                            if (body.isNotBlank()) {
+                                                File(target, fileNameFor(deck.title)).writeText(body)
+                                            }
+                                        }
+                                        container.deckRepository.decks().forEach { deck ->
+                                            container.deckRepository.delete(deck.id)
+                                        }
+                                        container.componentRepository.clearAll()
+                                        container.learningRepository.invalidatePlan()
+                                        container.settings.clearAll()
+                                    }.onFailure { error -> logLine("wipe failed: " + error) }
+                                    wipeArmed = false
+                                    dataNote = null
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = if (wipeArmed) S.t("set.076") else S.t("set.077"),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.muted
+                        )
+                    }
+
+                    dataNote?.let { line ->
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            text = line,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = palette.ink
+                        )
+                    }
+                    Spacer(Modifier.height(30.dp))
+                            SectionTitle(S.t("pc.010"), palette)
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = S.t("pc.002"),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = palette.muted
+                            )
+                }
+            }
         }
-
-        dataNote?.let { line ->
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = line,
-                style = MaterialTheme.typography.labelMedium,
-                color = palette.ink
-            )
-        }
-
-        // -- keyboard --------------------------------------------------------
-        Spacer(Modifier.height(30.dp))
-        SectionTitle(S.t("pc.010"), palette)
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = S.t("pc.002"),
-            style = MaterialTheme.typography.labelMedium,
-            color = palette.muted
-        )
-
-        // -- not here yet --------------------------------------------------------
-        Spacer(Modifier.height(30.dp))
-        SectionTitle(S.t("set.094"), palette)
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = S.t("pc.001"),
-            style = MaterialTheme.typography.labelMedium,
-            color = palette.muted
-        )
-
-        Spacer(Modifier.height(22.dp))
-        SectionTitle(S.t("anki.001"), palette)
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = S.t("pc.001"),
-            style = MaterialTheme.typography.labelMedium,
-            color = palette.muted
-        )
-
-        Spacer(Modifier.height(40.dp))
     }
 }
 
 /** A name on the left, a switch on the right, the whole row a click target. */
 @Composable
-private fun ToggleRow(
-    title: String,
-    checked: Boolean,
-    palette: IknaPalette,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyMedium,
-            color = palette.ink,
-            modifier = Modifier.weight(1f)
-        )
-        IknaToggle(checked = checked, onCheckedChange = onCheckedChange, label = title)
-    }
+private fun ToggleRow(title: String, checked: Boolean, palette: IknaPalette, onCheckedChange: (Boolean) -> Unit) {
+    IknaSettingsToggleRow(title, null, checked, onCheckedChange)
 }
 
 /** The four colours of a custom scheme, with the contrast they produce. */

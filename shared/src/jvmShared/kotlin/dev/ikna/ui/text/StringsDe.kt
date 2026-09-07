@@ -302,4 +302,5 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "optimizer.023" to "Angewendetes Ergebnis vom {date}.",
     "optimizer.024" to "Volle Berechnung höchstens alle 30 Tage.",
     "optimizer.025" to "Gespeicherter akzeptierter Kandidat vom {date}.",
+    "file.001" to "Vorhandene Datei ersetzen?",
 )

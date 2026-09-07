@@ -1,15 +1,8 @@
 package dev.ikna.desktop
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,8 +18,6 @@ import dev.ikna.desktop.anki.AnkiImportError
 import dev.ikna.desktop.anki.AnkiImportException
 import dev.ikna.desktop.anki.AnkiImportResult
 import dev.ikna.ui.text.S
-import dev.ikna.ui.theme.IknaGlyph
-import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaWideButton
@@ -92,89 +83,79 @@ fun AnkiPane(
     // as pressing the button, so it does not ask again.
     LaunchedEffect(DesktopDrop.pending) {
         val dropped = DesktopDrop.pending
-        if (!busy && dropped != null && dropped.name.endsWith(".apkg", ignoreCase = true)) {
+        if (!busy && dropped != null && (dropped.name.endsWith(".apkg", ignoreCase = true) || dropped.name.endsWith(".colpkg", ignoreCase = true))) {
             DesktopDrop.pending = null
             run(dropped)
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(40.dp)
-    ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            IknaIconButton(glyph = IknaGlyph.BACK, onClick = onBack, label = S.t("add.001"))
-        }
-        Spacer(Modifier.height(Space.md))
-        Column(modifier = Modifier.widthIn(max = 720.dp)) {
-            SectionTitle(S.t("anki.001"), palette)
-            Spacer(Modifier.height(Space.md))
-            Note(S.t("anki.002"), palette)
-            Note(S.t("anki.003"), palette)
+    DesktopScrollablePane(S.t("anki.001"), onBack) {
 
-            Spacer(Modifier.height(Space.lg))
-            IknaWideButton(
-                label = if (busy) S.t("anki.006") else S.t("anki.005"),
-                onClick = { choose() },
-                modifier = Modifier.widthIn(max = 360.dp),
-                filled = true,
-                enabled = !busy
-            )
-            if (busy) {
-                Spacer(Modifier.height(Space.sm))
-                Note(S.t("anki.007"), palette)
-            }
+Spacer(Modifier.height(Space.md))
+Note(S.t("anki.002"), palette)
+Note(S.t("anki.003"), palette)
 
-            val error = failure
-            if (error != null) {
-                Spacer(Modifier.height(Space.md))
-                Text(
-                    text = error,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = palette.ink
-                )
-                Spacer(Modifier.height(Space.sm))
-                Note(S.t("anki.024"), palette)
-            }
+Spacer(Modifier.height(Space.lg))
+IknaWideButton(
+    label = if (busy) S.t("anki.006") else S.t("anki.005"),
+    onClick = { choose() },
+    modifier = Modifier.widthIn(max = 360.dp),
+    filled = true,
+    enabled = !busy
+)
+if (busy) {
+    Spacer(Modifier.height(Space.sm))
+    Note(S.t("anki.007"), palette)
+}
 
-            val done = report
-            if (done != null) {
-                Spacer(Modifier.height(Space.lg))
-                IknaRule(color = palette.line)
-                Spacer(Modifier.height(Space.lg))
-                SectionTitle(S.t("anki.025"), palette)
-                Spacer(Modifier.height(Space.md))
-                Line(S.t("anki.008") + done.decks, palette)
-                Line(S.t("anki.009") + done.cards, palette)
-                Line(S.t("anki.032") + languages(done.languages), palette)
-                Line(S.t("anki.010") + done.reviewEventsImported, palette)
-                if (done.reviewEventsSkipped > 0) {
-                    Line(S.t("anki.011") + done.reviewEventsSkipped, palette)
-                }
-                if (done.suspendedOrBuried > 0) {
-                    Line(S.t("anki.012") + done.suspendedOrBuried, palette)
-                }
-                if (done.skippedCards > 0) Line(S.t("anki.013") + done.skippedCards, palette)
-                if (done.mediaCards > 0) Line(S.t("anki.014") + done.mediaCards, palette)
-                if (done.fallbackCards > 0) Line(S.t("anki.030") + done.fallbackCards, palette)
-                if (done.historyWasLimited) {
-                    Spacer(Modifier.height(Space.sm))
-                    Note(S.t("anki.015"), palette)
-                }
-                Spacer(Modifier.height(Space.md))
-                Note(S.t("anki.028"), palette)
-                Note(S.t("anki.029"), palette)
-                Spacer(Modifier.height(Space.md))
-                IknaWideButton(
-                    label = S.t("anki.017"),
-                    onClick = { choose() },
-                    modifier = Modifier.widthIn(max = 360.dp),
-                    enabled = !busy
-                )
-            }
-        }
+val error = failure
+if (error != null) {
+    Spacer(Modifier.height(Space.md))
+    Text(
+        text = error,
+        style = MaterialTheme.typography.bodyMedium,
+        color = palette.ink
+    )
+    Spacer(Modifier.height(Space.sm))
+    Note(S.t("anki.024"), palette)
+}
+
+val done = report
+if (done != null) {
+    Spacer(Modifier.height(Space.lg))
+    IknaRule(color = palette.line)
+    Spacer(Modifier.height(Space.lg))
+    SectionTitle(S.t("anki.025"), palette)
+    Spacer(Modifier.height(Space.md))
+    Line(S.t("anki.008") + done.decks, palette)
+    Line(S.t("anki.009") + done.cards, palette)
+    Line(S.t("anki.032") + languages(done.languages), palette)
+    Line(S.t("anki.010") + done.reviewEventsImported, palette)
+    if (done.reviewEventsSkipped > 0) {
+        Line(S.t("anki.011") + done.reviewEventsSkipped, palette)
+    }
+    if (done.suspendedOrBuried > 0) {
+        Line(S.t("anki.012") + done.suspendedOrBuried, palette)
+    }
+    if (done.skippedCards > 0) Line(S.t("anki.013") + done.skippedCards, palette)
+    if (done.mediaCards > 0) Line(S.t("anki.014") + done.mediaCards, palette)
+    if (done.fallbackCards > 0) Line(S.t("anki.030") + done.fallbackCards, palette)
+    if (done.historyWasLimited) {
+        Spacer(Modifier.height(Space.sm))
+        Note(S.t("anki.015"), palette)
+    }
+    Spacer(Modifier.height(Space.md))
+    Note(S.t("anki.028"), palette)
+    Note(S.t("anki.029"), palette)
+    Spacer(Modifier.height(Space.md))
+    IknaWideButton(
+        label = S.t("anki.017"),
+        onClick = { choose() },
+        modifier = Modifier.widthIn(max = 360.dp),
+        enabled = !busy
+    )
+}
+
     }
 }
 

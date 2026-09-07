@@ -55,12 +55,13 @@ class OptimizerChecks(unittest.TestCase):
   for t in ('cardDao','HttpClient','java.net','scheduler.apply'):self.assertNotIn(t,text)
   body=text.split('private suspend fun runFit',1)[1].split('private fun activate',1)[0]
   self.assertNotIn('active.set',body);self.assertNotIn('enabled = true',body)
- def test_both_platforms_use_same_panel_and_provider(self):
+ def test_both_platforms_use_automatic_policy_and_provider(self):
   for p in ('app/src/main/java/dev/ikna/AppContainer.kt','desktop/src/main/kotlin/dev/ikna/desktop/DesktopContainer.kt'):
    text=(ROOT/p).read_text()
-   for t in ('paramsProvider = optimizer::parameters','optimizer.initialize()','optimizerHistory'):self.assertIn(t,text)
+   for t in ('paramsProvider = optimizer::parameters','optimizer.initialize()','optimizerHistory','startAutomatic','observeOptimizerChanges','AutomaticLearningPolicy.DERIVED_WHEN_READY'):self.assertIn(t,text)
   for p in ('app/src/main/java/dev/ikna/ui/settings/SettingsScreen.kt','desktop/src/main/kotlin/dev/ikna/desktop/SettingsPane.kt'):
-   self.assertIn('LocalOptimizerPanel(container.optimizer)',(ROOT/p).read_text())
+   self.assertNotIn('LocalOptimizerPanel',(ROOT/p).read_text())
+   self.assertNotIn('grading.001',(ROOT/p).read_text())
   self.assertIn('store.disableLocalOptimizer()',(S/'data/export/SettingsBackup.kt').read_text())
  def test_estimator_uses_shared_cap_and_original_outcome(self):
   text=(S/'domain/fsrs/FsrsOptimizer.kt').read_text()

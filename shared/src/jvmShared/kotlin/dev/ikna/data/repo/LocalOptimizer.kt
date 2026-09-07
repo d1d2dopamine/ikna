@@ -5,13 +5,14 @@ import dev.ikna.data.prefs.suppressedOf
 import dev.ikna.domain.fsrs.*
 import dev.ikna.domain.optimizer.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
-/** App-lifetime CPU worker: no network, card mutations, automatic fitting or activation. */
+/** Local CPU worker. Automatic policy is separate from fitting and the answer path. */
 class LocalOptimizer(private val settings: SettingsStore, private val defaults: FsrsParams,
     private val scope: CoroutineScope, private val loadHistory: suspend () -> List<ReviewEntity>,
     private val clock: () -> Long = System::currentTimeMillis,
@@ -25,6 +26,9 @@ class LocalOptimizer(private val settings: SettingsStore, private val defaults: 
     private val _state = MutableStateFlow(OptimizerUiState())
     val state: StateFlow<OptimizerUiState> = _state.asStateFlow()
     @Volatile private var work: Job? = null
+    private var automation: Job? = null
+    private val automaticCommands = Mutex()
+    private var automaticRetryNotBefore = 0L
     init { settings.onOptimizerReset = { restoreDefaults() } }
     /** Atomic read only; never wait for fitting or read disk while answering. */
     fun parameters(): FsrsParams = active.get()
@@ -100,7 +104,7 @@ class LocalOptimizer(private val settings: SettingsStore, private val defaults: 
                     if (generation != epoch.get()) throw CancellationException("Profile reset")
                     old.copy(latest = record, candidate = if (record.accepted) record else old.candidate)
                 }
-                // A new fit NEVER changes the applied model without a separate explicit action.
+                // Publishing evidence is separate from activation; automatic policy validates the result next.
                 _state.update { it.copy(stored = saved) }
             }
         } catch (cancelled: CancellationException) {
@@ -116,8 +120,8 @@ class LocalOptimizer(private val settings: SettingsStore, private val defaults: 
             }
         }
     }
-    suspend fun applyCandidate() = commands.withLock {
-        val generation = epoch.get()
+    suspend fun applyCandidate() = applyCandidateAt(epoch.get())
+    private suspend fun applyCandidateAt(generation: Long) = commands.withLock {
         try {
             val saved = settings.updateOptimizer { old ->
                 if (generation != epoch.get()) throw CancellationException("Profile reset")
@@ -141,6 +145,51 @@ class LocalOptimizer(private val settings: SettingsStore, private val defaults: 
                 activate(generation, if (enabled) policy(saved.applied!!) else defaults, saved)
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (_: Exception) { _state.update { it.copy(issue = OptimizerIssue.STORAGE) } }
+        }
+    }
+
+    /** One monitor per application, not per settings composition or card answer. */
+    @Synchronized fun startAutomatic(historyChanges: Flow<Long>): Job {
+        automation?.takeIf { it.isActive }?.let { return it }
+        return scope.launch {
+            coroutineScope {
+                val wakeups = Channel<Unit>(Channel.CONFLATED)
+                launch { historyChanges.distinctUntilChanged().collect { wakeups.trySend(Unit) } }
+                launch {
+                    while (isActive) { delay(3_600_000L); wakeups.trySend(Unit) }
+                }
+                for (signal in wakeups) {
+                    // Wait for a quiet gap rather than competing with a rapid sequence of answers.
+                    while (withTimeoutOrNull(20_000L) { wakeups.receive(); true } == true) { }
+                    try { runAutomaticCycle() }
+                    catch (cancelled: CancellationException) { currentCoroutineContext().ensureActive() }
+                    catch (_: Exception) { _state.update { it.copy(issue = OptimizerIssue.FAILED) } }
+                }
+            }
+        }.also { automation = it }
+    }
+
+    /** Public for deterministic regression tests; not a user-facing command. */
+    suspend fun runAutomaticCycle() = automaticCommands.withLock {
+        if (!_state.value.ready || _state.value.running || clock() < automaticRetryNotBefore) return@withLock
+        automaticRetryNotBefore = clock() + 3_600_000L
+        val generation = epoch.get()
+        val before = OptimizerStateCodec.decode(settings.optimizerRaw.first()) ?: return@withLock
+        val candidate = before.candidate
+        // An accepted result left by the former manual UI may be used only for the same history.
+        if (candidate?.accepted == true && (candidate != before.applied || !before.enabled)) {
+            if (candidate.sourceFingerprint == input().fingerprint) applyCandidateAt(generation)
+        }
+        if (generation != epoch.get() || clock() < AutomaticLearningPolicy.nextFitAt(before.latest)) return@withLock
+        val job = start() ?: return@withLock
+        job.join()
+        currentCoroutineContext().ensureActive()
+        if (job.isCancelled || generation != epoch.get()) return@withLock
+        val after = OptimizerStateCodec.decode(settings.optimizerRaw.first()) ?: return@withLock
+        val fresh = after.latest
+        if (fresh != before.latest) automaticRetryNotBefore = 0L
+        if (fresh != before.latest && fresh?.accepted == true && after.candidate == fresh) {
+            applyCandidateAt(generation)
         }
     }
 }

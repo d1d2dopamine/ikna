@@ -115,7 +115,7 @@ class DesktopContainer(val home: File) {
             suppressedOf(settings.flow.first().suppressed).toSet()
         }
         learningRepository.onSuppress = { chunkId -> settings.suppressChunk(chunkId) }
-        learningRepository.derivedGradingEnabled = { settings.current().derivedGrading }
+        learningRepository.derivedGradingEnabled = { dev.ikna.domain.optimizer.AutomaticLearningPolicy.DERIVED_WHEN_READY }
         learningRepository.loadSettings = {
             val s = settings.flow.first()
             LearningRepository.LoadSetting(auto = s.autoLoad, manual = s.manualLoad)
@@ -133,5 +133,6 @@ class DesktopContainer(val home: File) {
         optimizer.initialize()
         packLoader.installBundledPacks()
         installed = true
+        optimizer.startAutomatic(db.reviewDao().observeOptimizerChanges())
     }
 }

@@ -3,8 +3,6 @@ package dev.ikna.ui.search
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,9 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import dev.ikna.AppContainer
-import dev.ikna.data.catalog.catalogMeaning
 import dev.ikna.data.catalog.tatoebaSentenceUrl
 import dev.ikna.data.db.ChunkSearchRow
 import dev.ikna.data.repo.localSearchTerms
@@ -42,7 +38,6 @@ import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaRule
-import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaTextField
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.Space
@@ -153,7 +148,7 @@ fun DeckSearchScreen(
                         .padding(horizontal = Edge)
                 ) {
                     items(results, key = { it.chunkId }) { row ->
-                        SearchResult(
+                        IknaSearchResult(
                             row = row,
                             onOpenDeck = { onOpenDeck(row.packId) },
                             onSource = { id -> openTatoeba(context, id) }
@@ -196,53 +191,7 @@ private fun SearchMessage(text: String, lattice: Boolean = false) {
     }
 }
 
-@Composable
-private fun SearchResult(
-    row: ChunkSearchRow,
-    onOpenDeck: () -> Unit,
-    onSource: (String) -> Unit
-) {
-    val meaning = catalogMeaning(row.translation)
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        Text(
-            text = row.text,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(Modifier.height(Space.xs))
-        Text(
-            text = row.contextSentence,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(Modifier.height(Space.xs))
-        Text(
-            text = meaning.text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        meaning.tatoebaId?.let { id ->
-            Spacer(Modifier.height(Space.xs))
-            Text(
-                text = S.t("src.001") + "Tatoeba #" + id,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-                textDecoration = TextDecoration.Underline,
-                modifier = Modifier.clickable { onSource(id) }
-            )
-        }
-        Spacer(Modifier.height(Space.sm))
-        IknaTextButton(
-            label = S.t("search.010") + row.packTitle,
-            onClick = onOpenDeck,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
+
 
 private fun openTatoeba(context: Context, id: String) {
     val url = tatoebaSentenceUrl(id) ?: return
