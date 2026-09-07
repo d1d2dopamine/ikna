@@ -125,6 +125,32 @@ class DesignContracts(unittest.TestCase):
         for language in ['En', 'Ru', 'Pl', 'De', 'Es', 'Fr']:
             self.assertIn('"file.001" to ', read(SHARED, 'ui/text/Strings' + language + '.kt'))
 
+    def test_compose_typography_references_have_imports(self):
+        # Imported Android UI bodies can keep FontWeight.Medium while losing
+        # their file-level imports. Check all three production source roots;
+        # this guard supplements, and does not replace, the Kotlin compiler.
+        symbols = {
+            'FontWeight': 'androidx.compose.ui.text.font.FontWeight',
+            'FontStyle': 'androidx.compose.ui.text.font.FontStyle',
+            'TextAlign': 'androidx.compose.ui.text.style.TextAlign',
+            'TextOverflow': 'androidx.compose.ui.text.style.TextOverflow',
+            'TextDecoration': 'androidx.compose.ui.text.style.TextDecoration',
+        }
+        for base in [ANDROID, DESKTOP, SHARED]:
+            for path in sorted(base.rglob('*.kt')):
+                source = path.read_text(encoding='utf-8')
+                imports = set(re.findall(r'^import ([\w.*]+)\s*$', source, re.M))
+                body = re.sub(r'^import .*$|^package .*$', '', source, flags=re.M)
+                body = re.sub(r'/\*.*?\*/|//[^\n]*|""".*?"""|"(?:\\.|[^"\\])*"',
+                              '', body, flags=re.S)
+                for symbol, qualified in symbols.items():
+                    if not re.search(r'(?<![\w.])' + symbol + r'\b', body):
+                        continue
+                    package_wildcard = qualified.rsplit('.', 1)[0] + '.*'
+                    with self.subTest(path=path.relative_to(ROOT), symbol=symbol):
+                        self.assertTrue(qualified in imports or package_wildcard in imports,
+                                        f'{path.relative_to(ROOT)} uses {symbol} without importing {qualified}')
+
     def test_ci_keeps_real_build_and_migration_gates(self):
         source = read(ROOT, '.github/workflows/grading.yml')
         for required in ['tools/check_design_parity.py', ':desktop:test', ':app:testReleaseUnitTest', ':app:assembleDebugAndroidTest', ':app:connectedDebugAndroidTest']:
