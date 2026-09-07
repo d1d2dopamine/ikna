@@ -183,7 +183,7 @@ class MigrationTest {
     }
 
     @Test
-    fun `an upgrade from version 1 keeps the answers and gains the new tables`() {
+    fun upgradeFromVersion1KeepsAnswersAndGainsNewTables() {
         createOldDatabase(1, V1_DDL) { db ->
             db.execSQL(
                 "INSERT INTO reviews (chunkId, level, ts, rating, elapsedDays, " +
@@ -242,7 +242,7 @@ class MigrationTest {
     }
 
     @Test
-    fun `an upgrade from version 2 keeps its undo trail`() {
+    fun upgradeFromVersion2KeepsUndoTrail() {
         createOldDatabase(2, V2_DDL) { db ->
             db.execSQL(
                 "INSERT INTO reviews (id, chunkId, level, ts, rating, elapsedDays, " +
@@ -286,7 +286,7 @@ class MigrationTest {
     }
 
     @Test
-    fun `an upgrade from version 3 gains the governor's inputs and a search index`() {
+    fun upgradeFromVersion3GainsGovernorInputsAndSearchIndex() {
         createOldDatabase(3, V3_DDL) { db ->
             db.execSQL(
                 "INSERT INTO governor_log (ts, day, dueToday, forecastAvg3d, backlog, " +
@@ -379,7 +379,7 @@ class MigrationTest {
     }
 
     @Test
-    fun `an upgrade from version 4 gains the transcription columns`() {
+    fun upgradeFromVersion4GainsTranscriptionColumns() {
         createOldDatabase(4, V4_DDL) { db ->
             db.execSQL(
                 "INSERT INTO chunks (id, packId, lang, text, contextSentence, " +
@@ -432,7 +432,7 @@ class MigrationTest {
     }
 
     @Test
-    fun `version 5 gains observations without rewriting reviews or undo`() {
+    fun version5GainsObservationsWithoutRewritingReviewsOrUndo() {
         createOldDatabase(5, V5_DDL) { db ->
             db.execSQL(
                 "INSERT INTO reviews (id, chunkId, level, ts, rating, elapsedDays, " +
@@ -474,7 +474,7 @@ class MigrationTest {
     }
 
     @Test
-    fun `version six raw signals survive the versioned-grading migration`() {
+    fun version6RawSignalsSurviveVersionedGradingMigration() {
         createOldDatabase(6, V6_DDL) { db ->
             db.execSQL(
                 "INSERT INTO reviews (id, chunkId, level, ts, rating, elapsedDays, " +
@@ -497,7 +497,7 @@ class MigrationTest {
     }
 
     @Test
-    fun `version seven preserves grading history and adds nullable parameter snapshots`() {
+    fun version7PreservesGradingHistoryAndAddsParameterSnapshots() {
         createOldDatabase(7, V7_DDL) { db ->
             db.execSQL("INSERT INTO reviews (id,chunkId,level,ts,rating,elapsedDays,stabilityBefore,stabilityAfter,difficultyBefore,difficultyAfter,durationMs,wasAmnesty,inputRating,gradingVersion,gradingReason) VALUES (81,'kept',1,1700000000000,2,1,2,4,5,5,6000,0,3,1,'slow')")
         }
@@ -508,7 +508,7 @@ class MigrationTest {
     }
 
     @Test
-    fun `a fresh install opens at the current version`() {
+    fun freshInstallOpensAtCurrentVersion() {
         withMigratedDatabase { db ->
             assertEquals(IKNA_DATABASE_VERSION, count(db, "PRAGMA user_version"))
             assertTrue(

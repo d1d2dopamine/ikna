@@ -22,7 +22,7 @@ jobs:
       - name: Android SDK
         uses: android-actions/setup-android@v4
       - name: Gradle 8.10.2
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: "8.10.2"
       - name: Verify text, fixtures and additive migrations
@@ -32,12 +32,14 @@ jobs:
           python3 tools/check_grading.py
           python3 tools/grading/check_full.py
           python3 tools/check_optimizer.py
+          python3 tools/check_android_ci.py --self-test
+          python3 tools/check_android_ci.py
       - name: Existing build assets
         run: |
           bash tools/voice/fetch-voice.sh
           bash tools/catalog/fetch-bundled-pack.sh
       - name: Compile both targets and run JVM regression suites
-        run: gradle --no-daemon --stacktrace :desktop:test :app:testReleaseUnitTest :app:assembleDebug
+        run: bash tools/ci/run-gradle.sh ci-logs/jvm-build.log :desktop:test :app:testReleaseUnitTest :app:assembleDebug
       - name: Paired replay of synthetic scenarios using production Kotlin
         shell: bash
         run: |
@@ -57,7 +59,7 @@ jobs:
           fi
       - name: Test reports and compiler schemas
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: grading-jvm-reports
           path: |
@@ -65,6 +67,7 @@ jobs:
             desktop/build/reports/tests/test/
             app/build/reports/tests/testReleaseUnitTest/
             app/schemas/
+            ci-logs/
           if-no-files-found: warn
 
   migrations:
@@ -76,13 +79,26 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - uses: gradle/actions/setup-gradle@v4
+      - name: Prepare migration diagnostics and check DEX-safe names
+        shell: bash
+        run: |
+          mkdir -p ci-logs
+          printf '%s\n' 'Migration validation: minSdk 29; emulator API 35; x86_64; Gradle 8.10.2.' > ci-logs/migrations-context.txt
+          python3 tools/check_android_ci.py --self-test
+          python3 tools/check_android_ci.py
+      - name: Android SDK
+        uses: android-actions/setup-android@v4
+      - uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: "8.10.2"
+          # The parallel JVM job writes the cache; this job only restores it.
+          cache-read-only: true
       - name: Existing build assets
         run: |
           bash tools/voice/fetch-voice.sh
           bash tools/catalog/fetch-bundled-pack.sh
+      - name: Build application and instrumented APK before starting emulator
+        run: bash tools/ci/run-gradle.sh ci-logs/android-test-apk.log :app:assembleDebug :app:assembleDebugAndroidTest -Pikna.abi=emulator
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -95,11 +111,15 @@ jobs:
           arch: x86_64
           target: google_apis
           disable-animations: true
-          script: gradle --no-daemon --stacktrace :app:connectedDebugAndroidTest -Pikna.abi=emulator
+          script: bash tools/ci/run-gradle.sh ci-logs/android-connected-tests.log :app:connectedDebugAndroidTest -Pikna.abi=emulator
       - name: Instrumented migration report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: grading-migration-reports
-          path: app/build/reports/androidTests/
+          path: |
+            ci-logs/
+            app/build/reports/androidTests/
+            app/build/outputs/androidTest-results/
+            app/build/outputs/logs/
           if-no-files-found: warn

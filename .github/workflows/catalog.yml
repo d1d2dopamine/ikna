@@ -169,7 +169,7 @@ jobs:
           cat catalog/TIERS.md
 
       - name: Keep the result whether or not it is published
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: catalog
           path: catalog/

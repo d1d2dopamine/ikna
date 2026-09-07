@@ -39,7 +39,7 @@ jobs:
       # tested against; letting the action pick "latest" silently changes the
       # toolchain under the build.
       - name: Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: "8.10.2"
 
@@ -71,7 +71,7 @@ jobs:
 
       - name: APK
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ikna-apk
           path: app/build/outputs/apk/debug/*.apk
@@ -85,7 +85,7 @@ jobs:
       # one available, even if someone forgets.
       - name: Room schemas
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ikna-room-schemas
           path: app/schemas
@@ -114,7 +114,7 @@ jobs:
 
       - name: Test report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ikna-test-report
           path: app/build/reports/tests/testReleaseUnitTest
@@ -160,7 +160,7 @@ jobs:
         uses: android-actions/setup-android@v4
 
       - name: Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: "8.10.2"
 
@@ -183,7 +183,7 @@ jobs:
       # here would only produce a zip inside a zip.
       - name: Windows application
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ikna-windows-portable
           path: desktop/build/compose/binaries/main-release/app
@@ -241,7 +241,7 @@ jobs:
 
       - name: Installer artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ikna-windows-msi
           path: desktop/build/compose/binaries/main-release/msi/*.msi
@@ -289,7 +289,7 @@ jobs:
       # present -- but this is the image the android job above builds an APK
       # on, which is a stronger guarantee than any action could add.
       - name: Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: "8.10.2"
 
@@ -328,7 +328,7 @@ jobs:
       # folder is: a run that goes red should still leave something to install.
       - name: AppImage artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ikna-linux-appimage
           path: build/appimage/*.AppImage
@@ -422,7 +422,7 @@ jobs:
       # above is missing or does not start.
       - name: Application image, if this job failed
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ikna-linux-app-image
           path: desktop/build/compose/binaries/main-release/app
