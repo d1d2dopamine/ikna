@@ -84,6 +84,7 @@ fun languageName(code: String): String = when (code) {
 	"pt" -> "Portuguese"
 	"zh" -> "Chinese"
 	"ja" -> "Japanese"
+	"ko" -> "Korean"
 	else -> ""
 }
 

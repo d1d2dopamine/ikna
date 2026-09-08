@@ -112,7 +112,11 @@ class DesktopUi {
 }
 
 @Composable
-fun IknaDesktopApp(container: DesktopContainer, ui: DesktopUi) {
+fun IknaDesktopApp(
+    container: DesktopContainer,
+    ui: DesktopUi,
+    titleBar: @Composable (IknaPalette) -> Unit = {}
+) {
     val settings by container.settings.flow.collectAsState(initial = IknaSettings())
 
     // A desktop window has no reliable light/dark signal to read, so the
@@ -138,23 +142,26 @@ fun IknaDesktopApp(container: DesktopContainer, ui: DesktopUi) {
         contentFont = contentFont,
         motionEnabled = settings.animations
     ) {
-        Box(Modifier.fillMaxSize().background(palette.background)) {
-            if (!ready) {
-                Column(
-                    Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    IknaWordmark(height = 22.dp, ink = palette.ink, dot = palette.accent)
-                    Spacer(Modifier.height(Space.lg))
-                    Box(Modifier.width(220.dp)) { IknaLatticePlaceholder() }
+        Column(Modifier.fillMaxSize().background(palette.background)) {
+            titleBar(palette)
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                if (!ready) {
+                    Column(
+                        Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        IknaWordmark(height = 22.dp, ink = palette.ink, dot = palette.accent)
+                        Spacer(Modifier.height(Space.lg))
+                        Box(Modifier.width(220.dp)) { IknaLatticePlaceholder() }
+                    }
+                } else {
+                    DesktopShell(container, settings, palette, ui)
                 }
-            } else {
-                DesktopShell(container, settings, palette, ui)
-            }
 
-            if (ui.showShortcuts) {
-                ShortcutsOverlay(palette) { ui.showShortcuts = false }
+                if (ui.showShortcuts) {
+                    ShortcutsOverlay(palette) { ui.showShortcuts = false }
+                }
             }
         }
     }

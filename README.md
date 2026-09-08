@@ -211,13 +211,13 @@ Tatoeba contributors, and every card naming the sentence it was cut out of by nu
 
 | Can be learned | Can carry the meanings |
 | --- | --- |
-| English, Russian, Polish, Spanish, French, German, Italian, Portuguese | those eight, plus Chinese and Japanese |
+| English, Russian, Polish, Spanish, French, German, Italian, Portuguese, Chinese, Japanese, Korean | the same eleven languages |
 
-Eight against ten, because a phrase is cut on word boundaries and a translation is
-never cut at all. So Chinese and Japanese are already available as the language you
-already know, and not yet as the language you are learning — the same goes for Thai
-and Arabic, for the same reason, and it changes when the pipeline learns to
-segment.
+A learned phrase is cut on word boundaries, while a translation is
+never cut at all. Chinese and Japanese now use ICU word segmentation in the
+catalogue pipeline; Korean uses written-word boundaries. These run only while
+building the catalogue, not on the learner's device. Available pairs still depend
+on direct corpus translations and appear after a catalogue release is rebuilt.
 
 How well a pair is served is measured by the pipeline, not promised here: **full**
 when the sieve drops little, **thin** when decks come out smaller than asked for,

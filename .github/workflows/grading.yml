@@ -25,6 +25,11 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: "8.10.2"
+      - name: CJK catalogue segmentation regression
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libicu-dev
+          python3 tools/catalog/test_segmentation.py
       - name: Verify text, fixtures and additive migrations
         run: |
           python3 tools/check_text.py
@@ -43,6 +48,10 @@ jobs:
           javac --release 8 -encoding UTF-8 -d "$classes" \
             app/src/test/java/dev/ikna/ui/SettingsSourceContracts.java
           java -cp "$classes" dev.ikna.ui.SettingsSourceContracts
+          javac --release 8 -encoding UTF-8 -d "$classes" \
+            desktop/src/main/java/dev/ikna/desktop/TitleBarClicks.java \
+            desktop/src/test/java/dev/ikna/desktop/TitleBarClicksChecks.java
+          java -cp "$classes" dev.ikna.desktop.TitleBarClicksChecks
       - name: Existing build assets
         run: |
           bash tools/voice/fetch-voice.sh

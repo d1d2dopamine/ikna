@@ -50,21 +50,14 @@ import re
 import sys
 from collections import Counter, defaultdict
 from datetime import date
+from segmentation import CJK, WORD, IcuUnavailable, prepare, word_spans, utf16_length, utf16_offset
 
 # ---------------------------------------------------------------------------
 # Languages
 # ---------------------------------------------------------------------------
 #
-# Two lists, not one, and the difference is the honest part of this pipeline.
-#
-# A language can be LEARNED here only if a phrase can be cut out of its
-# sentences, and the cut is made on word boundaries. Languages written without
-# spaces - Chinese, Japanese - need a segmenter, which this script does not have
-# and will not pretend to have. They are still available as the language the
-# MEANINGS are in, because a translation is shown whole and never cut.
-#
-# Both lists are subsets of the app's own DECK_LANGS, so every deck emitted here
-# lands on a language the app already knows.
+# CJK boundaries are determined offline by ICU, never guessed by characters.
+# The eight existing languages keep their original tokenizer.
 
 # ISO 639-3, which is what Tatoeba writes, to the two-letter codes the app uses.
 CODES = {
@@ -78,14 +71,14 @@ CODES = {
     "por": "pt",
     "cmn": "zh",
     "jpn": "ja",
+    "kor": "ko",
 }
 
-#: Languages a deck can teach, because their words are separated by spaces.
-LEARNABLE = ["en", "ru", "pl", "es", "fr", "de", "it", "pt"]
+#: Languages with a supported word-boundary strategy.
+LEARNABLE = ["en", "ru", "pl", "es", "fr", "de", "it", "pt", "zh", "ja", "ko"]
 
-#: Languages the meanings can be in - everything, including the two that cannot
-#: yet be taught.
-MEANINGS = ["en", "ru", "pl", "es", "fr", "de", "it", "pt", "zh", "ja"]
+#: Meanings are displayed whole and never segmented.
+MEANINGS = list(LEARNABLE)
 
 NAMES = {
     "en": "English",
@@ -98,6 +91,7 @@ NAMES = {
     "pt": "Portuguese",
     "zh": "Chinese",
     "ja": "Japanese",
+    "ko": "Korean",
 }
 
 # ---------------------------------------------------------------------------
@@ -145,12 +139,14 @@ SOURCES_CC0 = ["Tatoeba, public-domain set", "Wiktionary via Wiktextract, word f
 #: uses, so a catalogue card and a hand-made one look alike.
 SOURCE_MARK = "\n\u2014 "
 
-WORD = re.compile(r"[^\W\d_]+(?:['\u2019\-][^\W\d_]+)*", re.UNICODE)
+def words(text, lang=None):
+    """Written surfaces, in order; punctuation never becomes a taught word."""
+    return [span.surface for span in word_spans(text, lang)]
 
 
-def words(text):
-    """The words of a sentence, in order, as they are written."""
-    return [match.group(0) for match in WORD.finditer(text)]
+def minimum_phrase(lang):
+    # A single CJK character can be an entire word (本, 山, 봄).
+    return 1 if lang in CJK else MIN_PHRASE
 
 
 # ---------------------------------------------------------------------------
@@ -255,7 +251,7 @@ def read_forms(directory, langs):
 # ---------------------------------------------------------------------------
 
 
-def frequency(texts):
+def frequency(texts, lang=None):
     """
     The rank of every written form in a language, 1 being the commonest.
 
@@ -266,14 +262,14 @@ def frequency(texts):
     """
     counts = Counter()
     for text in texts:
-        counts.update(word.lower() for word in words(text))
+        counts.update(word.lower() for word in words(text, lang))
     ranks = {}
     for position, (form, _) in enumerate(counts.most_common(), start=1):
         ranks[form] = position
     return ranks
 
 
-def token_list(sentence, ranks, forms):
+def token_list(sentence, ranks, forms, lang=None):
     """
     The sentence as the app stores it: one token per word, in order.
 
@@ -283,10 +279,10 @@ def token_list(sentence, ranks, forms):
     something worth weighting, FUNC for the glue.
     """
     out = []
-    for surface in words(sentence):
+    for surface in words(sentence, lang):
         low = surface.lower()
         rank = ranks.get(low, 10 ** 9)
-        content = rank > FUNCTION_TOP and len(surface) > 1
+        content = rank > FUNCTION_TOP and len(surface) >= minimum_phrase(lang)
         out.append(
             {
                 "surface": surface,
@@ -298,7 +294,7 @@ def token_list(sentence, ranks, forms):
     return out
 
 
-def pick_phrase(sentence, ranks, forms, used):
+def pick_phrase(sentence, ranks, forms, used, lang=None):
     """
     Which word this sentence is going to teach, or None.
 
@@ -310,14 +306,14 @@ def pick_phrase(sentence, ranks, forms, used):
       - its dictionary word has not been taught in this deck already;
       - it is a word rather than glue or a single letter.
     """
-    found = words(sentence)
+    found = words(sentence, lang)
     best = None
     for surface in found:
         low = surface.lower()
         rank = ranks.get(low)
         if rank is None or rank <= FUNCTION_TOP:
             continue
-        if len(surface) < MIN_PHRASE or len(surface) > MAX_PHRASE:
+        if len(surface) < minimum_phrase(lang) or utf16_length(surface) > MAX_PHRASE:
             continue
         lemma = forms.get(low, low)
         if lemma in used:
@@ -331,12 +327,13 @@ def pick_phrase(sentence, ranks, forms, used):
     return best
 
 
-def offsets(sentence, surface):
-    """Where the phrase sits in its sentence, or None if it somehow does not."""
-    start = sentence.find(surface)
-    if start < 0:
+def offsets(sentence, surface, lang=None):
+    """Resolve a complete token, not an earlier substring; return UTF-16 units."""
+    found = [span for span in word_spans(sentence, lang) if span.surface == surface]
+    if len(found) != 1:
         return None
-    return start, start + len(surface)
+    span = found[0]
+    return utf16_offset(sentence, span.start), utf16_offset(sentence, span.end)
 
 
 def level_of(rank):
@@ -366,13 +363,13 @@ def build_pair(lang, meaning, sentences, links, ranks, forms, cc0, stats,
     # Easiest sentences first, so the commonest words get the plainest examples
     # and a deck's early cards are not sentences with three rare words in them.
     def difficulty(item):
-        found = [ranks.get(word.lower(), 10 ** 9) for word in words(item[1])]
+        found = [ranks.get(word.lower(), 10 ** 9) for word in words(item[1], lang)]
         return max(found) if found else 10 ** 9
 
     for sid, sentence in sorted(target.items(), key=difficulty):
         if public_domain and sid not in cc0:
             continue
-        if len(sentence) < MIN_SENTENCE or len(sentence) > MAX_SENTENCE:
+        if len(sentence) < (6 if lang in CJK else MIN_SENTENCE) or utf16_length(sentence) > MAX_SENTENCE:
             stats["sentence length"] += 1
             continue
 
@@ -380,7 +377,7 @@ def build_pair(lang, meaning, sentences, links, ranks, forms, cc0, stats,
             other[tid]
             for tid in links.get(sid, ())
             if tid in other
-            and 0 < len(other[tid]) <= MAX_TRANSLATION
+            and 0 < utf16_length(other[tid]) <= MAX_TRANSLATION
             and (not public_domain or tid in cc0)
         ]
         if not translations:
@@ -390,13 +387,13 @@ def build_pair(lang, meaning, sentences, links, ranks, forms, cc0, stats,
         # of five translations is the one somebody skips.
         translation = min(translations, key=len)
 
-        chosen = pick_phrase(sentence, ranks, forms, used)
+        chosen = pick_phrase(sentence, ranks, forms, used, lang)
         if chosen is None:
             stats["nothing to teach"] += 1
             continue
         surface, rank, lemma = chosen
 
-        span = offsets(sentence, surface)
+        span = offsets(sentence, surface, lang)
         if span is None:
             # Cannot happen: the surface was taken out of this sentence. Counted
             # anyway, because the day it happens is the day this assumption is
@@ -428,7 +425,7 @@ def build_pair(lang, meaning, sentences, links, ranks, forms, cc0, stats,
                 "translation": translation + SOURCE_MARK + "Tatoeba #" + str(sid),
                 "targetStart": span[0],
                 "targetEnd": span[1],
-                "tokens": token_list(sentence, ranks, forms),
+                "tokens": token_list(sentence, ranks, forms, lang),
                 "ipa": ipa,
                 "ipaContext": ipa_context,
             }
@@ -528,6 +525,15 @@ def main(argv=None):
     meanings = [code.strip() for code in args.meanings.split(",") if code.strip()]
     wanted = set(learn) | set(meanings)
 
+    unsupported = (set(learn) - set(LEARNABLE)) | (set(meanings) - set(MEANINGS))
+    if unsupported:
+        parser.error("unsupported languages: " + ", ".join(sorted(unsupported)))
+    try:
+        segmentation = prepare(learn)
+    except IcuUnavailable as error:
+        parser.error(str(error))
+    print("segmentation: " + json.dumps(segmentation, ensure_ascii=False), flush=True)
+
     sentences_path = os.path.join(args.tatoeba, "sentences.csv")
     links_path = os.path.join(args.tatoeba, "links.csv")
     cc0_path = os.path.join(args.tatoeba, "sentences_CC0.csv")
@@ -585,7 +591,7 @@ def main(argv=None):
     ranks = {}
     for code in learn:
         if code in sentences:
-            ranks[code] = frequency(sentences[code].values())
+            ranks[code] = frequency(sentences[code].values(), code)
 
     decks = []
     pairs = []
@@ -671,6 +677,7 @@ def main(argv=None):
     index = {
         "version": 1,
         "builtAt": date.today().isoformat(),
+        "segmentation": segmentation,
         "decks": decks,
         "pairs": pairs,
     }

@@ -16,10 +16,10 @@ on:
     inputs:
       learn:
         description: "Languages to teach, comma separated"
-        default: "en,ru,pl,es,fr,de,it,pt"
+        default: "en,ru,pl,es,fr,de,it,pt,zh,ja,ko"
       meanings:
         description: "Languages the meanings may be in"
-        default: "en,ru,pl,es,fr,de,it,pt,zh,ja"
+        default: "en,ru,pl,es,fr,de,it,pt,zh,ja,ko"
       max_deck:
         description: "Cards per deck at most"
         default: "3000"
@@ -51,7 +51,7 @@ jobs:
   # second. It runs first and on its own so that a mistake in the script is a
   # one-minute failure rather than a failure found forty minutes into a download.
   sample:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
@@ -59,6 +59,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: ICU word segmentation and end-to-end CJK checks
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libicu-dev
+          python3 tools/catalog/test_segmentation.py
 
       # Rules rather than a model, so it installs in seconds and answers the
       # same way every run. espeak-ng is here as a second opinion only: it is
@@ -90,13 +96,15 @@ jobs:
         run: |
           python3 - <<'PY'
           import glob, json, sys
+          sys.path.insert(0, "tools/catalog")
+          from segmentation import utf16_slice
           bad = 0
           cards = 0
           for path in glob.glob("sample-out/*.jsonl"):
               for number, line in enumerate(open(path, encoding="utf-8"), start=1):
                   card = json.loads(line)
                   cards += 1
-                  cut = card["context"][card["targetStart"]:card["targetEnd"]]
+                  cut = utf16_slice(card["context"], card["targetStart"], card["targetEnd"])
                   if cut != card["text"]:
                       print("%s:%d phrase %r is not at its offsets (%r)" % (path, number, card["text"], cut))
                       bad += 1
@@ -115,7 +123,7 @@ jobs:
 
   catalogue:
     needs: sample
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # The corpus is hundreds of megabytes and the sieve reads every sentence of
     # ten languages. Generous, but not open-ended.
     timeout-minutes: 180
@@ -125,6 +133,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: ICU word segmentation
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libicu-dev
 
       # Tatoeba publishes plain tab-separated exports and asks nothing of anybody
       # who downloads them. The licence of what comes out the other end is

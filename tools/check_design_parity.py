@@ -15,6 +15,32 @@ def read(base, name):
 
 
 class DesignContracts(unittest.TestCase):
+    def test_windows_title_bar_is_themed_and_other_frames_stay_native(self):
+        main = read(DESKTOP, 'Main.kt')
+        bar = read(DESKTOP, 'WindowTitleBar.kt')
+        shell = read(DESKTOP, 'Shell.kt')
+        for text in ['undecorated = customTitleBar', 'resizable = !customTitleBar',
+                     'windowState.placement != WindowPlacement.Fullscreen',
+                     'IknaWindowTitleBar(windowState, palette, closeWindow)',
+                     'onCloseRequest = closeWindow', 'saveGeometry(home, windowState)']:
+            self.assertIn(text, main)
+        for text in ['WindowDraggableArea(', 'state.isMinimized = true',
+                     'WindowPlacement.Maximized', 'WindowPlacement.Floating',
+                     'PointerEventPass.Initial', 'LocalWindowInfo', 'Role.Button',
+                     'IknaWordmark(', 'palette.background', 'collectIsFocusedAsState']:
+            self.assertIn(text, bar)
+        self.assertNotIn('.consume(', bar)
+        self.assertIn('titleBar(palette)', shell)
+        self.assertLess(shell.index('IknaTheme('), shell.index('titleBar(palette)'))
+        self.assertLess(main.index('runBlocking {\n        runCatching { container.install()'),
+                        main.index('    application {'))
+
+    def test_window_controls_are_named_in_all_six_locales(self):
+        for language in ['En', 'Ru', 'Pl', 'De', 'Es', 'Fr']:
+            source = read(SHARED, 'ui/text/Strings' + language + '.kt')
+            for number in range(17, 21):
+                self.assertIn('"pc.%03d" to ' % number, source)
+
     def test_model_controls_are_not_exposed(self):
         for base, name in [(ANDROID, 'ui/settings/SettingsScreen.kt'), (DESKTOP, 'SettingsPane.kt')]:
             source = read(base, name)

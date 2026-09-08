@@ -83,7 +83,10 @@ with open(path, encoding="utf-8") as handle:
             if key not in card:
                 raise SystemExit(f"line {number}: missing {key}")
         start, end = card["targetStart"], card["targetEnd"]
-        if card["context"][start:end] != card["text"]:
+        encoded = card["context"].encode("utf-16-le")
+        if not isinstance(start, int) or not isinstance(end, int) or not 0 <= start < end <= len(encoded) // 2:
+            raise SystemExit(f"line {number}: invalid UTF-16 span")
+        if encoded[start * 2:end * 2].decode("utf-16-le") != card["text"]:
             raise SystemExit(f"line {number}: phrase does not match offsets")
         if "\n— Tatoeba #" not in card["translation"]:
             raise SystemExit(f"line {number}: source id is missing")

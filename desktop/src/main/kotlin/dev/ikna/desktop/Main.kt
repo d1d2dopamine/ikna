@@ -373,6 +373,7 @@ fun main(args: Array<String>) {
     // need to reach the same screen state the shell is drawing from.
     val ui = DesktopUi()
     val geometry = loadGeometry(home)
+    val customTitleBar = TitleBarClicks.useCustomTitleBar(System.getProperty("os.name"))
 
     application {
         val windowState = rememberWindowState(
@@ -381,12 +382,17 @@ fun main(args: Array<String>) {
             placement = geometry.placement
         )
 
+        val closeWindow: () -> Unit = {
+            saveGeometry(home, windowState)
+            logLine("exit")
+            exitApplication()
+        }
         Window(
-            onCloseRequest = {
-                saveGeometry(home, windowState)
-                logLine("exit")
-                exitApplication()
-            },
+            onCloseRequest = closeWindow,
+            undecorated = customTitleBar,
+            // Compose handles floating-window resizing. Do not leave resize
+            // handles over the maximize/close controls in a maximized window.
+            resizable = !customTitleBar || windowState.placement == WindowPlacement.Floating,
             title = "Ikna",
             // The icon on the window and in the taskbar of a running instance.
             // Separate from the .ico jpackage puts on the executable: that one
@@ -403,10 +409,17 @@ fun main(args: Array<String>) {
             // three lines and every number moves. AWT holds the limit, so the
             // layout is never asked to draw itself smaller than it can be drawn.
             LaunchedEffect(window) {
-                window.minimumSize = Dimension(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT)
+                window.minimumSize = Dimension(
+                    MIN_WINDOW_WIDTH,
+                    MIN_WINDOW_HEIGHT + if (customTitleBar) WINDOWS_TITLE_BAR_HEIGHT else 0
+                )
                 installDropTarget(window, ui)
             }
-            IknaDesktopApp(container, ui)
+            IknaDesktopApp(container, ui, titleBar = { palette ->
+                if (customTitleBar && windowState.placement != WindowPlacement.Fullscreen) {
+                    IknaWindowTitleBar(windowState, palette, closeWindow)
+                }
+            })
         }
     }
 }

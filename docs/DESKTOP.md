@@ -408,3 +408,26 @@ Two things that are not glibc and still stop a download from opening:
   file refuses to start with a message about `libfuse`, and
   `./ikna-x86_64.AppImage --appimage-extract-and-run` works anyway -- as does
   installing `fuse` or `fuse-libs` from the distribution.
+
+
+## Windows title bar in the app's visual system
+
+Windows now uses an undecorated Compose window and `WindowTitleBar.kt`: the same
+palette, real wordmark, flat square controls and a one-pixel dividing rule. It
+adds no appearance switch and follows palette changes immediately. Linux retains
+its native window-manager decorations; database-before-Skia startup ordering and
+AppImage locale workarounds are untouched.
+
+The drag surface is a `WindowDraggableArea`; the three buttons are outside it.
+Double-click toggles maximize/restore without consuming drag events. Minimize,
+maximize/restore and close have keyboard-focus indication and names in all six
+interface languages. Closing follows the existing geometry-save/exit path.
+F11 hides the bar in full screen. Compose handles edge/corner resizing for a
+floating undecorated window; resize handles are disabled when maximized/full
+screen. The title strip occupies 45 dp including its rule; each button is 44 dp.
+
+This is a Compose title bar, not a Win32 non-client-area implementation. The
+Windows 11 Snap Layout flyout on hovering the maximize button is not implemented;
+no claim is made that OS snapping gestures behave identically to a native frame.
+Window motion, DPI transitions and packaged Windows interaction still require
+real Windows testing; source checks and headless gesture tests are not a GUI test.

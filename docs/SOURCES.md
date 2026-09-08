@@ -113,10 +113,9 @@ The two sides of the matrix are not the same length, and the difference is not a
 oversight:
 
 - **learned:** English, Russian, Polish, Spanish, French, German, Italian,
-  Portuguese. Eight, because a phrase is cut on word boundaries.
-- **meanings in:** those eight plus Chinese and Japanese. Ten, because a
-  translation is shown whole and never cut, so a language that cannot yet be
-  taught can still be the language somebody already knows.
+  Portuguese, Chinese, Japanese and Korean.
+- **meanings in:** the same eleven languages. A translation is displayed whole;
+  only the learned side needs word segmentation.
 
 Two facts shape it, and both are properties of the corpora rather than of this
 code:
@@ -139,13 +138,33 @@ and published with the catalogue rather than decided here:
 | Thin | the pair works, but decks come out smaller than asked for |
 | Not yet | the pair is not in the catalogue at all |
 
-"Not yet" is, for the language being **learned**, every language a phrase cannot
-be cut out of reliably: those written without spaces between words, such as
-Chinese, Japanese and Thai, and those where the written form drops vowels, such as
-Arabic. Cutting by character offsets there produces half a word, and half a word
-is worse than no card. They come back when the pipeline gains a segmentation
-step — and in the meantime Chinese and Japanese are already available as the
-language the **meanings** are in, which costs nothing and needs no segmenter.
+Chinese and Japanese now use ICU dictionary word boundaries at catalogue-build
+time. Korean uses Unicode written-word (eojeol) boundaries: suffixes stay on
+their written word, and no morphological lemma is invented. The previous eight
+languages retain their original Unicode word regex. Thai and Arabic remain
+outside the supported matrix; this change does not claim support for them.
+
+The whole sentence is segmented before counting frequencies, choosing a target
+or emitting tokens. The selected target must be a complete token with one
+unambiguous occurrence. A one-character CJK word is allowed when the segmenter
+recognises that boundary; blindly making a card per character is not a fallback.
+If ICU or its required dictionary data is unavailable, the build fails before
+reading the large corpus.
+
+`tools/catalog/segmentation.py` calls ICU's stable C word-break API through
+Python's standard-library `ctypes`. Catalogue CI is pinned to Ubuntu 24.04 and
+installs `libicu-dev`; there are no pip models, runtime network calls or new APK
+libraries. The actual ICU version and segmentation strategy are recorded under
+`segmentation` in `index.json`, so a dictionary-version change is visible.
+[ICU boundary analysis](https://unicode-org.github.io/icu/userguide/boundaryanalysis/)
+is word segmentation, not a guarantee of linguistic accuracy or lemmatisation.
+
+**Offset units are UTF-16**, matching Kotlin/Java strings. Python slicing is never
+used directly on stored offsets. Supplementary-plane Han characters and emoji
+therefore cannot move a cloze target. This does not change the pack format or
+rewrite installed cards, review history or component state. Local free-text seed
+import is unchanged: this feature implements the offline catalogue step, not an
+on-device CJK morphological analyser.
 
 The tier of every pair is computed by the pipeline, written into the index and
 printed as a table beside the catalogue release, so the README's table is
@@ -163,6 +182,8 @@ The pipeline runs in CI, on demand, in this repository:
 | File | What it is |
 | --- | --- |
 | `tools/catalog/build_catalog.py` | the whole pipeline: reads the dumps, sieves them, writes the decks, the index and the tier table |
+| `tools/catalog/segmentation.py` | ICU word boundaries and explicit UTF-16 conversion |
+| `tools/catalog/test_segmentation.py` | real ICU checks and synthetic CJK catalogue builds |
 | `tools/catalog/make_sample.py` | a hundred and twenty made-up sentences in Tatoeba's shape, so the pipeline can be run end to end in a second |
 | `.github/workflows/catalog.yml` | runs the sample first, then the real build, then attaches the result to one release called `catalog` |
 
