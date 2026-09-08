@@ -10,6 +10,11 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +36,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -43,6 +50,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
@@ -269,8 +277,8 @@ fun IknaIconButton(
  * Fixed height matters more than it looks: the answer buttons must never change
  * size between cards, or the target moves under a thumb that is already moving.
  *
- * [quiet] dims the outline and the label without changing the geometry, so a
- * rarely used answer can sit next to a common one without competing with it.
+ * [quiet] uses a readable subdued label without changing the geometry. Disabled
+ * controls alone lose opacity; an enabled answer must not become hard to read.
  */
 @Composable
 fun IknaWideButton(
@@ -283,33 +291,51 @@ fun IknaWideButton(
     height: Dp = 56.dp,
     fillWidth: Boolean = true
 ) {
-    val ink = MaterialTheme.colorScheme.onBackground
-    val paper = MaterialTheme.colorScheme.background
+    val colors = LocalIknaControlColors.current
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    val focused by interaction.collectIsFocusedAsState()
+    val pressed by interaction.collectIsPressedAsState()
     val motionEnabled = LocalIknaMotionEnabled.current
-    val targetAlpha = (if (enabled) 1f else 0.35f) * (if (quiet) 0.6f else 1f)
     val alpha by animateFloatAsState(
-        targetValue = targetAlpha,
+        targetValue = if (enabled) 1f else 0.35f,
         animationSpec = if (motionEnabled) tween(
             durationMillis = Motion.controlChangeDurationMillis,
             easing = LinearOutSlowInEasing
         ) else snap(),
         label = "wide-button-alpha"
     )
+    val fillColor by key(colors) { animateColorAsState(
+        targetValue = when {
+            enabled && pressed -> colors.pressed
+            enabled && hovered -> colors.hover
+            filled -> colors.fill
+            else -> colors.fill.copy(alpha = 0f)
+        },
+        animationSpec = if (motionEnabled) tween(
+            durationMillis = Motion.controlChangeDurationMillis,
+            easing = LinearOutSlowInEasing
+        ) else snap(),
+        label = "wide-button-fill"
+    ) }
+    val boundary = if (filled || (enabled && focused)) colors.mark else colors.outline
 
     Box(
         modifier = modifier
             .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier)
             .height(height)
-            .background(if (filled) ink.copy(alpha = alpha) else Color.Transparent)
-            .border(1.dp, ink.copy(alpha = alpha))
-            .clickable(enabled = enabled, onClick = onClick)
+            .background(fillColor.copy(alpha = fillColor.alpha * alpha))
+            .border(if (enabled && focused) 2.dp else 1.dp, boundary.copy(alpha = alpha))
+            .hoverable(interaction, enabled = enabled)
+            .clickable(interactionSource = interaction, indication = null,
+                enabled = enabled, role = Role.Button, onClick = onClick)
             .then(if (fillWidth) Modifier else Modifier.padding(horizontal = Space.md)),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
-            color = (if (filled) paper else ink).copy(alpha = alpha),
+            color = (if (quiet) colors.quietLabel else colors.label).copy(alpha = alpha),
             textAlign = TextAlign.Center,
             maxLines = 1
         )
@@ -375,7 +401,11 @@ fun IknaToggle(
      */
     label: String? = null
 ) {
-    val ink = MaterialTheme.colorScheme.onBackground
+    val colors = LocalIknaControlColors.current
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    val focused by interaction.collectIsFocusedAsState()
+    val pressed by interaction.collectIsPressedAsState()
     val alpha = if (enabled) 1f else 0.35f
     val motionEnabled = LocalIknaMotionEnabled.current
     val knobOffset by animateDpAsState(
@@ -386,27 +416,43 @@ fun IknaToggle(
         ) else snap(),
         label = "toggle-position"
     )
-    val knobColor by animateColorAsState(
-        targetValue = if (checked) ink.copy(alpha = alpha)
-        else ink.copy(alpha = 0.22f * alpha),
+    val knobColor by key(colors) { animateColorAsState(
+        targetValue = if (checked) colors.mark else colors.idle,
         animationSpec = if (motionEnabled) tween(
             durationMillis = Motion.controlChangeDurationMillis,
             easing = LinearOutSlowInEasing
         ) else snap(),
         label = "toggle-fill"
-    )
+    ) }
+    val trackColor by key(colors) { animateColorAsState(
+        targetValue = when {
+            enabled && pressed -> colors.pressed
+            enabled && hovered -> colors.hover
+            checked -> colors.fill
+            else -> colors.idle
+        },
+        animationSpec = if (motionEnabled) tween(
+            durationMillis = Motion.controlChangeDurationMillis,
+            easing = LinearOutSlowInEasing
+        ) else snap(),
+        label = "toggle-track"
+    ) }
+    val boundary = if (checked || (enabled && focused)) colors.mark else colors.outline
 
     Box(
         modifier = modifier
             .width(56.dp)
             .height(32.dp)
-            .border(1.dp, ink.copy(alpha = 0.55f * alpha))
-            // toggleable rather than clickable: it is what tells the platform
-            // this is a switch and what state it is in, so a screen reader says
-            // "on" and "off" instead of announcing an anonymous button.
+            .background(trackColor.copy(alpha = alpha))
+            .border(if (enabled && focused) 2.dp else 1.dp, boundary.copy(alpha = alpha))
+            // Position and a solid/outlined thumb identify the state without
+            // relying on hue. The platform still announces a real switch.
             .semantics { if (label != null) contentDescription = label }
+            .hoverable(interaction, enabled = enabled)
             .toggleable(
                 value = checked,
+                interactionSource = interaction,
+                indication = null,
                 enabled = enabled,
                 role = Role.Switch,
                 onValueChange = onCheckedChange
@@ -418,12 +464,13 @@ fun IknaToggle(
             modifier = Modifier
                 .offset(x = knobOffset)
                 .size(width = 24.dp, height = 24.dp)
-                .background(knobColor)
+                .background(knobColor.copy(alpha = alpha))
+                .border(1.dp, (if (checked) colors.mark else colors.outline).copy(alpha = alpha))
         )
     }
 }
 
-/** Square chip. Selected means filled, not tinted and not outlined-in-accent. */
+/** Square chip. Selection has a quiet fill and a heavier boundary, never inverted ink. */
 @Composable
 fun IknaChip(
     label: String,
@@ -431,48 +478,50 @@ fun IknaChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val ink = MaterialTheme.colorScheme.onBackground
-    val paper = MaterialTheme.colorScheme.background
-    val line = MaterialTheme.colorScheme.outline
+    val colors = LocalIknaControlColors.current
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    val focused by interaction.collectIsFocusedAsState()
+    val pressed by interaction.collectIsPressedAsState()
     val motionEnabled = LocalIknaMotionEnabled.current
-    val fillColor by animateColorAsState(
-        targetValue = if (selected) ink else Color.Transparent,
+    val fillColor by key(colors) { animateColorAsState(
+        targetValue = when {
+            pressed -> colors.pressed
+            hovered -> colors.hover
+            selected -> colors.fill
+            else -> colors.fill.copy(alpha = 0f)
+        },
         animationSpec = if (motionEnabled) tween(
             durationMillis = Motion.controlChangeDurationMillis,
             easing = LinearOutSlowInEasing
         ) else snap(),
         label = "chip-fill"
-    )
-    val borderColor by animateColorAsState(
-        targetValue = if (selected) ink else line,
+    ) }
+    val borderColor by key(colors) { animateColorAsState(
+        targetValue = if (selected || focused) colors.mark else colors.outline,
         animationSpec = if (motionEnabled) tween(
             durationMillis = Motion.controlChangeDurationMillis,
             easing = LinearOutSlowInEasing
         ) else snap(),
         label = "chip-border"
-    )
-    val labelColor by animateColorAsState(
-        targetValue = if (selected) paper else ink,
-        animationSpec = if (motionEnabled) tween(
-            durationMillis = Motion.controlChangeDurationMillis,
-            easing = LinearOutSlowInEasing
-        ) else snap(),
-        label = "chip-label"
-    )
+    ) }
 
     Box(
         modifier = modifier
             .height(40.dp)
             .background(fillColor)
-            .border(1.dp, borderColor)
-            .clickable(onClick = onClick)
+            .border(if (selected || focused) 2.dp else 1.dp, borderColor)
+            .semantics { this.selected = selected }
+            .hoverable(interaction)
+            .clickable(interactionSource = interaction, indication = null,
+                role = Role.Button, onClick = onClick)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = labelColor,
+            color = colors.label,
             maxLines = 1
         )
     }
@@ -589,7 +638,7 @@ fun IknaDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.background)
-                .border(1.dp, MaterialTheme.colorScheme.onBackground)
+                .border(1.dp, LocalIknaControlColors.current.outline)
                 .padding(horizontal = 20.dp, vertical = 24.dp)
         ) {
             Text(text = title, style = MaterialTheme.typography.headlineSmall)

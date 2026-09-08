@@ -45,6 +45,7 @@ import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaWordmark
+import dev.ikna.ui.theme.LocalIknaControlColors
 import java.awt.Toolkit
 
 internal const val WINDOWS_TITLE_BAR_HEIGHT = 45
@@ -112,18 +113,18 @@ private fun WindowButton(mark: WindowMark, label: String, ink: Color, palette: I
     val hovered by interaction.collectIsHoveredAsState()
     val focused by interaction.collectIsFocusedAsState()
     val pressed by interaction.collectIsPressedAsState()
-    val tint = if (mark == WindowMark.CLOSE) palette.accent else palette.ink
-    val fill = if (pressed) tint.copy(alpha = 0.18f)
-        else if (hovered) tint.copy(alpha = 0.09f) else Color.Transparent
+    val colors = LocalIknaControlColors.current
+    val fill = if (pressed) colors.pressed
+        else if (hovered) colors.hover else Color.Transparent
     Box(Modifier.size(44.dp).background(fill)
-        .border(1.dp, if (focused) palette.accent else Color.Transparent)
+        .border(1.dp, if (focused) colors.mark else Color.Transparent)
         .semantics { contentDescription = label }
         .hoverable(interaction)
         .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center) {
         Canvas(Modifier.size(14.dp)) {
             val line = 1.dp.toPx()
-            val color = if (focused) palette.accent else ink
+            val color = if (focused) colors.mark else ink
             val w = size.width
             val h = size.height
             when (mark) {

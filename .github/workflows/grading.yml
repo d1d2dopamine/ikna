@@ -38,6 +38,8 @@ jobs:
           python3 tools/grading/check_full.py
           python3 tools/check_optimizer.py
           python3 tools/check_design_parity.py
+          python3 tools/check_palettes.py
+          python3 tools/make_palette_preview.py --check
           python3 tools/check_android_ci.py --self-test
           python3 tools/check_android_ci.py
       - name: Settings source contracts (Java 8 API compatibility and JUnit assertions)

@@ -76,6 +76,7 @@ import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaSwatch
 import dev.ikna.ui.theme.IknaPalettes
+import dev.ikna.ui.theme.LocalIknaControlColors
 import dev.ikna.ui.theme.MIN_READABLE_CONTRAST
 import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.theme.contrastRatio
@@ -1306,7 +1307,8 @@ private fun PaletteTiles(
                                 .fillMaxWidth()
                                 .height(64.dp)
                                 .background(p.background)
-                                .border(if (selected) 2.dp else 1.dp, if (selected) ink else line)
+                                .border(if (selected) 2.dp else 1.dp,
+                                    if (selected) LocalIknaControlColors.current.mark else line)
                                 .padding(8.dp)
                         ) {
                             Text(

@@ -153,10 +153,10 @@ data class IknaPaletteSpec(
 /**
  * Every palette the app ships, in the order they are offered.
  *
- * Each one is a hue in the background with paper of the same hue as its light
+ * Each one is a hue in the background with grey paper of the same hue as its light
  * version — one brand in two lightings. "Ноль" is the exception on purpose: pure
- * black and pure white, for sunlight and for OLED, where the recognisable part is
- * the absence of colour.
+ * black in dark lighting and neutral grey in light lighting. Its recognisable
+ * part is the absence of hue, not an obligation to draw blinding white fills.
  *
  * Every entry here is asserted readable, in both lightings, by PaletteTest.
  */
@@ -172,14 +172,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFFFF7A5C)
         ),
         light = IknaPalette(
-            background = Color(0xFFEDF1F8),
-            // Deeper than the coral of the dark version by two steps rather than
-            // one: #C9452B looked right next to it and measured 4.2:1 on this
-            // paper, which is under the line for the small mono labels the accent
-            // is also used for.
+            background = Color(0xFFD0D3D9),
             ink = Color(0xFF0E1526),
-            muted = Color(0xFF58637A),
-            accent = Color(0xFFB83A21)
+            muted = Color(0xFF485162),
+            accent = Color(0xFF932D19)
         )
     ),
     // Библиотека. Bottle green and brass: a reading room, nothing hurrying.
@@ -193,10 +189,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFFE3B45E)
         ),
         light = IknaPalette(
-            background = Color(0xFFEFF2E8),
+            background = Color(0xFFD1D4CD),
             ink = Color(0xFF14201A),
-            muted = Color(0xFF5C6D61),
-            accent = Color(0xFF7E6413)
+            muted = Color(0xFF49534C),
+            accent = Color(0xFF644E0F)
         )
     ),
     // Уголь. Kept for existing installs: burnt earth and an ember, finally
@@ -211,10 +207,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFFF2683C)
         ),
         light = IknaPalette(
-            background = Color(0xFFF7EADC),
+            background = Color(0xFFD6D0C9),
             ink = Color(0xFF241610),
-            muted = Color(0xFF7A5B49),
-            accent = Color(0xFFB8431F)
+            muted = Color(0xFF5E4C41),
+            accent = Color(0xFF8E3016)
         )
     ),
     // Слива. The loudest one: aubergine and mint.
@@ -228,10 +224,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFF45D6A6)
         ),
         light = IknaPalette(
-            background = Color(0xFFF4EFF7),
+            background = Color(0xFFD3CFD7),
             ink = Color(0xFF1D1324),
-            muted = Color(0xFF695B74),
-            accent = Color(0xFF0C7A59)
+            muted = Color(0xFF554B5E),
+            accent = Color(0xFF085A41)
         )
     ),
     // Роза. Pink without the sugar: a wine-dark field and a rose that reads as a
@@ -252,10 +248,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFFFF7FB8)
         ),
         light = IknaPalette(
-            background = Color(0xFFFBEEF3),
+            background = Color(0xFFD7CED2),
             ink = Color(0xFF26121C),
-            muted = Color(0xFF7C5566),
-            accent = Color(0xFFA81E5E)
+            muted = Color(0xFF654653),
+            accent = Color(0xFF931A50)
         )
     ),
     // Иней. The one palette with nothing warm in it anywhere.
@@ -274,15 +270,15 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFF5FD2E8)
         ),
         light = IknaPalette(
-            background = Color(0xFFECF3F6),
+            background = Color(0xFFCDD4D7),
             ink = Color(0xFF0C1B22),
-            muted = Color(0xFF516771),
-            accent = Color(0xFF0C6072)
+            muted = Color(0xFF41535B),
+            accent = Color(0xFF095364)
         )
     ),
     // Фосфор. The odd one out, and the reason it is here.
     //
-    // In all eight above, the ink is a neutral and the accent is the only coloured
+    // In the other coloured palettes, the ink is a neutral and the accent is the only coloured
     // thing on the screen. Here the ink itself is the colour, so the whole surface
     // is one hue and the accent is merely a brighter pass of it — a phosphor tube,
     // where the glass could only ever glow in one direction.
@@ -301,10 +297,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFF4AF08C)
         ),
         light = IknaPalette(
-            background = Color(0xFFEEF6EF),
+            background = Color(0xFFCFD6D0),
             ink = Color(0xFF0A1E11),
-            muted = Color(0xFF4E6B58),
-            accent = Color(0xFF116B36)
+            muted = Color(0xFF405646),
+            accent = Color(0xFF0D5B2D)
         )
     ),
     // Ноль. No hue at all, in either direction.
@@ -318,14 +314,14 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFFFFFFFF)
         ),
         light = IknaPalette(
-            background = Color(0xFFFFFFFF),
-            ink = Color(0xFF000000),
-            muted = Color(0xFF6E6E6E),
-            accent = Color(0xFF000000)
+            background = Color(0xFFD2D2D2),
+            ink = Color(0xFF242424),
+            muted = Color(0xFF505050),
+            accent = Color(0xFF343434)
         )
     ),
-    // What the app looked like before it had a palette. Kept, because someone
-    // updating into a new brand should be able to put the old one back.
+    // The original neutral identity, now with the same grey light treatment.
+    // Existing palette ids and user choices do not change.
     IknaPaletteSpec(
         id = "neutral",
         nameKey = "set.121",
@@ -336,10 +332,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFF97A4D8)
         ),
         light = IknaPalette(
-            background = Color(0xFFFBFAF8),
+            background = Color(0xFFD4D2CE),
             ink = Color(0xFF2C2A27),
-            muted = Color(0xFF6B685F),
-            accent = Color(0xFF33469E)
+            muted = Color(0xFF53514B),
+            accent = Color(0xFF2E3D89)
         )
     ),
     // Ультрафиолет. Purple is the accent as well as the atmosphere: unlike
@@ -354,10 +350,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFFC29BFF)
         ),
         light = IknaPalette(
-            background = Color(0xFFF3EEFC),
+            background = Color(0xFFD1CDD9),
             ink = Color(0xFF1C1230),
-            muted = Color(0xFF6C5D83),
-            accent = Color(0xFF6D32C4)
+            muted = Color(0xFF564867),
+            accent = Color(0xFF5D2BA8)
         )
     ),
     // Лагуна. A green-blue field with no brass or coral: calm, cool and distinct
@@ -372,10 +368,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFF69E0C0)
         ),
         light = IknaPalette(
-            background = Color(0xFFEDF7F4),
+            background = Color(0xFFCCD6D3),
             ink = Color(0xFF10231F),
-            muted = Color(0xFF58746E),
-            accent = Color(0xFF08705D)
+            muted = Color(0xFF405651),
+            accent = Color(0xFF075C4C)
         )
     ),
     // Кобальт. A deep blue field with a yellow signal. Чернила is navy and
@@ -390,10 +386,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFFFFD45A)
         ),
         light = IknaPalette(
-            background = Color(0xFFEEF2FF),
+            background = Color(0xFFCDD2DD),
             ink = Color(0xFF121A34),
-            muted = Color(0xFF5D6888),
-            accent = Color(0xFF6E5700)
+            muted = Color(0xFF475067),
+            accent = Color(0xFF5F4B00)
         )
     )
 )
@@ -452,12 +448,16 @@ fun paletteFor(settings: IknaSettings, systemDark: Boolean = true): IknaPalette 
  * screen never has to import a constant to draw secondary text — which is what
  * made the old palette impossible to theme.
  */
-private fun schemeOf(p: IknaPalette) = if (p.light) {
+private fun schemeOf(p: IknaPalette, controls: IknaControlColors) = if (p.light) {
     lightColorScheme(
         primary = p.accent,
         onPrimary = p.background,
+        primaryContainer = controls.fill,
+        onPrimaryContainer = controls.label,
         secondary = p.accent,
         onSecondary = p.background,
+        secondaryContainer = controls.fill,
+        onSecondaryContainer = controls.label,
         background = p.background,
         onBackground = p.ink,
         surface = p.panel,
@@ -473,8 +473,12 @@ private fun schemeOf(p: IknaPalette) = if (p.light) {
     darkColorScheme(
         primary = p.accent,
         onPrimary = p.background,
+        primaryContainer = controls.fill,
+        onPrimaryContainer = controls.label,
         secondary = p.accent,
         onSecondary = p.background,
+        secondaryContainer = controls.fill,
+        onSecondaryContainer = controls.label,
         background = p.background,
         onBackground = p.ink,
         surface = p.panel,
@@ -614,7 +618,8 @@ fun IknaTheme(
     motionEnabled: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val scheme = schemeOf(palette)
+    val controls = remember(palette) { controlColors(palette) }
+    val scheme = remember(palette, controls) { schemeOf(palette, controls) }
     MaterialTheme(
         colorScheme = scheme,
         typography = typographyOf(contentFont),
@@ -636,6 +641,7 @@ fun IknaTheme(
         // Both are fixed here once, for every screen, instead of per call site.
         CompositionLocalProvider(
             LocalContentColor provides palette.ink,
+            LocalIknaControlColors provides controls,
             LocalIknaMotionEnabled provides motionEnabled
         ) {
             Box(

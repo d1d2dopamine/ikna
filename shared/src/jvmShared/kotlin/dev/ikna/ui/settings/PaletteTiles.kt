@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaPalettes
+import dev.ikna.ui.theme.LocalIknaControlColors
 
 private const val WORDMARK = "ikna"
 
@@ -76,7 +77,8 @@ fun IknaPaletteTiles(
                                 .fillMaxWidth()
                                 .height(tileHeight)
                                 .background(p.background)
-                                .border(if (selected) 2.dp else 1.dp, if (selected) ink else line)
+                                .border(if (selected) 2.dp else 1.dp,
+                                    if (selected) LocalIknaControlColors.current.mark else line)
                                 .padding(8.dp)
                         ) {
                             Text(

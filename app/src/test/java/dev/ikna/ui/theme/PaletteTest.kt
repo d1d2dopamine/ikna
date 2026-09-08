@@ -59,8 +59,8 @@ class PaletteTest {
 
 	/**
 	 * The rule that makes light and dark one app rather than two: the light version
-	 * is paper, the dark version is not, and neither is a mid grey that leaves the
-	 * status bar icons guessing.
+	 * is grey paper, the dark version is not. The grey stays above the system-bar
+	 * threshold while a ceiling explicitly prevents the old near-white field.
 	 */
 	@Test
 	fun `each lighting is the lighting it claims to be`() {
@@ -68,8 +68,8 @@ class PaletteTest {
 			assertTrue(spec.id + " light version reads as dark", spec.light.light)
 			assertTrue(spec.id + " dark version reads as light", !spec.dark.light)
 			assertTrue(
-				spec.id + " light background is too dim to be paper",
-				relativeLuminance(spec.light.background) > 0.75
+				spec.id + " light background must be grey, not near white or dark",
+				relativeLuminance(spec.light.background) in 0.55..0.70
 			)
 			assertTrue(
 				spec.id + " dark background is not dark",

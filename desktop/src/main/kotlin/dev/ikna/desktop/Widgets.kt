@@ -50,7 +50,7 @@ fun Modifier.handCursor(): Modifier = this.pointerHoverIcon(PointerIcon.Hand)
 /**
  * A rectangular action.
  *
- * Ink-filled for the one action a screen is for, outlined for everything else --
+ * Quietly tinted for the primary action, outlined for everything else --
  * the same two weights the phone's IknaWideButton has, at desktop height and
  * hugging its label instead of filling the width.
  */

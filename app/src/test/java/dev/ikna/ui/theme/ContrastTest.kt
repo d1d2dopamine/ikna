@@ -63,19 +63,10 @@ class ContrastTest {
         assertTrue(!isLight(black))
     }
 
-    /**
-     * A light theme that is merely "less dark" is the thing that was wrong
-     * before: it has to be genuinely bright, not an inverted dark theme.
-     *
-     * The line is 0.80 rather than 0.85 because the light version of a palette is
-     * tinted paper, not white — the default one measures 0.88. That is the point
-     * of it: a white light theme and a coloured dark theme are two apps, and the
-     * hue has to survive the lamp being turned on. Anything below 0.80 stops being
-     * paper and starts being a dim room.
-     */
+    /** Light lighting is grey, still unambiguously light for system-bar icons. */
     @Test
-    fun `the light background is actually bright`() {
-        assertTrue(relativeLuminance(LightPalette.background) > 0.80)
+    fun `the light background is grey rather than white`() {
+        assertTrue(relativeLuminance(LightPalette.background) in 0.55..0.70)
         assertTrue(relativeLuminance(DarkPalette.background) < 0.05)
     }
 
@@ -101,7 +92,7 @@ class ContrastTest {
     @Test
     fun `a colour survives the trip through the text field`() {
         assertEquals("1B1813", hexOf(parseHexColor("1b1813")!!))
-        assertEquals("B83A21", hexOf(LightPalette.accent))
+        assertEquals("932D19", hexOf(LightPalette.accent))
         assertEquals("0B1120", hexOf(DarkPalette.background))
     }
 
