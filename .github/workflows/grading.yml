@@ -35,8 +35,14 @@ jobs:
           python3 tools/check_design_parity.py
           python3 tools/check_android_ci.py --self-test
           python3 tools/check_android_ci.py
-      - name: Settings source contracts (same assertions as JUnit)
-        run: java --source 17 app/src/test/java/dev/ikna/ui/SettingsSourceContracts.java
+      - name: Settings source contracts (Java 8 API compatibility and JUnit assertions)
+        shell: bash
+        run: |
+          classes="$(mktemp -d)"
+          trap 'rm -rf "$classes"' EXIT
+          javac --release 8 -encoding UTF-8 -d "$classes" \
+            app/src/test/java/dev/ikna/ui/SettingsSourceContracts.java
+          java -cp "$classes" dev.ikna.ui.SettingsSourceContracts
       - name: Existing build assets
         run: |
           bash tools/voice/fetch-voice.sh

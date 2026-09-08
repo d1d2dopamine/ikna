@@ -174,7 +174,12 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('ui/settings/SettingsChrome.kt', helper)
         self.assertIn('throw new AssertionError', helper)
         ci = read(ROOT, '.github/workflows/grading.yml')
-        self.assertIn('java --source 17 ' + helper_path, ci)
+        self.assertIn('javac --release 8 -encoding UTF-8', ci)
+        self.assertIn(helper_path, ci)
+        self.assertIn('java -cp "$classes" dev.ikna.ui.SettingsSourceContracts', ci)
+        self.assertIn('new String(Files.readAllBytes(', helper)
+        for incompatible in ['Files.readString(', '.results()', 'android.lines()']:
+            self.assertNotIn(incompatible, helper)
         self.assertIn('jvm-build.log --continue :desktop:test :app:testReleaseUnitTest :app:assembleDebug', ci)
 
     def test_ci_keeps_real_build_and_migration_gates(self):

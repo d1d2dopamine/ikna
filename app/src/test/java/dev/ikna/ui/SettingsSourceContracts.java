@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -13,6 +14,9 @@ import java.util.regex.Pattern;
  * These have always been source contracts, not Compose runtime tests. Keep
  * their implementation dependency-free so the SAME checks can also run before
  * Gradle, with: java --source 17 app/src/test/java/dev/ikna/ui/SettingsSourceContracts.java
+ * Keep this helper within Java 8 library APIs: Android's javac API surface
+ * is not the same as a full JDK 17, even for host-side unit-test sources.
+ * CI compiles with --release 8 before running the resulting class.
  * Missing sources fail; no test is silently skipped. No production code lives here.
  */
 public final class SettingsSourceContracts {
@@ -42,7 +46,9 @@ public final class SettingsSourceContracts {
 
     private String source(String relative) {
         try {
-            return Files.readString(root.resolve(relative), StandardCharsets.UTF_8);
+            // Language level 17 does not make Java 11 library APIs available
+            // in the Android compile classpath. readAllBytes is available there.
+            return new String(Files.readAllBytes(root.resolve(relative)), StandardCharsets.UTF_8);
         } catch (IOException failure) {
             throw new AssertionError("Source was not found or could not be read: " + root.resolve(relative), failure);
         }
@@ -68,7 +74,11 @@ public final class SettingsSourceContracts {
     }
 
     private static void count(String text, String regex, long expected, String description) {
-        long actual = Pattern.compile(regex).matcher(text).results().count();
+        Matcher matcher = Pattern.compile(regex).matcher(text);
+        long actual = 0;
+        while (matcher.find()) {
+            actual++;
+        }
         if (actual != expected) {
             throw new AssertionError(description + ": expected " + expected + ", found " + actual);
         }
@@ -129,8 +139,13 @@ public final class SettingsSourceContracts {
         has(android, "listState = listState", "The strip must observe the actual Android list");
         lacks(android, "return@JumpRow", "No obsolete composable callback label");
         lacks(android, "return@IknaJumpRow", "Do not replace an obsolete callback label with another invalid label");
-        long typedItems = android.lines().filter(line -> line.contains("item(key = ID_")
-                && line.contains("contentType = SETTINGS_SECTION_CONTENT_TYPE")).count();
+        long typedItems = 0;
+        for (String line : android.split("\\r\\n|\\r|\\n", -1)) {
+            if (line.contains("item(key = ID_")
+                    && line.contains("contentType = SETTINGS_SECTION_CONTENT_TYPE")) {
+                typedItems++;
+            }
+        }
         if (typedItems != 9) {
             throw new AssertionError("All nine Android lazy sections must retain a common content type; found " + typedItems);
         }
