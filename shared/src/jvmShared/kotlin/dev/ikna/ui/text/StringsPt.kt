@@ -1,7 +1,7 @@
 package dev.ikna.ui.text
 
 /** Complete Brazilian Portuguese interface catalogue. */
-internal val STRINGS_PT: Map<String, String> = linkedMapOf(
+val STRINGS_PT: Map<String, String> = linkedMapOf(
     "app.001" to "Lembrete",
     "app.002" to "Um lembrete por dia, somente se a meta mínima ainda não tiver sido concluída",
     "font.001" to "Não foi possível ler o arquivo",
