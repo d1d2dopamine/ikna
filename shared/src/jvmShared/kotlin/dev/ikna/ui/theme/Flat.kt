@@ -272,11 +272,16 @@ fun IknaIconButton(
         )
         if (crossed) {
             Canvas(Modifier.size(glyphSize + 4.dp)) {
+                // IknaIconButton also has a Dp parameter named `size`. Name the
+                // DrawScope size explicitly so that Kotlin cannot resolve the
+                // coordinates against that outer parameter.
+                val canvasSize = this.size
                 drawLine(
                     color = color,
-                    start = Offset(size.width * 0.12f, size.height * 0.88f),
-                    end = Offset(size.width * 0.88f, size.height * 0.12f),
-                    strokeWidth = (size.minDimension * 0.1f).coerceAtLeast(1f)
+                    start = Offset(canvasSize.width * 0.12f, canvasSize.height * 0.88f),
+                    end = Offset(canvasSize.width * 0.88f, canvasSize.height * 0.12f),
+                    strokeWidth = (minOf(canvasSize.width, canvasSize.height) * 0.1f)
+                        .coerceAtLeast(1f)
                 )
             }
         }

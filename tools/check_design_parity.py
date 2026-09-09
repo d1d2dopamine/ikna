@@ -175,8 +175,11 @@ class DesignContracts(unittest.TestCase):
     def test_browse_control_stays_visible_and_explains_why(self):
         flat = read(SHARED, 'ui/theme/Flat.kt')
         for required in ['crossed: Boolean = false', 'if (crossed)',
-                         'size.width * 0.12f', 'size.height * 0.12f']:
+                         'val canvasSize = this.size', 'canvasSize.width * 0.12f',
+                         'canvasSize.height * 0.12f',
+                         'minOf(canvasSize.width, canvasSize.height)']:
             self.assertIn(required, flat)
+        self.assertNotIn('Offset(size.width', flat)
         for base, name in [(ANDROID, 'ui/decks/DecksScreen.kt'), (SHARED, 'ui/decks/DeckList.kt')]:
             source = read(base, name)
             for required in ['browseAvailable: Boolean', 'crossed = !browseAvailable',
