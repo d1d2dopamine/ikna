@@ -115,7 +115,8 @@ fun IknaDeckRow(
     perCardMs: Long?,
     onOpen: () -> Unit,
     onOpenDeck: () -> Unit,
-    onToggle: (Boolean) -> Unit
+    onToggle: (Boolean) -> Unit,
+    onBrowse: (() -> Unit)? = null
 ) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val accent = MaterialTheme.colorScheme.primary
@@ -165,6 +166,16 @@ fun IknaDeckRow(
                             )
                         }
                     }
+                }
+                if (onBrowse != null) {
+                    IknaIconButton(
+                        glyph = IknaGlyph.STACK,
+                        onClick = onBrowse,
+                        size = 32.dp,
+                        glyphSize = 18.dp,
+                        color = accent,
+                        label = S.t("a11y.012")
+                    )
                 }
                 IknaIconButton(
                     glyph = IknaGlyph.DOTS,

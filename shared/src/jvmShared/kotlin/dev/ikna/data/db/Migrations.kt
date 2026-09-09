@@ -190,6 +190,41 @@ object IknaMigrations {
             connection.execSQL("ALTER TABLE reviews ADD COLUMN fsrsParameters TEXT")
         }
     }
+
+    /**
+     * v8 -> v9: optional reading gets its own log. A visible answer is an
+     * exposure, not a recall outcome, so no column is added to `reviews` and no
+     * existing schedule is rewritten.
+     */
+    private val MIGRATION_8_9 = object : Migration(8, 9) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL(
+                "CREATE TABLE IF NOT EXISTS browse_exposures (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "day TEXT NOT NULL, " +
+                    "chunkId TEXT NOT NULL, " +
+                    "packId TEXT NOT NULL, " +
+                    "ts INTEGER NOT NULL)"
+            )
+            connection.execSQL(
+                "CREATE UNIQUE INDEX IF NOT EXISTS index_browse_exposures_day_chunkId " +
+                    "ON browse_exposures (day, chunkId)"
+            )
+            connection.execSQL(
+                "CREATE INDEX IF NOT EXISTS index_browse_exposures_chunkId " +
+                    "ON browse_exposures (chunkId)"
+            )
+        }
+    }
     val ALL: Array<Migration> =
-        arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+        arrayOf(
+            MIGRATION_1_2,
+            MIGRATION_2_3,
+            MIGRATION_3_4,
+            MIGRATION_4_5,
+            MIGRATION_5_6,
+            MIGRATION_6_7,
+            MIGRATION_7_8,
+            MIGRATION_8_9
+        )
 }

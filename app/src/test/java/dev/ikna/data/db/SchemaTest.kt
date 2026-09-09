@@ -26,7 +26,7 @@ import java.io.File
  * on disk agrees with the migration that is supposed to produce it, and that
  * every version step has a migration at all.
  */
-private const val DB_VERSION = 8
+private const val DB_VERSION = 9
 
 private const val SCHEMA_DIR = "schemas/dev.ikna.data.db.IknaDatabase"
 
@@ -122,6 +122,15 @@ class SchemaTest {
 			assertTrue(text.contains(name))
 			assertFalse(schema(6)!!.readText().contains(name))
 		}
+	}
+
+	@Test
+	fun `browse exposures are separate from reviews in schema nine`() {
+		val previous = schema(8)!!.readText()
+		val current = schema(9)!!.readText()
+		assertFalse(previous.contains("browse_exposures"))
+		assertTrue(current.contains("browse_exposures"))
+		assertTrue(current.contains("index_browse_exposures_day_chunkId"))
 	}
 
 	@Test

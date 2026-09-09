@@ -145,6 +145,9 @@ private val V7_DDL = V6_DDL + listOf(
     "ALTER TABLE reviews ADD COLUMN inputMethod TEXT",
     "ALTER TABLE reviews ADD COLUMN peekSemantics TEXT"
 )
+private val V8_DDL = V7_DDL + listOf(
+    "ALTER TABLE reviews ADD COLUMN fsrsParameters TEXT"
+)
 private const val DB_NAME = "ikna-migration-test.db"
 
 /**
@@ -502,8 +505,22 @@ class MigrationTest {
             db.execSQL("INSERT INTO reviews (id,chunkId,level,ts,rating,elapsedDays,stabilityBefore,stabilityAfter,difficultyBefore,difficultyAfter,durationMs,wasAmnesty,inputRating,gradingVersion,gradingReason) VALUES (81,'kept',1,1700000000000,2,1,2,4,5,5,6000,0,3,1,'slow')")
         }
         withMigratedDatabase { db ->
-            assertEquals(8, count(db, "PRAGMA user_version"))
+            assertEquals(IKNA_DATABASE_VERSION, count(db, "PRAGMA user_version"))
             assertEquals(1, count(db, "SELECT COUNT(*) FROM reviews WHERE id=81 AND rating=2 AND inputRating=3 AND gradingVersion=1 AND gradingReason='slow' AND fsrsParameters IS NULL"))
+        }
+    }
+
+    @Test
+    fun version8AddsBrowseWithoutTouchingTheReviewLog() {
+        createOldDatabase(8, V8_DDL) { db ->
+            db.execSQL("INSERT INTO reviews (id,chunkId,level,ts,rating,elapsedDays,stabilityBefore,stabilityAfter,difficultyBefore,difficultyAfter,durationMs,wasAmnesty,fsrsParameters) VALUES (91,'kept',0,1700000000000,3,1,2,4,5,5,6000,0,'0.1,0.2')")
+        }
+        withMigratedDatabase { db ->
+            assertEquals(IKNA_DATABASE_VERSION, count(db, "PRAGMA user_version"))
+            assertEquals(1, count(db, "SELECT COUNT(*) FROM reviews WHERE id=91 AND fsrsParameters='0.1,0.2'"))
+            assertEquals(0, count(db, "SELECT COUNT(*) FROM browse_exposures"))
+            db.execSQL("INSERT INTO browse_exposures (day,chunkId,packId,ts) VALUES ('2026-09-09','kept','deck',1700000000001)")
+            assertEquals(1, count(db, "SELECT COUNT(*) FROM browse_exposures WHERE chunkId='kept'"))
         }
     }
 

@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 
-const val IKNA_DATABASE_VERSION = 8
+const val IKNA_DATABASE_VERSION = 9
 
 @Database(
     entities = [
@@ -14,6 +14,7 @@ const val IKNA_DATABASE_VERSION = 8
         PackEntity::class,
         CardEntity::class,
         ReviewEntity::class,
+        BrowseExposureEntity::class,
         ComponentEntity::class,
         DailyStatEntity::class,
         GovernorLogEntity::class,
@@ -29,9 +30,11 @@ const val IKNA_DATABASE_VERSION = 8
     // v6: nullable gesture observations on `reviews`; no scheduling change.
     // v7: original input, measurement context and versioned derived decision.
     // v8: immutable FSRS parameter snapshots, without rescheduling existing cards.
+    // v9: a separate append-only log for optional Browse exposures. These are
+    //     not reviews and never enter FSRS, accuracy or governor statistics.
     // Kept as a literal because SchemaTest deliberately reads this source line:
     // changing it must force a migration and a committed Room schema.
-    version = 8,
+    version = 9,
     // KSP writes the schema history into app/schemas (see the ksp block in
     // shared/build.gradle.kts -- it stays under app/ so that the workflow step
     // that uploads it and the one that checks it is committed do not move).
@@ -46,6 +49,7 @@ abstract class IknaDatabase : RoomDatabase() {
     abstract fun chunkDao(): ChunkDao
     abstract fun cardDao(): CardDao
     abstract fun reviewDao(): ReviewDao
+    abstract fun browseDao(): BrowseDao
     abstract fun componentDao(): ComponentDao
     abstract fun statsDao(): StatsDao
     abstract fun governorDao(): GovernorDao

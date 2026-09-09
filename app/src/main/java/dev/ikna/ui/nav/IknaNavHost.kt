@@ -33,6 +33,7 @@ import dev.ikna.ui.decks.DecksScreen
 import dev.ikna.ui.onboarding.OnboardingScreen
 import dev.ikna.ui.search.DeckSearchScreen
 import dev.ikna.ui.session.SessionScreen
+import dev.ikna.ui.session.BrowseScreen
 import dev.ikna.ui.settings.SettingsScreen
 import dev.ikna.ui.settings.VoiceScreen
 import dev.ikna.ui.stats.StatsScreen
@@ -53,6 +54,7 @@ object Routes {
     const val ONBOARDING = "onboarding"
     const val HOME = "home"
     const val SESSION = "session/{deck}"
+    const val BROWSE = "browse/{deck}"
     const val STATS = "stats"
     const val SETTINGS = "settings"
     const val ADD_DECK = "add-deck"
@@ -66,6 +68,8 @@ object Routes {
     const val ALL_DECKS = "all"
 
     fun session(deckId: String?): String = "session/" + (deckId ?: ALL_DECKS)
+
+    fun browse(deckId: String): String = "browse/" + deckId
 
     fun deck(deckId: String): String = "deck/" + deckId
 }
@@ -185,6 +189,7 @@ fun IknaNavHost(
                     state = decksState,
                     listState = decksListState,
                     onOpenSession = { deckId -> forward(Routes.session(deckId)) },
+                    onOpenBrowse = { deckId -> forward(Routes.browse(deckId)) },
                     onOpenDeck = { deckId -> forward(Routes.deck(deckId)) },
                     onOpenStats = { forward(Routes.STATS) },
                     onOpenSettings = { forward(Routes.SETTINGS) },
@@ -259,6 +264,19 @@ fun IknaNavHost(
                     deckId = if (raw == null || raw == Routes.ALL_DECKS) null else raw,
                     onBack = { back() }
                 )
+            }
+
+            composable(
+                route = Routes.BROWSE,
+                arguments = listOf(navArgument("deck") { type = NavType.StringType })
+            ) { entry ->
+                entry.arguments?.getString("deck")?.let { deckId ->
+                    BrowseScreen(
+                        container = container,
+                        deckId = deckId,
+                        onBack = { back() }
+                    )
+                }
             }
 
             composable(Routes.STATS) {

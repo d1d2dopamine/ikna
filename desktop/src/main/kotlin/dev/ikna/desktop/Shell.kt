@@ -64,7 +64,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Which screen the content area is showing. */
-enum class Pane { SESSION, DECK, STATS, SETTINGS, ADD, CATALOG, SEARCH, ANKI, BACKUP }
+enum class Pane { SESSION, BROWSE, DECK, STATS, SETTINGS, ADD, CATALOG, SEARCH, ANKI, BACKUP }
 
 /**
  * The state the window agrees on with its key handler.
@@ -78,6 +78,7 @@ class DesktopUi {
     var pane by mutableStateOf(Pane.SESSION)
     var openDeck by mutableStateOf<String?>(null)
     var sessionDeck by mutableStateOf<String?>(null)
+    var browseDeck by mutableStateOf<String?>(null)
     var showShortcuts by mutableStateOf(false)
 
     /**
@@ -96,6 +97,13 @@ class DesktopUi {
     fun study(deckId: String?) {
         sessionDeck = deckId
         pane = Pane.SESSION
+        listOpen = false
+    }
+
+    /** Open the optional reading queue for one deck. */
+    fun browse(deckId: String) {
+        browseDeck = deckId
+        pane = Pane.BROWSE
         listOpen = false
     }
 
@@ -192,11 +200,16 @@ private fun DesktopShell(
     val deckListState = rememberLazyListState()
     var decks by remember { mutableStateOf<List<DeckSummary>>(emptyList()) }
     var remaining by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
+    var browseDeckIds by remember { mutableStateOf<Set<String>>(emptySet()) }
 
     LaunchedEffect(ui.reload) {
-        decks = runCatching { container.deckRepository.decks() }.getOrDefault(emptyList())
+        val nextDecks = runCatching { container.deckRepository.decks() }.getOrDefault(emptyList())
+        decks = nextDecks
         remaining = runCatching { container.learningRepository.remainingByDeck() }
             .getOrDefault(emptyMap())
+        browseDeckIds = runCatching {
+            container.learningRepository.browseDeckIds(nextDecks.map { it.id })
+        }.getOrDefault(emptySet())
     }
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -218,7 +231,7 @@ private fun DesktopShell(
         if (wide) {
             Row(Modifier.fillMaxSize()) {
                 Box(Modifier.width(listWidth).fillMaxHeight()) {
-                    DecksColumn(container, settings, palette, ui, decks, remaining, deckListState)
+                    DecksColumn(container, settings, palette, ui, decks, remaining, browseDeckIds, deckListState)
                 }
                 VerticalRule(palette)
                 Box(Modifier.weight(1f).fillMaxHeight()) {
@@ -226,7 +239,7 @@ private fun DesktopShell(
                 }
             }
         } else if (ui.listOpen) {
-            DecksColumn(container, settings, palette, ui, decks, remaining, deckListState)
+            DecksColumn(container, settings, palette, ui, decks, remaining, browseDeckIds, deckListState)
         } else {
             PaneContent(container, settings, palette, ui, decks, wide = false)
         }
@@ -255,6 +268,7 @@ private fun DecksColumn(
     ui: DesktopUi,
     decks: List<DeckSummary>,
     remaining: Map<String, Int>,
+    browseDeckIds: Set<String>,
     listState: LazyListState
 ) {
     val scope = rememberCoroutineScope()
@@ -297,6 +311,11 @@ private fun DecksColumn(
                         perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
                         onOpen = { ui.study(deck.id) },
                         onOpenDeck = { ui.openDeckScreen(deck.id) },
+                        onBrowse = if (deck.id in browseDeckIds) {
+                            { ui.browse(deck.id) }
+                        } else {
+                            null
+                        },
                         onToggle = { on ->
                             scope.launch {
                                 runCatching {
@@ -425,6 +444,22 @@ private fun PaneContent(
                 onChanged = { ui.refresh() },
                 onBack = back
             )
+
+            Pane.BROWSE -> {
+                val id = ui.browseDeck
+                if (id != null) {
+                    BrowsePane(
+                        container = container,
+                        settings = settings,
+                        palette = palette,
+                        deckId = id,
+                        onChanged = { ui.refresh() },
+                        onBack = back
+                    )
+                } else {
+                    Centered(S.t("pc.004"), palette)
+                }
+            }
 
             Pane.DECK -> {
                 val id = ui.openDeck

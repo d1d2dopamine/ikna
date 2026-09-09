@@ -78,6 +78,7 @@ class AppContainer(context: Context) {
         statsDao = db.statsDao(),
         governorDao = db.governorDao(),
         planDao = db.planDao(),
+        browseDao = db.browseDao(),
         components = componentRepository,
         scheduler = scheduler,
         selector = ChunkSelector(),

@@ -342,6 +342,25 @@ interface CardDao {
         limit: Int
     ): List<CardEntity>
 
+    /**
+     * Mature recognition cards that are still in the future. Browse applies
+     * the remaining safeguards in Kotlin: distinct study days, today's answers,
+     * suppressed chunks and the passive-exposure cooldown.
+     */
+    @Query(
+        "SELECT c.* FROM cards c JOIN chunks ch ON ch.id = c.chunkId " +
+            "WHERE ch.packId = :packId AND c.level = 0 AND c.isNew = 0 " +
+            "AND c.inAmnesty = 0 AND c.dueAt > :after " +
+            "AND c.stability >= :minStability " +
+            "ORDER BY c.dueAt ASC LIMIT :limit"
+    )
+    suspend fun browseCandidatesForPack(
+        packId: String,
+        after: Long,
+        minStability: Double,
+        limit: Int
+    ): List<CardEntity>
+
     // Forecast: how many cards fall due on each of the next days.
     @Query(
         "SELECT COUNT(*) FROM cards WHERE inAmnesty = 0 " +
@@ -483,6 +502,31 @@ interface ReviewDao {
 
     @Query("SELECT * FROM reviews WHERE chunkId = :chunkId AND " + NOT_RETRACTED + " ORDER BY ts DESC")
     suspend fun forChunk(chunkId: String): List<ReviewEntity>
+
+    /** One bounded read lets Browse count real study days without one query per card. */
+    @Query(
+        "SELECT chunkId, ts FROM reviews WHERE chunkId IN (:chunkIds) " +
+            "AND " + NOT_RETRACTED + " ORDER BY ts ASC"
+    )
+    suspend fun reviewTimesForChunks(chunkIds: List<String>): List<ChunkReviewTime>
+}
+
+data class ChunkReviewTime(val chunkId: String, val ts: Long)
+
+@Dao
+interface BrowseDao {
+    /** The unique day/chunk index makes recording the same visible card a no-op. */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insert(exposure: BrowseExposureEntity): Long
+
+    @Query("SELECT COUNT(*) FROM browse_exposures WHERE day = :day")
+    suspend fun countForDay(day: String): Int
+
+    @Query("SELECT DISTINCT chunkId FROM browse_exposures WHERE day >= :fromDay")
+    suspend fun chunkIdsSince(fromDay: String): List<String>
+
+    @Query("DELETE FROM browse_exposures")
+    suspend fun clear()
 }
 
 @Dao

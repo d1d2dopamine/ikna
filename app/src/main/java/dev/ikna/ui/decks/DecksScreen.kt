@@ -73,13 +73,20 @@ class DecksHomeState {
     var today by mutableStateOf<Map<String, Int>>(emptyMap())
         private set
 
+    var browseDeckIds by mutableStateOf<Set<String>>(emptySet())
+        private set
+
     suspend fun reload(container: AppContainer) {
         val nextDecks = container.deckRepository.decks()
         val nextToday = runCatching {
             container.learningRepository.remainingByDeck()
         }.getOrDefault(emptyMap())
+        val nextBrowseDeckIds = runCatching {
+            container.learningRepository.browseDeckIds(nextDecks.map { it.id })
+        }.getOrDefault(emptySet())
         decks = nextDecks
         today = nextToday
+        browseDeckIds = nextBrowseDeckIds
     }
 }
 
@@ -107,6 +114,7 @@ fun DecksScreen(
     state: DecksHomeState,
     listState: LazyListState,
     onOpenSession: (String?) -> Unit,
+    onOpenBrowse: (String) -> Unit,
     onOpenDeck: (String) -> Unit,
     onOpenStats: () -> Unit,
     onOpenSettings: () -> Unit,
@@ -193,6 +201,11 @@ fun DecksScreen(
                     dueToday = today[deck.id] ?: 0,
                     perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
                     onOpen = { onOpenSession(deck.id) },
+                    onBrowse = if (deck.id in state.browseDeckIds) {
+                        { onOpenBrowse(deck.id) }
+                    } else {
+                        null
+                    },
                     onOpenDeck = { onOpenDeck(deck.id) },
                     onToggle = { active ->
                         scope.launch {
@@ -403,6 +416,7 @@ private fun DeckRow(
     dueToday: Int,
     perCardMs: Long?,
     onOpen: () -> Unit,
+    onBrowse: (() -> Unit)?,
     onOpenDeck: () -> Unit,
     onToggle: (Boolean) -> Unit
 ) {
@@ -503,6 +517,16 @@ private fun DeckRow(
                 // reason, the two sit at the end of a row that is itself one big
                 // target, and a control that silently changes the height of every
                 // row in the list is the worse of the two problems.
+                if (onBrowse != null) {
+                    IknaIconButton(
+                        glyph = IknaGlyph.STACK,
+                        onClick = onBrowse,
+                        size = 32.dp,
+                        glyphSize = 18.dp,
+                        color = accent,
+                        label = S.t("a11y.012")
+                    )
+                }
                 IknaIconButton(
                     glyph = IknaGlyph.DOTS,
                     onClick = onOpenDeck,

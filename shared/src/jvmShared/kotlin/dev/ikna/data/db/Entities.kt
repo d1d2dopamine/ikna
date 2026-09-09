@@ -168,6 +168,26 @@ data class ReviewEntity(
 )
 
 // ---------------------------------------------------------------------------
+// Optional reading. Separate from reviews because seeing the answer is not an
+// FSRS observation and must never move accuracy, stability or the daily plan.
+// ---------------------------------------------------------------------------
+
+@Entity(
+    tableName = "browse_exposures",
+    indices = [
+        Index(value = ["day", "chunkId"], unique = true),
+        Index("chunkId")
+    ]
+)
+data class BrowseExposureEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val day: String,
+    val chunkId: String,
+    val packId: String,
+    val ts: Long
+)
+
+// ---------------------------------------------------------------------------
 // Derived tables. Fully rebuildable from `reviews`; migrations may drop them.
 // ---------------------------------------------------------------------------
 

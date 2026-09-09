@@ -2,6 +2,8 @@ package dev.ikna.data.repo
 
 import dev.ikna.data.db.CardDao
 import dev.ikna.data.db.CardEntity
+import dev.ikna.data.db.BrowseDao
+import dev.ikna.data.db.BrowseExposureEntity
 import dev.ikna.data.db.ChunkDao
 import dev.ikna.data.db.ChunkEntity
 import dev.ikna.data.db.DailyPlanEntity
@@ -29,6 +31,8 @@ import dev.ikna.domain.governor.LoadGovernor
 import dev.ikna.domain.governor.dailyNewRoom
 import dev.ikna.domain.governor.ruledOnceToday
 import dev.ikna.domain.session.Level
+import dev.ikna.domain.session.BrowsePlan
+import dev.ikna.domain.session.BrowsePolicy
 import dev.ikna.domain.session.SessionBuilder
 import dev.ikna.domain.session.ReviewSignals
 import dev.ikna.domain.session.SessionCard
@@ -51,6 +55,7 @@ class LearningRepository(
     private val statsDao: StatsDao,
     private val governorDao: GovernorDao,
     private val planDao: PlanDao,
+    private val browseDao: BrowseDao,
     private val components: ComponentRepository,
     private val scheduler: Scheduler,
     private val selector: ChunkSelector,
@@ -766,6 +771,131 @@ class LearningRepository(
             .eachCount()
     }
 
+    /** Decks whose Browse button may be drawn right now. */
+    suspend fun browseDeckIds(
+        deckIds: List<String>,
+        now: Long = System.currentTimeMillis()
+    ): Set<String> {
+        if (deckIds.isEmpty()) return emptySet()
+        val plan = ensureDailyPlan(now)
+        if (browseRoom(plan, now) <= 0) return emptySet()
+
+        return deckIds.filterTo(linkedSetOf()) { deckId ->
+            browseCandidates(deckId, limit = 1, now = now).isNotEmpty()
+        }
+    }
+
+    /**
+     * Opens a bounded Browse queue and records its first visible card.
+     *
+     * Recording visibility, rather than a swipe, makes the quota honest when
+     * the user reads one card and leaves. The insert lives in the same writer
+     * lock as the allowance check, so two taps cannot spend the same slot.
+     */
+    suspend fun startBrowse(
+        deckId: String,
+        now: Long = System.currentTimeMillis()
+    ): BrowsePlan = writeLock.withLock {
+        val title = chunkDao.pack(deckId)?.title ?: deckId
+        val plan = ensureDailyPlanLocked(now)
+        val room = browseRoom(plan, now)
+        if (room <= 0) return@withLock BrowsePlan(emptyList(), deckId, title)
+
+        val cards = browseCandidates(deckId, limit = room, now = now)
+        val first = cards.firstOrNull()
+            ?: return@withLock BrowsePlan(emptyList(), deckId, title)
+        if (!insertBrowseExposure(first, now)) {
+            return@withLock BrowsePlan(emptyList(), deckId, title)
+        }
+        BrowsePlan(cards, deckId, title)
+    }
+
+    /** Records the next card before the interface puts its answer on screen. */
+    suspend fun recordBrowse(
+        card: SessionCard,
+        now: Long = System.currentTimeMillis()
+    ): Boolean = writeLock.withLock {
+        val plan = ensureDailyPlanLocked(now)
+        browseRoom(plan, now) > 0 && insertBrowseExposure(card, now)
+    }
+
+    /** Required questions are the fixed prefix; explicit extras are appended. */
+    private fun requiredIds(plan: DailyPlanEntity): List<String> =
+        BrowsePolicy.requiredIds(plan.ids, plan.extraRequested)
+
+    private suspend fun browseRoom(plan: DailyPlanEntity, now: Long): Int {
+        if (boundary.isNight(now, config.nightCutoffHour)) return 0
+        val required = requiredIds(plan)
+        val answered = reviewDao.answeredKeysSince(startOfDay(now)).toSet()
+        if (!BrowsePolicy.requiredComplete(required, answered)) return 0
+
+        val log = governorDao.firstForDay(plan.day)
+        val reason = runCatching { GovernorReason.valueOf(plan.reason) }
+            .getOrDefault(GovernorReason.OK)
+        val gate = log?.gate?.let { value ->
+            runCatching { GovernorReason.valueOf(value) }.getOrNull()
+        }
+        val quota = BrowsePolicy.quota(required.size, reason, gate)
+        val used = browseDao.countForDay(plan.day)
+        return (quota - used).coerceAtLeast(0)
+    }
+
+    private suspend fun browseCandidates(
+        deckId: String,
+        limit: Int,
+        now: Long
+    ): List<SessionCard> {
+        if (limit <= 0) return emptyList()
+
+        val hidden = suppressedNow()
+        val candidates = cardDao.browseCandidatesForPack(
+            packId = deckId,
+            after = now,
+            minStability = BrowsePolicy.MIN_STABILITY_DAYS,
+            limit = BrowsePolicy.CANDIDATE_SCAN_LIMIT
+        ).filterNot { it.chunkId in hidden }
+        if (candidates.isEmpty()) return emptyList()
+
+        val day = dayKey(now)
+        val cooldownStart = LocalDate.parse(day)
+            .minusDays(BrowsePolicy.COOLDOWN_DAYS - 1)
+            .toString()
+        val viewed = browseDao.chunkIdsSince(cooldownStart).toSet()
+        val daysByChunk = reviewDao.reviewTimesForChunks(candidates.map { it.chunkId })
+            .groupBy { it.chunkId }
+            .mapValues { (_, rows) -> rows.map { dayKey(it.ts) }.toSet() }
+
+        val eligible = candidates.filter { card ->
+            val reviewDays = daysByChunk[card.chunkId].orEmpty()
+            BrowsePolicy.eligible(
+                activeReviewDays = reviewDays.size,
+                stability = card.stability,
+                isNew = card.isNew,
+                inAmnesty = card.inAmnesty,
+                dueAt = card.dueAt,
+                now = now,
+                reviewedToday = day in reviewDays,
+                viewedRecently = card.chunkId in viewed
+            )
+        }.sortedWith(
+            compareBy<CardEntity> { scheduler.predictRecall(it, now) }
+                .thenBy { it.dueAt }
+                .thenBy { it.chunkId }
+        ).take(limit)
+
+        return builder().materialize(eligible.map { it.key })
+    }
+
+    private suspend fun insertBrowseExposure(card: SessionCard, now: Long): Boolean =
+        browseDao.insert(
+            BrowseExposureEntity(
+                day = dayKey(now),
+                chunkId = card.chunk.id,
+                packId = card.chunk.packId,
+                ts = now
+            )
+        ) != -1L
+
     /**
      * "Ещё немного". Adds cards that are already due to today's plan and
      * nothing else: no new chunks, so a good day today never inflates tomorrow.
@@ -806,23 +936,9 @@ class LearningRepository(
         val repeats = builder().pickExtra(exclude, count, now, deckId)
             .filterNot { it.chunkId in hidden }
 
-        // A deck nothing has been learned from yet has no cards at all, so there
-        // is nothing to repeat and this used to answer "nothing is due" - true,
-        // and useless, because what such a deck has is new material and only the
-        // governor could hand that out, once a day. A deck switched on this
-        // evening was therefore switched on and empty, and the one button on the
-        // screen could not help.
-        //
-        // So here, and nowhere else, new chunks are introduced outside the daily
-        // budget: this is a deliberate press, not the app deciding. They are
-        // still counted against the day, so tomorrow's measured capacity knows
-        // what happened and the safety valve still sees it.
-        val fresh =
-            if (repeats.isNotEmpty()) emptyList()
-            else introduce(count, now, deckId)
-        if (fresh.isNotEmpty()) countIntroduced(now, fresh.size)
-
-        val extra = (repeats + fresh).take(count)
+        // No fallback to [introduce]. This button is voluntary repetition, not
+        // a second way around the governor's one daily new-material decision.
+        val extra = repeats.take(count)
         if (extra.isEmpty()) return 0
 
         planDao.upsert(
@@ -883,15 +999,28 @@ class LearningRepository(
 
         val plan = planDao.plan(dayKey(now)) ?: return
         // Every level of the chunk leaves the plan, not just the one on screen.
-        val kept = plan.ids.filterNot { it.substringBeforeLast(':') == chunkId }
+        val requiredCount = (plan.ids.size - plan.extraRequested).coerceAtLeast(0)
+        val required = plan.ids.take(requiredCount)
+        val extras = plan.ids.drop(requiredCount)
+        val keptRequired = required.filterNot { it.substringBeforeLast(':') == chunkId }
+        val keptExtras = extras.filterNot { it.substringBeforeLast(':') == chunkId }
+        val kept = keptRequired + keptExtras
         val removed = plan.ids.size - kept.size
         if (removed > 0) {
             planDao.upsert(
                 plan.copy(
                     plannedIds = kept.joinToString(","),
-                    plannedTotal = (plan.plannedTotal - removed).coerceAtLeast(0)
+                    plannedTotal = kept.size,
+                    extraRequested = keptExtras.size
                 )
             )
+            statsDao.day(plan.day)?.let { stat ->
+                statsDao.upsert(
+                    stat.copy(
+                        planCompleted = planCompleted(plan.day, stat.reviewsDone, now)
+                    )
+                )
+            }
         }
 
         // A chunk met for the first time today and thrown away was never learned,
@@ -1160,7 +1289,7 @@ class LearningRepository(
                 correctCount = correct,
                 activeMs = prev.activeMs + durationMs,
                 accuracy = correct.toDouble() / done,
-                planCompleted = planCompleted(day, done)
+                planCompleted = planCompleted(day, done, now)
             )
         )
     }
@@ -1176,7 +1305,7 @@ class LearningRepository(
                 correctCount = correct,
                 activeMs = (prev.activeMs - review.durationMs).coerceAtLeast(0L),
                 accuracy = if (done == 0) 1.0 else (correct.toDouble() / done).coerceIn(0.0, 1.0),
-                planCompleted = planCompleted(day, done)
+                planCompleted = planCompleted(day, done, review.ts)
             )
         )
     }
@@ -1192,14 +1321,18 @@ class LearningRepository(
      * with a larger target. The plan the governor built is the obligation.
      *
      * Extras are subtracted out: "ещё немного" is voluntary, and pressing it
-     * must not move the finish line further away. If there is no plan row for
-     * the day (an old day whose row has been cleaned up, or a replay from the
-     * log) the old minimum is the fallback.
+     * must not move the finish line further away. Repeated AGAIN answers count
+     * in reviewsDone but do not complete another required question, so the
+     * unique keys in the immutable required prefix are checked directly.
+     * If there is no plan row for the day (an old day whose row has been cleaned
+     * up, or a replay from the log) the old minimum is the fallback.
      */
-    private suspend fun planCompleted(day: String, done: Int): Boolean {
+    private suspend fun planCompleted(day: String, done: Int, ts: Long): Boolean {
         val plan = planDao.plan(day)
-        val obligation = plan?.let { it.plannedTotal - it.extraRequested } ?: 0
-        return if (obligation > 0) done >= obligation else done >= config.dailyMinimumCards
+            ?: return done >= config.dailyMinimumCards
+        val required = requiredIds(plan)
+        val answered = reviewDao.answeredKeysSince(startOfDay(ts)).toSet()
+        return BrowsePolicy.requiredComplete(required, answered)
     }
 
     private fun startOfDay(ts: Long): Long = boundary.startOfDay(ts)
@@ -1217,6 +1350,7 @@ class LearningRepository(
         components.clearAll()
         statsDao.clear()
         planDao.clear()
+        browseDao.clear()
     }
 
     /**
