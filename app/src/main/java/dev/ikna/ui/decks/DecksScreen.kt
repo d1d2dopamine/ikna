@@ -1,6 +1,7 @@
 package dev.ikna.ui.decks
 
 import dev.ikna.ui.text.S
+import dev.ikna.ui.text.quantityWord
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -43,6 +44,9 @@ import dev.ikna.data.prefs.DeckLook
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.lookFor
 import dev.ikna.data.repo.DeckSummary
+import dev.ikna.domain.session.BrowseAvailability
+import dev.ikna.domain.session.BrowseUnavailableReason
+import dev.ikna.ui.session.browseUnavailableText
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaBottomBar
@@ -52,6 +56,7 @@ import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaMemoryField
 import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.IknaToggle
+import dev.ikna.ui.theme.IknaTransientNotice
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Space
 import dev.ikna.ui.theme.deckTintColor
@@ -73,7 +78,7 @@ class DecksHomeState {
     var today by mutableStateOf<Map<String, Int>>(emptyMap())
         private set
 
-    var browseDeckIds by mutableStateOf<Set<String>>(emptySet())
+    var browseAvailability by mutableStateOf<Map<String, BrowseAvailability>>(emptyMap())
         private set
 
     suspend fun reload(container: AppContainer) {
@@ -81,12 +86,12 @@ class DecksHomeState {
         val nextToday = runCatching {
             container.learningRepository.remainingByDeck()
         }.getOrDefault(emptyMap())
-        val nextBrowseDeckIds = runCatching {
-            container.learningRepository.browseDeckIds(nextDecks.map { it.id })
-        }.getOrDefault(emptySet())
+        val nextBrowseAvailability = runCatching {
+            container.learningRepository.browseDeckAvailability(nextDecks.map { it.id })
+        }.getOrDefault(emptyMap())
         decks = nextDecks
         today = nextToday
-        browseDeckIds = nextBrowseDeckIds
+        browseAvailability = nextBrowseAvailability
     }
 }
 
@@ -139,7 +144,7 @@ fun DecksScreen(
     // the database from the launcher's process, so the app hands it the finished
     // text every time this screen knows a new value - and this screen is the one
     // a session returns to, so it always does.
-    LaunchedEffect(todayTotal, S.lang) {
+    LaunchedEffect(todayTotal, S.lang, S.pseudo) {
         TodayWidget.publish(
             context = context,
             count = todayTotal,
@@ -195,17 +200,28 @@ fun DecksScreen(
             verticalArrangement = Arrangement.spacedBy(Space.lg)
         ) {
             items(decks, key = { it.id }) { deck ->
+                val browse = state.browseAvailability[deck.id]
+                    ?: BrowseAvailability(reason = BrowseUnavailableReason.LOAD_GUARD)
                 DeckRow(
                     deck = deck,
                     look = settings.lookFor(deck.id),
                     dueToday = today[deck.id] ?: 0,
                     perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
                     onOpen = { onOpenSession(deck.id) },
-                    onBrowse = if (deck.id in state.browseDeckIds) {
-                        { onOpenBrowse(deck.id) }
-                    } else {
-                        null
-                    },
+                    onBrowse = if (browse.available) {
+                        {
+                            scope.launch {
+                                val latest = runCatching {
+                                    container.learningRepository
+                                        .browseDeckAvailability(listOf(deck.id))[deck.id]
+                                }.getOrNull()
+                                if (latest?.available == true) onOpenBrowse(deck.id)
+                                else note = browseUnavailableText(
+                                    latest?.reason ?: BrowseUnavailableReason.LOAD_GUARD
+                                )
+                            }
+                        }
+                    } else null,
                     onOpenDeck = { onOpenDeck(deck.id) },
                     onToggle = { active ->
                         scope.launch {
@@ -236,15 +252,6 @@ fun DecksScreen(
                     }
                 }
             }
-        }
-
-        note?.let { text ->
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodySmall,
-                color = muted,
-                modifier = Modifier.padding(horizontal = Edge, vertical = Space.sm)
-            )
         }
 
         Spacer(Modifier.height(Space.md))
@@ -329,6 +336,13 @@ fun DecksScreen(
             }
         }
         }
+        IknaTransientNotice(
+            message = note,
+            onDismiss = { note = null },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(start = Edge, end = Edge, bottom = BarHeight + Space.md)
+        )
     }
 }
 
@@ -667,12 +681,5 @@ private fun minutesTail(count: Int, perCardMs: Long?): String {
 }
 
 private fun cardWord(count: Int): String {
-    val mod100 = count % 100
-    val mod10 = count % 10
-    return when {
-        mod100 in 11..14 -> S.t("deck.014")
-        mod10 == 1 -> S.t("deck.015")
-        mod10 in 2..4 -> S.t("deck.016")
-        else -> S.t("deck.017")
-    }
+    return quantityWord(count.toLong(), "deck.014", "deck.015", "deck.016", "deck.017")
 }

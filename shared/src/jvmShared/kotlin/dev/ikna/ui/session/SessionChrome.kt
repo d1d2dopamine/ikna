@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.ikna.ui.text.S
+import dev.ikna.ui.text.quantityWord
 import dev.ikna.ui.theme.*
 import androidx.compose.animation.core.Animatable
 import androidx.compose.ui.text.style.TextAlign
@@ -250,14 +251,7 @@ private fun nextDueLabel(nextDueAt: Long?): String? {
 }
 
 private fun dayWord(days: Long): String {
-    val mod100 = days % 100
-    val mod10 = days % 10
-    return when {
-        mod100 in 11..14 -> S.t("sess.033")
-        mod10 == 1L -> S.t("sess.034")
-        mod10 in 2..4 -> S.t("sess.035")
-        else -> S.t("sess.036")
-    }
+    return quantityWord(days, "sess.033", "sess.034", "sess.035", "sess.036")
 }
 
 // ---- how long this will take ----------------------------------------------
@@ -287,12 +281,5 @@ private fun startEstimate(state: SessionUiState): String {
 }
 
 private fun cardWord(count: Int): String {
-    val mod100 = count % 100
-    val mod10 = count % 10
-    return when {
-        mod100 in 11..14 -> S.t("sess.039")
-        mod10 == 1 -> S.t("sess.040")
-        mod10 in 2..4 -> S.t("sess.041")
-        else -> S.t("sess.042")
-    }
+    return quantityWord(count.toLong(), "sess.039", "sess.040", "sess.041", "sess.042")
 }

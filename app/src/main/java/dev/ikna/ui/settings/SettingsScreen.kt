@@ -1009,6 +1009,15 @@ fun SettingsScreen(
 
                         if (advancedOpen) {
                             Spacer(Modifier.height(16.dp))
+                            IknaSettingsToggleRow(
+                                title = S.t("pseudo.001"),
+                                subtitle = S.t("pseudo.002"),
+                                checked = settings.pseudoLocale,
+                                onCheckedChange = {
+                                    scope.launch { container.settings.setPseudoLocale(it) }
+                                }
+                            )
+                            Spacer(Modifier.height(8.dp))
                             IknaWideButton(
                                 label = S.t("set.067"),
                                 height = 52.dp,
@@ -1394,7 +1403,7 @@ private val SPEECH_SECTION_INDEX = JUMPS.indexOfFirst { it.first == ID_SPEECH }
  * other deck into homework in translation.
  */
 private val LANGUAGES = listOf(
-    LANGUAGE_SYSTEM, "ru", "en", "pl", "es", "fr", "de"
+    LANGUAGE_SYSTEM, "ru", "en", "pl", "es", "fr", "de", "pt"
 )
 
 /**
@@ -1419,6 +1428,7 @@ private fun languageLabel(code: String): String = when (code) {
     "es" -> "ESPAÑOL"
     "fr" -> "FRANÇAIS"
     "de" -> "DEUTSCH"
+    "pt" -> "PORTUGUÊS (BRASIL)"
     else -> code.uppercase(Locale.getDefault())
 }
 

@@ -5,6 +5,7 @@ import dev.ikna.ui.text.LANG_ES
 import dev.ikna.ui.text.LANG_FR
 import dev.ikna.ui.text.LANG_DE
 import dev.ikna.ui.text.LANG_PL
+import dev.ikna.ui.text.LANG_PT
 import dev.ikna.ui.text.LANG_RU
 import dev.ikna.ui.text.S
 import dev.ikna.ui.text.STRINGS_EN
@@ -12,16 +13,19 @@ import dev.ikna.ui.text.STRINGS_ES
 import dev.ikna.ui.text.STRINGS_FR
 import dev.ikna.ui.text.STRINGS_DE
 import dev.ikna.ui.text.STRINGS_PL
+import dev.ikna.ui.text.STRINGS_PT
 import dev.ikna.ui.text.STRINGS_RU
+import dev.ikna.ui.text.pseudoLocalize
+import dev.ikna.ui.text.quantityWord
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.Locale
 
 /**
- * The interface is written six times over, and a missing line is invisible
+ * The interface is written seven times over, and a missing line is invisible
  * until someone is standing in front of it in Warsaw. These tests are the only
- * place where all three copies are laid next to each other, so a key added to
+ * place where all copies are laid next to each other, so a key added to
  * one language and forgotten in another fails the build instead of shipping an
  * empty label.
  */
@@ -29,14 +33,15 @@ class StringsCatalogTest {
 
     @Test
     fun `every language has exactly the russian key set`() {
-        val tables = listOf(STRINGS_EN, STRINGS_PL, STRINGS_ES, STRINGS_FR, STRINGS_DE)
+        val tables = listOf(STRINGS_EN, STRINGS_PL, STRINGS_ES, STRINGS_FR, STRINGS_DE, STRINGS_PT)
         tables.forEach { table -> assertEquals(STRINGS_RU.keys, table.keys) }
     }
 
     @Test
     fun `no translation carries a key russian does not have`() {
         val strays = (STRINGS_EN.keys + STRINGS_PL.keys + STRINGS_ES.keys +
-            STRINGS_FR.keys + STRINGS_DE.keys).filterNot { it in STRINGS_RU }.sorted()
+            STRINGS_FR.keys + STRINGS_DE.keys + STRINGS_PT.keys)
+            .filterNot { it in STRINGS_RU }.sorted()
 
         assertEquals("keys without a russian original: $strays", emptyList<String>(), strays)
     }
@@ -44,7 +49,7 @@ class StringsCatalogTest {
     @Test
     fun `nothing is blank`() {
         val blank = (STRINGS_RU + STRINGS_EN + STRINGS_PL + STRINGS_ES +
-            STRINGS_FR + STRINGS_DE).filterValues { it.isEmpty() }.keys
+            STRINGS_FR + STRINGS_DE + STRINGS_PT).filterValues { it.isEmpty() }.keys
 
         assertEquals("blank text for: $blank", emptySet<String>(), blank)
     }
@@ -94,6 +99,7 @@ class LanguageResolverTest {
             assertEquals(LANG_ES, S.resolve("es"))
             assertEquals(LANG_FR, S.resolve("fr"))
             assertEquals(LANG_DE, S.resolve("de"))
+            assertEquals(LANG_PT, S.resolve("pt"))
         }
     }
 
@@ -105,12 +111,13 @@ class LanguageResolverTest {
         withLocale(Locale("es", "ES")) { assertEquals(LANG_ES, S.resolve("system")) }
         withLocale(Locale("fr", "FR")) { assertEquals(LANG_FR, S.resolve("system")) }
         withLocale(Locale("de", "DE")) { assertEquals(LANG_DE, S.resolve("system")) }
+        withLocale(Locale("pt", "BR")) { assertEquals(LANG_PT, S.resolve("system")) }
     }
 
     @Test
-    fun `a phone in a language we do not have falls back to russian`() {
-        withLocale(Locale("ja", "JP")) { assertEquals(LANG_RU, S.resolve("system")) }
-        assertEquals(LANG_RU, S.resolve("klingon"))
+    fun `a phone in a language we do not have falls back to english`() {
+        withLocale(Locale("ja", "JP")) { assertEquals(LANG_EN, S.resolve("system")) }
+        assertEquals(LANG_EN, S.resolve("klingon"))
     }
 
     @Test
@@ -130,7 +137,34 @@ class LanguageResolverTest {
         S.apply("de")
         assertEquals("Einstellungen", S.t("set.012"))
 
+        S.apply("pt")
+        assertEquals("Configurações", S.t("set.012"))
+
         S.apply("ru")
         assertTrue(S.t("set.012").isNotEmpty())
+    }
+
+    @Test
+    fun `pseudo locale preserves edge whitespace and substitution tokens`() {
+        val result = pseudoLocalize("  {count} / 500  ")
+        assertTrue(result.startsWith("  ⟦ {count} / 500"))
+        assertTrue(result.endsWith(" ⟧  "))
+        assertTrue("{count}" in result)
+        assertTrue("500" in result)
+    }
+
+    @Test
+    fun `non slavic languages use singular only for exactly one`() {
+        try {
+            S.apply("en")
+            assertEquals("card", quantityWord(1, "deck.014", "deck.015", "deck.016", "deck.017"))
+            assertEquals("cards", quantityWord(21, "deck.014", "deck.015", "deck.016", "deck.017"))
+
+            S.apply("pt")
+            assertEquals("cartão", quantityWord(1, "deck.014", "deck.015", "deck.016", "deck.017"))
+            assertEquals("cartões", quantityWord(21, "deck.014", "deck.015", "deck.016", "deck.017"))
+        } finally {
+            S.apply("ru")
+        }
     }
 }

@@ -33,6 +33,8 @@ import dev.ikna.domain.governor.ruledOnceToday
 import dev.ikna.domain.session.Level
 import dev.ikna.domain.session.BrowsePlan
 import dev.ikna.domain.session.BrowsePolicy
+import dev.ikna.domain.session.BrowseAvailability
+import dev.ikna.domain.session.BrowseUnavailableReason
 import dev.ikna.domain.session.SessionBuilder
 import dev.ikna.domain.session.ReviewSignals
 import dev.ikna.domain.session.SessionCard
@@ -67,6 +69,10 @@ class LearningRepository(
 
     /** The load switch as stored, read on demand. See [loadSettings]. */
     data class LoadSetting(val auto: Boolean, val manual: Int)
+    private data class BrowseGate(
+        val room: Int,
+        val reason: BrowseUnavailableReason? = null
+    )
 
     /**
      * Where the size of a day really comes from.
@@ -771,19 +777,35 @@ class LearningRepository(
             .eachCount()
     }
 
-    /** Decks whose Browse button may be drawn right now. */
+    /** One state per deck, so an unavailable control can explain itself. */
+    suspend fun browseDeckAvailability(
+        deckIds: List<String>,
+        now: Long = System.currentTimeMillis()
+    ): Map<String, BrowseAvailability> {
+        if (deckIds.isEmpty()) return emptyMap()
+        val plan = ensureDailyPlan(now)
+        val gate = browseGate(plan, now)
+        if (gate.room <= 0) {
+            val blocked = BrowseAvailability(reason = gate.reason ?: BrowseUnavailableReason.LOAD_GUARD)
+            return deckIds.associateWith { blocked }
+        }
+
+        return deckIds.associateWith { deckId ->
+            if (browseCandidates(deckId, limit = 1, now = now).isNotEmpty()) {
+                BrowseAvailability(remaining = gate.room)
+            } else {
+                BrowseAvailability(reason = BrowseUnavailableReason.NO_CANDIDATES)
+            }
+        }
+    }
+
+    /** Kept for callers that only need the old yes/no answer. */
     suspend fun browseDeckIds(
         deckIds: List<String>,
         now: Long = System.currentTimeMillis()
-    ): Set<String> {
-        if (deckIds.isEmpty()) return emptySet()
-        val plan = ensureDailyPlan(now)
-        if (browseRoom(plan, now) <= 0) return emptySet()
-
-        return deckIds.filterTo(linkedSetOf()) { deckId ->
-            browseCandidates(deckId, limit = 1, now = now).isNotEmpty()
-        }
-    }
+    ): Set<String> = browseDeckAvailability(deckIds, now)
+        .filterValues { it.available }
+        .keys
 
     /**
      * Opens a bounded Browse queue and records its first visible card.
@@ -824,10 +846,21 @@ class LearningRepository(
         BrowsePolicy.requiredIds(plan.ids, plan.extraRequested)
 
     private suspend fun browseRoom(plan: DailyPlanEntity, now: Long): Int {
-        if (boundary.isNight(now, config.nightCutoffHour)) return 0
+        return browseGate(plan, now).room
+    }
+
+    private suspend fun browseGate(plan: DailyPlanEntity, now: Long): BrowseGate {
+        if (boundary.isNight(now, config.nightCutoffHour)) {
+            return BrowseGate(0, BrowseUnavailableReason.LATE_NIGHT)
+        }
         val required = requiredIds(plan)
         val answered = reviewDao.answeredKeysSince(startOfDay(now)).toSet()
-        if (!BrowsePolicy.requiredComplete(required, answered)) return 0
+        if (required.isNotEmpty() && !BrowsePolicy.requiredComplete(required, answered)) {
+            return BrowseGate(0, BrowseUnavailableReason.PLAN_NOT_COMPLETE)
+        }
+        if (required.size < BrowsePolicy.REQUIRED_CARDS_PER_BROWSE) {
+            return BrowseGate(0, BrowseUnavailableReason.PLAN_TOO_SMALL)
+        }
 
         val log = governorDao.firstForDay(plan.day)
         val reason = runCatching { GovernorReason.valueOf(plan.reason) }
@@ -836,8 +869,11 @@ class LearningRepository(
             runCatching { GovernorReason.valueOf(value) }.getOrNull()
         }
         val quota = BrowsePolicy.quota(required.size, reason, gate)
+        if (quota <= 0) return BrowseGate(0, BrowseUnavailableReason.LOAD_GUARD)
         val used = browseDao.countForDay(plan.day)
-        return (quota - used).coerceAtLeast(0)
+        val room = (quota - used).coerceAtLeast(0)
+        return if (room > 0) BrowseGate(room)
+        else BrowseGate(0, BrowseUnavailableReason.LIMIT_REACHED)
     }
 
     private suspend fun browseCandidates(

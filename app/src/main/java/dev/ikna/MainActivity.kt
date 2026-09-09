@@ -62,8 +62,8 @@ class MainActivity : ComponentActivity() {
             // settings still gets their own language. Changing it redraws the
             // screens in place: no activity restart, so nothing is lost from the
             // card that is open at that moment.
-            LaunchedEffect(settings.language) {
-                S.apply(settings.language)
+            LaunchedEffect(settings.language, settings.pseudoLocale) {
+                S.apply(settings.language, settings.pseudoLocale)
             }
 
             // The status and navigation icons have to follow the chosen palette,

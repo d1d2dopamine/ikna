@@ -10,6 +10,24 @@ data class BrowsePlan(
     val deckTitle: String
 )
 
+enum class BrowseUnavailableReason {
+    PLAN_NOT_COMPLETE,
+    PLAN_TOO_SMALL,
+    LATE_NIGHT,
+    LOAD_GUARD,
+    LIMIT_REACHED,
+    NO_CANDIDATES
+}
+
+/** What one deck can say when its always-visible Browse control is pressed. */
+data class BrowseAvailability(
+    val remaining: Int = 0,
+    val reason: BrowseUnavailableReason? = null
+) {
+    val available: Boolean
+        get() = remaining > 0 && reason == null
+}
+
 /**
  * The rules that keep Browse from becoming an easier replacement for review.
  *

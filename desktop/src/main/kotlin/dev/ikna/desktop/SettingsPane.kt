@@ -215,7 +215,8 @@ fun SettingsPane(
             item(key = "language", contentType = "settings-section") {
                 IknaSettingsSection(S.t("set.024"), null) {
                     val languages = listOf(LANGUAGE_SYSTEM to "set.099", "ru" to "set.105", "en" to "set.106",
-                        "pl" to "set.104", "es" to "set.108", "fr" to "set.109", "de" to "set.107")
+                        "pl" to "set.104", "es" to "set.108", "fr" to "set.109", "de" to "set.107",
+                        "pt" to "set.149")
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         languages.forEach { (code, label) ->
                             IknaChip(S.t(label), selected = settings.language == code,
@@ -455,6 +456,15 @@ fun SettingsPane(
 
                     if (advancedOpen) {
                         Spacer(Modifier.height(12.dp))
+                        IknaSettingsToggleRow(
+                            title = S.t("pseudo.001"),
+                            subtitle = S.t("pseudo.002"),
+                            checked = settings.pseudoLocale,
+                            onCheckedChange = { on ->
+                                save { container.settings.setPseudoLocale(on) }
+                            }
+                        )
+                        Spacer(Modifier.height(8.dp))
                         IknaButton(label = S.t("set.067"), palette = palette) {
                             scope.launch {
                                 runCatching { container.componentRepository.rebuildFromReviews() }

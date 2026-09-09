@@ -106,6 +106,8 @@ data class IknaSettings(
      * right language before the user has been asked anything at all.
      */
     val language: String = LANGUAGE_SYSTEM,
+    /** Expands translated interface text to expose clipping; never touches cards. */
+    val pseudoLocale: Boolean = false,
     /**
      * When true the daily norm is measured from behaviour and [manualLoad] is
      * ignored.
@@ -290,6 +292,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val load = stringPreferencesKey("load")
         val manualLoad = intPreferencesKey("manualLoad")
         val language = stringPreferencesKey("language")
+        val pseudoLocale = booleanPreferencesKey("pseudoLocale")
         val autoLoad = booleanPreferencesKey("autoLoad")
         val reminderEnabled = booleanPreferencesKey("reminderEnabled")
         val reminderHour = intPreferencesKey("reminderHour")
@@ -335,6 +338,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             customAccent = p[Keys.customAccent] ?: defaults.customAccent,
             manualLoad = p[Keys.manualLoad] ?: legacyLoad(p[Keys.load]) ?: defaults.manualLoad,
             language = p[Keys.language] ?: defaults.language,
+            pseudoLocale = p[Keys.pseudoLocale] ?: defaults.pseudoLocale,
             autoLoad = p[Keys.autoLoad] ?: defaults.autoLoad,
             reminderEnabled = p[Keys.reminderEnabled] ?: defaults.reminderEnabled,
             reminderHour = p[Keys.reminderHour] ?: defaults.reminderHour,
@@ -397,6 +401,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
     }
 
     suspend fun setLanguage(code: String) = put { it[Keys.language] = code }
+    suspend fun setPseudoLocale(on: Boolean) = put { it[Keys.pseudoLocale] = on }
 
     suspend fun setAutoLoad(on: Boolean) = put { it[Keys.autoLoad] = on }
     suspend fun setHaptics(on: Boolean) = put { it[Keys.haptics] = on }

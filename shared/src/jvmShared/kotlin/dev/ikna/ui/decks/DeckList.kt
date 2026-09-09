@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import dev.ikna.data.prefs.DeckLook
 import dev.ikna.data.repo.DeckSummary
 import dev.ikna.ui.text.S
+import dev.ikna.ui.text.quantityWord
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
@@ -291,12 +292,5 @@ fun iknaMinutesTail(count: Int, perCardMs: Long?): String {
 
 /** The word after the figure, declined the way the language needs. */
 fun iknaCardWord(count: Int): String {
-    val mod100 = count % 100
-    val mod10 = count % 10
-    return when {
-        mod100 in 11..14 -> S.t("deck.014")
-        mod10 == 1 -> S.t("deck.015")
-        mod10 in 2..4 -> S.t("deck.016")
-        else -> S.t("deck.017")
-    }
+    return quantityWord(count.toLong(), "deck.014", "deck.015", "deck.016", "deck.017")
 }

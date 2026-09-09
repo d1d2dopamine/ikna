@@ -39,10 +39,13 @@ import androidx.compose.ui.unit.dp
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.lookFor
 import dev.ikna.data.repo.DeckSummary
+import dev.ikna.domain.session.BrowseAvailability
+import dev.ikna.domain.session.BrowseUnavailableReason
 import dev.ikna.ui.decks.IknaDeckRow
 import dev.ikna.ui.decks.IknaTodayBlock
 import dev.ikna.ui.nav.sharedAxisEnter
 import dev.ikna.ui.nav.sharedAxisExit
+import dev.ikna.ui.session.browseUnavailableText
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
@@ -54,6 +57,7 @@ import dev.ikna.ui.theme.IknaMemoryField
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaPanel
 import dev.ikna.ui.theme.IknaTheme
+import dev.ikna.ui.theme.IknaTransientNotice
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.theme.Space
@@ -132,7 +136,9 @@ fun IknaDesktopApp(
     // the app has always looked like.
     val palette = paletteFor(settings, systemDark = true)
 
-    LaunchedEffect(settings.language) { S.apply(settings.language) }
+    LaunchedEffect(settings.language, settings.pseudoLocale) {
+        S.apply(settings.language, settings.pseudoLocale)
+    }
 
     val contentFont = rememberContentFont(settings.fontName)
 
@@ -200,16 +206,16 @@ private fun DesktopShell(
     val deckListState = rememberLazyListState()
     var decks by remember { mutableStateOf<List<DeckSummary>>(emptyList()) }
     var remaining by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
-    var browseDeckIds by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var browseAvailability by remember { mutableStateOf<Map<String, BrowseAvailability>>(emptyMap()) }
 
     LaunchedEffect(ui.reload) {
         val nextDecks = runCatching { container.deckRepository.decks() }.getOrDefault(emptyList())
         decks = nextDecks
         remaining = runCatching { container.learningRepository.remainingByDeck() }
             .getOrDefault(emptyMap())
-        browseDeckIds = runCatching {
-            container.learningRepository.browseDeckIds(nextDecks.map { it.id })
-        }.getOrDefault(emptySet())
+        browseAvailability = runCatching {
+            container.learningRepository.browseDeckAvailability(nextDecks.map { it.id })
+        }.getOrDefault(emptyMap())
     }
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -231,7 +237,7 @@ private fun DesktopShell(
         if (wide) {
             Row(Modifier.fillMaxSize()) {
                 Box(Modifier.width(listWidth).fillMaxHeight()) {
-                    DecksColumn(container, settings, palette, ui, decks, remaining, browseDeckIds, deckListState)
+                    DecksColumn(container, settings, palette, ui, decks, remaining, browseAvailability, deckListState)
                 }
                 VerticalRule(palette)
                 Box(Modifier.weight(1f).fillMaxHeight()) {
@@ -239,7 +245,7 @@ private fun DesktopShell(
                 }
             }
         } else if (ui.listOpen) {
-            DecksColumn(container, settings, palette, ui, decks, remaining, browseDeckIds, deckListState)
+            DecksColumn(container, settings, palette, ui, decks, remaining, browseAvailability, deckListState)
         } else {
             PaneContent(container, settings, palette, ui, decks, wide = false)
         }
@@ -268,11 +274,12 @@ private fun DecksColumn(
     ui: DesktopUi,
     decks: List<DeckSummary>,
     remaining: Map<String, Int>,
-    browseDeckIds: Set<String>,
+    browseAvailability: Map<String, BrowseAvailability>,
     listState: LazyListState
 ) {
     val scope = rememberCoroutineScope()
     val todayTotal = remaining.values.sum()
+    var notice by remember { mutableStateOf<String?>(null) }
 
     Box(Modifier.fillMaxSize()) {
         IknaMemoryField(seed = 0x1A4B_7C2D, modifier = Modifier.fillMaxSize())
@@ -304,6 +311,8 @@ private fun DecksColumn(
                 verticalArrangement = Arrangement.spacedBy(Space.lg)
             ) {
                 items(decks, key = { it.id }) { deck ->
+                    val browse = browseAvailability[deck.id]
+                        ?: BrowseAvailability(reason = BrowseUnavailableReason.LOAD_GUARD)
                     IknaDeckRow(
                         deck = deck,
                         look = settings.lookFor(deck.id),
@@ -311,11 +320,20 @@ private fun DecksColumn(
                         perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
                         onOpen = { ui.study(deck.id) },
                         onOpenDeck = { ui.openDeckScreen(deck.id) },
-                        onBrowse = if (deck.id in browseDeckIds) {
-                            { ui.browse(deck.id) }
-                        } else {
-                            null
-                        },
+                        onBrowse = if (browse.available) {
+                            {
+                                scope.launch {
+                                    val latest = runCatching {
+                                        container.learningRepository
+                                            .browseDeckAvailability(listOf(deck.id))[deck.id]
+                                    }.getOrNull()
+                                    if (latest?.available == true) ui.browse(deck.id)
+                                    else notice = browseUnavailableText(
+                                        latest?.reason ?: BrowseUnavailableReason.LOAD_GUARD
+                                    )
+                                }
+                            }
+                        } else null,
                         onToggle = { on ->
                             scope.launch {
                                 runCatching {
@@ -399,6 +417,13 @@ private fun DecksColumn(
                 }
             }
         }
+        IknaTransientNotice(
+            message = notice,
+            onDismiss = { notice = null },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(start = Edge, end = Edge, bottom = BarHeight + Space.md)
+        )
     }
 }
 
