@@ -976,4 +976,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "browse.012" to "Browse rests at this hour and returns after the night cutoff.",
     "browse.013" to "The load governor is protecting your effort today, so Browse stays closed.",
     "a11y.014" to "Dismiss notice",
+    "a11y.015" to "Browse unavailable",
+    "progress.001" to "TODAY",
+    "progress.002" to "DECK",
 )

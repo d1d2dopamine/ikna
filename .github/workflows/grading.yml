@@ -33,6 +33,7 @@ jobs:
       - name: Verify text, fixtures and additive migrations
         run: |
           python3 tools/check_text.py
+          python3 tools/check_localization.py
           python3 tools/grading/generate_synthetic.py --check
           python3 tools/check_grading.py
           python3 tools/grading/check_full.py

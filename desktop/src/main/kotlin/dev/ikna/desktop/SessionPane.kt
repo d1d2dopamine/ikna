@@ -1,6 +1,7 @@
 package dev.ikna.desktop
 import dev.ikna.ui.session.SessionUiState
 import dev.ikna.ui.session.IknaSessionTopBar
+import dev.ikna.ui.session.IknaTodayProgress
 import dev.ikna.ui.session.IknaSessionEmptyState
 import dev.ikna.ui.session.IknaSessionUndoBar
 import dev.ikna.ui.theme.IknaBottomBar
@@ -249,7 +250,7 @@ fun SessionPane(
             .padding(vertical = 0.dp)
     ) {
         IknaSessionTopBar(presentation)
-        IknaProgress(fraction = presentation.progress)
+        IknaTodayProgress(state = presentation)
 
         BoxWithConstraints(
             modifier = Modifier.weight(1f).fillMaxWidth(),

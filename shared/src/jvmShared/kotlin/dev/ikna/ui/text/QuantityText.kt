@@ -8,7 +8,7 @@ fun quantityWord(
     fewKey: String,
     manyKey: String
 ): String {
-    if (S.lang != LANG_RU && S.lang != LANG_PL) {
+    if (uiLanguage(S.lang)?.quantityRule != QuantityRule.SLAVIC) {
         return S.t(if (count == 1L) oneKey else manyKey)
     }
     val mod100 = count % 100

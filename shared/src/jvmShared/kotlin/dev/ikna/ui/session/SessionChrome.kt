@@ -60,6 +60,34 @@ fun IknaSessionTopBar(state: SessionUiState) {
     }
 }
 
+/** Names the short-term bar and states its finite daily scope. */
+@Composable
+fun IknaTodayProgress(state: SessionUiState) {
+    val total = state.sessionTotal.coerceAtLeast(0)
+    val done = state.sessionDone.coerceIn(0, total)
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 3.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = S.t("progress.001"),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.weight(1f))
+            Text(
+                text = "$done / $total",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        IknaProgress(fraction = state.progress)
+    }
+}
+
 @Composable
 fun IknaSessionEmptyState(
     state: SessionUiState,

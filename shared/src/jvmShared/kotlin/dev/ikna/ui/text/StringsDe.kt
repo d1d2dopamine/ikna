@@ -326,4 +326,7 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "browse.012" to "Um diese Uhrzeit pausiert Durchsehen und kehrt nach der Nachtgrenze zurück.",
     "browse.013" to "Der Belastungsregler schont heute deine Kräfte, daher bleibt Durchsehen geschlossen.",
     "a11y.014" to "Hinweis schließen",
+    "a11y.015" to "Durchsehen nicht verfügbar",
+    "progress.001" to "HEUTE",
+    "progress.002" to "STAPEL",
 )

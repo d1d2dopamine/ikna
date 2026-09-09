@@ -208,8 +208,11 @@ fun DecksScreen(
                     dueToday = today[deck.id] ?: 0,
                     perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
                     onOpen = { onOpenSession(deck.id) },
-                    onBrowse = if (browse.available) {
-                        {
+                    browseAvailable = browse.available,
+                    onBrowse = {
+                        if (!browse.available) {
+                            note = browseUnavailableText(browse.reason)
+                        } else {
                             scope.launch {
                                 val latest = runCatching {
                                     container.learningRepository
@@ -221,7 +224,7 @@ fun DecksScreen(
                                 )
                             }
                         }
-                    } else null,
+                    },
                     onOpenDeck = { onOpenDeck(deck.id) },
                     onToggle = { active ->
                         scope.launch {
@@ -430,7 +433,8 @@ private fun DeckRow(
     dueToday: Int,
     perCardMs: Long?,
     onOpen: () -> Unit,
-    onBrowse: (() -> Unit)?,
+    browseAvailable: Boolean,
+    onBrowse: () -> Unit,
     onOpenDeck: () -> Unit,
     onToggle: (Boolean) -> Unit
 ) {
@@ -485,15 +489,9 @@ private fun DeckRow(
                         )
                     )
                     Spacer(Modifier.height(Space.xs))
-                    // What today asks of this deck, and how far through it you
-                    // are, on one line.
-                    //
-                    // The percentage used to sit under the progress bar, where it
-                    // gave a switched-on row a fourth line and a shape no other
-                    // row in the list had. Beside today's figure it costs no
-                    // height at all, and the two belong together: both are one
-                    // glance at the same deck. The bar keeps the last line to
-                    // itself, which is what a bar is for.
+                    // What today asks of this deck. Long-term progress is kept on
+                    // its own explicitly named line below, so the two figures can
+                    // no longer be read as the same measure.
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = if (owes) S.t("deck.009") + dueToday +
@@ -507,14 +505,6 @@ private fun DeckRow(
                             style = MaterialTheme.typography.labelMedium,
                             color = if (owes) accent else muted
                         )
-                        if (deck.isActive) {
-                            Text(
-                                text = " · " + percentDone(deck.introduced, deck.total),
-                                maxLines = 1,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = muted
-                            )
-                        }
                     }
                 }
                 // Settings on the left of the switch, and the same height as it.
@@ -531,16 +521,15 @@ private fun DeckRow(
                 // reason, the two sit at the end of a row that is itself one big
                 // target, and a control that silently changes the height of every
                 // row in the list is the worse of the two problems.
-                if (onBrowse != null) {
-                    IknaIconButton(
-                        glyph = IknaGlyph.STACK,
-                        onClick = onBrowse,
-                        size = 32.dp,
-                        glyphSize = 18.dp,
-                        color = accent,
-                        label = S.t("a11y.012")
-                    )
-                }
+                IknaIconButton(
+                    glyph = IknaGlyph.STACK,
+                    onClick = onBrowse,
+                    size = 32.dp,
+                    glyphSize = 18.dp,
+                    color = if (browseAvailable) accent else muted,
+                    crossed = !browseAvailable,
+                    label = S.t(if (browseAvailable) "a11y.012" else "a11y.015")
+                )
                 IknaIconButton(
                     glyph = IknaGlyph.DOTS,
                     onClick = onOpenDeck,
@@ -558,13 +547,10 @@ private fun DeckRow(
             }
             if (deck.isActive) {
                 Spacer(Modifier.height(Space.md))
-                IknaProgress(
-                    fraction = if (deck.total == 0) 0f else deck.introduced.toFloat() / deck.total,
-                    height = 4.dp,
-                    color = if (owes) accent else muted,
-                    // Here the empty part means something — it is the rest of the deck.
-                    track = true,
-                    segments = 18
+                IknaDeckProgress(
+                    introduced = deck.introduced,
+                    total = deck.total,
+                    color = if (owes) accent else muted
                 )
             }
             // Sharing used to be written out on every row, which put a
@@ -652,12 +638,6 @@ private fun DeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
             maxLines = 1
         )
     }
-}
-
-/** How far into the deck, as the one figure the progress bar cannot state. */
-private fun percentDone(introduced: Int, total: Int): String {
-    if (total <= 0) return "0%"
-    return (introduced * 100 / total).toString() + "%"
 }
 
 /**

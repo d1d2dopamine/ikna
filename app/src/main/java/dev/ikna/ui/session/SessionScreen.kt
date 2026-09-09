@@ -111,7 +111,7 @@ fun SessionScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         IknaSessionTopBar(state = state)
-        IknaProgress(fraction = state.progress)
+        IknaTodayProgress(state = state)
 
         Box(
             modifier = Modifier

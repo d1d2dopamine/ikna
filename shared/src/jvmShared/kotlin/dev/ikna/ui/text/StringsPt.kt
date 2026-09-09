@@ -661,4 +661,7 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "browse.012" to "A Visualização descansa neste horário e volta depois do limite noturno.",
     "browse.013" to "O regulador de carga está poupando esforço hoje, por isso a Visualização permanece fechada.",
     "a11y.014" to "Fechar aviso",
+    "a11y.015" to "Visualização indisponível",
+    "progress.001" to "HOJE",
+    "progress.002" to "BARALHO",
 )

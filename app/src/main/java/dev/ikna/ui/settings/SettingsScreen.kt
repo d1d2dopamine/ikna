@@ -2,6 +2,8 @@ package dev.ikna.ui.settings
 
 import dev.ikna.data.prefs.suppressedOf
 import dev.ikna.ui.text.S
+import dev.ikna.ui.text.UI_LANGUAGES
+import dev.ikna.ui.text.uiLanguageLabel
 import dev.ikna.ui.debug.DebugHooks
 
 import android.Manifest
@@ -1403,8 +1405,8 @@ private val SPEECH_SECTION_INDEX = JUMPS.indexOfFirst { it.first == ID_SPEECH }
  * other deck into homework in translation.
  */
 private val LANGUAGES = listOf(
-    LANGUAGE_SYSTEM, "ru", "en", "pl", "es", "fr", "de", "pt"
-)
+    LANGUAGE_SYSTEM
+) + UI_LANGUAGES.map { it.code }
 
 /**
  * How many language chips are shown before the rest go behind one tap.
@@ -1422,14 +1424,7 @@ private const val LANGUAGE_FOLD = 6
  */
 private fun languageLabel(code: String): String = when (code) {
     LANGUAGE_SYSTEM -> S.t("set.099")
-    "ru" -> S.t("set.100")
-    "en" -> "ENGLISH"
-    "pl" -> "POLSKI"
-    "es" -> "ESPAÑOL"
-    "fr" -> "FRANÇAIS"
-    "de" -> "DEUTSCH"
-    "pt" -> "PORTUGUÊS (BRASIL)"
-    else -> code.uppercase(Locale.getDefault())
+    else -> uiLanguageLabel(code) ?: code.uppercase(Locale.getDefault())
 }
 
 private val REMINDER_TIMES = listOf(9 to 0, 13 to 0, 20 to 0, 22 to 0)

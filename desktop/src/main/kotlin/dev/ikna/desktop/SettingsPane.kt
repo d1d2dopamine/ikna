@@ -36,6 +36,8 @@ import dev.ikna.data.prefs.LANGUAGE_SYSTEM
 import dev.ikna.data.prefs.ThemeMode
 import dev.ikna.data.update.UpdateCheck
 import dev.ikna.ui.text.S
+import dev.ikna.ui.text.UI_LANGUAGES
+import dev.ikna.ui.text.uiLanguageLabel
 import dev.ikna.ui.theme.IknaChip
 import dev.ikna.ui.theme.IknaHexField
 import dev.ikna.ui.theme.IknaPalette
@@ -214,12 +216,12 @@ fun SettingsPane(
             }
             item(key = "language", contentType = "settings-section") {
                 IknaSettingsSection(S.t("set.024"), null) {
-                    val languages = listOf(LANGUAGE_SYSTEM to "set.099", "ru" to "set.105", "en" to "set.106",
-                        "pl" to "set.104", "es" to "set.108", "fr" to "set.109", "de" to "set.107",
-                        "pt" to "set.149")
+                    val languages = listOf(LANGUAGE_SYSTEM) + UI_LANGUAGES.map { it.code }
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        languages.forEach { (code, label) ->
-                            IknaChip(S.t(label), selected = settings.language == code,
+                        languages.forEach { code ->
+                            val label = if (code == LANGUAGE_SYSTEM) S.t("set.099")
+                            else uiLanguageLabel(code) ?: code.uppercase()
+                            IknaChip(label, selected = settings.language == code,
                                 onClick = { save { container.settings.setLanguage(code) } })
                         }
                     }

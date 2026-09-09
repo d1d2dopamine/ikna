@@ -169,13 +169,10 @@ fun DeckScreen(
                         color = muted
                     )
                     Spacer(Modifier.height(Space.md))
-                    IknaProgress(
-                        fraction = if (current.total == 0) 0f
-                        else current.introduced.toFloat() / current.total,
-                        height = 4.dp,
-                        color = MaterialTheme.colorScheme.primary,
-                        track = true,
-                        segments = 18
+                    IknaDeckProgress(
+                        introduced = current.introduced,
+                        total = current.total,
+                        color = MaterialTheme.colorScheme.primary
                     )
 
                     Spacer(Modifier.height(Space.xl))
@@ -442,9 +439,8 @@ fun DeckScreen(
     }
 }
 
-/** State, position in the deck, and nothing else: "Включена · 34 / 121 · 28%". */
+/** State and position in the deck; the named progress line owns the percentage. */
 private fun stateLine(deck: DeckSummary): String {
     val state = if (deck.isActive) S.t("dp.001") else S.t("dp.002")
-    val percent = if (deck.total <= 0) 0 else deck.introduced * 100 / deck.total
-    return state + " · " + deck.introduced + " / " + deck.total + " · " + percent + "%"
+    return state + " · " + deck.introduced + " / " + deck.total
 }

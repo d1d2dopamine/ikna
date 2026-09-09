@@ -14,6 +14,11 @@ def read(base, name):
     return (base / name).read_text(encoding='utf-8')
 
 
+def interface_locale_suffixes():
+    text_dir = SHARED / 'ui/text'
+    return sorted(path.stem.removeprefix('Strings') for path in text_dir.glob('Strings??.kt'))
+
+
 class DesignContracts(unittest.TestCase):
     def test_windows_title_bar_is_themed_and_other_frames_stay_native(self):
         main = read(DESKTOP, 'Main.kt')
@@ -35,8 +40,8 @@ class DesignContracts(unittest.TestCase):
         self.assertLess(main.index('runBlocking {\n        runCatching { container.install()'),
                         main.index('    application {'))
 
-    def test_window_controls_are_named_in_all_six_locales(self):
-        for language in ['En', 'Ru', 'Pl', 'De', 'Es', 'Fr']:
+    def test_window_controls_are_named_in_all_locales(self):
+        for language in interface_locale_suffixes():
             source = read(SHARED, 'ui/text/Strings' + language + '.kt')
             for number in range(17, 21):
                 self.assertIn('"pc.%03d" to ' % number, source)
@@ -147,9 +152,64 @@ class DesignContracts(unittest.TestCase):
             self.assertNotRegex(source, r'^import (?:android\.|dev\.ikna\.(?:desktop\.|AppContainer))', name)
             self.assertNotIn('LocalContext', source)
 
-    def test_all_six_locales_have_overwrite_confirmation(self):
-        for language in ['En', 'Ru', 'Pl', 'De', 'Es', 'Fr']:
+    def test_all_locales_have_overwrite_confirmation(self):
+        for language in interface_locale_suffixes():
             self.assertIn('"file.001" to ', read(SHARED, 'ui/text/Strings' + language + '.kt'))
+
+    def test_interface_language_registry_drives_both_targets(self):
+        registry = read(SHARED, 'ui/text/UiLanguages.kt')
+        self.assertEqual(registry.count('UiLanguage(LANG_'), 7)
+        for required in ['LANG_PT, "PORTUGUÊS (BRASIL)"', 'STRINGS_PT',
+                         'QuantityRule.SLAVIC', 'QuantityRule.ONE_OTHER']:
+            self.assertIn(required, registry)
+        strings = read(SHARED, 'ui/text/Strings.kt')
+        self.assertIn('uiLanguage(raw)?.code ?: LANG_EN', strings)
+        self.assertIn('uiLanguage(lang)?.strings ?: STRINGS_EN', strings)
+        quantity = read(SHARED, 'ui/text/QuantityText.kt')
+        self.assertIn('uiLanguage(S.lang)?.quantityRule', quantity)
+        for base, name in [(ANDROID, 'ui/settings/SettingsScreen.kt'), (DESKTOP, 'SettingsPane.kt')]:
+            source = read(base, name)
+            self.assertIn('UI_LANGUAGES.map { it.code }', source)
+            self.assertIn('uiLanguageLabel(code)', source)
+
+    def test_browse_control_stays_visible_and_explains_why(self):
+        flat = read(SHARED, 'ui/theme/Flat.kt')
+        for required in ['crossed: Boolean = false', 'if (crossed)',
+                         'size.width * 0.12f', 'size.height * 0.12f']:
+            self.assertIn(required, flat)
+        for base, name in [(ANDROID, 'ui/decks/DecksScreen.kt'), (SHARED, 'ui/decks/DeckList.kt')]:
+            source = read(base, name)
+            for required in ['browseAvailable: Boolean', 'crossed = !browseAvailable',
+                             'if (browseAvailable) "a11y.012" else "a11y.015"']:
+                self.assertIn(required, source)
+            self.assertNotIn('if (onBrowse != null)', source)
+        for base, name, notice in [
+            (ANDROID, 'ui/decks/DecksScreen.kt', 'note'),
+            (DESKTOP, 'Shell.kt', 'notice'),
+        ]:
+            source = read(base, name)
+            self.assertIn('browseAvailable = browse.available', source)
+            self.assertIn(notice + ' = browseUnavailableText(browse.reason)', source)
+            self.assertIn('latest?.available == true', source)
+        transient = read(SHARED, 'ui/theme/TransientNotice.kt')
+        self.assertIn('NOTICE_MILLIS = 5_000L', transient)
+        self.assertIn('widthIn(max = 560.dp)', transient)
+
+    def test_progress_names_today_and_deck_and_preserves_subpercent(self):
+        session = read(SHARED, 'ui/session/SessionChrome.kt')
+        for required in ['fun IknaTodayProgress(', 'S.t("progress.001")',
+                         'text = "$done / $total"']:
+            self.assertIn(required, session)
+        for base, name in [(ANDROID, 'ui/session/SessionScreen.kt'), (DESKTOP, 'SessionPane.kt')]:
+            self.assertIn('IknaTodayProgress(', read(base, name))
+        deck = read(SHARED, 'ui/decks/DeckList.kt')
+        for required in ['fun IknaDeckProgress(', 'S.t("progress.002")',
+                         'return if (percent == 0L) "<1%"']:
+            self.assertIn(required, deck)
+        for base, name in [(ANDROID, 'ui/decks/DecksScreen.kt'),
+                           (ANDROID, 'ui/decks/DeckScreen.kt'),
+                           (DESKTOP, 'DeckPane.kt')]:
+            self.assertIn('IknaDeckProgress(', read(base, name))
 
     def test_compose_typography_references_have_imports(self):
         # Imported Android UI bodies can keep FontWeight.Medium while losing
@@ -210,7 +270,7 @@ class DesignContracts(unittest.TestCase):
 
     def test_ci_keeps_real_build_and_migration_gates(self):
         source = read(ROOT, '.github/workflows/grading.yml')
-        for required in ['tools/check_design_parity.py', ':desktop:test', ':app:testReleaseUnitTest', ':app:assembleDebugAndroidTest', ':app:connectedDebugAndroidTest']:
+        for required in ['tools/check_localization.py', 'tools/check_design_parity.py', ':desktop:test', ':app:testReleaseUnitTest', ':app:assembleDebugAndroidTest', ':app:connectedDebugAndroidTest']:
             self.assertIn(required, source)
         source = read(ROOT, 'app/src/test/java/dev/ikna/domain/optimizer/LocalOptimizerTest.kt')
         for test in ['automaticPolicyAppliesOnlyAcceptedResultsAndHonoursMonthlyLimit', 'automaticEligibilityIsQuietAndInsufficientHistoryKeepsDefaults', 'automaticActivationCannotReviveAProfileAfterReset', 'automaticFailuresBackOffInsteadOfFittingAfterEveryAnswer']:

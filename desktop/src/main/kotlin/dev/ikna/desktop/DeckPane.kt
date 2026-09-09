@@ -1,5 +1,6 @@
 package dev.ikna.desktop
 import dev.ikna.ui.decks.IknaDeckAppearance
+import dev.ikna.ui.decks.IknaDeckProgress
 import dev.ikna.ui.decks.LangChips
 import dev.ikna.data.prefs.lookFor
 import dev.ikna.domain.phonetics.Phonetics
@@ -163,15 +164,15 @@ fun DeckPane(
     DesktopScrollablePane(current.title, onBack) {
         Spacer(Modifier.height(Space.xs))
         Text(
-            text = current.total.toString() + " " + iknaCardWord(current.total) +
-                "   " + iknaPercentDone(current.introduced, current.total),
+            text = current.total.toString() + " " + iknaCardWord(current.total),
             style = MaterialTheme.typography.labelMedium,
             color = palette.muted
         )
         Spacer(Modifier.height(Space.sm))
-        IknaProgress(
-            if (current.total <= 0) 0f else current.introduced.toFloat() / current.total.toFloat(),
-            Modifier.fillMaxWidth()
+        IknaDeckProgress(
+            introduced = current.introduced,
+            total = current.total,
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(28.dp))

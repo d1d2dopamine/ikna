@@ -661,4 +661,7 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "browse.012" to "La Vista descansa a esta hora y vuelve después del límite nocturno.",
     "browse.013" to "El regulador de carga está protegiendo hoy tu esfuerzo, por eso la Vista sigue cerrada.",
     "a11y.014" to "Cerrar aviso",
+    "a11y.015" to "Vista no disponible",
+    "progress.001" to "HOY",
+    "progress.002" to "MAZO",
 )

@@ -117,7 +117,8 @@ fun IknaDeckRow(
     onOpen: () -> Unit,
     onOpenDeck: () -> Unit,
     onToggle: (Boolean) -> Unit,
-    onBrowse: (() -> Unit)? = null
+    browseAvailable: Boolean,
+    onBrowse: () -> Unit
 ) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val accent = MaterialTheme.colorScheme.primary
@@ -158,26 +159,17 @@ fun IknaDeckRow(
                             style = MaterialTheme.typography.labelMedium,
                             color = if (owes) accent else muted
                         )
-                        if (deck.isActive) {
-                            Text(
-                                text = " \u00B7 " + iknaPercentDone(deck.introduced, deck.total),
-                                maxLines = 1,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = muted
-                            )
-                        }
                     }
                 }
-                if (onBrowse != null) {
-                    IknaIconButton(
-                        glyph = IknaGlyph.STACK,
-                        onClick = onBrowse,
-                        size = 32.dp,
-                        glyphSize = 18.dp,
-                        color = accent,
-                        label = S.t("a11y.012")
-                    )
-                }
+                IknaIconButton(
+                    glyph = IknaGlyph.STACK,
+                    onClick = onBrowse,
+                    size = 32.dp,
+                    glyphSize = 18.dp,
+                    color = if (browseAvailable) accent else muted,
+                    crossed = !browseAvailable,
+                    label = S.t(if (browseAvailable) "a11y.012" else "a11y.015")
+                )
                 IknaIconButton(
                     glyph = IknaGlyph.DOTS,
                     onClick = onOpenDeck,
@@ -195,15 +187,51 @@ fun IknaDeckRow(
             }
             if (deck.isActive) {
                 Spacer(Modifier.height(Space.md))
-                IknaProgress(
-                    fraction = if (deck.total == 0) 0f else deck.introduced.toFloat() / deck.total,
-                    height = 4.dp,
-                    color = if (owes) accent else muted,
-                    track = true,
-                    segments = 18
+                IknaDeckProgress(
+                    introduced = deck.introduced,
+                    total = deck.total,
+                    color = if (owes) accent else muted
                 )
             }
         }
+    }
+}
+
+/** Makes the long-term bar impossible to mistake for today's session. */
+@Composable
+fun IknaDeckProgress(
+    introduced: Int,
+    total: Int,
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.primary
+) {
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = S.t("progress.002"),
+            style = MaterialTheme.typography.labelSmall,
+            color = muted,
+            maxLines = 1
+        )
+        Spacer(Modifier.width(Space.sm))
+        IknaProgress(
+            fraction = if (total <= 0) 0f else introduced.toFloat() / total,
+            modifier = Modifier.weight(1f),
+            height = 4.dp,
+            color = color,
+            track = true,
+            segments = 18
+        )
+        Spacer(Modifier.width(Space.sm))
+        Text(
+            text = iknaPercentDone(introduced, total),
+            style = MaterialTheme.typography.labelSmall,
+            color = muted,
+            maxLines = 1
+        )
     }
 }
 
@@ -277,8 +305,9 @@ fun IknaDeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
 
 /** How far into the deck, as the one figure the progress bar cannot state. */
 fun iknaPercentDone(introduced: Int, total: Int): String {
-    if (total <= 0) return "0%"
-    return (introduced * 100 / total).toString() + "%"
+    if (total <= 0 || introduced <= 0) return "0%"
+    val percent = introduced.coerceAtMost(total).toLong() * 100L / total.toLong()
+    return if (percent == 0L) "<1%" else percent.toString() + "%"
 }
 
 /** "~4 min" beside what a deck owes today, when there is a measurement for it. */

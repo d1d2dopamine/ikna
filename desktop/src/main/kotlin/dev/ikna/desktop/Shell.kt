@@ -320,8 +320,11 @@ private fun DecksColumn(
                         perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
                         onOpen = { ui.study(deck.id) },
                         onOpenDeck = { ui.openDeckScreen(deck.id) },
-                        onBrowse = if (browse.available) {
-                            {
+                        browseAvailable = browse.available,
+                        onBrowse = {
+                            if (!browse.available) {
+                                notice = browseUnavailableText(browse.reason)
+                            } else {
                                 scope.launch {
                                     val latest = runCatching {
                                         container.learningRepository
@@ -333,7 +336,7 @@ private fun DecksColumn(
                                     )
                                 }
                             }
-                        } else null,
+                        },
                         onToggle = { on ->
                             scope.launch {
                                 runCatching {

@@ -976,4 +976,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "browse.012" to "O tej porze przeglądanie odpoczywa i wróci po nocnym ograniczeniu.",
     "browse.013" to "Regulator obciążenia oszczędza dziś Twój wysiłek, dlatego przeglądanie pozostaje zamknięte.",
     "a11y.014" to "Zamknij powiadomienie",
+    "a11y.015" to "Przeglądanie niedostępne",
+    "progress.001" to "DZISIAJ",
+    "progress.002" to "TALIA",
 )

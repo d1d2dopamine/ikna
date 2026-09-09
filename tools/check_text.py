@@ -45,9 +45,9 @@ MOJIBAKE = (
     "\u00e2\u20ac\u00a6", "\u00e2\u20ac\u2122", "\u00e2\u20ac\u0153",
     "\u00e2\u20ac\u009d", "\u00ef\u00bb\u00bf",
 )
-# The six localization tables moved to :shared with the rest of the code that
-# is not Android. They are still the only tables, and StringsRu is still the
-# reference the other five are compared against.
+# The interface localization tables live in :shared with the rest of the code
+# that is not Android. StringsRu remains the structural reference; the registry
+# contract is checked separately by check_localization.py.
 STRINGS_DIR = ROOT / "shared/src/jvmShared/kotlin/dev/ikna/ui/text"
 # Every module that can contain an S.t("key") call.
 KOTLIN_ROOTS = (

@@ -36,28 +36,11 @@ object S {
 
 	fun resolve(code: String): String {
 		val raw = if (code == "system") Locale.getDefault().language else code
-		return when (raw.lowercase(Locale.ROOT)) {
-			LANG_RU -> LANG_RU
-			LANG_EN -> LANG_EN
-			LANG_PL -> LANG_PL
-			LANG_ES -> LANG_ES
-			LANG_FR -> LANG_FR
-			LANG_DE -> LANG_DE
-			LANG_PT -> LANG_PT
-			else -> LANG_EN
-		}
+		return uiLanguage(raw)?.code ?: LANG_EN
 	}
 
 	fun t(key: String): String {
-		val table = when (lang) {
-			LANG_EN -> STRINGS_EN
-			LANG_PL -> STRINGS_PL
-			LANG_ES -> STRINGS_ES
-			LANG_FR -> STRINGS_FR
-			LANG_DE -> STRINGS_DE
-			LANG_PT -> STRINGS_PT
-			else -> STRINGS_RU
-		}
+		val table = uiLanguage(lang)?.strings ?: STRINGS_EN
 		val text = table[key] ?: STRINGS_EN[key] ?: key
 		return if (pseudo) pseudoLocalize(text) else text
 	}

@@ -250,6 +250,8 @@ fun IknaIconButton(
     size: Dp = 44.dp,
     glyphSize: Dp = 20.dp,
     color: Color = MaterialTheme.colorScheme.onBackground,
+    /** Draws a 45-degree slash while keeping the control pressable. */
+    crossed: Boolean = false,
     /** The name a screen reader reads out. Every call site should pass one. */
     label: String? = null
 ) {
@@ -268,6 +270,16 @@ fun IknaIconButton(
             color = color.copy(alpha = if (enabled) 1f else 0.35f),
             size = glyphSize
         )
+        if (crossed) {
+            Canvas(Modifier.size(glyphSize + 4.dp)) {
+                drawLine(
+                    color = color,
+                    start = Offset(size.width * 0.12f, size.height * 0.88f),
+                    end = Offset(size.width * 0.88f, size.height * 0.12f),
+                    strokeWidth = (size.minDimension * 0.1f).coerceAtLeast(1f)
+                )
+            }
+        }
     }
 }
 

@@ -15,8 +15,11 @@ import dev.ikna.ui.text.STRINGS_DE
 import dev.ikna.ui.text.STRINGS_PL
 import dev.ikna.ui.text.STRINGS_PT
 import dev.ikna.ui.text.STRINGS_RU
+import dev.ikna.ui.text.UI_LANGUAGES
 import dev.ikna.ui.text.pseudoLocalize
 import dev.ikna.ui.text.quantityWord
+import dev.ikna.ui.text.uiLanguage
+import dev.ikna.ui.decks.iknaPercentDone
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -35,6 +38,17 @@ class StringsCatalogTest {
     fun `every language has exactly the russian key set`() {
         val tables = listOf(STRINGS_EN, STRINGS_PL, STRINGS_ES, STRINGS_FR, STRINGS_DE, STRINGS_PT)
         tables.forEach { table -> assertEquals(STRINGS_RU.keys, table.keys) }
+    }
+
+    @Test
+    fun `the public registry owns every supported language`() {
+        val expected = listOf("ru", "en", "pl", "es", "fr", "de", "pt")
+        assertEquals(expected, UI_LANGUAGES.map { it.code })
+        assertEquals(expected.size, UI_LANGUAGES.map { it.code }.toSet().size)
+        assertEquals("PORTUGUÊS (BRASIL)", uiLanguage("pt")?.nativeLabel)
+        UI_LANGUAGES.forEach { language ->
+            assertEquals("${language.code} catalogue", STRINGS_RU.keys, language.strings.keys)
+        }
     }
 
     @Test
@@ -166,5 +180,13 @@ class LanguageResolverTest {
         } finally {
             S.apply("ru")
         }
+    }
+
+    @Test
+    fun `started deck progress below one percent is not rendered as zero`() {
+        assertEquals("0%", iknaPercentDone(0, 500))
+        assertEquals("<1%", iknaPercentDone(1, 500))
+        assertEquals("1%", iknaPercentDone(5, 500))
+        assertEquals("100%", iknaPercentDone(700, 500))
     }
 }

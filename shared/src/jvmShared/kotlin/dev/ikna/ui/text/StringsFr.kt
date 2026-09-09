@@ -345,4 +345,7 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "browse.012" to "Le parcours se repose à cette heure et reviendra après la limite nocturne.",
     "browse.013" to "Le régulateur de charge ménage vos efforts aujourd’hui ; le parcours reste donc fermé.",
     "a11y.014" to "Fermer l’avertissement",
+    "a11y.015" to "Parcours indisponible",
+    "progress.001" to "AUJOURD’HUI",
+    "progress.002" to "PAQUET",
 )
