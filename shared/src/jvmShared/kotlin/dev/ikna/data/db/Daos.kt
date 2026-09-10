@@ -626,3 +626,47 @@ interface PlanDao {
     @Query("DELETE FROM daily_plan")
     suspend fun clear()
 }
+
+/**
+ * The deliberately destructive half of "erase everything".
+ *
+ * Ordinary repositories never receive this DAO: deleting one deck preserves
+ * its append-only review history by design, while this control promises the
+ * exact opposite. Keeping every table-level delete together makes omissions
+ * visible when the schema grows and lets [IknaDatabase.wipeAllData] execute the
+ * complete set inside one shared Android/Desktop transaction.
+ */
+@Dao
+interface WipeDao {
+    @Query("DELETE FROM browse_exposures")
+    suspend fun clearBrowseExposures()
+
+    @Query("DELETE FROM reviews")
+    suspend fun clearReviews()
+
+    @Query("DELETE FROM cards")
+    suspend fun clearCards()
+
+    @Query("DELETE FROM components")
+    suspend fun clearComponents()
+
+    @Query("DELETE FROM daily_stats")
+    suspend fun clearDailyStats()
+
+    @Query("DELETE FROM governor_log")
+    suspend fun clearGovernorLog()
+
+    @Query("DELETE FROM daily_plan")
+    suspend fun clearDailyPlan()
+
+    @Query("DELETE FROM chunk_tokens")
+    suspend fun clearChunkTokens()
+
+    // Deleting chunks fires ChunkFtsIndex's delete trigger, so the external
+    // full-text index cannot retain terms from erased or imported decks.
+    @Query("DELETE FROM chunks")
+    suspend fun clearChunks()
+
+    @Query("DELETE FROM packs")
+    suspend fun clearPacks()
+}

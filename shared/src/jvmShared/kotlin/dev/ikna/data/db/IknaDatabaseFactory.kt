@@ -44,3 +44,25 @@ fun buildIknaDatabase(builder: RoomDatabase.Builder<IknaDatabase>): IknaDatabase
  */
 suspend fun <R> IknaDatabase.inTransaction(block: suspend () -> R): R =
     useWriterConnection { transactor -> transactor.immediateTransaction { block() } }
+
+/**
+ * Clears every entity table in one transaction on both Android and Desktop.
+ *
+ * Room's generated Android database exposes clearAllTables(), but its KMP
+ * desktop base type does not. This explicit DAO is therefore also the schema
+ * checklist: adding an entity requires adding its delete here and to the
+ * source contract that compares the two sets.
+ */
+suspend fun IknaDatabase.wipeAllData() = inTransaction {
+    val wipe = wipeDao()
+    wipe.clearBrowseExposures()
+    wipe.clearReviews()
+    wipe.clearCards()
+    wipe.clearComponents()
+    wipe.clearDailyStats()
+    wipe.clearGovernorLog()
+    wipe.clearDailyPlan()
+    wipe.clearChunkTokens()
+    wipe.clearChunks()
+    wipe.clearPacks()
+}

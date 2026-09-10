@@ -1,6 +1,7 @@
 package dev.ikna.desktop
 
 import dev.ikna.data.db.openIknaDatabase
+import dev.ikna.data.db.wipeAllData
 import dev.ikna.data.pack.PackLoader
 import dev.ikna.data.prefs.SETTINGS_DATASTORE_FILE
 import dev.ikna.data.prefs.SettingsStore
@@ -138,13 +139,13 @@ class DesktopContainer(val home: File) {
      * Full wipe, as if the desktop app had just been installed.
      *
      * Deleting decks one by one deliberately preserves the append-only review
-     * log, so it can never implement "erase everything". Room clears every
-     * entity table as one database operation; preferences are cleared after it
-     * so their first-run flag sends the window back to onboarding. The caller
-     * keeps this blocking database operation off the UI thread.
+     * log, so it can never implement "erase everything". The shared KMP wipe
+     * DAO clears every entity table in one transaction; preferences are cleared
+     * after it so their first-run flag sends the window back to onboarding. The
+     * caller keeps the operation off the UI thread.
      */
     suspend fun wipeAllData() {
-        db.clearAllTables()
+        db.wipeAllData()
         settings.clearAll()
     }
 

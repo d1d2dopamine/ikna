@@ -54,6 +54,7 @@ abstract class IknaDatabase : RoomDatabase() {
     abstract fun statsDao(): StatsDao
     abstract fun governorDao(): GovernorDao
     abstract fun planDao(): PlanDao
+    abstract fun wipeDao(): WipeDao
 }
 
 /**

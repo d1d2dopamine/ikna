@@ -1,6 +1,7 @@
 package dev.ikna
 
 import dev.ikna.data.db.openIknaDatabase
+import dev.ikna.data.db.wipeAllData
 import dev.ikna.domain.governor.loadGovernorConfig
 
 import android.content.Context
@@ -126,13 +127,13 @@ class AppContainer(context: Context) {
     /**
      * Full wipe, as if the app had just been installed.
      *
-     * Room's own clearAllTables does it in one transaction, so a wipe cannot
-     * leave half a database behind. Blocking call — keep it off the main thread.
+     * The shared KMP wipe DAO does it in one transaction, so a wipe cannot
+     * leave half a database behind. Keep it off the main thread.
      * The caller is expected to clear settings and restart the process too:
      * singletons and in-memory session state outlive the tables otherwise.
      */
-    fun wipeDatabase() {
-        db.clearAllTables()
+    suspend fun wipeDatabase() {
+        db.wipeAllData()
     }
 
     val jsonExporter = JsonExporter(context, db.reviewDao())

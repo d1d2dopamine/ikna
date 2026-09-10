@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Offline source contracts; not a Kotlin compiler or a screenshot test."""
 from pathlib import Path
+import json
 import re
+import sqlite3
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -204,15 +206,75 @@ class DesignContracts(unittest.TestCase):
         android = read(ANDROID, 'AppContainer.kt')
         desktop = read(DESKTOP, 'DesktopContainer.kt')
         settings = read(DESKTOP, 'SettingsPane.kt')
-        self.assertIn('fun wipeDatabase()', android)
-        self.assertIn('db.clearAllTables()', android)
-        for required in ['suspend fun wipeAllData()', 'db.clearAllTables()',
+        database = read(SHARED, 'data/db/IknaDatabase.kt')
+        factory = read(SHARED, 'data/db/IknaDatabaseFactory.kt')
+        daos = read(SHARED, 'data/db/Daos.kt')
+        self.assertIn('suspend fun wipeDatabase()', android)
+        self.assertIn('db.wipeAllData()', android)
+        for required in ['suspend fun wipeAllData()', 'db.wipeAllData()',
                          'settings.clearAll()']:
             self.assertIn(required, desktop)
+        self.assertIn('abstract fun wipeDao(): WipeDao', database)
+        for required in ['suspend fun IknaDatabase.wipeAllData()',
+                         'inTransaction {', 'val wipe = wipeDao()']:
+            self.assertIn(required, factory)
+        wipe_dao = daos.split('interface WipeDao {', 1)[1]
+        wiped_tables = set(re.findall(r'@Query\("DELETE FROM ([a-z_]+)"\)', wipe_dao))
+        schema = read(ROOT, 'app/schemas/dev.ikna.data.db.IknaDatabase/9.json')
+        schema_tables = set(re.findall(r'"tableName"\s*:\s*"([a-z_]+)"', schema))
+        self.assertEqual(schema_tables, wiped_tables)
+        self.assertEqual(10, len(wiped_tables))
+        self.assertNotIn('clearAllTables', android + desktop)
         self.assertIn('withContext(Dispatchers.IO)', settings)
         self.assertIn('container.wipeAllData()', settings)
         self.assertIn('onWiped()', settings)
         self.assertNotIn('container.deckRepository.delete(deck.id)', settings)
+
+    def test_wipe_queries_execute_and_empty_every_schema_nine_table(self):
+        schema_path = ROOT / 'app/schemas/dev.ikna.data.db.IknaDatabase/9.json'
+        entities = json.loads(schema_path.read_text(encoding='utf-8'))['database']['entities']
+        database = sqlite3.connect(':memory:')
+        tables = []
+        for entity in entities:
+            table = entity['tableName']
+            tables.append(table)
+            database.execute(entity['createSql'].replace('${TABLE_NAME}', table))
+            columns = database.execute(f'PRAGMA table_info("{table}")').fetchall()
+            names = [f'"{column[1]}"' for column in columns]
+            values = []
+            for column in columns:
+                affinity = (column[2] or 'TEXT').upper()
+                if 'INT' in affinity:
+                    values.append(1)
+                elif any(kind in affinity for kind in ('REAL', 'FLOA', 'DOUB')):
+                    values.append(1.0)
+                elif 'BLOB' in affinity:
+                    values.append(b'x')
+                else:
+                    values.append('x')
+            marks = ','.join('?' for _ in values)
+            database.execute(
+                f'INSERT INTO "{table}" ({",".join(names)}) VALUES ({marks})',
+                values
+            )
+        database.commit()
+        self.assertTrue(all(database.execute(
+            f'SELECT COUNT(*) FROM "{table}"'
+        ).fetchone()[0] == 1 for table in tables))
+
+        daos = read(SHARED, 'data/db/Daos.kt')
+        wipe_dao = daos.split('interface WipeDao {', 1)[1]
+        queries = re.findall(r'@Query\("(DELETE FROM [a-z_]+)"\)', wipe_dao)
+        self.assertEqual(10, len(queries))
+        database.execute('BEGIN')
+        for query in queries:
+            database.execute(query)
+        database.commit()
+        self.assertTrue(all(database.execute(
+            f'SELECT COUNT(*) FROM "{table}"'
+        ).fetchone()[0] == 0 for table in tables))
+        self.assertEqual(('ok',), database.execute('PRAGMA integrity_check').fetchone())
+        database.close()
 
     def test_desktop_first_launch_uses_the_mobile_onboarding_contract(self):
         shell = read(DESKTOP, 'Shell.kt')
