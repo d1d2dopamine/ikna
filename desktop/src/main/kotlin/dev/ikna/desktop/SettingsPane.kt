@@ -48,7 +48,9 @@ import dev.ikna.ui.theme.hexOf
 import dev.ikna.ui.theme.isLight
 import dev.ikna.ui.theme.parseHexColor
 import dev.ikna.ui.theme.ratioText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
@@ -71,6 +73,7 @@ fun SettingsPane(
     settings: IknaSettings,
     palette: IknaPalette,
     onOpenBackup: () -> Unit = {},
+    onWiped: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
@@ -527,25 +530,34 @@ fun SettingsPane(
                                 wipeArmed = true
                                 dataNote = S.t("set.075")
                             } else {
+                                wipeArmed = false
                                 scope.launch {
-                                    runCatching {
-                                        val target = File(container.home, "export")
-                                        target.mkdirs()
-                                        container.deckRepository.decks().forEach { deck ->
-                                            val body = container.deckRepository.exportText(deck.id)
-                                            if (body.isNotBlank()) {
-                                                File(target, fileNameFor(deck.title)).writeText(body)
+                                    val wiped = withContext(Dispatchers.IO) {
+                                        // A failed courtesy export must not turn
+                                        // the explicit second press into a no-op.
+                                        runCatching {
+                                            val target = File(container.home, "export")
+                                            target.mkdirs()
+                                            container.deckRepository.decks().forEach { deck ->
+                                                val body = container.deckRepository.exportText(deck.id)
+                                                if (body.isNotBlank()) {
+                                                    File(target, fileNameFor(deck.title)).writeText(body)
+                                                }
                                             }
+                                        }.onFailure { error ->
+                                            logLine("pre-wipe export failed: " + error)
                                         }
-                                        container.deckRepository.decks().forEach { deck ->
-                                            container.deckRepository.delete(deck.id)
-                                        }
-                                        container.componentRepository.clearAll()
-                                        container.learningRepository.invalidatePlan()
-                                        container.settings.clearAll()
-                                    }.onFailure { error -> logLine("wipe failed: " + error) }
-                                    wipeArmed = false
-                                    dataNote = null
+
+                                        runCatching { container.wipeAllData() }
+                                    }
+                                    wiped.onSuccess {
+                                        dataNote = null
+                                        onWiped()
+                                    }.onFailure { error ->
+                                        logLine("wipe failed: " + error)
+                                        dataNote = S.t("pc.013") + " " +
+                                            iknaLogFile(container.home).absolutePath
+                                    }
                                 }
                             }
                         }

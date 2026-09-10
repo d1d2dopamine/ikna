@@ -123,6 +123,31 @@ class DesktopContainer(val home: File) {
         }
     }
 
+    /**
+     * Finishes the same first-run contract as Android: make sure the bundled
+     * deck exists, build the first finite plan, and only then dismiss the
+     * introduction. Safe after a full wipe because bundled packs are upserts.
+     */
+    suspend fun completeOnboarding() {
+        packLoader.installBundledPacks()
+        learningRepository.ensureDailyPlan()
+        settings.setOnboardingDone(true)
+    }
+
+    /**
+     * Full wipe, as if the desktop app had just been installed.
+     *
+     * Deleting decks one by one deliberately preserves the append-only review
+     * log, so it can never implement "erase everything". Room clears every
+     * entity table as one database operation; preferences are cleared after it
+     * so their first-run flag sends the window back to onboarding. The caller
+     * keeps this blocking database operation off the UI thread.
+     */
+    suspend fun wipeAllData() {
+        db.clearAllTables()
+        settings.clearAll()
+    }
+
     // Main installs the decks before the window opens and the shell asks again
     // from the composition. The second ask is a no-op rather than a second
     // pass over the manifest.

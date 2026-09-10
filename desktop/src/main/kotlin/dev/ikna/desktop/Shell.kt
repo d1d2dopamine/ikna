@@ -121,6 +121,17 @@ class DesktopUi {
     fun refresh() {
         reload += 1
     }
+
+    /** Everything held only by the running window must match a first launch. */
+    fun resetForFirstRun() {
+        pane = Pane.SESSION
+        openDeck = null
+        sessionDeck = null
+        browseDeck = null
+        showShortcuts = false
+        listOpen = false
+        reload += 1
+    }
 }
 
 @Composable
@@ -129,7 +140,13 @@ fun IknaDesktopApp(
     ui: DesktopUi,
     titleBar: @Composable (IknaPalette) -> Unit = {}
 ) {
-    val settings by container.settings.flow.collectAsState(initial = IknaSettings())
+    // Null means the DataStore has not answered yet. Using a default settings
+    // object as the loading value would flash onboarding on every ordinary
+    // launch, because onboardingDone defaults to false.
+    val storedSettings by container.settings.flow.collectAsState(
+        initial = null as IknaSettings?
+    )
+    val settings = storedSettings ?: IknaSettings()
 
     // A desktop window has no reliable light/dark signal to read, so the
     // lighting follows the chosen palette and defaults to dark, which is what
@@ -138,6 +155,10 @@ fun IknaDesktopApp(
 
     LaunchedEffect(settings.language, settings.pseudoLocale) {
         S.apply(settings.language, settings.pseudoLocale)
+    }
+
+    LaunchedEffect(storedSettings?.onboardingDone) {
+        if (storedSettings?.onboardingDone == false) ui.resetForFirstRun()
     }
 
     val contentFont = rememberContentFont(settings.fontName)
@@ -159,7 +180,7 @@ fun IknaDesktopApp(
         Column(Modifier.fillMaxSize().background(palette.background)) {
             titleBar(palette)
             Box(Modifier.weight(1f).fillMaxWidth()) {
-                if (!ready) {
+                if (!ready || storedSettings == null) {
                     Column(
                         Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center,
@@ -169,6 +190,8 @@ fun IknaDesktopApp(
                         Spacer(Modifier.height(Space.lg))
                         Box(Modifier.width(220.dp)) { IknaLatticePlaceholder() }
                     }
+                } else if (!settings.onboardingDone) {
+                    DesktopOnboardingPane(container) { ui.resetForFirstRun() }
                 } else {
                     DesktopShell(container, settings, palette, ui)
                 }
@@ -519,6 +542,7 @@ private fun PaneContent(
                 settings = settings,
                 palette = palette,
                 onOpenBackup = { ui.show(Pane.BACKUP) },
+                onWiped = { ui.resetForFirstRun() },
                 onBack = back
             )
 

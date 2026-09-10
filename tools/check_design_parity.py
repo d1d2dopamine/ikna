@@ -174,17 +174,18 @@ class DesignContracts(unittest.TestCase):
 
     def test_browse_control_stays_visible_and_explains_why(self):
         flat = read(SHARED, 'ui/theme/Flat.kt')
-        for required in ['crossed: Boolean = false', 'if (crossed)',
-                         'val canvasSize = this.size', 'canvasSize.width * 0.12f',
-                         'canvasSize.height * 0.12f',
-                         'minOf(canvasSize.width, canvasSize.height)']:
+        for required in ['IknaGlyph.BROWSE ->', 's * 0.78f', 's * 0.61f',
+                         's * 0.44f', 'val x = s * 0.11f']:
             self.assertIn(required, flat)
-        self.assertNotIn('Offset(size.width', flat)
+        self.assertNotIn('IknaGlyph.STACK', flat)
+        self.assertNotIn('crossed: Boolean', flat)
         for base, name in [(ANDROID, 'ui/decks/DecksScreen.kt'), (SHARED, 'ui/decks/DeckList.kt')]:
             source = read(base, name)
-            for required in ['browseAvailable: Boolean', 'crossed = !browseAvailable',
+            for required in ['browseAvailable: Boolean', 'glyph = IknaGlyph.BROWSE',
+                             'color = if (browseAvailable) accent else muted',
                              'if (browseAvailable) "a11y.012" else "a11y.015"']:
                 self.assertIn(required, source)
+            self.assertNotIn('crossed =', source)
             self.assertNotIn('if (onBrowse != null)', source)
         for base, name, notice in [
             (ANDROID, 'ui/decks/DecksScreen.kt', 'note'),
@@ -198,6 +199,36 @@ class DesignContracts(unittest.TestCase):
         transient = read(SHARED, 'ui/theme/TransientNotice.kt')
         self.assertIn('NOTICE_MILLIS = 5_000L', transient)
         self.assertIn('widthIn(max = 560.dp)', transient)
+
+    def test_desktop_wipe_clears_the_whole_database_and_returns_to_first_run(self):
+        android = read(ANDROID, 'AppContainer.kt')
+        desktop = read(DESKTOP, 'DesktopContainer.kt')
+        settings = read(DESKTOP, 'SettingsPane.kt')
+        self.assertIn('fun wipeDatabase()', android)
+        self.assertIn('db.clearAllTables()', android)
+        for required in ['suspend fun wipeAllData()', 'db.clearAllTables()',
+                         'settings.clearAll()']:
+            self.assertIn(required, desktop)
+        self.assertIn('withContext(Dispatchers.IO)', settings)
+        self.assertIn('container.wipeAllData()', settings)
+        self.assertIn('onWiped()', settings)
+        self.assertNotIn('container.deckRepository.delete(deck.id)', settings)
+
+    def test_desktop_first_launch_uses_the_mobile_onboarding_contract(self):
+        shell = read(DESKTOP, 'Shell.kt')
+        onboarding = read(DESKTOP, 'OnboardingPane.kt')
+        container = read(DESKTOP, 'DesktopContainer.kt')
+        for required in ['storedSettings == null', '!settings.onboardingDone',
+                         'DesktopOnboardingPane(container)', 'resetForFirstRun()']:
+            self.assertIn(required, shell)
+        for required in ['"onb.001"', '"onb.003"', '"onb.005"', '"onb.011"',
+                         'IknaWordmark(', 'GestureDemo()', 'container.completeOnboarding()']:
+            self.assertIn(required, onboarding)
+        for required in ['suspend fun completeOnboarding()',
+                         'packLoader.installBundledPacks()',
+                         'learningRepository.ensureDailyPlan()',
+                         'settings.setOnboardingDone(true)']:
+            self.assertIn(required, container)
 
     def test_progress_names_today_and_deck_and_preserves_subpercent(self):
         session = read(SHARED, 'ui/session/SessionChrome.kt')

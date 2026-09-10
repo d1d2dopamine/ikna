@@ -84,7 +84,7 @@ import kotlin.math.floor
  * clip-art, and a pulled-in icon font would bring Material's rounded geometry
  * back through the side door.
  */
-enum class IknaGlyph { SPARK, STACK, BARS, SLIDERS, GEAR, PLUS, BACK, SOUND, DOTS, SEARCH }
+enum class IknaGlyph { SPARK, BROWSE, BARS, SLIDERS, GEAR, PLUS, BACK, SOUND, DOTS, SEARCH }
 
 @Composable
 fun IknaGlyphIcon(
@@ -122,11 +122,18 @@ fun IknaGlyphIcon(
                 }
                 drawPath(path, color)
             }
-            // Decks: three stacked slabs.
-            IknaGlyph.STACK -> {
-                val h = s * 0.16f
-                listOf(0f, s * 0.42f, s * 0.84f).forEach { y ->
-                    drawRect(color, Offset(0f, y), Size(s, h))
+            // Browse: three left-aligned lines of text. At the 18dp size used
+            // beside a deck they are approximately 14 / 11 / 8dp long, with
+            // the same square geometry and optical weight as the other marks.
+            IknaGlyph.BROWSE -> {
+                val h = s * 0.10f
+                val x = s * 0.11f
+                listOf(
+                    s * 0.17f to s * 0.78f,
+                    s * 0.45f to s * 0.61f,
+                    s * 0.73f to s * 0.44f
+                ).forEach { (y, width) ->
+                    drawRect(color, Offset(x, y), Size(width, h))
                 }
             }
             // Progress: bars of different heights, never a rising curve.
@@ -250,8 +257,6 @@ fun IknaIconButton(
     size: Dp = 44.dp,
     glyphSize: Dp = 20.dp,
     color: Color = MaterialTheme.colorScheme.onBackground,
-    /** Draws a 45-degree slash while keeping the control pressable. */
-    crossed: Boolean = false,
     /** The name a screen reader reads out. Every call site should pass one. */
     label: String? = null
 ) {
@@ -270,21 +275,6 @@ fun IknaIconButton(
             color = color.copy(alpha = if (enabled) 1f else 0.35f),
             size = glyphSize
         )
-        if (crossed) {
-            Canvas(Modifier.size(glyphSize + 4.dp)) {
-                // IknaIconButton also has a Dp parameter named `size`. Name the
-                // DrawScope size explicitly so that Kotlin cannot resolve the
-                // coordinates against that outer parameter.
-                val canvasSize = this.size
-                drawLine(
-                    color = color,
-                    start = Offset(canvasSize.width * 0.12f, canvasSize.height * 0.88f),
-                    end = Offset(canvasSize.width * 0.88f, canvasSize.height * 0.12f),
-                    strokeWidth = (minOf(canvasSize.width, canvasSize.height) * 0.1f)
-                        .coerceAtLeast(1f)
-                )
-            }
-        }
     }
 }
 

@@ -162,12 +162,11 @@ fun IknaDeckRow(
                     }
                 }
                 IknaIconButton(
-                    glyph = IknaGlyph.STACK,
+                    glyph = IknaGlyph.BROWSE,
                     onClick = onBrowse,
                     size = 32.dp,
                     glyphSize = 18.dp,
                     color = if (browseAvailable) accent else muted,
-                    crossed = !browseAvailable,
                     label = S.t(if (browseAvailable) "a11y.012" else "a11y.015")
                 )
                 IknaIconButton(
