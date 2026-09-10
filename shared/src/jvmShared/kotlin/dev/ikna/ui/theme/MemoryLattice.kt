@@ -106,6 +106,10 @@ fun IknaDeckHeaderPaint(
         val todayRight = 196.dp.toPx()
         val todayTop = 51.dp.toPx()
         val todayBottom = 146.dp.toPx()
+        // Preserve the successful upper-right cluster exactly. Every hidden
+        // column still advances the deterministic generator; it simply does
+        // not paint the isolated marks that used to sit on the left.
+        val clusterLeft = size.width * 0.49f
 
         fun protected(x: Float, y: Float, width: Float, height: Float): Boolean {
             fun touches(left: Float, top: Float, right: Float, bottom: Float): Boolean =
@@ -133,7 +137,7 @@ fun IknaDeckHeaderPaint(
                 val x = (column * pitch + ((state ushr 12) and 3) * pixel * 0.24f)
                     .coerceIn(0f, (size.width - markWidth).coerceAtLeast(0f))
                 val y = row * pitch + ((state ushr 14) and 3) * pixel * 0.20f
-                if (protected(x, y, markWidth, markHeight)) continue
+                if (x < clusterLeft || protected(x, y, markWidth, markHeight)) continue
 
                 val alpha = when ((state ushr 24) and 3) {
                     0 -> 0.18f
@@ -162,7 +166,7 @@ fun IknaDeckHeaderPaint(
                 if (step > 1 && ((state ushr 25) and 3) == 0) continue
                 val height = if (step == run - 1) pixel * 2f else pixel
                 val y = 45.dp.toPx() + step * pitch
-                if (y >= size.height || protected(x, y, width, height)) continue
+                if (x < clusterLeft || y >= size.height || protected(x, y, width, height)) continue
                 drawRect(
                     color = ink.copy(alpha = if (step == run - 1) 0.15f else 0.105f),
                     topLeft = Offset(x, y),

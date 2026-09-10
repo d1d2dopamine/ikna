@@ -45,8 +45,8 @@ private data class DesktopOnboardingSlide(
 private val DESKTOP_ONBOARDING_SLIDES = listOf(
     DesktopOnboardingSlide("onb.001", "onb.002"),
     DesktopOnboardingSlide("onb.003", "onb.004"),
-    DesktopOnboardingSlide("onb.005", "onb.006"),
-    DesktopOnboardingSlide("onb.011", "onb.012", demo = true)
+    DesktopOnboardingSlide("onb.005", "onb.006", demo = true),
+    DesktopOnboardingSlide("onb.011", "onb.012")
 )
 
 /**
@@ -167,7 +167,7 @@ fun DesktopOnboardingPane(
     }
 }
 
-/** The same static swipe explanation the phone shows on its final slide. */
+/** The same static answer explanation the phone shows beside the error text. */
 @Composable
 private fun GestureDemo() {
     Box(

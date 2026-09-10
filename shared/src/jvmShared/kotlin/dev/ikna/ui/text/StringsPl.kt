@@ -606,17 +606,17 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"sess.046" to "termin",
 	"sess.047" to "z pamięci",
 	// Фразами, а не словами
-	"onb.001" to "Zwrotami, nie słowami",
+	"onb.001" to "To jest ikna.",
 	// Внутри — готовые чанки: короткие живые куски речи. Новые добавляются сами — ничего не надо
-	"onb.002" to "W środku są gotowe chunki: krótkie, żywe kawałki mowy. Nowe dochodzą same — niczego nie trzeba wpisywać ręcznie.",
+	"onb.002" to "Stworzyłem ikna, ponieważ współczesny rynek aplikacji SRS kształtują głównie zespoły marketingowe, których nie obchodzi, ile naprawdę udaje się nauczyć ani jak skuteczna jest nauka. Innym powodem jest to, że obecnie nie ma aplikacji do nauki przedmiotów i języków zaprojektowanych dla osób neuroróżnorodnych, na przykład osób z ADHD. Chcę pomóc uniknąć problemów, które pojawiają się w innych aplikacjach podczas prób nauczenia się lub opanowania czegoś.",
 	// Пропуск — не провал
-	"onb.003" to "Przerwa to nie porażka",
+	"onb.003" to "Każdego dnia aplikacja układa skończony plan.",
 	// Если день или неделя пропали, завала на входе не будет. Старое уйдёт в тихий пул и будет в
-	"onb.004" to "Opuszczony tydzień nie zostawi zatoru: stare wraca po trochu.",
+	"onb.004" to "Gdy plan jest ukończony, to wszystko na dziś. Liczba kart zmienia się stopniowo i zależy od poprzednich dni.",
 	// Минимум — одна карточка
-	"onb.005" to "Minimum to jedna karta",
+	"onb.005" to "Najpierw wypróbuj aplikację i zdecyduj, czy jest ci potrzebna.",
 	// Одна карточка закрывает день целиком. Захочется больше — есть кнопка «ещё немного», и она
-	"onb.006" to "Jedna karta zamyka cały dzień. Zechcesz więcej — jest przycisk «jeszcze trochę», i nie obciąży jutra.",
+	"onb.006" to "Błąd tutaj nie jest karą. Pomaga aplikacji prawidłowo zaplanować następną powtórkę.",
 	// ГОТОВЛЮ КАРТОЧКИ…
 	"onb.007" to "PRZYGOTOWUJĘ KARTY…",
 	// ДАЛЬШЕ
@@ -626,9 +626,9 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// ПРОПУСТИТЬ
 	"onb.010" to "POMIŃ",
 	// Влево и вправо
-	"onb.011" to "W lewo i w prawo",
+	"onb.011" to "Postęp jest przechowywany na urządzeniu.",
 	// Карточку смахивают: влево — не знаю, вправо — знаю. Можно вместо этого нажать на слово внизу. Ответ отменяется сразу после него, так что ошибиться не страшно.
-	"onb.012" to "W lewo — nie znam, w prawo — znam. Odpowiedź można cofnąć od razu po niej.",
+	"onb.012" to "Możesz go wyeksportować, przenieść lub całkowicie usunąć w ustawieniach. Jestem otwarty na krytykę i poprę twoje pomysły, jeśli okażą się przydatne. Zacznijmy od pierwszej krótkiej sesji.",
 	// ОТЛИЧНОЕ
 	"speaker.001" to "ŚWIETNA",
 	// ХОРОШЕЕ

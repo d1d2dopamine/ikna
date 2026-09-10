@@ -52,23 +52,21 @@ private data class Slide(
 private val SLIDES = listOf(
     Slide("onb.001", "onb.002"),
     Slide("onb.003", "onb.004"),
-    Slide("onb.005", "onb.006"),
-    Slide("onb.011", "onb.012", demo = true)
+    Slide("onb.005", "onb.006", demo = true),
+    Slide("onb.011", "onb.012")
 )
 
 /**
  * Four screens, then the first card.
  *
- * The first three answer the questions that decide whether the app survives
- * week two — what am I learning, what happens if I disappear, and how little is
- * enough — and they never ask the user to configure anything.
+ * The screens keep the author's own order: why ikna exists, how the finite
+ * daily plan works, whether the app feels useful and what an error does, then
+ * where progress lives and how feedback is welcomed. No configuration is
+ * required before the first session.
  *
- * The fourth one exists because the first three used to be the whole screen,
- * and none of them said how to answer a card. The gesture was left to be
- * guessed: the words at the bottom corners of a card are visible from the
- * first answer onwards, but only after the first answer has already been
- * given. Being the last slide is deliberate — it is the last thing read before
- * the card it describes, and "skip" now lands here rather than past it.
+ * The static answer demo sits beside the third screen because that is where an
+ * error and its effect on the next review are explained. The final screen stays
+ * visually quiet so its data and feedback promise is the last thing read.
  */
 @Composable
 fun OnboardingScreen(container: AppContainer, onDone: () -> Unit) {

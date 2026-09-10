@@ -314,13 +314,37 @@ class DesignContracts(unittest.TestCase):
     def test_desktop_first_launch_uses_the_mobile_onboarding_contract(self):
         shell = read(DESKTOP, 'Shell.kt')
         onboarding = read(DESKTOP, 'OnboardingPane.kt')
+        android_onboarding = read(ANDROID, 'ui/onboarding/OnboardingScreen.kt')
         container = read(DESKTOP, 'DesktopContainer.kt')
+        russian = read(SHARED, 'ui/text/StringsRu.kt')
+        english = read(SHARED, 'ui/text/StringsEn.kt')
         for required in ['storedSettings == null', '!settings.onboardingDone',
                          'DesktopOnboardingPane(container)', 'resetForFirstRun()']:
             self.assertIn(required, shell)
         for required in ['"onb.001"', '"onb.003"', '"onb.005"', '"onb.011"',
-                         'IknaWordmark(', 'GestureDemo()', 'container.completeOnboarding()']:
+                         'IknaWordmark(', 'GestureDemo()', 'container.completeOnboarding()',
+                         'DesktopOnboardingSlide("onb.005", "onb.006", demo = true)',
+                         'DesktopOnboardingSlide("onb.011", "onb.012")']:
             self.assertIn(required, onboarding)
+        self.assertIn('Slide("onb.005", "onb.006", demo = true)', android_onboarding)
+        self.assertIn('Slide("onb.011", "onb.012")', android_onboarding)
+        for required in [
+            '"onb.001" to "Это ikna."',
+            'современный рынок SRS-приложений',
+            '"onb.003" to "Каждый день приложение собирает конечный план."',
+            'План закончен - на сегодня всё.',
+            '"onb.005" to "Сначала попробуй приложение и определи, нужно ли оно тебе."',
+            'Ошибка здесь не наказывает тебя - она помогает приложению',
+            '"onb.011" to "Прогресс хранится на устройстве."',
+            'Я готов к критике и поддержу твои идеи, если они будут полезны.'
+        ]:
+            self.assertIn(required, russian)
+        for line in russian.splitlines():
+            if any(f'"{key}"' in line for key in
+                   ('onb.001', 'onb.002', 'onb.003', 'onb.004',
+                    'onb.005', 'onb.006', 'onb.011', 'onb.012')):
+                self.assertNotIn('—', line)
+        self.assertIn('"onb.001" to "This is ikna."', english)
         for required in ['suspend fun completeOnboarding()',
                          'packLoader.installBundledPacks()',
                          'learningRepository.ensureDailyPlan()',
@@ -422,6 +446,8 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('fun IknaDeckHeaderPaint(', lattice)
         self.assertIn('val todayLeft', lattice)
         self.assertIn('fun protected(', lattice)
+        self.assertIn('val clusterLeft = size.width * 0.49f', lattice)
+        self.assertEqual(2, lattice.count('x < clusterLeft'))
         self.assertIn('for (step in 0 until run)', lattice)
         for home in (android_home, desktop_shell):
             self.assertIn('IknaDeckHeaderPaint(seed = 0x5D31_7A0C)', home)

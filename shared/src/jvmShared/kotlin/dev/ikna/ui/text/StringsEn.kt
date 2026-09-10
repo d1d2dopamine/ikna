@@ -605,18 +605,18 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"sess.045" to "Taken out of rotation. The mistake was not written into your statistics.",
 	"sess.046" to "the term",
 	"sess.047" to "from memory",
-	// Фразами, а не словами
-	"onb.001" to "In phrases, not in words",
-	// Внутри — готовые чанки: короткие живые куски речи. Новые добавляются сами — ничего не надо
-	"onb.002" to "Inside are ready-made chunks: short living pieces of speech. New ones are added by themselves — nothing has to be typed in by hand.",
-	// Пропуск — не провал
-	"onb.003" to "A skip is not a failure",
-	// Если день или неделя пропали, завала на входе не будет. Старое уйдёт в тихий пул и будет в
-	"onb.004" to "A missed week leaves no pile at the door: the old comes back little by little.",
-	// Минимум — одна карточка
-	"onb.005" to "The minimum is one card",
-	// Одна карточка закрывает день целиком. Захочется больше — есть кнопка «ещё немного», и она
-	"onb.006" to "One card closes the whole day. If you want more, there is an «a bit more» button, and it will not make tomorrow heavier.",
+	// Это ikna.
+	"onb.001" to "This is ikna.",
+	// Я сделал ikna, потому что современный рынок SRS-приложений в основном формируют команды маркетологов, которым не важно, сколько удаётся выучить и насколько эффективно проходит обучение. Ещё одна причина в том, что сейчас нет приложений для изучения предметов и языков, созданных для нейроотличных людей, например для людей с СДВГ. Я хочу помочь избежать проблем, которые возникают в других приложениях при попытке что-то изучить или освоить.
+	"onb.002" to "I made ikna because today’s SRS app market is largely shaped by marketing teams that do not care how much you actually learn or how effective the process is. Another reason is that there are currently no apps for learning subjects and languages designed for neurodivergent people, including people with ADHD. I want to help you avoid the problems that can arise in other apps when you try to learn or master something.",
+	// Каждый день приложение собирает конечный план.
+	"onb.003" to "Every day, the app creates a finite plan.",
+	// План закончен - на сегодня всё. Количество карточек меняется постепенно и зависит от предыдущих дней.
+	"onb.004" to "Once the plan is complete, that is all for today. The number of cards changes gradually and depends on the previous days.",
+	// Сначала попробуй приложение и определи, нужно ли оно тебе.
+	"onb.005" to "First, try the app and decide whether it is right for you.",
+	// Ошибка здесь не наказывает тебя - она помогает приложению правильно назначить следующее повторение.
+	"onb.006" to "A mistake here does not punish you. It helps the app schedule the next review correctly.",
 	// ГОТОВЛЮ КАРТОЧКИ…
 	"onb.007" to "PREPARING CARDS…",
 	// ДАЛЬШЕ
@@ -625,10 +625,10 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"onb.009" to "START",
 	// ПРОПУСТИТЬ
 	"onb.010" to "SKIP",
-	// Влево и вправо
-	"onb.011" to "Left and right",
-	// Карточку смахивают: влево — не знаю, вправо — знаю. Можно вместо этого нажать на слово внизу. Ответ отменяется сразу после него, так что ошибиться не страшно.
-	"onb.012" to "Swipe left if you don't know the card, right if you do. An answer can be undone right after it.",
+	// Прогресс хранится на устройстве.
+	"onb.011" to "Your progress stays on your device.",
+	// Его можно выгрузить, перенести или полностью стереть в настройках. Я готов к критике и поддержу твои идеи, если они будут полезны. Начнём с первой небольшой сессии.
+	"onb.012" to "You can export it, move it, or erase it completely in Settings. I am open to criticism and will support your ideas if they are useful. Let us start with a short first session.",
 	// ОТЛИЧНОЕ
 	"speaker.001" to "EXCELLENT",
 	// ХОРОШЕЕ
