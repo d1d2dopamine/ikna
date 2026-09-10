@@ -120,7 +120,7 @@ On a disposable profile, check:
 
 - tap reveal, front pull reveal and cancelled pull;
 - mouse/touch answer after at least 250 ms;
-- keyboard reveal and second-arrow answer;
+- Space reveal and one-tap A/D answer;
 - mixed keyboard/mouse interaction falling back safely;
 - focus loss, background, lock/unlock and timeout;
 - same-card repeats, undo, export and restore;

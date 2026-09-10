@@ -95,6 +95,13 @@ class DesignContracts(unittest.TestCase):
         self.assertEqual(len(actual), 9)
         self.assertLess(desktop.index('item(key = "update"'), desktop.index('item(key = "data"'))
         self.assertIn('verticalScrolling', read(SHARED, 'ui/settings/SettingsChrome.kt'))
+        self.assertNotIn('setShowWordmark(', mobile + desktop)
+        shell = read(DESKTOP, 'Shell.kt')
+        mobile_decks = read(ANDROID, 'ui/decks/DecksScreen.kt')
+        self.assertNotIn('settings.showWordmark', shell + mobile_decks)
+        # Shell keeps one temporary loading wordmark; the desktop home footer has none.
+        self.assertEqual(1, shell.count('IknaWordmark('))
+        self.assertEqual(2, mobile_decks.count('IknaWordmark(modifier = Modifier.padding('))
 
     def test_desktop_hotkeys_are_captured_not_typed(self):
         settings = read(DESKTOP, 'SettingsPane.kt')
@@ -102,16 +109,20 @@ class DesignContracts(unittest.TestCase):
         key_input = read(DESKTOP, 'HotkeyInput.kt')
         store = read(SHARED, 'data/prefs/SettingsStore.kt')
         backup = read(SHARED, 'data/export/SettingsBackup.kt')
+        hotkeys = read(SHARED, 'data/prefs/Hotkeys.kt')
         self.assertIn('item(key = "keys"', settings)
         self.assertIn('PRIMARY_HOTKEY_ACTIONS = listOf(HotkeyAction.MISS, HotkeyAction.KNOW)', editor)
         for required in ['onPreviewKeyEvent', 'animateDpAsState(', 'AnimatedVisibility(',
-                         'HotkeyBindings.conflictingAction', 'keys.014']:
+                         'HotkeyBindings.conflictingAction', 'keys.014', 'keys.021']:
             self.assertIn(required, editor)
         self.assertNotIn('BasicTextField', editor)
         for required in ['tokens.size > 3', 'isReservedGlobalHotkey', 'Key.DirectionLeft',
-                         'Key.DirectionRight', 'Key.One, Key.NumPad1']:
+                         'Key.DirectionRight', 'Key.One, Key.NumPad1',
+                         'HotkeyCaptureProblem.UNSUITABLE_KEY']:
             self.assertIn(required, key_input)
         self.assertIn('stringPreferencesKey("hotkeysV1")', store)
+        self.assertIn('"miss=A;know=D;reveal=SPACE;undo=Z"', hotkeys)
+        self.assertIn('UNSUITABLE_HOTKEY_MAIN_TOKENS', hotkeys)
         self.assertIn('store.setHotkeys(snapshot.hotkeys)', backup)
         for forbidden in ['HotkeyAction.AGAIN', 'HotkeyAction.HARD',
                           'HotkeyAction.GOOD', 'HotkeyAction.EASY']:
@@ -123,6 +134,18 @@ class DesignContracts(unittest.TestCase):
             for required in ['IknaDeckAppearance(', 'Phonetics.sample(', 'current.hasPhonetics', 'LangChips(']:
                 self.assertIn(required, source)
         self.assertIn('FlowRow(', read(SHARED, 'ui/decks/DeckLangs.kt'))
+        mark = read(SHARED, 'ui/decks/DeckMark.kt')
+        repo = read(SHARED, 'data/repo/DeckRepository.kt')
+        for required in ['fun deckSealCells(deckId: String, installedAt: Long)',
+                         'fun deckSealHighlights(deckId: String, installedAt: Long)']:
+            self.assertIn(required, mark)
+        self.assertNotIn('languageSealCells', mark)
+        self.assertIn('installedAt = pack.installedAt', repo)
+        for base, name in [(ANDROID, 'ui/decks/DecksScreen.kt'),
+                           (SHARED, 'ui/decks/DeckList.kt')]:
+            renderer = read(base, name)
+            self.assertIn('deckSealCells(deck.id, deck.installedAt)', renderer)
+            self.assertIn('deckSealHighlights(deck.id, deck.installedAt)', renderer)
 
     def test_session_uses_shared_quiet_chrome(self):
         for base, name in [(ANDROID, 'ui/session/SessionScreen.kt'), (DESKTOP, 'SessionPane.kt')]:
@@ -133,6 +156,11 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('if (result.isSuccess)', source)
         self.assertIn('!loading && !saving', source)
         self.assertIn('HotkeyAction.UNDO', source)
+        self.assertIn('if (revealed) requestKeyboardSwipe(Rating.AGAIN)', source)
+        self.assertIn('if (revealed) requestKeyboardSwipe(Rating.GOOD)', source)
+        card = read(SHARED, 'ui/session/CardStack.kt')
+        self.assertIn('flying.value || !revealedNow.value', card)
+        self.assertNotIn('revealNow.value(INPUT_KEYBOARD)', card)
         self.assertIn('HotkeyBindings.decode(settings.hotkeys)', source)
         self.assertIn('ProgrammaticSwipe', source)
         self.assertIn('requestKeyboardSwipe(Rating.AGAIN)', source)

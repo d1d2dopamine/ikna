@@ -254,11 +254,11 @@ fun SessionPane(
                     if (!heldReviewKeys.add(event.key)) return@onPreviewKeyEvent true
                     when (action) {
                         HotkeyAction.MISS -> if (current != null) {
-                            requestKeyboardSwipe(Rating.AGAIN)
+                            if (revealed) requestKeyboardSwipe(Rating.AGAIN)
                             true
                         } else false
                         HotkeyAction.KNOW -> if (current != null) {
-                            requestKeyboardSwipe(Rating.GOOD)
+                            if (revealed) requestKeyboardSwipe(Rating.GOOD)
                             true
                         } else false
                         HotkeyAction.REVEAL -> if (current != null && !revealed) {

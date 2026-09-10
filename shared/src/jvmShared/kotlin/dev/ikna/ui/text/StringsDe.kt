@@ -355,5 +355,6 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "keys.018" to "Drücke eine normale Taste, nicht nur Sondertasten",
     "keys.019" to "Kombination ändern",
     "keys.020" to "Esc bricht die Eingabe ab",
+    "keys.021" to "Diese Taste kann nicht verwendet werden",
 
 )

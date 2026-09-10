@@ -22,19 +22,19 @@ import androidx.compose.ui.unit.sp
 /**
  * The deck square, drawn from a palette rather than from MaterialTheme.
  *
- * The phone draws exactly this mark: two letters over the pixel seal of the
- * deck's language, filled when the deck owes something today, hollow when it is
+ * The phone draws exactly this mark: two letters over the installation-seeded pixel seal of the
+ * deck, filled when the deck owes something today, hollow when it is
  * done, faint when it is switched off. The one on the phone reads its colours
  * out of the Material scheme, which the desktop shell does not build; this one
  * is handed the four palette colours instead, so both platforms produce the same
- * square from the same [languageSealCells] and [monogramOf] as before -- the
- * seal of a language cannot drift between the two applications, because there is
- * still only one function that generates it.
+ * square from the same [deckSealCells] and [monogramOf]. The persisted pack
+ * installation time keeps one device stable while giving another device its own pattern.
  */
 @Composable
 fun IknaDeckSeal(
     lang: String,
     deckId: String,
+    installedAt: Long,
     title: String,
     accent: Color,
     ink: Color,
@@ -57,8 +57,8 @@ fun IknaDeckSeal(
         active -> line
         else -> line.copy(alpha = 0.5f)
     }
-    val patternCells = remember(lang) { languageSealCells(lang) }
-    val highlightCells = remember(deckId) { deckSealHighlights(deckId) }
+    val patternCells = remember(deckId, installedAt) { deckSealCells(deckId, installedAt) }
+    val highlightCells = remember(deckId, installedAt) { deckSealHighlights(deckId, installedAt) }
     val pattern = when {
         owes -> background.copy(alpha = 0.16f)
         active -> accent.copy(alpha = 0.18f)
@@ -79,12 +79,12 @@ fun IknaDeckSeal(
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val inset = this.size.minDimension * 0.077f
-            val step = (this.size.minDimension - inset * 2f) / LANGUAGE_SEAL_SIDE
+            val step = (this.size.minDimension - inset * 2f) / DECK_SEAL_SIDE
             val cell = step * 0.56f
             fun drawCell(index: Int, color: Color) {
                 if (isDeckSealLetterZone(index)) return
-                val column = index % LANGUAGE_SEAL_SIDE
-                val row = index / LANGUAGE_SEAL_SIDE
+                val column = index % DECK_SEAL_SIDE
+                val row = index / DECK_SEAL_SIDE
                 val x = inset + column * step + (step - cell) / 2f
                 val y = inset + row * step + (step - cell) / 2f
                 drawRect(color, Offset(x, y), Size(cell, cell))

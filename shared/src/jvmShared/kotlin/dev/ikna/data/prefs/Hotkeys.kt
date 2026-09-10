@@ -8,15 +8,25 @@ package dev.ikna.data.prefs
  * desktop toolkit key code or on the machine that created the backup.
  */
 const val DEFAULT_HOTKEYS =
-    "miss=LEFT;know=RIGHT;reveal=SPACE;undo=Z"
+    "miss=A;know=D;reveal=SPACE;undo=Z"
 
 private val HOTKEY_TOKEN = Regex("^[A-Z0-9_]+$")
 private val MODIFIER_ORDER = listOf("CTRL", "ALT", "SHIFT", "META")
 private val MODIFIERS = MODIFIER_ORDER.toSet()
 
+/**
+ * Navigation, editing and function keys are poor review shortcuts: their codes
+ * differ across compact keyboards and the operating system may intercept them.
+ * Space remains valid because it has one explicit job: reveal the answer.
+ */
+val UNSUITABLE_HOTKEY_MAIN_TOKENS: Set<String> = setOf(
+    "LEFT", "RIGHT", "UP", "DOWN",
+    "ENTER", "BACKSPACE", "DELETE", "TAB", "ESCAPE"
+) + (1..12).map { "F$it" }
+
 enum class HotkeyAction(val storedName: String, val defaultValue: String) {
-    MISS("miss", "LEFT"),
-    KNOW("know", "RIGHT"),
+    MISS("miss", "A"),
+    KNOW("know", "D"),
     REVEAL("reveal", "SPACE"),
     UNDO("undo", "Z");
 
@@ -46,7 +56,7 @@ class HotkeyChord private constructor(val tokens: List<String>) {
                 .distinct()
             if (clean.size !in 1..3 || clean.any { !HOTKEY_TOKEN.matches(it) }) return null
             val main = clean.filterNot { it in MODIFIERS }
-            if (main.size != 1) return null
+            if (main.size != 1 || main.single() in UNSUITABLE_HOTKEY_MAIN_TOKENS) return null
             val canonical = MODIFIER_ORDER.filter { it in clean } + main.single()
             return HotkeyChord(canonical)
         }
@@ -60,7 +70,7 @@ object HotkeyBindings {
         }
     }
 
-    /** Malformed or future entries are ignored one-by-one, never as a whole file. */
+    /** Malformed, unsuitable or future entries are ignored one by one. */
     fun decode(value: String?): Map<HotkeyAction, HotkeyChord> {
         val result = defaults().toMutableMap()
         value.orEmpty().split(';').forEach { entry ->

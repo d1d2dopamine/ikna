@@ -183,35 +183,24 @@ fun SwipeableCard(
     val line = if (threshold > 0f) threshold else SWIPE_THRESHOLD
     val progress: () -> Float = { (shift() / line).coerceIn(-1f, 1f) }
 
-    // Keyboard input uses the same moving card and two-stage contract, but its
-    // fixed visual speed is animation only. It is deliberately not written to
-    // swipeVelocityX or admitted into the pointer calibration window.
+    // A/D are final-answer controls only. Space (or a pointer) reveals first;
+    // then one key-down performs the same visible throw as a mouse gesture. The
+    // fixed visual speed is animation only and never becomes pointer evidence.
     LaunchedEffect(key, programmaticSwipe?.token) {
         val command = programmaticSwipe ?: return@LaunchedEffect
-        if (flying.value) {
+        if (flying.value || !revealedNow.value) {
             programmaticHandledNow.value(command.token)
             return@LaunchedEffect
         }
         val direction = if (command.rating == Rating.AGAIN) -1f else 1f
         flying.value = true
         offsetX.snapTo(drag.value)
-        if (!revealedNow.value) {
-            revealNow.value(INPUT_KEYBOARD)
-            if (animations) {
-                val nudge = min(line * 0.55f, 48f) * direction
-                offsetX.animateTo(nudge, Motion.reveal)
-                settle(offsetX, animations)
-            } else {
-                offsetX.snapTo(0f)
-            }
-        } else {
-            signals.keyboardStarted()
-            val observation = signals.snapshot(inputMethod = INPUT_KEYBOARD)
-            val visualVelocity = PROGRAMMATIC_THROW_SPEED * direction
-            if (animations) throwOut(offsetX, command.rating, Velocity(visualVelocity, 0f))
-            rateNow.value(command.rating, observation)
-            offsetX.snapTo(0f)
-        }
+        signals.keyboardStarted()
+        val observation = signals.snapshot(inputMethod = INPUT_KEYBOARD)
+        val visualVelocity = PROGRAMMATIC_THROW_SPEED * direction
+        if (animations) throwOut(offsetX, command.rating, Velocity(visualVelocity, 0f))
+        rateNow.value(command.rating, observation)
+        offsetX.snapTo(0f)
         drag.value = 0f
         flying.value = false
         programmaticHandledNow.value(command.token)

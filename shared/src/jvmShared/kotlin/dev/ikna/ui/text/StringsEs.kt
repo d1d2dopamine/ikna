@@ -690,5 +690,6 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "keys.018" to "Pulsa una tecla normal, no solo modificadores",
     "keys.019" to "Cambiar combinación",
     "keys.020" to "Esc cancela la entrada",
+    "keys.021" to "Esa tecla no se puede usar",
 
 )

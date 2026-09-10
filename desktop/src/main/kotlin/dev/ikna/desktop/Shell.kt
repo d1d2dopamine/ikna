@@ -265,8 +265,8 @@ private fun DesktopShell(
         // A fixed 340dp is a third of a small window and a seventh of a large
         // one, and at the small end it was taking the width the pane beside it
         // needed, which is where the numbers started wrapping and moving. Three
-        // steps instead: 300dp is the narrowest the bottom bar's five buttons
-        // and the wordmark sit in without touching, and it is only used when the
+        // steps instead: 300dp is the narrowest the bottom bar's four controls
+        // sit in without touching, and it is only used when the
         // window is near its floor.
         val listWidth = when {
             maxWidth >= 1400.dp -> 380.dp
@@ -301,8 +301,8 @@ private fun VerticalRule(palette: IknaPalette) {
  * The phone's deck screen, whole.
  *
  * Same pixel field behind it, same title, same figure for the day, same rows
- * with the same squares, percentages and segmented bars, same bottom bar with
- * the wordmark, the statistics, the settings, the search and the plus. The only
+ * with the same squares, percentages and segmented bars, and the same bottom
+ * controls for statistics, settings, search and adding a deck. The only
  * thing the window changes is that this screen no longer has to go away for
  * something else to be shown.
  */
@@ -426,13 +426,7 @@ private fun DecksColumn(
                         onClick = { ui.show(Pane.STATS) },
                         label = S.t("a11y.003")
                     )
-                    if (settings.showWordmark) {
-                        IknaWordmark(modifier = Modifier.padding(start = Space.md))
-                    }
                 } else {
-                    if (settings.showWordmark) {
-                        IknaWordmark(modifier = Modifier.padding(start = Space.md))
-                    }
                     IknaIconButton(
                         glyph = IknaGlyph.BARS,
                         onClick = { ui.show(Pane.STATS) },

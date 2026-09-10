@@ -690,5 +690,6 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "keys.018" to "Pressione uma tecla comum, não apenas modificadores",
     "keys.019" to "Alterar combinação",
     "keys.020" to "Esc cancela a entrada",
+    "keys.021" to "Essa tecla não pode ser usada",
 
 )

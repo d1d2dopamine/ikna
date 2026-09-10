@@ -165,12 +165,7 @@ data class IknaSettings(
     val autoSpeakEvery: Boolean = false,
     /** File name of the installed content font. Empty means the built-in one. */
     val fontName: String = "",
-    /**
-     * The ikna mark in the bottom bar. On by default and off by choice: it is
-     * the one place the app says its own name, which is worth having on the
-     * first day and worth nothing on the four hundredth. Whoever is tired of it
-     * gets the room back.
-     */
+    /** Legacy serialized field; current chrome keeps exactly one platform-appropriate wordmark. */
     val showWordmark: Boolean = true,
     /**
      * The bottom bar mirrored, so the marks sit under a left thumb.

@@ -152,7 +152,7 @@ Decks, catalogue, sessions, transcription, search, statistics, settings, JSON
 export and import. No voice, no widget, no reminders.
 
 **Stage 3 -- desktop manners.**
-Keyboard shortcuts (space to reveal, arrows to answer with automatic grading,
+Keyboard shortcuts (Space to reveal, A/D to answer with automatic grading,
 Z to undo), window size and position remembered, tray notifications, Anki import through a native file
 dialog, update check that opens the release page.
 

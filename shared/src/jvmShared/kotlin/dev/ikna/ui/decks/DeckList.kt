@@ -260,8 +260,8 @@ fun IknaDeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
         deck.isActive -> MaterialTheme.colorScheme.outline
         else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
     }
-    val patternCells = remember(deck.lang) { languageSealCells(deck.lang) }
-    val highlightCells = remember(deck.id) { deckSealHighlights(deck.id) }
+    val patternCells = remember(deck.id, deck.installedAt) { deckSealCells(deck.id, deck.installedAt) }
+    val highlightCells = remember(deck.id, deck.installedAt) { deckSealHighlights(deck.id, deck.installedAt) }
     val pattern = when {
         owes -> background.copy(alpha = 0.16f)
         deck.isActive -> accent.copy(alpha = 0.18f)
@@ -283,12 +283,12 @@ fun IknaDeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val inset = 4.dp.toPx()
-            val step = (size.minDimension - inset * 2f) / LANGUAGE_SEAL_SIDE
+            val step = (size.minDimension - inset * 2f) / DECK_SEAL_SIDE
             val cell = step * 0.56f
             fun drawCell(index: Int, color: Color) {
                 if (isDeckSealLetterZone(index)) return
-                val column = index % LANGUAGE_SEAL_SIDE
-                val row = index / LANGUAGE_SEAL_SIDE
+                val column = index % DECK_SEAL_SIDE
+                val row = index / DECK_SEAL_SIDE
                 val x = inset + column * step + (step - cell) / 2f
                 val y = inset + row * step + (step - cell) / 2f
                 drawRect(color, Offset(x, y), Size(cell, cell))

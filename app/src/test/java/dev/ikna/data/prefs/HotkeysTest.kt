@@ -6,17 +6,16 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HotkeysTest {
-
     @Test
-    fun `defaults keep arrows for the two visible actions`() {
+    fun `defaults use physical A and D for the two visible actions`() {
         val bindings = HotkeyBindings.decode(DEFAULT_HOTKEYS)
-        assertEquals("LEFT", bindings[HotkeyAction.MISS]?.encoded)
-        assertEquals("RIGHT", bindings[HotkeyAction.KNOW]?.encoded)
+        assertEquals("A", bindings[HotkeyAction.MISS]?.encoded)
+        assertEquals("D", bindings[HotkeyAction.KNOW]?.encoded)
         assertEquals(HotkeyAction.entries.size, bindings.values.distinct().size)
     }
 
     @Test
-    fun `one ordinary key and no more than three keys are accepted`() {
+    fun `ordinary keys and at most two modifiers are accepted`() {
         assertEquals("K", HotkeyChord.parse("K")?.encoded)
         assertEquals("CTRL+SHIFT+K", HotkeyChord.parse("shift+ctrl+k")?.encoded)
         assertNull(HotkeyChord.parse(""))
@@ -25,9 +24,29 @@ class HotkeysTest {
     }
 
     @Test
-    fun `one malformed imported entry does not discard the other bindings`() {
+    fun `navigation editing and function keys are unsuitable`() {
+        for (token in listOf("LEFT", "RIGHT", "UP", "DOWN", "ENTER", "BACKSPACE",
+            "DELETE", "TAB", "ESCAPE", "F1", "F8", "F12")) {
+            assertNull(token, HotkeyChord.parse(token))
+            assertNull("CTRL+$token", HotkeyChord.parse("CTRL+$token"))
+        }
+        assertEquals("SPACE", HotkeyChord.parse("SPACE")?.encoded)
+    }
+
+    @Test
+    fun `legacy arrow defaults migrate to A and D but custom letters survive`() {
+        val migrated = HotkeyBindings.decode("miss=LEFT;know=RIGHT;reveal=SPACE;undo=Z")
+        assertEquals("A", migrated[HotkeyAction.MISS]?.encoded)
+        assertEquals("D", migrated[HotkeyAction.KNOW]?.encoded)
+        val custom = HotkeyBindings.decode("miss=J;know=CTRL+K;reveal=SPACE;undo=Z")
+        assertEquals("J", custom[HotkeyAction.MISS]?.encoded)
+        assertEquals("CTRL+K", custom[HotkeyAction.KNOW]?.encoded)
+    }
+
+    @Test
+    fun `one malformed imported entry does not discard other bindings`() {
         val bindings = HotkeyBindings.decode("miss=CTRL+ALT;know=CTRL+K;future=F8")
-        assertEquals("LEFT", bindings[HotkeyAction.MISS]?.encoded)
+        assertEquals("A", bindings[HotkeyAction.MISS]?.encoded)
         assertEquals("CTRL+K", bindings[HotkeyAction.KNOW]?.encoded)
         assertEquals("SPACE", bindings[HotkeyAction.REVEAL]?.encoded)
     }
@@ -48,17 +67,16 @@ class HotkeysTest {
         )
         assertEquals(setOf("miss", "know", "reveal", "undo"),
             HotkeyAction.entries.map { it.storedName }.toSet())
-        assertEquals(4, bindings.size)
+        assertEquals("A", bindings[HotkeyAction.MISS]?.encoded)
+        assertEquals("D", bindings[HotkeyAction.KNOW]?.encoded)
     }
 
     @Test
     fun `conflicts are reported without changing either action`() {
         val bindings = HotkeyBindings.decode(DEFAULT_HOTKEYS)
-        val left = requireNotNull(bindings[HotkeyAction.MISS])
-        assertEquals(
-            HotkeyAction.MISS,
-            HotkeyBindings.conflictingAction(bindings, HotkeyAction.KNOW, left)
-        )
-        assertNull(HotkeyBindings.conflictingAction(bindings, HotkeyAction.MISS, left))
+        val miss = requireNotNull(bindings[HotkeyAction.MISS])
+        assertEquals(HotkeyAction.MISS,
+            HotkeyBindings.conflictingAction(bindings, HotkeyAction.KNOW, miss))
+        assertNull(HotkeyBindings.conflictingAction(bindings, HotkeyAction.MISS, miss))
     }
 }

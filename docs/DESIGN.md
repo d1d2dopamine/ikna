@@ -150,9 +150,10 @@ Any `.ttf` or `.otf` on the phone can be used, and it is applied to the entire
 interface — headings, body, section marks, captions and counters alike. The file is
 validated before it is accepted, so a broken font cannot leave the app unreadable.
 
-The wordmark in the bottom bar is the real artwork, tinted at runtime: the letters
+The wordmark is the real artwork, tinted at runtime: Android keeps one in its
+bottom bar, while desktop keeps one in the top-left window title bar. The letters
 take the ink of the current palette and the square dot over the `i` takes its
-accent. The letterforms are never redrawn in code.
+accent. The letterforms are never redrawn in code or duplicated on one screen.
 
 ## What is deliberately not customisable
 
@@ -162,8 +163,9 @@ keeping written down: **the app feeds you, you do not feed the app.**
 Every hour spent choosing a wallpaper, a mascot or a badge is an hour that feels
 like studying and is not. Apps that let you decorate them end up being decorated,
 and the decoration becomes the thing the user comes back for. So the palette
-chooses the whole screen at once, decks get one fixed language seal each, and there
-is nothing here to arrange.
+chooses the whole screen at once, and each deck gets a stable decorative seal
+seeded by its id and the local pack installation time. It looks personal without
+becoming another thing to arrange.
 
 What is adjustable is what makes the text readable or the day workable: the
 palette, four colours of your own, the font, the size of the day, the hour of the

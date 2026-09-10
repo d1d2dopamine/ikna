@@ -139,6 +139,7 @@ fun DeckListRow(
         IknaDeckSeal(
             lang = deck.lang,
             deckId = deck.id,
+            installedAt = deck.installedAt,
             title = deck.title,
             label = look.label,
             owes = due > 0,

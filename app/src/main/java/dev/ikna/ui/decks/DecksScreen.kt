@@ -279,8 +279,8 @@ fun DecksScreen(
             // The square over the i is drawn in the accent, so the mark belongs to
             // whichever palette is on rather than to the one it was drawn in.
             //
-            // Both of those are now a choice. The mark can be switched off in
-            // settings, and the whole row can be mirrored for a left hand: the
+            // The wordmark stays visible because Android has no window title bar.
+            // The whole row can still be mirrored for a left hand: the
             // marks are the only controls on this screen, a phone is held in
             // one hand, and until now every one of them sat on the far side of
             // it for half the people holding it. Mirrored, the rarest action
@@ -309,13 +309,9 @@ fun DecksScreen(
                     onClick = onOpenStats,
                     label = S.t("a11y.003")
                 )
-                if (settings.showWordmark) {
-                    IknaWordmark(modifier = Modifier.padding(end = Space.md))
-                }
+                IknaWordmark(modifier = Modifier.padding(end = Space.md))
             } else {
-                if (settings.showWordmark) {
-                    IknaWordmark(modifier = Modifier.padding(start = Space.md))
-                }
+                IknaWordmark(modifier = Modifier.padding(start = Space.md))
                 IknaIconButton(
                     glyph = IknaGlyph.BARS,
                     onClick = onOpenStats,
@@ -566,9 +562,8 @@ private fun DeckRow(
  *
  * Filled means this deck wants something from you today. Hollow means it is done
  * or resting. Faint means it is switched off. Three states, no words, readable
- * across a room — and the letters come from the deck's language, so PL and EN
- * stay in the same place on the screen every day and become landmarks instead of
- * labels.
+ * across a room — and the letters remain semantic while the pixel pattern is stable for this
+ * installation instead of being shared by every deck of one language.
  */
 @Composable
 private fun DeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
@@ -591,8 +586,8 @@ private fun DeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
         deck.isActive -> MaterialTheme.colorScheme.outline
         else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
     }
-    val patternCells = remember(deck.lang) { languageSealCells(deck.lang) }
-    val highlightCells = remember(deck.id) { deckSealHighlights(deck.id) }
+    val patternCells = remember(deck.id, deck.installedAt) { deckSealCells(deck.id, deck.installedAt) }
+    val highlightCells = remember(deck.id, deck.installedAt) { deckSealHighlights(deck.id, deck.installedAt) }
     val pattern = when {
         owes -> background.copy(alpha = 0.16f)
         deck.isActive -> accent.copy(alpha = 0.18f)
@@ -613,12 +608,12 @@ private fun DeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val inset = 4.dp.toPx()
-            val step = (size.minDimension - inset * 2f) / LANGUAGE_SEAL_SIDE
+            val step = (size.minDimension - inset * 2f) / DECK_SEAL_SIDE
             val cell = step * 0.56f
             fun drawCell(index: Int, color: androidx.compose.ui.graphics.Color) {
                 if (isDeckSealLetterZone(index)) return
-                val column = index % LANGUAGE_SEAL_SIDE
-                val row = index / LANGUAGE_SEAL_SIDE
+                val column = index % DECK_SEAL_SIDE
+                val row = index / DECK_SEAL_SIDE
                 val x = inset + column * step + (step - cell) / 2f
                 val y = inset + row * step + (step - cell) / 2f
                 drawRect(color, Offset(x, y), Size(cell, cell))

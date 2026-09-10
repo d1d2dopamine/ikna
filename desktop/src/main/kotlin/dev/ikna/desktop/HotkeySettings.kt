@@ -127,6 +127,7 @@ internal fun HotkeySettingsContent(
                     errorKey = null
                 },
                 onTooMany = { errorKey = "keys.015" },
+                onUnsuitable = { errorKey = "keys.021" },
                 onWaiting = { errorKey = null },
                 onAccept = { accept(action, it) },
                 onUndo = { undo?.let { restore(it) } }
@@ -159,6 +160,7 @@ internal fun HotkeySettingsContent(
                         errorKey = null
                     },
                     onTooMany = { errorKey = "keys.015" },
+                    onUnsuitable = { errorKey = "keys.021" },
                     onWaiting = { errorKey = null },
                     onAccept = { accept(action, it) },
                     onUndo = { undo?.let { restore(it) } }
@@ -179,6 +181,7 @@ private fun HotkeyBindingRow(
     onBegin: () -> Unit,
     onCancel: () -> Unit,
     onTooMany: () -> Unit,
+    onUnsuitable: () -> Unit,
     onWaiting: () -> Unit,
     onAccept: (HotkeyChord) -> Unit,
     onUndo: () -> Unit
@@ -201,6 +204,7 @@ private fun HotkeyBindingRow(
                 onBegin = onBegin,
                 onCancel = onCancel,
                 onTooMany = onTooMany,
+                onUnsuitable = onUnsuitable,
                 onWaiting = onWaiting,
                 onAccept = onAccept
             )
@@ -232,6 +236,7 @@ private fun HotkeyCaptureField(
     onBegin: () -> Unit,
     onCancel: () -> Unit,
     onTooMany: () -> Unit,
+    onUnsuitable: () -> Unit,
     onWaiting: () -> Unit,
     onAccept: (HotkeyChord) -> Unit
 ) {
@@ -265,6 +270,7 @@ private fun HotkeyCaptureField(
                 when {
                     result.chord != null -> onAccept(result.chord)
                     result.problem == HotkeyCaptureProblem.TOO_MANY_KEYS -> onTooMany()
+                    result.problem == HotkeyCaptureProblem.UNSUITABLE_KEY -> onUnsuitable()
                     else -> onWaiting()
                 }
                 true

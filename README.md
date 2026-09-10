@@ -92,7 +92,7 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
 
 ## ✨ Features
 
-- **Two-intention answering.** Swipe, or use desktop arrows: left means "do not
+- **Two-intention answering.** Swipe, or use desktop A/D keys: left means "do not
   know", right means "know". The answer is still revealed before every grade.
   After enough private same-input timing history, a verified mature answer may be
   refined to bounded *hard* or *easy* automatically. No extra choice or number key

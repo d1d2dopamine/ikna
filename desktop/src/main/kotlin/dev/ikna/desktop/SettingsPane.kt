@@ -208,9 +208,6 @@ fun SettingsPane(
                     ToggleRow(S.t("set.020"), settings.animations, palette) {
                         save { container.settings.setAnimations(it) }
                     }
-                    ToggleRow(S.t("bar.001"), settings.showWordmark, palette) {
-                        save { container.settings.setShowWordmark(it) }
-                    }
                     Spacer(Modifier.height(12.dp))
                     ToggleRow(S.t("bar.003"), settings.leftHanded, palette) {
                         save { container.settings.setLeftHanded(it) }

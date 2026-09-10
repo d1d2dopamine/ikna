@@ -108,10 +108,8 @@ class DeckLookTest {
     }
 
     @Test
-    fun `the bar keeps its defaults until somebody changes them`() {
+    fun `the bar keeps its handedness until somebody changes it`() {
         val settings = IknaSettings()
-
-        assertTrue("the mark is shown out of the box", settings.showWordmark)
         assertTrue("the bar is not mirrored out of the box", !settings.leftHanded)
     }
 }

@@ -466,12 +466,6 @@ fun SettingsScreen(
                         )
 
                         IknaSettingsToggleRow(
-                            title = S.t("bar.001"),
-                            subtitle = null,
-                            checked = settings.showWordmark,
-                            onCheckedChange = { scope.launch { container.settings.setShowWordmark(it) } }
-                        )
-                        IknaSettingsToggleRow(
                             title = S.t("bar.003"),
                             subtitle = null,
                             checked = settings.leftHanded,

@@ -12,8 +12,13 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.utf16CodePoint
 import dev.ikna.data.prefs.HotkeyAction
 import dev.ikna.data.prefs.HotkeyChord
+import dev.ikna.data.prefs.UNSUITABLE_HOTKEY_MAIN_TOKENS
 
-internal enum class HotkeyCaptureProblem { WAITING_FOR_MAIN_KEY, TOO_MANY_KEYS }
+internal enum class HotkeyCaptureProblem {
+    WAITING_FOR_MAIN_KEY,
+    TOO_MANY_KEYS,
+    UNSUITABLE_KEY
+}
 
 internal data class HotkeyCaptureResult(
     val chord: HotkeyChord? = null,
@@ -24,6 +29,9 @@ internal data class HotkeyCaptureResult(
 internal fun captureHotkey(event: KeyEvent): HotkeyCaptureResult {
     val main = mainKeyToken(event)
         ?: return HotkeyCaptureResult(problem = HotkeyCaptureProblem.WAITING_FOR_MAIN_KEY)
+    if (main in UNSUITABLE_HOTKEY_MAIN_TOKENS) {
+        return HotkeyCaptureResult(problem = HotkeyCaptureProblem.UNSUITABLE_KEY)
+    }
     val tokens = buildList {
         if (event.isCtrlPressed) add("CTRL")
         if (event.isAltPressed) add("ALT")

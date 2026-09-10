@@ -374,5 +374,6 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "keys.018" to "Appuyez sur une touche ordinaire, pas seulement sur des modificateurs",
     "keys.019" to "Changer la combinaison",
     "keys.020" to "Échap annule la saisie",
+    "keys.021" to "Cette touche ne peut pas être utilisée",
 
 )

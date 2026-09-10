@@ -1005,5 +1005,6 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "keys.018" to "Naciśnij zwykły klawisz, nie tylko modyfikatory",
     "keys.019" to "Zmień kombinację",
     "keys.020" to "Esc anuluje wprowadzanie",
+    "keys.021" to "Tego klawisza nie można użyć",
 
 )

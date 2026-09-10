@@ -208,6 +208,11 @@ class GradingChecks(unittest.TestCase):
         for forbidden in ["HotkeyAction.AGAIN", "HotkeyAction.HARD",
                           "HotkeyAction.GOOD", "HotkeyAction.EASY"]:
             self.assertNotIn(forbidden, source + hotkeys)
+        self.assertIn("if (revealed) requestKeyboardSwipe(Rating.AGAIN)", source)
+        self.assertIn("if (revealed) requestKeyboardSwipe(Rating.GOOD)", source)
+        self.assertIn("flying.value || !revealedNow.value", card)
+        self.assertNotIn("revealNow.value(INPUT_KEYBOARD)", card)
+        self.assertIn('"miss=A;know=D;reveal=SPACE;undo=Z"', hotkeys)
         self.assertIn("signals.keyboardStarted()", card)
         self.assertIn("signals.snapshot(inputMethod = INPUT_KEYBOARD)", card)
         self.assertIn("INPUT_KEYBOARD -> signals.swipeVelocityX == null", grading)
