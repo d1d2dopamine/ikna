@@ -18,13 +18,14 @@ class DerivedGradingTest {
     private fun window(size: Int = 80, level: Int = 0) = TimingWindow().also { w ->
         repeat(size) { w.add(TimingSample(1_000L + it * 100L, level, 25)) }
     }
-    private fun signals(ms: Long? = 4_000L, peek: Boolean? = false, semantics: String? = PEEK_OPTIONAL) = ReviewSignals(
+    private fun signals(ms: Long? = 4_000L, peek: Boolean? = true, semantics: String? = PEEK_REQUIRED) = ReviewSignals(
         latencyMs = ms, swipeVelocityX = 950f, peeked = peek,
         inputMethod = INPUT_SWIPE, peekSemantics = semantics
     )
-    private fun decide(ms: Long? = 4_000, peek: Boolean? = false, input: Rating = Rating.GOOD,
-                       enabled: Boolean = true, w: TimingWindow = window(), semantics: String? = PEEK_OPTIONAL) =
-        DerivedGrading.decide(input, signals(ms, peek, semantics), 0, 25, w, enabled)
+    private fun decide(ms: Long? = 4_000, peek: Boolean? = true, input: Rating = Rating.GOOD,
+                       enabled: Boolean = true, w: TimingWindow = window(), semantics: String? = PEEK_REQUIRED,
+                       easyEligible: Boolean = true) =
+        DerivedGrading.decide(input, signals(ms, peek, semantics), 0, 25, w, enabled, easyEligible)
 
     @Test fun `experiment defaults off`() { assertFalse(IknaSettings().derivedGrading) }
 
@@ -59,14 +60,13 @@ class DerivedGradingTest {
         assertEquals(1_249L, w.samples().last().latencyMs)
     }
 
-    @Test fun `four mappings and ties are conservative`() {
+    @Test fun `binary input maps to conservative verified grades`() {
         assertEquals(Rating.AGAIN, decide(500L, input = Rating.AGAIN).rating)
-        assertEquals(Rating.HARD, decide(500L, peek = true).rating)
         assertEquals(Rating.HARD, decide(10_000L).rating)
         assertEquals(Rating.GOOD, decide(4_000L).rating)
         assertEquals(Rating.EASY, decide(500L).rating)
-        // Window 1000..8900 has exact quartile ties 2975 / 6925.
-        assertEquals(Rating.GOOD, decide(2_975L).rating)
+        // Window 1000..8900 has interpolated 10th/75th ties at 1790 / 6925.
+        assertEquals(Rating.GOOD, decide(1_790L).rating)
         assertEquals(Rating.GOOD, decide(6_925L).rating)
     }
 
@@ -78,7 +78,7 @@ class DerivedGradingTest {
     @Test fun `unknown timing and focus loss fall back even with a peek`() {
         assertEquals(Rating.GOOD, decide(ms = null, peek = true).rating)
         val invalid = signals(500L, true).copy(timingDiscardReason = "focus_lost")
-        val decision = DerivedGrading.decide(Rating.GOOD, invalid, 0, 25, window(), true)
+        val decision = DerivedGrading.decide(Rating.GOOD, invalid, 0, 25, window(), true, true)
         assertEquals(Rating.GOOD, decision.rating)
         assertNull(decision.acceptedSample)
         assertEquals("focus_lost", decision.timingDiscardReason)
@@ -89,10 +89,13 @@ class DerivedGradingTest {
         assertEquals(Rating.GOOD, decide(500L, semantics = null).rating)
     }
 
-    @Test fun `required reveal is not all hard and cannot manufacture easy`() {
-        assertEquals(Rating.GOOD, decide(4_000L, true, semantics = PEEK_REQUIRED).rating)
-        assertEquals(Rating.GOOD, decide(500L, true, semantics = PEEK_REQUIRED).rating)
-        assertEquals(Rating.HARD, decide(10_000L, true, semantics = PEEK_REQUIRED).rating)
+    @Test fun `mandatory reveal supports easy only after card maturity`() {
+        assertEquals(Rating.GOOD, decide(4_000L).rating)
+        assertEquals(Rating.EASY, decide(500L, easyEligible = true).rating)
+        assertEquals("fast_verified", decide(500L, easyEligible = true).reason)
+        assertEquals(Rating.GOOD, decide(500L, easyEligible = false).rating)
+        assertEquals("fast_not_mature", decide(500L, easyEligible = false).reason)
+        assertEquals(Rating.HARD, decide(10_000L).rating)
     }
 
     @Test fun `flat timing window is not evidence`() {
@@ -115,28 +118,33 @@ class DerivedGradingTest {
 
     @Test fun `latency is normalized by length with level stratification`() {
         val w = window()
-        val short = DerivedGrading.decide(Rating.GOOD, signals(4_000L), 0, 25, w, true)
-        val long = DerivedGrading.decide(Rating.GOOD, signals(8_000L), 0, 100, w, true)
+        val short = DerivedGrading.decide(Rating.GOOD, signals(4_000L), 0, 25, w, true, true)
+        val long = DerivedGrading.decide(Rating.GOOD, signals(8_000L), 0, 100, w, true, true)
         assertEquals(short.rating, long.rating)
         assertEquals(short.acceptedSample!!.normalized, long.acceptedSample!!.normalized, 0.0)
     }
 
-    @Test fun `noise cannot turn good into easy`() {
+    @Test fun `slow outliers cannot turn good into easy`() {
         val grades = listOf(500L, 4_000L, 10_000L, 40_000L).map { decide(it).rating }
         assertEquals(listOf(Rating.EASY, Rating.GOOD, Rating.HARD, Rating.GOOD), grades)
     }
 
-    @Test fun `keyboard accessibility invalid lengths and nonfinite velocities are never calibrated`() {
-        for (method in listOf(INPUT_KEYBOARD, INPUT_ACCESSIBILITY, null)) {
-            val result = DerivedGrading.decide(Rating.GOOD, signals().copy(inputMethod = method), 0, 25, window(), true)
+    @Test fun `keyboard timing is calibrated while accessibility and invalid context are not`() {
+        val keyboard = signals(500L).copy(inputMethod = INPUT_KEYBOARD, swipeVelocityX = null)
+        val keyboardDecision = DerivedGrading.decide(Rating.GOOD, keyboard, 0, 25, window(), true, true)
+        assertNotNull(keyboardDecision.acceptedSample)
+        assertEquals(Rating.EASY, keyboardDecision.rating)
+
+        for (method in listOf(INPUT_ACCESSIBILITY, null)) {
+            val result = DerivedGrading.decide(Rating.GOOD, signals().copy(inputMethod = method), 0, 25, window(), true, true)
             assertNull(result.acceptedSample)
             assertEquals(Rating.GOOD, result.rating)
         }
         for (length in listOf(null, 0, -1, 4_001)) {
-            assertNull(DerivedGrading.decide(Rating.GOOD, signals(), 0, length, window(), true).acceptedSample)
+            assertNull(DerivedGrading.decide(Rating.GOOD, signals(), 0, length, window(), true, true).acceptedSample)
         }
         for (velocity in listOf(null, Float.NaN, Float.POSITIVE_INFINITY)) {
-            assertNull(DerivedGrading.decide(Rating.GOOD, signals().copy(swipeVelocityX = velocity), 0, 25, window(), true).acceptedSample)
+            assertNull(DerivedGrading.decide(Rating.GOOD, signals().copy(swipeVelocityX = velocity), 0, 25, window(), true, true).acceptedSample)
         }
         assertNull(decide(0L).acceptedSample)
     }
@@ -184,15 +192,16 @@ class DerivedGradingTest {
             val now = start + i * DAY_MS
             val input = if (i % 17 == 0) Rating.AGAIN else Rating.GOOD
             val ms = when (i % 4) { 0 -> 500L; 1 -> 3_000L; 2 -> 7_000L; else -> 12_000L }
-            val raw = signals(ms, peek = i % 11 == 0)
-            val decision = DerivedGrading.decide(input, raw, 0, 25, w, enabled = i < 140)
+            val raw = signals(ms, peek = true)
+            val decision = DerivedGrading.decide(input, raw, 0, 25, w, enabled = i < 140,
+                easyEligible = !live.isNew && live.reps - live.lapses >= EASY_MIN_PRIOR_SUCCESSES)
             val version = if (decision.rating != input) 1 else null
             val result = if (version == 1) scheduler.applyDerivedV1(live, decision.rating, now)
                          else scheduler.apply(live, input, now)
             val record = ReviewRecord(
                 id = i + 1L, chunkId = "one", ts = now, rating = decision.rating.value,
                 inputRating = input.value, gradingVersion = version, gradingReason = decision.reason,
-                presentationLength = 25, inputMethod = INPUT_SWIPE, peekSemantics = PEEK_OPTIONAL,
+                presentationLength = 25, inputMethod = INPUT_SWIPE, peekSemantics = PEEK_REQUIRED,
                 latencyMs = ms, swipeVelocityX = 950f, peeked = raw.peeked,
                 timingDiscardReason = decision.timingDiscardReason,
                 prevStability = live.stability, prevDifficulty = live.difficulty,
@@ -231,21 +240,30 @@ class DerivedGradingTest {
             inputRating = 3, gradingVersion = 99).toEntity())
     }
 
-    @Test fun `persisted ring restores in order and ignores missing and manual samples`() {
-        val rows = (0..249).map { i -> ReviewRecord(chunkId = "one", ts = start + i, rating = 3,
+    @Test fun `persisted rings restore independently for swipe and keyboard`() {
+        val swipeRows = (0..249).map { i -> ReviewRecord(chunkId = "one", ts = start + i, rating = 3,
             inputRating = 3, latencyMs = i + 1_000L, presentationLength = 25,
-            inputMethod = INPUT_SWIPE, swipeVelocityX = 0f).toEntity() }
-        val w = gradingWindowFromReviews(rows + rows.last().copy(inputMethod = INPUT_KEYBOARD))
-        assertEquals(200, w.size)
-        assertEquals(1_050L, w.samples().first().latencyMs)
-        assertEquals(1_249L, w.samples().last().latencyMs)
+            inputMethod = INPUT_SWIPE, peekSemantics = PEEK_REQUIRED, peeked = true, swipeVelocityX = 0f).toEntity() }
+        val keyboardRows = (0..59).map { i -> ReviewRecord(chunkId = "key", ts = start + 1_000 + i,
+            rating = 3, inputRating = 3, latencyMs = i + 2_000L, presentationLength = 25,
+            inputMethod = INPUT_KEYBOARD, peekSemantics = PEEK_REQUIRED, peeked = true, swipeVelocityX = null).toEntity() }
+
+        val swipe = gradingWindowFromReviews(swipeRows + keyboardRows)
+        assertEquals(200, swipe.size)
+        assertEquals(1_050L, swipe.samples().first().latencyMs)
+        assertEquals(1_249L, swipe.samples().last().latencyMs)
+
+        val keyboard = gradingWindowFromReviews(swipeRows + keyboardRows, INPUT_KEYBOARD)
+        assertEquals(60, keyboard.size)
+        assertEquals(2_000L, keyboard.samples().first().latencyMs)
+        assertEquals(2_059L, keyboard.samples().last().latencyMs)
     }
 
     private fun fixture() = (0 until 240).map { i -> ReviewRecord(
         id = i + 1L, chunkId = "card-${i % 12}", ts = start + i * DAY_MS,
         rating = if (i % 7 == 0) 1 else 3, inputRating = if (i % 7 == 0) 1 else 3,
         latencyMs = 500L + (i % 21) * 500L, presentationLength = 25,
-        inputMethod = INPUT_SWIPE, peekSemantics = PEEK_OPTIONAL, peeked = i % 13 == 0,
+        inputMethod = INPUT_SWIPE, peekSemantics = PEEK_REQUIRED, peeked = true,
         swipeVelocityX = 950f, synthetic = true
     ) }
 

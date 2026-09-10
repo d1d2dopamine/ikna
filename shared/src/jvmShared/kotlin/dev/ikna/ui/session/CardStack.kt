@@ -49,6 +49,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import dev.ikna.domain.fsrs.Rating
+import dev.ikna.domain.grading.INPUT_ACCESSIBILITY
+import dev.ikna.domain.grading.INPUT_KEYBOARD
+import dev.ikna.domain.grading.INPUT_SWIPE
 import dev.ikna.domain.session.ReviewSignalTracker
 import dev.ikna.domain.session.ReviewSignals
 import dev.ikna.domain.session.TimingDiscardReason
@@ -57,8 +60,13 @@ import dev.ikna.ui.theme.Space
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 
 private const val EXIT_X = 1400f
+private const val PROGRAMMATIC_THROW_SPEED = 1200f
+
+/** A real review command from a non-pointer input, never fake pointer telemetry. */
+data class ProgrammaticSwipe(val token: Int, val rating: Rating)
 
 /** How far the card leans as it travels. Larger divisor, calmer rotation. */
 private const val ROTATION_DIVISOR = 64f
@@ -110,9 +118,11 @@ fun SwipeableCard(
     animations: Boolean,
     haptics: Boolean,
     railsAtRest: Boolean,
-    onReveal: () -> Unit,
+    onReveal: (String) -> Unit,
     onRate: (Rating, ReviewSignals) -> Unit,
     signals: ReviewSignalTracker,
+    programmaticSwipe: ProgrammaticSwipe? = null,
+    onProgrammaticSwipeHandled: (Int) -> Unit = {},
     /**
      * How far the card has to travel to become an answer, in pixels.
      *
@@ -153,6 +163,7 @@ fun SwipeableCard(
     val revealedNow = rememberUpdatedState(revealed)
     val revealNow = rememberUpdatedState(onReveal)
     val rateNow = rememberUpdatedState(onRate)
+    val programmaticHandledNow = rememberUpdatedState(onProgrammaticSwipeHandled)
     val windowInfo = LocalWindowInfo.current
 
     // Observation only: neither focus nor timing is allowed to block an answer.
@@ -172,6 +183,40 @@ fun SwipeableCard(
     val line = if (threshold > 0f) threshold else SWIPE_THRESHOLD
     val progress: () -> Float = { (shift() / line).coerceIn(-1f, 1f) }
 
+    // Keyboard input uses the same moving card and two-stage contract, but its
+    // fixed visual speed is animation only. It is deliberately not written to
+    // swipeVelocityX or admitted into the pointer calibration window.
+    LaunchedEffect(key, programmaticSwipe?.token) {
+        val command = programmaticSwipe ?: return@LaunchedEffect
+        if (flying.value) {
+            programmaticHandledNow.value(command.token)
+            return@LaunchedEffect
+        }
+        val direction = if (command.rating == Rating.AGAIN) -1f else 1f
+        flying.value = true
+        offsetX.snapTo(drag.value)
+        if (!revealedNow.value) {
+            revealNow.value(INPUT_KEYBOARD)
+            if (animations) {
+                val nudge = min(line * 0.55f, 48f) * direction
+                offsetX.animateTo(nudge, Motion.reveal)
+                settle(offsetX, animations)
+            } else {
+                offsetX.snapTo(0f)
+            }
+        } else {
+            signals.keyboardStarted()
+            val observation = signals.snapshot(inputMethod = INPUT_KEYBOARD)
+            val visualVelocity = PROGRAMMATIC_THROW_SPEED * direction
+            if (animations) throwOut(offsetX, command.rating, Velocity(visualVelocity, 0f))
+            rateNow.value(command.rating, observation)
+            offsetX.snapTo(0f)
+        }
+        drag.value = 0f
+        flying.value = false
+        programmaticHandledNow.value(command.token)
+    }
+
     val revealAction = S.t("card.002")
     val missAction = S.t("a11y.008")
     val keepAction = S.t("a11y.009")
@@ -189,12 +234,18 @@ fun SwipeableCard(
                     listOf(
                         CustomAccessibilityAction(keepAction) {
                             val canRate = revealedNow.value
-                            if (canRate) rateNow.value(Rating.GOOD, signals.snapshot())
+                            if (canRate) {
+                                signals.answerStarted(INPUT_ACCESSIBILITY)
+                                rateNow.value(Rating.GOOD, signals.snapshot())
+                            }
                             canRate
                         },
                         CustomAccessibilityAction(missAction) {
                             val canRate = revealedNow.value
-                            if (canRate) rateNow.value(Rating.AGAIN, signals.snapshot())
+                            if (canRate) {
+                                signals.answerStarted(INPUT_ACCESSIBILITY)
+                                rateNow.value(Rating.AGAIN, signals.snapshot())
+                            }
                             canRate
                         }
                     )
@@ -202,7 +253,7 @@ fun SwipeableCard(
                     listOf(
                         CustomAccessibilityAction(revealAction) {
                             val canReveal = !revealedNow.value
-                            if (canReveal) revealNow.value()
+                            if (canReveal) revealNow.value(INPUT_ACCESSIBILITY)
                             canReveal
                         }
                     )
@@ -214,10 +265,10 @@ fun SwipeableCard(
             .pointerInput(key, signals) {
                 detectDragGestures(
                     onDragStart = {
-                        signals.dragStarted()
                         tracker.resetTracking()
                         armed.value = null
                         gradable.value = revealedNow.value
+                        if (gradable.value) signals.dragStarted()
                     },
                     onDrag = { change, delta ->
                         tracker.addPosition(change.uptimeMillis, change.position)
@@ -234,7 +285,7 @@ fun SwipeableCard(
                                 armed.value = candidate
                             }
                         } else if (!revealedNow.value && abs(next) >= PEEK_TRAVEL) {
-                            revealNow.value()
+                            revealNow.value(INPUT_SWIPE)
                         }
                     },
                     onDragCancel = {

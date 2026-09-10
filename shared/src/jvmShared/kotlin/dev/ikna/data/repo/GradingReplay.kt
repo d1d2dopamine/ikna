@@ -6,7 +6,9 @@ import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.fsrs.ScheduleResult
 import dev.ikna.domain.fsrs.Scheduler
 import dev.ikna.domain.grading.DERIVED_GRADING_VERSION
+import dev.ikna.domain.grading.INPUT_KEYBOARD
 import dev.ikna.domain.grading.INPUT_SWIPE
+import dev.ikna.domain.grading.PEEK_REQUIRED
 import dev.ikna.domain.grading.TimingSample
 import dev.ikna.domain.grading.TimingWindow
 import dev.ikna.domain.session.ReviewSignals
@@ -24,12 +26,21 @@ fun ReviewEntity.observations() = ReviewSignals(
     peekSemantics = peekSemantics
 )
 
-/** Input is already undo-filtered and chronological. Latest 200 wins. */
-fun gradingWindowFromReviews(answers: List<ReviewEntity>): TimingWindow = TimingWindow().also { window ->
+/** Input is already undo-filtered and chronological. Latest 200 per modality wins. */
+fun gradingWindowFromReviews(
+    answers: List<ReviewEntity>,
+    inputMethod: String = INPUT_SWIPE
+): TimingWindow = TimingWindow().also { window ->
     for (row in answers) {
-        if (row.inputMethod != INPUT_SWIPE || row.inputRating !in listOf(1, 3) ||
+        val validModality = when (inputMethod) {
+            INPUT_SWIPE -> row.swipeVelocityX?.isFinite() == true
+            INPUT_KEYBOARD -> row.swipeVelocityX == null
+            else -> false
+        }
+        if (row.inputMethod != inputMethod || !validModality || row.inputRating != Rating.GOOD.value ||
+            row.peekSemantics != PEEK_REQUIRED || row.peeked != true ||
             row.timingDiscardReason != null || row.latencyMs == null || row.presentationLength == null ||
-            row.undoOf != null || row.rating == 0 || row.swipeVelocityX?.isFinite() != true
+            row.undoOf != null || row.rating == 0
         ) continue
         window.add(TimingSample(row.latencyMs, row.level, row.presentationLength))
     }

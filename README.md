@@ -92,9 +92,11 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
 
 ## ✨ Features
 
-- **Swipe-only answering.** Two directions carry four grades: how far and how fast
-  you throw the card is the difference between *again* and *easy*. No buttons to
-  choose between.
+- **Two-intention answering.** Swipe, or use desktop arrows: left means "do not
+  know", right means "know". The answer is still revealed before every grade.
+  After enough private same-input timing history, a verified mature answer may be
+  refined to bounded *hard* or *easy* automatically. No extra choice or number key
+  asks the learner to grade their own confidence.
 - **A governor that rations new material for you**, from your own recent numbers.
 - **Three levels per chunk** — recognition, cloze, production — scheduled
   independently by FSRS-6.

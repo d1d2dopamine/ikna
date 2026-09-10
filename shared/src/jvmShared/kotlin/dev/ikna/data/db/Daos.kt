@@ -474,15 +474,18 @@ interface ReviewDao {
         " ORDER BY ts DESC, id DESC LIMIT :limit")
     suspend fun optimizerHistory(limit: Int, beforeTs: Long): List<ReviewEntity>
 
-    /** Latest usable native swipe timings, across sessions, excluding undo. */
+    /** Latest usable timings for one native input modality, excluding undo. */
     @Query(
         "SELECT * FROM reviews WHERE " + NOT_RETRACTED +
-            " AND ts <= :beforeTs AND inputMethod = 'swipe' AND inputRating IN (1, 3)" +
-            " AND latencyMs BETWEEN 1 AND 60000 AND timingDiscardReason IS NULL AND swipeVelocityX IS NOT NULL" +
+            " AND ts <= :beforeTs AND inputMethod = :inputMethod AND inputRating = 3" +
+            " AND peekSemantics = :peekSemantics AND peeked = 1" +
+            " AND latencyMs BETWEEN 1 AND 60000 AND timingDiscardReason IS NULL" +
+            " AND ((:inputMethod = 'swipe' AND swipeVelocityX IS NOT NULL)" +
+            " OR (:inputMethod = 'keyboard' AND swipeVelocityX IS NULL))" +
             " AND presentationLength BETWEEN 1 AND 4000 AND level BETWEEN 0 AND 2" +
             " ORDER BY ts DESC, id DESC LIMIT :limit"
     )
-    suspend fun recentGradingTimings(limit: Int, beforeTs: Long): List<ReviewEntity>
+    suspend fun recentGradingTimings(inputMethod: String, peekSemantics: String, limit: Int, beforeTs: Long): List<ReviewEntity>
 
     /** Identity used to skip duplicates when restoring from an export file. */
     @Query("SELECT chunkId || ':' || level || ':' || ts FROM reviews")

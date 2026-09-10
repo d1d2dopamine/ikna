@@ -35,10 +35,20 @@ class HotkeysTest {
     @Test
     fun `replacement survives canonical encoding`() {
         val chord = requireNotNull(HotkeyChord.parse("ALT+J"))
-        val encoded = HotkeyBindings.replace(DEFAULT_HOTKEYS, HotkeyAction.EASY, chord)
+        val encoded = HotkeyBindings.replace(DEFAULT_HOTKEYS, HotkeyAction.UNDO, chord)
         val restored = HotkeyBindings.decode(encoded)
-        assertEquals("ALT+J", restored[HotkeyAction.EASY]?.encoded)
+        assertEquals("ALT+J", restored[HotkeyAction.UNDO]?.encoded)
         assertTrue(HotkeyAction.entries.all { encoded.contains("${it.storedName}=") })
+    }
+
+    @Test
+    fun `obsolete manual grade entries in an older backup are ignored`() {
+        val bindings = HotkeyBindings.decode(
+            "miss=LEFT;know=RIGHT;reveal=SPACE;again=1;hard=2;good=3;easy=4;undo=Z"
+        )
+        assertEquals(setOf("miss", "know", "reveal", "undo"),
+            HotkeyAction.entries.map { it.storedName }.toSet())
+        assertEquals(4, bindings.size)
     }
 
     @Test

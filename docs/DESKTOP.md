@@ -152,8 +152,8 @@ Decks, catalogue, sessions, transcription, search, statistics, settings, JSON
 export and import. No voice, no widget, no reminders.
 
 **Stage 3 -- desktop manners.**
-Keyboard shortcuts (space to reveal, 1-4 to grade, arrows to move), window size
-and position remembered, tray notifications, Anki import through a native file
+Keyboard shortcuts (space to reveal, arrows to answer with automatic grading,
+Z to undo), window size and position remembered, tray notifications, Anki import through a native file
 dialog, update check that opens the release page.
 
 **Stage 4 -- voice, if the artefact exists.**

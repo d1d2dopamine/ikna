@@ -38,7 +38,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
@@ -48,6 +50,8 @@ import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.phoneticsFor
 import dev.ikna.data.repo.NO_LANG
 import dev.ikna.domain.fsrs.Rating
+import dev.ikna.domain.grading.INPUT_KEYBOARD
+import dev.ikna.domain.grading.INPUT_SWIPE
 import dev.ikna.domain.phonetics.Phonetics
 import dev.ikna.domain.session.Ask
 import dev.ikna.domain.session.SessionPlan
@@ -56,6 +60,7 @@ import dev.ikna.domain.session.ReviewSignals
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.ui.platform.LocalDensity
 import dev.ikna.ui.session.ChunkCard
+import dev.ikna.ui.session.ProgrammaticSwipe
 import dev.ikna.ui.session.SwipeableCard
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaPalette
@@ -72,8 +77,8 @@ import kotlinx.coroutines.launch
  * so the interaction survived the move unchanged.
  *
  * What the window adds is what a keyboard can offer and a thumb cannot: space
- * to turn a card over, the arrow keys for the two answers, the number keys for
- * all four FSRS grades, and Z to take the last one back.
+ * to turn a card over, the arrow keys for the same two answers, and Z to take
+ * the last one back. HARD/GOOD/EASY remain the app's decision, not extra keys.
  */
 @Composable
 fun SessionPane(
@@ -93,6 +98,9 @@ fun SessionPane(
     var reload by remember { mutableStateOf(0) }
     var note by remember { mutableStateOf<String?>(null) }
     val focus = remember { FocusRequester() }
+    val heldReviewKeys = remember { mutableSetOf<Key>() }
+    var programmaticSwipe by remember { mutableStateOf<ProgrammaticSwipe?>(null) }
+    var programmaticSwipeToken by remember { mutableStateOf(0) }
     val clipboard = LocalClipboardManager.current
     var saving by remember { mutableStateOf(false) }
     var answeredHere by remember { mutableStateOf(0) }
@@ -115,6 +123,7 @@ fun SessionPane(
         index = 0
         answeredHere = 0
         revealed = false
+        programmaticSwipe = null
         shownAt = System.currentTimeMillis()
         loading = false
         runCatching { focus.requestFocus() }
@@ -125,13 +134,14 @@ fun SessionPane(
     val reviewSignals = remember(deckId, reload, index, current?.card?.key, loading) {
         ReviewSignalTracker()
     }
-    val reveal: () -> Unit = {
-        reviewSignals.reveal()
+    val reveal: (String) -> Unit = { inputMethod ->
+        reviewSignals.reveal(inputMethod)
         revealed = true
     }
 
     val advance: () -> Unit = {
         revealed = false
+        programmaticSwipe = null
         shownAt = System.currentTimeMillis()
         if (index + 1 < cards.size) index += 1 else reload += 1
         onChanged()
@@ -165,8 +175,11 @@ fun SessionPane(
         }
     }
 
-    val grade: (Rating) -> Unit = { rating ->
-        gradeWithSignals(rating, reviewSignals.snapshot(inputMethod = "keyboard"))
+    val requestKeyboardSwipe: (Rating) -> Unit = { rating ->
+        if (current != null && !loading && !saving && programmaticSwipe == null) {
+            programmaticSwipeToken += 1
+            programmaticSwipe = ProgrammaticSwipe(programmaticSwipeToken, rating)
+        }
     }
 
     val undo: () -> Unit = {
@@ -223,37 +236,43 @@ fun SessionPane(
         nextDueAt = plan?.nextDueAt, noMoreExtra = noMoreExtra)
     val hotkeys = remember(settings.hotkeys) { HotkeyBindings.decode(settings.hotkeys) }
 
+    LaunchedEffect(current?.card?.key, reportCard, loading) {
+        if (!loading && reportCard == null) runCatching { focus.requestFocus() }
+    }
 
     Column(
         Modifier
             .fillMaxSize()
             .focusRequester(focus)
-            .focusable()
             .onPreviewKeyEvent { event ->
-                if (loading || saving || reportCard != null || event.type != KeyEventType.KeyDown) {
+                if (event.type == KeyEventType.KeyUp) {
+                    heldReviewKeys.remove(event.key)
+                } else if (loading || saving || reportCard != null || event.type != KeyEventType.KeyDown) {
                     false
-                } else when (hotkeyAction(event, hotkeys)) {
-                    HotkeyAction.MISS -> if (current != null) {
-                        // An arrow behaves like the same two-stage physical
-                        // gesture: first reveal, then answer on the next press.
-                        if (revealed) grade(Rating.AGAIN) else reveal()
-                        true
-                    } else false
-                    HotkeyAction.KNOW -> if (current != null) {
-                        if (revealed) grade(Rating.GOOD) else reveal()
-                        true
-                    } else false
-                    HotkeyAction.REVEAL -> if (current != null && !revealed) {
-                        reveal(); true
-                    } else false
-                    HotkeyAction.AGAIN -> if (revealed) { grade(Rating.AGAIN); true } else false
-                    HotkeyAction.HARD -> if (revealed) { grade(Rating.HARD); true } else false
-                    HotkeyAction.GOOD -> if (revealed) { grade(Rating.GOOD); true } else false
-                    HotkeyAction.EASY -> if (revealed) { grade(Rating.EASY); true } else false
-                    HotkeyAction.UNDO -> { undo(); true }
-                    null -> false
+                } else {
+                    val action = hotkeyAction(event, hotkeys) ?: return@onPreviewKeyEvent false
+                    if (!heldReviewKeys.add(event.key)) return@onPreviewKeyEvent true
+                    when (action) {
+                        HotkeyAction.MISS -> if (current != null) {
+                            requestKeyboardSwipe(Rating.AGAIN)
+                            true
+                        } else false
+                        HotkeyAction.KNOW -> if (current != null) {
+                            requestKeyboardSwipe(Rating.GOOD)
+                            true
+                        } else false
+                        HotkeyAction.REVEAL -> if (current != null && !revealed) {
+                            reveal(INPUT_KEYBOARD)
+                            true
+                        } else false
+                        HotkeyAction.UNDO -> {
+                            undo()
+                            true
+                        }
+                    }
                 }
             }
+            .focusable()
             // Only the header is inset. The card below is the whole pane, edge
             // to edge, exactly as it is the whole screen on the phone.
             .padding(vertical = 0.dp)
@@ -308,6 +327,10 @@ fun SessionPane(
                         onReveal = reveal,
                         onRate = gradeWithSignals,
                         signals = reviewSignals,
+                        programmaticSwipe = programmaticSwipe,
+                        onProgrammaticSwipeHandled = { token ->
+                            if (programmaticSwipe?.token == token) programmaticSwipe = null
+                        },
                         threshold = swipeLine
                     ) { progress ->
                         ChunkCard(
@@ -339,7 +362,7 @@ fun SessionPane(
                             revealed = revealed,
                             showTapHint = !revealed && index == 0,
                             progress = progress,
-                            onTap = reveal,
+                            onTap = { reveal(INPUT_SWIPE) },
                             tapEnabled = !revealed,
                             modifier = Modifier.fillMaxSize()
                         )

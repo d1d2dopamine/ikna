@@ -60,7 +60,7 @@ class GradingRestoreTest {
                     inputRating = input.value, gradingVersion = version,
                     fsrsParameters = if (i < 10) null else dev.ikna.domain.fsrs.FsrsSnapshotCodec.encode(liveScheduler.currentParameters()),
                     gradingReason = if (version == 1) "test" else "disabled",
-                    presentationLength = 25, inputMethod = "swipe", peekSemantics = "optional_peek",
+                    presentationLength = 25, inputMethod = "swipe", peekSemantics = "required_reveal_verified_v2",
                     latencyMs = 1_000L + i, swipeVelocityX = 950f, peeked = false,
                     elapsedDays = result.elapsedDays,
                     stabilityBefore = before.stability, stabilityAfter = result.after.stability,

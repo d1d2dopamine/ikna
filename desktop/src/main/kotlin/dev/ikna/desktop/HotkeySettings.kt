@@ -59,10 +59,6 @@ import dev.ikna.ui.theme.Space
 private val PRIMARY_HOTKEY_ACTIONS = listOf(HotkeyAction.MISS, HotkeyAction.KNOW)
 private val EXTRA_HOTKEY_ACTIONS = listOf(
     HotkeyAction.REVEAL,
-    HotkeyAction.AGAIN,
-    HotkeyAction.HARD,
-    HotkeyAction.GOOD,
-    HotkeyAction.EASY,
     HotkeyAction.UNDO
 )
 
@@ -324,10 +320,6 @@ internal fun hotkeyActionLabel(action: HotkeyAction): String = S.t(
         HotkeyAction.MISS -> "keys.003"
         HotkeyAction.KNOW -> "keys.004"
         HotkeyAction.REVEAL -> "keys.005"
-        HotkeyAction.AGAIN -> "keys.006"
-        HotkeyAction.HARD -> "keys.007"
-        HotkeyAction.GOOD -> "keys.008"
-        HotkeyAction.EASY -> "keys.009"
         HotkeyAction.UNDO -> "keys.010"
     }
 )

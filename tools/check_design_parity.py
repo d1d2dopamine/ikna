@@ -113,6 +113,9 @@ class DesignContracts(unittest.TestCase):
             self.assertIn(required, key_input)
         self.assertIn('stringPreferencesKey("hotkeysV1")', store)
         self.assertIn('store.setHotkeys(snapshot.hotkeys)', backup)
+        for forbidden in ['HotkeyAction.AGAIN', 'HotkeyAction.HARD',
+                          'HotkeyAction.GOOD', 'HotkeyAction.EASY']:
+            self.assertNotIn(forbidden, editor)
 
     def test_deck_marks_and_phonetics_are_real(self):
         for base, name in [(ANDROID, 'ui/decks/DeckScreen.kt'), (DESKTOP, 'DeckPane.kt')]:
@@ -131,6 +134,9 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('!loading && !saving', source)
         self.assertIn('HotkeyAction.UNDO', source)
         self.assertIn('HotkeyBindings.decode(settings.hotkeys)', source)
+        self.assertIn('ProgrammaticSwipe', source)
+        self.assertIn('requestKeyboardSwipe(Rating.AGAIN)', source)
+        self.assertIn('requestKeyboardSwipe(Rating.GOOD)', source)
         self.assertIn('cardWidthPx * 0.08f', source)
         self.assertIn('.coerceIn(40f, 112f)', source)
 
@@ -366,8 +372,9 @@ class DesignContracts(unittest.TestCase):
                 self.assertNotIn('—', line)
         self.assertIn('"onb.001" to "This is"', english)
         branded_title = read(SHARED, 'ui/onboarding/OnboardingTitle.kt')
-        self.assertIn('IknaWordmark(height = 29.dp', branded_title)
-        self.assertNotIn('IknaWordmark(height = 44.dp', onboarding + android_onboarding)
+        self.assertIn('IknaWordmark(height = 22.dp', branded_title)
+        self.assertIn('IknaWordmark(height = 44.dp', branded_title)
+        self.assertEqual(2, branded_title.count('IknaWordmark('))
         self.assertIn('if (showWordmark)', read(DESKTOP, 'WindowTitleBar.kt'))
         for required in ['suspend fun completeOnboarding()',
                          'packLoader.installBundledPacks()',

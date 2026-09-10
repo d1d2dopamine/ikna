@@ -8,7 +8,7 @@ package dev.ikna.data.prefs
  * desktop toolkit key code or on the machine that created the backup.
  */
 const val DEFAULT_HOTKEYS =
-    "miss=LEFT;know=RIGHT;reveal=SPACE;again=1;hard=2;good=3;easy=4;undo=Z"
+    "miss=LEFT;know=RIGHT;reveal=SPACE;undo=Z"
 
 private val HOTKEY_TOKEN = Regex("^[A-Z0-9_]+$")
 private val MODIFIER_ORDER = listOf("CTRL", "ALT", "SHIFT", "META")
@@ -18,10 +18,6 @@ enum class HotkeyAction(val storedName: String, val defaultValue: String) {
     MISS("miss", "LEFT"),
     KNOW("know", "RIGHT"),
     REVEAL("reveal", "SPACE"),
-    AGAIN("again", "1"),
-    HARD("hard", "2"),
-    GOOD("good", "3"),
-    EASY("easy", "4"),
     UNDO("undo", "Z");
 
     companion object {

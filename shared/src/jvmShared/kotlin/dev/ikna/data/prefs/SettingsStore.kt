@@ -126,7 +126,7 @@ data class IknaSettings(
     val haptics: Boolean = true,
     val animations: Boolean = true,
     val autoExport: Boolean = true,
-    /** Explicit local experiment; never automatically enabled or restored. */
+    /** Legacy serialized field retained for old settings files; runtime policy ignores it. */
     val derivedGrading: Boolean = false,
     /**
      * Speech, through the engine already installed on the phone. **Off by

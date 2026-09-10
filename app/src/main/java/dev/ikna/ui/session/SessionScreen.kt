@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import dev.ikna.domain.grading.INPUT_SWIPE
 import dev.ikna.domain.session.Ask
 import dev.ikna.ui.text.S
 
@@ -187,7 +188,7 @@ fun SessionScreen(
                         // first card of a first session explained nothing at all.
                         showTapHint = state.showRevealHint,
                         progress = progress,
-                        onTap = vm::reveal,
+                        onTap = { vm.reveal(INPUT_SWIPE) },
                         tapEnabled = !state.revealed,
                         modifier = Modifier.fillMaxSize()
                     )

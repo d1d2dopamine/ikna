@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Assert mechanics of CI reports, never require or proclaim synthetic benefit."""
+"""Assert CI report mechanics without proclaiming synthetic benefit."""
 from pathlib import Path
 import math
 import sys
 
 root = Path(sys.argv[1])
 reports = {}
-for scenario in ("optional", "required", "noise"):
+for scenario in ("verified", "immature", "noise"):
     path = root / f"{scenario}.txt"
     report = dict(line.split("=", 1) for line in path.read_text().splitlines() if "=" in line)
     assert report["source"] == "synthetic", "CI must never publish personal history metrics"
@@ -21,8 +21,8 @@ for scenario in ("optional", "required", "noise"):
         value = float(report[key])
         assert math.isfinite(value) and value >= 0, (scenario, key, value)
     reports[scenario] = report
-assert int(reports["optional"]["derivedHard"]) > 0
-assert int(reports["optional"]["derivedEasy"]) > 0
-assert int(reports["required"]["derivedEasy"]) == 0, "Required reveal must not invent no-peek evidence"
-assert int(reports["noise"]["discardedTimings"]) > int(reports["optional"]["discardedTimings"])
+assert int(reports["verified"]["derivedHard"]) > 0
+assert int(reports["verified"]["derivedEasy"]) > 0
+assert int(reports["immature"]["derivedEasy"]) == 0, "Immature cards must stay GOOD when fast"
+assert int(reports["noise"]["discardedTimings"]) > int(reports["verified"]["discardedTimings"])
 print("Production Kotlin replay reports pass structural checks; no empirical benefit claim.")

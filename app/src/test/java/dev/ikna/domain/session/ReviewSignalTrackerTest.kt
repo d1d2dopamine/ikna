@@ -1,5 +1,9 @@
 package dev.ikna.domain.session
 
+import dev.ikna.domain.grading.INPUT_ACCESSIBILITY
+import dev.ikna.domain.grading.INPUT_KEYBOARD
+import dev.ikna.domain.grading.INPUT_SWIPE
+import dev.ikna.domain.grading.PEEK_REQUIRED
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -11,16 +15,19 @@ class ReviewSignalTrackerTest {
     private fun tracker() = ReviewSignalTracker { clockMs * 1_000_000L }
 
     @Test
-    fun `latency ends at first drag not release`() {
+    fun `latency ends at final answer gesture after required reveal`() {
         val tracker = tracker()
         tracker.shown()
-        clockMs += 1_200L
+        clockMs += 700L
+        tracker.reveal(INPUT_SWIPE)
+        clockMs += 500L
         tracker.dragStarted()
         clockMs += 800L
         val result = tracker.snapshot(950f)
         assertEquals(1_200L, result.latencyMs!!)
         assertEquals(950f, result.swipeVelocityX!!, 0f)
-        assertEquals(false, result.peeked)
+        assertTrue(result.peeked!!)
+        assertEquals(PEEK_REQUIRED, result.peekSemantics)
         assertNull(result.timingDiscardReason)
     }
 
@@ -29,47 +36,51 @@ class ReviewSignalTrackerTest {
         val tracker = tracker()
         clockMs += 10_000L
         tracker.shown()
-        clockMs += 700L
+        clockMs += 400L
         tracker.shown()
-        clockMs += 300L
+        tracker.reveal(INPUT_SWIPE)
+        clockMs += 600L
         tracker.dragStarted()
         assertEquals(1_000L, tracker.snapshot(100f).latencyMs!!)
     }
 
     @Test
-    fun `peek and cancelled attempts keep the first latency`() {
+    fun `exploratory reveal pull is not mistaken for final answer`() {
         val tracker = tracker()
         tracker.shown()
         clockMs += 900L
-        tracker.dragStarted()
-        tracker.reveal()
-        // The first gesture springs back; the second commits the answer.
+        tracker.reveal(INPUT_SWIPE)
+        // The reveal pull springs back; only the next deliberate throw answers.
         clockMs += 500L
         tracker.dragStarted()
         val result = tracker.snapshot(-1_250f)
-        assertEquals(900L, result.latencyMs!!)
+        assertEquals(1_400L, result.latencyMs!!)
         assertTrue(result.peeked!!)
         assertEquals(-1_250f, result.swipeVelocityX!!, 0f)
+        assertNull(result.timingDiscardReason)
     }
 
     @Test
-    fun `tap reveal is recorded too`() {
+    fun `instant post reveal throw is never timing evidence`() {
         val tracker = tracker()
         tracker.shown()
-        tracker.reveal()
-        clockMs += 2_000L
+        tracker.reveal(INPUT_SWIPE)
+        clockMs += ReviewSignalTracker.MIN_REVEAL_CHECK_MS - 1L
         tracker.dragStarted()
-        assertTrue(tracker.snapshot(0f).peeked!!)
+        val result = tracker.snapshot(900f)
+        assertEquals(TimingDiscardReason.REVEAL_NOT_VERIFIED, result.timingDiscardReason)
     }
 
     @Test
-    fun `zero velocity is measured not absent`() {
+    fun `minimum verification boundary is accepted`() {
         val tracker = tracker()
         tracker.shown()
+        tracker.reveal(INPUT_SWIPE)
+        clockMs += ReviewSignalTracker.MIN_REVEAL_CHECK_MS
         tracker.dragStarted()
         val result = tracker.snapshot(0f)
         assertEquals(0f, result.swipeVelocityX!!, 0f)
-        assertEquals(0L, result.latencyMs!!)
+        assertEquals(ReviewSignalTracker.MIN_REVEAL_CHECK_MS, result.latencyMs!!)
         assertNull(result.timingDiscardReason)
     }
 
@@ -81,15 +92,14 @@ class ReviewSignalTrackerTest {
         )) {
             val tracker = tracker()
             tracker.shown()
-            clockMs += 100L
+            tracker.reveal(INPUT_SWIPE)
+            clockMs += 500L
             tracker.dragStarted()
             tracker.interrupt(reason)
             tracker.shown()
-            tracker.reveal()
-            clockMs += 500L
             val result = tracker.snapshot(1_000f)
             assertEquals(reason, result.timingDiscardReason)
-            assertEquals(100L, result.latencyMs!!)
+            assertEquals(500L, result.latencyMs!!)
             assertTrue(result.peeked!!)
         }
     }
@@ -100,14 +110,17 @@ class ReviewSignalTrackerTest {
         tracker.shown()
         tracker.interrupt(TimingDiscardReason.FOCUS_LOST)
         tracker.interrupt(TimingDiscardReason.APP_BACKGROUND)
+        tracker.reveal(INPUT_SWIPE)
+        clockMs += 300L
         tracker.dragStarted()
         assertEquals(TimingDiscardReason.FOCUS_LOST, tracker.snapshot(42f).timingDiscardReason)
     }
 
     @Test
-    fun `more than sixty seconds is discarded without clamping the raw latency`() {
+    fun `more than sixty seconds is discarded without clamping raw latency`() {
         val tracker = tracker()
         tracker.shown()
+        tracker.reveal(INPUT_SWIPE)
         clockMs += 60_001L
         tracker.dragStarted()
         val result = tracker.snapshot(100f)
@@ -119,44 +132,76 @@ class ReviewSignalTrackerTest {
     fun `exactly sixty seconds is within the ceiling`() {
         val tracker = tracker()
         tracker.shown()
-        clockMs += 60_000L
+        clockMs += 100L
+        tracker.reveal(INPUT_SWIPE)
+        clockMs += 59_900L
         tracker.dragStarted()
         assertNull(tracker.snapshot(0f).timingDiscardReason)
     }
 
     @Test
-    fun `distraction after an early drag still discards timing`() {
+    fun `distraction after answer gesture still discards timing`() {
         val tracker = tracker()
         tracker.shown()
-        clockMs += 100L
+        tracker.reveal(INPUT_SWIPE)
+        clockMs += 300L
         tracker.dragStarted()
         clockMs += 120_000L
         val result = tracker.snapshot(42f)
-        assertEquals(100L, result.latencyMs!!)
+        assertEquals(300L, result.latencyMs!!)
         assertEquals(TimingDiscardReason.TIMEOUT, result.timingDiscardReason)
     }
 
     @Test
-    fun `keyboard or accessibility cannot invent a swipe`() {
+    fun `keyboard latency ends at final answer key not reveal key`() {
         val tracker = tracker()
         tracker.shown()
-        tracker.reveal()
-        val result = tracker.snapshot()
-        assertNull(result.latencyMs)
+        clockMs += 700L
+        tracker.reveal(INPUT_KEYBOARD)
+        clockMs += 500L
+        tracker.keyboardStarted()
+        val result = tracker.snapshot(inputMethod = INPUT_KEYBOARD)
+        assertEquals(1_200L, result.latencyMs!!)
+        assertNull(result.swipeVelocityX)
+        assertTrue(result.peeked!!)
+        assertNull(result.timingDiscardReason)
+    }
+
+    @Test
+    fun `accessibility cannot enter native timing calibration`() {
+        val tracker = tracker()
+        tracker.shown()
+        tracker.reveal(INPUT_ACCESSIBILITY)
+        clockMs += 300L
+        tracker.answerStarted(INPUT_ACCESSIBILITY)
+        val result = tracker.snapshot(inputMethod = INPUT_ACCESSIBILITY)
+        assertEquals(300L, result.latencyMs!!)
         assertNull(result.swipeVelocityX)
         assertTrue(result.peeked!!)
         assertEquals(TimingDiscardReason.NO_SWIPE, result.timingDiscardReason)
     }
 
     @Test
-    fun `a keyboard answer after a drag still has no swipe velocity`() {
+    fun `switching modality between reveal and answer discards timing`() {
+        val tracker = tracker()
+        tracker.shown()
+        tracker.reveal(INPUT_SWIPE)
+        clockMs += 600L
+        tracker.keyboardStarted()
+        val result = tracker.snapshot(inputMethod = INPUT_KEYBOARD)
+        assertEquals(600L, result.latencyMs!!)
+        assertEquals(TimingDiscardReason.MIXED_INPUT, result.timingDiscardReason)
+    }
+
+    @Test
+    fun `answer without the required reveal is discarded`() {
         val tracker = tracker()
         tracker.shown()
         clockMs += 600L
         tracker.dragStarted()
-        val result = tracker.snapshot()
-        assertEquals(600L, result.latencyMs!!)
-        assertEquals(TimingDiscardReason.NO_SWIPE, result.timingDiscardReason)
+        val result = tracker.snapshot(500f)
+        assertFalse(result.peeked!!)
+        assertEquals(TimingDiscardReason.ANSWER_NOT_REVEALED, result.timingDiscardReason)
     }
 
     @Test
@@ -165,6 +210,8 @@ class ReviewSignalTrackerTest {
         for (velocity in listOf(Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY)) {
             val tracker = tracker()
             tracker.shown()
+            tracker.reveal(INPUT_SWIPE)
+            clockMs += 300L
             tracker.dragStarted()
             val result = tracker.snapshot(velocity)
             assertNull(result.swipeVelocityX)
@@ -177,28 +224,31 @@ class ReviewSignalTrackerTest {
         val tracker = tracker()
         tracker.shown()
         clockMs -= 1L
+        tracker.reveal(INPUT_SWIPE)
         tracker.dragStarted()
         assertEquals(TimingDiscardReason.INVALID_CLOCK, tracker.snapshot(10f).timingDiscardReason)
     }
 
     @Test
-    fun `a new presentation has neither the old peek nor the old interruption`() {
+    fun `a new presentation has neither old reveal nor interruption`() {
         val old = tracker()
         old.shown()
-        old.reveal()
+        old.reveal(INPUT_SWIPE)
         old.interrupt(TimingDiscardReason.FOCUS_LOST)
         val fresh = tracker()
         fresh.shown()
+        clockMs += 300L
         fresh.dragStarted()
         val result = fresh.snapshot(0f)
         assertFalse(result.peeked!!)
-        assertNull(result.timingDiscardReason)
+        assertEquals(TimingDiscardReason.ANSWER_NOT_REVEALED, result.timingDiscardReason)
     }
 
     @Test
-    fun `an observation captured before animation stays immutable`() {
+    fun `observation captured before animation stays immutable`() {
         val tracker = tracker()
         tracker.shown()
+        tracker.reveal(INPUT_SWIPE)
         clockMs += 300L
         tracker.dragStarted()
         val atRelease = tracker.snapshot(300f)

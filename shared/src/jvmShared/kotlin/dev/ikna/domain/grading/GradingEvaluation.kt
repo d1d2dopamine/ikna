@@ -105,8 +105,12 @@ object GradingEvaluator {
                 }
             }
             val initial = seed(row)
+            val derivedBefore = previousB ?: initial
             val decision = DerivedGrading.decide(
-                binaryGrade, row.observations(), row.level, row.presentationLength, window, enabled = true
+                binaryGrade, row.observations(), row.level, row.presentationLength, window,
+                enabled = true,
+                easyEligible = !derivedBefore.isNew &&
+                    derivedBefore.reps - derivedBefore.lapses >= EASY_MIN_PRIOR_SUCCESSES
             )
             binary[key] = scheduler.apply(previousA ?: initial, binaryGrade, row.ts).card
             derived[key] = if (decision.rating == Rating.HARD || decision.rating == Rating.EASY) {

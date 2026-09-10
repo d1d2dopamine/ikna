@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Deterministic TEST data. Never an empirical validation or a user's history.
+"""Deterministic TEST data. Never empirical validation or a person's history.
 
-Outcomes come from a deliberately simple latent-ability model, not from the
-candidate FSRS parameters being evaluated. The three scenarios expose optional
-peeks, the actual required-reveal UI and dirty/missing data respectively.
+All scenarios use the shipping mandatory-reveal timing protocol. They exercise
+mature verified answers, cards that cannot yet receive EASY, and dirty data.
 """
 from __future__ import annotations
 import argparse
@@ -14,31 +13,32 @@ import random
 
 ROOT = Path(__file__).resolve().parent
 BASE_TS = 1_700_000_000_000
-SCENARIOS = ("optional", "required", "noise")
+SCENARIOS = ("verified", "immature", "noise")
+PROTOCOL = "required_reveal_verified_v2"
 
 
 def generate(scenario: str) -> list[dict]:
     rng = random.Random(73021)
     records = []
     for i in range(1200):
-        card = i % 120
+        # Three sightings per card are insufficient for the fourth-answer EASY
+        # maturity gate; other scenarios revisit 120 cards ten times each.
+        card = i % (400 if scenario == "immature" else 120)
         level = card % 3
         length = (16, 36, 64, 100, 144)[card % 5]
         ability = (card % 11) / 10.0
         fatigue = 0.1 * math.sin(i / 53.0)
         recall_probability = max(0.15, min(0.96, 0.65 + ability * 0.25 - fatigue))
         recalled = rng.random() < recall_probability
-        retrieval_cost = max(50, 700 - ability * 380 + rng.gauss(0, 150) + fatigue * 500)
-        latency = round(retrieval_cost * math.sqrt(length))
-        peek = recalled and rng.random() < (0.20 - ability * 0.10)
+        response_cost = max(50, 700 - ability * 380 + rng.gauss(0, 150) + fatigue * 500)
+        latency = round(response_cost * math.sqrt(length))
         row = dict(
             synthetic=True, id=i + 1, chunkId=f"SYNTHETIC-ONLY-{card:03d}", level=level,
             ts=BASE_TS + i * 1_800_000, rating=3 if recalled else 1,
             inputRating=3 if recalled else 1,
             durationMs=latency + 1200, latencyMs=latency,
             swipeVelocityX=round(rng.uniform(200, 1700) * (1 if recalled else -1), 2),
-            peeked=True if scenario == "required" else peek,
-            peekSemantics="required_reveal" if scenario == "required" else "optional_peek",
+            peeked=True, peekSemantics=PROTOCOL,
             presentationLength=length, inputMethod="swipe", wasAmnesty=False,
         )
         if scenario == "noise":

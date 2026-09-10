@@ -493,7 +493,7 @@ private fun toggleFullScreen(state: WindowState) {
  * Window-level keys.
  *
  * Only the ones that belong to the application as a whole. Everything a card
- * responds to -- space, the number keys, the arrows -- stays inside the session,
+ * responds to -- space, the answer arrows and undo -- stays inside the session,
  * where it can be read next to the thing it acts on.
  */
 private fun handleWindowKey(event: KeyEvent, ui: DesktopUi, state: WindowState): Boolean {

@@ -86,8 +86,8 @@ class FullGradingChecks(unittest.TestCase):
         for i in range(1, 221):
             db.execute("""INSERT INTO reviews (id,chunkId,level,ts,rating,elapsedDays,stabilityBefore,
                 stabilityAfter,difficultyBefore,difficultyAfter,durationMs,wasAmnesty,inputRating,
-                inputMethod,latencyMs,swipeVelocityX,presentationLength)
-                VALUES (?, 'one', 0, ?, 3, 0, 1, 1, 5, 5, 3000, 0, 3, 'swipe', ?, 900, 25)""", (i, i, i + 1000))
+                inputMethod,peekSemantics,peeked,latencyMs,swipeVelocityX,presentationLength)
+                VALUES (?, 'one', 0, ?, 3, 0, 1, 1, 5, 5, 3000, 0, 3, 'swipe', 'required_reveal_verified_v2', 1, ?, 900, 25)""", (i, i, i + 1000))
         db.execute("UPDATE reviews SET timingDiscardReason='focus_lost' WHERE id=219")
         db.execute("UPDATE reviews SET inputMethod='keyboard' WHERE id=218")
         db.execute("UPDATE reviews SET swipeVelocityX=NULL WHERE id=217")
@@ -95,12 +95,25 @@ class FullGradingChecks(unittest.TestCase):
             stabilityAfter,difficultyBefore,difficultyAfter,durationMs,wasAmnesty,undoOf)
             VALUES (500,'one',0,221,0,0,0,0,0,0,0,0,216)""")
         db.row_factory = sqlite3.Row
-        rows = db.execute(sql, dict(limit=200, beforeTs=219)).fetchall()
+        rows = db.execute(sql, dict(inputMethod='swipe', peekSemantics='required_reveal_verified_v2', limit=200, beforeTs=219)).fetchall()
         ids = [row['id'] for row in rows]
         self.assertEqual(200, len(ids))
         self.assertEqual(215, ids[0])
         self.assertEqual(16, ids[-1])
         self.assertFalse(set(ids) & {216, 217, 218, 219, 220, 500})
+
+        for i in range(60):
+            db.execute("""INSERT INTO reviews (id,chunkId,level,ts,rating,elapsedDays,stabilityBefore,
+                stabilityAfter,difficultyBefore,difficultyAfter,durationMs,wasAmnesty,inputRating,
+                inputMethod,peekSemantics,peeked,latencyMs,swipeVelocityX,presentationLength)
+                VALUES (?, 'keys', 0, ?, 3, 0, 1, 1, 5, 5, 3000, 0, 3, 'keyboard', 'required_reveal_verified_v2', 1, ?, NULL, 25)""",
+                (600 + i, 300 + i, 2000 + i))
+        keyboard_rows = db.execute(
+            sql, dict(inputMethod='keyboard', peekSemantics='required_reveal_verified_v2', limit=200, beforeTs=1000)
+        ).fetchall()
+        self.assertEqual(60, len(keyboard_rows))
+        self.assertTrue(all(row['inputMethod'] == 'keyboard' and row['swipeVelocityX'] is None
+                            for row in keyboard_rows))
         db.close()
 
     def test_live_restore_and_undo_use_input_outcome_not_derived_hard_as_failure(self):

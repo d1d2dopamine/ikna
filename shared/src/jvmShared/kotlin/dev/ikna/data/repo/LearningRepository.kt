@@ -18,7 +18,12 @@ import dev.ikna.domain.fsrs.ComponentPrior
 import dev.ikna.domain.fsrs.DAY_MS
 import dev.ikna.domain.grading.DerivedGrading
 import dev.ikna.domain.grading.DERIVED_GRADING_VERSION
+import dev.ikna.domain.grading.EASY_MIN_PRIOR_SUCCESSES
 import dev.ikna.domain.grading.GRADING_WINDOW_SIZE
+import dev.ikna.domain.grading.INPUT_KEYBOARD
+import dev.ikna.domain.grading.INPUT_SWIPE
+import dev.ikna.domain.grading.PEEK_REQUIRED
+import dev.ikna.domain.grading.TimingWindow
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.fsrs.Scheduler
 import dev.ikna.domain.governor.ChunkSelector
@@ -1122,10 +1127,23 @@ class LearningRepository(
         // in-memory copy, and that copy is stale.
         val before = cardDao.card(sessionCard.chunk.id, sessionCard.level.value) ?: sessionCard.card
         val length = sessionCard.prompt.codePointCount(0, sessionCard.prompt.length)
-        val window = gradingWindowFromReviews(reviewDao.recentGradingTimings(GRADING_WINDOW_SIZE, now).asReversed())
+        // Pointer and keyboard reaction times have different motor overhead, so
+        // each modality learns only from its own prior answers. A keyboard-only
+        // learner therefore reaches warm-up without borrowing mouse behaviour.
+        val gradingInput = signals.inputMethod
+        val window = if (gradingInput == INPUT_SWIPE || gradingInput == INPUT_KEYBOARD) {
+            gradingWindowFromReviews(
+                reviewDao.recentGradingTimings(gradingInput, PEEK_REQUIRED, GRADING_WINDOW_SIZE, now).asReversed(),
+                gradingInput
+            )
+        } else {
+            TimingWindow()
+        }
+        val priorSuccesses = (before.reps - before.lapses).coerceAtLeast(0)
         val decision = DerivedGrading.decide(
             rating, signals, sessionCard.level.value, length, window,
-            enabled = derivedGradingEnabled?.invoke() == true
+            enabled = derivedGradingEnabled?.invoke() == true,
+            easyEligible = !before.isNew && priorSuccesses >= EASY_MIN_PRIOR_SUCCESSES
         )
         val version = if (decision.rating != rating) DERIVED_GRADING_VERSION else null
         val answerScheduler = scheduler.snapshot()

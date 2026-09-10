@@ -64,7 +64,7 @@ jobs:
       - name: Paired replay of synthetic scenarios using production Kotlin
         shell: bash
         run: |
-          for scenario in optional required noise; do
+          for scenario in verified immature noise; do
             gradle --no-daemon :desktop:gradingLab \
               -Pgrading.input="tools/grading/fixtures/synthetic-$scenario.jsonl" \
               -Pgrading.output="build/grading/$scenario.txt"

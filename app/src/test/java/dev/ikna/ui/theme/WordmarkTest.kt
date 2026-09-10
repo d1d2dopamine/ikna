@@ -49,8 +49,12 @@ class WordmarkTest {
 			"IknaOnboardingTitle(" in screen
 		)
 		assertTrue(
-			"The shared onboarding title no longer draws IknaWordmark",
-			"IknaWordmark(" in title
+			"The inline first-slide wordmark is no longer text-sized",
+			"IknaWordmark(height = 22.dp" in title
+		)
+		assertTrue(
+			"Later onboarding slides lost their centred wordmark",
+			"IknaWordmark(height = 44.dp" in title
 		)
 		assertTrue(
 			"Onboarding fell back to typed ikna",

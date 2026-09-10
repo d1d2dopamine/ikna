@@ -8,6 +8,7 @@ import dev.ikna.audio.SpeakerStatus
 import dev.ikna.data.prefs.SettingsStore
 import dev.ikna.data.repo.LearningRepository
 import dev.ikna.domain.fsrs.Rating
+import dev.ikna.domain.grading.INPUT_SWIPE
 import dev.ikna.domain.session.SessionCard
 import dev.ikna.domain.session.ReviewSignals
 import dev.ikna.domain.session.ReviewSignalTracker
@@ -264,11 +265,11 @@ class SessionViewModel(
         }
     }
 
-    /** Tap anywhere on the card. */
-    fun reveal() {
+    /** Show the mandatory answer and remember which input modality did it. */
+    fun reveal(inputMethod: String = INPUT_SWIPE) {
         val s = _state.value
         if (s.revealed || s.current == null) return
-        reviewSignals.reveal()
+        reviewSignals.reveal(inputMethod)
         _state.value = s.copy(revealed = true, showRevealHint = false)
         if (hintsShown < HINT_LIMIT) {
             hintsShown++
@@ -278,9 +279,9 @@ class SessionViewModel(
 
     /**
      * Two outcomes, both of them from one horizontal axis: [Rating.AGAIN] for a
-     * chunk that is not known and [Rating.GOOD] for one that is. The other two
-     * grades stay in the model for the sake of the log, which holds years of
-     * answers given when the card could still be thrown up and down.
+     * chunk that is not known and [Rating.GOOD] for one that is. After the
+     * mandatory reveal, private per-modality timing may conservatively refine a
+     * mature known answer to HARD/EASY without asking another question.
      *
      * [viaSwipe] is counted, not just logged: it is the only evidence that the
      * gesture has actually been found. Until there is enough of it, the two

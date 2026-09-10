@@ -183,8 +183,9 @@ class GradingChecks(unittest.TestCase):
         self.assertIn(".onGloballyPositioned { signals.shown() }", source)
         self.assertIn("signals.dragStarted()", source)
         self.assertIn("customActions = if (revealed)", source)
-        self.assertIn("if (canRate) rateNow.value(Rating.GOOD, signals.snapshot())", source)
-        self.assertIn("if (canRate) rateNow.value(Rating.AGAIN, signals.snapshot())", source)
+        self.assertIn("signals.answerStarted(INPUT_ACCESSIBILITY)", source)
+        self.assertIn("rateNow.value(Rating.GOOD, signals.snapshot())", source)
+        self.assertIn("rateNow.value(Rating.AGAIN, signals.snapshot())", source)
 
     def test_android_interruption_observers_are_registered_and_removed(self):
         source = (ROOT / "app/src/main/java/dev/ikna/ui/session/ReviewInterruptions.kt").read_text()
@@ -193,14 +194,31 @@ class GradingChecks(unittest.TestCase):
         for cleanup in ("removeObserver", "removeOnWindowFocusChangeListener", "unregisterReceiver"):
             self.assertIn(cleanup, source)
 
-    def test_desktop_preserves_explicit_keyboard_grades(self):
+    def test_desktop_keyboard_uses_its_own_automatic_grading_path(self):
         source = (ROOT / "desktop/src/main/kotlin/dev/ikna/desktop/SessionPane.kt").read_text()
-        self.assertIn("HotkeyAction.HARD -> if (revealed) { grade(Rating.HARD); true }", source)
-        self.assertIn("HotkeyAction.EASY -> if (revealed) { grade(Rating.EASY); true }", source)
-        self.assertIn("HotkeyAction.MISS -> if (current != null)", source)
-        self.assertIn("HotkeyBindings.decode(settings.hotkeys)", source)
-        self.assertIn('gradeWithSignals(rating, reviewSignals.snapshot(inputMethod = "keyboard"))' , source)
+        card = (SHARED / "ui/session/CardStack.kt").read_text()
+        grading = (SHARED / "domain/grading/DerivedGrading.kt").read_text()
+        replay = (SHARED / "data/repo/GradingReplay.kt").read_text()
+        dao = (SHARED / "data/db/Daos.kt").read_text()
+        hotkeys = (SHARED / "data/prefs/Hotkeys.kt").read_text()
+        for required in ["ProgrammaticSwipe", "requestKeyboardSwipe(Rating.AGAIN)",
+                         "requestKeyboardSwipe(Rating.GOOD)", "reveal(INPUT_KEYBOARD)",
+                         "HotkeyBindings.decode(settings.hotkeys)"]:
+            self.assertIn(required, source)
+        for forbidden in ["HotkeyAction.AGAIN", "HotkeyAction.HARD",
+                          "HotkeyAction.GOOD", "HotkeyAction.EASY"]:
+            self.assertNotIn(forbidden, source + hotkeys)
+        self.assertIn("signals.keyboardStarted()", card)
+        self.assertIn("signals.snapshot(inputMethod = INPUT_KEYBOARD)", card)
+        self.assertIn("INPUT_KEYBOARD -> signals.swipeVelocityX == null", grading)
+        self.assertIn("inputMethod: String = INPUT_SWIPE", replay)
+        self.assertIn("inputMethod = :inputMethod", dao)
+        self.assertIn("peekSemantics = :peekSemantics", dao)
+        self.assertIn("inputRating = 3", dao)
+        self.assertIn("peeked = 1", dao)
+        self.assertIn("required_reveal_verified_v2", grading)
         self.assertIn("remember(deckId, reload, index, current?.card?.key, loading)", source)
+        self.assertLess(source.index(".onPreviewKeyEvent { event ->"), source.index(".focusable()"))
 
 
 if __name__ == "__main__":
