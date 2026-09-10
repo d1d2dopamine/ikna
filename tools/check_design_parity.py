@@ -192,7 +192,8 @@ class DesignContracts(unittest.TestCase):
         ]:
             source = read(base, name)
             self.assertIn('browseAvailable = browse.available', source)
-            self.assertIn(notice + ' = browseUnavailableText(browse.reason)', source)
+            self.assertIn('browse.reason ?: BrowseUnavailableReason.LOAD_GUARD', source)
+            self.assertNotIn('browseUnavailableText(browse.reason)', source)
             self.assertIn('latest?.available == true', source)
         transient = read(SHARED, 'ui/theme/TransientNotice.kt')
         self.assertIn('NOTICE_MILLIS = 5_000L', transient)

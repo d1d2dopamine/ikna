@@ -323,7 +323,9 @@ private fun DecksColumn(
                         browseAvailable = browse.available,
                         onBrowse = {
                             if (!browse.available) {
-                                notice = browseUnavailableText(browse.reason)
+                                notice = browseUnavailableText(
+                                    browse.reason ?: BrowseUnavailableReason.LOAD_GUARD
+                                )
                             } else {
                                 scope.launch {
                                     val latest = runCatching {

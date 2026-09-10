@@ -211,7 +211,9 @@ fun DecksScreen(
                     browseAvailable = browse.available,
                     onBrowse = {
                         if (!browse.available) {
-                            note = browseUnavailableText(browse.reason)
+                            note = browseUnavailableText(
+                                browse.reason ?: BrowseUnavailableReason.LOAD_GUARD
+                            )
                         } else {
                             scope.launch {
                                 val latest = runCatching {
