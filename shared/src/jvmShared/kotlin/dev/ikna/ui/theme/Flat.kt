@@ -262,6 +262,7 @@ fun IknaIconButton(
 ) {
     Box(
         modifier = modifier
+            .iknaInspect("IknaIconButton[${label ?: glyph.name}]")
             .size(size)
             .semantics {
                 role = Role.Button
@@ -329,6 +330,7 @@ fun IknaWideButton(
 
     Box(
         modifier = modifier
+            .iknaInspect("IknaWideButton[$label]")
             .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier)
             .height(height)
             .background(fillColor.copy(alpha = fillColor.alpha * alpha))
@@ -374,6 +376,7 @@ fun IknaTextButton(
     )
     Box(
         modifier = modifier
+            .iknaInspect("IknaTextButton[$label]")
             .height(44.dp)
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 8.dp),
@@ -448,6 +451,7 @@ fun IknaToggle(
 
     Box(
         modifier = modifier
+            .iknaInspect("IknaToggle[${label ?: if (checked) "on" else "off"}]")
             .width(56.dp)
             .height(32.dp)
             .background(trackColor.copy(alpha = alpha))

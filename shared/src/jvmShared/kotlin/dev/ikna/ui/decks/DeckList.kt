@@ -37,6 +37,7 @@ import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.Space
 import dev.ikna.ui.theme.deckTintColor
+import dev.ikna.ui.theme.iknaInspect
 
 /*
  * The deck list, compiled once and drawn on both machines.
@@ -66,6 +67,7 @@ fun IknaTodayBlock(total: Int, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(vertical = Space.sm)
+            .iknaInspect("IknaTodayBlock")
     ) {
         Text(
             text = S.t("deck.007"),
@@ -127,7 +129,8 @@ fun IknaDeckRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onOpen),
+            .clickable(onClick = onOpen)
+            .iknaInspect("IknaDeckRow[${deck.title}]"),
         verticalAlignment = Alignment.Top
     ) {
         IknaDeckMark(deck = deck, owes = owes, look = look)
@@ -206,7 +209,7 @@ fun IknaDeckProgress(
 ) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().iknaInspect("IknaDeckProgress[$introduced/$total]"),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -273,6 +276,7 @@ fun IknaDeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
     Box(
         modifier = Modifier
             .size(52.dp)
+            .iknaInspect("IknaDeckMark[${deck.title}]")
             .background(fill)
             .border(Space.hair, edge),
         contentAlignment = Alignment.Center

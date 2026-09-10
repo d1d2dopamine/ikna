@@ -195,12 +195,47 @@ class DesignContracts(unittest.TestCase):
         ]:
             source = read(base, name)
             self.assertIn('browseAvailable = browse.available', source)
-            self.assertIn('browse.reason ?: BrowseUnavailableReason.LOAD_GUARD', source)
-            self.assertNotIn('browseUnavailableText(browse.reason)', source)
-            self.assertIn('latest?.available == true', source)
+            self.assertIn('BrowseAvailability.blocked(BrowseUnavailableReason.CHECKING)', source)
+            self.assertIn('BrowseUnavailableReason.CHECK_FAILED', source)
+            self.assertIn('browseUnavailableText(latest)', source)
+            self.assertIn('if (latest.available)', source)
+            self.assertNotIn('LOAD_GUARD', source)
         transient = read(SHARED, 'ui/theme/TransientNotice.kt')
         self.assertIn('NOTICE_MILLIS = 5_000L', transient)
         self.assertIn('widthIn(max = 560.dp)', transient)
+
+    def test_browse_credit_is_cumulative_global_and_honest(self):
+        policy = read(SHARED, 'domain/session/BrowsePolicy.kt')
+        repository = read(SHARED, 'data/repo/LearningRepository.kt')
+        settings = read(SHARED, 'data/prefs/SettingsStore.kt')
+        daos = read(SHARED, 'data/db/Daos.kt')
+        notice = read(SHARED, 'ui/session/BrowseNotice.kt')
+        for required in ['POINTS_PER_BROWSE = 3', 'MAX_BANK_POINTS =',
+                         'fun settleCredits(', 'day > previous',
+                         'GovernorReason.FIRST_RUN,', 'MIN_SUCCESSFUL_REVIEW_DAYS = 3']:
+            self.assertIn(required, policy)
+        for forbidden in ['PLAN_TOO_SMALL', 'LOAD_GUARD', 'MIN_STABILITY_DAYS',
+                          'fun quota(']:
+            self.assertNotIn(forbidden, policy + repository)
+        for required in ['settleBrowseCreditPoints', 'clearBrowseCredits',
+                         'browseDao.countAll()', 'BrowsePolicy.cardsForCredits(creditPoints)',
+                         'BrowseAvailability.blocked(blockers)',
+                         'successfulReviewTimesForChunks']:
+            self.assertIn(required, repository)
+        for required in ['browseEarnedPointsV1', 'browseExposureBaselineV1',
+                         'browseLastExposureCountV1', 'browseCreditedDayV1',
+                         'suspend fun settleBrowseCredits(',
+                         'suspend fun clearBrowseCredits()']:
+            self.assertIn(required, settings)
+        self.assertIn('AND rating >= 3 AND', daos)
+        self.assertIn('SELECT COUNT(*) FROM browse_exposures', daos)
+        self.assertIn('availability.blockers', notice)
+        self.assertIn('joinToString(separator = "\\n")', notice)
+        for base, name in [(ANDROID, 'AppContainer.kt'), (DESKTOP, 'DesktopContainer.kt')]:
+            container = read(base, name)
+            self.assertIn('learningRepository.settleBrowseCreditPoints', container)
+            self.assertIn('settings.settleBrowseCredits(', container)
+            self.assertIn('learningRepository.clearBrowseCredits', container)
 
     def test_desktop_wipe_clears_the_whole_database_and_returns_to_first_run(self):
         android = read(ANDROID, 'AppContainer.kt')
@@ -372,6 +407,37 @@ class DesignContracts(unittest.TestCase):
         source = read(ROOT, 'app/src/test/java/dev/ikna/domain/optimizer/LocalOptimizerTest.kt')
         for test in ['automaticPolicyAppliesOnlyAcceptedResultsAndHonoursMonthlyLimit', 'automaticEligibilityIsQuietAndInsufficientHistoryKeepsDefaults', 'automaticActivationCannotReviveAProfileAfterReset', 'automaticFailuresBackOffInsteadOfFittingAfterEveryAnswer']:
             self.assertIn(test, source)
+
+
+    def test_deck_header_paint_and_desktop_inspector(self):
+        lattice = read(SHARED, 'ui/theme/MemoryLattice.kt')
+        inspector = read(SHARED, 'ui/theme/ElementInspector.kt')
+        controls = read(SHARED, 'ui/theme/Flat.kt')
+        deck_rows = read(SHARED, 'ui/decks/DeckList.kt')
+        prefs = read(SHARED, 'data/prefs/SettingsStore.kt')
+        android_home = read(ANDROID, 'ui/decks/DecksScreen.kt')
+        desktop_shell = read(DESKTOP, 'Shell.kt')
+        desktop_settings = read(DESKTOP, 'SettingsPane.kt')
+
+        self.assertIn('fun IknaDeckHeaderPaint(', lattice)
+        self.assertIn('val todayLeft', lattice)
+        self.assertIn('fun protected(', lattice)
+        self.assertIn('for (step in 0 until run)', lattice)
+        for home in (android_home, desktop_shell):
+            self.assertIn('IknaDeckHeaderPaint(seed = 0x5D31_7A0C)', home)
+
+        self.assertIn('val elementInspector: Boolean = false', prefs)
+        self.assertIn('booleanPreferencesKey("elementInspector")', prefs)
+        self.assertIn('suspend fun setElementInspector(', prefs)
+        self.assertIn('S.t("inspector.001")', desktop_settings)
+        self.assertIn('settings.elementInspector', desktop_settings)
+        self.assertIn('IknaElementInspector(enabled = settings.elementInspector)', desktop_shell)
+        self.assertIn('.iknaInspect("IknaDesktopApp")', desktop_shell)
+        self.assertIn('Alignment.BottomEnd', inspector)
+        self.assertIn('PointerEventType.Move', inspector)
+        self.assertIn('Stroke(width = 1.dp.toPx())', inspector)
+        self.assertIn('IknaIconButton[', controls)
+        self.assertIn('IknaDeckRow[', deck_rows)
 
 
 if __name__ == '__main__':

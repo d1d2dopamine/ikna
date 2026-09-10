@@ -129,7 +129,7 @@ def main() -> int:
                 problems.append(f"{path.relative_to(ROOT)}: selector does not use {required}")
 
     if reference is not None:
-        for key in ["a11y.015", "progress.001", "progress.002"]:
+        for key in ["a11y.015", "progress.001", "progress.002", "browse.021", "inspector.002"]:
             if key not in reference:
                 problems.append(f"catalogue: missing new UI contract key {key}")
 

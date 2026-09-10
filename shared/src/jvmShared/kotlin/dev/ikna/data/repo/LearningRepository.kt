@@ -47,6 +47,7 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -71,7 +72,7 @@ class LearningRepository(
     data class LoadSetting(val auto: Boolean, val manual: Int)
     private data class BrowseGate(
         val room: Int,
-        val reason: BrowseUnavailableReason? = null
+        val blockers: List<BrowseUnavailableReason> = emptyList()
     )
 
     /**
@@ -86,6 +87,15 @@ class LearningRepository(
      * plan is built removes the race instead of narrowing it.
      */
     @Volatile var loadSettings: (suspend () -> LoadSetting)? = null
+
+    /**
+     * DataStore-backed, global credit ledger. The nullable completed count is
+     * deliberate: an unfinished plan may inspect its balance but may not earn.
+     */
+    @Volatile var settleBrowseCreditPoints: (suspend (String, Int?, Int) -> Int)? = null
+
+    /** Clears allowance together with a deliberate learning-progress reset. */
+    @Volatile var clearBrowseCredits: (suspend () -> Unit)? = null
 
     /**
      * The chunks the learner has marked as wrong, read on demand.
@@ -785,16 +795,15 @@ class LearningRepository(
         if (deckIds.isEmpty()) return emptyMap()
         val plan = ensureDailyPlan(now)
         val gate = browseGate(plan, now)
-        if (gate.room <= 0) {
-            val blocked = BrowseAvailability(reason = gate.reason ?: BrowseUnavailableReason.LOAD_GUARD)
-            return deckIds.associateWith { blocked }
-        }
-
         return deckIds.associateWith { deckId ->
-            if (browseCandidates(deckId, limit = 1, now = now).isNotEmpty()) {
+            val blockers = gate.blockers.toMutableList()
+            if (browseCandidates(deckId, limit = 1, now = now).isEmpty()) {
+                blockers += BrowseUnavailableReason.NO_CANDIDATES
+            }
+            if (blockers.isEmpty() && gate.room > 0) {
                 BrowseAvailability(remaining = gate.room)
             } else {
-                BrowseAvailability(reason = BrowseUnavailableReason.NO_CANDIDATES)
+                BrowseAvailability.blocked(blockers)
             }
         }
     }
@@ -850,30 +859,56 @@ class LearningRepository(
     }
 
     private suspend fun browseGate(plan: DailyPlanEntity, now: Long): BrowseGate {
-        if (boundary.isNight(now, config.nightCutoffHour)) {
-            return BrowseGate(0, BrowseUnavailableReason.LATE_NIGHT)
-        }
+        val blockers = mutableListOf<BrowseUnavailableReason>()
         val required = requiredIds(plan)
         val answered = reviewDao.answeredKeysSince(startOfDay(now)).toSet()
-        if (required.isNotEmpty() && !BrowsePolicy.requiredComplete(required, answered)) {
-            return BrowseGate(0, BrowseUnavailableReason.PLAN_NOT_COMPLETE)
-        }
-        if (required.size < BrowsePolicy.REQUIRED_CARDS_PER_BROWSE) {
-            return BrowseGate(0, BrowseUnavailableReason.PLAN_TOO_SMALL)
+        val missing = BrowsePolicy.remainingRequired(required, answered)
+        val planComplete = missing == 0
+        if (!planComplete) blockers += BrowseUnavailableReason.PLAN_NOT_COMPLETE
+
+        if (boundary.isNight(now, config.nightCutoffHour)) {
+            blockers += BrowseUnavailableReason.LATE_NIGHT
+        } else {
+            val log = governorDao.firstForDay(plan.day)
+            val reason = runCatching { GovernorReason.valueOf(plan.reason) }.getOrNull()
+            val rawGate = log?.gate
+            val governorGate = rawGate?.let { value ->
+                runCatching { GovernorReason.valueOf(value) }.getOrNull()
+            }
+            if (reason == null || (rawGate != null && governorGate == null)) {
+                blockers += BrowseUnavailableReason.CHECK_FAILED
+            } else {
+                BrowsePolicy.safetyBlock(reason, governorGate)?.let { blockers += it }
+            }
         }
 
-        val log = governorDao.firstForDay(plan.day)
-        val reason = runCatching { GovernorReason.valueOf(plan.reason) }
-            .getOrDefault(GovernorReason.OK)
-        val gate = log?.gate?.let { value ->
-            runCatching { GovernorReason.valueOf(value) }.getOrNull()
+        val totalExposures = browseDao.countAll()
+        val creditLoader = settleBrowseCreditPoints
+        val creditPoints = if (creditLoader == null) {
+            blockers += BrowseUnavailableReason.CHECK_FAILED
+            0
+        } else {
+            creditLoader(
+                plan.day,
+                required.size.takeIf { planComplete },
+                totalExposures
+            )
         }
-        val quota = BrowsePolicy.quota(required.size, reason, gate)
-        if (quota <= 0) return BrowseGate(0, BrowseUnavailableReason.LOAD_GUARD)
-        val used = browseDao.countForDay(plan.day)
-        val room = (quota - used).coerceAtLeast(0)
-        return if (room > 0) BrowseGate(room)
-        else BrowseGate(0, BrowseUnavailableReason.LIMIT_REACHED)
+        val usedToday = browseDao.countForDay(plan.day)
+        val dailyRoom = (BrowsePolicy.MAX_CARDS_PER_DAY - usedToday).coerceAtLeast(0)
+        val creditRoom = BrowsePolicy.cardsForCredits(creditPoints)
+
+        if (planComplete) {
+            if (dailyRoom == 0) blockers += BrowseUnavailableReason.LIMIT_REACHED
+            else if (creditRoom == 0) blockers += BrowseUnavailableReason.NO_CREDITS
+        }
+
+        val room = min(dailyRoom, creditRoom)
+        val unique = blockers.distinct()
+        return BrowseGate(
+            room = if (unique.isEmpty()) room else 0,
+            blockers = unique
+        )
     }
 
     private suspend fun browseCandidates(
@@ -887,7 +922,6 @@ class LearningRepository(
         val candidates = cardDao.browseCandidatesForPack(
             packId = deckId,
             after = now,
-            minStability = BrowsePolicy.MIN_STABILITY_DAYS,
             limit = BrowsePolicy.CANDIDATE_SCAN_LIMIT
         ).filterNot { it.chunkId in hidden }
         if (candidates.isEmpty()) return emptyList()
@@ -897,15 +931,14 @@ class LearningRepository(
             .minusDays(BrowsePolicy.COOLDOWN_DAYS - 1)
             .toString()
         val viewed = browseDao.chunkIdsSince(cooldownStart).toSet()
-        val daysByChunk = reviewDao.reviewTimesForChunks(candidates.map { it.chunkId })
+        val daysByChunk = reviewDao.successfulReviewTimesForChunks(candidates.map { it.chunkId })
             .groupBy { it.chunkId }
             .mapValues { (_, rows) -> rows.map { dayKey(it.ts) }.toSet() }
 
         val eligible = candidates.filter { card ->
             val reviewDays = daysByChunk[card.chunkId].orEmpty()
             BrowsePolicy.eligible(
-                activeReviewDays = reviewDays.size,
-                stability = card.stability,
+                successfulReviewDays = reviewDays.size,
                 isNew = card.isNew,
                 inAmnesty = card.inAmnesty,
                 dueAt = card.dueAt,
@@ -1381,12 +1414,13 @@ class LearningRepository(
      * one thing in this database that cannot be regenerated, so "start over"
      * means forgetting the schedule, not the history.
      */
-    suspend fun resetProgress() {
+    suspend fun resetProgress() = writeLock.withLock {
         cardDao.clear()
         components.clearAll()
         statsDao.clear()
         planDao.clear()
         browseDao.clear()
+        clearBrowseCredits?.invoke()
     }
 
     /**

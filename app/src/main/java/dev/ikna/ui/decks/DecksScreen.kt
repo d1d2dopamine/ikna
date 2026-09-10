@@ -52,6 +52,7 @@ import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
+import dev.ikna.ui.theme.IknaDeckHeaderPaint
 import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaMemoryField
 import dev.ikna.ui.theme.IknaProgress
@@ -88,7 +89,11 @@ class DecksHomeState {
         }.getOrDefault(emptyMap())
         val nextBrowseAvailability = runCatching {
             container.learningRepository.browseDeckAvailability(nextDecks.map { it.id })
-        }.getOrDefault(emptyMap())
+        }.getOrElse {
+            nextDecks.associate { deck ->
+                deck.id to BrowseAvailability.blocked(BrowseUnavailableReason.CHECK_FAILED)
+            }
+        }
         decks = nextDecks
         today = nextToday
         browseAvailability = nextBrowseAvailability
@@ -166,6 +171,7 @@ fun DecksScreen(
         // Every pushed route and the NavHost paint an opaque clipped surface, so the
         // field cannot survive after Home's exit or leak into Settings.
         IknaMemoryField(seed = 0x1A4B_7C2D, modifier = Modifier.fillMaxSize())
+        IknaDeckHeaderPaint(seed = 0x5D31_7A0C)
         Column(modifier = Modifier.fillMaxSize()) {
         // The name of the app, and nothing else up here. The marks that used to
         // share this row now live in the bar at the bottom of the screen: a phone
@@ -201,7 +207,7 @@ fun DecksScreen(
         ) {
             items(decks, key = { it.id }) { deck ->
                 val browse = state.browseAvailability[deck.id]
-                    ?: BrowseAvailability(reason = BrowseUnavailableReason.LOAD_GUARD)
+                    ?: BrowseAvailability.blocked(BrowseUnavailableReason.CHECKING)
                 DeckRow(
                     deck = deck,
                     look = settings.lookFor(deck.id),
@@ -210,21 +216,14 @@ fun DecksScreen(
                     onOpen = { onOpenSession(deck.id) },
                     browseAvailable = browse.available,
                     onBrowse = {
-                        if (!browse.available) {
-                            note = browseUnavailableText(
-                                browse.reason ?: BrowseUnavailableReason.LOAD_GUARD
-                            )
-                        } else {
-                            scope.launch {
-                                val latest = runCatching {
-                                    container.learningRepository
-                                        .browseDeckAvailability(listOf(deck.id))[deck.id]
-                                }.getOrNull()
-                                if (latest?.available == true) onOpenBrowse(deck.id)
-                                else note = browseUnavailableText(
-                                    latest?.reason ?: BrowseUnavailableReason.LOAD_GUARD
-                                )
-                            }
+                        scope.launch {
+                            val latest = runCatching {
+                                container.learningRepository
+                                    .browseDeckAvailability(listOf(deck.id))[deck.id]
+                            }.getOrNull()
+                                ?: BrowseAvailability.blocked(BrowseUnavailableReason.CHECK_FAILED)
+                            if (latest.available) onOpenBrowse(deck.id)
+                            else note = browseUnavailableText(latest)
                         }
                     },
                     onOpenDeck = { onOpenDeck(deck.id) },

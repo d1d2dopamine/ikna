@@ -343,21 +343,19 @@ interface CardDao {
     ): List<CardEntity>
 
     /**
-     * Mature recognition cards that are still in the future. Browse applies
-     * the remaining safeguards in Kotlin: distinct study days, today's answers,
-     * suppressed chunks and the passive-exposure cooldown.
+     * Learned recognition cards that are still in the future. Browse applies
+     * the understandable familiarity rule in Kotlin: successful reviews on
+     * three study days, no answer today, no suppression and no recent Browse.
      */
     @Query(
         "SELECT c.* FROM cards c JOIN chunks ch ON ch.id = c.chunkId " +
             "WHERE ch.packId = :packId AND c.level = 0 AND c.isNew = 0 " +
             "AND c.inAmnesty = 0 AND c.dueAt > :after " +
-            "AND c.stability >= :minStability " +
             "ORDER BY c.dueAt ASC LIMIT :limit"
     )
     suspend fun browseCandidatesForPack(
         packId: String,
         after: Long,
-        minStability: Double,
         limit: Int
     ): List<CardEntity>
 
@@ -503,12 +501,12 @@ interface ReviewDao {
     @Query("SELECT * FROM reviews WHERE chunkId = :chunkId AND " + NOT_RETRACTED + " ORDER BY ts DESC")
     suspend fun forChunk(chunkId: String): List<ReviewEntity>
 
-    /** One bounded read lets Browse count real study days without one query per card. */
+    /** GOOD/EASY days only: failures and same-day drills do not make a card familiar. */
     @Query(
         "SELECT chunkId, ts FROM reviews WHERE chunkId IN (:chunkIds) " +
-            "AND " + NOT_RETRACTED + " ORDER BY ts ASC"
+            "AND rating >= 3 AND " + NOT_RETRACTED + " ORDER BY ts ASC"
     )
-    suspend fun reviewTimesForChunks(chunkIds: List<String>): List<ChunkReviewTime>
+    suspend fun successfulReviewTimesForChunks(chunkIds: List<String>): List<ChunkReviewTime>
 }
 
 data class ChunkReviewTime(val chunkId: String, val ts: Long)
@@ -521,6 +519,10 @@ interface BrowseDao {
 
     @Query("SELECT COUNT(*) FROM browse_exposures WHERE day = :day")
     suspend fun countForDay(day: String): Int
+
+    /** Global spending counter: switching decks or restarting cannot mint slots. */
+    @Query("SELECT COUNT(*) FROM browse_exposures")
+    suspend fun countAll(): Int
 
     @Query("SELECT DISTINCT chunkId FROM browse_exposures WHERE day >= :fromDay")
     suspend fun chunkIdsSince(fromDay: String): List<String>

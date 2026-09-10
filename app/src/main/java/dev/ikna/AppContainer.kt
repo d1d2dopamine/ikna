@@ -184,6 +184,10 @@ class AppContainer(context: Context) {
             suppressedOf(settings.flow.first().suppressed).toSet()
         }
         learningRepository.onSuppress = { chunkId -> settings.suppressChunk(chunkId) }
+        learningRepository.settleBrowseCreditPoints = { day, completed, exposures ->
+            settings.settleBrowseCredits(day, completed, exposures).availablePoints
+        }
+        learningRepository.clearBrowseCredits = { settings.clearBrowseCredits() }
 
         learningRepository.derivedGradingEnabled = { dev.ikna.domain.optimizer.AutomaticLearningPolicy.DERIVED_WHEN_READY }
         learningRepository.loadSettings = {

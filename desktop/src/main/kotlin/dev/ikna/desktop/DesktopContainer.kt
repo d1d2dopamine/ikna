@@ -111,12 +111,16 @@ class DesktopContainer(val home: File) {
     )
 
     init {
-        // The three hooks AppContainer installs. Without them the session
-        // builder cannot see hidden cards or the daily load setting.
+        // The shared hooks AppContainer installs. Without them the session
+        // builder cannot see hidden cards, the load setting or Browse credit.
         learningRepository.suppressedChunks = {
             suppressedOf(settings.flow.first().suppressed).toSet()
         }
         learningRepository.onSuppress = { chunkId -> settings.suppressChunk(chunkId) }
+        learningRepository.settleBrowseCreditPoints = { day, completed, exposures ->
+            settings.settleBrowseCredits(day, completed, exposures).availablePoints
+        }
+        learningRepository.clearBrowseCredits = { settings.clearBrowseCredits() }
         learningRepository.derivedGradingEnabled = { dev.ikna.domain.optimizer.AutomaticLearningPolicy.DERIVED_WHEN_READY }
         learningRepository.loadSettings = {
             val s = settings.flow.first()

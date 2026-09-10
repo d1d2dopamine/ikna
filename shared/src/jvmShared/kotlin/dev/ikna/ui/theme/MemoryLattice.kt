@@ -76,6 +76,103 @@ fun IknaMemoryField(
     }
 }
 
+/**
+ * Sparse pixel paint above the deck list, with unfinished runs falling down.
+ *
+ * The title and Today's whole reading area are protected rectangles: the field
+ * frames those words but never competes with them. On desktop this canvas is
+ * already clipped by the deck column, so no pixel can leak into the work pane.
+ */
+@Composable
+fun IknaDeckHeaderPaint(
+    seed: Int,
+    modifier: Modifier = Modifier
+) {
+    val ink = MaterialTheme.colorScheme.onSurfaceVariant
+    Canvas(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(148.dp)
+    ) {
+        val pitch = 6.dp.toPx()
+        val pixel = 1.35.dp.toPx()
+        val columns = (size.width / pitch).toInt().coerceAtLeast(1)
+        val denseRows = (54.dp.toPx() / pitch).toInt().coerceAtLeast(1)
+        val titleLeft = 14.dp.toPx()
+        val titleRight = 190.dp.toPx()
+        val titleTop = 7.dp.toPx()
+        val titleBottom = 50.dp.toPx()
+        val todayLeft = 12.dp.toPx()
+        val todayRight = 196.dp.toPx()
+        val todayTop = 51.dp.toPx()
+        val todayBottom = 146.dp.toPx()
+
+        fun protected(x: Float, y: Float, width: Float, height: Float): Boolean {
+            fun touches(left: Float, top: Float, right: Float, bottom: Float): Boolean =
+                x < right && x + width > left && y < bottom && y + height > top
+            return touches(titleLeft, titleTop, titleRight, titleBottom) ||
+                touches(todayLeft, todayTop, todayRight, todayBottom)
+        }
+
+        var state = seed xor 0x72C4_19A5
+
+        // A broken coat rather than a solid band. Density falls toward the edge,
+        // which is what makes the lower marks read as wet paint, not wallpaper.
+        for (row in 0 until denseRows) {
+            val keep = when {
+                row < denseRows / 3 -> 8
+                row < denseRows * 2 / 3 -> 6
+                else -> 3
+            }
+            for (column in 0 until columns) {
+                state = fieldStep(state + row * 149 + column * 61)
+                if ((state ushr 28) >= keep) continue
+
+                val markWidth = pixel * (1 + ((state ushr 6) and 3))
+                val markHeight = pixel * (1 + ((state ushr 10) and 1))
+                val x = (column * pitch + ((state ushr 12) and 3) * pixel * 0.24f)
+                    .coerceIn(0f, (size.width - markWidth).coerceAtLeast(0f))
+                val y = row * pitch + ((state ushr 14) and 3) * pixel * 0.20f
+                if (protected(x, y, markWidth, markHeight)) continue
+
+                val alpha = when ((state ushr 24) and 3) {
+                    0 -> 0.18f
+                    1 -> 0.13f
+                    else -> 0.085f
+                }
+                drawRect(
+                    color = ink.copy(alpha = alpha),
+                    topLeft = Offset(x, y),
+                    size = Size(markWidth, markHeight)
+                )
+            }
+        }
+
+        // A few segmented vertical runs descend from the unfinished lower edge.
+        // Their lengths differ, and gaps keep them in the app's pixel language.
+        for (column in 0 until columns) {
+            state = fieldStep(state + column * 233)
+            if ((state ushr 28) >= 3) continue
+            val run = 3 + ((state ushr 7) and 7)
+            val width = if (((state ushr 18) and 3) == 0) pixel * 2f else pixel
+            val x = (column * pitch + pitch * 0.42f)
+                .coerceIn(0f, (size.width - width).coerceAtLeast(0f))
+            for (step in 0 until run) {
+                state = fieldStep(state + step * 97)
+                if (step > 1 && ((state ushr 25) and 3) == 0) continue
+                val height = if (step == run - 1) pixel * 2f else pixel
+                val y = 45.dp.toPx() + step * pitch
+                if (y >= size.height || protected(x, y, width, height)) continue
+                drawRect(
+                    color = ink.copy(alpha = if (step == run - 1) 0.15f else 0.105f),
+                    topLeft = Offset(x, y),
+                    size = Size(width, height)
+                )
+            }
+        }
+    }
+}
+
 /** A compact unfinished lattice used instead of a dash or a blank chart. */
 @Composable
 fun IknaLatticePlaceholder(modifier: Modifier = Modifier) {

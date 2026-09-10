@@ -19,6 +19,7 @@ class SettingsBackupTest {
 
     @Test
     fun `round trips through json`() {
+        assertFalse(IknaSettings().elementInspector)
         val settings = IknaSettings(
             theme = ThemeMode.CUSTOM,
             paletteId = "plum",

@@ -196,7 +196,9 @@ fun IknaSettingsSection(
     Spacer(Modifier.height(12.dp))
     val motionEnabled = LocalIknaMotionEnabled.current
     Column(
-        modifier = Modifier.animateContentSize(
+        modifier = Modifier
+            .iknaInspect("IknaSettingsSection[$title]")
+            .animateContentSize(
             animationSpec = if (motionEnabled) tween(
                 durationMillis = Motion.contentChangeDurationMillis,
                 easing = LinearOutSlowInEasing
@@ -217,7 +219,8 @@ fun IknaSettingsToggleRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .iknaInspect("IknaSettingsToggleRow[$title]"),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {

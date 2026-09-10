@@ -470,6 +470,15 @@ fun SettingsPane(
                             }
                         )
                         Spacer(Modifier.height(8.dp))
+                        IknaSettingsToggleRow(
+                            title = S.t("inspector.001"),
+                            subtitle = S.t("inspector.002"),
+                            checked = settings.elementInspector,
+                            onCheckedChange = { on ->
+                                save { container.settings.setElementInspector(on) }
+                            }
+                        )
+                        Spacer(Modifier.height(8.dp))
                         IknaButton(label = S.t("set.067"), palette = palette) {
                             scope.launch {
                                 runCatching { container.componentRepository.rebuildFromReviews() }

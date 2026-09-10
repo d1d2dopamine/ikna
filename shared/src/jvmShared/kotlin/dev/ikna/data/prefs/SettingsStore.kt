@@ -1,6 +1,9 @@
 package dev.ikna.data.prefs
 
 import dev.ikna.domain.phonetics.PhoneticsMode
+import dev.ikna.domain.session.BrowseCreditLedger
+import dev.ikna.domain.session.BrowseCreditSettlement
+import dev.ikna.domain.session.BrowsePolicy
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -108,6 +111,8 @@ data class IknaSettings(
     val language: String = LANGUAGE_SYSTEM,
     /** Expands translated interface text to expose clipping; never touches cards. */
     val pseudoLocale: Boolean = false,
+    /** Local desktop development aid; not included in exported user settings. */
+    val elementInspector: Boolean = false,
     /**
      * When true the daily norm is measured from behaviour and [manualLoad] is
      * ignored.
@@ -293,6 +298,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val manualLoad = intPreferencesKey("manualLoad")
         val language = stringPreferencesKey("language")
         val pseudoLocale = booleanPreferencesKey("pseudoLocale")
+        val elementInspector = booleanPreferencesKey("elementInspector")
         val autoLoad = booleanPreferencesKey("autoLoad")
         val reminderEnabled = booleanPreferencesKey("reminderEnabled")
         val reminderHour = intPreferencesKey("reminderHour")
@@ -317,6 +323,13 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val updateCheck = booleanPreferencesKey("updateCheck")
         val updateSkipped = stringPreferencesKey("updateSkipped")
         val updateCheckedAt = longPreferencesKey("updateCheckedAt")
+        // Internal Browse ledger. It is not a user preference and is not
+        // restored from a settings backup, so an imported file cannot mint
+        // passive cards without completing this installation's plans.
+        val browseEarnedPoints = intPreferencesKey("browseEarnedPointsV1")
+        val browseExposureBaseline = intPreferencesKey("browseExposureBaselineV1")
+        val browseLastExposureCount = intPreferencesKey("browseLastExposureCountV1")
+        val browseCreditedDay = stringPreferencesKey("browseCreditedDayV1")
         // Internal migration marker, deliberately absent from IknaSettings:
         // it is not a preference and no screen is allowed to change it.
         val schedulerVersion = intPreferencesKey("schedulerVersion")
@@ -339,6 +352,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             manualLoad = p[Keys.manualLoad] ?: legacyLoad(p[Keys.load]) ?: defaults.manualLoad,
             language = p[Keys.language] ?: defaults.language,
             pseudoLocale = p[Keys.pseudoLocale] ?: defaults.pseudoLocale,
+            elementInspector = p[Keys.elementInspector] ?: defaults.elementInspector,
             autoLoad = p[Keys.autoLoad] ?: defaults.autoLoad,
             reminderEnabled = p[Keys.reminderEnabled] ?: defaults.reminderEnabled,
             reminderHour = p[Keys.reminderHour] ?: defaults.reminderHour,
@@ -402,6 +416,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
 
     suspend fun setLanguage(code: String) = put { it[Keys.language] = code }
     suspend fun setPseudoLocale(on: Boolean) = put { it[Keys.pseudoLocale] = on }
+    suspend fun setElementInspector(on: Boolean) = put { it[Keys.elementInspector] = on }
 
     suspend fun setAutoLoad(on: Boolean) = put { it[Keys.autoLoad] = on }
     suspend fun setHaptics(on: Boolean) = put { it[Keys.haptics] = on }
@@ -497,6 +512,55 @@ class SettingsStore(private val store: DataStore<Preferences>) {
     }
 
     suspend fun markUpdateChecked(now: Long) = put { it[Keys.updateCheckedAt] = now }
+
+    /**
+     * Atomically credits a completed plan at most once and reconciles spending
+     * against the database's append-only Browse exposure count.
+     *
+     * [completedRequiredCards] is null while today's plan is unfinished. Zero
+     * means a legitimately empty completed plan: it records the day without
+     * creating credit. The pure arithmetic lives in [BrowsePolicy] and is unit
+     * tested without DataStore or a platform runtime.
+     */
+    suspend fun settleBrowseCredits(
+        day: String,
+        completedRequiredCards: Int?,
+        totalExposures: Int
+    ): BrowseCreditSettlement {
+        var settled: BrowseCreditSettlement? = null
+        store.edit { prefs ->
+            val ledger = BrowseCreditLedger(
+                earnedPoints = prefs[Keys.browseEarnedPoints] ?: 0,
+                exposureBaseline = prefs[Keys.browseExposureBaseline],
+                lastExposureCount = prefs[Keys.browseLastExposureCount],
+                creditedDay = prefs[Keys.browseCreditedDay]
+            )
+            val next = BrowsePolicy.settleCredits(
+                ledger = ledger,
+                day = day,
+                completedRequiredCards = completedRequiredCards,
+                totalExposures = totalExposures
+            )
+            prefs[Keys.browseEarnedPoints] = next.ledger.earnedPoints
+            prefs[Keys.browseExposureBaseline] = next.ledger.exposureBaseline
+                ?: totalExposures.coerceAtLeast(0)
+            prefs[Keys.browseLastExposureCount] = next.ledger.lastExposureCount
+                ?: totalExposures.coerceAtLeast(0)
+            val credited = next.ledger.creditedDay
+            if (credited == null) prefs.remove(Keys.browseCreditedDay)
+            else prefs[Keys.browseCreditedDay] = credited
+            settled = next
+        }
+        return requireNotNull(settled)
+    }
+
+    /** A progress reset cannot leave allowance earned by the erased history. */
+    suspend fun clearBrowseCredits() = put { prefs ->
+        prefs.remove(Keys.browseEarnedPoints)
+        prefs.remove(Keys.browseExposureBaseline)
+        prefs.remove(Keys.browseLastExposureCount)
+        prefs.remove(Keys.browseCreditedDay)
+    }
 
     /** Which scheduler has produced the card table. Zero means a pre-marker build. */
     suspend fun schedulerVersion(): Int =

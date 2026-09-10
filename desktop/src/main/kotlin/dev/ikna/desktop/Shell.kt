@@ -52,6 +52,8 @@ import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
+import dev.ikna.ui.theme.IknaDeckHeaderPaint
+import dev.ikna.ui.theme.IknaElementInspector
 import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaMemoryField
 import dev.ikna.ui.theme.IknaPalette
@@ -63,6 +65,7 @@ import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.theme.Space
 import dev.ikna.ui.theme.paletteFor
 import dev.ikna.ui.theme.rememberContentFont
+import dev.ikna.ui.theme.iknaInspect
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -177,8 +180,14 @@ fun IknaDesktopApp(
         contentFont = contentFont,
         motionEnabled = settings.animations
     ) {
-        Column(Modifier.fillMaxSize().background(palette.background)) {
-            titleBar(palette)
+        IknaElementInspector(enabled = settings.elementInspector) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .background(palette.background)
+                    .iknaInspect("IknaDesktopApp")
+            ) {
+                titleBar(palette)
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 if (!ready || storedSettings == null) {
                     Column(
@@ -199,6 +208,7 @@ fun IknaDesktopApp(
                 if (ui.showShortcuts) {
                     ShortcutsOverlay(palette) { ui.showShortcuts = false }
                 }
+            }
             }
         }
     }
@@ -238,10 +248,14 @@ private fun DesktopShell(
             .getOrDefault(emptyMap())
         browseAvailability = runCatching {
             container.learningRepository.browseDeckAvailability(nextDecks.map { it.id })
-        }.getOrDefault(emptyMap())
+        }.getOrElse {
+            nextDecks.associate { deck ->
+                deck.id to BrowseAvailability.blocked(BrowseUnavailableReason.CHECK_FAILED)
+            }
+        }
     }
 
-    BoxWithConstraints(Modifier.fillMaxSize()) {
+    BoxWithConstraints(Modifier.fillMaxSize().iknaInspect("DesktopShell")) {
         val wide = maxWidth >= 900.dp
         // The deck column keeps a proportion, not a pixel count.
         //
@@ -304,15 +318,17 @@ private fun DecksColumn(
     val todayTotal = remaining.values.sum()
     var notice by remember { mutableStateOf<String?>(null) }
 
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().iknaInspect("DecksColumn")) {
         IknaMemoryField(seed = 0x1A4B_7C2D, modifier = Modifier.fillMaxSize())
+        IknaDeckHeaderPaint(seed = 0x5D31_7A0C)
 
         Column(Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(BarHeight)
-                    .padding(start = Edge, end = Space.sm),
+                    .padding(start = Edge, end = Space.sm)
+                    .iknaInspect("DecksColumn / Header"),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -335,7 +351,7 @@ private fun DecksColumn(
             ) {
                 items(decks, key = { it.id }) { deck ->
                     val browse = browseAvailability[deck.id]
-                        ?: BrowseAvailability(reason = BrowseUnavailableReason.LOAD_GUARD)
+                        ?: BrowseAvailability.blocked(BrowseUnavailableReason.CHECKING)
                     IknaDeckRow(
                         deck = deck,
                         look = settings.lookFor(deck.id),
@@ -345,21 +361,14 @@ private fun DecksColumn(
                         onOpenDeck = { ui.openDeckScreen(deck.id) },
                         browseAvailable = browse.available,
                         onBrowse = {
-                            if (!browse.available) {
-                                notice = browseUnavailableText(
-                                    browse.reason ?: BrowseUnavailableReason.LOAD_GUARD
-                                )
-                            } else {
-                                scope.launch {
-                                    val latest = runCatching {
-                                        container.learningRepository
-                                            .browseDeckAvailability(listOf(deck.id))[deck.id]
-                                    }.getOrNull()
-                                    if (latest?.available == true) ui.browse(deck.id)
-                                    else notice = browseUnavailableText(
-                                        latest?.reason ?: BrowseUnavailableReason.LOAD_GUARD
-                                    )
-                                }
+                            scope.launch {
+                                val latest = runCatching {
+                                    container.learningRepository
+                                        .browseDeckAvailability(listOf(deck.id))[deck.id]
+                                }.getOrNull()
+                                    ?: BrowseAvailability.blocked(BrowseUnavailableReason.CHECK_FAILED)
+                                if (latest.available) ui.browse(deck.id)
+                                else notice = browseUnavailableText(latest)
                             }
                         },
                         onToggle = { on ->
@@ -479,7 +488,11 @@ private fun PaneContent(
     }
 
     AnimatedContent(
-        modifier = Modifier.fillMaxSize().background(palette.background).clipToBounds(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(palette.background)
+            .clipToBounds()
+            .iknaInspect("PaneContent[${ui.pane.name}]"),
         targetState = ui.pane,
         transitionSpec = {
             val forward = targetState.ordinal >= initialState.ordinal
