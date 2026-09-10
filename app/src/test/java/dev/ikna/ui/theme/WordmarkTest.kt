@@ -20,6 +20,8 @@ import java.io.File
  */
 private const val ASSET = "shared/src/androidMain/res/drawable-nodpi/ikna_wordmark.png"
 private const val ONBOARDING = "src/main/java/dev/ikna/ui/onboarding/OnboardingScreen.kt"
+private const val ONBOARDING_TITLE =
+	"shared/src/jvmShared/kotlin/dev/ikna/ui/onboarding/OnboardingTitle.kt"
 
 /** PNG signature, then the IHDR chunk: width and height are its first eight bytes. */
 private val PNG_MAGIC = byteArrayOf(
@@ -40,9 +42,20 @@ class WordmarkTest {
 
 	@Test
 	fun `the first launch uses the wordmark artwork not typed letters`() {
-		val source = onboardingSource()?.readText() ?: return
-		assertTrue("Onboarding no longer draws IknaWordmark", "IknaWordmark(" in source)
-		assertTrue("Onboarding fell back to typed ikna", "text = \"ikna\"" !in source)
+		val screen = onboardingSource()?.readText() ?: return
+		val title = onboardingTitleSource()?.readText() ?: return
+		assertTrue(
+			"Onboarding no longer uses the shared branded title",
+			"IknaOnboardingTitle(" in screen
+		)
+		assertTrue(
+			"The shared onboarding title no longer draws IknaWordmark",
+			"IknaWordmark(" in title
+		)
+		assertTrue(
+			"Onboarding fell back to typed ikna",
+			"text = \"ikna\"" !in screen && "text = \"ikna\"" !in title
+		)
 	}
 
 	@Test
@@ -123,6 +136,10 @@ class WordmarkTest {
 	 */
 	private fun onboardingSource(): File? =
 		listOf(File(ONBOARDING), File("app/$ONBOARDING")).firstOrNull { it.isFile }
+
+	private fun onboardingTitleSource(): File? =
+		listOf(File(ONBOARDING_TITLE), File("../$ONBOARDING_TITLE"))
+			.firstOrNull { it.isFile }
 
 	private fun asset(): File? =
 		listOf(File(ASSET), File("../$ASSET")).firstOrNull { it.isFile }
