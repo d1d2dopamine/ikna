@@ -24,13 +24,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.ikna.ui.text.S
+import dev.ikna.ui.onboarding.IknaOnboardingTitle
 import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaWideButton
-import dev.ikna.ui.theme.IknaWordmark
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -78,15 +77,11 @@ fun DesktopOnboardingPane(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(48.dp))
-            IknaWordmark(height = 44.dp, label = "ikna")
-
             Spacer(Modifier.weight(1f))
 
-            Text(
-                text = S.t(slide.titleKey),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center
+            IknaOnboardingTitle(
+                titleKey = slide.titleKey,
+                branded = step == 0
             )
             Spacer(Modifier.height(16.dp))
             Text(

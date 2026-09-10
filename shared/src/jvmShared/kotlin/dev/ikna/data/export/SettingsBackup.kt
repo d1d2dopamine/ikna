@@ -4,6 +4,7 @@ import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.LANGUAGE_SYSTEM
 import dev.ikna.data.prefs.SettingsStore
 import dev.ikna.data.prefs.DEFAULT_PALETTE_ID
+import dev.ikna.data.prefs.DEFAULT_HOTKEYS
 import dev.ikna.data.prefs.ThemeMode
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -93,7 +94,9 @@ data class SettingsSnapshot(
     val deckPhonetics: String = "",
     // The learner's own corrections. Restoring a backup without them would
     // put every card they threw away back into circulation.
-    val suppressed: String = ""
+    val suppressed: String = "",
+    // Desktop review keys are portable token names, not machine key codes.
+    val hotkeys: String = DEFAULT_HOTKEYS
 )
 
 object SettingsBackup {
@@ -129,7 +132,8 @@ object SettingsBackup {
         leftHanded = settings.leftHanded,
         deckLooks = settings.deckLooks,
         deckPhonetics = settings.deckPhonetics,
-        suppressed = settings.suppressed
+        suppressed = settings.suppressed,
+        hotkeys = settings.hotkeys
     )
 
     fun encode(settings: IknaSettings): String = json.encodeToString(
@@ -190,5 +194,6 @@ object SettingsBackup {
         store.setDeckLooks(snapshot.deckLooks)
         store.setDeckPhonetics(snapshot.deckPhonetics)
         store.setSuppressed(snapshot.suppressed)
+        store.setHotkeys(snapshot.hotkeys)
     }
 }

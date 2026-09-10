@@ -38,12 +38,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
+import dev.ikna.data.prefs.HotkeyAction
+import dev.ikna.data.prefs.HotkeyBindings
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.phoneticsFor
 import dev.ikna.data.repo.NO_LANG
@@ -221,6 +221,7 @@ fun SessionPane(
         deckTitle = plan?.deckTitle, perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
         reason = plan?.reason ?: dev.ikna.domain.governor.GovernorReason.OK,
         nextDueAt = plan?.nextDueAt, noMoreExtra = noMoreExtra)
+    val hotkeys = remember(settings.hotkeys) { HotkeyBindings.decode(settings.hotkeys) }
 
 
     Column(
@@ -231,18 +232,26 @@ fun SessionPane(
             .onPreviewKeyEvent { event ->
                 if (loading || saving || reportCard != null || event.type != KeyEventType.KeyDown) {
                     false
-                } else when (event.key) {
-                    Key.Spacebar, Key.Enter -> {
-                        if (current != null && !revealed) { reveal(); true } else false
-                    }
-                    Key.DirectionLeft -> if (revealed) { grade(Rating.AGAIN); true } else false
-                    Key.DirectionRight -> if (revealed) { grade(Rating.GOOD); true } else false
-                    Key.One, Key.NumPad1 -> if (revealed) { grade(Rating.AGAIN); true } else false
-                    Key.Two, Key.NumPad2 -> if (revealed) { grade(Rating.HARD); true } else false
-                    Key.Three, Key.NumPad3 -> if (revealed) { grade(Rating.GOOD); true } else false
-                    Key.Four, Key.NumPad4 -> if (revealed) { grade(Rating.EASY); true } else false
-                    Key.Z -> { undo(); true }
-                    else -> false
+                } else when (hotkeyAction(event, hotkeys)) {
+                    HotkeyAction.MISS -> if (current != null) {
+                        // An arrow behaves like the same two-stage physical
+                        // gesture: first reveal, then answer on the next press.
+                        if (revealed) grade(Rating.AGAIN) else reveal()
+                        true
+                    } else false
+                    HotkeyAction.KNOW -> if (current != null) {
+                        if (revealed) grade(Rating.GOOD) else reveal()
+                        true
+                    } else false
+                    HotkeyAction.REVEAL -> if (current != null && !revealed) {
+                        reveal(); true
+                    } else false
+                    HotkeyAction.AGAIN -> if (revealed) { grade(Rating.AGAIN); true } else false
+                    HotkeyAction.HARD -> if (revealed) { grade(Rating.HARD); true } else false
+                    HotkeyAction.GOOD -> if (revealed) { grade(Rating.GOOD); true } else false
+                    HotkeyAction.EASY -> if (revealed) { grade(Rating.EASY); true } else false
+                    HotkeyAction.UNDO -> { undo(); true }
+                    null -> false
                 }
             }
             // Only the header is inset. The card below is the whole pane, edge
@@ -281,11 +290,12 @@ fun SessionPane(
                 // frame.
                 val cardWidthPx = with(LocalDensity.current) { maxWidth.toPx() }
                 // The gesture is a share of the card. The phone's 140 pixels were
-                // measured against a screen that IS the card, and thirteen
-                // percent of the card's own width is the same drag at any window
-                // size, with a floor and a ceiling so a narrow window cannot
-                // grade on a twitch and a wide one cannot demand a shove.
-                val swipeLine = (cardWidthPx * 0.13f).coerceIn(56f, 220f)
+                // measured against a screen that IS the card. A mouse needs a
+                // shorter deliberate move than a thumb, especially in a wide
+                // window. Android keeps its own 140 px threshold; only Desktop
+                // uses this bounded eight-percent line. The shared gesture still
+                // measures real drag latency and release velocity unchanged.
+                val swipeLine = (cardWidthPx * 0.08f).coerceIn(40f, 112f)
                 Box(Modifier.fillMaxSize().clipToBounds()) {
                     SwipeableCard(
                         key = current.card.key + ":" + index,

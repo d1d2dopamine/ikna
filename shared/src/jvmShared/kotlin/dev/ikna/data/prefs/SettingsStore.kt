@@ -226,6 +226,8 @@ data class IknaSettings(
      * belong.
      */
     val suppressed: String = "",
+    /** Portable desktop review shortcuts. See Hotkeys.kt. */
+    val hotkeys: String = DEFAULT_HOTKEYS,
     val onboardingDone: Boolean = false,
     /** How many times the tap-to-reveal hint has been shown. Stops at 5. */
     val revealHintsShown: Int = 0,
@@ -316,6 +318,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val deckLooks = stringPreferencesKey("deckLooks")
         val deckPhonetics = stringPreferencesKey("deckPhonetics")
         val suppressed = stringPreferencesKey("suppressed")
+        val hotkeys = stringPreferencesKey("hotkeysV1")
         val onboardingDone = booleanPreferencesKey("onboardingDone")
         val revealHintsShown = intPreferencesKey("revealHintsShown")
         val swipesDone = intPreferencesKey("swipesDone")
@@ -374,6 +377,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             deckLooks = p[Keys.deckLooks] ?: defaults.deckLooks,
             deckPhonetics = p[Keys.deckPhonetics] ?: defaults.deckPhonetics,
             suppressed = p[Keys.suppressed] ?: defaults.suppressed,
+            hotkeys = p[Keys.hotkeys] ?: defaults.hotkeys,
             onboardingDone = p[Keys.onboardingDone] ?: defaults.onboardingDone,
             revealHintsShown = p[Keys.revealHintsShown] ?: defaults.revealHintsShown,
             swipesDone = p[Keys.swipesDone] ?: defaults.swipesDone,
@@ -496,6 +500,18 @@ class SettingsStore(private val store: DataStore<Preferences>) {
     suspend fun clearSuppressed() = put { it[Keys.suppressed] = "" }
 
     suspend fun setSuppressed(value: String) = put { it[Keys.suppressed] = value }
+
+    suspend fun setHotkey(action: HotkeyAction, chord: HotkeyChord) = put { preferences ->
+        preferences[Keys.hotkeys] = HotkeyBindings.replace(
+            preferences[Keys.hotkeys] ?: DEFAULT_HOTKEYS,
+            action,
+            chord
+        )
+    }
+
+    suspend fun setHotkeys(value: String) = put { preferences ->
+        preferences[Keys.hotkeys] = HotkeyBindings.encode(HotkeyBindings.decode(value))
+    }
 
     suspend fun setUpdateCheck(on: Boolean) = put { it[Keys.updateCheck] = on }
 

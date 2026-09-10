@@ -415,9 +415,9 @@ fun main(args: Array<String>) {
                 )
                 installDropTarget(window, ui)
             }
-            IknaDesktopApp(container, ui, titleBar = { palette ->
+            IknaDesktopApp(container, ui, titleBar = { palette, showWordmark ->
                 if (customTitleBar && windowState.placement != WindowPlacement.Fullscreen) {
-                    IknaWindowTitleBar(windowState, palette, closeWindow)
+                    IknaWindowTitleBar(windowState, palette, closeWindow, showWordmark)
                 }
             })
         }

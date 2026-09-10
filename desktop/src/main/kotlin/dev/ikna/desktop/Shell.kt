@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import dev.ikna.data.prefs.HotkeyBindings
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.lookFor
 import dev.ikna.data.repo.DeckSummary
@@ -141,7 +142,7 @@ class DesktopUi {
 fun IknaDesktopApp(
     container: DesktopContainer,
     ui: DesktopUi,
-    titleBar: @Composable (IknaPalette) -> Unit = {}
+    titleBar: @Composable (IknaPalette, Boolean) -> Unit = { _, _ -> }
 ) {
     // Null means the DataStore has not answered yet. Using a default settings
     // object as the loading value would flash onboarding on every ordinary
@@ -187,7 +188,9 @@ fun IknaDesktopApp(
                     .background(palette.background)
                     .iknaInspect("IknaDesktopApp")
             ) {
-                titleBar(palette)
+                // Keep the draggable strip and window controls during welcome,
+                // but do not repeat ikna in its top-left corner.
+                titleBar(palette, settings.onboardingDone)
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 if (!ready || storedSettings == null) {
                     Column(
@@ -206,7 +209,7 @@ fun IknaDesktopApp(
                 }
 
                 if (ui.showShortcuts) {
-                    ShortcutsOverlay(palette) { ui.showShortcuts = false }
+                    ShortcutsOverlay(palette, settings) { ui.showShortcuts = false }
                 }
             }
             }
@@ -607,7 +610,12 @@ private fun PaneContent(
 
 /** What the keyboard can do, on F1. */
 @Composable
-private fun ShortcutsOverlay(palette: IknaPalette, onClose: () -> Unit) {
+private fun ShortcutsOverlay(
+    palette: IknaPalette,
+    settings: IknaSettings,
+    onClose: () -> Unit
+) {
+    val bindings = remember(settings.hotkeys) { HotkeyBindings.decode(settings.hotkeys) }
     Box(
         Modifier.fillMaxSize().background(palette.background.copy(alpha = 0.86f)),
         contentAlignment = Alignment.Center
@@ -627,11 +635,9 @@ private fun ShortcutsOverlay(palette: IknaPalette, onClose: () -> Unit) {
                 ShortcutLine("F11", S.t("pc.009"), palette)
                 ShortcutLine("Ctrl + Q", S.t("pc.008"), palette)
                 Spacer(Modifier.height(Space.sm))
-                Text(
-                    text = S.t("pc.002"),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = palette.muted
-                )
+                bindings.forEach { (action, chord) ->
+                    ShortcutLine(hotkeyDisplay(chord), hotkeyActionLabel(action), palette)
+                }
                 Spacer(Modifier.height(Space.sm))
                 IknaButton(S.t("sess.014"), palette, filled = true) { onClose() }
             }

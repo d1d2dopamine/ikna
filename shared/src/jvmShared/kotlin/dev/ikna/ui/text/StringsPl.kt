@@ -606,7 +606,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"sess.046" to "termin",
 	"sess.047" to "z pamięci",
 	// Фразами, а не словами
-	"onb.001" to "To jest ikna.",
+	"onb.001" to "To jest",
 	// Внутри — готовые чанки: короткие живые куски речи. Новые добавляются сами — ничего не надо
 	"onb.002" to "Stworzyłem ikna, ponieważ współczesny rynek aplikacji SRS kształtują głównie zespoły marketingowe, których nie obchodzi, ile naprawdę udaje się nauczyć ani jak skuteczna jest nauka. Innym powodem jest to, że obecnie nie ma aplikacji do nauki przedmiotów i języków zaprojektowanych dla osób neuroróżnorodnych, na przykład osób z ADHD. Chcę pomóc uniknąć problemów, które pojawiają się w innych aplikacjach podczas prób nauczenia się lub opanowania czegoś.",
 	// Пропуск — не провал
@@ -989,4 +989,25 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "progress.002" to "TALIA",
     "inspector.001" to "Inspektor elementów",
     "inspector.002" to "Po najechaniu pokazuje wewnętrzną nazwę i granice elementu w prawym dolnym rogu. Tylko do dopracowywania interfejsu na komputerze.",
+    "keys.001" to "KLAWISZE",
+    "keys.002" to "Naciśnij mały krzyżyk, a potem nową kombinację. Możesz użyć od 1 do 3 klawiszy.",
+    "keys.003" to "Nie wiem / w lewo",
+    "keys.004" to "Wiem / w prawo",
+    "keys.005" to "Pokaż odpowiedź",
+    "keys.006" to "Ocena: ponownie",
+    "keys.007" to "Ocena: trudno",
+    "keys.008" to "Ocena: dobrze",
+    "keys.009" to "Ocena: łatwo",
+    "keys.010" to "Cofnij odpowiedź",
+    "keys.011" to "NACIŚNIJ KLAWISZE",
+    "keys.012" to "WIĘCEJ",
+    "keys.013" to "UKRYJ",
+    "keys.014" to "PRZYWRÓĆ POPRZEDNIĄ",
+    "keys.015" to "Użyj najwyżej trzech klawiszy",
+    "keys.016" to "Ta kombinacja jest już używana",
+    "keys.017" to "Ta kombinacja jest zarezerwowana przez aplikację",
+    "keys.018" to "Naciśnij zwykły klawisz, nie tylko modyfikatory",
+    "keys.019" to "Zmień kombinację",
+    "keys.020" to "Esc anuluje wprowadzanie",
+
 )

@@ -195,8 +195,10 @@ class GradingChecks(unittest.TestCase):
 
     def test_desktop_preserves_explicit_keyboard_grades(self):
         source = (ROOT / "desktop/src/main/kotlin/dev/ikna/desktop/SessionPane.kt").read_text()
-        self.assertIn("Key.Two, Key.NumPad2 -> if (revealed) { grade(Rating.HARD); true }", source)
-        self.assertIn("Key.Four, Key.NumPad4 -> if (revealed) { grade(Rating.EASY); true }", source)
+        self.assertIn("HotkeyAction.HARD -> if (revealed) { grade(Rating.HARD); true }", source)
+        self.assertIn("HotkeyAction.EASY -> if (revealed) { grade(Rating.EASY); true }", source)
+        self.assertIn("HotkeyAction.MISS -> if (current != null)", source)
+        self.assertIn("HotkeyBindings.decode(settings.hotkeys)", source)
         self.assertIn('gradeWithSignals(rating, reviewSignals.snapshot(inputMethod = "keyboard"))' , source)
         self.assertIn("remember(deckId, reload, index, current?.card?.key, loading)", source)
 

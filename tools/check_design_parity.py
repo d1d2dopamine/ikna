@@ -28,7 +28,7 @@ class DesignContracts(unittest.TestCase):
         shell = read(DESKTOP, 'Shell.kt')
         for text in ['undecorated = customTitleBar', 'resizable = !customTitleBar',
                      'windowState.placement != WindowPlacement.Fullscreen',
-                     'IknaWindowTitleBar(windowState, palette, closeWindow)',
+                     'IknaWindowTitleBar(windowState, palette, closeWindow, showWordmark)',
                      'onCloseRequest = closeWindow', 'saveGeometry(home, windowState)']:
             self.assertIn(text, main)
         for text in ['WindowDraggableArea(', 'state.isMinimized = true',
@@ -37,8 +37,8 @@ class DesignContracts(unittest.TestCase):
                      'IknaWordmark(', 'palette.background', 'collectIsFocusedAsState']:
             self.assertIn(text, bar)
         self.assertNotIn('.consume(', bar)
-        self.assertIn('titleBar(palette)', shell)
-        self.assertLess(shell.index('IknaTheme('), shell.index('titleBar(palette)'))
+        self.assertIn('titleBar(palette, settings.onboardingDone)', shell)
+        self.assertLess(shell.index('IknaTheme('), shell.index('titleBar(palette, settings.onboardingDone)'))
         self.assertLess(main.index('runBlocking {\n        runCatching { container.install()'),
                         main.index('    application {'))
 
@@ -96,6 +96,24 @@ class DesignContracts(unittest.TestCase):
         self.assertLess(desktop.index('item(key = "update"'), desktop.index('item(key = "data"'))
         self.assertIn('verticalScrolling', read(SHARED, 'ui/settings/SettingsChrome.kt'))
 
+    def test_desktop_hotkeys_are_captured_not_typed(self):
+        settings = read(DESKTOP, 'SettingsPane.kt')
+        editor = read(DESKTOP, 'HotkeySettings.kt')
+        key_input = read(DESKTOP, 'HotkeyInput.kt')
+        store = read(SHARED, 'data/prefs/SettingsStore.kt')
+        backup = read(SHARED, 'data/export/SettingsBackup.kt')
+        self.assertIn('item(key = "keys"', settings)
+        self.assertIn('PRIMARY_HOTKEY_ACTIONS = listOf(HotkeyAction.MISS, HotkeyAction.KNOW)', editor)
+        for required in ['onPreviewKeyEvent', 'animateDpAsState(', 'AnimatedVisibility(',
+                         'HotkeyBindings.conflictingAction', 'keys.014']:
+            self.assertIn(required, editor)
+        self.assertNotIn('BasicTextField', editor)
+        for required in ['tokens.size > 3', 'isReservedGlobalHotkey', 'Key.DirectionLeft',
+                         'Key.DirectionRight', 'Key.One, Key.NumPad1']:
+            self.assertIn(required, key_input)
+        self.assertIn('stringPreferencesKey("hotkeysV1")', store)
+        self.assertIn('store.setHotkeys(snapshot.hotkeys)', backup)
+
     def test_deck_marks_and_phonetics_are_real(self):
         for base, name in [(ANDROID, 'ui/decks/DeckScreen.kt'), (DESKTOP, 'DeckPane.kt')]:
             source = read(base, name)
@@ -111,8 +129,10 @@ class DesignContracts(unittest.TestCase):
         source = read(DESKTOP, 'SessionPane.kt')
         self.assertIn('if (result.isSuccess)', source)
         self.assertIn('!loading && !saving', source)
-        self.assertIn('Key.Z', source)
-        self.assertIn('cardWidthPx * 0.13f', source)
+        self.assertIn('HotkeyAction.UNDO', source)
+        self.assertIn('HotkeyBindings.decode(settings.hotkeys)', source)
+        self.assertIn('cardWidthPx * 0.08f', source)
+        self.assertIn('.coerceIn(40f, 112f)', source)
 
     def test_source_aware_search_and_catalog_are_shared(self):
         for base, name in [(ANDROID, 'ui/search/DeckSearchScreen.kt'), (DESKTOP, 'SearchPane.kt')]:
@@ -322,14 +342,14 @@ class DesignContracts(unittest.TestCase):
                          'DesktopOnboardingPane(container)', 'resetForFirstRun()']:
             self.assertIn(required, shell)
         for required in ['"onb.001"', '"onb.003"', '"onb.005"', '"onb.011"',
-                         'IknaWordmark(', 'GestureDemo()', 'container.completeOnboarding()',
+                         'IknaOnboardingTitle(', 'branded = step == 0', 'GestureDemo()', 'container.completeOnboarding()',
                          'DesktopOnboardingSlide("onb.005", "onb.006", demo = true)',
                          'DesktopOnboardingSlide("onb.011", "onb.012")']:
             self.assertIn(required, onboarding)
         self.assertIn('Slide("onb.005", "onb.006", demo = true)', android_onboarding)
         self.assertIn('Slide("onb.011", "onb.012")', android_onboarding)
         for required in [
-            '"onb.001" to "Это ikna."',
+            '"onb.001" to "Это"',
             'современный рынок SRS-приложений',
             '"onb.003" to "Каждый день приложение собирает конечный план."',
             'План закончен - на сегодня всё.',
@@ -344,7 +364,11 @@ class DesignContracts(unittest.TestCase):
                    ('onb.001', 'onb.002', 'onb.003', 'onb.004',
                     'onb.005', 'onb.006', 'onb.011', 'onb.012')):
                 self.assertNotIn('—', line)
-        self.assertIn('"onb.001" to "This is ikna."', english)
+        self.assertIn('"onb.001" to "This is"', english)
+        branded_title = read(SHARED, 'ui/onboarding/OnboardingTitle.kt')
+        self.assertIn('IknaWordmark(height = 29.dp', branded_title)
+        self.assertNotIn('IknaWordmark(height = 44.dp', onboarding + android_onboarding)
+        self.assertIn('if (showWordmark)', read(DESKTOP, 'WindowTitleBar.kt'))
         for required in ['suspend fun completeOnboarding()',
                          'packLoader.installBundledPacks()',
                          'learningRepository.ensureDailyPlan()',

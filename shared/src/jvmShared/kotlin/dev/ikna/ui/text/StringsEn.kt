@@ -606,7 +606,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"sess.046" to "the term",
 	"sess.047" to "from memory",
 	// Это ikna.
-	"onb.001" to "This is ikna.",
+	"onb.001" to "This is",
 	// Я сделал ikna, потому что современный рынок SRS-приложений в основном формируют команды маркетологов, которым не важно, сколько удаётся выучить и насколько эффективно проходит обучение. Ещё одна причина в том, что сейчас нет приложений для изучения предметов и языков, созданных для нейроотличных людей, например для людей с СДВГ. Я хочу помочь избежать проблем, которые возникают в других приложениях при попытке что-то изучить или освоить.
 	"onb.002" to "I made ikna because today’s SRS app market is largely shaped by marketing teams that do not care how much you actually learn or how effective the process is. Another reason is that there are currently no apps for learning subjects and languages designed for neurodivergent people, including people with ADHD. I want to help you avoid the problems that can arise in other apps when you try to learn or master something.",
 	// Каждый день приложение собирает конечный план.
@@ -989,4 +989,25 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "progress.002" to "DECK",
     "inspector.001" to "Element inspector",
     "inspector.002" to "On hover, shows an element’s internal name and boundary in the bottom-right corner. Intended only for desktop interface tuning.",
+    "keys.001" to "KEYS",
+    "keys.002" to "Use the small × to replace a shortcut, then press the new combination. Use 1 to 3 keys.",
+    "keys.003" to "Don’t know / left",
+    "keys.004" to "Know / right",
+    "keys.005" to "Reveal answer",
+    "keys.006" to "Rating: Again",
+    "keys.007" to "Rating: Hard",
+    "keys.008" to "Rating: Good",
+    "keys.009" to "Rating: Easy",
+    "keys.010" to "Undo answer",
+    "keys.011" to "PRESS KEYS",
+    "keys.012" to "MORE",
+    "keys.013" to "HIDE",
+    "keys.014" to "RESTORE PREVIOUS",
+    "keys.015" to "Use no more than three keys",
+    "keys.016" to "That combination is already in use",
+    "keys.017" to "That combination is reserved by the app",
+    "keys.018" to "Press an ordinary key, not modifiers alone",
+    "keys.019" to "Replace shortcut",
+    "keys.020" to "Esc cancels input",
+
 )

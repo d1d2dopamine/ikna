@@ -24,12 +24,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
 import dev.ikna.ui.theme.IknaTextButton
-import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.IknaWideButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -82,21 +80,11 @@ fun OnboardingScreen(container: AppContainer, onDone: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(48.dp))
-        // The supplied mark is artwork, not four letters set in the UI font.
-        // IknaWordmark keeps those exact letterforms while tinting the ink and
-        // square for whichever of the twelve palettes is active.
-        IknaWordmark(
-            height = 44.dp,
-            label = "ikna"
-        )
-
         Spacer(Modifier.weight(1f))
 
-        Text(
-            text = S.t(slide.titleKey),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center
+        IknaOnboardingTitle(
+            titleKey = slide.titleKey,
+            branded = step == 0
         )
         Spacer(Modifier.height(16.dp))
         Text(

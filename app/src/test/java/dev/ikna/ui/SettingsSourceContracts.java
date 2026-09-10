@@ -96,7 +96,7 @@ public final class SettingsSourceContracts {
         has(desktop, "LazyColumn(", "Desktop must use the same lazy section model");
         has(desktop, "rememberLazyListState()", "Desktop must retain its lazy-list state");
         lacks(desktop, ".verticalScroll(", "Do not restore an eager desktop settings document");
-        count(desktop, "item\\(key = \"", 9, "Desktop settings section count");
+        count(desktop, "item\\(key = \"", 10, "Desktop settings section count");
     }
 
     public void jumpStripTargetsLazyItemsWithoutGlobalSectionMeasurement() {

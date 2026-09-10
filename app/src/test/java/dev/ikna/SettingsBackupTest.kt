@@ -2,6 +2,9 @@ package dev.ikna
 
 import dev.ikna.data.export.SettingsBackup
 import dev.ikna.data.prefs.IknaSettings
+import dev.ikna.data.prefs.HotkeyAction
+import dev.ikna.data.prefs.HotkeyBindings
+import dev.ikna.data.prefs.HotkeyChord
 import dev.ikna.data.prefs.ThemeMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -34,7 +37,12 @@ class SettingsBackupTest {
             speechEnabled = false,
             phoneVoice = false,
             autoSpeakEvery = true,
-            fontName = "Atkinson.ttf"
+            fontName = "Atkinson.ttf",
+            hotkeys = HotkeyBindings.replace(
+                IknaSettings().hotkeys,
+                HotkeyAction.KNOW,
+                requireNotNull(HotkeyChord.parse("CTRL+K"))
+            )
         )
 
         val decoded = SettingsBackup.decode(SettingsBackup.encode(settings))
@@ -53,6 +61,8 @@ class SettingsBackupTest {
         assertEquals(false, decoded?.phoneVoice)
         assertEquals(true, decoded?.autoSpeakEvery)
         assertEquals("Atkinson.ttf", decoded?.fontName)
+        val restoredHotkeys = HotkeyBindings.decode(decoded?.hotkeys)
+        assertEquals("CTRL+K", restoredHotkeys[HotkeyAction.KNOW]?.encoded)
     }
 
     @Test
@@ -70,6 +80,7 @@ class SettingsBackupTest {
         assertEquals(true, decoded?.phoneVoice)
         assertEquals(false, decoded?.autoSpeakEvery)
         assertEquals("Atkinson.ttf", decoded?.fontName)
+        assertEquals(IknaSettings().hotkeys, decoded?.hotkeys)
     }
 
     @Test

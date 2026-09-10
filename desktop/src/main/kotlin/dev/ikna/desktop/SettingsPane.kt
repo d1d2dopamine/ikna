@@ -112,7 +112,7 @@ fun SettingsPane(
         }.getOrNull()
     }
     val sections = listOf("load" to "set.091", "look" to "set.092", "language" to "set.093",
-        "speech" to "set.094", "font" to "set.095", "reminder" to "set.096",
+        "speech" to "set.094", "font" to "set.095", "keys" to "keys.001", "reminder" to "set.096",
         "update" to "set.140", "data" to "set.097", "advanced" to "set.098")
     DesktopPaneFrame(S.t("set.012"), onBack, MaterialTheme.typography.headlineSmall) {
         IknaSettingsJumpRow(sections, listState, settings.animations, settled = true) { id ->
@@ -272,6 +272,17 @@ fun SettingsPane(
                             dataNote = S.t("set.046")
                         }
                     }
+                }
+            }
+            item(key = "keys", contentType = "settings-section") {
+                IknaSettingsSection(S.t("keys.001"), S.t("keys.002")) {
+                    HotkeySettingsContent(
+                        settings = settings,
+                        palette = palette,
+                        onSetHotkey = { action, chord ->
+                            save { container.settings.setHotkey(action, chord) }
+                        }
+                    )
                 }
             }
             item(key = "reminder", contentType = "settings-section") {
@@ -586,14 +597,6 @@ fun SettingsPane(
                             color = palette.ink
                         )
                     }
-                    Spacer(Modifier.height(30.dp))
-                            SectionTitle(S.t("pc.010"), palette)
-                            Spacer(Modifier.height(8.dp))
-                            Text(
-                                text = S.t("pc.002"),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = palette.muted
-                            )
                 }
             }
         }

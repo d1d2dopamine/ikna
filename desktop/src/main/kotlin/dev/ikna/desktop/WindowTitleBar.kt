@@ -53,7 +53,12 @@ private enum class WindowMark { MINIMIZE, MAXIMIZE, RESTORE, CLOSE }
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun WindowScope.IknaWindowTitleBar(state: WindowState, palette: IknaPalette, onClose: () -> Unit) {
+fun WindowScope.IknaWindowTitleBar(
+    state: WindowState,
+    palette: IknaPalette,
+    onClose: () -> Unit,
+    showWordmark: Boolean = true
+) {
     val active = LocalWindowInfo.current.isWindowFocused
     val ink = if (active) palette.ink else palette.muted
     val maximize: () -> Unit = {
@@ -94,7 +99,13 @@ fun WindowScope.IknaWindowTitleBar(state: WindowState, palette: IknaPalette, onC
             ) {
                 Box(Modifier.fillMaxWidth().fillMaxHeight().padding(start = Edge),
                     contentAlignment = Alignment.CenterStart) {
-                    IknaWordmark(height = 16.dp, ink = ink, dot = if (active) palette.accent else palette.muted)
+                    if (showWordmark) {
+                        IknaWordmark(
+                            height = 16.dp,
+                            ink = ink,
+                            dot = if (active) palette.accent else palette.muted
+                        )
+                    }
                 }
             }
             WindowButton(WindowMark.MINIMIZE, S.t("pc.017"), ink, palette) { state.isMinimized = true }
