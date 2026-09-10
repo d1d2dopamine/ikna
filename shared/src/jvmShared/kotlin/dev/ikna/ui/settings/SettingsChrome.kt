@@ -196,14 +196,12 @@ fun IknaSettingsSection(
     Spacer(Modifier.height(12.dp))
     val motionEnabled = LocalIknaMotionEnabled.current
     Column(
-        modifier = Modifier
-            .iknaInspect("IknaSettingsSection[$title]")
-            .animateContentSize(
+        modifier = Modifier.animateContentSize(
             animationSpec = if (motionEnabled) tween(
                 durationMillis = Motion.contentChangeDurationMillis,
                 easing = LinearOutSlowInEasing
             ) else snap()
-        )
+        ).iknaInspect("IknaSettingsSection[$title]")
     ) {
         content()
     }

@@ -434,8 +434,12 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('IknaElementInspector(enabled = settings.elementInspector)', desktop_shell)
         self.assertIn('.iknaInspect("IknaDesktopApp")', desktop_shell)
         self.assertIn('Alignment.BottomEnd', inspector)
-        self.assertIn('PointerEventType.Move', inspector)
+        self.assertIn('collectIsHoveredAsState()', inspector)
+        self.assertIn('.hoverable(interactionSource = interaction)', inspector)
+        self.assertNotIn('onPointerEvent', inspector)
         self.assertIn('Stroke(width = 1.dp.toPx())', inspector)
+        settings_chrome = read(SHARED, 'ui/settings/SettingsChrome.kt')
+        self.assertIn('Modifier.animateContentSize(', settings_chrome)
         self.assertIn('IknaIconButton[', controls)
         self.assertIn('IknaDeckRow[', deck_rows)
 
