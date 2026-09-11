@@ -73,12 +73,16 @@ def main() -> None:
         "desktop\\installer\\ikna.nsi",
     ], "build-installer.ps1")
     require(smoke, [
+        'Start-Process -FilePath $Path -ArgumentList $Arguments -Wait -PassThru',
+        '$process.ExitCode',
         'Run-Exe $Installer @("/S")',
         'Run-Exe $uninstaller @("/S")',
         'Run-Exe $uninstaller @("/S", "/PURGE=1")',
         'Ordinary uninstall deleted user data',
         'Windows uninstall registry key survived purge uninstall',
     ], "test-installer.ps1")
+    if "$LASTEXITCODE" in smoke:
+        raise AssertionError("GUI installer smoke test must use the waited Process.ExitCode")
 
     for forbidden in ["TargetFormat.Msi", "TargetFormat.Exe", "upgradeUuid"]:
         if forbidden in gradle:

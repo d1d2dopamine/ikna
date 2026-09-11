@@ -22,9 +22,13 @@ function Wait-Removed([string]$Path) {
 }
 
 function Run-Exe([string]$Path, [string[]]$Arguments) {
-    & $Path @Arguments
-    if ($LASTEXITCODE -ne 0) {
-        throw "$Path $($Arguments -join ' ') failed with exit code $LASTEXITCODE"
+    # NSIS setup and uninstaller are Windows GUI executables. Invoking one with
+    # `&` does not reliably wait for it or provide a native exit status in pwsh,
+    # which made a successful /S install look like a failure with an empty code.
+    $process = Start-Process -FilePath $Path -ArgumentList $Arguments -Wait -PassThru
+    $exitCode = $process.ExitCode
+    if ($exitCode -ne 0) {
+        throw "$Path $($Arguments -join ' ') failed with exit code $exitCode"
     }
 }
 
