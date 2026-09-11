@@ -8,7 +8,7 @@ set -euo pipefail
 # does the whole build -- the same task, the same module and the same ProGuard
 # rules the Windows build uses -- and jpackage hands back an application image:
 # a folder with the launcher in bin/ and a trimmed Java runtime in lib/. On
-# Windows that folder becomes Ikna.exe plus an .msi and the job is done.
+# Windows packages that folder with the checked-in NSIS recipe.
 #
 # Linux has no equivalent jpackage can produce. --type app-image is a folder,
 # and deb and rpm are per-distribution installers that have to be built on the

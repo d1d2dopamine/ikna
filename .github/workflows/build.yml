@@ -234,20 +234,32 @@ jobs:
           fi
           exit $code
 
-      # The installer is a convenience, not the deliverable. It needs WiX, which
-      # the runner may or may not have, so a failure here must not take the
-      # portable build down with it.
-      - name: Installer
-        continue-on-error: true
-        run: gradle --no-daemon --stacktrace :desktop:packageReleaseMsi
+      # The installer's complete recipe is desktop/installer/ikna.nsi. NSIS is
+      # installed only as a compiler; no setup logic is downloaded in CI.
+      - name: NSIS 3
+        shell: pwsh
+        run: |
+          $compiler = Get-Command makensis.exe -ErrorAction SilentlyContinue
+          $installed = Join-Path ${env:ProgramFiles(x86)} "NSIS\makensis.exe"
+          if (!$compiler -and !(Test-Path $installed)) {
+            choco install nsis --yes --no-progress --limit-output
+          }
+
+      - name: Build NSIS installer
+        shell: pwsh
+        run: ./tools/nsis/build-installer.ps1
+
+      - name: Silent installer and removal smoke test
+        shell: pwsh
+        run: ./tools/nsis/test-installer.ps1 -Installer "desktop/build/compose/binaries/main-release/nsis/*.exe"
 
       - name: Installer artifact
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: ikna-windows-msi
-          path: desktop/build/compose/binaries/main-release/msi/*.msi
-          if-no-files-found: ignore
+          name: ikna-windows-nsis
+          path: desktop/build/compose/binaries/main-release/nsis/*.exe
+          if-no-files-found: error
 
   # ---------------------------------------------------------------------------
   # The Linux application.

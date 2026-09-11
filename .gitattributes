@@ -9,3 +9,10 @@
 *.aar binary
 *.zip binary
 *.apk binary
+
+# Reviewable Windows installer source and deterministic binary artwork.
+*.nsi text eol=lf
+*.ps1 text eol=lf
+*.bmp binary
+*.ico binary
+*.exe binary

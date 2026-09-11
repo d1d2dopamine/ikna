@@ -103,7 +103,7 @@ labelled as not yet available on PC, and finding out is its own stage.
            androidMain  Context, storage access framework, TTS, WorkManager
            desktopMain  %APPDATA% paths, file dialogs, tray
 :app       thin Android: MainActivity, manifest, widget, workers
-:desktop   thin Windows: main(), the window, .exe and .msi packaging
+:desktop   thin Windows: main(), the window, .exe app image, NSIS setup
 ```
 
 The seam between them is about ten `expect`/`actual` declarations: where files
@@ -168,21 +168,24 @@ dialog, update check that opens the release page.
 - `windows` on `windows-latest`, producing the portable folder and the
   installer.
 
-The Windows runner is not a preference. `jpackage`, the JDK tool that produces
-an `.exe` and an `.msi`, documents its Windows options as "available only when
-running on Windows". There is no way to make a Windows installer on the Ubuntu
-runner, and any plan that claims otherwise is wrong.
+The Windows runner is not a preference. `jpackage` builds the application
+image for the machine it runs on, and NSIS compiles the one-file Windows setup.
+The complete install recipe is committed as `desktop/installer/ikna.nsi`; CI
+downloads no setup template and treats a setup build failure as a release
+failure rather than silently falling back to another format.
 
 The shell scripts the build already depends on -- `tools/voice/fetch-voice.sh`
 and `tools/catalog/fetch-bundled-pack.sh` -- run on the Windows runner under
 `shell: bash`, which is Git Bash and is present by default.
 
-`release.yml` gains a third job attaching `Ikna-<version>-windows-x64.zip` and
-the `.msi` beside the APK.
+`release.yml` attaches `ikna-<tag>-windows-x64.zip` and the required
+`ikna-<tag>-windows-x64-setup.exe` beside the APK.
 
-One wrinkle worth writing down before it surprises somebody: `jpackage`
-insists on a purely numeric version, so `0.10.0 press` becomes `0.10.0` for the
-installer. The epoch word stays in the file name and in the app.
+One wrinkle worth writing down before it surprises somebody: `jpackage` and
+the Windows executable version field insist on a numeric version. The app can
+show `0.10.0 press`, while `desktop/build.gradle.kts` uses `0.10.0` and the epoch
+word stays in the release tag. `build-installer.ps1` reads that value rather
+than duplicating it.
 
 ## What you download
 
@@ -190,8 +193,28 @@ Two things, because they answer different questions:
 
 - **A portable zip.** `Ikna.exe` and a cut-down Java runtime beside it. Unpack,
   run, delete the folder to uninstall. Nothing to install, no Java needed.
-- **An installer.** An `.msi` that puts it in Program Files with a Start menu
-  entry.
+- **An installer.** A per-user NSIS `-setup.exe` under
+  `%LOCALAPPDATA%\Programs\ikna`, with a Start-menu entry and no UAC prompt.
+
+The installer creates no service, scheduled task, bundle or auto-start entry.
+It supports normal unattended deployment and removal:
+
+```powershell
+ikna-<tag>-windows-x64-setup.exe /S
+"$env:LOCALAPPDATA\Programs\ikna\Uninstall.exe" /S
+```
+
+Ordinary removal deletes the application, shortcuts and installer registry keys
+but preserves cards and settings in `%APPDATA%\Ikna`. The visible uninstaller
+offers an explicit data checkbox. Automation requests a complete wipe with:
+
+```powershell
+"$env:LOCALAPPDATA\Programs\ikna\Uninstall.exe" /S /PURGE=1
+```
+
+A private `.ikna-install-root` marker prevents recursive deletion of an unknown
+custom folder. Both preserving and purge paths are exercised by a real Windows
+CI smoke test. Every side effect is readable in `desktop/installer/ikna.nsi`.
 
 Both are somewhere around 70-110 MB, most of which is the runtime and Skia.
 
@@ -240,9 +263,9 @@ itself into a temporary folder instead, at the cost of a slower start:
 ```
 
 There is one file rather than the Windows two because the second Windows file
-answers a question Linux does not ask: an `.msi` exists so the app can live in
-Program Files with a Start menu entry, and an AppImage in `~/Downloads` is
-already a program you can run and delete. No `.deb` and no `.rpm`, which
+answers a question Linux does not ask: NSIS setup integrates ikna with the
+Windows Start menu and **Installed apps**, while an AppImage in `~/Downloads`
+is already a program you can run and delete. No `.deb` and no `.rpm`, which
 `jpackage` will happily produce, because both are installers tied to the
 distribution that built them -- a `.deb` built on the Ubuntu runner is a
 promise about Fedora that nobody checked. `app-image`, the third `jpackage`

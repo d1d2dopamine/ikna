@@ -1,4 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 // ---------------------------------------------------------------------------
 // The desktop application: Windows, and now Linux.
@@ -62,8 +61,7 @@ compose.desktop {
         }
 
         nativeDistributions {
-            targetFormats(TargetFormat.Msi, TargetFormat.Exe)
-            packageName = "Ikna"
+                packageName = "Ikna"
 
             // jpackage refuses anything that is not MAJOR.MINOR.PATCH, so this
             // cannot simply be appVersionName from app/build.gradle.kts, which
@@ -98,17 +96,9 @@ compose.desktop {
                 "jdk.charsets"
             )
 
-            // Linux, where the deliverable is one .AppImage file.
-            //
-            // targetFormats above is left alone on purpose. Msi and Exe are
-            // Windows formats and jpackage can produce neither of them here;
-            // an AppImage is not a jpackage format at all. What a Linux build
-            // needs from Gradle is createReleaseDistributable -- the
-            // application image every packager starts from -- and that task
-            // does not read targetFormats, which is why adding Deb and Rpm
-            // would buy nothing. They would also have to be built on the
-            // distribution they are for, and one file that runs on any of
-            // them is the point of the exercise.
+            // Linux uses this same application image as the input to
+            // tools/appimage/build-appimage.sh. NSIS is host-specific and never
+            // participates in the Linux build.
             linux {
                 // jpackage refuses an .ico here, and it copies whatever this
                 // names into the application image as lib/Ikna.png -- which
@@ -124,21 +114,10 @@ compose.desktop {
             }
 
             windows {
-                menuGroup = "Ikna"
-                shortcut = true
-                dirChooser = true
-
-                // Without this jpackage stamps the Compose Multiplatform
-                // default onto the executable, the shortcut and the installer,
-                // which is why the first build shipped with a Kotlin logo.
-                // icon.ico is generated from the same wordmark the phone
-                // launcher icon uses, by tools/make-desktop-icon.py. It has no
-                // source of its own on purpose: the two marks cannot drift.
+                // jpackage stamps the launcher in the application image. The
+                // checked-in NSIS recipe owns setup, upgrades and shortcuts.
+                // icon.ico comes from the same wordmark as the phone launcher.
                 iconFile.set(project.file("icon.ico"))
-                // Fixed for the lifetime of the product: it is how Windows
-                // recognises an installer as an upgrade of what is already
-                // there rather than a second copy of it.
-                upgradeUuid = "6f3c9c1e-4f2a-4b8d-9a1e-2d7b5c8e3a04"
             }
         }
     }

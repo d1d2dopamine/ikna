@@ -3,9 +3,6 @@ package dev.ikna.ui.decks
 import dev.ikna.ui.text.S
 import dev.ikna.ui.text.quantityWord
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -33,14 +29,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
-import dev.ikna.data.prefs.DeckLook
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.lookFor
 import dev.ikna.data.repo.DeckSummary
@@ -55,12 +46,9 @@ import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaDeckHeaderPaint
 import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaMemoryField
-import dev.ikna.ui.theme.IknaProgress
-import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.IknaTransientNotice
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Space
-import dev.ikna.ui.theme.deckTintColor
 import dev.ikna.widget.TodayWidget
 import kotlinx.coroutines.launch
 
@@ -208,7 +196,7 @@ fun DecksScreen(
             items(decks, key = { it.id }) { deck ->
                 val browse = state.browseAvailability[deck.id]
                     ?: BrowseAvailability.blocked(BrowseUnavailableReason.CHECKING)
-                DeckRow(
+                IknaDeckRow(
                     deck = deck,
                     look = settings.lookFor(deck.id),
                     dueToday = today[deck.id] ?: 0,
@@ -410,251 +398,7 @@ private fun TodayBlock(total: Int, onClick: () -> Unit) {
     }
 }
 
-/**
- * One deck: its mark, what it owes today, and how far through it you are.
- *
- * The outline is gone. A list of identical rectangles is read as a list of
- * identical rectangles — nothing in it is faster to find than anything else, so
- * the eye has to read every title in order. The mark on the left fixes that: two
- * large letters, filled with the accent when the deck owes work and hollow when
- * it does not, so "which deck do I owe today" is answered by colour and shape
- * before any reading happens. That is the whole reason this screen exists.
- *
- * Rows are separated by space rather than by lines. With a solid mark anchoring
- * each row, a border adds nothing except another rectangle.
- */
-@Composable
-private fun DeckRow(
-    deck: DeckSummary,
-    look: DeckLook,
-    dueToday: Int,
-    perCardMs: Long?,
-    onOpen: () -> Unit,
-    browseAvailable: Boolean,
-    onBrowse: () -> Unit,
-    onOpenDeck: () -> Unit,
-    onToggle: (Boolean) -> Unit
-) {
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    val accent = MaterialTheme.colorScheme.primary
-    val owes = dueToday > 0
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            // Always openable, whatever the deck owes today.
-            //
-            // This row used to be clickable only when something was due, so a
-            // deck with an empty plan could not be opened at all — tap, nothing,
-            // no message, no reason given. Two ordinary situations landed there:
-            // a deck just switched on (the day was built before it existed) and a
-            // deck already finished today. Neither is a locked door. The session
-            // screen has the empty state and the "a few more" path for exactly
-            // this, and until now that path was unreachable.
-            .clickable(onClick = onOpen),
-        verticalAlignment = Alignment.Top
-    ) {
-        DeckMark(deck = deck, owes = owes, look = look)
-        Spacer(Modifier.width(Space.md))
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) {
-                    // The title is a title again.
-                    //
-                    // It used to be the only door to the deck's own screen, which
-                    // meant the two destinations in this row were told apart by
-                    // aiming at a word rather than at a control: nothing said the
-                    // name was pressable, and the square on the left -- the one
-                    // thing that looks like a button -- opened a session. Now the
-                    // whole row starts the session, and the three dots below open
-                    // the deck. Both are visible before they are touched.
-                    Text(
-                        text = deck.title,
-                        // One line, cut with an ellipsis.
-                        //
-                        // A catalogue deck brings its own name with it, and a name three lines
-                        // long grew the row downwards: the progress bar and the percentage under
-                        // it were pushed out of the shape every other row in the list has. The
-                        // name is also cut on the way into the database now; this is the second
-                        // line of defence, for the decks that were installed before that.
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onBackground.copy(
-                            alpha = if (deck.isActive) 1f else 0.55f
-                        )
-                    )
-                    Spacer(Modifier.height(Space.xs))
-                    // What today asks of this deck. Long-term progress is kept on
-                    // its own explicitly named line below, so the two figures can
-                    // no longer be read as the same measure.
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = if (owes) S.t("deck.009") + dueToday +
-                                minutesTail(dueToday, perCardMs)
-                            else S.t("deck.010"),
-                            // The percentage is short and fixed; today's figure
-                            // yields first if the row runs out of width.
-                            modifier = Modifier.weight(1f, fill = false),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = if (owes) accent else muted
-                        )
-                    }
-                }
-                // Settings on the left of the switch, and the same height as it.
-                //
-                // Arriving on the right, the dots took the outer edge the switch
-                // had held since the first version -- so the one control on this
-                // row that people already know how to find had moved, which is
-                // why the pair read as an accident. And at 44dp against the
-                // switch's 32dp they made the whole line twelve points taller,
-                // dragging the progress bar and the percentage down with them.
-                //
-                // 32dp is under the 48dp a touch target is supposed to be, and it
-                // is deliberate here: the switch beside it is 32dp for the same
-                // reason, the two sit at the end of a row that is itself one big
-                // target, and a control that silently changes the height of every
-                // row in the list is the worse of the two problems.
-                IknaIconButton(
-                    glyph = IknaGlyph.BROWSE,
-                    onClick = onBrowse,
-                    size = 32.dp,
-                    glyphSize = 18.dp,
-                    color = if (browseAvailable) accent else muted,
-                    label = S.t(if (browseAvailable) "a11y.012" else "a11y.015")
-                )
-                IknaIconButton(
-                    glyph = IknaGlyph.DOTS,
-                    onClick = onOpenDeck,
-                    size = 32.dp,
-                    glyphSize = 18.dp,
-                    color = muted,
-                    label = S.t("a11y.010")
-                )
-                Spacer(Modifier.width(Space.sm))
-                IknaToggle(
-                    checked = deck.isActive,
-                    onCheckedChange = onToggle,
-                    label = S.t("a11y.006")
-                )
-            }
-            if (deck.isActive) {
-                Spacer(Modifier.height(Space.md))
-                IknaDeckProgress(
-                    introduced = deck.introduced,
-                    total = deck.total,
-                    color = if (owes) accent else muted
-                )
-            }
-            // Sharing used to be written out on every row, which put a
-            // second button under a card that already had one and repeated the
-            // same word down the whole list. It now lives on the deck's own
-            // screen, where the deck is the subject and the word is needed once.
-        }
-    }
-}
-
-/**
- * Two letters in a square, and the square is the whole signal.
- *
- * Filled means this deck wants something from you today. Hollow means it is done
- * or resting. Faint means it is switched off. Three states, no words, readable
- * across a room — and the letters remain semantic while the pixel pattern is stable for this
- * installation instead of being shared by every deck of one language.
- */
-@Composable
-private fun DeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
-    // The deck's own colour when it was given one, the palette's accent when
-    // it was not. It is the same variable either way on purpose: a coloured
-    // deck is not a new kind of square, it is this square in another colour,
-    // and the three states below keep working without knowing the difference.
-    val accent = deckTintColor(look.tint, MaterialTheme.colorScheme.primary)
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    val background = MaterialTheme.colorScheme.background
-
-    val fill = if (owes) accent else background
-    val ink = when {
-        owes -> background
-        deck.isActive -> MaterialTheme.colorScheme.onBackground
-        else -> muted.copy(alpha = 0.6f)
-    }
-    val edge = when {
-        owes -> accent
-        deck.isActive -> MaterialTheme.colorScheme.outline
-        else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-    }
-    val patternCells = remember(deck.id, deck.installedAt) { deckSealCells(deck.id, deck.installedAt) }
-    val highlightCells = remember(deck.id, deck.installedAt) { deckSealHighlights(deck.id, deck.installedAt) }
-    val pattern = when {
-        owes -> background.copy(alpha = 0.16f)
-        deck.isActive -> accent.copy(alpha = 0.18f)
-        else -> muted.copy(alpha = 0.10f)
-    }
-    val highlight = when {
-        owes -> background.copy(alpha = 0.34f)
-        deck.isActive -> accent.copy(alpha = 0.40f)
-        else -> muted.copy(alpha = 0.20f)
-    }
-
-    Box(
-        modifier = Modifier
-            .size(52.dp)
-            .background(fill)
-            .border(Space.hair, edge),
-        contentAlignment = Alignment.Center
-    ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val inset = 4.dp.toPx()
-            val step = (size.minDimension - inset * 2f) / DECK_SEAL_SIDE
-            val cell = step * 0.56f
-            fun drawCell(index: Int, color: androidx.compose.ui.graphics.Color) {
-                if (isDeckSealLetterZone(index)) return
-                val column = index % DECK_SEAL_SIDE
-                val row = index / DECK_SEAL_SIDE
-                val x = inset + column * step + (step - cell) / 2f
-                val y = inset + row * step + (step - cell) / 2f
-                drawRect(color, Offset(x, y), Size(cell, cell))
-            }
-            patternCells.forEach { index -> drawCell(index, pattern) }
-            highlightCells.forEach { index -> drawCell(index, highlight) }
-        }
-        // The typed label if there is one, otherwise the two letters the app
-        // works out by itself. One Text either way: a label is not a different
-        // kind of mark, it is the same mark with better letters in it, so it
-        // inherits the tint, the fade and the inversion without asking.
-        Text(
-            text = look.label.ifEmpty { monogramOf(deck.lang, deck.title) },
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = ink,
-            maxLines = 1
-        )
-    }
-}
-
-/**
- * "~4 мин" beside what a deck owes today, when there is a measurement to say
- * it with.
- *
- * A count of cards does not answer the question being asked while looking at
- * this list, which is whether this fits into the time there is. The figure is
- * the same one shown above the first card of a session, from the same
- * measurement: two phrasings of one number read as two numbers.
- *
- * Empty when nothing has been measured yet. Nothing is better than a guess here
- * -- an estimate that turns out to be a lie is not used again.
- */
-private fun minutesTail(count: Int, perCardMs: Long?): String {
-    if (perCardMs == null || count <= 0) return ""
-    val totalMs = count * perCardMs
-    if (totalMs < 45_000L) return S.t("deck.018")
-    val minutes = ((totalMs + 30_000L) / 60_000L).toInt().coerceAtLeast(1)
-    return " · ~" + minutes + S.t("deck.019")
-}
-
+/** Android and Desktop deliberately render [IknaDeckRow] from the shared module. */
 private fun cardWord(count: Int): String {
     return quantityWord(count.toLong(), "deck.014", "deck.015", "deck.016", "deck.017")
 }

@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 TEXT_SUFFIXES = {
     ".kt", ".kts", ".md", ".txt", ".yml", ".yaml", ".json", ".jsonl",
-    ".py", ".sh", ".xml", ".properties", ".toml", ".csv",
+    ".py", ".sh", ".ps1", ".nsi", ".xml", ".properties", ".toml", ".csv",
 }
 TEXT_NAMES = {".editorconfig", ".gitattributes", ".gitignore", "gradlew"}
 SKIP_PARTS = {".git", ".gradle", "build", "out", "node_modules", "__pycache__"}

@@ -240,38 +240,6 @@ fun AddDeckScreen(
 					.padding(horizontal = Edge)
 			) {
 				Spacer(Modifier.height(Space.md))
-				// The same border the import screen uses. An explanation is a panel with
-				// an edge, not a paragraph loose on the page.
-				IknaPanel {
-					Text(
-						text = S.t("add.002"),
-						style = MaterialTheme.typography.bodyMedium
-					)
-				}
-
-				Spacer(Modifier.height(Space.lg))
-				// A migration path before any card-generation path. Anki stays untouched;
-				// its package is read locally and ikna reports every unsupported part.
-				Text(
-					text = S.t("anki.025"),
-					style = MaterialTheme.typography.labelMedium,
-					color = muted
-				)
-				Spacer(Modifier.height(Space.sm))
-				Text(
-					text = S.t("anki.026"),
-					style = MaterialTheme.typography.bodySmall,
-					color = muted
-				)
-				Spacer(Modifier.height(Space.md))
-				IknaWideButton(
-					label = S.t("anki.027"),
-					onClick = onOpenAnki,
-					enabled = !busy
-				)
-				Spacer(Modifier.height(Space.lg))
-				IknaRule()
-				Spacer(Modifier.height(Space.lg))
 				// Ready-made open decks, offered before the model path.
 				// The catalogue remains the default for open, attributed language material.
 				// point asks somebody to talk to a model and paste the answer back,
@@ -284,18 +252,18 @@ fun AddDeckScreen(
 					style = MaterialTheme.typography.labelMedium,
 					color = muted
 				)
-				Spacer(Modifier.height(Space.sm))
-				Text(
-					text = S.t("cat.032"),
-					style = MaterialTheme.typography.bodySmall,
-					color = muted
-				)
 				Spacer(Modifier.height(Space.md))
 				IknaWideButton(
 					label = S.t("cat.033"),
 					filled = true,
 					onClick = onOpenCatalog,
 					enabled = !busy
+				)
+				Spacer(Modifier.height(Space.sm))
+				Text(
+					text = S.t("cat.032"),
+					style = MaterialTheme.typography.bodySmall,
+					color = muted
 				)
 
 							Spacer(Modifier.height(Space.lg))
@@ -517,12 +485,6 @@ fun AddDeckScreen(
 				IknaRule()
 				Spacer(Modifier.height(Space.lg))
 
-				Text(
-					text = S.t("add.016"),
-					style = MaterialTheme.typography.labelMedium,
-					color = muted
-				)
-				Spacer(Modifier.height(Space.sm))
 				// The language of the deck, asked where the deck actually arrives.
 				//
 				// It used to stand with the prompt questions, and the prompt is folded
@@ -537,9 +499,15 @@ fun AddDeckScreen(
 					)
 					Spacer(Modifier.height(Space.sm))
 					LangChips(current = lang, onPick = { lang = it })
-					Spacer(Modifier.height(Space.md))
+					Spacer(Modifier.height(Space.lg))
 				}
 
+				Text(
+					text = S.t("add.016"),
+					style = MaterialTheme.typography.labelMedium,
+					color = muted
+				)
+				Spacer(Modifier.height(Space.sm))
 				// Two different things, decided by size: a field for a deck small enough
 				// to be typed by hand, and a folded summary for one that was pasted.
 				val pastedLines = remember(pasted) {
@@ -731,6 +699,21 @@ fun AddDeckScreen(
 						enabled = !busy
 					)
 				}
+
+				Spacer(Modifier.height(Space.lg))
+				IknaRule()
+				Spacer(Modifier.height(Space.lg))
+				IknaWideButton(
+					label = S.t("anki.001"),
+					onClick = onOpenAnki,
+					enabled = !busy
+				)
+				Spacer(Modifier.height(Space.sm))
+				Text(
+					text = S.t("anki.026"),
+					style = MaterialTheme.typography.bodySmall,
+					color = muted
+				)
 
 				Spacer(Modifier.height(Space.xxl))
 			}

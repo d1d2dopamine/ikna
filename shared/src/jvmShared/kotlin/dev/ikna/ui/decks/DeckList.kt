@@ -39,6 +39,9 @@ import dev.ikna.ui.theme.Space
 import dev.ikna.ui.theme.deckTintColor
 import dev.ikna.ui.theme.iknaInspect
 
+private val DECK_ROW_HEIGHT = 68.dp
+private val DECK_MARK_SIZE = 68.dp
+
 /*
  * The deck list, compiled once and drawn on both machines.
  *
@@ -129,6 +132,7 @@ fun IknaDeckRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(DECK_ROW_HEIGHT)
             .clickable(onClick = onOpen)
             .iknaInspect("IknaDeckRow[${deck.title}]"),
         verticalAlignment = Alignment.Top
@@ -188,7 +192,10 @@ fun IknaDeckRow(
                 )
             }
             if (deck.isActive) {
-                Spacer(Modifier.height(Space.md))
+                // 44dp of title/status + 8dp air + 16dp progress = 68dp.
+                // The line therefore ends on the square's bottom edge, never
+                // below it, and disabled rows keep exactly the same footprint.
+                Spacer(Modifier.height(Space.sm))
                 IknaDeckProgress(
                     introduced = deck.introduced,
                     total = deck.total,
@@ -275,7 +282,7 @@ fun IknaDeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
 
     Box(
         modifier = Modifier
-            .size(52.dp)
+            .size(DECK_MARK_SIZE)
             .iknaInspect("IknaDeckMark[${deck.title}]")
             .background(fill)
             .border(Space.hair, edge),

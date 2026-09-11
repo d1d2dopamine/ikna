@@ -142,11 +142,12 @@ class DesignContracts(unittest.TestCase):
             self.assertIn(required, mark)
         self.assertNotIn('languageSealCells', mark)
         self.assertIn('installedAt = pack.installedAt', repo)
-        for base, name in [(ANDROID, 'ui/decks/DecksScreen.kt'),
-                           (SHARED, 'ui/decks/DeckList.kt')]:
-            renderer = read(base, name)
-            self.assertIn('deckSealCells(deck.id, deck.installedAt)', renderer)
-            self.assertIn('deckSealHighlights(deck.id, deck.installedAt)', renderer)
+        renderer = read(SHARED, 'ui/decks/DeckList.kt')
+        self.assertIn('deckSealCells(deck.id, deck.installedAt)', renderer)
+        self.assertIn('deckSealHighlights(deck.id, deck.installedAt)', renderer)
+        android_home = read(ANDROID, 'ui/decks/DecksScreen.kt')
+        self.assertIn('IknaDeckRow(', android_home)
+        self.assertNotIn('private fun DeckMark(', android_home)
 
     def test_session_uses_shared_quiet_chrome(self):
         for base, name in [(ANDROID, 'ui/session/SessionScreen.kt'), (DESKTOP, 'SessionPane.kt')]:
@@ -239,14 +240,13 @@ class DesignContracts(unittest.TestCase):
             self.assertIn(required, flat)
         self.assertNotIn('IknaGlyph.STACK', flat)
         self.assertNotIn('crossed: Boolean', flat)
-        for base, name in [(ANDROID, 'ui/decks/DecksScreen.kt'), (SHARED, 'ui/decks/DeckList.kt')]:
-            source = read(base, name)
-            for required in ['browseAvailable: Boolean', 'glyph = IknaGlyph.BROWSE',
-                             'color = if (browseAvailable) accent else muted',
-                             'if (browseAvailable) "a11y.012" else "a11y.015"']:
-                self.assertIn(required, source)
-            self.assertNotIn('crossed =', source)
-            self.assertNotIn('if (onBrowse != null)', source)
+        source = read(SHARED, 'ui/decks/DeckList.kt')
+        for required in ['browseAvailable: Boolean', 'glyph = IknaGlyph.BROWSE',
+                         'color = if (browseAvailable) accent else muted',
+                         'if (browseAvailable) "a11y.012" else "a11y.015"']:
+            self.assertIn(required, source)
+        self.assertNotIn('crossed =', source)
+        self.assertNotIn('if (onBrowse != null)', source)
         for base, name, notice in [
             (ANDROID, 'ui/decks/DecksScreen.kt', 'note'),
             (DESKTOP, 'Shell.kt', 'notice'),
@@ -425,8 +425,8 @@ class DesignContracts(unittest.TestCase):
         for required in ['fun IknaDeckProgress(', 'S.t("progress.002")',
                          'return if (percent == 0L) "<1%"']:
             self.assertIn(required, deck)
-        for base, name in [(ANDROID, 'ui/decks/DecksScreen.kt'),
-                           (ANDROID, 'ui/decks/DeckScreen.kt'),
+        self.assertIn('IknaDeckRow(', read(ANDROID, 'ui/decks/DecksScreen.kt'))
+        for base, name in [(ANDROID, 'ui/decks/DeckScreen.kt'),
                            (DESKTOP, 'DeckPane.kt')]:
             self.assertIn('IknaDeckProgress(', read(base, name))
 
@@ -495,6 +495,32 @@ class DesignContracts(unittest.TestCase):
         for test in ['automaticPolicyAppliesOnlyAcceptedResultsAndHonoursMonthlyLimit', 'automaticEligibilityIsQuietAndInsufficientHistoryKeepsDefaults', 'automaticActivationCannotReviveAProfileAfterReset', 'automaticFailuresBackOffInsteadOfFittingAfterEveryAnswer']:
             self.assertIn(test, source)
 
+
+    def test_mobile_add_deck_is_clean_and_deck_rows_keep_proportions(self):
+        add = read(ANDROID, 'ui/decks/AddDeckScreen.kt')
+        android_rows = read(ANDROID, 'ui/decks/DecksScreen.kt')
+        shared_rows = read(SHARED, 'ui/decks/DeckList.kt')
+
+        self.assertNotIn('S.t("add.002")', add)
+        self.assertNotIn('S.t("anki.025")', add)
+        order = [add.index(token) for token in [
+            'S.t("cat.031")', 'S.t("cat.033")', 'S.t("cat.032")',
+            'S.t("add.072")', 'S.t("add.016")', 'S.t("add.015")',
+            'S.t("anki.001")', 'S.t("anki.026")'
+        ]]
+        self.assertEqual(order, sorted(order))
+
+        self.assertIn('IknaDeckRow(', android_rows)
+        self.assertNotIn('private fun DeckRow(', android_rows)
+        self.assertNotIn('private fun DeckMark(', android_rows)
+        for required in [
+            'private val DECK_ROW_HEIGHT = 68.dp',
+            'private val DECK_MARK_SIZE = 68.dp',
+            '.height(DECK_ROW_HEIGHT)',
+            '.size(DECK_MARK_SIZE)',
+            'Spacer(Modifier.height(Space.sm))\n                IknaDeckProgress('
+        ]:
+            self.assertIn(required, shared_rows)
 
     def test_deck_header_paint_and_desktop_inspector(self):
         lattice = read(SHARED, 'ui/theme/MemoryLattice.kt')

@@ -163,23 +163,29 @@ jobs:
           New-Item -ItemType Directory -Force -Path out | Out-Null
           Compress-Archive -Path $app -DestinationPath "out/ikna-$env:GITHUB_REF_NAME-windows-x64.zip" -Force
 
-      - name: Installer
-        continue-on-error: true
-        run: gradle --no-daemon --stacktrace :desktop:packageReleaseMsi
-
-      - name: Collect the installer if there is one
-        continue-on-error: true
+      - name: NSIS 3
         shell: pwsh
         run: |
-          $msi = Get-ChildItem -Path desktop/build/compose/binaries/main-release/msi -Filter *.msi -ErrorAction SilentlyContinue
-          if ($msi) { Copy-Item $msi[0].FullName "out/ikna-$env:GITHUB_REF_NAME-windows-x64.msi" }
+          $compiler = Get-Command makensis.exe -ErrorAction SilentlyContinue
+          $installed = Join-Path ${env:ProgramFiles(x86)} "NSIS\makensis.exe"
+          if (!$compiler -and !(Test-Path $installed)) {
+            choco install nsis --yes --no-progress --limit-output
+          }
+
+      - name: Build NSIS installer
+        shell: pwsh
+        run: ./tools/nsis/build-installer.ps1 -Output "out/ikna-$env:GITHUB_REF_NAME-windows-x64-setup.exe"
+
+      - name: Silent installer and removal smoke test
+        shell: pwsh
+        run: ./tools/nsis/test-installer.ps1 -Installer "out/*-windows-x64-setup.exe"
 
       - name: Publish
         uses: softprops/action-gh-release@v2
         with:
           files: |
             out/*.zip
-            out/*.msi
+            out/*-setup.exe
           generate_release_notes: true
 
   # ---------------------------------------------------------------------------
