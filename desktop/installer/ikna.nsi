@@ -13,12 +13,13 @@
 ;   final command-line argument when a managed custom location is needed.
 ; * The application folder is replaced atomically enough for an in-place update:
 ;   it is removed only when our private marker file is present and ikna is closed.
-; * The installer creates one Start-menu shortcut and one HKCU uninstall entry.
-;   It creates no service, scheduled task, browser item or auto-start entry.
+; * The installer creates Start-menu and Desktop shortcuts by default, plus one
+;   HKCU uninstall entry. It creates no service, scheduled task, browser item or
+;   auto-start entry.
 ;
 ; Uninstallation model
 ; --------------------
-; * Uninstall.exe /S removes the application, shortcut and registry entries.
+; * Uninstall.exe /S removes the application, shortcuts and registry entries.
 ; * Cards and settings in $APPDATA\Ikna are user data, not installer debris, and
 ;   are preserved by default. The visible uninstaller offers a clear checkbox.
 ; * Uninstall.exe /S /PURGE=1 also removes cards, progress, settings and logs.
@@ -301,6 +302,7 @@ Section "ikna" SEC_IKNA
 
     CreateDirectory "$SMPROGRAMS\ikna"
     CreateShortcut "$SMPROGRAMS\ikna\ikna.lnk" "$INSTDIR\${APP_EXE}" "" "$INSTDIR\${APP_EXE}" 0
+    CreateShortcut "$DESKTOP\ikna.lnk" "$INSTDIR\${APP_EXE}" "" "$INSTDIR\${APP_EXE}" 0
 
     WriteRegStr HKCU "${APP_REG_KEY}" "InstallLocation" "$INSTDIR"
     WriteRegStr HKCU "${APP_REG_KEY}" "Version" "${APP_VERSION}"

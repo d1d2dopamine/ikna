@@ -8,7 +8,7 @@ step.
 
 - installs the jpackage application image for the current user in
   `%LOCALAPPDATA%\Programs\ikna`;
-- creates one Start-menu shortcut;
+- creates Start-menu and Desktop shortcuts by default;
 - registers one entry in **Installed apps** under `HKCU`;
 - installs no service, scheduled task, browser item or automatic startup entry;
 - updates an existing NSIS installation only when its private

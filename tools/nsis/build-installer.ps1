@@ -53,6 +53,8 @@ if ($command) {
 $quadVersion = "$Version.0"
 $arguments = @(
     "/V4",
+    "/INPUTCHARSET",
+    "UTF8",
     "/DAPP_VERSION=$Version",
     "/DAPP_VERSION_QUAD=$quadVersion",
     "/DAPP_IMAGE=$AppImage",

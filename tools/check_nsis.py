@@ -33,6 +33,18 @@ def bmp(path: Path, expected: tuple[int, int]) -> None:
         )
 
 
+def png(path: Path, expected: tuple[int, int]) -> None:
+    data = path.read_bytes()
+    if data[:8] != b"\x89PNG\r\n\x1a\n" or data[12:16] != b"IHDR":
+        raise AssertionError(f"{path.relative_to(ROOT)} is not a PNG")
+    width, height, bit_depth, color_type = struct.unpack_from(">IIBB", data, 16)
+    if (width, height) != expected or bit_depth != 8 or color_type != 6:
+        raise AssertionError(
+            f"{path.relative_to(ROOT)} is {width}x{height}/{bit_depth}-bit type {color_type}, "
+            f"expected {expected[0]}x{expected[1]}/8-bit RGBA"
+        )
+
+
 def main() -> None:
     nsi = NSI.read_text(encoding="utf-8")
     build = BUILD.read_text(encoding="utf-8")
@@ -54,6 +66,8 @@ def main() -> None:
         '${GetOptions} $0 "/PURGE=" $1',
         'RMDir /r "$APPDATA\\Ikna"',
         'CreateShortcut "$SMPROGRAMS\\ikna\\ikna.lnk"',
+        'CreateShortcut "$DESKTOP\\ikna.lnk"',
+        'Delete "$DESKTOP\\ikna.lnk"',
         'DeleteRegKey HKCU "${UNINSTALL_KEY}"',
         'MUI_WELCOMEFINISHPAGE_BITMAP',
         '!insertmacro MUI_LANGUAGE "PortugueseBR"',
@@ -67,6 +81,8 @@ def main() -> None:
 
     require(build, [
         "makensis.exe",
+        '"/INPUTCHARSET"',
+        '"UTF8"',
         "/DAPP_VERSION=$Version",
         "/DAPP_IMAGE=$AppImage",
         "/DOUTPUT_FILE=$Output",
@@ -78,6 +94,9 @@ def main() -> None:
         'Run-Exe $Installer @("/S")',
         'Run-Exe $uninstaller @("/S")',
         'Run-Exe $uninstaller @("/S", "/PURGE=1")',
+        '$desktopShortcut = Join-Path ([Environment]::GetFolderPath("Desktop")) "ikna.lnk"',
+        'Desktop shortcut survived uninstall',
+        'Desktop shortcut survived purge uninstall',
         'Ordinary uninstall deleted user data',
         'Windows uninstall registry key survived purge uninstall',
     ], "test-installer.ps1")
@@ -101,7 +120,8 @@ def main() -> None:
 
     bmp(ROOT / "desktop/installer/sidebar.bmp", (164, 314))
     bmp(ROOT / "desktop/installer/header.bmp", (150, 57))
-    print("NSIS contract OK: /S, safe upgrades, clean uninstall, opt-in purge, branded assets and no MSI")
+    png(ROOT / "docs/pixel-icon.png", (42, 49))
+    print("NSIS contract OK: UTF-8 text, default Desktop shortcut, /S, safe upgrades, clean uninstall, opt-in purge, branded assets and no MSI")
 
 
 if __name__ == "__main__":
