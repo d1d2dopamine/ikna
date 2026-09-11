@@ -97,9 +97,13 @@ internal fun hotkeyDisplay(chord: HotkeyChord): String = chord.tokens.joinToStri
         "MINUS" -> "-"
         "EQUALS" -> "="
         "GRAVE" -> "`"
-        else -> token.removePrefix("CHAR_").toIntOrNull(16)?.let { codePoint ->
-            runCatching { Character.toChars(codePoint).concatToString() }.getOrNull()
-        } ?: token
+        else -> if (token.startsWith("CHAR_")) {
+            token.removePrefix("CHAR_").toIntOrNull(16)?.let { codePoint ->
+                runCatching { Character.toChars(codePoint).concatToString() }.getOrNull()
+            } ?: token
+        } else {
+            token
+        }
     }
 }
 

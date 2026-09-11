@@ -57,6 +57,7 @@ import dev.ikna.domain.session.ReviewSignals
 import dev.ikna.domain.session.TimingDiscardReason
 import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.theme.Space
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.max
@@ -188,7 +189,17 @@ fun SwipeableCard(
     // fixed visual speed is animation only and never becomes pointer evidence.
     LaunchedEffect(key, programmaticSwipe?.token) {
         val command = programmaticSwipe ?: return@LaunchedEffect
-        if (flying.value || !revealedNow.value) {
+        if (!revealedNow.value) {
+            programmaticHandledNow.value(command.token)
+            return@LaunchedEffect
+        }
+        // A mouse pull reveals first and then springs back. A/D pressed during
+        // that short spring must be queued, not silently discarded. Waiting on
+        // the actual state also keeps keyboard timing out of pointer telemetry.
+        if (flying.value) {
+            snapshotFlow { flying.value }.first { active -> !active }
+        }
+        if (!revealedNow.value) {
             programmaticHandledNow.value(command.token)
             return@LaunchedEffect
         }

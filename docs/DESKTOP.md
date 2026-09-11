@@ -153,7 +153,9 @@ export and import. No voice, no widget, no reminders.
 
 **Stage 3 -- desktop manners.**
 Keyboard shortcuts (Space to reveal, A/D to answer with automatic grading,
-Z to undo), window size and position remembered, tray notifications, Anki import through a native file
+Z to undo). A pointer reveal returns focus to the session, so the same A/D
+answer works after either input method. Window size and position are remembered,
+along with tray notifications and Anki import through a native file
 dialog, update check that opens the release page.
 
 **Stage 4 -- voice, if the artefact exists.**

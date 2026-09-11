@@ -118,7 +118,8 @@ class DesignContracts(unittest.TestCase):
         self.assertNotIn('BasicTextField', editor)
         for required in ['tokens.size > 3', 'isReservedGlobalHotkey', 'Key.DirectionLeft',
                          'Key.DirectionRight', 'Key.One, Key.NumPad1',
-                         'HotkeyCaptureProblem.UNSUITABLE_KEY']:
+                         'HotkeyCaptureProblem.UNSUITABLE_KEY',
+                         'token.startsWith("CHAR_")']:
             self.assertIn(required, key_input)
         self.assertIn('stringPreferencesKey("hotkeysV1")', store)
         self.assertIn('"miss=A;know=D;reveal=SPACE;undo=Z"', hotkeys)
@@ -158,8 +159,11 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('HotkeyAction.UNDO', source)
         self.assertIn('if (revealed) requestKeyboardSwipe(Rating.AGAIN)', source)
         self.assertIn('if (revealed) requestKeyboardSwipe(Rating.GOOD)', source)
+        self.assertIn('LaunchedEffect(revealed, current?.card?.key)', source)
+        self.assertIn('if (revealed) runCatching { focus.requestFocus() }', source)
         card = read(SHARED, 'ui/session/CardStack.kt')
-        self.assertIn('flying.value || !revealedNow.value', card)
+        self.assertIn('snapshotFlow { flying.value }.first { active -> !active }', card)
+        self.assertGreaterEqual(card.count('if (!revealedNow.value)'), 2)
         self.assertNotIn('revealNow.value(INPUT_KEYBOARD)', card)
         self.assertIn('HotkeyBindings.decode(settings.hotkeys)', source)
         self.assertIn('ProgrammaticSwipe', source)

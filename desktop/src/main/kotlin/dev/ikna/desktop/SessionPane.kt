@@ -131,6 +131,12 @@ fun SessionPane(
 
     val cards = plan?.cards.orEmpty()
     val current = cards.getOrNull(index)
+    // A clickable card can become the focused Compose node. Reclaim the
+    // session's keyboard target after every reveal so A/D work identically
+    // whether the answer was opened with Space, a click or a short pull.
+    LaunchedEffect(revealed, current?.card?.key) {
+        if (revealed) runCatching { focus.requestFocus() }
+    }
     val reviewSignals = remember(deckId, reload, index, current?.card?.key, loading) {
         ReviewSignalTracker()
     }
