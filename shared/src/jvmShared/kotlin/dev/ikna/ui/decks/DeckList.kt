@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -39,8 +41,10 @@ import dev.ikna.ui.theme.Space
 import dev.ikna.ui.theme.deckTintColor
 import dev.ikna.ui.theme.iknaInspect
 
-private val DECK_ROW_HEIGHT = 68.dp
-private val DECK_MARK_SIZE = 68.dp
+private val DECK_ROW_HEIGHT = 52.dp
+private val DECK_MARK_SIZE = 52.dp
+private val DECK_INFO_HEIGHT = 34.dp
+private val DECK_PROGRESS_HEIGHT = 14.dp
 
 /*
  * The deck list, compiled once and drawn on both machines.
@@ -133,15 +137,22 @@ fun IknaDeckRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(DECK_ROW_HEIGHT)
+            .clipToBounds()
             .clickable(onClick = onOpen)
             .iknaInspect("IknaDeckRow[${deck.title}]"),
         verticalAlignment = Alignment.Top
     ) {
         IknaDeckMark(deck = deck, owes = owes, look = look)
         Spacer(Modifier.width(Space.md))
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+            Row(
+                modifier = Modifier.height(DECK_INFO_HEIGHT),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text(
                         text = deck.title,
                         maxLines = 1,
@@ -152,21 +163,17 @@ fun IknaDeckRow(
                             alpha = if (deck.isActive) 1f else 0.55f
                         )
                     )
-                    Spacer(Modifier.height(Space.xs))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = if (owes) {
-                                S.t("deck.009") + dueToday + iknaMinutesTail(dueToday, perCardMs)
-                            } else {
-                                S.t("deck.010")
-                            },
-                            modifier = Modifier.weight(1f, fill = false),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = if (owes) accent else muted
-                        )
-                    }
+                    Text(
+                        text = if (owes) {
+                            S.t("deck.009") + dueToday + iknaMinutesTail(dueToday, perCardMs)
+                        } else {
+                            S.t("deck.010")
+                        },
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (owes) accent else muted
+                    )
                 }
                 IknaIconButton(
                     glyph = IknaGlyph.BROWSE,
@@ -192,13 +199,14 @@ fun IknaDeckRow(
                 )
             }
             if (deck.isActive) {
-                // 44dp of title/status + 8dp air + 16dp progress = 68dp.
-                // The line therefore ends on the square's bottom edge, never
-                // below it, and disabled rows keep exactly the same footprint.
-                Spacer(Modifier.height(Space.sm))
+                // Keep the original 52dp square. Compact one-line text and a
+                // bounded progress line end at its lower edge instead of making
+                // the mark grow to cover an overflowing column.
+                Spacer(Modifier.height(Space.xs))
                 IknaDeckProgress(
                     introduced = deck.introduced,
                     total = deck.total,
+                    modifier = Modifier.height(DECK_PROGRESS_HEIGHT),
                     color = if (owes) accent else muted
                 )
             }

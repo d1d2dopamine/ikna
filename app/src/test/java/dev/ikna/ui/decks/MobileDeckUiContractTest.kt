@@ -27,18 +27,31 @@ class MobileDeckUiContractTest {
     }
 
     @Test
-    fun `one fixed shared row owns Android and desktop proportions`() {
+    fun `shared row restores the compact mark and bounds every line to it`() {
         val android = androidSource("DecksScreen.kt")
         val shared = sharedSource("DeckList.kt")
 
         assertTrue(android.contains("IknaDeckRow("))
         assertFalse(android.contains("private fun DeckRow("))
         assertFalse(android.contains("private fun DeckMark("))
-        assertTrue(shared.contains("private val DECK_ROW_HEIGHT = 68.dp"))
-        assertTrue(shared.contains("private val DECK_MARK_SIZE = 68.dp"))
-        assertTrue(shared.contains(".height(DECK_ROW_HEIGHT)"))
-        assertTrue(shared.contains(".size(DECK_MARK_SIZE)"))
-        assertTrue(shared.contains("Spacer(Modifier.height(Space.sm))\n                IknaDeckProgress("))
+        for (required in listOf(
+            "private val DECK_ROW_HEIGHT = 52.dp",
+            "private val DECK_MARK_SIZE = 52.dp",
+            "private val DECK_INFO_HEIGHT = 34.dp",
+            "private val DECK_PROGRESS_HEIGHT = 14.dp",
+            ".height(DECK_ROW_HEIGHT)\n            .clipToBounds()",
+            "modifier = Modifier.weight(1f).fillMaxHeight()",
+            "modifier = Modifier.height(DECK_INFO_HEIGHT)",
+            "verticalArrangement = Arrangement.SpaceBetween",
+            "Spacer(Modifier.height(Space.xs))\n                IknaDeckProgress(",
+            "modifier = Modifier.height(DECK_PROGRESS_HEIGHT)"
+        )) assertTrue(required, shared.contains(required))
+
+        val row = shared.substringAfter("fun IknaDeckRow(")
+            .substringBefore("/** Makes the long-term bar")
+        assertFalse(row.contains("68.dp"))
+        assertTrue(row.contains("style = MaterialTheme.typography.labelSmall"))
+        assertTrue(row.split("overflow = TextOverflow.Ellipsis").size >= 3)
     }
 
     private fun androidSource(name: String): String = source(

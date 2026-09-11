@@ -514,13 +514,23 @@ class DesignContracts(unittest.TestCase):
         self.assertNotIn('private fun DeckRow(', android_rows)
         self.assertNotIn('private fun DeckMark(', android_rows)
         for required in [
-            'private val DECK_ROW_HEIGHT = 68.dp',
-            'private val DECK_MARK_SIZE = 68.dp',
-            '.height(DECK_ROW_HEIGHT)',
+            'private val DECK_ROW_HEIGHT = 52.dp',
+            'private val DECK_MARK_SIZE = 52.dp',
+            'private val DECK_INFO_HEIGHT = 34.dp',
+            'private val DECK_PROGRESS_HEIGHT = 14.dp',
+            '.height(DECK_ROW_HEIGHT)\n            .clipToBounds()',
             '.size(DECK_MARK_SIZE)',
-            'Spacer(Modifier.height(Space.sm))\n                IknaDeckProgress('
+            'modifier = Modifier.weight(1f).fillMaxHeight()',
+            'modifier = Modifier.height(DECK_INFO_HEIGHT)',
+            'verticalArrangement = Arrangement.SpaceBetween',
+            'Spacer(Modifier.height(Space.xs))\n                IknaDeckProgress(',
+            'modifier = Modifier.height(DECK_PROGRESS_HEIGHT)'
         ]:
             self.assertIn(required, shared_rows)
+        row = shared_rows[shared_rows.index('fun IknaDeckRow('):shared_rows.index('/** Makes the long-term bar')]
+        self.assertNotIn('68.dp', row)
+        self.assertIn('style = MaterialTheme.typography.labelSmall', row)
+        self.assertGreaterEqual(row.count('overflow = TextOverflow.Ellipsis'), 2)
 
     def test_deck_header_paint_and_desktop_inspector(self):
         lattice = read(SHARED, 'ui/theme/MemoryLattice.kt')
