@@ -246,7 +246,7 @@ class CatalogFetch(
 }
 
 /** Pure decoder so the compressed catalogue contract is unit-testable without a socket. */
-internal fun decodeCatalogDeckBytes(bytes: ByteArray, deck: CatalogDeck): String? {
+fun decodeCatalogDeckBytes(bytes: ByteArray, deck: CatalogDeck): String? {
     val compressed = deck.compression.equals("gzip", ignoreCase = true) ||
         deck.file.endsWith(".gz", ignoreCase = true)
     if (!compressed) {

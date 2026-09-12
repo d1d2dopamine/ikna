@@ -15,6 +15,8 @@ words mean and what a number promises inside an epoch is written down once, in
 
 ## 0.11.0 press (in development)
 
+Android release unit tests can now exercise the shared Catalogue v2 gzip decoder across the `:app`/`:shared` module boundary; the decoder remains a pure bounded helper and the catalogue format itself is unchanged.
+
 Catalogue v2 deck storage is now losslessly compacted as deterministic gzip
 JSONL. The importer still receives the exact same logical rows after
 decompression, while `index.json` records compressed and uncompressed sizes
