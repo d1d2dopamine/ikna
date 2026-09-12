@@ -54,6 +54,12 @@ jobs:
       # app/libs, and it is not committed. Until now only the release workflow
       # needed it, and only for a second APK; with one APK nothing compiles
       # without it, so it is fetched first and a failure here fails the run.
+      - name: Speech runtime cache
+        uses: actions/cache@v4
+        with:
+          path: app/libs/sherpa-onnx-*.aar
+          key: sherpa-onnx-aar-${{ runner.os }}-${{ hashFiles('tools/voice/fetch-voice.sh') }}
+
       - name: Speech runtime
         run: bash tools/voice/fetch-voice.sh
 

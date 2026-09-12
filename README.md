@@ -4,15 +4,13 @@
 
 <h1 align="center" id="ikna"></h1>
 
-<p align="center">▪</p>
-
 <p align="center">
   <strong>English</strong> · <a href="#русский">Русский</a>
 </p>
 
 <p align="center">
-  Anki, but reversed. The system feeds you; you never feed the system.<br>
-  Android · Windows · Linux · no accounts · no telemetry · network only for static release and catalogue files
+  A language-learning app that decides what deserves your attention today.<br>
+  Android · Windows · Linux · no accounts · no telemetry
 </p>
 
 <p align="center">
@@ -22,7 +20,8 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
   <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/made%20with-Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="kotlin"></a>
   <img src="https://img.shields.io/badge/Android-10%2B-3DDC84?style=flat-square&logo=android&logoColor=white" alt="android">
-  <img src="https://img.shields.io/badge/network-update%20check%20%2B%20catalogue-4b4b4b?style=flat-square" alt="network">
+  <img src="https://img.shields.io/badge/Windows-x64-0078D4?style=flat-square&logo=windows11&logoColor=white" alt="windows x64">
+  <img src="https://img.shields.io/badge/AppImage-x86__64-2E2E2E?style=flat-square&logo=appimage&logoColor=white" alt="AppImage x86_64">
 </p>
 
 <p align="center">
@@ -33,35 +32,26 @@
   <a href="docs/ARCHITECTURE.md">Developer docs</a>
 </p>
 
----
+## What is ikna?
 
-## 🧩 What it is
+ikna teaches languages through **chunks**: a useful phrase, a natural sentence that contains it, and its meaning.
 
-ikna teaches a language in **chunks**: a short phrase, one natural sentence that
-contains it, and what it means. Not a word and its translation — a phrase caught in
-the wild, with the sentence that makes it obvious.
+You do not build a giant card collection and then spend months managing it. ikna handles the daily load for you. Its **load governor** looks at upcoming reviews, backlog, recent accuracy and missed days, then decides whether new material fits today.
 
-One idea no other flashcard app implements: a **load governor** that decides
-*whether you are allowed new material today*, from a forecast of your upcoming
-review load, your backlog, your recent accuracy and the days you missed. You do not
-ration yourself. The app does it for you, before you can overcommit.
+There is no streak to protect, no visible backlog counter, and no four-button confidence ritual. During review you make one decision: **know** or **do not know**. The scheduler handles the rest.
 
-There is no "add card" button. There never will be. Decks are written by a model
-from a prompt the app hands you, or generated offline — never typed in one card at a
-time, because that is the homework nobody finishes.
+The app is designed around a simple idea: studying should take attention, not administration.
 
-Built for ADHD — not as a slogan, but as a list of constraints that rejected
-features. No streaks. No guilt. No growing counter. No queue number. No choice where
-a choice can be avoided. And a day that starts at four in the morning, because that
-is when the previous one actually ends.
+### The short version
 
-The name is lower case, always. A capital I is a bare vertical bar in most
-sans-serif faces and reads as a lower case L, so "Ikna" invites being read as
-"lkna".
+- Learn phrases in context instead of isolated word pairs.
+- Answer with two intentions: **know** / **do not know**.
+- Let FSRS-6 schedule recognition, cloze and production separately.
+- Let the governor control how much new material enters the system.
+- Import ready-made decks, generate your own, or move from Anki.
+- Keep review history on your device.
 
----
-
-## ⬇️ Download
+## Download
 
 | Platform | File in the release |
 | --- | --- |
@@ -73,237 +63,123 @@ sans-serif faces and reads as a lower case L, so "Ikna" invites being read as
 
 **[Open the v0.10.0 press release](https://github.com/d1d2dopamine/ikna/releases/tag/v0.10.0-press)**
 
-The main Android APK is for every arm64 phone; older 32-bit ARM devices take the
-`-legacy32.apk` from the same page. Android asks once whether to allow installing
-from this source. Every Android release is signed with the key committed to this
-repository, so a new APK installs over the old one and **your answers survive the
-update**.
+### Platform notes
 
-On Windows, the installer is per-user and needs no administrator rights; the
-portable zip can be unpacked anywhere and run without a separate Java install.
-The executable is unsigned, so SmartScreen may ask for confirmation on first run.
-On Linux, make the AppImage executable with `chmod +x` before starting it; no Java
-install is needed. Desktop data lives outside the application files, so replacing
-or deleting the executable does not delete cards or settings. See
-[`docs/DESKTOP.md`](docs/DESKTOP.md).
+**Android.** The main APK is for arm64 devices; older 32-bit ARM devices use the `-legacy32.apk`. Releases are signed with the repository key, so a new APK can install over the previous one without discarding your review history.
 
-On Android there is one APK, not separate voice/no-voice builds. There used to be a second `-voice` APK; the choice was never a
-real one, so the speech engine is simply inside now and switched off until you turn
-it on. It ships with **no model** — that part is yours to add, a Kokoro or Piper
-folder from your own phone, in the language you are actually learning. The app never
-downloads a model itself, and there is nowhere inside it to ask for one. Until you
-add a model it
-speaks with the voice your phone already has, and the voice screen always names who
-is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
+**Windows.** The installer is per-user and does not require administrator rights. The portable zip runs without a separate Java installation. The executable is unsigned, so SmartScreen may ask for confirmation on first launch.
 
----
+**Linux.** Make the AppImage executable with `chmod +x` before launching it. No separate Java installation is required.
 
-## ✨ Features
+Desktop data is stored outside the application files, so replacing the executable does not delete cards or settings. See [`docs/DESKTOP.md`](docs/DESKTOP.md).
 
-- **Two-intention answering.** Swipe, or use desktop A/D keys: left means "do not
-  know", right means "know". The answer is revealed before every final answer.
-  After a private on-device warm-up, clean mature successful answers can be refined
-  automatically to bounded *hard* or *easy* from local timing history; it never asks
-  for another confidence button or number key.
-- **A governor that rations new material for you**, from your own recent numbers.
-- **Three levels per chunk** — recognition, cloze, production — scheduled
-  independently by FSRS-6.
-- **A second memory layer** under the cards: individual words carry their own state,
-  so a phrase you have never seen can already be partly known.
-- **20% amnesty.** A card you missed comes back inside the same day, but not
-  immediately and not all of them. There is no visible backlog number, ever.
-- **Make a deck with any AI.** The app gives you a written prompt; you paste the
-  answer back. Three columns, one line per card.
-- **Share a deck** as plain text that imports on another ikna device.
-- **Move in from Anki.** Import an `.apkg` and your answer history comes over with
-  the cards, so the schedule carries on instead of restarting. Nothing leaves the
-  device.
-- **Twelve palettes**, each in two lightings, plus an imported font. A clean
-  install opens in Ink.
-- **A memory field of cells and fine pixel grain:** clear language marks,
-  segmented progress and a soft 280 ms Shared Axis X transition. The route
-  viewport stays fixed and the fade has one hand-off, so two screens never fight
-  for the same frame. Forward and Back mirror; motion can be switched off instantly.
-- **Settings stay light on entry:** only visible sections are composed. The jump
-  strip targets stable lazy items, and speech warm-up waits until its section is visible.
-- **Back keeps Home continuous:** the populated deck list and its scroll position live
-  above route composition, while opaque clipped route surfaces prevent background bleed.
-- **Fast scrolling stays dedicated to the list:** the pinned Settings strip waits for a
-  fling to finish, while switches, chips, expandable content and progress use short,
-  non-bouncing transitions that obey the Animations preference.
-- **Browse without grading.** After the required daily plan is complete, familiar
-  cards can appear in a limited reading-only Browse allowance. Browse records an
-  exposure, never a recall result, and cannot replace required review.
-- **Pronunciation per deck.** Catalogue cards can carry IPA; ikna can show either
-  IPA or a readable English respelling under the phrase, while production cards
-  never print the answer's pronunciation on the prompt side.
-- **Local FSRS fitting.** With enough scored history, ikna can fit locally, validate
-  against held-out recent answers and activate only an accepted result. Existing
-  dates and review history are not rewritten; stale or rejected fits stay out.
-- **A widget and one reminder a day on Android**, both opening the cards directly.
-- **Russian, English, Polish, Spanish, French, German and Brazilian Portuguese** interface. All seven are available in-app; system locale is followed automatically, while Android's per-app system picker exposes the six locales declared by the platform config.
-- **Your answers are append-only.** Android can export the review log and settings
-  to `Documents/ikna/`; desktop can save a complete portable backup. Restore
-  replays answers instead of copying schedule state blindly.
-- **A catalogue of ready-made decks**, cut out of open corpora on the build server
-  and not written by a model: every card names the sentence it came from, by
-  number, on a public site. The licence and the credit are shown before the
-  download, not after it.
-- **Network only for static files you ask for.** The optional update check reads
-  the releases page at most once a day. The catalogue reads its index, a bounded
-  preview only after a tap, and the selected deck only after download is pressed.
-  Voice models are never fetched by ikna. Nothing is uploaded — no account,
-  identifier, statistic, card or answer. See [`docs/UPDATES.md`](docs/UPDATES.md),
-  [`docs/SOURCES.md`](docs/SOURCES.md) and [`docs/VOICE.md`](docs/VOICE.md).
+Android speech is included in the app but ships without a voice model. You can add a Kokoro or Piper model yourself; until then, ikna uses the voice already available on the phone. ikna never downloads voice models on its own. See [`docs/VOICE.md`](docs/VOICE.md).
 
----
+## Why it feels different
 
-## 🃏 How it works
+### Two answers, not four ratings
 
-1. **A chunk** is a phrase, a sentence containing it, and its meaning. The phrase is
-   highlighted inside the sentence; that highlight is what is being trained.
-2. **You answer with one of two intentions** — left for "do not know", right for
-   "know". A swipe works everywhere; desktop also has A/D after reveal. Once enough
-   clean personal timing history exists, some successful answers can become bounded
-   HARD or EASY automatically without another choice: [`docs/GRADING.md`](docs/GRADING.md).
-3. **FSRS-6 schedules each level separately**, including a separate model for
-   repeats inside the same day, and answers also credit the
-   individual words inside the trained phrase.
-4. **The governor decides the size of the day** before you see it, and can refuse
-   new material without refusing the session: [`docs/GOVERNOR.md`](docs/GOVERNOR.md).
-5. **The plan is fixed once a day** and may only shrink while you work. It grows only
-   when you ask for more.
-6. **A day starts at 04:00**, so a session at one in the morning belongs to the
-   evening it actually was.
-7. **Nothing is ever overwritten.** The review log only gains rows, undo included —
-   restoring it replays every answer through the scheduler instead of copying a
-   database back.
+Every review ends with one human decision: **I know this** or **I do not know this**. Swipe on mobile; use A/D on desktop after revealing the answer.
 
-The reasoning behind each of these, and the interface built on top of them, is in
-[`docs/DESIGN.md`](docs/DESIGN.md).
+With enough clean local timing history, ikna can refine some successful answers to bounded HARD or EASY grades automatically. That happens on-device and never adds another button to the review screen. See [`docs/GRADING.md`](docs/GRADING.md).
 
----
+### Three memories for every chunk
 
-## 🃋 Decks
+Each chunk is trained at three levels:
 
-| Deck | Chunks | Shipped |
-| --- | --- | --- |
-| `catalog-en-ru-beginner` — English from Russian, beginner | catalogue deck | on |
+1. recognition,
+2. cloze,
+3. production.
 
-A deck can be turned off without consequences: only **new** chunks stop coming from
-it, and everything already started keeps its schedule.
+FSRS-6 schedules them independently. Words inside the trained phrase also carry their own memory state, so knowledge can transfer between chunks.
 
-There is a **catalogue** in the app now, and it is the first thing the plus screen
-offers: finished decks cut out
-of open corpora on the build server. Sentences come from
-[Tatoeba](https://tatoeba.org), the phrase on a card is cut out of the sentence it
-appears in rather than written next to it, and the licence and the credit are on
-screen before the download and inside the cards after it. The filters — what you
-are learning, what the meanings should be in, which level — run on the phone,
-over one small index.
+### A governor for new material
 
-**Getting one on the phone:** **+** → **A ready-made deck** → **OPEN THE CATALOGUE**,
-then say what you are learning and which language the meanings should be in. A deck
-already installed says **ALREADY DOWNLOADED** on its row instead of offering the same
-file twice. An unfolded row can fetch three examples first; that request is capped
-at 96 KiB even if a server ignores HTTP Range.
+The governor decides whether new material fits into the day before you start. It uses your own recent workload and performance instead of asking you to pick an arbitrary number of new cards.
 
-The English-from-Russian beginner deck is also bundled into the APK, so a clean
-installation starts with real catalogue material before the first network request.
-CI downloads that exact release asset and verifies its size and SHA-256 before
-Gradle builds the app.
+The daily plan can shrink while you work. It only grows when you explicitly ask for more. See [`docs/GOVERNOR.md`](docs/GOVERNOR.md).
 
-The square search mark on the home screen searches phrases, sentences and meanings
-across installed decks only. It reads the local Room database and never opens a
-socket. On a catalogue card, **Tatoeba #…** opens the public source sentence. Marking
-one wrong can hide it and copy a paste-ready report containing only the deck, card
-text and public source link — never review history or device data.
+### Browse without grading
 
-**Reading the catalogue without the app:**
+Once the required plan is complete, familiar cards can appear in a limited Browse mode. Browse is for reading. It records exposure, not a recall result, and does not replace required review.
 
-- the release itself: [`releases/tag/catalog`](https://github.com/d1d2dopamine/ikna/releases/tag/catalog)
-- the index the phone reads: [`index.json`](https://github.com/d1d2dopamine/ikna/releases/download/catalog/index.json)
-- one deck, to look at the format: [`en-ru-beginner.jsonl`](https://github.com/d1d2dopamine/ikna/releases/download/catalog/en-ru-beginner.jsonl)
+### Local FSRS fitting
 
-The first build came out at **466,061 cards** in **216 decks** over **72 language
-pairs** — 66 of them full, 6 thin — every card under `CC BY 2.0 FR`, credited to
-Tatoeba contributors, and every card naming the sentence it was cut out of by number.
+With enough scored history, ikna can fit FSRS parameters locally and validate them against recent held-out answers. Only an accepted fit becomes active. Existing review history and due dates are not bulk-rewritten.
 
-| Can be learned | Can carry the meanings |
-| --- | --- |
-| English, Russian, Polish, Spanish, French, German, Italian, Portuguese, Chinese, Japanese, Korean | the same eleven languages |
+Details: [`docs/FSRS-OPTIMIZER.md`](docs/FSRS-OPTIMIZER.md) · [`docs/FSRS-OPTIMIZER-INTEGRATION.md`](docs/FSRS-OPTIMIZER-INTEGRATION.md)
 
-A learned phrase is cut on word boundaries, while a translation is
-never cut at all. Chinese and Japanese now use ICU word segmentation in the
-catalogue pipeline; Korean uses written-word boundaries. These run only while
-building the catalogue, not on the learner's device. Available pairs still depend
-on direct corpus translations and appear after a catalogue release is rebuilt.
+## Decks
 
-How well a pair is served is measured by the pipeline, not promised here: **full**
-when the sieve drops little, **thin** when decks come out smaller than asked for,
-and absent when the corpus has too few direct translations between those two
-languages. The catalogue says which of the three your pair is before you download
-anything. A deck's size is a result, not a promise.
+You have three ways to get material into ikna:
 
-Where the decks come from, what the sieve throws away, and why not AnkiWeb:
-[`docs/SOURCES.md`](docs/SOURCES.md).
+### 1. Ready-made catalogue
 
-Your own deck is three columns of plain text, one line per card:
+The built-in catalogue contains decks generated from open corpora. Sentences come from [Tatoeba](https://tatoeba.org), and catalogue cards keep their public source reference and licence information.
+
+The initial catalogue build contains **466,061 cards**, **216 decks** and **72 language pairs**. The available learning and meaning languages are:
+
+English, Russian, Polish, Spanish, French, German, Italian, Portuguese, Chinese, Japanese and Korean.
+
+The catalogue reports whether a language pair is well populated, thin, or unavailable before download. Source and pipeline details live in [`docs/SOURCES.md`](docs/SOURCES.md).
+
+You can inspect the catalogue outside the app:
+
+- [`releases/tag/catalog`](https://github.com/d1d2dopamine/ikna/releases/tag/catalog)
+- [`index.json`](https://github.com/d1d2dopamine/ikna/releases/download/catalog/index.json)
+- [`en-ru-beginner.jsonl`](https://github.com/d1d2dopamine/ikna/releases/download/catalog/en-ru-beginner.jsonl)
+
+A beginner English-from-Russian catalogue deck is bundled with the Android app, so a clean installation starts with real study material before the first catalogue request.
+
+### 2. Make your own deck
+
+A deck is plain text with three columns:
 
 ```
 get used to | It takes a while to get used to the noise. | to grow accustomed
 ```
 
-The plus in the bottom bar hands you a prompt written for that format. Send it to any
-AI with your language and your topic, paste the reply back, and the deck is
-imported — bullets, numbering, code fences and Markdown tables and all. Lines that
-cannot work are skipped, counted, and quoted back with the reason.
+ikna can give you a prompt for this format. Send it to any AI, paste the result back, and the importer handles common list, code-block and Markdown-table formatting. Invalid rows are skipped and reported.
 
-Format, refusals, the deck screen and the offline generator:
-[`docs/DECKS.md`](docs/DECKS.md).
+Format and import rules: [`docs/DECKS.md`](docs/DECKS.md).
 
----
+### 3. Move from Anki
 
-## 🔀 Moving from Anki
+Import an `.apkg` and ikna brings over text cards together with answer history, so scheduling can continue instead of starting from zero.
 
-1. **+** → **Add a deck** → **Move from Anki**.
-2. Pick an `.apkg` file.
-3. Read the report, then import.
+Pictures and audio are not imported. Suspended and buried cards stay in Anki. Collections above 300 MB are rejected rather than partially imported, and the file is only read, never modified.
 
-Cards arrive grouped by the decks they were already in, and your answer history
-comes with them, so the schedule carries on instead of starting from zero.
+Repeated imports update the same imported decks instead of creating duplicates. There is no export back to Anki.
 
-Any `.apkg` works, old or new. The language of each deck is read from its cards,
-and if that comes out wrong, the deck's own page changes it.
+More: [`docs/ANKI.md`](docs/ANKI.md).
 
-Text cards move over. Pictures and sounds do not: where one was, the card shows
-`[image]` or `[audio]`, and a card that was nothing but a picture is listed as
-skipped. Suspended and buried cards stay in Anki.
+## Pronunciation
 
-The report appears before anything is saved and says what came over and what did
-not. Your `.apkg` is only ever read, never changed, and nothing leaves the phone.
-Collections above 300 MB are turned down rather than half-imported.
+Catalogue cards can include IPA pronunciation. Per deck, ikna can show IPA, a readable English respelling, or no pronunciation line.
 
-Importing the same file again updates those decks instead of making copies. There
-is no export back to Anki.
+Production prompts do not reveal the missing answer through pronunciation. See [`docs/PHONETICS.md`](docs/PHONETICS.md).
 
----
+## Privacy and data
 
-## 🏷️ Versions
+ikna has no accounts and no telemetry.
 
-A version here is a number **and a word**: `0.10.0 press`. The word names the epoch
-the build belongs to, the number counts releases inside it, and git tags replace the
-space with a dash: `v0.10.0-press`.
+The network is used for static files you request: release checks, catalogue index/preview/deck files and public source links. Cards, answers, statistics and identifiers are not uploaded. Voice models are never fetched by ikna.
 
-What the words mean, what the numbers promise and how `appVersionCode` is built:
-[`docs/VERSIONS.md`](docs/VERSIONS.md).
+Review history is append-only. Android can export the log and settings to `Documents/ikna/`; desktop can create a portable backup. Restore replays answers through the scheduler instead of trusting copied schedule state.
 
----
+See [`PRIVACY.md`](PRIVACY.md) and [`docs/UPDATES.md`](docs/UPDATES.md).
 
-## 🔨 Build
+## Interface
 
-Push to `main`, or run the `build` workflow by hand, and download the `ikna-apk`
-artifact. No Gradle wrapper jar is committed; CI provisions Gradle itself.
+ikna includes twelve palettes in two lightings, optional imported fonts and motion that can be disabled.
+
+The interface is available in Russian, English, Polish, Spanish, French, German and Brazilian Portuguese.
+
+Android also provides a home-screen widget and one daily reminder. Desktop currently ships without speech, widget or reminders.
+
+## Build
+
+Push to `main`, or run the `build` workflow manually, then download the `ikna-apk` artifact. CI provisions Gradle; the wrapper jar is not committed.
 
 ```
 bash tools/voice/fetch-voice.sh                # once per clone: speech runtime
@@ -315,37 +191,30 @@ bash tools/catalog/fetch-bundled-pack.sh         # pinned starter catalogue deck
 ./gradlew :desktop:createReleaseDistributable    # desktop application image
 ```
 
-The starter deck is pinned by size and SHA-256, so a rebuilt catalogue stops the
-build on purpose. When that is the intended change, run
-`bash tools/catalog/fetch-bundled-pack.sh --update` and commit the pin it writes.
+The starter catalogue deck is pinned by size and SHA-256. If the catalogue was intentionally rebuilt, run:
 
-The Android speech runtime is a ten-megabyte `.aar` that this repository does not
-store, so `tools/voice/fetch-voice.sh` has to run once before the first Android
-build; CI does it itself. No model is fetched and none is shipped. Desktop currently
-ships without speech, widget or reminders; the rest of the study core is shared.
+```
+bash tools/catalog/fetch-bundled-pack.sh --update
+```
 
-Both debug and release are signed with one keystore committed to this repository, on
-purpose: in CI every machine would otherwise generate its own signature, a new APK
-could not install over the old one, and the review log inside it would be lost. The
-trade-off is written down in [`docs/KEYSTORE.md`](docs/KEYSTORE.md).
+The Android speech runtime is fetched once per clone with `tools/voice/fetch-voice.sh`; CI does this automatically. No speech model is fetched or bundled.
 
-### 🚀 Release
+Both debug and release builds use the repository keystore so updates remain installable over previous Android builds. The trade-off is documented in [`docs/KEYSTORE.md`](docs/KEYSTORE.md).
 
-Bump the two version lines in `app/build.gradle.kts`, then tag the commit with the
-same string, space replaced by a dash:
+### Release
+
+Bump the version in `app/build.gradle.kts`, then tag the same version with the space replaced by a dash:
 
 ```
 git tag v0.10.0-press
 git push origin v0.10.0-press
 ```
 
-The `release` workflow refuses to continue if the tag and the build file disagree,
-then runs the release gates and attaches the Android APKs, Windows portable zip and
-installer, and Linux AppImage built from that exact tag to the same GitHub release.
+The release workflow verifies that the tag matches the build file, runs release gates, and attaches the Android APKs, Windows installer and portable zip, and Linux AppImage built from that tag.
 
----
+Versioning rules: [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
-## 📚 Docs
+## Documentation
 
 [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
 [`DESIGN.md`](docs/DESIGN.md) ·
@@ -366,15 +235,9 @@ installer, and Linux AppImage built from that exact tag to the same GitHub relea
 [`CHANGELOG.md`](CHANGELOG.md) ·
 [`PRIVACY.md`](PRIVACY.md)
 
----
+## License
 
-## ⚖️ License
-
-ikna is free software under the **GNU General Public License, version 3 or (at your
-option) any later version**. The full text is in [LICENSE](LICENSE).
-
-The licence covers the whole repository — every file, every commit and every
-release, the ones published before this notice as well as every future one.
+ikna is free software under the **GNU General Public License, version 3 or (at your option) any later version**. See [LICENSE](LICENSE).
 
 ---
 
@@ -384,15 +247,13 @@ release, the ones published before this notice as well as every future one.
 
 <h1 align="center" id="русский"></h1>
 
-<p align="center">▪</p>
-
 <p align="center">
   <a href="#ikna">English</a> · <strong>Русский</strong>
 </p>
 
 <p align="center">
-  Анки наизнанку. Система кормит тебя, а не ты её.<br>
-  Android · Windows · Linux · без аккаунтов · без телеметрии · сеть только для статических файлов релиза и каталога
+  Приложение для изучения языков, которое само решает, сколько материала тебе сегодня действительно нужно.<br>
+  Android · Windows · Linux · без аккаунтов · без телеметрии
 </p>
 
 <p align="center">
@@ -402,7 +263,8 @@ release, the ones published before this notice as well as every future one.
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
   <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/made%20with-Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="kotlin"></a>
   <img src="https://img.shields.io/badge/Android-10%2B-3DDC84?style=flat-square&logo=android&logoColor=white" alt="android">
-  <img src="https://img.shields.io/badge/network-update%20check%20%2B%20catalogue-4b4b4b?style=flat-square" alt="network">
+  <img src="https://img.shields.io/badge/Windows-x64-0078D4?style=flat-square&logo=windows11&logoColor=white" alt="windows x64">
+  <img src="https://img.shields.io/badge/AppImage-x86__64-2E2E2E?style=flat-square&logo=appimage&logoColor=white" alt="AppImage x86_64">
 </p>
 
 <p align="center">
@@ -413,36 +275,26 @@ release, the ones published before this notice as well as every future one.
   <a href="docs/ARCHITECTURE.md">Документация</a>
 </p>
 
----
+## Что такое ikna?
 
-## 🧩 Что это
+ikna учит язык **кусками**: полезная фраза, естественное предложение с ней и её смысл.
 
-ikna учит язык **кусками**: короткая фраза, живое предложение с ней и то, что она
-значит. Не слово и перевод, а фраза в своём естественном окружении — вместе с
-предложением, из-за которого она понятна.
+Тебе не нужно сначала собирать огромную коллекцию карточек, а потом месяцами управлять ею. ikna сама регулирует дневную нагрузку. **Регулятор нагрузки** смотрит на будущие повторы, накопившийся долг, недавнюю точность и пропущенные дни, а затем решает, помещается ли сегодня новый материал.
 
-Главная идея, которой нет ни в одном другом приложении с карточками — **регулятор
-нагрузки**. Он решает, *можно ли тебе сегодня новый материал*, исходя из прогноза
-будущих повторений, накопившегося долга, точности ответов и пропущенных дней.
-Не надо себя дозировать самому — приложение сделает это раньше, чем ты успеешь
-набрать лишнего.
+Нет стрика, который страшно потерять. Нет растущего счётчика долгов. Нет четырёх кнопок уверенности. На повторении ты принимаешь одно решение: **знаю** или **не знаю**. Остальное делает планировщик.
 
-Кнопки «добавить карточку» нет и не будет. Колоду пишет ии по промпту, который
-выдаёт само приложение, либо генератор без сети — но никогда человек вручную по
-карточке, потому что именно эта домашка никем не доделывается.
+Идея простая: внимание должно уходить на язык, а не на обслуживание системы карточек.
 
-Сделано под СДВГ — не как лозунг, а как список ограничений, который выбрасывал
-функции. Никаких стриков. Никакого чувства вины. Никакого растущего счётчика и
-номера в очереди. Никакого выбора там, где его можно не делать. И день, который
-начинается в четыре утра, потому что именно тогда заканчивается предыдущий.
+### Если совсем коротко
 
-Название всегда со строчной. Заглавная I в большинстве шрифтов — просто
-вертикальная палка и читается как строчная L, так что «Ikna» просится быть прочитанным
-как «lkna».
+- Учишь фразы в контексте, а не пары «слово-перевод».
+- Отвечаешь двумя намерениями: **знаю** / **не знаю**.
+- FSRS-6 отдельно планирует узнавание, пропуск и производство.
+- Регулятор сам ограничивает новый материал.
+- Можно брать готовые колоды, делать свои или переехать из Anki.
+- История ответов остаётся на устройстве.
 
----
-
-## ⬇️ Скачать
+## Скачать
 
 | Платформа | Файл в релизе |
 | --- | --- |
@@ -454,236 +306,123 @@ ikna учит язык **кусками**: короткая фраза, живо
 
 **[Открыть релиз v0.10.0 press](https://github.com/d1d2dopamine/ikna/releases/tag/v0.10.0-press)**
 
-Основной Android APK — для arm64; старые 32-битные ARM-устройства берут
-`-legacy32.apk` с той же страницы. Android один раз спросит разрешение на установку
-из этого источника. Все Android-релизы подписаны ключом из репозитория, поэтому
-новый APK ставится поверх старого и **твои ответы переживают обновление**.
+### По платформам
 
-В Windows установщик ставится только для текущего пользователя и не требует прав
-администратора; portable zip можно распаковать куда угодно, отдельная Java не
-нужна. Файл не подписан сертификатом Windows, поэтому SmartScreen при первом
-запуске может попросить подтверждение. В Linux AppImage сначала надо сделать
-исполняемым через `chmod +x`; Java отдельно тоже не нужна. Данные desktop-версии
-хранятся отдельно от файлов программы, поэтому замена или удаление исполняемого
-файла не удаляет карточки и настройки. Подробности в
-[`docs/DESKTOP.md`](docs/DESKTOP.md).
+**Android.** Основной APK предназначен для arm64; старые 32-битные ARM-устройства используют `-legacy32.apk`. Релизы подписаны ключом из репозитория, поэтому новая версия ставится поверх старой без потери журнала ответов.
 
-На Android APK один, без отдельной voice-сборки. Раньше был второй, `-voice`, но выбор был ненастоящий, так что
-движок озвучки теперь просто внутри и выключен, пока его не включишь. **Модели
-внутри нет** — её добавляешь ты сам: папка Kokoro или Piper с твоего же телефона, на
-том языке, который реально учишь. Модель приложение не скачивает само и попросить
-её внутри негде. Пока модели нет, читает голосом, который уже есть в
-телефоне, а экран озвучки всегда говорит, кто именно сейчас говорит. Подробности в
-[`docs/VOICE.md`](docs/VOICE.md).
+**Windows.** Установщик работает для текущего пользователя и не требует прав администратора. Portable zip запускается без отдельной Java. Файл не подписан сертификатом Windows, поэтому SmartScreen при первом запуске может запросить подтверждение.
 
----
+**Linux.** Перед запуском AppImage нужно сделать исполняемым через `chmod +x`. Отдельная Java не требуется.
 
-## ✨ Возможности
+Данные desktop-версии хранятся отдельно от файлов приложения, поэтому замена исполняемого файла не удаляет карточки и настройки. Подробнее: [`docs/DESKTOP.md`](docs/DESKTOP.md).
 
-- **Два намерения вместо четырёх кнопок.** Свайп работает везде, а на desktop есть
-  A/D: влево — «не знаю», вправо — «знаю». Ответ всегда открывается до финального
-  действия. После локального разогрева чистые зрелые успешные ответы могут
-  автоматически уточняться до ограниченных HARD/EASY по личной истории времени
-  ответа — без ещё одной кнопки уверенности.
-- **Регулятор дозирует новый материал за тебя**, от твоих же чисел.
-- **Три уровня у каждого куска** — узнавание, пропуск, производство — и у каждого
-  своё расписание по FSRS-6.
-- **Второй слой памяти** под карточками: у отдельных слов есть своё состояние,
-  так что ни разу не виденная фраза может быть уже частично знакомой.
-- **Амнистия 20%.** Проваленная карточка вернётся в тот же день, но не сразу и
-  не все. Никакого видимого числа долгов, никогда.
-- **Колода любым ии.** Приложение даёт готовый промпт, ты вставляешь ответ
-  обратно. Три столбца, одна строка — одна карточка.
-- **Колодой можно поделиться** — обычным текстом, который импортируется на другом
-  устройстве с ikna.
-- **Переезд из Anki.** Импортируй `.apkg` — вместе с карточками переедет
-  история ответов, так что расписание продолжится, а не начнётся заново.
-  С устройства ничего не уходит.
-- **Двенадцать палитр**, каждая в двух освещениях, плюс импортированный шрифт.
-  Чистая установка открывается в «Чернилах».
-- **Поле памяти из ячеек и мелкого пиксельного зерна:** чёткие языковые
-  знаки, сегментированный прогресс и мягкий Shared Axis X на 280 мс.
-  Область экрана зафиксирована, а затухания не пересекаются: две вкладки больше
-  не спорят за один кадр. Вперёд и назад зеркальны; анимации можно отключить.
-- **Настройки открываются легко:** создаются только видимые разделы. Полоса
-  переходов работает по ленивым элементам, а озвучка ждёт появления своего раздела.
-- **Возврат сохраняет экран колод:** список и прокрутка живут выше маршрута, а
-  непрозрачные обрезанные поверхности не позволяют фонам вкладок смешиваться.
-- **Быстрая прокрутка принадлежит только списку:** закреплённая полоса настроек ждёт
-  окончания инерции, а переключатели, чипы, раскрытие и прогресс используют короткие
-  переходы без пружин и подчиняются общему тумблеру анимаций.
-- **Browse без оценки.** После обязательного плана знакомые карточки могут появиться
-  в ограниченном режиме чтения. Browse записывает только показ, не ответ, и не может
-  заменить обязательное повторение.
-- **Произношение отдельно для каждой колоды.** Каталожные карточки могут хранить
-  IPA; ikna показывает IPA или читаемую английскую респеллинг-строку под фразой,
-  но никогда не печатает произношение ответа на стороне production-задания.
-- **Локальная подгонка FSRS.** Когда истории достаточно, ikna делает fit локально,
-  проверяет его на отложенной части недавних ответов и активирует только принятый
-  результат. Уже назначенные даты и история не переписываются; устаревший или
-  отвергнутый fit не включается.
-- **Виджет и одно напоминание в день на Android**, оба открывают сразу карточки.
-- **Русский, английский, польский, испанский, французский, немецкий и бразильский португальский** интерфейс. Все семь выбираются внутри ikna; системный язык подхватывается автоматически, а системный Android-пикер отдельного языка показывает шесть локалей из platform config.
-- **Ответы только дописываются.** Android умеет выгружать журнал и настройки в
-  `Documents/ikna/`, а desktop — сохранять полный переносимый backup. Восстановление
-  проигрывает ответы заново вместо слепого копирования состояния расписания.
-- **Каталог готовых колод**, собранных не моделью, а из открытых корпусов на
-  сервере сборки: у каждой карточки есть номер предложения, которое можно
-  открыть на публичном сайте. Лицензия и автор — до скачивания, а не после.
-- **Сеть только для статических файлов, которые запросили.** Необязательная
-  проверка обновлений читает страницу релизов не чаще раза в сутки. Каталог
-  загружает индекс, ограниченный предпросмотр только после нажатия и выбранную
-  колоду только после команды скачать. Голосовые модели ikna сама не скачивает.
-  Ничего не отправляется: ни аккаунта, ни идентификатора, ни статистики, ни
-  карточек, ни ответов. Подробности в [`docs/UPDATES.md`](docs/UPDATES.md),
-  [`docs/SOURCES.md`](docs/SOURCES.md) и [`docs/VOICE.md`](docs/VOICE.md).
+На Android движок озвучки уже входит в приложение, но голосовой модели внутри нет. Можно добавить свою модель Kokoro или Piper; до этого ikna использует системный голос телефона. Само приложение голосовые модели не скачивает. Подробнее: [`docs/VOICE.md`](docs/VOICE.md).
 
----
+## Чем ikna отличается
 
-## 🃏 Как это работает
+### Два ответа вместо четырёх оценок
 
-1. **Кусок** — это фраза, предложение с ней и её смысл. Фраза выделена внутри
-   предложения, и именно это выделенное и тренируется.
-2. **Ответ выражает одно из двух намерений**: влево — «не знаю», вправо — «знаю».
-   Свайп работает везде; на desktop после открытия ответа работают A/D. Если
-   накопилась чистая личная история времени ответа, часть успешных ответов может
-   автоматически стать ограниченным HARD или EASY без ещё одного выбора: [`docs/GRADING.md`](docs/GRADING.md).
-3. **FSRS-6 ведёт каждый уровень отдельно**, отдельно учитывает повторы в тот же
-   день, а ответ засчитывается ещё и словам
-   внутри тренируемой фразы.
-4. **Регулятор решает размер дня** до того, как ты его увидишь, и может отказать в
-   новом материале, не отказывая в сессии: [`docs/GOVERNOR.md`](docs/GOVERNOR.md).
-5. **План фиксируется раз в день** и пока ты работаешь может только уменьшаться.
-   Растёт он только если ты сам попросишь ещё.
-6. **День начинается в 04:00**, чтобы сессия в час ночи относилась к тому вечеру,
-   которым она и была.
-7. **Ничего никогда не перезаписывается.** В журнале ответов строки только
-   добавляются, включая отмену — а восстановление прогоняет все ответы через
-   планировщик заново, а не копирует базу обратно.
+Каждый повтор заканчивается одним человеческим решением: **знаю** или **не знаю**. На телефоне это свайп; на desktop после открытия ответа работают A/D.
 
-Почему всё именно так и как из этого собран интерфейс — в [`docs/DESIGN.md`](docs/DESIGN.md).
+Когда накопится достаточно чистой локальной истории времени ответа, ikna может автоматически уточнять часть успешных ответов до ограниченных HARD или EASY. Всё происходит на устройстве и не добавляет новых кнопок в сессию. Подробнее: [`docs/GRADING.md`](docs/GRADING.md).
 
----
+### Три вида памяти у каждого куска
 
-## 🃋 Колоды
+Каждый кусок проходит три уровня:
 
-| Колода | Кусков | В комплекте |
-| --- | --- | --- |
-| `catalog-en-ru-beginner` — английский с русскими значениями, начало | колода каталога | вкл |
+1. узнавание,
+2. пропуск,
+3. производство.
 
-Колоду можно выключить без последствий: перестанут приходить только **новые**
-куски из неё, а всё уже начатое сохранит своё расписание.
+FSRS-6 планирует их независимо. Отдельные слова внутри изучаемой фразы тоже имеют своё состояние памяти, поэтому знание переносится между кусками.
 
-В приложении теперь есть **каталог**, и это первое, что предлагает экран
-добавления: готовые колоды,
-собранные из открытых корпусов на сервере сборки. Предложения — из
-[Tatoeba](https://tatoeba.org), фраза на карточке не написана рядом, а вырезана из
-того же предложения, а лицензия и автор видны до скачивания и остаются
-внутри карточек после. Фильтры — что учишь, на каком языке значения, какой
-уровень — работают на телефоне, по одному маленькому списку.
+### Регулятор нового материала
 
-**Как скачать колоду на телефоне:** **+** → **Готовая колода** → **ОТКРЫТЬ КАТАЛОГ**,
-дальше выбрать, что учишь и на каком языке должны быть значения. Уже скачанная
-колода пишет на своей строке **УЖЕ СКАЧАНА** вместо того, чтобы предлагать
-тот же файл второй раз. В раскрытой строке можно сначала получить три примера;
-даже если сервер проигнорирует HTTP Range, приложение прочитает не больше 96 КиБ.
+До начала сессии регулятор решает, помещается ли новый материал в сегодняшний день. Он смотрит на твою реальную нагрузку и результаты, а не просит заранее придумать произвольное число новых карточек.
 
-Beginner-колода английского с русскими значениями теперь входит прямо в APK, так
-что после чистой установки настоящие карточки каталога есть ещё до первого запроса
-в сеть. CI скачивает конкретный файл релиза и до сборки проверяет его размер и
-SHA-256.
+Дневной план может уменьшаться по ходу работы. Увеличивается он только когда ты сам просишь ещё. Подробнее: [`docs/GOVERNOR.md`](docs/GOVERNOR.md).
 
-Квадратная кнопка поиска на главном экране ищет фразу, предложение и перевод во
-всех установленных колодах. Поиск читает только локальную Room-базу и не открывает
-сеть. На карточке каталога строка **Tatoeba #…** открывает исходное предложение.
-Действие «карточка неверна» может скрыть её и скопировать готовый отчёт: только
-колода, текст и публичная ссылка — без истории ответов и данных телефона.
+### Browse без оценки
 
-**Где посмотреть каталог без приложения:**
+После обязательного плана знакомые карточки могут появляться в ограниченном режиме Browse. Это чтение, а не повторение: ikna записывает факт показа, но не превращает его в результат recall и не подменяет им обязательную сессию.
 
-- сам релиз: [`releases/tag/catalog`](https://github.com/d1d2dopamine/ikna/releases/tag/catalog)
-- список, который читает телефон: [`index.json`](https://github.com/d1d2dopamine/ikna/releases/download/catalog/index.json)
-- одна колода, чтобы посмотреть формат: [`en-ru-beginner.jsonl`](https://github.com/d1d2dopamine/ikna/releases/download/catalog/en-ru-beginner.jsonl)
+### Локальная подгонка FSRS
 
-Первая сборка вышла на **466 061 карточку** в **216 колодах** по **72 парам языков** —
-66 из них full, 6 thin — всё под `CC BY 2.0 FR`, с указанием авторов Tatoeba, и
-каждая карточка называет номер предложения, из которого она вырезана.
+Когда истории достаточно, ikna может локально подобрать параметры FSRS и проверить их на недавних отложенных ответах. Активируется только принятый результат. Уже существующая история и назначенные даты массово не переписываются.
 
-| Можно учить | Может быть языком значений |
-| --- | --- |
-| английский, русский, польский, испанский, французский, немецкий, итальянский, португальский, китайский, японский, корейский | те же одиннадцать языков |
+Подробности: [`docs/FSRS-OPTIMIZER.md`](docs/FSRS-OPTIMIZER.md) · [`docs/FSRS-OPTIMIZER-INTEGRATION.md`](docs/FSRS-OPTIMIZER-INTEGRATION.md)
 
-Фраза вырезается по границам слов, а перевод показывается целиком. Для китайского
-и японского каталог использует ICU-сегментацию на этапе сборки; для корейского —
-границы письменных слов. На устройстве этот анализ не работает: доступные пары всё
-равно зависят от прямых переводов в корпусе и появляются после пересборки каталога.
+## Колоды
 
-Насколько хорошо обеспечена пара языков — не обещание, а измерение конвейера:
-**full**, когда сито отбрасывает мало, **thin**, когда колоды выходят меньше
-заказанного, и пары нет вовсе, когда прямых переводов между этими двумя
-языками в корпусе слишком мало. Каталог говорит это до того, как ты что-то
-скачаешь. Размер колоды — результат, а не обещание.
+Есть три способа добавить материал.
 
-Откуда берутся колоды, что выбрасывает сито и почему не AnkiWeb — в
-[`docs/SOURCES.md`](docs/SOURCES.md).
+### 1. Готовый каталог
 
-Своя колода — это три столбца обычного текста, одна строка — одна карточка:
+Встроенный каталог содержит колоды, собранные из открытых корпусов. Предложения берутся из [Tatoeba](https://tatoeba.org), а карточки сохраняют публичную ссылку на источник и сведения о лицензии.
+
+Первая сборка каталога содержит **466 061 карточку**, **216 колод** и **72 пары языков**. Доступные языки обучения и значений:
+
+английский, русский, польский, испанский, французский, немецкий, итальянский, португальский, китайский, японский и корейский.
+
+До скачивания каталог показывает, насколько хорошо наполнена выбранная пара. Подробности об источниках и конвейере: [`docs/SOURCES.md`](docs/SOURCES.md).
+
+Каталог можно посмотреть и без приложения:
+
+- [`releases/tag/catalog`](https://github.com/d1d2dopamine/ikna/releases/tag/catalog)
+- [`index.json`](https://github.com/d1d2dopamine/ikna/releases/download/catalog/index.json)
+- [`en-ru-beginner.jsonl`](https://github.com/d1d2dopamine/ikna/releases/download/catalog/en-ru-beginner.jsonl)
+
+Beginner-колода английского с русскими значениями уже лежит внутри Android-приложения, поэтому после чистой установки можно начать с настоящего материала ещё до первого запроса к каталогу.
+
+### 2. Своя колода
+
+Формат простой: три столбца обычного текста.
 
 ```
 get used to | It takes a while to get used to the noise. | привыкать
 ```
 
-Плюс в нижней панели выдаёт промпт, написанный под этот формат. Отправь его
-любому ии, укажи язык и тему, вставь ответ обратно — и колода импортируется
-вместе с маркерами списка, нумерацией, блоками кода и таблицами маркдауна.
-Строки, которые не могут работать, пропускаются, считаются и показываются с
-причиной.
+ikna может выдать готовый промпт для этого формата. Отправь его любому ИИ, вставь ответ обратно, и импортёр разберёт обычные списки, code blocks и Markdown-таблицы. Неподходящие строки будут пропущены и показаны в отчёте.
 
-Формат, правила отказа, экран колоды и генератор без сети — в
-[`docs/DECKS.md`](docs/DECKS.md).
+Формат и правила импорта: [`docs/DECKS.md`](docs/DECKS.md).
 
----
+### 3. Переезд из Anki
 
-## 🔀 Переезд из Anki
+Импортируй `.apkg`, и ikna перенесёт текстовые карточки вместе с историей ответов, чтобы расписание не начиналось с нуля.
 
-1. **+** → **Добавить колоду** → **Переехать из Anki**.
-2. Выбери файл `.apkg`.
-3. Прочитай отчёт и импортируй.
+Картинки и звук не переносятся. Приостановленные и отложенные карточки остаются в Anki. Коллекции тяжелее 300 МБ отклоняются целиком, а исходный файл только читается и никогда не меняется.
 
-Карточки приезжают теми же колодами, в которых уже лежали, и вместе с ними
-переезжает история ответов — расписание продолжается, а не начинается с нуля.
+Повторный импорт обновляет уже созданные колоды вместо дубликатов. Экспорта обратно в Anki нет.
 
-Подойдёт любой `.apkg` — из старой или новой Anki. Язык каждой колоды
-берётся из её карточек, а если определился неверно — меняется на странице колоды.
+Подробнее: [`docs/ANKI.md`](docs/ANKI.md).
 
-Переезжают текстовые карточки. Картинки и звук — нет: на их месте в карточке
-будет `[image]` или `[audio]`, а карточка, в которой кроме картинки ничего не было,
-попадёт в список пропущенных. Приостановленные и отложенные карточки остаются в Anki.
+## Произношение
 
-Отчёт показывается до того, как что-то будет сохранено, и говорит, что переехало,
-а что нет. Твой `.apkg` только читается и никогда не меняется, с телефона ничего
-не уходит. Коллекции тяжелее 300 МБ отклоняются, а не импортируются наполовину.
+Каталожные карточки могут содержать IPA. Для каждой колоды можно выбрать IPA, читаемую английскую respelling-строку или полностью скрыть произношение.
 
-Повторный импорт того же файла обновляет эти колоды, а не плодит копии.
-Экспорта обратно в Anki нет.
+На production-заданиях произношение не раскрывает пропущенный ответ. Подробнее: [`docs/PHONETICS.md`](docs/PHONETICS.md).
 
----
+## Приватность и данные
 
-## 🏷️ Версии
+В ikna нет аккаунтов и телеметрии.
 
-Версия здесь — это номер **и слово**: `0.10.0 press`. Слово называет эпоху, к которой
-относится сборка, номер считает релизы внутри неё, а в тегах git пробел заменяется
-дефисом: `v0.10.0-press`.
+Сеть нужна только для статических файлов, которые ты сам запрашиваешь: проверки релиза, каталога, предпросмотра, скачивания колоды и публичных ссылок на источники. Карточки, ответы, статистика и идентификаторы не загружаются. Голосовые модели приложение тоже не скачивает.
 
-Что значат слова, что обещают номера и как собирается `appVersionCode` — в
-[`docs/VERSIONS.md`](docs/VERSIONS.md).
+Журнал ответов append-only. На Android его вместе с настройками можно экспортировать в `Documents/ikna/`; desktop умеет создавать переносимый backup. При восстановлении ответы заново проигрываются через планировщик вместо слепого копирования состояния расписания.
 
----
+Подробнее: [`PRIVACY.md`](PRIVACY.md) и [`docs/UPDATES.md`](docs/UPDATES.md).
 
-## 🔨 Сборка
+## Интерфейс
 
-Пуш в `main` или ручной запуск воркфлоу `build`, потом скачать артефакт
-`ikna-apk`. Jar грейдл-раппера в репозитории нет — CI ставит грейдл сам.
+В ikna есть двенадцать палитр в двух вариантах освещения, импорт собственных шрифтов и возможность полностью отключить анимации.
+
+Интерфейс доступен на русском, английском, польском, испанском, французском, немецком и бразильском португальском.
+
+На Android также есть виджет и одно ежедневное напоминание. Desktop сейчас выходит без озвучки, виджета и напоминаний.
+
+## Сборка
+
+Пуш в `main` или ручной запуск workflow `build`, затем скачать артефакт `ikna-apk`. Gradle ставится в CI; jar wrapper в репозитории не хранится.
 
 ```
 bash tools/voice/fetch-voice.sh                # один раз на клон: движок озвучки
@@ -695,39 +434,30 @@ bash tools/catalog/fetch-bundled-pack.sh         # закреплённая ст
 ./gradlew :desktop:createReleaseDistributable    # desktop application image
 ```
 
-Стартовая колода закреплена по размеру и SHA-256, поэтому пересобранный каталог
-намеренно останавливает сборку. Если так и было задумано, выполни
-`bash tools/catalog/fetch-bundled-pack.sh --update` и закоммить новое закрепление.
+Стартовая колода закреплена по размеру и SHA-256. Если каталог был пересобран намеренно, выполни:
 
-Android-движок озвучки — это `.aar` примерно на десять мегабайт, репозиторий его
-не хранит, так что `tools/voice/fetch-voice.sh` надо один раз запустить перед первой
-Android-сборкой; CI делает это сам. Модель не скачивается и не кладётся внутрь.
-Desktop сейчас выходит без озвучки, виджета и напоминаний; остальное учебное ядро
-общее.
+```
+bash tools/catalog/fetch-bundled-pack.sh --update
+```
 
-И debug, и release подписаны одним ключом, лежащим в репозитории, и это сделано
-намеренно: иначе каждая машина в CI сгенерировала бы свою подпись, новый apk не
-встал бы поверх старого, и журнал ответов внутри пропал бы. Компромисс разобран в
-[`docs/KEYSTORE.md`](docs/KEYSTORE.md).
+Android-движок озвучки загружается один раз на клон через `tools/voice/fetch-voice.sh`; CI делает это автоматически. Голосовая модель при этом не скачивается и не кладётся в сборку.
 
-### 🚀 Релиз
+Debug и release используют ключ из репозитория, чтобы новые Android-сборки устанавливались поверх предыдущих. Компромисс описан в [`docs/KEYSTORE.md`](docs/KEYSTORE.md).
 
-Поднять две строки версии в `app/build.gradle.kts` и поставить на коммит тег с той
-же строкой, где пробел заменён дефисом:
+### Релиз
+
+Подними версию в `app/build.gradle.kts`, затем поставь тег с той же версией, заменив пробел дефисом:
 
 ```
 git tag v0.10.0-press
 git push origin v0.10.0-press
 ```
 
-Воркфлоу `release` откажется работать, если тег и файл сборки расходятся, а затем
-прогонит релизные проверки и приложит к одному GitHub-релизу Android APK,
-portable zip и установщик Windows, а также Linux AppImage, собранные из этого же
-тега.
+Release workflow проверяет совпадение тега и build-файла, запускает релизные проверки и прикладывает Android APK, Windows installer и portable zip, а также Linux AppImage, собранные из этого тега.
 
----
+Правила версионирования: [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
-## 📚 Документация
+## Документация
 
 [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
 [`DESIGN.md`](docs/DESIGN.md) ·
@@ -750,12 +480,6 @@ portable zip и установщик Windows, а также Linux AppImage, со
 
 Документация в `docs/` ведётся на английском.
 
----
+## Лицензия
 
-## ⚖️ Лицензия
-
-ikna — свободное программное обеспечение под **GNU General Public License версии 3
-или (по твоему выбору) любой позднеей**. Полный текст — в [LICENSE](LICENSE).
-
-Лицензия покрывает весь репозиторий — каждый файл, каждый коммит и каждый релиз,
-выложенные и до этой оговорки, и после неё.
+ikna распространяется под **GNU General Public License версии 3 или, по твоему выбору, любой более поздней версии**. Полный текст: [LICENSE](LICENSE).

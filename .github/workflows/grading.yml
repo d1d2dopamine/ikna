@@ -56,6 +56,12 @@ jobs:
             desktop/src/main/java/dev/ikna/desktop/TitleBarClicks.java \
             desktop/src/test/java/dev/ikna/desktop/TitleBarClicksChecks.java
           java -cp "$classes" dev.ikna.desktop.TitleBarClicksChecks
+      - name: Speech runtime cache
+        uses: actions/cache@v4
+        with:
+          path: app/libs/sherpa-onnx-*.aar
+          key: sherpa-onnx-aar-${{ runner.os }}-${{ hashFiles('tools/voice/fetch-voice.sh') }}
+
       - name: Existing build assets
         run: |
           bash tools/voice/fetch-voice.sh
@@ -115,6 +121,12 @@ jobs:
           gradle-version: "8.10.2"
           # The parallel JVM job writes the cache; this job only restores it.
           cache-read-only: true
+      - name: Speech runtime cache
+        uses: actions/cache@v4
+        with:
+          path: app/libs/sherpa-onnx-*.aar
+          key: sherpa-onnx-aar-${{ runner.os }}-${{ hashFiles('tools/voice/fetch-voice.sh') }}
+
       - name: Existing build assets
         run: |
           bash tools/voice/fetch-voice.sh

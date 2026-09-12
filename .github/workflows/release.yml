@@ -54,6 +54,12 @@ jobs:
       # Fetched before anything is compiled: the speech runtime is a local .aar
       # that is not committed, and since the two builds became one even the unit
       # tests need it on the classpath.
+      - name: Speech runtime cache
+        uses: actions/cache@v4
+        with:
+          path: app/libs/sherpa-onnx-*.aar
+          key: sherpa-onnx-aar-${{ runner.os }}-${{ hashFiles('tools/voice/fetch-voice.sh') }}
+
       - name: Speech runtime
         run: bash tools/voice/fetch-voice.sh
 
