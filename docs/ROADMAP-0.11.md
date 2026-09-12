@@ -2,6 +2,8 @@
 
 Theme: **evidence first**.
 
+Operational checkpoint: [`PLAN-0.11.md`](PLAN-0.11.md).
+
 0.11 is primarily an architecture, content-data and learning-science release. The
 interface is not the project to optimize in this cycle unless a learning-engine
 change requires a small UI adjustment.

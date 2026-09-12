@@ -4,10 +4,16 @@
     under half an hour anyway, and a periodic wake-up to redraw a number that
     only changes when the user answers a card is a battery cost with no return.
     The app pushes a new value whenever it knows one.
+
+    The minimum height is intentionally realistic for the compact three-row
+    layout. Declaring 40dp while drawing substantially more content let some
+    launchers squeeze the widget until the count was clipped at the bottom.
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="110dp"
-    android:minHeight="40dp"
+    android:minHeight="80dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="80dp"
     android:targetCellWidth="2"
     android:targetCellHeight="1"
     android:updatePeriodMillis="0"

@@ -7,6 +7,12 @@
     reach it. What it can have is the same shape language - flat, square, one
     number - so it reads as part of the same app rather than a system tile.
 
+    This layout has to fit a real 2 x 1 launcher cell. The old version stacked
+    the mark, title, count and label as four independent lines. Launchers such as
+    One UI give a 1-cell widget less usable height than that sum, so the count
+    was pushed into the bottom edge and the label disappeared. Keep the mark and
+    title stacked, but put the count and its noun on one baseline.
+
     Every string in here is written by the app, already translated. The widget
     formats nothing and knows nothing about languages.
 -->
@@ -16,12 +22,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/widget_background"
-    android:padding="12dp">
+    android:gravity="center_vertical"
+    android:paddingStart="12dp"
+    android:paddingTop="6dp"
+    android:paddingEnd="12dp"
+    android:paddingBottom="6dp">
 
-    <!-- The pixel wordmark, drawn at its own grid size. This is the one place in
-         the product where the pixel version of the logo belongs: at 38x16 it is
-         smaller than any text could be set here, and a widget needs to say which
-         app it is without spending a line on it. -->
+    <!-- The pixel wordmark, drawn at its own grid size. -->
     <ImageView
         android:id="@+id/widget_mark"
         android:layout_width="38dp"
@@ -31,35 +38,51 @@
 
     <TextView
         android:id="@+id/widget_title"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="2dp"
+        android:includeFontPadding="false"
         android:textColor="@color/widget_muted"
-        android:textSize="11sp"
+        android:textSize="10sp"
         android:letterSpacing="0.08"
         android:maxLines="1"
         android:ellipsize="end"
         android:text="@string/app_name" />
 
-    <TextView
-        android:id="@+id/widget_count"
-        android:layout_width="wrap_content"
+    <!-- Count and label share one line. Besides saving a whole text row, baseline
+         alignment keeps a large number from visually falling below the noun. -->
+    <LinearLayout
+        android:id="@+id/widget_value_row"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:textColor="@color/widget_accent"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        android:maxLines="1"
-        android:text="@string/widget_placeholder" />
+        android:layout_marginTop="3dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:baselineAligned="true">
 
-    <TextView
-        android:id="@+id/widget_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/widget_ink"
-        android:textSize="13sp"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:text="" />
+        <TextView
+            android:id="@+id/widget_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:textColor="@color/widget_accent"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:text="@string/widget_placeholder" />
+
+        <TextView
+            android:id="@+id/widget_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:includeFontPadding="false"
+            android:textColor="@color/widget_ink"
+            android:textSize="11sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="" />
+    </LinearLayout>
 
 </LinearLayout>

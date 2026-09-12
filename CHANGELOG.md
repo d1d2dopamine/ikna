@@ -1,5 +1,3 @@
-- Catalogue v2 CI corpus downloads are now atomic, resumable and retried on all transport failures (including curl 35 connection resets); downloaded archives are validated before ingestion, and UD clones retry over HTTP/1.1.
-
 # Changelog
 
 Every release is built by GitHub Actions from the tag it is attached to. Android,
@@ -16,6 +14,10 @@ words mean and what a number promises inside an epoch is written down once, in
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
 ## 0.11.0 press (in development)
+
+Catalogue v2 CI corpus downloads are atomic, resumable and retried on transport failures (including connection resets); downloaded archives are validated before ingestion, and UD clones retry over HTTP/1.1.
+
+The 0.11 checkpoint also fixes the compact Android home-screen widget: the count and its localized noun now share one baseline inside the declared 2 x 1 cell, and the provider no longer advertises an unrealistically short 40dp minimum height that allowed launchers to clip the number. Major README sections regain their emoji navigation markers, and `CONTRIBUTING.md` plus `docs/PLAN-0.11.md` now document how to work on the repository and what still blocks the release.
 
 The 0.11 cycle starts with an architecture contract rather than a UI feature. The
 learning engine is being split conceptually into scheduling, workload, target,
@@ -64,15 +66,18 @@ and stored source contexts, so installing the same exact v2 target from Beginner
 Middle or another collection reuses one FSRS history instead of creating parallel
 cards. Existing v1/hand-made chunks keep their old ids and migration 9 -> 10 only
 backfills membership/context rows; review rows are untouched. The builder reports
-unique targets, deck memberships and contexts separately and returns the per-level
-target cap to 3,000. Mature v1 segmentation, sieve, level and UTF-16 rules are
+unique targets, deck memberships and contexts separately. The workflow keeps a
+conservative 3,000-target default, while full census runs can explicitly request
+8,000 unique targets per collection/level deck. Mature v1 segmentation, sieve,
+level and UTF-16 rules are
 frozen in a source-independent core and parity tested; the existing phonetics
 pipeline remains available for the final v2 rebuild. The public `catalog` release
 is still changed only by an explicit reviewed publish.
 
 See [`docs/CATALOGUE-V2.md`](docs/CATALOGUE-V2.md),
 [`docs/MORPHOLOGY.md`](docs/MORPHOLOGY.md),
-[`docs/ROADMAP-0.11.md`](docs/ROADMAP-0.11.md) and
+[`docs/ROADMAP-0.11.md`](docs/ROADMAP-0.11.md),
+[`docs/PLAN-0.11.md`](docs/PLAN-0.11.md) and
 [`docs/LEARNING-ENGINE.md`](docs/LEARNING-ENGINE.md).
 
 ## 0.10.0 press
