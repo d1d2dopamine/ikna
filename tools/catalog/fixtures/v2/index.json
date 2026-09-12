@@ -1,0 +1,64 @@
+{
+  "version": 2,
+  "catalogueVersion": 2,
+  "builtAt": "2026-09-12",
+  "targetIdentity": {
+    "version": 2,
+    "method": "nfkc-casefold-exact"
+  },
+  "collections": [
+    {
+      "id": "everyday",
+      "title": "Everyday",
+      "description": "Short, general and everyday language."
+    }
+  ],
+  "sourceFamilies": [
+    {
+      "id": "tatoeba",
+      "title": "Tatoeba",
+      "homepage": "https://tatoeba.org",
+      "licence": "CC BY 2.0 FR",
+      "attribution": "Sentences by Tatoeba contributors, tatoeba.org"
+    }
+  ],
+  "decks": [
+    {
+      "id": "en-ru-everyday-beginner",
+      "title": "English from Russian - Everyday - beginner",
+      "lang": "en",
+      "meaningLang": "ru",
+      "chunkCount": 2,
+      "file": "en-ru-everyday-beginner.jsonl",
+      "sizeBytes": 1024,
+      "subject": "",
+      "level": "beginner",
+      "licence": "CC BY 2.0 FR",
+      "attribution": "Sentences by Tatoeba contributors, tatoeba.org",
+      "sources": ["Tatoeba, CC BY 2.0 FR"],
+      "phonetics": true,
+      "version": 2,
+      "collection": "everyday",
+      "sourceFamily": "tatoeba"
+    }
+  ],
+  "pairs": [
+    {
+      "lang": "en",
+      "meaningLang": "ru",
+      "tier": "thin",
+      "deckCount": 1,
+      "chunkCount": 2
+    }
+  ],
+  "collectionPairs": [
+    {
+      "collection": "everyday",
+      "lang": "en",
+      "meaningLang": "ru",
+      "tier": "thin",
+      "deckCount": 1,
+      "chunkCount": 2
+    }
+  ]
+}

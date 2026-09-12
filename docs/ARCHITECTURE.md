@@ -3,9 +3,9 @@
 ## Layers
 
 ```text
-corpora -> Ikna Database -> catalogue packs
-                              |
-                              v
+open corpora -> Catalogue v2 pipeline -> catalogue packs
+                                         |
+                                         v
 UI (Compose) -> SessionViewModel -> learning engine
                                       |
                          Scheduler / Governor
@@ -17,10 +17,10 @@ repositories -> local learner database
                 (append-only reviews + rebuildable state)
 ```
 
-The content-side **Ikna Database** and the app's local learner database are different
-systems. The first contains public corpus relationships and provenance; the second
-contains private learner history and installed content. See
-[`IKNA-DATABASE.md`](IKNA-DATABASE.md).
+Catalogue v2 is the public content-data layer: source provenance, morphology, target
+identity and context identity are prepared offline and shipped as static packs. The
+app's local learner database remains a separate private system containing installed
+content and learner history. See [`CATALOGUE-V2.md`](CATALOGUE-V2.md).
 
 The learning responsibilities are specified in
 [`LEARNING-ENGINE.md`](LEARNING-ENGINE.md). Their research status and the rules for

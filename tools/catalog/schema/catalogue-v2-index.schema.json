@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/d1d2dopamine/ikna/tools/catalog/schema/catalogue-v2-index.schema.json",
+  "title": "ikna Catalogue v2 index",
+  "type": "object",
+  "required": [
+    "version",
+    "catalogueVersion",
+    "builtAt",
+    "targetIdentity",
+    "collections",
+    "sourceFamilies",
+    "decks",
+    "pairs",
+    "collectionPairs"
+  ],
+  "properties": {
+    "version": { "const": 2 },
+    "catalogueVersion": { "const": 2 },
+    "builtAt": { "type": "string", "format": "date" },
+    "segmentation": { "type": "object" },
+    "targetIdentity": {
+      "type": "object",
+      "required": ["version", "method"],
+      "properties": {
+        "version": { "type": "integer", "minimum": 1 },
+        "method": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "collections": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/collection" }
+    },
+    "sourceFamilies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/sourceFamily" }
+    },
+    "decks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/deck" }
+    },
+    "pairs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/pair" }
+    },
+    "collectionPairs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/collectionPair" }
+    }
+  },
+  "$defs": {
+    "collection": {
+      "type": "object",
+      "required": ["id", "title", "description"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "title": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "sourceFamily": {
+      "type": "object",
+      "required": ["id", "title", "homepage", "licence", "attribution"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "title": { "type": "string", "minLength": 1 },
+        "homepage": { "type": "string", "minLength": 1 },
+        "licence": { "type": "string", "minLength": 1 },
+        "attribution": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "deck": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "lang",
+        "meaningLang",
+        "chunkCount",
+        "file",
+        "sizeBytes",
+        "subject",
+        "level",
+        "licence",
+        "attribution",
+        "sources",
+        "phonetics",
+        "version",
+        "collection",
+        "sourceFamily"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "lang": { "type": "string", "minLength": 2 },
+        "meaningLang": { "type": "string", "minLength": 2 },
+        "chunkCount": { "type": "integer", "minimum": 1 },
+        "file": { "type": "string", "pattern": "^[^/]+\\.jsonl$" },
+        "sizeBytes": { "type": "integer", "minimum": 1 },
+        "subject": { "type": "string" },
+        "level": { "enum": ["beginner", "middle", "advanced"] },
+        "licence": { "type": "string", "minLength": 1 },
+        "attribution": { "type": "string", "minLength": 1 },
+        "sources": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        },
+        "phonetics": { "type": "boolean" },
+        "version": { "type": "integer", "minimum": 1 },
+        "collection": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "sourceFamily": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" }
+      },
+      "additionalProperties": true
+    },
+    "pair": {
+      "type": "object",
+      "required": ["lang", "meaningLang", "tier", "deckCount", "chunkCount"],
+      "properties": {
+        "lang": { "type": "string", "minLength": 2 },
+        "meaningLang": { "type": "string", "minLength": 2 },
+        "tier": { "enum": ["full", "thin"] },
+        "deckCount": { "type": "integer", "minimum": 1 },
+        "chunkCount": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": true
+    },
+    "collectionPair": {
+      "allOf": [
+        { "$ref": "#/$defs/pair" },
+        {
+          "type": "object",
+          "required": ["collection"],
+          "properties": {
+            "collection": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" }
+          }
+        }
+      ]
+    }
+  },
+  "additionalProperties": true
+}

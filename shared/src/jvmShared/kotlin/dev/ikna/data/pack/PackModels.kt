@@ -27,7 +27,13 @@ data class PackToken(
     val surface: String,
     val lemma: String,
     val pos: String,
-    val isContent: Boolean
+    val isContent: Boolean,
+    /** Catalogue v2: Universal Dependencies POS when morphology resolves it. */
+    val upos: String? = null,
+    /** Catalogue v2: canonical CoNLL-U FEATS string. */
+    val feats: String? = null,
+    /** Catalogue v2: where the emitted lemma/morphology decision came from. */
+    val lemmaSource: String? = null
 )
 
 @Serializable
@@ -51,5 +57,13 @@ data class PackChunk(
      */
     val ipa: String? = null,
     /** IPA for [context]. Absent whenever [ipa] is. */
-    val ipaContext: String? = null
+    val ipaContext: String? = null,
+    /** Catalogue v2 learning-target identity. Old and hand-made packs omit it. */
+    val targetId: String? = null,
+    /** Catalogue v2 stable source reference for [context]. */
+    val contextId: String? = null,
+    /** Catalogue v2 stable source reference for the meaning/aligned segment. */
+    val meaningId: String? = null,
+    /** Catalogue v2 source-family id from the catalogue index registry. */
+    val sourceFamily: String? = null
 )

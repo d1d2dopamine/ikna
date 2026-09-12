@@ -127,7 +127,7 @@ clear hypothesis and a way to disable or remove it.
 
 ## 0.11 implementation order
 
-1. Define the content model and stable identities in `IKNA-DATABASE.md`.
+1. Define the content model and stable identities in `CATALOGUE-V2.md`.
 2. Build the corpus-side grouping pipeline and fixtures before changing runtime
    scheduling.
 3. Teach the app to read target/context metadata while preserving old packs.

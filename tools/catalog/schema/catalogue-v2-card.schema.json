@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/d1d2dopamine/ikna/tools/catalog/schema/catalogue-v2-card.schema.json",
+  "title": "ikna Catalogue v2 card",
+  "type": "object",
+  "required": [
+    "id",
+    "text",
+    "context",
+    "translation",
+    "targetStart",
+    "targetEnd",
+    "freqRank",
+    "tokens",
+    "targetId",
+    "contextId",
+    "meaningId",
+    "sourceFamily"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "text": { "type": "string", "minLength": 1 },
+    "context": { "type": "string", "minLength": 1 },
+    "translation": { "type": "string", "minLength": 1 },
+    "targetStart": { "type": "integer", "minimum": 0 },
+    "targetEnd": { "type": "integer", "minimum": 1 },
+    "freqRank": { "type": "integer", "minimum": 1 },
+    "tokens": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/token" }
+    },
+    "audioRef": { "type": ["string", "null"] },
+    "ipa": { "type": ["string", "null"] },
+    "ipaContext": { "type": ["string", "null"] },
+    "targetId": {
+      "type": "string",
+      "pattern": "^t[0-9]+:[a-z]{2,3}:[0-9a-f]{16,64}$"
+    },
+    "contextId": { "type": "string", "minLength": 3 },
+    "meaningId": { "type": "string", "minLength": 3 },
+    "sourceFamily": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" }
+  },
+  "$defs": {
+    "token": {
+      "type": "object",
+      "required": ["surface", "lemma", "pos", "isContent"],
+      "properties": {
+        "surface": { "type": "string", "minLength": 1 },
+        "lemma": { "type": "string", "minLength": 1 },
+        "pos": { "type": "string", "minLength": 1 },
+        "isContent": { "type": "boolean" },
+        "upos": { "type": "string", "minLength": 1 },
+        "feats": { "type": "string" },
+        "lemmaSource": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

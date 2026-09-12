@@ -20,16 +20,20 @@ learning engine is being split conceptually into scheduling, workload, target,
 context, transfer and grading responsibilities, and learning claims now carry an
 explicit evidence status in `docs/SCIENCE.md`.
 
-The proposed **Ikna Database** is a public content layer upstream of Catalogue, not
-the user's local Room database and not telemetry. Its first job is to represent a
-learning target separately from its real corpus occurrences and contexts, so future
-reviews can distinguish a familiar card from retrieval in an unseen source context.
-No runtime context-rotation policy or FSRS weighting changes in this foundation
-step.
+The first data decision is **Catalogue v2**. A full census of the published
+catalogue showed that the existing assets already contain large amounts of
+exact-target reuse across distinct source contexts, so v2 extends that data model
+with collections, structured provenance, target/context identity and morphology
+metadata. No runtime context-rotation policy or FSRS weighting changes in this
+foundation step.
 
-See [`docs/ROADMAP-0.11.md`](docs/ROADMAP-0.11.md),
-[`docs/LEARNING-ENGINE.md`](docs/LEARNING-ENGINE.md) and
-[`docs/IKNA-DATABASE.md`](docs/IKNA-DATABASE.md).
+Catalogue v2 keeps the fixed GitHub release tag `catalog`; the release title becomes
+`Catalogue v2` only when v2 assets are published. The specification preserves the
+old index/card fields so older builds can ignore the new metadata safely.
+
+See [`docs/CATALOGUE-V2.md`](docs/CATALOGUE-V2.md),
+[`docs/ROADMAP-0.11.md`](docs/ROADMAP-0.11.md) and
+[`docs/LEARNING-ENGINE.md`](docs/LEARNING-ENGINE.md).
 
 ## 0.10.0 press
 

@@ -1,5 +1,9 @@
 # Sources
 
+This document describes the currently published Tatoeba-based catalogue pipeline.
+The multi-source format planned for 0.11 is specified separately in
+[`CATALOGUE-V2.md`](CATALOGUE-V2.md); the existing `catalog` release tag is retained.
+
 A deck in the catalogue is not written by a model. It is cut out of two open
 corpora, and every chunk in it can be traced back to the sentence it came from,
 by number, on a public website. That is the whole point of the catalogue: a model

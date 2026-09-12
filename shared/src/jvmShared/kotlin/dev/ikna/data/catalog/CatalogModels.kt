@@ -49,7 +49,11 @@ data class CatalogDeck(
      * pipeline learned to transcribe reports simply by not mentioning it.
      */
     val phonetics: Boolean = false,
-    val version: Int = 1
+    val version: Int = 1,
+    /** Catalogue v2 collection id, for example everyday, knowledge or world. */
+    val collection: String = "",
+    /** Catalogue v2 source-family id used for structured provenance. */
+    val sourceFamily: String = ""
 )
 
 /**
@@ -70,12 +74,56 @@ data class CatalogPair(
 )
 
 @Serializable
-data class CatalogIndex(
+data class CatalogCollection(
+    val id: String,
+    val title: String,
+    val description: String = ""
+)
+
+@Serializable
+data class CatalogSourceFamily(
+    val id: String,
+    val title: String,
+    val homepage: String = "",
+    val licence: String = "",
+    val attribution: String = ""
+)
+
+@Serializable
+data class CatalogTargetIdentity(
     val version: Int = 1,
+    val method: String = ""
+)
+
+@Serializable
+data class CatalogCollectionPair(
+    val collection: String,
+    val lang: String,
+    val meaningLang: String,
+    val tier: String = TIER_THIN,
+    val deckCount: Int = 0,
+    val chunkCount: Int = 0
+)
+
+@Serializable
+data class CatalogIndex(
+    /** Schema version. v1 indexes omit every v2 field below and still parse. */
+    val version: Int = 1,
+    /** Public catalogue generation. Kept separate from later small schema changes. */
+    val catalogueVersion: Int = 1,
     /** When the pipeline ran, ISO date. Shown so a stale catalogue is visible. */
     val builtAt: String = "",
     val decks: List<CatalogDeck> = emptyList(),
-    val pairs: List<CatalogPair> = emptyList()
+    /** Aggregate pair rows retained for older clients. */
+    val pairs: List<CatalogPair> = emptyList(),
+    /** Catalogue v2 user-facing content collections. */
+    val collections: List<CatalogCollection> = emptyList(),
+    /** Catalogue v2 structured provenance registry. */
+    val sourceFamilies: List<CatalogSourceFamily> = emptyList(),
+    /** Per-collection pair coverage; [pairs] remains the compatibility aggregate. */
+    val collectionPairs: List<CatalogCollectionPair> = emptyList(),
+    /** Offline identity algorithm used by targetId in v2 pack lines. */
+    val targetIdentity: CatalogTargetIdentity? = null
 )
 
 /** A small, read-only glimpse of a deck before its full file is downloaded. */
