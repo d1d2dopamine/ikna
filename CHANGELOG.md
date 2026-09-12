@@ -1,3 +1,5 @@
+- Catalogue v2 CI corpus downloads are now atomic, resumable and retried on all transport failures (including curl 35 connection resets); downloaded archives are validated before ingestion, and UD clones retry over HTTP/1.1.
+
 # Changelog
 
 Every release is built by GitHub Actions from the tag it is attached to. Android,

@@ -91,9 +91,12 @@ jobs:
         run: |
           set -euo pipefail
           base=https://downloads.tatoeba.org/exports
-          curl -fsSL --retry 5 --retry-delay 5 \
-            -D corpus/sentences.headers -o corpus/sentences.tar.bz2 "$base/sentences.tar.bz2"
-          curl -fsSL --retry 5 --retry-delay 5 -o corpus/links.tar.bz2 "$base/links.tar.bz2"
+          tools/ci/fetch-url.sh \
+            "$base/sentences.tar.bz2" corpus/sentences.tar.bz2 corpus/sentences.headers
+          tools/ci/fetch-url.sh "$base/links.tar.bz2" corpus/links.tar.bz2
+          # Fail here with a useful archive error instead of much later in ingestion.
+          tar -tjf corpus/sentences.tar.bz2 >/dev/null
+          tar -tjf corpus/links.tar.bz2 >/dev/null
           tar -xjf corpus/sentences.tar.bz2 -C corpus
           tar -xjf corpus/links.tar.bz2 -C corpus
 
@@ -130,7 +133,8 @@ jobs:
             [ -n "$url" ] || continue
             raw="raw/WikiMatrix.${first}-${second}.tsv.gz"
             echo "Downloading $url"
-            curl -fsSL --retry 6 --retry-delay 10 -o "$raw" "$url"
+            tools/ci/fetch-url.sh "$url" "$raw"
+            gzip -t "$raw"
             python3 tools/catalog/ingest_sources.py wikimatrix-pair \
               --tsv "$raw" --first "$first" --second "$second" \
               --min-score "${{ inputs.wikimatrix_min_score }}" \
@@ -157,8 +161,18 @@ jobs:
           PY
           while IFS=$'\t' read -r lang repo; do
             echo "UD $lang: $repo"
-            git clone --quiet --depth 1 --branch r2.18 \
-              "https://github.com/UniversalDependencies/${repo}.git" "morphology/${repo}"
+            cloned=false
+            for attempt in 1 2 3 4 5; do
+              rm -rf "morphology/${repo}"
+              if git -c http.version=HTTP/1.1 clone --quiet --depth 1 --branch r2.18 \
+                "https://github.com/UniversalDependencies/${repo}.git" "morphology/${repo}"; then
+                cloned=true
+                break
+              fi
+              echo "UD clone failed for $repo (attempt $attempt/5); retrying..." >&2
+              sleep $((attempt * 5))
+            done
+            [ "$cloned" = true ] || { echo "UD clone failed for $repo after 5 attempts" >&2; exit 1; }
           done < ud-repos.tsv
           python3 tools/catalog/prepare_ud_manifest.py \
             --root morphology --langs "${{ inputs.learn }}" \

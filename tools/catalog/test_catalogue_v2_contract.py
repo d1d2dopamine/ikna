@@ -35,7 +35,25 @@ def utf16_slice(text, start, end):
     return raw[start * 2:end * 2].decode("utf-16-le")
 
 
+def check_workflow_download_resilience():
+    root = HERE.parent.parent
+    workflow = (root / ".github/workflows/catalogue-v2.yml").read_text(encoding="utf-8")
+    fetcher = (root / "tools/ci/fetch-url.sh").read_text(encoding="utf-8")
+    for required in (
+        "tools/ci/fetch-url.sh",
+        "gzip -t \"$raw\"",
+        "tar -tjf corpus/sentences.tar.bz2",
+        "git -c http.version=HTTP/1.1 clone",
+    ):
+        if required not in workflow:
+            raise AssertionError("catalogue workflow is missing resilient download contract: %s" % required)
+    for required in ("--http1.1", "--continue-at", '${dest}.part'):
+        if required not in fetcher:
+            raise AssertionError("fetch helper is missing resilience behavior: %s" % required)
+
+
 def main():
+    check_workflow_download_resilience()
     for name in (
         "catalogue-v2-index.schema.json",
         "catalogue-v2-card.schema.json",
