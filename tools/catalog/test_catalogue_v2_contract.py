@@ -36,7 +36,12 @@ def utf16_slice(text, start, end):
 
 
 def main():
-    for name in ("catalogue-v2-index.schema.json", "catalogue-v2-card.schema.json"):
+    for name in (
+        "catalogue-v2-index.schema.json",
+        "catalogue-v2-card.schema.json",
+        "catalogue-v2-candidate.schema.json",
+        "catalogue-v2-source-registry.schema.json",
+    ):
         schema = json.loads((SCHEMAS / name).read_text(encoding="utf-8"))
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             raise AssertionError("%s does not declare JSON Schema 2020-12" % name)

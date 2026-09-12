@@ -21,13 +21,24 @@ Status: specified in [`CATALOGUE-V2.md`](CATALOGUE-V2.md).
 
 ### Part 2 - New corpus ingestion
 
-- Keep Tatoeba as the initial source for `Everyday`.
-- Add audited adapters for WikiMatrix/Wikipedia and Global Voices after their exact
-  distribution, attribution and licence requirements are recorded.
-- Normalize every source into one internal candidate representation before deck
-  selection.
-- Deduplicate across sources without erasing provenance.
-- Reject source records whose provenance or licence cannot be represented safely.
+Status: source adapters and licence/provenance gates implemented. Large corpus
+downloads and deck rebuilding remain later work.
+
+- Tatoeba remains the source family for `Everyday`; v2 ingestion prefers the detailed export so contributor metadata survives and requires a pinned weekly-export version for real runs.
+- WikiMatrix is registered for `Knowledge` under CC BY-SA 4.0. Its alignment score
+  can be retained for the later quality sieve, and TSV column direction is handled
+  explicitly so a reversed learning pair cannot be mislabeled.
+- Global Voices is registered for `World` under CC BY 3.0, but publication requires
+  record-level contributor credit and a canonical article URL; plain aligned text
+  is rejected.
+- All three adapters normalize local dumps into the same candidate JSONL contract
+  before target extraction or level selection.
+- Exact duplicates merge only inside the same collection, and every source origin
+  survives the merge.
+- The source registry is an allowlist: an unknown, unaudited or disallowed licence
+  fails before ingestion.
+- No new corpus is published by this part. The current `catalog` release remains
+  the existing Tatoeba catalogue until the later rebuild/publish step.
 
 ### Part 3 - Morphology enrichment
 

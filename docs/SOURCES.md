@@ -62,6 +62,71 @@ attribution at all; everything else says CC BY 2.0 FR and carries it. The line i
 written into the index, shown before the download, and appended to every card's
 meaning, so it survives being exported and sent on.
 
+## Catalogue v2 source ingestion
+
+The currently published `catalog` release is still the Tatoeba catalogue described
+above. Catalogue v2 does not silently change that release while its pipeline is
+being built.
+
+The v2 ingestion layer has three audited source families:
+
+| Collection | Source family | Content licence | Ingestion rule |
+| --- | --- | --- | --- |
+| Everyday | Tatoeba | CC BY 2.0 FR | direct sentence links; stable ids; contributor metadata retained when available |
+| Knowledge | WikiMatrix / Wikipedia | CC BY-SA 4.0 | aligned segments; keep alignment score when available |
+| World | Global Voices | CC BY 3.0 | aligned segment plus article URL and credited contributors |
+
+The exact machine-readable policy lives in
+`tools/catalog/sources/catalogue-v2-sources.json`. Every source has an explicit
+licence id, licence URL, attribution string, distribution location and audit
+evidence. The ingestion code accepts only an allowlisted licence and rejects
+unknown policy fields. Adding a fourth corpus therefore requires a source-policy
+change and review rather than one more URL in a workflow.
+
+For Tatoeba, v2 ingestion prefers `sentences_detailed.csv` over the smaller
+`sentences.csv`; the detailed export includes the contributor who owns a sentence
+at export time. Stable Tatoeba ids remain the primary source reference, and a real
+published run must pin the weekly export date/version rather than recording only
+`weekly`.
+
+WikiMatrix is mined from Wikipedia and its v1 dataset is distributed under CC
+BY-SA 4.0. A future Knowledge deck built from it must keep that content licence
+and attribution. The app's GPL licence is a separate matter: catalogue assets are
+data files with their own licences.
+
+Global Voices needs a stricter provenance gate. The text is reusable under CC BY,
+but credit belongs to the article/translation contributors. A plain pair of aligned
+text files is therefore insufficient for ikna publication. The adapter requires an
+attribution sidecar containing at least a canonical article URL and contributors
+for every aligned record, and stops on the first missing row. This requirement is
+stricter than merely knowing that the corpus as a whole came from Global Voices.
+
+All adapters emit the same intermediate JSONL candidate shape before the existing
+ideas of chunk extraction, frequency level and deck size are applied. A candidate
+has a collection, language pair, aligned context/meaning and one or more origins.
+WikiMatrix can be read directly from its scored TSV(.gz), so its alignment score
+survives for the later quality sieve. The upstream TSV column order follows the
+filename, not the learner's requested direction; the adapter records/infer that
+order and swaps columns when necessary. Exact duplicates can merge **inside the
+same collection** while retaining every origin. The merge is SQLite-backed rather
+than held in RAM. Identical text in two different collections is not merged at
+ingestion, because Everyday, Knowledge and World are deliberate learner choices.
+
+The adapters are offline. `tools/catalog/ingest_sources.py` reads local dumps and
+never downloads them itself. Large downloads belong in a later workflow stage, so
+network failures, licence decisions and parsing failures stay separate.
+
+Source audit references:
+
+- Tatoeba downloads and terms: <https://tatoeba.org/en/downloads> and
+  <https://tatoeba.org/en/terms_of_use>.
+- WikiMatrix dataset/distribution: <https://github.com/facebookresearch/LASER/tree/main/tasks/WikiMatrix>;
+  licence metadata: <https://live.european-language-grid.eu/catalogue/corpus/5122>.
+- Global Voices distribution: <https://opus.nlpl.eu/datasets/GlobalVoices>;
+  OPUS/ELRC metadata records Global Voices parallel resources under CC BY 3.0, and
+  Global Voices' Creative Commons attribution policy is documented at
+  <https://wiki.creativecommons.org/wiki/Case_Studies/Global_Voices_Online>.
+
 ## How a chunk is built
 
 A chunk is a short phrase, one sentence that contains it, and what the phrase

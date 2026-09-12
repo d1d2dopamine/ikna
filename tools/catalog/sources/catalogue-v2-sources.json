@@ -1,0 +1,97 @@
+{
+  "registryVersion": 1,
+  "sources": [
+    {
+      "id": "tatoeba",
+      "title": "Tatoeba",
+      "collection": "everyday",
+      "adapter": "tatoeba",
+      "homepage": "https://tatoeba.org",
+      "distribution": "https://downloads.tatoeba.org/exports/",
+      "defaultSourceVersion": "weekly",
+      "requiresExplicitSourceVersion": true,
+      "licence": {
+        "id": "CC-BY-2.0-FR",
+        "name": "CC BY 2.0 FR",
+        "url": "https://creativecommons.org/licenses/by/2.0/fr/deed.en"
+      },
+      "attribution": "Tatoeba sentence contributors; sentence ids remain traceable to tatoeba.org",
+      "audit": {
+        "status": "approved",
+        "checked": "2026-09-12",
+        "evidence": [
+          "https://tatoeba.org/en/downloads",
+          "https://tatoeba.org/en/terms_of_use",
+          "https://downloads.tatoeba.org/exports/"
+        ],
+        "note": "Tatoeba textual exports are CC BY 2.0 FR, with a separate CC0 subset. Catalogue v2 prefers sentences_detailed.csv so contributor names can be retained when present. Audio is out of scope."
+      },
+      "publication": {
+        "status": "ready",
+        "requiredRecordAttribution": []
+      }
+    },
+    {
+      "id": "wikimatrix",
+      "title": "WikiMatrix",
+      "collection": "knowledge",
+      "adapter": "wikimatrix",
+      "homepage": "https://github.com/facebookresearch/LASER/tree/main/tasks/WikiMatrix",
+      "distribution": "https://dl.fbaipublicfiles.com/laser/WikiMatrix/v1/",
+      "defaultSourceVersion": "v1",
+      "requiresExplicitSourceVersion": false,
+      "licence": {
+        "id": "CC-BY-SA-4.0",
+        "name": "CC BY-SA 4.0",
+        "url": "https://creativecommons.org/licenses/by-sa/4.0/"
+      },
+      "attribution": "Wikipedia contributors; WikiMatrix by Schwenk et al.; extraction and filtering changes by ikna",
+      "audit": {
+        "status": "approved",
+        "checked": "2026-09-12",
+        "evidence": [
+          "https://github.com/facebookresearch/LASER/tree/main/tasks/WikiMatrix",
+          "https://live.european-language-grid.eu/catalogue/corpus/5122"
+        ],
+        "note": "The upstream WikiMatrix README distributes the mined data under Creative Commons Attribution-ShareAlike; ELG records the v1 distribution specifically as CC BY-SA 4.0. The alignment score is retained so the later quality sieve can choose a threshold."
+      },
+      "publication": {
+        "status": "ready",
+        "requiredRecordAttribution": []
+      }
+    },
+    {
+      "id": "globalvoices",
+      "title": "Global Voices",
+      "collection": "world",
+      "adapter": "globalvoices",
+      "homepage": "https://globalvoices.org",
+      "distribution": "https://opus.nlpl.eu/datasets/GlobalVoices",
+      "defaultSourceVersion": "v2018q4",
+      "requiresExplicitSourceVersion": false,
+      "licence": {
+        "id": "CC-BY-3.0",
+        "name": "CC BY 3.0",
+        "url": "https://creativecommons.org/licenses/by/3.0/"
+      },
+      "attribution": "Global Voices plus the credited article/translation contributors and canonical article URL",
+      "audit": {
+        "status": "approved",
+        "checked": "2026-09-12",
+        "evidence": [
+          "https://wiki.creativecommons.org/wiki/Case_Studies/Global_Voices_Online",
+          "https://opus.nlpl.eu/ELRCpublic",
+          "https://opus.nlpl.eu/datasets/GlobalVoices"
+        ],
+        "note": "Global Voices publishes reusable text under CC BY and requires source/author credit. The v2018q4 OPUS aligned text is accepted only together with record-level attribution recovered from the underlying articles or an equivalent trustworthy sidecar."
+      },
+      "publication": {
+        "status": "record-attribution-required",
+        "requiredRecordAttribution": [
+          "articleUrl",
+          "contributors"
+        ]
+      }
+    }
+  ]
+}

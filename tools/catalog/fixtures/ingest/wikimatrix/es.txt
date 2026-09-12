@@ -1,0 +1,4 @@
+El agua se congela a cero grados Celsius.
+La ciudad se encuentra en la costa norte.
+La ciudad se encuentra en la costa norte.
+Esta línea de puntuación baja debe desaparecer.

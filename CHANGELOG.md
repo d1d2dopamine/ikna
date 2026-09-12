@@ -31,6 +31,16 @@ Catalogue v2 keeps the fixed GitHub release tag `catalog`; the release title bec
 `Catalogue v2` only when v2 assets are published. The specification preserves the
 old index/card fields so older builds can ignore the new metadata safely.
 
+The second foundation step adds the source-ingestion boundary without rebuilding
+the published catalogue. Tatoeba, WikiMatrix and Global Voices now have explicit
+source policies, offline adapters and one normalized candidate format. Licence and
+provenance are gated before a candidate can move toward publication: Tatoeba can
+retain contributor metadata from its detailed export and real runs must pin the
+weekly export version; WikiMatrix keeps its alignment score and handles physical
+TSV direction explicitly; Global Voices candidates require article URL and
+contributor metadata instead of accepting an attribution-poor parallel-text dump.
+Exact duplicates can merge inside a collection without losing their source origins.
+
 See [`docs/CATALOGUE-V2.md`](docs/CATALOGUE-V2.md),
 [`docs/ROADMAP-0.11.md`](docs/ROADMAP-0.11.md) and
 [`docs/LEARNING-ENGINE.md`](docs/LEARNING-ENGINE.md).

@@ -96,6 +96,63 @@ A v2 publication must never contain a source family without a resolved licence
 and attribution policy. Planned sources may be documented in this repository,
 but only active, audited sources belong in a published `index.json`.
 
+## Ingestion boundary
+
+Part 2 adds an offline source-normalization layer before deck selection. Source
+adapters do not emit learner cards and do not decide levels or targets. They turn
+local corpus dumps into one small candidate contract:
+
+```text
+source dump
+    -> source adapter
+    -> normalized candidate pair
+    -> exact deduplication within a collection
+    -> later quality sieve / target extraction / deck build
+```
+
+A normalized candidate contains the learned-language segment, its aligned meaning,
+the collection it belongs to and one or more source origins. Exact duplicates may
+merge inside one collection, but every origin is retained. The same text in two
+different collections remains two candidates because the learner-facing collection
+choice is intentional.
+
+The machine-readable source registry is
+`tools/catalog/sources/catalogue-v2-sources.json`. It is the only place an adapter
+gets a source licence, attribution rule, collection and publication requirements.
+Adapters cannot invent a licence from a dump filename. The registry currently
+audits Tatoeba, WikiMatrix and Global Voices, rejects unknown policy fields and
+allowlists the content licences accepted by this pipeline.
+
+Tatoeba ingestion prefers the weekly `sentences_detailed.csv` export so contributor
+names can be retained with stable sentence ids. Production ingestion also requires
+an explicit export version/date instead of recording the moving word `weekly`. The
+smaller `sentences.csv` remains parseable for fixtures and compatibility work.
+
+Global Voices has an extra gate: an aligned text pair alone is not publishable. A
+record must also retain a canonical article URL and credited contributors. The
+adapter therefore requires an attribution sidecar and fails on the first missing
+record. This keeps a convenient OPUS text download from silently stripping the
+information required for attribution.
+
+WikiMatrix keeps its alignment score. The adapter understands the upstream v1
+`score<TAB>sentence<TAB>sentence` TSV directly (including `.gz`) and can also read
+an already split aligned pair. Upstream TSVs store columns in filename order, so
+the adapter infers that order from `WikiMatrix.xx-yy.tsv.gz` and safely swaps the
+segments when the requested learning direction is reversed. A renamed TSV must
+declare its physical column languages explicitly. Score thresholds are an
+ingestion/build parameter, not part of the public card schema; the final threshold
+is intentionally left to the later quality-sieve stage.
+
+Catalogue-scale exact deduplication is disk-backed through SQLite rather than a
+Python set of millions of full records. Duplicate candidates inside one collection
+merge their provenance origins; candidates in different collections remain separate.
+
+The reference CLI is `tools/catalog/ingest_sources.py`; command examples and the
+intermediate contract are documented in `tools/catalog/ingest/README.md`. The CLI
+performs no network requests. Downloading large corpora remains a workflow
+responsibility so a failed source download cannot be confused with a parsing or
+licence decision.
+
 ## Card contract
 
 A v2 JSONL line is still a `PackChunk`. All v1 fields remain valid and keep their
@@ -229,7 +286,8 @@ unambiguous even when all collections are shown together.
 
 ## Publication rules
 
-Part 1 specifies the format only. It does not publish v2 assets yet.
+Parts 1 and 2 specify the format and ingestion boundary only. They do not publish
+v2 assets yet.
 
 The eventual rollout is atomic from the index's point of view:
 
@@ -245,8 +303,8 @@ The existing publisher already sends `index.json` last. That rule remains.
 
 This specification deliberately does not define:
 
-- how WikiMatrix or Global Voices are filtered;
-- the final licences/attribution strings for sources not yet audited;
+- the final WikiMatrix alignment-score threshold or other corpus-specific quality cutoffs;
+- how Global Voices record-attribution sidecars are extracted from the upstream distribution at scale;
 - which morphology source wins when several analyses disagree;
 - when a learner receives a new context;
 - whether a novel-context result changes FSRS or grading;
@@ -257,7 +315,9 @@ pretending they have already been solved.
 
 ## Machine-readable contract
 
-The repository contains JSON Schemas and fixtures under
-`tools/catalog/schema/` and `tools/catalog/fixtures/v2/`. The Python contract test
-checks the examples and the compatibility invariants without adding a runtime or
-CI dependency on a JSON Schema package.
+The repository contains JSON Schemas under `tools/catalog/schema/`, v2 pack/index
+fixtures under `tools/catalog/fixtures/v2/`, source-ingestion fixtures under
+`tools/catalog/fixtures/ingest/`, and the audited source registry at
+`tools/catalog/sources/catalogue-v2-sources.json`. The Python contract tests check
+the examples, source gates, deduplication and compatibility invariants without
+adding a runtime or CI dependency on a JSON Schema package.

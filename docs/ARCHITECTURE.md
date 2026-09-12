@@ -18,9 +18,12 @@ repositories -> local learner database
 ```
 
 Catalogue v2 is the public content-data layer: source provenance, morphology, target
-identity and context identity are prepared offline and shipped as static packs. The
-app's local learner database remains a separate private system containing installed
-content and learner history. See [`CATALOGUE-V2.md`](CATALOGUE-V2.md).
+identity and context identity are prepared offline and shipped as static packs.
+Source-specific dump formats stop at an ingestion boundary first; Tatoeba,
+WikiMatrix and Global Voices are normalized into the same candidate records before
+the later quality sieve and deck builder. The app's local learner database remains
+a separate private system containing installed content and learner history. See
+[`CATALOGUE-V2.md`](CATALOGUE-V2.md).
 
 The learning responsibilities are specified in
 [`LEARNING-ENGINE.md`](LEARNING-ENGINE.md). Their research status and the rules for

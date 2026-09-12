@@ -1,0 +1,4 @@
+Water freezes at zero degrees Celsius.
+The city lies on the northern coast.
+The city lies on the northern coast.
+This deliberately low-score line should disappear.

@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/d1d2dopamine/ikna/tools/catalog/schema/catalogue-v2-source-registry.schema.json",
+  "title": "Catalogue v2 source registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["registryVersion", "sources"],
+  "properties": {
+    "registryVersion": {"const": 1},
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/source"}
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "collection",
+        "adapter",
+        "homepage",
+        "distribution",
+        "defaultSourceVersion",
+        "requiresExplicitSourceVersion",
+        "licence",
+        "attribution",
+        "audit",
+        "publication"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+        "title": {"type": "string", "minLength": 1},
+        "collection": {"enum": ["everyday", "knowledge", "world"]},
+        "adapter": {"enum": ["tatoeba", "wikimatrix", "globalvoices"]},
+        "homepage": {"type": "string", "pattern": "^https://"},
+        "distribution": {"type": "string", "pattern": "^https://"},
+        "defaultSourceVersion": {"type": "string", "minLength": 1},
+        "requiresExplicitSourceVersion": {"type": "boolean"},
+        "licence": {"$ref": "#/$defs/licence"},
+        "attribution": {"type": "string", "minLength": 1},
+        "audit": {"$ref": "#/$defs/audit"},
+        "publication": {"$ref": "#/$defs/publication"}
+      }
+    },
+    "licence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "url"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "url": {"type": "string", "pattern": "^https://"}
+      }
+    },
+    "audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "checked", "evidence", "note"],
+      "properties": {
+        "status": {"const": "approved"},
+        "checked": {"type": "string", "format": "date"},
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "pattern": "^https://"}
+        },
+        "note": {"type": "string", "minLength": 1}
+      }
+    },
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "requiredRecordAttribution"],
+      "properties": {
+        "status": {"enum": ["ready", "record-attribution-required"]},
+        "requiredRecordAttribution": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}
