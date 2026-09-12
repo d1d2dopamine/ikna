@@ -54,7 +54,12 @@ en-ru-knowledge-beginner
 en-ru-world-beginner
 ```
 
-The asset name is the deck id plus `.jsonl`.
+The asset name is the deck id plus `.jsonl`. The collection is intentionally part
+of the local deck identity too. A v2 `Everyday` deck is not imported over an
+already installed v1 deck: the rebuild changes card membership and positional
+card ids, so reusing the old pack id could attach existing review history to
+different content. The old deck therefore keeps its history and can be disabled
+independently after the learner installs its v2 replacement.
 
 The old v1 naming scheme remains readable. The v2 rollout may replace the old
 assets in the same `catalog` release only after the application and the bundled
@@ -219,30 +224,40 @@ reference it uses.
 
 ## Morphology
 
-The existing token fields remain:
+Part 3 implements morphology as an offline, pinned enrichment step. It does not
+change `targetId` and does not put a morphology model in the app. The public token
+contract remains:
 
 ```text
 surface
 lemma
 pos
 isContent
+upos          # optional
+feats         # optional canonical CoNLL-U FEATS
+lemmaSource   # optional evidence class
 ```
 
-v2 may enrich a token with:
+Rule version 1 uses UniMorph for conservative form-to-lemma evidence and Universal
+Dependencies for lemma/UPOS/FEATS evidence. An exact, unambiguous UD sentence match
+may resolve a token in context. Outside an exact context, a written form is enriched
+only when the selected datasets agree. Known ambiguity or source disagreement falls
+back to the existing/identity lemma. `pos` and `isContent` are never rewritten.
 
-- `upos`: Universal Dependencies universal POS tag when known.
-- `feats`: morphology in canonical CoNLL-U `FEATS` form, for example
-  `Mood=Ind|Number=Plur|Person=1|Tense=Pres|VerbForm=Fin`.
-- `lemmaSource`: provenance for the lemma/morphology decision, such as
-  `unimorph`, `ud`, `wiktextract` or `identity`.
+UniMorph feature bundles are not silently converted to UD FEATS. The raw UniMorph
+bundle can stay in the local build index for audit, while public `feats` comes from
+UD in rule v1. This keeps two different annotation systems from being presented as
+if they were identical.
 
-No fabricated probability is required. When morphology cannot be resolved
-reliably, the existing identity lemma is allowed and `lemmaSource` records that
-fact. Unknown is preferable to a false merge.
+Morphology inputs are pinned by source version and SHA-256. UniMorph licences vary
+by language dataset and UD licences vary by treebank, so every production dataset
+has its own licence and attribution record. NC, ND and unaudited inputs are rejected
+before indexing. The catalogue index can publish one `morphology` block containing
+the rule version, policy and dataset registry; individual decks can name the dataset
+ids they used through `morphologySources`. Full strings are not repeated per token.
 
-The coarse `pos` and `isContent` fields are retained because existing releases and
-the component-memory code already consume them. `upos` and `feats` are enrichment,
-not a replacement in the v2 migration.
+The reference pipeline is `tools/catalog/enrich_morphology.py`; the full contract is
+in [`MORPHOLOGY.md`](MORPHOLOGY.md).
 
 ## Provenance and licences
 
@@ -286,8 +301,8 @@ unambiguous even when all collections are shown together.
 
 ## Publication rules
 
-Parts 1 and 2 specify the format and ingestion boundary only. They do not publish
-v2 assets yet.
+Parts 1 through 3 specify the format, ingestion boundary and offline morphology
+enrichment. They do not publish v2 assets yet.
 
 The eventual rollout is atomic from the index's point of view:
 
@@ -305,7 +320,6 @@ This specification deliberately does not define:
 
 - the final WikiMatrix alignment-score threshold or other corpus-specific quality cutoffs;
 - how Global Voices record-attribution sidecars are extracted from the upstream distribution at scale;
-- which morphology source wins when several analyses disagree;
 - when a learner receives a new context;
 - whether a novel-context result changes FSRS or grading;
 - semantic embeddings or LLM-generated relationships.
@@ -317,7 +331,45 @@ pretending they have already been solved.
 
 The repository contains JSON Schemas under `tools/catalog/schema/`, v2 pack/index
 fixtures under `tools/catalog/fixtures/v2/`, source-ingestion fixtures under
-`tools/catalog/fixtures/ingest/`, and the audited source registry at
-`tools/catalog/sources/catalogue-v2-sources.json`. The Python contract tests check
+`tools/catalog/fixtures/ingest/`, morphology fixtures under
+`tools/catalog/fixtures/morphology/`, and audited content/morphology source
+registries under `tools/catalog/sources/`. The Python contract tests check
 the examples, source gates, deduplication and compatibility invariants without
 adding a runtime or CI dependency on a JSON Schema package.
+
+## Full rebuild and census
+
+Part 4 adds `tools/catalog/build_catalogue_v2.py` and the manual
+`catalogue v2 build` workflow. The legacy `catalog.yml` publisher remains in place
+as the known-good v1 path until a v2 artifact has been reviewed. The v2 workflow
+defaults to `publish=false`.
+
+The first large build uses two automatically publishable collections:
+
+- **Everyday**: one streaming pass over Tatoeba sentences and reciprocal direct
+  translation links; stable Tatoeba sentence ids become `contextId`/`meaningId`.
+- **Knowledge**: bounded WikiMatrix v1 hub pairs. One downloaded TSV is read once
+  and emits both learning directions. The default margin threshold is 1.04 and the
+  workflow caps retained aligned rows per hub pair so the build has a deterministic
+  disk/time ceiling.
+
+`World` is represented in the v2 collection registry but the automatic rebuild does
+not emit Global Voices decks yet. Part 2's record-attribution gate remains binding:
+article URL and contributor data must survive ingestion before a World deck can be
+published.
+
+The source-independent sieve keeps the v1 length, Unicode segmentation and UTF-16
+offset rules, but it no longer requires a written target to appear only once in a
+pair. A build parameter caps distinct natural contexts per exact `targetId` (three
+by default). This creates material for later Context Policy work without changing
+runtime scheduling in Part 4.
+
+The build emits `BUILD.json` and `BUILD.md` with separate counts for cards, exact
+targets and source contexts. The workflow then runs `catalogue meta-info` over the
+finished deck files. It does not generate the large all-groups JSONL unless someone
+explicitly asks the standalone census workflow for it.
+
+GitHub release constraints are treated as build constraints: index/deck size caps
+remain enforced and the builder refuses an asset count close to the release limit.
+The initial WikiMatrix hub plan is intentionally narrower than every possible
+language pair for the same reason.

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "udRelease": "r2.18",
+  "datasets": {
+    "en": {"repo":"UD_English-EWT","licence":"CC-BY-SA-4.0","attribution":"Universal Dependencies English EWT contributors"},
+    "ru": {"repo":"UD_Russian-GSD","licence":"CC-BY-SA-4.0","attribution":"Universal Dependencies Russian GSD contributors"},
+    "pl": {"repo":"UD_Polish-PUD","licence":"CC-BY-SA-4.0","attribution":"Universal Dependencies Polish PUD contributors"},
+    "es": {"repo":"UD_Spanish-GSD","licence":"CC-BY-SA-4.0","attribution":"Universal Dependencies Spanish GSD contributors"},
+    "fr": {"repo":"UD_French-GSD","licence":"CC-BY-SA-4.0","attribution":"Universal Dependencies French GSD contributors"},
+    "de": {"repo":"UD_German-GSD","licence":"CC-BY-SA-4.0","attribution":"Universal Dependencies German GSD contributors"},
+    "it": {"repo":"UD_Italian-ParlaMint","licence":"CC-BY-SA-4.0","attribution":"Universal Dependencies Italian ParlaMint contributors"},
+    "pt": {"repo":"UD_Portuguese-Bosque","licence":"CC-BY-SA-4.0","attribution":"Universal Dependencies Portuguese Bosque contributors"},
+    "zh": {"repo":"UD_Chinese-GSDSimp","licence":"CC-BY-SA-4.0","attribution":"Universal Dependencies Chinese GSDSimp contributors"},
+    "ja": {"repo":"UD_Japanese-GSD","licence":"CC-BY-SA-4.0","attribution":"Universal Dependencies Japanese GSD contributors"},
+    "ko": {"repo":"UD_Korean-GSD","licence":"CC-BY-SA-4.0","attribution":"Universal Dependencies Korean GSD contributors"}
+  }
+}

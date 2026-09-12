@@ -53,7 +53,9 @@ data class CatalogDeck(
     /** Catalogue v2 collection id, for example everyday, knowledge or world. */
     val collection: String = "",
     /** Catalogue v2 source-family id used for structured provenance. */
-    val sourceFamily: String = ""
+    val sourceFamily: String = "",
+    /** Pinned morphology dataset ids used to enrich this deck, if any. */
+    val morphologySources: List<String> = emptyList()
 )
 
 /**
@@ -95,6 +97,29 @@ data class CatalogTargetIdentity(
     val method: String = ""
 )
 
+
+@Serializable
+data class CatalogMorphologyDataset(
+    val id: String,
+    val sourceFamily: String,
+    val kind: String,
+    val lang: String,
+    val sourceVersion: String = "",
+    val sourceUrl: String = "",
+    val licence: String = "",
+    val licenceUrl: String = "",
+    val attribution: String = ""
+)
+
+@Serializable
+data class CatalogMorphology(
+    val ruleVersion: Int = 1,
+    val policy: String = "",
+    /** Rule v1 enriches tokens only and never changes targetId. */
+    val targetIdentityAffected: Boolean = false,
+    val datasets: List<CatalogMorphologyDataset> = emptyList()
+)
+
 @Serializable
 data class CatalogCollectionPair(
     val collection: String,
@@ -123,7 +148,9 @@ data class CatalogIndex(
     /** Per-collection pair coverage; [pairs] remains the compatibility aggregate. */
     val collectionPairs: List<CatalogCollectionPair> = emptyList(),
     /** Offline identity algorithm used by targetId in v2 pack lines. */
-    val targetIdentity: CatalogTargetIdentity? = null
+    val targetIdentity: CatalogTargetIdentity? = null,
+    /** Offline morphology rule and pinned datasets used by this catalogue build. */
+    val morphology: CatalogMorphology? = null
 )
 
 /** A small, read-only glimpse of a deck before its full file is downloaded. */

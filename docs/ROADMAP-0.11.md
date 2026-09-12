@@ -21,10 +21,11 @@ Status: specified in [`CATALOGUE-V2.md`](CATALOGUE-V2.md).
 
 ### Part 2 - New corpus ingestion
 
-Status: source adapters and licence/provenance gates implemented. Large corpus
-downloads and deck rebuilding remain later work.
+Status: source adapters and licence/provenance gates implemented. The Part 4
+workflow now exercises them at catalogue scale; the public `catalog` release is
+still unchanged until a reviewed build is explicitly published.
 
-- Tatoeba remains the source family for `Everyday`; v2 ingestion prefers the detailed export so contributor metadata survives and requires a pinned weekly-export version for real runs.
+- Tatoeba remains the source family for `Everyday`; the adapter accepts the detailed export when contributor metadata is wanted, while the large rebuild may use the smaller sentence export and stable sentence ids to stay within runner memory. Real runs record the weekly export date.
 - WikiMatrix is registered for `Knowledge` under CC BY-SA 4.0. Its alignment score
   can be retained for the later quality sieve, and TSV column direction is handled
   explicitly so a reversed learning pair cannot be mislabeled.
@@ -42,21 +43,40 @@ downloads and deck rebuilding remain later work.
 
 ### Part 3 - Morphology enrichment
 
-- Replace identity-only lemmas where a reliable open morphology source can resolve
-  them.
-- Preserve the existing `lemma`, `pos` and `isContent` contract.
-- Add `upos`, canonical CoNLL-U `feats` and `lemmaSource` as enrichment.
-- Prefer unresolved/identity morphology to a false merge.
-- Version every rule that can change target identity.
+Status: offline enrichment pipeline and contracts implemented. Part 4 adds an
+audited UD 2.18 production set and generates a SHA-256-pinned manifest for each
+full rebuild; UniMorph remains supported but is not required by the first v2 run.
+
+- UniMorph supplies conservative form-to-lemma evidence; ambiguous paradigms remain unresolved.
+- Universal Dependencies supplies contextual/form evidence for lemma, UPOS and canonical CoNLL-U FEATS.
+- Every production morphology input must be version-pinned, SHA-256 pinned and pass a per-dataset/treebank licence gate.
+- Existing `lemma`, `pos` and `isContent` remain compatible; `pos` and `isContent` are never rewritten by enrichment.
+- Rule v1 prefers identity morphology to source disagreement and does not convert UniMorph features into UD FEATS.
+- Morphology rule version 1 does not alter `targetId`; a later morphology-aware target identity must increment its own identity version.
 
 ### Part 4 - Catalogue expansion and census
 
-- Rebuild the catalogue from the audited sources.
-- Target at least one million useful cards, with 1.5-2 million as a scale goal only
-  if the quality sieve supports it.
-- Track unique source contexts separately from JSONL card count.
-- Run `catalogue meta-info` against the complete build before publication.
-- Publish deck assets first and `index.json` last to the existing `catalog` tag.
+Status: experimental full-build pipeline and GitHub Actions workflow implemented;
+the first full CI census is intentionally pending review before publication.
+
+- `catalogue v2 build` keeps `publish=false` by default and leaves the current
+  release untouched while a complete build is inspected as an Actions artifact.
+- `Everyday` is rebuilt from the current Tatoeba weekly export in one matrix pass.
+- `Knowledge` is expanded from bounded WikiMatrix v1 hub pairs. The default English
+  hub is deliberately small enough for a hosted runner and the GitHub release asset
+  limit, while still adding both learning directions.
+- `World` remains empty in the automatic build until Global Voices article URL and
+  contributor attribution can be supplied for every retained segment.
+- The source-independent v2 sieve can retain up to three natural source contexts
+  per exact target and pair instead of forcing one written target to one card.
+- The build tracks card count, exact targets and unique source contexts separately.
+  At least one million useful cards is the acceptance target; 1.5-2 million remains
+  a scale goal only if the census shows the quality sieve supports it.
+- An audited permissive UD 2.18 treebank set can enrich the selected cards. The
+  generated manifest records file SHA-256 values for the exact run.
+- `catalogue meta-info` runs against the finished v2 assets before any publication.
+- An explicit reviewed publish still uses the existing `catalog` tag, uploads deck
+  assets first and `index.json` last, and changes the release title to `Catalogue v2`.
 
 ### Part 5 - Target/context relations
 

@@ -41,6 +41,8 @@ def main():
         "catalogue-v2-card.schema.json",
         "catalogue-v2-candidate.schema.json",
         "catalogue-v2-source-registry.schema.json",
+        "catalogue-v2-morphology-manifest.schema.json",
+        "catalogue-v2-morphology-source-registry.schema.json",
     ):
         schema = json.loads((SCHEMAS / name).read_text(encoding="utf-8"))
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":

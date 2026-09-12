@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import gzip
 import hashlib
 import json
 import unicodedata
@@ -150,9 +151,15 @@ def merge_candidates(records: Iterable[Candidate]) -> list[Candidate]:
     return list(merged.values())
 
 
+def _open_jsonl(path: str, mode: str = "rt"):
+    if str(path).endswith(".gz"):
+        return gzip.open(path, mode, compresslevel=6, encoding="utf-8", newline="" if "w" in mode else None)
+    return open(path, mode.replace("t", ""), encoding="utf-8", newline="" if "w" in mode else None)
+
+
 def read_jsonl(path: str) -> list[Candidate]:
     records: list[Candidate] = []
-    with open(path, encoding="utf-8") as handle:
+    with _open_jsonl(path, "rt") as handle:
         for number, line in enumerate(handle, start=1):
             line = line.strip()
             if not line:
@@ -166,7 +173,7 @@ def read_jsonl(path: str) -> list[Candidate]:
 
 def write_jsonl(path: str, records: Iterable[Candidate]) -> int:
     count = 0
-    with open(path, "w", encoding="utf-8", newline="\n") as handle:
+    with _open_jsonl(path, "wt") as handle:
         for record in records:
             handle.write(json.dumps(record.to_dict(), ensure_ascii=False, sort_keys=True) + "\n")
             count += 1
@@ -202,7 +209,7 @@ def merge_candidate_files(inputs: Iterable[str], output: str, db_path: str | Non
                 "CREATE TABLE IF NOT EXISTS origins (candidate_id TEXT NOT NULL, origin_key TEXT NOT NULL, origin_json TEXT NOT NULL, PRIMARY KEY(candidate_id, origin_key))"
             )
             for path in inputs:
-                with open(path, encoding="utf-8") as handle:
+                with _open_jsonl(path, "rt") as handle:
                     for number, line in enumerate(handle, start=1):
                         line = line.strip()
                         if not line:
@@ -233,7 +240,7 @@ def merge_candidate_files(inputs: Iterable[str], output: str, db_path: str | Non
             db.commit()
 
             output_count = 0
-            with open(output, "w", encoding="utf-8", newline="\n") as out:
+            with _open_jsonl(output, "wt") as out:
                 for candidate_id, base_json in db.execute("SELECT id, base_json FROM candidates ORDER BY seq"):
                     value = json.loads(base_json)
                     value["origins"] = [

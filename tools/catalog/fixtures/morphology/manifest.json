@@ -1,0 +1,28 @@
+{
+  "manifestVersion": 1,
+  "ruleVersion": 1,
+  "datasets": [
+    {
+      "id": "fixture-unimorph-es",
+      "sourceFamily": "unimorph",
+      "kind": "unimorph",
+      "lang": "es",
+      "sourceVersion": "fixture-1",
+      "sourceUrl": "https://unimorph.github.io/",
+      "licence": {"id": "CC0-1.0", "name": "CC0 1.0 fixture", "url": "https://creativecommons.org/publicdomain/zero/1.0/"},
+      "attribution": "Synthetic UniMorph-format fixture maintained by ikna",
+      "files": [{"path": "unimorph-es.tsv", "sha256": "6f367b407cd87b3b0e9e20d4df9472965eced714c04499302f55c4d2f9d6c76d"}]
+    },
+    {
+      "id": "fixture-ud-es",
+      "sourceFamily": "universal-dependencies",
+      "kind": "ud",
+      "lang": "es",
+      "sourceVersion": "fixture-1",
+      "sourceUrl": "https://universaldependencies.org/",
+      "licence": {"id": "CC0-1.0", "name": "CC0 1.0 fixture", "url": "https://creativecommons.org/publicdomain/zero/1.0/"},
+      "attribution": "Synthetic CoNLL-U fixture maintained by ikna",
+      "files": [{"path": "ud-es.conllu", "sha256": "84a4440a67639ec1ba734f99deb12880a6aa728a3ba8256c0f90518f4a20e5ce"}]
+    }
+  ]
+}

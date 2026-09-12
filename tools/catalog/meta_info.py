@@ -27,6 +27,7 @@ from typing import Any
 SOURCE_RE = re.compile(r"(?:^|\n)\u2014\s*Tatoeba\s+#(\d+)\s*$")
 DECK_RE = re.compile(
     r"^(?P<lang>[a-z]{2})-(?P<meaning>[a-z]{2})-"
+    r"(?:(?P<collection>everyday|knowledge|world)-)?"
     r"(?P<level>beginner|middle|advanced)(?P<pd>-pd)?\.jsonl$"
 )
 REQUIRED_FIELDS = (
@@ -71,6 +72,7 @@ def deck_from_filename(path: Path) -> dict[str, str]:
         "lang": match.group("lang"),
         "meaningLang": match.group("meaning"),
         "level": match.group("level"),
+        "collection": match.group("collection") or "legacy",
         "family": "public-domain" if match.group("pd") else "attributed",
     }
 
@@ -124,6 +126,8 @@ class Stats:
     per_language_cards: Counter = field(default_factory=Counter)
     per_level_cards: Counter = field(default_factory=Counter)
     per_pair_cards: Counter = field(default_factory=Counter)
+    per_collection_cards: Counter = field(default_factory=Counter)
+    per_source_family_cards: Counter = field(default_factory=Counter)
 
 
 def analyse(root: Path) -> tuple[dict[str, Any], list[TargetGroup]]:
@@ -145,6 +149,8 @@ def analyse(root: Path) -> tuple[dict[str, Any], list[TargetGroup]]:
         meaning = str(deck.get("meaningLang") or "?")
         level = str(deck.get("level") or "?")
         deck_id = str(deck.get("id") or path.stem)
+        collection = str(deck.get("collection") or "legacy")
+        source_family = str(deck.get("sourceFamily") or "legacy")
 
         try:
             handle = path.open(encoding="utf-8")
@@ -169,6 +175,8 @@ def analyse(root: Path) -> tuple[dict[str, Any], list[TargetGroup]]:
                 stats.per_language_cards[lang] += 1
                 stats.per_level_cards[level] += 1
                 stats.per_pair_cards[(lang, meaning)] += 1
+                stats.per_collection_cards[collection] += 1
+                stats.per_source_family_cards[source_family] += 1
                 for key in REQUIRED_FIELDS + OPTIONAL_FIELDS:
                     if key in card and card[key] not in (None, "", []):
                         stats.field_present[key] += 1
@@ -187,11 +195,14 @@ def analyse(root: Path) -> tuple[dict[str, Any], list[TargetGroup]]:
                     continue
 
                 sid = source_id(translation)
-                if sid is None:
+                explicit_context = str(card.get("contextId") or "").strip()
+                if explicit_context:
+                    context_key = explicit_context
+                elif sid is not None:
+                    context_key = "tatoeba:" + sid
+                else:
                     stats.provenance_missing += 1
                     context_key = fallback_context_key(context)
-                else:
-                    context_key = "tatoeba:" + sid
                 unique_source_keys.add((lang, context_key))
                 unique_target_source.add((lang, target_norm, context_key))
 
@@ -281,6 +292,7 @@ def analyse(root: Path) -> tuple[dict[str, Any], list[TargetGroup]]:
         },
         "metadata": {
             "fieldCoverage": dict(stats.field_present),
+            "provenanceMissing": stats.provenance_missing,
             "tatoebaProvenanceMissing": stats.provenance_missing,
             "badTargetOffsets": stats.offsets_bad,
             "cardsWithIpa": stats.ipa_cards,
@@ -298,6 +310,8 @@ def analyse(root: Path) -> tuple[dict[str, Any], list[TargetGroup]]:
                 f"{lang}->{meaning}": count
                 for (lang, meaning), count in sorted(stats.per_pair_cards.items())
             },
+            "cardsByCollection": dict(sorted(stats.per_collection_cards.items())),
+            "cardsBySourceFamily": dict(sorted(stats.per_source_family_cards.items())),
         },
     }
     return result, sorted(
@@ -339,7 +353,7 @@ def markdown_report(data: dict[str, Any], groups: list[TargetGroup], top: int) -
         "",
         "## Context reuse",
         "",
-        "A target counts as multi-context only when the same exact target occurs in at least two different source sentences. Reusing one Tatoeba sentence in decks with different meaning languages does not create a new context.",
+        "A target counts as multi-context only when the same exact target occurs in at least two distinct source contexts. Reusing one source context in decks with different meaning languages does not create a new context.",
         "",
         "| exact target groups | count | share of targets |",
         "| --- | ---: | ---: |",
@@ -377,7 +391,7 @@ def markdown_report(data: dict[str, Any], groups: list[TargetGroup], top: int) -
         lines.append(f"| `{key}` | {present:,} | {pct(present, cards)} |")
     lines.extend(
         [
-            f"| Tatoeba provenance missing | {meta['tatoebaProvenanceMissing']:,} | {pct(meta['tatoebaProvenanceMissing'], cards)} |",
+            f"| source provenance missing | {meta['provenanceMissing']:,} | {pct(meta['provenanceMissing'], cards)} |",
             f"| invalid target offsets | {meta['badTargetOffsets']:,} | {pct(meta['badTargetOffsets'], cards)} |",
             "",
             "### Token metadata",
@@ -394,6 +408,10 @@ def markdown_report(data: dict[str, Any], groups: list[TargetGroup], top: int) -
     )
     for lang, count in data["breakdown"]["cardsByLearningLanguage"].items():
         lines.append(f"| `{lang}` | {count:,} |")
+
+    lines.extend(["", "## Cards by collection", "", "| collection | cards |", "| --- | ---: |"])
+    for collection, count in data["breakdown"].get("cardsByCollection", {}).items():
+        lines.append(f"| `{collection}` | {count:,} |")
 
     lines.extend(
         [
@@ -422,7 +440,7 @@ def markdown_report(data: dict[str, Any], groups: list[TargetGroup], top: int) -
         for key, context in list(group.contexts.items())[:5]:
             source = key.removeprefix("tatoeba:") if key.startswith("tatoeba:") else None
             safe = context.replace("\n", " ").strip()
-            label = f"Tatoeba #{source}" if source else "source id unavailable"
+            label = f"Tatoeba #{source}" if source else key
             lines.append(f"- {label}: {safe}")
         if len(group.contexts) > 5:
             lines.append(f"- ... {len(group.contexts) - 5} more contexts")

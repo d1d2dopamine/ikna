@@ -228,6 +228,7 @@ Versioning rules: [`docs/VERSIONS.md`](docs/VERSIONS.md).
 [`FSRS-OPTIMIZER.md`](docs/FSRS-OPTIMIZER.md) ·
 [`FSRS-OPTIMIZER-INTEGRATION.md`](docs/FSRS-OPTIMIZER-INTEGRATION.md) ·
 [`PHONETICS.md`](docs/PHONETICS.md) ·
+[`MORPHOLOGY.md`](docs/MORPHOLOGY.md) ·
 [`DESKTOP.md`](docs/DESKTOP.md) ·
 [`DECKS.md`](docs/DECKS.md) ·
 [`ANKI.md`](docs/ANKI.md) ·
@@ -475,6 +476,7 @@ Release workflow проверяет совпадение тега и build-фа�
 [`FSRS-OPTIMIZER.md`](docs/FSRS-OPTIMIZER.md) ·
 [`FSRS-OPTIMIZER-INTEGRATION.md`](docs/FSRS-OPTIMIZER-INTEGRATION.md) ·
 [`PHONETICS.md`](docs/PHONETICS.md) ·
+[`MORPHOLOGY.md`](docs/MORPHOLOGY.md) ·
 [`DESKTOP.md`](docs/DESKTOP.md) ·
 [`DECKS.md`](docs/DECKS.md) ·
 [`ANKI.md`](docs/ANKI.md) ·

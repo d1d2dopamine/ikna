@@ -1,0 +1,49 @@
+{
+  "registryVersion": 1,
+  "allowedLicences": [
+    "CC0-1.0",
+    "CC-BY-2.0",
+    "CC-BY-3.0",
+    "CC-BY-4.0",
+    "CC-BY-SA-3.0",
+    "CC-BY-SA-4.0"
+  ],
+  "sources": [
+    {
+      "id": "unimorph",
+      "title": "UniMorph",
+      "homepage": "https://unimorph.github.io/",
+      "distribution": "https://github.com/unimorph",
+      "format": "lemma<TAB>inflected-form<TAB>UniMorph-features",
+      "licencePolicy": "per-language-dataset",
+      "audit": {
+        "status": "approved-with-dataset-gate",
+        "checked": "2026-09-12",
+        "evidence": [
+          "https://unimorph.github.io/",
+          "https://unimorph.github.io/schema/",
+          "https://github.com/unimorph"
+        ],
+        "note": "Each language repository carries its own licence. A build manifest must pin the repository revision/file hash and a licence from the allowlist. UniMorph v1 enrichment is used for conservative form-to-lemma evidence; its feature bundle is retained in the local index but is not silently relabelled as UD FEATS."
+      }
+    },
+    {
+      "id": "universal-dependencies",
+      "title": "Universal Dependencies",
+      "homepage": "https://universaldependencies.org/",
+      "distribution": "https://universaldependencies.org/download.html",
+      "format": "CoNLL-U",
+      "licencePolicy": "per-treebank",
+      "audit": {
+        "status": "approved-with-treebank-gate",
+        "checked": "2026-09-12",
+        "evidence": [
+          "https://universaldependencies.org/",
+          "https://universaldependencies.org/contributing/licensing.html",
+          "https://universaldependencies.org/format.html"
+        ],
+        "note": "UD is mixed-licence. Every selected treebank must have its own pinned release/file hashes and an allowed licence. NC, ND and unknown treebanks are rejected. UD supplies UPOS and canonical CoNLL-U FEATS; exact-context evidence is used only when one unambiguous annotation sequence matches the catalogue sentence."
+      }
+    }
+  ]
+}

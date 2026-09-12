@@ -19,8 +19,10 @@ from ingest.adapters import (
     infer_wikimatrix_tsv_languages,
     iter_globalvoices,
     iter_tatoeba,
+    iter_tatoeba_matrix,
     iter_wikimatrix,
     iter_wikimatrix_tsv,
+    iter_wikimatrix_tsv_pair,
 )
 from ingest.model import merge_candidate_files, write_jsonl
 from ingest.registry import SourceRegistry
@@ -53,6 +55,13 @@ def parser() -> argparse.ArgumentParser:
         help="immutable weekly-export date or other pinned source version, e.g. 2026-09-05",
     )
 
+    tm = sub.add_parser("tatoeba-matrix")
+    tm.add_argument("--dump-dir", required=True)
+    tm.add_argument("--learn", required=True, help="comma-separated learning languages")
+    tm.add_argument("--meanings", required=True, help="comma-separated meaning languages")
+    tm.add_argument("--out", required=True)
+    tm.add_argument("--source-version", required=True)
+
     w = sub.add_parser("wikimatrix")
     source = w.add_mutually_exclusive_group(required=True)
     source.add_argument("--tsv", help="upstream WikiMatrix score<TAB>sentence<TAB>sentence TSV or .gz")
@@ -60,6 +69,7 @@ def parser() -> argparse.ArgumentParser:
     w.add_argument("--meaning-file", help="second file when --learn-file is used")
     w.add_argument("--score-file")
     w.add_argument("--min-score", type=float)
+    w.add_argument("--max-rows", type=int, help="stop after this many retained upstream rows")
     w.add_argument("--learn", required=True)
     w.add_argument("--meaning", required=True)
     w.add_argument("--out", required=True)
@@ -69,6 +79,15 @@ def parser() -> argparse.ArgumentParser:
         type=_language_pair,
         help="physical sentence-column languages, e.g. de,en; inferred from WikiMatrix.de-en.tsv.gz when omitted",
     )
+
+    wp = sub.add_parser("wikimatrix-pair")
+    wp.add_argument("--tsv", required=True)
+    wp.add_argument("--first", required=True)
+    wp.add_argument("--second", required=True)
+    wp.add_argument("--min-score", type=float, default=1.04)
+    wp.add_argument("--max-rows", type=int)
+    wp.add_argument("--out", required=True)
+    wp.add_argument("--source-version")
 
     g = sub.add_parser("globalvoices")
     g.add_argument("--learn-file", required=True)
@@ -105,13 +124,30 @@ def main(argv: list[str] | None = None) -> int:
 
     source_id = {
         "tatoeba": "tatoeba",
+        "tatoeba-matrix": "tatoeba",
         "wikimatrix": "wikimatrix",
+        "wikimatrix-pair": "wikimatrix",
         "globalvoices": "globalvoices",
     }[args.command]
     policy = registry.get(source_id)
 
     if args.command == "tatoeba":
         records = iter_tatoeba(args.dump_dir, policy, args.learn, args.meaning, source_version=args.source_version)
+    elif args.command == "tatoeba-matrix":
+        learn = {part.strip().lower() for part in args.learn.split(",") if part.strip()}
+        meanings = {part.strip().lower() for part in args.meanings.split(",") if part.strip()}
+        if not learn or not meanings:
+            parser().error("--learn and --meanings must contain at least one language")
+        records = iter_tatoeba_matrix(
+            args.dump_dir, policy, learn, meanings, source_version=args.source_version
+        )
+    elif args.command == "wikimatrix-pair":
+        if args.first == args.second:
+            parser().error("WikiMatrix pair languages must differ")
+        records = iter_wikimatrix_tsv_pair(
+            args.tsv, policy, args.first.lower(), args.second.lower(),
+            min_score=args.min_score, source_version=args.source_version, max_rows=args.max_rows,
+        )
     elif args.command == "wikimatrix":
         if args.tsv:
             if args.meaning_file or args.score_file:
@@ -129,6 +165,7 @@ def main(argv: list[str] | None = None) -> int:
                 min_score=args.min_score,
                 source_version=args.source_version,
                 tsv_languages=physical,
+                max_rows=args.max_rows,
             )
         else:
             if args.tsv_langs:

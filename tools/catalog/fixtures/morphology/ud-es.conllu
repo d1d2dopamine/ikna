@@ -1,0 +1,18 @@
+# sent_id = fixture-1
+# text = Hablaste con Ana.
+1	Hablaste	hablar	VERB	_	Tense=Past|Mood=Ind|Person=2|Number=Sing|VerbForm=Fin	0	root	_	_
+2	con	con	ADP	_	_	3	case	_	_
+3	Ana	Ana	PROPN	_	_	1	obl	_	SpaceAfter=No
+4	.	.	PUNCT	_	_	1	punct	_	_
+
+# sent_id = fixture-2
+# text = Vino ayer.
+1	Vino	venir	VERB	_	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
+2	ayer	ayer	ADV	_	_	1	advmod	_	SpaceAfter=No
+3	.	.	PUNCT	_	_	1	punct	_	_
+
+# sent_id = fixture-3
+# text = Fui feliz.
+1	Fui	ser	AUX	_	Mood=Ind|Number=Sing|Person=1|Tense=Past|VerbForm=Fin	0	cop	_	_
+2	feliz	feliz	ADJ	_	Number=Sing	0	root	_	SpaceAfter=No
+3	.	.	PUNCT	_	_	2	punct	_	_

@@ -63,6 +63,25 @@ class MetaInfoTests(unittest.TestCase):
             self.assertEqual(len(groups), 1)
             self.assertEqual(len(groups[0].source_keys), 2)
 
+
+    def test_v2_context_id_and_collection_are_used_directly(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            first = card("a", "care", "I care about this.", 1)
+            first.pop("translation")
+            first["translation"] = "translation without legacy suffix"
+            first.update({"contextId":"wikimatrix:v1:en-es:1:a","meaningId":"wikimatrix:v1:en-es:1:b","sourceFamily":"wikimatrix"})
+            second = card("b", "care", "They care about it.", 2)
+            second.pop("translation")
+            second["translation"] = "another translation"
+            second.update({"contextId":"wikimatrix:v1:en-es:2:a","meaningId":"wikimatrix:v1:en-es:2:b","sourceFamily":"wikimatrix"})
+            write_deck(root, "en-es-knowledge-beginner.jsonl", [first, second])
+            data, groups = meta_info.analyse(root)
+            self.assertEqual(data["metadata"]["provenanceMissing"], 0)
+            self.assertEqual(data["breakdown"]["cardsByCollection"]["knowledge"], 2)
+            self.assertEqual(data["targets"]["targetsWithAtLeast2Contexts"], 1)
+            self.assertEqual(len(groups), 1)
+
     def test_real_lemma_metadata_is_measured_without_using_it_for_grouping(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

@@ -1,0 +1,237 @@
+name: catalogue v2 build
+
+# Experimental 0.11 catalogue rebuild. It never replaces the public `catalog`
+# release unless `publish` is explicitly enabled. The current catalog.yml stays
+# available as the known-good v1 publisher while this build is being inspected.
+on:
+  workflow_dispatch:
+    inputs:
+      learn:
+        description: "Languages to teach, comma separated"
+        default: "en,ru,pl,es,fr,de,it,pt,zh,ja,ko"
+      meanings:
+        description: "Languages meanings may use"
+        default: "en,ru,pl,es,fr,de,it,pt,zh,ja,ko"
+      max_deck:
+        description: "Cards per collection/level deck at most"
+        default: "8000"
+      contexts_per_target:
+        description: "Natural source contexts kept per exact target and pair"
+        default: "3"
+      wikimatrix_hub:
+        description: "Knowledge collection hub language"
+        default: "en"
+      wikimatrix_min_score:
+        description: "Minimum WikiMatrix margin score"
+        default: "1.04"
+      wikimatrix_max_rows:
+        description: "Retained aligned rows per WikiMatrix hub pair"
+        default: "120000"
+      morphology:
+        description: "Enrich selected cards with audited UD 2.18 morphology"
+        type: boolean
+        default: true
+      phonetics:
+        description: "Transcribe selected cards (slow)"
+        type: boolean
+        default: false
+      publish:
+        description: "Replace the public catalog index after a reviewed build"
+        type: boolean
+        default: false
+      tag:
+        description: "Existing catalogue release tag"
+        default: "catalog"
+      per_minute:
+        description: "Release upload requests per minute"
+        default: "30"
+
+permissions:
+  contents: write
+
+jobs:
+  contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Catalogue v2 contracts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libicu-dev
+          python3 tools/catalog/test_segmentation.py
+          python3 tools/catalog/test_catalogue_v2_contract.py
+          python3 tools/catalog/test_ingestion.py
+          python3 tools/catalog/test_morphology.py
+          python3 tools/catalog/test_build_catalogue_v2.py
+          python3 tools/catalog/test_meta_info.py
+
+  catalogue-v2:
+    needs: contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build prerequisites
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libicu-dev
+          mkdir -p corpus candidates raw morphology reports
+
+      - name: Tatoeba Everyday candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=https://downloads.tatoeba.org/exports
+          curl -fsSL --retry 5 --retry-delay 5 \
+            -D corpus/sentences.headers -o corpus/sentences.tar.bz2 "$base/sentences.tar.bz2"
+          curl -fsSL --retry 5 --retry-delay 5 -o corpus/links.tar.bz2 "$base/links.tar.bz2"
+          tar -xjf corpus/sentences.tar.bz2 -C corpus
+          tar -xjf corpus/links.tar.bz2 -C corpus
+
+          # The URL is a moving weekly export. Pin the exact HTTP Last-Modified
+          # date observed on the downloaded bytes; never substitute today's date.
+          last_modified=$(tr -d '\r' < corpus/sentences.headers | awk -F': ' 'tolower($1)=="last-modified"{v=$2} END{print v}')
+          [ -n "$last_modified" ] || { echo "Tatoeba export did not provide Last-Modified" >&2; exit 1; }
+          tatoeba_version=$(python3 - "$last_modified" <<'PY'
+          import sys
+          from email.utils import parsedate_to_datetime
+          print(parsedate_to_datetime(sys.argv[1]).date().isoformat())
+          PY
+          )
+          echo "TATOEBA_VERSION=$tatoeba_version" >> "$GITHUB_ENV"
+
+          python3 tools/catalog/ingest_sources.py tatoeba-matrix \
+            --dump-dir corpus \
+            --learn "${{ inputs.learn }}" \
+            --meanings "${{ inputs.meanings }}" \
+            --source-version "$tatoeba_version" \
+            --out candidates/tatoeba.jsonl.gz
+          rm -rf corpus
+          ls -lh candidates/tatoeba.jsonl.gz
+
+      - name: WikiMatrix Knowledge candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/catalog/wikimatrix_plan.py \
+            --langs "${{ inputs.learn }},${{ inputs.meanings }}" \
+            --hub "${{ inputs.wikimatrix_hub }}" > wikimatrix-plan.tsv
+          cat wikimatrix-plan.tsv
+          while IFS=$'\t' read -r first second url; do
+            [ -n "$url" ] || continue
+            raw="raw/WikiMatrix.${first}-${second}.tsv.gz"
+            echo "Downloading $url"
+            curl -fsSL --retry 6 --retry-delay 10 -o "$raw" "$url"
+            python3 tools/catalog/ingest_sources.py wikimatrix-pair \
+              --tsv "$raw" --first "$first" --second "$second" \
+              --min-score "${{ inputs.wikimatrix_min_score }}" \
+              --max-rows "${{ inputs.wikimatrix_max_rows }}" \
+              --source-version v1 \
+              --out "candidates/wikimatrix-${first}-${second}.jsonl.gz"
+            rm -f "$raw"
+            # Upstream asks bulk users not to hammer the public bucket.
+            sleep 2
+          done < wikimatrix-plan.tsv
+          du -sh candidates
+
+      - name: Audited UD 2.18 morphology
+        if: ${{ inputs.morphology }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - "${{ inputs.learn }}" <<'PY' > ud-repos.tsv
+          import json,sys
+          cfg=json.load(open('tools/catalog/sources/catalogue-v2-ud-production.json',encoding='utf-8'))
+          for lang in [x.strip().lower() for x in sys.argv[1].split(',') if x.strip()]:
+              row=cfg['datasets'].get(lang)
+              if row: print(lang+'\t'+row['repo'])
+          PY
+          while IFS=$'\t' read -r lang repo; do
+            echo "UD $lang: $repo"
+            git clone --quiet --depth 1 --branch r2.18 \
+              "https://github.com/UniversalDependencies/${repo}.git" "morphology/${repo}"
+          done < ud-repos.tsv
+          python3 tools/catalog/prepare_ud_manifest.py \
+            --root morphology --langs "${{ inputs.learn }}" \
+            --out morphology/manifest.json
+          python3 tools/catalog/enrich_morphology.py build-index \
+            --manifest morphology/manifest.json --db morphology/morphology.sqlite3
+          du -sh morphology
+
+      - name: Phonetics dependencies
+        if: ${{ inputs.phonetics }}
+        run: |
+          python3 -m pip install --quiet -r tools/phonetics/requirements.txt
+          for code in en pl es fr de it pt; do
+            python3 tools/phonetics/g2p.py --lang "$code" --selftest
+          done
+
+      - name: Build Catalogue v2
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(
+            python3 tools/catalog/build_catalogue_v2.py
+            --candidates candidates/*.jsonl.gz
+            --out catalog-v2
+            --learn "${{ inputs.learn }}"
+            --meanings "${{ inputs.meanings }}"
+            --max-deck "${{ inputs.max_deck }}"
+            --contexts-per-target "${{ inputs.contexts_per_target }}"
+          )
+          if [ "${{ inputs.morphology }}" = "true" ]; then
+            args+=(--morphology-db morphology/morphology.sqlite3)
+          fi
+          if [ "${{ inputs.phonetics }}" = "true" ]; then
+            args+=(--phonetics)
+          fi
+          "${args[@]}"
+          cat catalog-v2/BUILD.md
+
+      - name: Census before publication
+        run: |
+          python3 tools/catalog/meta_info.py \
+            --dir catalog-v2 \
+            --json reports/catalogue-meta-info.json \
+            --markdown reports/catalogue-meta-info.md \
+            --top 50
+          cat reports/catalogue-meta-info.md >> "$GITHUB_STEP_SUMMARY"
+          cat catalog-v2/BUILD.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the complete experimental build
+        uses: actions/upload-artifact@v6
+        with:
+          name: catalogue-v2
+          path: |
+            catalog-v2/
+            reports/
+            wikimatrix-plan.tsv
+            morphology/manifest.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Prepare release notes
+        if: ${{ inputs.publish }}
+        run: |
+          cat catalog-v2/BUILD.md reports/catalogue-meta-info.md > reports/release-notes.md
+
+      - name: Publish reviewed Catalogue v2
+        if: ${{ inputs.publish }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 tools/catalog/publish.py \
+            --dir catalog-v2 \
+            --tag "${{ inputs.tag }}" \
+            --title "Catalogue v2" \
+            --notes reports/release-notes.md \
+            --repo "$GITHUB_REPOSITORY" \
+            --per-minute "${{ inputs.per_minute }}"

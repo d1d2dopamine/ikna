@@ -18,8 +18,10 @@ from ingest.adapters import (
     infer_wikimatrix_tsv_languages,
     iter_globalvoices,
     iter_tatoeba,
+    iter_tatoeba_matrix,
     iter_wikimatrix,
     iter_wikimatrix_tsv,
+    iter_wikimatrix_tsv_pair,
 )
 from ingest.model import Candidate, Origin, merge_candidate_files, merge_candidates, read_jsonl, write_jsonl
 from ingest.registry import SourceRegistry
@@ -84,6 +86,17 @@ def test_tatoeba(registry: SourceRegistry) -> list[Candidate]:
         "contextContributor": "Alice",
         "meaningContributor": "Beatriz",
     }
+    matrix = list(
+        iter_tatoeba_matrix(
+            str(FIXTURES / "tatoeba"),
+            registry.get("tatoeba"),
+            {"en", "es"},
+            {"en", "es"},
+            source_version="fixture-1",
+        )
+    )
+    assert len(merge_candidates(matrix)) == 4
+    assert {(row.lang, row.meaning_lang) for row in matrix} == {("en", "es"), ("es", "en")}
     return rows
 
 
@@ -135,6 +148,14 @@ def test_wikimatrix(registry: SourceRegistry) -> list[Candidate]:
     )
     assert reversed_rows[0].context == "El agua se congela a cero grados Celsius."
     assert reversed_rows[0].meaning == "Water freezes at zero degrees Celsius."
+    pair_rows = list(
+        iter_wikimatrix_tsv_pair(
+            str(base / "sample.tsv"), registry.get("wikimatrix"), "en", "es",
+            min_score=1.0, source_version="v1-fixture", max_rows=1,
+        )
+    )
+    assert len(pair_rows) == 2
+    assert {(row.lang, row.meaning_lang) for row in pair_rows} == {("en", "es"), ("es", "en")}
     assert infer_wikimatrix_tsv_languages("WikiMatrix.de-en.tsv.gz") == ("de", "en")
     assert infer_wikimatrix_tsv_languages("sample.tsv") is None
     expect_raises(
@@ -232,6 +253,10 @@ def test_round_trip(rows: list[Candidate]) -> None:
         reread = read_jsonl(str(path))
         assert [row.to_dict() for row in reread] == [row.to_dict() for row in rows]
 
+        gzip_path = Path(td) / "candidates.jsonl.gz"
+        write_jsonl(str(gzip_path), rows)
+        assert [row.to_dict() for row in read_jsonl(str(gzip_path))] == [row.to_dict() for row in rows]
+
         duplicate_path = Path(td) / "duplicates.jsonl"
         write_jsonl(str(duplicate_path), [rows[0], rows[0]])
         merged_path = Path(td) / "merged.jsonl"
@@ -270,6 +295,18 @@ def test_cli(registry: SourceRegistry) -> None:
         )
         assert len(read_jsonl(str(tatoeba_out))) == 2
 
+        matrix_out = td_path / "tatoeba-matrix.jsonl.gz"
+        subprocess.run(
+            [
+                sys.executable, str(CLI), "tatoeba-matrix",
+                "--dump-dir", str(FIXTURES / "tatoeba"),
+                "--learn", "en,es", "--meanings", "en,es",
+                "--source-version", "fixture-1", "--out", str(matrix_out),
+            ],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+        )
+        assert len(merge_candidates(read_jsonl(str(matrix_out)))) == 4
+
         wiki_out = td_path / "wikimatrix.jsonl"
         subprocess.run(
             [
@@ -297,6 +334,16 @@ def test_cli(registry: SourceRegistry) -> None:
         wiki_rows = read_jsonl(str(wiki_out))
         assert len(wiki_rows) == 3
         assert wiki_rows[0].context.startswith("El agua")
+
+        pair_out = td_path / "wikimatrix-pair.jsonl.gz"
+        subprocess.run(
+            [sys.executable, str(CLI), "wikimatrix-pair",
+             "--tsv", str(FIXTURES / "wikimatrix" / "sample.tsv"),
+             "--first", "en", "--second", "es", "--min-score", "1.0",
+             "--max-rows", "1", "--out", str(pair_out)],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+        )
+        assert len(read_jsonl(str(pair_out))) == 2
 
         gv_out = td_path / "globalvoices.jsonl"
         subprocess.run(

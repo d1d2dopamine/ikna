@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/d1d2dopamine/ikna/tools/catalog/schema/catalogue-v2-morphology-source-registry.schema.json",
+  "title": "Catalogue v2 morphology source registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["registryVersion", "allowedLicences", "sources"],
+  "properties": {
+    "registryVersion": {"const": 1},
+    "allowedLicences": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "homepage", "distribution", "format", "licencePolicy", "audit"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "title": {"type": "string", "minLength": 1},
+          "homepage": {"type": "string", "minLength": 1},
+          "distribution": {"type": "string", "minLength": 1},
+          "format": {"type": "string", "minLength": 1},
+          "licencePolicy": {"type": "string", "minLength": 1},
+          "audit": {"type": "object"}
+        },
+        "additionalProperties": true
+      }
+    }
+  }
+}

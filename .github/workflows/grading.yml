@@ -32,6 +32,8 @@ jobs:
           python3 tools/catalog/test_segmentation.py
           python3 tools/catalog/test_catalogue_v2_contract.py
           python3 tools/catalog/test_ingestion.py
+          python3 tools/catalog/test_morphology.py
+          python3 tools/catalog/test_build_catalogue_v2.py
       - name: Verify text, fixtures and additive migrations
         run: |
           python3 tools/check_text.py

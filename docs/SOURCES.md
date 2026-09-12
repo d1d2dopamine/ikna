@@ -139,7 +139,7 @@ means. Each field has exactly one source:
 | `translation` | the Tatoeba sentence linked to this one as a **direct** translation, plus a line naming the sentence by number |
 | `targetStart`, `targetEnd` | where the cut was made |
 | `freqRank` | how common the phrase is in the corpus this deck was cut from |
-| `tokens` | the words of the sentence; the dictionary form comes from Wiktextract when it is available and from lowercasing when it is not |
+| `tokens` | the words of the sentence; v1 can use Wiktextract for dictionary forms, while Catalogue v2 can enrich tokens offline from pinned UniMorph/UD data |
 | `audioRef` | nothing yet; Tatoeba audio has per-recording licences and is left alone |
 
 The fourth row is the trick that makes the whole thing work without a morphology
@@ -149,9 +149,11 @@ offsets it took it at. A phrase that was cut out of a sentence is inside that
 sentence by construction, so the import check that a phrase must occur in its
 context cannot fail, in any language, ever.
 
-Inflection is still needed, but only to find candidates: to build a chunk for
-"слово" the pipeline needs to know that "словами" is the same word. Wiktextract
-supplies those forms, offline, at build time.
+Inflection is still useful offline, but it is not trusted blindly. The current v1
+builder can read Wiktextract forms when supplied. Catalogue v2 adds a separate,
+pinned morphology stage: UniMorph may resolve an unambiguous written form to a
+lemma, and Universal Dependencies may supply UPOS/FEATS when its evidence is
+unambiguous. Conflicts stay unresolved. See [`MORPHOLOGY.md`](MORPHOLOGY.md).
 
 ## The sieve
 
@@ -303,10 +305,36 @@ checking for an update.
 ## What is not claimed
 
 The decks are not reviewed by us and are not certified as correct. The claim is
-narrower and checkable: every chunk names the corpus, the contributor and the
-sentence it came from, under a licence that allows it to be there. The session,
-preview and local search all render that sentence id as a link. Marking a catalogue
-card wrong can copy a report containing the public card and source, but never the
-review state or device data. A card that looks wrong can therefore be looked up,
-argued with, and fixed upstream — which is the part a generated deck can never
-offer.
+narrower and checkable: every published chunk retains a source-family identity and
+a source occurrence reference under an audited licence. Record-level contributor
+credit is preserved when the source exposes it in a form the pipeline can retain;
+Global Voices is blocked entirely when its required article/contributor attribution
+is missing. Tatoeba source ids remain linkable from the app, while other source
+families retain their own provenance identifiers in Catalogue v2. Marking a
+catalogue card wrong can copy public card/source information, but never review
+history or device data.
+
+## Catalogue v2 expansion path
+
+The experimental `catalogue v2 build` workflow is the Part 4 rebuild path. It is
+manual and defaults to `publish=false`, so testing a million-card-scale build does
+not change the public `catalog` release.
+
+It currently acquires Tatoeba for the `Everyday` collection and a bounded set of
+WikiMatrix v1 hub pairs for `Knowledge`. WikiMatrix files are processed one at a
+time and removed after normalization; the upstream margin score is filtered before
+the much larger candidate set reaches the deck builder. `World` remains gated:
+Global Voices text is not publishable by this workflow until the article URL and
+credited contributors required by the source policy exist for every retained row.
+
+For optional production morphology, the workflow uses the audited UD 2.18 treebank
+map in `tools/catalog/sources/catalogue-v2-ud-production.json`. Every selected
+checkout is converted into the normal Part 3 manifest with file SHA-256 values
+before a morphology SQLite index is built. Mixed-licence UD treebanks are not
+selected merely because they exist; the committed map is the allowlist used by the
+workflow.
+
+The v2 builder writes `BUILD.md`/`BUILD.json`, then `tools/catalog/meta_info.py`
+runs over the finished assets. Card count, unique exact targets and unique source
+contexts are reported separately. Scale is therefore measured after the sieve,
+not inferred from the size of the downloaded corpora.

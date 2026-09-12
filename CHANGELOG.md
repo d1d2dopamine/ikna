@@ -41,7 +41,24 @@ TSV direction explicitly; Global Voices candidates require article URL and
 contributor metadata instead of accepting an attribution-poor parallel-text dump.
 Exact duplicates can merge inside a collection without losing their source origins.
 
+The third foundation step adds pinned offline morphology enrichment. UniMorph is used
+only when a written form has one unambiguous lemma; Universal Dependencies can add
+lemma, UPOS and canonical CoNLL-U FEATS when an exact context or form-level evidence
+is unambiguous. Conflicting or syncretic forms stay at identity instead of being
+guessed. Every morphology input is source/version/hash pinned and passes a per-dataset
+licence gate; rule v1 does not change target identity or runtime scheduling.
+
+The fourth step adds the first full Catalogue v2 rebuild path without publishing it
+by default. Tatoeba is ingested in one matrix pass for `Everyday`; bounded WikiMatrix
+hub pairs add both directions for `Knowledge`; Global Voices remains blocked from
+automatic publication until record-level article/contributor attribution is present.
+The new sieve can retain several real source contexts for one exact target, reports
+card/target/context counts separately, optionally enriches selected cards from an
+audited UD 2.18 set, and runs a full meta-info census before publication. The
+existing `catalog` release is changed only by an explicit reviewed publish.
+
 See [`docs/CATALOGUE-V2.md`](docs/CATALOGUE-V2.md),
+[`docs/MORPHOLOGY.md`](docs/MORPHOLOGY.md),
 [`docs/ROADMAP-0.11.md`](docs/ROADMAP-0.11.md) and
 [`docs/LEARNING-ENGINE.md`](docs/LEARNING-ENGINE.md).
 

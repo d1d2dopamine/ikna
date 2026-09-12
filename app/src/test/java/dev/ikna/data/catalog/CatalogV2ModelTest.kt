@@ -19,6 +19,7 @@ class CatalogV2ModelTest {
         assertEquals(1, index.catalogueVersion)
         assertEquals(emptyList<CatalogCollection>(), index.collections)
         assertNull(index.targetIdentity)
+        assertNull(index.morphology)
     }
 
     @Test
@@ -31,7 +32,8 @@ class CatalogV2ModelTest {
               "targetIdentity":{"version":2,"method":"nfkc-casefold-exact"},
               "collections":[{"id":"everyday","title":"Everyday","description":"General language"}],
               "sourceFamilies":[{"id":"tatoeba","title":"Tatoeba","homepage":"https://tatoeba.org","licence":"CC BY 2.0 FR","attribution":"Tatoeba contributors"}],
-              "decks":[{"id":"en-ru-everyday-beginner","title":"English from Russian - Everyday - beginner","lang":"en","meaningLang":"ru","collection":"everyday","sourceFamily":"tatoeba"}],
+              "morphology":{"ruleVersion":1,"policy":"ud-exact-context-then-unanimous-form","targetIdentityAffected":false,"datasets":[{"id":"unimorph-eng","sourceFamily":"unimorph","kind":"unimorph","lang":"en","sourceVersion":"pinned","sourceUrl":"https://github.com/unimorph/eng","licence":"CC BY-SA 3.0","licenceUrl":"https://creativecommons.org/licenses/by-sa/3.0/","attribution":"UniMorph English"}]},
+              "decks":[{"id":"en-ru-everyday-beginner","title":"English from Russian - Everyday - beginner","lang":"en","meaningLang":"ru","collection":"everyday","sourceFamily":"tatoeba","morphologySources":["unimorph-eng"]}],
               "pairs":[],
               "collectionPairs":[]
             }"""
@@ -41,7 +43,11 @@ class CatalogV2ModelTest {
         assertEquals("everyday", index.collections.single().id)
         assertEquals("tatoeba", index.sourceFamilies.single().id)
         assertEquals("everyday", index.decks.single().collection)
+        assertEquals(listOf("unimorph-eng"), index.decks.single().morphologySources)
         assertEquals("nfkc-casefold-exact", index.targetIdentity?.method)
+        assertEquals(1, index.morphology?.ruleVersion)
+        assertEquals("unimorph-eng", index.morphology?.datasets?.single()?.id)
+        assertEquals(false, index.morphology?.targetIdentityAffected)
     }
 
     @Test

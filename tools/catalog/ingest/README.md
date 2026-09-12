@@ -28,17 +28,35 @@ in RAM.
 
 ## Tatoeba
 
-Catalogue v2 prefers `sentences_detailed.csv` plus `links.csv`. The detailed
-export lets the adapter retain contributor names when present. It can parse the
-smaller `sentences.csv` as a compatibility fallback, but production ingestion
-must pin an explicit weekly-export version/date.
+The adapter supports both `sentences_detailed.csv` and the smaller
+`sentences.csv`, together with `links.csv`. The detailed export retains
+contributor names when present. The full Catalogue v2 workflow deliberately uses
+the smaller sentence export so the hosted runner does not need to hold the much
+larger detailed dump; stable Tatoeba sentence ids and corpus-level attribution
+remain intact. Every production run pins an explicit weekly-export version/date.
+
+For one direction:
 
 ```bash
 python3 tools/catalog/ingest_sources.py tatoeba \
   --dump-dir corpus/tatoeba \
   --learn en --meaning es \
   --source-version 2026-09-05 \
-  --out work/tatoeba-en-es.jsonl
+  --out work/tatoeba-en-es.jsonl.gz
+```
+
+For a catalogue rebuild, use the matrix command. It loads the requested sentence
+languages once, streams `links.csv` once and emits every requested directed pair.
+Tatoeba exports reciprocal links, so the adapter consumes one canonical
+orientation instead of materializing a second in-memory copy of the link graph.
+
+```bash
+python3 tools/catalog/ingest_sources.py tatoeba-matrix \
+  --dump-dir corpus/tatoeba \
+  --learn en,ru,es,fr,de \
+  --meanings en,ru,es,fr,de \
+  --source-version 2026-09-05 \
+  --out work/tatoeba.jsonl.gz
 ```
 
 ## WikiMatrix
@@ -53,11 +71,27 @@ python3 tools/catalog/ingest_sources.py wikimatrix \
   --tsv corpus/WikiMatrix.en-fr.tsv.gz \
   --learn fr --meaning en \
   --min-score 1.04 \
-  --out work/wikimatrix-fr-en.jsonl
+  --max-rows 120000 \
+  --out work/wikimatrix-fr-en.jsonl.gz
 ```
 
-The score is preserved as provenance metadata. The final threshold belongs to the
-later quality-sieve stage and is not fixed by the ingestion contract.
+For a rebuild where both directions are wanted, `wikimatrix-pair` reads the
+scored file once and emits both directions:
+
+```bash
+python3 tools/catalog/ingest_sources.py wikimatrix-pair \
+  --tsv corpus/WikiMatrix.en-fr.tsv.gz \
+  --first en --second fr \
+  --min-score 1.04 \
+  --max-rows 120000 \
+  --source-version v1 \
+  --out work/wikimatrix-en-fr.jsonl.gz
+```
+
+Upstream WikiMatrix files are score-sorted, so ingestion stops once the score
+falls below the selected threshold. The score is preserved as provenance
+metadata. `--max-rows` bounds accepted source rows for an experimental rebuild;
+it is not a claim that the same cap is optimal for every pair.
 
 ## Global Voices
 
@@ -83,12 +117,16 @@ upstream distribution/articles at catalogue scale is intentionally left to the
 later acquisition/rebuild stage rather than faking attribution from corpus-level
 metadata.
 
-## Merge
+## Compressed candidates and merge
+
+Candidate readers and writers accept both `.jsonl` and `.jsonl.gz`. Production
+rebuilds use gzip for intermediate candidate streams so millions of rows do not
+consume unnecessary runner disk space.
 
 ```bash
 python3 tools/catalog/ingest_sources.py merge \
-  work/a.jsonl work/b.jsonl \
-  --out work/merged.jsonl
+  work/a.jsonl.gz work/b.jsonl.gz \
+  --out work/merged.jsonl.gz
 ```
 
 For a long run, `--db work/dedupe.sqlite3` keeps the SQLite work file instead of

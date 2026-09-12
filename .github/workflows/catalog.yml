@@ -67,6 +67,8 @@ jobs:
           python3 tools/catalog/test_segmentation.py
           python3 tools/catalog/test_catalogue_v2_contract.py
           python3 tools/catalog/test_ingestion.py
+          python3 tools/catalog/test_morphology.py
+          python3 tools/catalog/test_build_catalogue_v2.py
 
       # Rules rather than a model, so it installs in seconds and answers the
       # same way every run. espeak-ng is here as a second opinion only: it is
