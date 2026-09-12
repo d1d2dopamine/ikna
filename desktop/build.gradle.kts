@@ -15,9 +15,9 @@
 // tools/appimage/build-appimage.sh, because no jpackage format is an AppImage.
 // ---------------------------------------------------------------------------
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "2.2.20"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.2.20"
-    id("org.jetbrains.compose") version "1.8.2"
+    id("org.jetbrains.kotlin.jvm")
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.compose")
 }
 
 kotlin {

@@ -1,15 +1,11 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 // ---------------------------------------------------------------------------
-// Plugin ids and versions are written out in full, on purpose.
-//
-// They used to be `alias(libs.plugins.…)` entries resolved from
-// gradle/libs.versions.toml. That catalog is generated into an accessor called
-// `libs` only if the file is actually present in the checkout; when it is not,
-// the build script itself fails to compile with "Unresolved reference: libs"
-// and nothing else in the project ever gets a chance to run. A single module
-// does not need the indirection, and this way the build depends on this file
-// alone.
+// Plugin ids live here; build-wide versions live in the root build.gradle.kts.
+// Keeping the versions at the common parent makes Gradle load the Kotlin plugin
+// once instead of creating one classloader per subproject. We still avoid a
+// version catalog, so a missing generated `libs` accessor cannot break script
+// compilation.
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 // Why Kotlin 2.2.20 and not the 2.0.20 that shipped every release up to 0.10.0.
@@ -37,12 +33,12 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 //                 kotlin ...".
 // ---------------------------------------------------------------------------
 plugins {
-    id("com.android.application") version "8.6.1"
-    id("org.jetbrains.kotlin.android") version "2.2.20"
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
     // Compose compiler is a separate Gradle plugin since Kotlin 2.0; without it
     // AGP fails configuration as soon as buildFeatures.compose is enabled.
-    id("org.jetbrains.kotlin.plugin.compose") version "2.2.20"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 // ---------------------------------------------------------------------------

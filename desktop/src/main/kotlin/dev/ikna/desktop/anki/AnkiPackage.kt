@@ -99,7 +99,7 @@ class AnkiImporter(
             // A changed template may produce fewer tokens on re-import. Remove
             // only this deterministic pack's derived token rows, then rebuild
             // them from the newly rendered questions inside the same transaction.
-            chunkDao.deleteTokensForPack(deck.packId)
+            chunkDao.deleteTokensExclusiveToPack(deck.packId)
             installed += packs.importChunks(
                 packId = deck.packId,
                 title = deck.title,

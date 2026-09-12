@@ -1,15 +1,26 @@
 // ---------------------------------------------------------------------------
-// Root build file: deliberately empty.
+// Build-wide plugin versions.
 //
-// It used to declare every plugin through the `libs` version catalog
-// (gradle/libs.versions.toml). A version catalog is a file like any other, and
-// that one is the single file in this repository that nothing else references,
-// so it is also the easiest one to forget when pushing. When it is missing, the
-// `libs` accessor simply does not exist and every build script that mentions it
-// fails to compile with "Unresolved reference: libs" — before a single line of
-// app code is even looked at.
+// Kotlin's Gradle plugin must be loaded once for the whole build. Declaring the
+// same Kotlin version independently in :app, :shared and :desktop creates
+// separate plugin classloaders; Gradle warns that this is unsupported and can
+// break cross-project builds. Keep the versions here and let subprojects apply
+// the plugins without repeating versions.
 //
-// Plugin ids and versions now live directly in app/build.gradle.kts, the only
-// module in this build. One module does not need a catalog; it needs a build
-// that cannot be broken by a file that failed to make it into a commit.
+// This keeps the repository self-contained without a version catalog: there is
+// still one ordinary file to review, and no generated `libs` accessor is
+// required for the build scripts to compile.
 // ---------------------------------------------------------------------------
+plugins {
+    id("com.android.application") version "8.6.1" apply false
+    id("com.android.library") version "8.6.1" apply false
+
+    id("org.jetbrains.kotlin.android") version "2.2.20" apply false
+    id("org.jetbrains.kotlin.multiplatform") version "2.2.20" apply false
+    id("org.jetbrains.kotlin.jvm") version "2.2.20" apply false
+    id("org.jetbrains.kotlin.plugin.compose") version "2.2.20" apply false
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20" apply false
+
+    id("org.jetbrains.compose") version "1.8.2" apply false
+    id("com.google.devtools.ksp") version "2.2.20-2.0.4" apply false
+}

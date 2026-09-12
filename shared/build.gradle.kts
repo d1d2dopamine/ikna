@@ -3,10 +3,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 // ---------------------------------------------------------------------------
 // The half of the application that does not know what a phone is.
 //
-// Plugin versions are written out in full and are identical to the ones in
-// app/build.gradle.kts and desktop/build.gradle.kts. Two sibling projects may
-// request the same plugin at the same version; requesting two different
-// versions is what fails, so these three files move together or not at all.
+// Plugin versions are declared once in the root build.gradle.kts. This module
+// only applies them, which keeps the Kotlin Gradle plugin in one build-wide
+// classloader instead of loading it independently in every sibling project.
 //
 // Compose Multiplatform 1.8.2 rather than 1.9.x: the 1.9 line is built on
 // Compose 1.9 and Material3 1.4, which want compileSdk 36, and compileSdk 36
@@ -14,12 +13,12 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 // 1.8.2 is the newest release that compiles against compileSdk 35.
 // ---------------------------------------------------------------------------
 plugins {
-    id("com.android.library") version "8.6.1"
-    id("org.jetbrains.kotlin.multiplatform") version "2.2.20"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.2.20"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
-    id("org.jetbrains.compose") version "1.8.2"
-    id("com.google.devtools.ksp") version "2.2.20-2.0.4"
+    id("com.android.library")
+    id("org.jetbrains.kotlin.multiplatform")
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.plugin.serialization")
+    id("org.jetbrains.compose")
+    id("com.google.devtools.ksp")
 }
 
 kotlin {
