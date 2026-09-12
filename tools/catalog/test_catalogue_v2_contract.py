@@ -40,7 +40,7 @@ def check_workflow_download_resilience():
     workflow = (root / ".github/workflows/catalogue-v2.yml").read_text(encoding="utf-8")
     fetcher = (root / "tools/ci/fetch-url.sh").read_text(encoding="utf-8")
     for required in (
-        "tools/ci/fetch-url.sh",
+        "bash tools/ci/fetch-url.sh",
         "gzip -t \"$raw\"",
         "tar -tjf corpus/sentences.tar.bz2",
         "git -c http.version=HTTP/1.1 clone",
