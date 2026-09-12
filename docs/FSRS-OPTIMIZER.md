@@ -128,5 +128,7 @@ The integration follows these requirements:
 5. Re-fit rarely -- monthly is plenty -- because a schedule that quietly changes
    every day is a schedule nobody can plan around.
 
-Full re-fits are manually requested and limited to once every 30 days. Existing
-card schedules are not bulk-rewritten when accepting or disabling a result.
+Full fits are started by the automatic local policy after a quiet period and are
+limited to once every 30 days after a completed accepted/rejected attempt; too-few-
+data eligibility may be rechecked daily. Accepted current-history results can be
+activated automatically. Existing card schedules are never bulk-rewritten.

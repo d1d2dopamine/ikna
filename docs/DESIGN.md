@@ -195,9 +195,9 @@ to “0%” says the opposite of what the number says.
 ## Accessibility
 
 Every mark in this app is drawn on a canvas, and a drawn shape has no text for a
-screen reader to find — so each one is given a name, in all six languages, and the
+screen reader to find — so each one is given a name, in all seven interface languages, and the
 switches are real toggles that announce their state. The system's per-app language
-picker (Android 13+) lists the six languages through `res/xml/locales_config.xml`.
+picker (Android 13+) lists the six locales declared in `res/xml/locales_config.xml`; Brazilian Portuguese remains available in ikna's own language selector and through the system locale.
 
 ## Your answers are the only backup that matters
 

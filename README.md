@@ -12,11 +12,11 @@
 
 <p align="center">
   Anki, but reversed. The system feeds you; you never feed the system.<br>
-  Android · no accounts · no telemetry · network only for static release and catalogue files
+  Android · Windows · Linux · no accounts · no telemetry · network only for static release and catalogue files
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.9.0-press"><img src="https://img.shields.io/badge/release-0.9.0%20press-crimson?style=flat-square" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.10.0-press"><img src="https://img.shields.io/badge/release-0.10.0%20press-crimson?style=flat-square" alt="release"></a>
   <a href="https://github.com/d1d2dopamine/ikna/releases"><img src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?label=downloads&style=flat-square&logo=github&color=blueviolet" alt="downloads"></a>
   <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.9.0-press/ikna-v0.9.0-press.apk"><strong>Download</strong></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.10.0-press"><strong>Download</strong></a>
   &nbsp;·&nbsp;
   <a href="CHANGELOG.md">Changelog</a>
   &nbsp;·&nbsp;
@@ -65,21 +65,29 @@ sans-serif faces and reads as a lower case L, so "Ikna" invites being read as
 
 | Platform | File in the release |
 | --- | --- |
-| **Android** 10+ (`minSdk 29`) | `ikna-v0.9.0-press.apk` (~40 MB) |
+| **Android** 10+ (`minSdk 29`), arm64 | `ikna-v0.10.0-press.apk` |
+| **Android** 10+, older 32-bit ARM | `ikna-v0.10.0-press-legacy32.apk` |
+| **Windows** x64, installer | `ikna-v0.10.0-press-windows-x64-setup.exe` |
+| **Windows** x64, portable | `ikna-v0.10.0-press-windows-x64.zip` |
+| **Linux** x86_64 | `ikna-v0.10.0-press-linux-x86_64.AppImage` |
 
-**[Download ikna-v0.9.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.9.0-press/ikna-v0.9.0-press.apk)** ·
-[all files](https://github.com/d1d2dopamine/ikna/releases/tag/v0.9.0-press)
+**[Open the v0.10.0 press release](https://github.com/d1d2dopamine/ikna/releases/tag/v0.10.0-press)**
 
-The file above is for every phone sold since roughly 2017. Older 32-bit ones
-take `ikna-v0.9.0-press-legacy32.apk` from the same page: the same app, built
-for the one architecture they can run.
+The main Android APK is for every arm64 phone; older 32-bit ARM devices take the
+`-legacy32.apk` from the same page. Android asks once whether to allow installing
+from this source. Every Android release is signed with the key committed to this
+repository, so a new APK installs over the old one and **your answers survive the
+update**.
 
-Download it and open it; Android asks once whether to allow installing from this
-source. There is no store listing. Every release is signed with the key committed to
-this repository, so a new APK installs over the old one and **your answers survive
-the update**.
+On Windows, the installer is per-user and needs no administrator rights; the
+portable zip can be unpacked anywhere and run without a separate Java install.
+The executable is unsigned, so SmartScreen may ask for confirmation on first run.
+On Linux, make the AppImage executable with `chmod +x` before starting it; no Java
+install is needed. Desktop data lives outside the application files, so replacing
+or deleting the executable does not delete cards or settings. See
+[`docs/DESKTOP.md`](docs/DESKTOP.md).
 
-One file, not two. There used to be a second `-voice` APK; the choice was never a
+On Android there is one APK, not separate voice/no-voice builds. There used to be a second `-voice` APK; the choice was never a
 real one, so the speech engine is simply inside now and switched off until you turn
 it on. It ships with **no model** — that part is yours to add, a Kokoro or Piper
 folder from your own phone, in the language you are actually learning. The app never
@@ -93,10 +101,10 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
 ## ✨ Features
 
 - **Two-intention answering.** Swipe, or use desktop A/D keys: left means "do not
-  know", right means "know". The answer is still revealed before every grade.
-  After enough private same-input timing history, a verified mature answer may be
-  refined to bounded *hard* or *easy* automatically. No extra choice or number key
-  asks the learner to grade their own confidence.
+  know", right means "know". The answer is revealed before every final answer.
+  After a private on-device warm-up, clean mature successful answers can be refined
+  automatically to bounded *hard* or *easy* from local timing history; it never asks
+  for another confidence button or number key.
 - **A governor that rations new material for you**, from your own recent numbers.
 - **Three levels per chunk** — recognition, cloze, production — scheduled
   independently by FSRS-6.
@@ -106,12 +114,12 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
   immediately and not all of them. There is no visible backlog number, ever.
 - **Make a deck with any AI.** The app gives you a written prompt; you paste the
   answer back. Three columns, one line per card.
-- **Share a deck** as plain text that imports on any other phone.
+- **Share a deck** as plain text that imports on another ikna device.
 - **Move in from Anki.** Import an `.apkg` and your answer history comes over with
   the cards, so the schedule carries on instead of restarting. Nothing leaves the
-  phone.
-- **Twelve palettes**, each in two lightings, plus any font file on the phone. A
-  clean install opens in Ink.
+  device.
+- **Twelve palettes**, each in two lightings, plus an imported font. A clean
+  install opens in Ink.
 - **A memory field of cells and fine pixel grain:** clear language marks,
   segmented progress and a soft 280 ms Shared Axis X transition. The route
   viewport stays fixed and the fade has one hand-off, so two screens never fight
@@ -123,10 +131,20 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
 - **Fast scrolling stays dedicated to the list:** the pinned Settings strip waits for a
   fling to finish, while switches, chips, expandable content and progress use short,
   non-bouncing transitions that obey the Animations preference.
-- **A widget and one reminder a day**, both opening the cards directly.
-- **Russian, English, Polish, Spanish, French and German** interface, switchable from the system too. The picker stays folded until all languages are requested.
-- **Your answers are append-only** and exported to `Documents/ikna/`, outside the
-  app sandbox, so they survive an uninstall.
+- **Browse without grading.** After the required daily plan is complete, familiar
+  cards can appear in a limited reading-only Browse allowance. Browse records an
+  exposure, never a recall result, and cannot replace required review.
+- **Pronunciation per deck.** Catalogue cards can carry IPA; ikna can show either
+  IPA or a readable English respelling under the phrase, while production cards
+  never print the answer's pronunciation on the prompt side.
+- **Local FSRS fitting.** With enough scored history, ikna can fit locally, validate
+  against held-out recent answers and activate only an accepted result. Existing
+  dates and review history are not rewritten; stale or rejected fits stay out.
+- **A widget and one reminder a day on Android**, both opening the cards directly.
+- **Russian, English, Polish, Spanish, French, German and Brazilian Portuguese** interface. All seven are available in-app; system locale is followed automatically, while Android's per-app system picker exposes the six locales declared by the platform config.
+- **Your answers are append-only.** Android can export the review log and settings
+  to `Documents/ikna/`; desktop can save a complete portable backup. Restore
+  replays answers instead of copying schedule state blindly.
 - **A catalogue of ready-made decks**, cut out of open corpora on the build server
   and not written by a model: every card names the sentence it came from, by
   number, on a public site. The licence and the credit are shown before the
@@ -134,7 +152,7 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
 - **Network only for static files you ask for.** The optional update check reads
   the releases page at most once a day. The catalogue reads its index, a bounded
   preview only after a tap, and the selected deck only after download is pressed.
-  Voice models are explicit downloads too. Nothing is uploaded — no account,
+  Voice models are never fetched by ikna. Nothing is uploaded — no account,
   identifier, statistic, card or answer. See [`docs/UPDATES.md`](docs/UPDATES.md),
   [`docs/SOURCES.md`](docs/SOURCES.md) and [`docs/VOICE.md`](docs/VOICE.md).
 
@@ -144,10 +162,10 @@ is speaking. See [`docs/VOICE.md`](docs/VOICE.md).
 
 1. **A chunk** is a phrase, a sentence containing it, and its meaning. The phrase is
    highlighted inside the sentence; that highlight is what is being trained.
-2. **You answer by throwing the card** — away from you when you knew it, towards you
-   when you did not. Distance and speed turn two directions into four grades, judged
-   against a rolling window of your own answers rather than a fixed threshold:
-   [`docs/GRADING.md`](docs/GRADING.md).
+2. **You answer with one of two intentions** — left for "do not know", right for
+   "know". A swipe works everywhere; desktop also has A/D after reveal. Once enough
+   clean personal timing history exists, some successful answers can become bounded
+   HARD or EASY automatically without another choice: [`docs/GRADING.md`](docs/GRADING.md).
 3. **FSRS-6 schedules each level separately**, including a separate model for
    repeats inside the same day, and answers also credit the
    individual words inside the trained phrase.
@@ -273,9 +291,9 @@ is no export back to Anki.
 
 ## 🏷️ Versions
 
-A version here is a number **and a word**: `0.9.0 press`. The word names the epoch
+A version here is a number **and a word**: `0.10.0 press`. The word names the epoch
 the build belongs to, the number counts releases inside it, and git tags replace the
-space with a dash: `v0.9.0-press`.
+space with a dash: `v0.10.0-press`.
 
 What the words mean, what the numbers promise and how `appVersionCode` is built:
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
@@ -292,17 +310,19 @@ bash tools/voice/fetch-voice.sh                # once per clone: speech runtime
 bash tools/catalog/fetch-bundled-pack.sh         # pinned starter catalogue deck
 ./gradlew assembleDebug                        # the app
 ./gradlew assembleRelease -Pikna.unsigned=true # unsigned, without the committed key
-./gradlew testReleaseUnitTest                  # the tests CI runs
+./gradlew testReleaseUnitTest                  # Android JVM tests
+./gradlew :desktop:test                          # desktop/shared JVM tests
+./gradlew :desktop:createReleaseDistributable    # desktop application image
 ```
 
 The starter deck is pinned by size and SHA-256, so a rebuilt catalogue stops the
 build on purpose. When that is the intended change, run
 `bash tools/catalog/fetch-bundled-pack.sh --update` and commit the pin it writes.
 
-There is one build. The speech runtime is a ten-megabyte `.aar` that this repository
-does not store, so `tools/voice/fetch-voice.sh` has to run once before the first
-build; both workflows run it themselves. No model is fetched and none is shipped —
-that part comes from whoever uses the app.
+The Android speech runtime is a ten-megabyte `.aar` that this repository does not
+store, so `tools/voice/fetch-voice.sh` has to run once before the first Android
+build; CI does it itself. No model is fetched and none is shipped. Desktop currently
+ships without speech, widget or reminders; the rest of the study core is shared.
 
 Both debug and release are signed with one keystore committed to this repository, on
 purpose: in CI every machine would otherwise generate its own signature, a new APK
@@ -315,13 +335,13 @@ Bump the two version lines in `app/build.gradle.kts`, then tag the commit with t
 same string, space replaced by a dash:
 
 ```
-git tag v0.9.0-press
-git push origin v0.9.0-press
+git tag v0.10.0-press
+git push origin v0.10.0-press
 ```
 
 The `release` workflow refuses to continue if the tag and the build file disagree,
-then runs the tests, builds a signed APK, names it after the tag and attaches it to
-the GitHub release.
+then runs the release gates and attaches the Android APKs, Windows portable zip and
+installer, and Linux AppImage built from that exact tag to the same GitHub release.
 
 ---
 
@@ -331,6 +351,11 @@ the GitHub release.
 [`DESIGN.md`](docs/DESIGN.md) ·
 [`GOVERNOR.md`](docs/GOVERNOR.md) ·
 [`GRADING.md`](docs/GRADING.md) ·
+[`GRADING-IMPLEMENTATION.md`](docs/GRADING-IMPLEMENTATION.md) ·
+[`FSRS-OPTIMIZER.md`](docs/FSRS-OPTIMIZER.md) ·
+[`FSRS-OPTIMIZER-INTEGRATION.md`](docs/FSRS-OPTIMIZER-INTEGRATION.md) ·
+[`PHONETICS.md`](docs/PHONETICS.md) ·
+[`DESKTOP.md`](docs/DESKTOP.md) ·
 [`DECKS.md`](docs/DECKS.md) ·
 [`ANKI.md`](docs/ANKI.md) ·
 [`SOURCES.md`](docs/SOURCES.md) ·
@@ -367,11 +392,11 @@ release, the ones published before this notice as well as every future one.
 
 <p align="center">
   Анки наизнанку. Система кормит тебя, а не ты её.<br>
-  Android · без аккаунтов · без телеметрии · сеть только для статических файлов релиза и каталога
+  Android · Windows · Linux · без аккаунтов · без телеметрии · сеть только для статических файлов релиза и каталога
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.9.0-press"><img src="https://img.shields.io/badge/release-0.9.0%20press-crimson?style=flat-square" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.10.0-press"><img src="https://img.shields.io/badge/release-0.10.0%20press-crimson?style=flat-square" alt="release"></a>
   <a href="https://github.com/d1d2dopamine/ikna/releases"><img src="https://img.shields.io/github/downloads/d1d2dopamine/ikna/total?label=downloads&style=flat-square&logo=github&color=blueviolet" alt="downloads"></a>
   <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
@@ -381,7 +406,7 @@ release, the ones published before this notice as well as every future one.
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/download/v0.9.0-press/ikna-v0.9.0-press.apk"><strong>Скачать</strong></a>
+  <a href="https://github.com/d1d2dopamine/ikna/releases/tag/v0.10.0-press"><strong>Скачать</strong></a>
   &nbsp;·&nbsp;
   <a href="CHANGELOG.md">Изменения</a>
   &nbsp;·&nbsp;
@@ -421,21 +446,29 @@ ikna учит язык **кусками**: короткая фраза, живо
 
 | Платформа | Файл в релизе |
 | --- | --- |
-| **Android** 10+ (`minSdk 29`) | `ikna-v0.9.0-press.apk` (~40 МБ) |
+| **Android** 10+ (`minSdk 29`), arm64 | `ikna-v0.10.0-press.apk` |
+| **Android** 10+, старый 32-битный ARM | `ikna-v0.10.0-press-legacy32.apk` |
+| **Windows** x64, установщик | `ikna-v0.10.0-press-windows-x64-setup.exe` |
+| **Windows** x64, portable | `ikna-v0.10.0-press-windows-x64.zip` |
+| **Linux** x86_64 | `ikna-v0.10.0-press-linux-x86_64.AppImage` |
 
-**[Скачать ikna-v0.9.0-press.apk](https://github.com/d1d2dopamine/ikna/releases/download/v0.9.0-press/ikna-v0.9.0-press.apk)** ·
-[все файлы](https://github.com/d1d2dopamine/ikna/releases/tag/v0.9.0-press)
+**[Открыть релиз v0.10.0 press](https://github.com/d1d2dopamine/ikna/releases/tag/v0.10.0-press)**
 
-Файл выше — для любого телефона примерно с 2017 года. Для более старых
-32-битных рядом лежит `ikna-v0.9.0-press-legacy32.apk`: то же самое
-приложение, одна архитектура, которую они умеют.
+Основной Android APK — для arm64; старые 32-битные ARM-устройства берут
+`-legacy32.apk` с той же страницы. Android один раз спросит разрешение на установку
+из этого источника. Все Android-релизы подписаны ключом из репозитория, поэтому
+новый APK ставится поверх старого и **твои ответы переживают обновление**.
 
-Скачать и открыть; андроид один раз спросит, разрешить ли установку из этого
-источника. Никакого магазина нет. Все релизы подписаны ключом из этого же
-репозитория, так что новый apk ставится поверх старого и **твои ответы переживают
-обновление**.
+В Windows установщик ставится только для текущего пользователя и не требует прав
+администратора; portable zip можно распаковать куда угодно, отдельная Java не
+нужна. Файл не подписан сертификатом Windows, поэтому SmartScreen при первом
+запуске может попросить подтверждение. В Linux AppImage сначала надо сделать
+исполняемым через `chmod +x`; Java отдельно тоже не нужна. Данные desktop-версии
+хранятся отдельно от файлов программы, поэтому замена или удаление исполняемого
+файла не удаляет карточки и настройки. Подробности в
+[`docs/DESKTOP.md`](docs/DESKTOP.md).
 
-Файл один, не два. Раньше был второй, `-voice`, но выбор был ненастоящий, так что
+На Android APK один, без отдельной voice-сборки. Раньше был второй, `-voice`, но выбор был ненастоящий, так что
 движок озвучки теперь просто внутри и выключен, пока его не включишь. **Модели
 внутри нет** — её добавляешь ты сам: папка Kokoro или Piper с твоего же телефона, на
 том языке, который реально учишь. Модель приложение не скачивает само и попросить
@@ -447,9 +480,11 @@ ikna учит язык **кусками**: короткая фраза, живо
 
 ## ✨ Возможности
 
-- **Ответ только свайпом.** Две стороны дают четыре оценки: как далеко и как
-  быстро ты отбросил карточку — это разница между «заново» и «легко». Никаких
-  кнопок, между которыми надо выбирать.
+- **Два намерения вместо четырёх кнопок.** Свайп работает везде, а на desktop есть
+  A/D: влево — «не знаю», вправо — «знаю». Ответ всегда открывается до финального
+  действия. После локального разогрева чистые зрелые успешные ответы могут
+  автоматически уточняться до ограниченных HARD/EASY по личной истории времени
+  ответа — без ещё одной кнопки уверенности.
 - **Регулятор дозирует новый материал за тебя**, от твоих же чисел.
 - **Три уровня у каждого куска** — узнавание, пропуск, производство — и у каждого
   своё расписание по FSRS-6.
@@ -459,12 +494,12 @@ ikna учит язык **кусками**: короткая фраза, живо
   не все. Никакого видимого числа долгов, никогда.
 - **Колода любым ии.** Приложение даёт готовый промпт, ты вставляешь ответ
   обратно. Три столбца, одна строка — одна карточка.
-- **Колодой можно поделиться** — обычным текстом, который встанет на любой другой
-  телефон.
+- **Колодой можно поделиться** — обычным текстом, который импортируется на другом
+  устройстве с ikna.
 - **Переезд из Anki.** Импортируй `.apkg` — вместе с карточками переедет
   история ответов, так что расписание продолжится, а не начнётся заново.
-  С телефона ничего не уходит.
-- **Двенадцать палитр**, каждая в двух освещениях, плюс любой шрифт с телефона.
+  С устройства ничего не уходит.
+- **Двенадцать палитр**, каждая в двух освещениях, плюс импортированный шрифт.
   Чистая установка открывается в «Чернилах».
 - **Поле памяти из ячеек и мелкого пиксельного зерна:** чёткие языковые
   знаки, сегментированный прогресс и мягкий Shared Axis X на 280 мс.
@@ -477,17 +512,28 @@ ikna учит язык **кусками**: короткая фраза, живо
 - **Быстрая прокрутка принадлежит только списку:** закреплённая полоса настроек ждёт
   окончания инерции, а переключатели, чипы, раскрытие и прогресс используют короткие
   переходы без пружин и подчиняются общему тумблеру анимаций.
-- **Виджет и одно напоминание в день**, оба открывают сразу карточки.
-- **Русский, английский, польский, испанский, французский и немецкий** интерфейс, переключается и из системы. Список свёрнут, пока не понадобятся все языки.
-- **Ответы только дописываются** и выгружаются в `Documents/ikna/` — вне песочницы
-  приложения, чтобы пережить удаление.
+- **Browse без оценки.** После обязательного плана знакомые карточки могут появиться
+  в ограниченном режиме чтения. Browse записывает только показ, не ответ, и не может
+  заменить обязательное повторение.
+- **Произношение отдельно для каждой колоды.** Каталожные карточки могут хранить
+  IPA; ikna показывает IPA или читаемую английскую респеллинг-строку под фразой,
+  но никогда не печатает произношение ответа на стороне production-задания.
+- **Локальная подгонка FSRS.** Когда истории достаточно, ikna делает fit локально,
+  проверяет его на отложенной части недавних ответов и активирует только принятый
+  результат. Уже назначенные даты и история не переписываются; устаревший или
+  отвергнутый fit не включается.
+- **Виджет и одно напоминание в день на Android**, оба открывают сразу карточки.
+- **Русский, английский, польский, испанский, французский, немецкий и бразильский португальский** интерфейс. Все семь выбираются внутри ikna; системный язык подхватывается автоматически, а системный Android-пикер отдельного языка показывает шесть локалей из platform config.
+- **Ответы только дописываются.** Android умеет выгружать журнал и настройки в
+  `Documents/ikna/`, а desktop — сохранять полный переносимый backup. Восстановление
+  проигрывает ответы заново вместо слепого копирования состояния расписания.
 - **Каталог готовых колод**, собранных не моделью, а из открытых корпусов на
   сервере сборки: у каждой карточки есть номер предложения, которое можно
   открыть на публичном сайте. Лицензия и автор — до скачивания, а не после.
 - **Сеть только для статических файлов, которые запросили.** Необязательная
   проверка обновлений читает страницу релизов не чаще раза в сутки. Каталог
   загружает индекс, ограниченный предпросмотр только после нажатия и выбранную
-  колоду только после команды скачать. Голосовые модели тоже скачиваются явно.
+  колоду только после команды скачать. Голосовые модели ikna сама не скачивает.
   Ничего не отправляется: ни аккаунта, ни идентификатора, ни статистики, ни
   карточек, ни ответов. Подробности в [`docs/UPDATES.md`](docs/UPDATES.md),
   [`docs/SOURCES.md`](docs/SOURCES.md) и [`docs/VOICE.md`](docs/VOICE.md).
@@ -498,10 +544,10 @@ ikna учит язык **кусками**: короткая фраза, живо
 
 1. **Кусок** — это фраза, предложение с ней и её смысл. Фраза выделена внутри
    предложения, и именно это выделенное и тренируется.
-2. **Ответ — бросок карточки**: от себя, если знал, к себе, если нет. Дальность и
-   скорость превращают две стороны в четыре оценки, и сравниваются они с твоими
-   же последними ответами, а не с фиксированным порогом:
-   [`docs/GRADING.md`](docs/GRADING.md).
+2. **Ответ выражает одно из двух намерений**: влево — «не знаю», вправо — «знаю».
+   Свайп работает везде; на desktop после открытия ответа работают A/D. Если
+   накопилась чистая личная история времени ответа, часть успешных ответов может
+   автоматически стать ограниченным HARD или EASY без ещё одного выбора: [`docs/GRADING.md`](docs/GRADING.md).
 3. **FSRS-6 ведёт каждый уровень отдельно**, отдельно учитывает повторы в тот же
    день, а ответ засчитывается ещё и словам
    внутри тренируемой фразы.
@@ -565,13 +611,12 @@ SHA-256.
 
 | Можно учить | Может быть языком значений |
 | --- | --- |
-| английский, русский, польский, испанский, французский, немецкий, итальянский, португальский | эти восемь плюс китайский и японский |
+| английский, русский, польский, испанский, французский, немецкий, итальянский, португальский, китайский, японский, корейский | те же одиннадцать языков |
 
-Восемь против десяти — потому что фраза вырезается по границам слов, а перевод
-не режется вообще. Поэтому китайский и японский уже годятся как язык, который
-ты уже знаешь, и пока не годятся как язык, который учишь — так же с таиским и
-арабским, и по той же причине; это изменится, когда конвейер научится резать
-текст без пробелов.
+Фраза вырезается по границам слов, а перевод показывается целиком. Для китайского
+и японского каталог использует ICU-сегментацию на этапе сборки; для корейского —
+границы письменных слов. На устройстве этот анализ не работает: доступные пары всё
+равно зависят от прямых переводов в корпусе и появляются после пересборки каталога.
 
 Насколько хорошо обеспечена пара языков — не обещание, а измерение конвейера:
 **full**, когда сито отбрасывает мало, **thin**, когда колоды выходят меньше
@@ -626,9 +671,9 @@ get used to | It takes a while to get used to the noise. | привыкать
 
 ## 🏷️ Версии
 
-Версия здесь — это номер **и слово**: `0.9.0 press`. Слово называет эпоху, к которой
+Версия здесь — это номер **и слово**: `0.10.0 press`. Слово называет эпоху, к которой
 относится сборка, номер считает релизы внутри неё, а в тегах git пробел заменяется
-дефисом: `v0.9.0-press`.
+дефисом: `v0.10.0-press`.
 
 Что значат слова, что обещают номера и как собирается `appVersionCode` — в
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
@@ -645,17 +690,20 @@ bash tools/voice/fetch-voice.sh                # один раз на клон: 
 bash tools/catalog/fetch-bundled-pack.sh         # закреплённая стартовая колода
 ./gradlew assembleDebug                        # приложение
 ./gradlew assembleRelease -Pikna.unsigned=true # без коммитнутого ключа
-./gradlew testReleaseUnitTest                  # тесты, которые гоняет CI
+./gradlew testReleaseUnitTest                  # Android JVM-тесты
+./gradlew :desktop:test                          # desktop/shared JVM-тесты
+./gradlew :desktop:createReleaseDistributable    # desktop application image
 ```
 
 Стартовая колода закреплена по размеру и SHA-256, поэтому пересобранный каталог
 намеренно останавливает сборку. Если так и было задумано, выполни
 `bash tools/catalog/fetch-bundled-pack.sh --update` и закоммить новое закрепление.
 
-Сборка одна. Движок озвучки — это `.aar` на десять мегабайт, репозиторий его не
-хранит, так что `tools/voice/fetch-voice.sh` надо один раз запустить перед первой
-сборкой; оба воркфлоу делают это сами. Модель не скачивается и не кладётся внутрь:
-её добавляет тот, кто пользуется приложением.
+Android-движок озвучки — это `.aar` примерно на десять мегабайт, репозиторий его
+не хранит, так что `tools/voice/fetch-voice.sh` надо один раз запустить перед первой
+Android-сборкой; CI делает это сам. Модель не скачивается и не кладётся внутрь.
+Desktop сейчас выходит без озвучки, виджета и напоминаний; остальное учебное ядро
+общее.
 
 И debug, и release подписаны одним ключом, лежащим в репозитории, и это сделано
 намеренно: иначе каждая машина в CI сгенерировала бы свою подпись, новый apk не
@@ -668,13 +716,14 @@ bash tools/catalog/fetch-bundled-pack.sh         # закреплённая ст
 же строкой, где пробел заменён дефисом:
 
 ```
-git tag v0.9.0-press
-git push origin v0.9.0-press
+git tag v0.10.0-press
+git push origin v0.10.0-press
 ```
 
 Воркфлоу `release` откажется работать, если тег и файл сборки расходятся, а затем
-прогонит тесты, соберёт подписанный apk, назовёт его по тегу и приложит к релизу
-на гитхабе.
+прогонит релизные проверки и приложит к одному GitHub-релизу Android APK,
+portable zip и установщик Windows, а также Linux AppImage, собранные из этого же
+тега.
 
 ---
 
@@ -684,6 +733,11 @@ git push origin v0.9.0-press
 [`DESIGN.md`](docs/DESIGN.md) ·
 [`GOVERNOR.md`](docs/GOVERNOR.md) ·
 [`GRADING.md`](docs/GRADING.md) ·
+[`GRADING-IMPLEMENTATION.md`](docs/GRADING-IMPLEMENTATION.md) ·
+[`FSRS-OPTIMIZER.md`](docs/FSRS-OPTIMIZER.md) ·
+[`FSRS-OPTIMIZER-INTEGRATION.md`](docs/FSRS-OPTIMIZER-INTEGRATION.md) ·
+[`PHONETICS.md`](docs/PHONETICS.md) ·
+[`DESKTOP.md`](docs/DESKTOP.md) ·
 [`DECKS.md`](docs/DECKS.md) ·
 [`ANKI.md`](docs/ANKI.md) ·
 [`SOURCES.md`](docs/SOURCES.md) ·

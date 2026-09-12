@@ -1,24 +1,26 @@
 # Local FSRS fitting: integration contract
 
-## Runtime and user control
+## Runtime and automatic policy
 
-`LocalOptimizer` connects the existing pure estimator to a shared Android/desktop
-settings panel. It runs only after an explicit request on `Dispatchers.Default`,
-not on the main thread, answer path or startup. This is an app-lifetime coroutine
-worker, not a new OS WorkManager task. Navigation does not cancel it; explicit
-cancellation does. Process death leaves the last committed result intact.
+`LocalOptimizer` connects the pure estimator to both Android and desktop. Fitting
+never runs on the answer path: one application-lifetime monitor coalesces history
+changes, waits for a 20-second quiet gap, and periodically rechecks eligibility.
+CPU work runs on `Dispatchers.Default`; answer-time parameter reads are atomic.
 
-The latest attempt, accepted candidate and explicitly applied result are separate.
-A new candidate never auto-activates or replaces the active model. Full accepted
-or rejected fits have a 30-day cooldown; too-few-data checks may be retried as more
-history accumulates. There is no hidden automatic monthly computation.
+The policy adds no learner-facing model controls. Derived grading is enabled when
+its own warm-up/evidence gates are ready. FSRS fitting follows the stored verdict:
+`TOO_FEW_ANSWERS` may be rechecked after 24 hours; a completed accepted or rejected
+fit keeps the 30-day cooldown. A one-hour runtime backoff prevents repeated work
+when the monitor wakes frequently.
 
-Off restores defaults immediately, including when a disk write fails; a storage
-error is shown and must be retried before restart on a read-only/full disk.
-Switching does not mutate cards, due dates, history, statistics or the daily plan.
-A short runtime lock makes reset and activation atomic, while answering only reads
-an atomic parameter reference. Startup loads a validated applied result before
-learning is exposed. Desired retention always remains current configuration policy.
+A candidate never activates merely because it exists. Before activation its source
+fingerprint must still match current history. A newly completed fit is applied only
+when accepted, current and valid; rejected, stale, cancelled or corrupt results stay
+out. Startup loads only a validated previously applied result. Reset immediately
+restores defaults, increments the generation guard and cancels in-flight work.
+
+Activation never mutates cards, due dates, history, statistics or the daily plan.
+Desired retention remains product policy rather than an estimated parameter.
 
 ## Evidence and fitting data
 

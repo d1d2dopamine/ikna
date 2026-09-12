@@ -1,12 +1,13 @@
 # Desktop
 
-Ikna is an Android app. This file is the plan for making it also a Windows
-program you can download as one file and run, what that costs, what it cannot
-reproduce, and which stage of the work each part belongs to.
+ikna ships on Android, Windows and Linux. This file records how the desktop build
+shares the study system with Android, what is genuinely platform-specific, how the
+Windows and Linux packages are produced, and which Android-only surfaces are
+deliberately not reproduced.
 
-It is written before the port rather than after it, because the first question
--- can the same design survive on a desktop -- has an answer that decides the
-shape of everything else.
+The document began as the port plan; the port is now implemented. Historical stage
+boundaries are kept below because they explain why the shared/platform seam has the
+shape it does.
 
 ## The answer
 
@@ -51,7 +52,7 @@ session builder, the phonetics respelling -- and it includes every string.
 
 Two facts make this much cheaper than it looks:
 
-- **The interface text is Kotlin, not resources.** All six translations live in
+- **The interface text is Kotlin, not resources.** All seven translations live in
   `ui/text/Strings*.kt` as 568 keys per table. There is no `values-ru/strings.xml`
   to reimplement, and `S.t("dp.014")` works unchanged on a desktop.
 - **Two drawables are used, in total.** `R.drawable.ikna_wordmark` in
@@ -142,31 +143,31 @@ regardless; doing it alone means that if it breaks, only one thing broke.
 See `app/build.gradle.kts` for why each number is the one it is, why the Room
 Gradle plugin is not applied, and why Room 2.8 and 3.0 were both declined.
 
-**Stage 1 -- split.**
+**Stage 1 -- split. Done.**
 `:shared`, `:app`, `:desktop`, the `expect`/`actual` boundaries, tests moved to
 `commonTest`. Still no Windows artefact. The Android APK must come out of stage
 1 byte-comparable in behaviour to the one before it.
 
-**Stage 2 -- the first .exe.**
+**Stage 2 -- the first .exe. Done.**
 Decks, catalogue, sessions, transcription, search, statistics, settings, JSON
 export and import. No voice, no widget, no reminders.
 
-**Stage 3 -- desktop manners.**
+**Stage 3 -- desktop manners. Done.**
 Keyboard shortcuts (Space to reveal, A/D to answer with automatic grading,
 Z to undo). A pointer reveal returns focus to the session, so the same A/D
 answer works after either input method. Window size and position are remembered,
 along with tray notifications and Anki import through a native file
 dialog, update check that opens the release page.
 
-**Stage 4 -- voice, if the artefact exists.**
+**Stage 4 -- voice, if the artefact exists. Not shipped.**
 
 ## Build
 
-`build.yml` becomes two jobs that run at the same time:
+`build.yml` runs three independent platform jobs:
 
-- `android` on `ubuntu-latest`, doing what it does today.
-- `windows` on `windows-latest`, producing the portable folder and the
-  installer.
+- `android` on `ubuntu-latest`, producing the APK and Android checks;
+- `windows` on `windows-latest`, producing the portable folder and installer;
+- `linux` on `ubuntu-latest`, producing and self-testing the AppImage.
 
 The Windows runner is not a preference. `jpackage` builds the application
 image for the machine it runs on, and NSIS compiles the one-file Windows setup.
@@ -179,7 +180,7 @@ and `tools/catalog/fetch-bundled-pack.sh` -- run on the Windows runner under
 `shell: bash`, which is Git Bash and is present by default.
 
 `release.yml` attaches `ikna-<tag>-windows-x64.zip` and the required
-`ikna-<tag>-windows-x64-setup.exe` beside the APK.
+`ikna-<tag>-windows-x64-setup.exe` beside the APKs and Linux AppImage.
 
 One wrinkle worth writing down before it surprises somebody: `jpackage` and
 the Windows executable version field insist on a numeric version. The app can

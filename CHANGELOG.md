@@ -1,8 +1,9 @@
 # Changelog
 
-Every released APK is built by GitHub Actions from the tag it is attached to.
-Versions are `MAJOR.MINOR.PATCH`; the app also shows a build number, which is the
-CI run that produced the file.
+Every release is built by GitHub Actions from the tag it is attached to. Android,
+Windows and Linux artefacts on a release page come from that exact commit. Versions
+are `MAJOR.MINOR.PATCH` plus an epoch word; Android also carries a monotonically
+increasing `versionCode` for safe in-place updates.
 
 This project keeps one rule above all others: **the review log is never rewritten
 and never dropped.** Any change that would touch it is listed here explicitly.
@@ -14,44 +15,110 @@ words mean and what a number promises inside an epoch is written down once, in
 
 ## 0.10.0 press
 
-How it is said, written down. A catalogue card can now carry a pronunciation,
-and the card shows it under the phrase in an English respelling that almost
-anybody can read aloud — `dziękuję` becomes `jeng-KOO-yeh` — rather than in a
-notation that needs to be learned first. The exact IPA is one tap away for the
-people who read it.
+One study system, three platforms. The same scheduler, governor, decks and review
+history now run on Android, Windows and Linux, while the study loop learns a few
+new ways to stay out of the learner's way: pronunciation can be printed instead of
+spoken, familiar cards can be browsed without pretending that reading was recall,
+and optional local evidence can tune both grading and FSRS without rewriting the
+past.
 
-- **A pronunciation line on the card.** Under the phrase, in the muted colour,
-  never on the side of a card that is asking the learner to produce the phrase
-  — printing how it sounds above the blank would hand over most of the answer.
-- **Set per deck, in that deck's settings**, between the language and the look.
-  Three choices: English respelling, IPA, off, with a live preview of the
-  deck's own language underneath. Not in the app's settings, because somebody
-  learning Polish from Russian needs this on every card and their
-  English-from-Russian deck does not; one switch for both is wrong for one of
-  them. Not offered at download either, where the choice would be made before
-  the first card had been seen.
-- **On by default**, unlike speech. A voice that starts talking in a quiet room
-  has to be opted into; a line of small grey text does not.
-- **The section is absent, not greyed out**, for a deck with no transcription in
-  it or a language nothing can transcribe. A disabled control is a question the
-  reader has to answer.
-- **All eight learnable languages** — English, Russian, Polish, Spanish, French,
-  German, Italian, Portuguese. Portuguese is Brazilian: its vowels stay open,
-  and open vowels are what survive the trip through an English respelling.
-- **The deck file stores IPA; the respelling is computed on the phone.** That is
-  what lets a better respelling ship in an APK and improve decks that were
-  downloaded a year earlier, instead of needing every deck rebuilt.
-- **Database version 5.** Two nullable columns on `chunks`. Nothing is
-  rewritten, nothing is recomputed, and the review log is not touched. A deck
-  installed before this release keeps working and simply has nothing to show
-  until it is reinstalled from a newer catalogue.
-- **The published catalogue has no transcriptions yet.** It was built before any
-  of this existed. Rebuilding it is a workflow run, described in
-  [`docs/PHONETICS.md`](docs/PHONETICS.md); the catalogue row says which decks
-  have pronunciation before anything is downloaded.
+**The append-only review log is preserved.** Database schema moves from 4 to 9.
+Existing review rows are never rewritten or deleted: migrations only add nullable
+observation/decision fields to `reviews`, two pronunciation columns to `chunks`,
+one immutable FSRS snapshot field, and a separate `browse_exposures` table.
 
-Why an English respelling for languages that are not English, what it gets
-wrong, and why that trade was made anyway: [`docs/PHONETICS.md`](docs/PHONETICS.md).
+### Windows and Linux are release targets
+
+- The shared Kotlin/JVM study core now powers Android and desktop from the same
+  repository. Windows ships as both a per-user NSIS installer and a portable zip;
+  Linux ships as a single x86_64 AppImage. No separate Java install is required.
+- Desktop keeps the same decks, catalogue, sessions, search, statistics, settings,
+  Anki import, backups and restore logic. Space reveals, A/D answer after reveal,
+  and Z undoes. Wide windows use a two-pane layout instead of stretching a phone
+  column across the screen.
+- Windows gets an ikna-drawn title bar; Linux keeps native window decorations.
+  Desktop update checks open the release page rather than self-installing.
+- Voice, the Android home-screen widget and Android reminders remain Android-only.
+  The Windows executable is unsigned; the Linux AppImage may require FUSE 2 or
+  `--appimage-extract-and-run`. Details and build constraints are in
+  [`docs/DESKTOP.md`](docs/DESKTOP.md).
+
+### Pronunciation can live on the card
+
+- Catalogue cards can carry IPA for the learned phrase and context. The deck can
+  show IPA, an English-readable respelling, or nothing, with the choice made per
+  deck rather than globally.
+- Production prompts never print the pronunciation of the missing answer. The
+  exact IPA stays in the deck file; respelling is computed locally so a later app
+  can improve it without rebuilding old decks.
+- The catalogue build pipeline can generate transcriptions for supported languages.
+  A deck downloaded before phonetics existed continues to work; it simply has no
+  pronunciation data until replaced by a newer catalogue build. See
+  [`docs/PHONETICS.md`](docs/PHONETICS.md).
+
+### Two intentions, automatic derived grades
+
+- The visible contract is binary: reveal, then answer **do not know** or **know**.
+  Swipe remains the pointer gesture; desktop adds A/D. There is still no four-button
+  confidence choice.
+- After enough clean, same-input personal timing history exists, a successful
+  answer can be refined automatically to HARD or EASY. Required
+  reveal is verification, not a peek. Interrupted, mixed or insufficient evidence
+  falls back to GOOD.
+- Derived schedules are bounded to 70–130% of the GOOD result; HARD cannot lengthen
+  and EASY cannot shorten. Original binary input still drives governor accuracy,
+  daily statistics and component learning. See [`docs/GRADING.md`](docs/GRADING.md).
+
+### Local FSRS fitting is wired in
+
+- Local fitting runs only after a quiet period and only when enough scored history
+  exists. It trains on older answers, validates against held-out recent answers and
+  accepts only a result that beats the default FSRS-6 weights by the configured
+  margin.
+- Accepted current-history candidates can activate automatically; rejected, stale,
+  cancelled or invalid fits never do. Full accepted/rejected fits are limited to
+  once per 30 days, while too-few-data eligibility can be rechecked daily.
+- A fit affects future answers only. Existing due dates and history are not
+  bulk-rewritten. Each review records the FSRS parameter snapshot used for replay,
+  so restore does not silently reinterpret history with today's settings. See
+  [`docs/FSRS-OPTIMIZER.md`](docs/FSRS-OPTIMIZER.md).
+
+### Browse is reading, not review
+
+- Familiar cards gain a limited Browse mode after the required daily plan is done.
+  The card is already revealed, advances only forward and carries **NO RATING**.
+- Browse has its own exposure log and safety gates. Every three required cards from
+  completed plans earn one Browse card, subject to daily, backlog, return-mode and
+  accuracy limits. Reading a card never becomes a recall outcome and never advances
+  its FSRS schedule.
+
+### The catalogue pipeline understands CJK boundaries
+
+- Chinese and Japanese now use ICU dictionary word segmentation at catalogue-build
+  time; Korean uses written-word boundaries. The original eight space-delimited
+  languages keep their existing Unicode word logic.
+- Offsets are stored in UTF-16 units to match Kotlin/Java strings, so supplementary
+  characters cannot move a cloze target. ICU and its dictionary data are build-time
+  dependencies only; no segmenter or language model was added to the app.
+
+### Backups and portability
+
+- Desktop can save and restore one portable ikna bundle containing the material
+  needed to move an installation between machines; it can also emit phone-compatible
+  export files. Restore continues to replay timestamped answers rather than trusting
+  copied schedule state.
+- Windows data lives under `%APPDATA%\Ikna`; Linux data lives under `~/.ikna`.
+  Removing the program preserves that data unless an explicit purge is requested.
+
+### Release and build hardening
+
+- Kotlin moves to 2.2.20, Compose Multiplatform to 1.8.2 and Room to 2.7.2 so the
+  shared desktop target can compile beside Android. Android remains `minSdk 29`,
+  `targetSdk 35`, scheduler version 6 and FSRS-6.
+- CI now exercises Android, Windows and Linux packaging, Windows installer
+  install/uninstall paths, Linux AppImage self-tests, grading fixtures, migration
+  paths, localization parity and optimizer contracts before release artefacts are
+  published.
 
 ## 0.9.0 press
 

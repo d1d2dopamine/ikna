@@ -53,9 +53,10 @@ number `100060000`, below the `press` build already installed, and Android would
 refuse the update — taking the review log with it if anyone forced the issue by
 reinstalling.
 
-There is exactly one place where a version number exists: `app/build.gradle.kts`.
-Not the tag, because F-Droid builds this repository on a machine that knows nothing
-about either tags or CI.
+The canonical human/Android version lives in `app/build.gradle.kts`. Desktop
+packaging also carries the numeric `MAJOR.MINOR.PATCH` in `desktop/build.gradle.kts`
+because `jpackage` and Windows version fields reject the epoch word; release checks
+keep it aligned with the same tag. The tag itself is still not a build input.
 
 ## Tags
 
@@ -64,14 +65,15 @@ cannot contain one: `v0.1.0-proof`. The `release` workflow refuses to publish if
 the tag and the build file disagree, so the About line in the app and the file on
 the release page cannot drift apart.
 
-## 0.9.0 press
+## 0.10.0 press
 
-- `versionName`: `0.9.0 press`
-- `versionCode`: `200090000`
-- release tag: `v0.9.0-press`
-- database schema: 4 (the governor log gains derived columns; the review log is
-  not touched)
-- scheduler: FSRS-6 / scheduler version 6 (unchanged)
+- `versionName`: `0.10.0 press`
+- `versionCode`: `200100000`
+- release tag: `v0.10.0-press`
+- desktop package version: `0.10.0`
+- database schema: 9 (additive phonetics, grading evidence, immutable FSRS
+  snapshots and a separate Browse exposure log; existing review rows are not
+  rewritten)
+- scheduler: FSRS-6 / scheduler version 6
 - clean-install palette: Ink
-- flagship feature: local Anki `.apkg` bridge — any export reads, and each deck's
-  language is worked out rather than asked for
+- release targets: Android arm64 + legacy32, Windows x64, Linux x86_64

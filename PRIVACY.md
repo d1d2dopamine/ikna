@@ -1,9 +1,9 @@
 # Privacy
 
-Ikna has no servers, no accounts and no analytics. There is nothing to opt out
+ikna has no servers, no accounts and no analytics. There is nothing to opt out
 of, because there is nothing collecting anything.
 
-## What leaves your phone
+## What leaves your device
 
 Nothing about you.
 
@@ -30,18 +30,20 @@ because you pressed something.
 
 | Data | Where it lives |
 | --- | --- |
-| Your answers, card schedules, word-level state, daily counts | `ikna.db`, in the app's private storage |
-| Settings: theme, colours, font, language, reminder time, voice | the app's private storage |
-| A font you imported | copied into the app's private storage |
-| Weekly export of the review log and settings | `Documents/ikna/`, on your own device |
-| Widget text | the app's private storage |
+| Your answers, card schedules, word-level state, daily counts | `ikna.db`, in ikna's data directory |
+| Settings: theme, colours, font, language and platform options | ikna's data directory |
+| A font you imported | copied into ikna's data directory |
+| Android review/settings export | `Documents/ikna/`, on your own device |
+| Desktop data | `%APPDATA%\Ikna` on Windows; `~/.ikna` on Linux |
+| Android widget text | Android private storage |
 
-The export in `Documents/ikna/` is the one thing written outside the sandbox, and
-it is written there deliberately: files inside the sandbox are deleted with the
-app, and the point of that export is to survive an uninstall and a new phone. It
-goes nowhere else. Copying it off the device — or not — is your decision.
+On Android, the export in `Documents/ikna/` is deliberately outside the app
+sandbox so it can survive an uninstall and a new phone. On desktop, cards and
+settings live outside the program files and a complete portable backup can be
+written to a location you choose. None of those files are uploaded by ikna. Copying
+them elsewhere — or not — is your decision.
 
-## Cloud backup
+## Android cloud backup
 
 Android can copy an app's data into your Google account automatically. Ikna turns
 that off (`android:allowBackup="false"`), and `res/xml/data_extraction_rules.xml`
@@ -59,7 +61,7 @@ you control.
 
 ## Speech
 
-Reading a chunk aloud uses a speech engine installed on your phone, through the
+On Android, reading a chunk aloud uses a speech engine installed on your phone, through the
 platform's own text-to-speech interface. Ikna does not ship a voice, does not
 download one, and does not send text to any online service. Which engine you have
 installed, and what that engine does, is between you and its author; a fully
@@ -69,7 +71,7 @@ The app asks the system which speech services are installed
 (`<queries>` in the manifest) purely so it can tell whether the speak mark should
 appear at all.
 
-## Permissions
+## Android permissions
 
 - **Notifications** — the daily reminder. Refuse it and the rest of the app works
   unchanged.
@@ -89,4 +91,4 @@ with what you were doing and, if you can, the log from `adb logcat`.
 
 ## Local Anki import
 
-Anki packages selected in 0.9.0 are copied only into ikna's private cache for parsing and are deleted after the attempt. The original document is not modified. Card text, deck names, review history and compatibility reports are not uploaded by the importer. Imported scripts and styles are discarded rather than executed. Android's document picker remains the only file-access boundary.
+Anki packages selected for import are copied only into ikna's private cache for parsing and are deleted after the attempt. The original document is not modified. Card text, deck names, review history and compatibility reports are not uploaded by the importer. Imported scripts and styles are discarded rather than executed. Android's document picker remains the only file-access boundary.
