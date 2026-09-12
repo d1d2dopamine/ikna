@@ -56,6 +56,41 @@ data class ChunkSearchRow(
     val freqRank: Int
 )
 
+/** Membership of one global learning target in one installed deck. */
+@Entity(
+    tableName = "pack_chunks",
+    primaryKeys = ["packId", "chunkId"],
+    indices = [Index("chunkId")]
+)
+data class PackChunkEntity(
+    val packId: String,
+    val chunkId: String,
+    val freqRank: Int,
+    val primaryContextId: String? = null,
+    val primaryMeaningId: String? = null
+)
+
+/** Natural source context attached to a global learning target. */
+@Entity(
+    tableName = "chunk_contexts",
+    primaryKeys = ["packId", "chunkId", "contextId", "meaningId"],
+    indices = [Index("chunkId"), Index("packId")]
+)
+data class ChunkContextEntity(
+    val packId: String,
+    val chunkId: String,
+    val contextId: String,
+    val meaningId: String,
+    val sourceFamily: String,
+    val contextSentence: String,
+    val translation: String,
+    val targetStart: Int,
+    val targetEnd: Int,
+    val freqRank: Int,
+    val ipaContext: String? = null,
+    val tokensJson: String
+)
+
 @Entity(tableName = "chunk_tokens", primaryKeys = ["chunkId", "position"], indices = [Index("lemma", "pos")])
 data class ChunkTokenEntity(
     val chunkId: String,

@@ -262,6 +262,10 @@
             "type": "string",
             "minLength": 1
           }
+        },
+        "contextCount": {
+          "type": "integer",
+          "minimum": 0
         }
       },
       "additionalProperties": true
@@ -297,6 +301,10 @@
         "chunkCount": {
           "type": "integer",
           "minimum": 1
+        },
+        "contextCount": {
+          "type": "integer",
+          "minimum": 0
         }
       },
       "additionalProperties": true

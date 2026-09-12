@@ -132,10 +132,11 @@ class AndroidCiChecks(unittest.TestCase):
         for path in files:
             self.assertEqual([], unsafe_identifiers(path.read_text()), str(path))
         source = (ROOT / "app/src/androidTest/java/dev/ikna/data/db/MigrationTest.kt").read_text()
-        self.assertEqual(9, len(re.findall(r"@Test\b", source)))
+        self.assertEqual(10, len(re.findall(r"@Test\b", source)))
         self.assertNotIn("@Ignore", source)
         self.assertIn("fun version7PreservesGradingHistoryAndAddsParameterSnapshots()", source)
         self.assertIn("fun version8AddsBrowseWithoutTouchingTheReviewLog()", source)
+        self.assertIn("fun version9AddsDeckTargetMembershipWithoutTouchingReviews()", source)
 
     def test_ci_builds_test_apk_before_emulator_and_retains_failure_logs(self):
         source = (ROOT / ".github/workflows/grading.yml").read_text()

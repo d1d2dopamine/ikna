@@ -27,6 +27,8 @@ data class CatalogDeck(
     /** The language the meanings are in. */
     val meaningLang: String,
     val chunkCount: Int = 0,
+    /** Natural source contexts retained for these targets, including primaries. */
+    val contextCount: Int = 0,
     /** File name inside the catalogue release. Never a URL. */
     val file: String = "",
     val sizeBytes: Long = 0L,
@@ -72,7 +74,8 @@ data class CatalogPair(
     /** "full" or "thin". Anything else is treated as thin. */
     val tier: String = TIER_THIN,
     val deckCount: Int = 0,
-    val chunkCount: Int = 0
+    val chunkCount: Int = 0,
+    val contextCount: Int = 0
 )
 
 @Serializable
@@ -127,7 +130,8 @@ data class CatalogCollectionPair(
     val meaningLang: String,
     val tier: String = TIER_THIN,
     val deckCount: Int = 0,
-    val chunkCount: Int = 0
+    val chunkCount: Int = 0,
+    val contextCount: Int = 0
 )
 
 @Serializable

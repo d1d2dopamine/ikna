@@ -37,6 +37,20 @@ data class PackToken(
 )
 
 @Serializable
+data class PackContext(
+    val context: String,
+    val translation: String,
+    val targetStart: Int,
+    val targetEnd: Int,
+    val freqRank: Int,
+    val tokens: List<PackToken>,
+    val contextId: String,
+    val meaningId: String,
+    val sourceFamily: String,
+    val ipaContext: String? = null
+)
+
+@Serializable
 data class PackChunk(
     val id: String,
     val text: String,
@@ -65,5 +79,8 @@ data class PackChunk(
     /** Catalogue v2 stable source reference for the meaning/aligned segment. */
     val meaningId: String? = null,
     /** Catalogue v2 source-family id from the catalogue index registry. */
-    val sourceFamily: String? = null
+    val sourceFamily: String? = null,
+    /** Additional natural contexts for the same target. The primary context stays
+     * in the legacy fields above so pre-v2 readers still get one usable card. */
+    val contexts: List<PackContext> = emptyList()
 )

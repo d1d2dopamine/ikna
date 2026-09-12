@@ -3,9 +3,12 @@ package dev.ikna.data.pack
 import dev.ikna.data.db.ChunkDao
 import dev.ikna.platform.Assets
 import dev.ikna.data.db.ChunkEntity
+import dev.ikna.data.db.ChunkContextEntity
 import dev.ikna.data.db.ChunkTokenEntity
 import dev.ikna.data.db.PackEntity
+import dev.ikna.data.db.PackChunkEntity
 import dev.ikna.domain.session.Shapes
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 data class ImportResult(val packId: String, val installed: Int, val skipped: Int)
@@ -90,52 +93,38 @@ class PackLoader(
         )
     }
 
-    /**
-     * Imports a `.jsonl` pack the user picked in the file browser. Same format
-     * as the bundled packs, one chunk per line; unreadable lines are counted
-     * and skipped instead of aborting the whole import.
-     */
+    /** Imports a JSONL pack. Catalogue v2 lines are one target with contexts. */
     suspend fun importJsonl(packId: String, title: String, lang: String, text: String): ImportResult {
         var skipped = 0
         val chunks = ArrayList<ChunkEntity>()
         val tokens = ArrayList<ChunkTokenEntity>()
-
+        val memberships = ArrayList<PackChunkEntity>()
+        val contexts = ArrayList<ChunkContextEntity>()
+        val shared = HashSet<String>()
         for (line in text.lineSequence()) {
             if (line.isBlank()) continue
             val parsed = runCatching { json.decodeFromString<PackChunk>(line) }.getOrNull()
-            if (parsed == null) {
-                skipped++
-                continue
-            }
-            collect(packId, lang, parsed, chunks, tokens)
+            if (parsed == null) { skipped++; continue }
+            collect(packId, lang, parsed, chunks, tokens, memberships, contexts, shared)
         }
-
-        if (chunks.isNotEmpty()) chunkDao.upsertChunks(chunks)
-        if (tokens.isNotEmpty()) chunkDao.upsertTokens(tokens)
-
+        flushCollected(chunks, tokens, memberships, contexts, shared)
         val existing = chunkDao.pack(packId)
+        val installed = memberships.map { it.chunkId }.distinct().size
         chunkDao.upsertPack(
             PackEntity(
                 id = packId,
                 version = (existing?.version ?: 0) + 1,
                 lang = lang,
-                chunkCount = chunks.size,
+                chunkCount = installed,
                 installedAt = existing?.installedAt ?: System.currentTimeMillis(),
                 title = packTitle(title, packId),
                 isActive = existing?.isActive ?: true
             )
         )
-        return ImportResult(packId, chunks.size, skipped)
+        return ImportResult(packId, installed, skipped)
     }
 
-    /**
-     * Installs chunks that were built in memory rather than read from a file.
-     *
-     * The three-column format the add-deck screen accepts is turned into the
-     * same [PackChunk] objects a `.jsonl` line decodes into, so from here down
-     * there is one import path and one set of bugs. Lines that did not survive
-     * parsing were already counted by the parser; this only reports what landed.
-     */
+    /** Installs chunks built in memory through the same target/membership path. */
     suspend fun importChunks(
         packId: String,
         title: String,
@@ -147,54 +136,69 @@ class PackLoader(
     ): ImportResult {
         val chunks = ArrayList<ChunkEntity>(source.size)
         val tokens = ArrayList<ChunkTokenEntity>(source.size * 8)
-        for (c in source) collect(packId, lang, c, chunks, tokens)
-
-        if (chunks.isNotEmpty()) chunkDao.upsertChunks(chunks)
-        if (tokens.isNotEmpty()) chunkDao.upsertTokens(tokens)
-
+        val memberships = ArrayList<PackChunkEntity>(source.size)
+        val contexts = ArrayList<ChunkContextEntity>(source.size * 2)
+        val shared = HashSet<String>()
+        for (c in source) collect(packId, lang, c, chunks, tokens, memberships, contexts, shared)
+        flushCollected(chunks, tokens, memberships, contexts, shared)
         val existing = chunkDao.pack(packId)
+        val added = memberships.map { it.chunkId }.distinct().size
         chunkDao.upsertPack(
             PackEntity(
                 id = packId,
                 version = (existing?.version ?: 0) + 1,
                 lang = lang,
-                // What the deck holds now, not what this file brought.
-                // Adding a second portion to a deck used to leave the count
-                // showing the portion instead of the deck.
-                chunkCount = if (append) (existing?.chunkCount ?: 0) + chunks.size
-                else chunks.size,
+                chunkCount = if (append) (existing?.chunkCount ?: 0) + added else added,
                 installedAt = existing?.installedAt ?: System.currentTimeMillis(),
                 title = packTitle(title, packId),
-                // A deck the user already switched keeps their choice; one
-                // arriving for the first time starts where the caller says.
                 isActive = existing?.isActive ?: active
             )
         )
-        return ImportResult(packId, chunks.size, skipped)
+        return ImportResult(packId, added, skipped)
     }
 
-    private suspend fun insertChunks(
-        packId: String,
-        lang: String,
-        lines: Sequence<String>
-    ): Int {
+    private suspend fun insertChunks(packId: String, lang: String, lines: Sequence<String>): Int {
         val chunks = ArrayList<ChunkEntity>(256)
         val tokens = ArrayList<ChunkTokenEntity>(2048)
+        val memberships = ArrayList<PackChunkEntity>(256)
+        val contexts = ArrayList<ChunkContextEntity>(768)
+        val shared = HashSet<String>()
         var total = 0
-
         for (line in lines) {
             if (line.isBlank()) continue
-            val c = json.decodeFromString<PackChunk>(line)
-            collect(packId, lang, c, chunks, tokens)
+            collect(packId, lang, json.decodeFromString<PackChunk>(line), chunks, tokens, memberships, contexts, shared)
             total++
             if (chunks.size >= 400) {
-                chunkDao.upsertChunks(chunks); chunks.clear()
-                chunkDao.upsertTokens(tokens); tokens.clear()
+                flushCollected(chunks, tokens, memberships, contexts, shared)
+                chunks.clear(); tokens.clear(); memberships.clear(); contexts.clear(); shared.clear()
             }
         }
-        if (chunks.isNotEmpty()) chunkDao.upsertChunks(chunks)
-        if (tokens.isNotEmpty()) chunkDao.upsertTokens(tokens)
+        flushCollected(chunks, tokens, memberships, contexts, shared)
         return total
+    }
+
+    /**
+     * The first installed Catalogue v2 occurrence becomes the target's current
+     * primary representation. Later decks add membership and source contexts
+     * without replacing the shared FSRS identity or component tokens.
+     */
+    private suspend fun flushCollected(
+        chunks: List<ChunkEntity>,
+        tokens: List<ChunkTokenEntity>,
+        memberships: List<PackChunkEntity>,
+        contexts: List<ChunkContextEntity>,
+        shared: Set<String>
+    ) {
+        val sharedChunks = chunks.filter { it.id in shared }
+        val legacyChunks = chunks.filterNot { it.id in shared }
+        if (legacyChunks.isNotEmpty()) chunkDao.upsertChunks(legacyChunks)
+        if (sharedChunks.isNotEmpty()) chunkDao.insertChunksIgnore(sharedChunks)
+        val sharedTokens = tokens.filter { it.chunkId in shared }
+        val legacyTokens = tokens.filterNot { it.chunkId in shared }
+        if (legacyTokens.isNotEmpty()) chunkDao.upsertTokens(legacyTokens)
+        if (sharedTokens.isNotEmpty()) chunkDao.insertTokensIgnore(sharedTokens)
+        if (memberships.isNotEmpty()) chunkDao.upsertPackChunks(memberships)
+        if (contexts.isNotEmpty()) chunkDao.upsertChunkContexts(contexts)
     }
 
     private fun collect(
@@ -202,46 +206,67 @@ class PackLoader(
         lang: String,
         c: PackChunk,
         chunks: MutableList<ChunkEntity>,
-        tokens: MutableList<ChunkTokenEntity>
+        tokens: MutableList<ChunkTokenEntity>,
+        memberships: MutableList<PackChunkEntity>,
+        contexts: MutableList<ChunkContextEntity>,
+        shared: MutableSet<String>
     ) {
+        val chunkId = c.targetId ?: c.id
+        if (c.targetId != null) shared += chunkId
         chunks += ChunkEntity(
-            id = c.id,
+            id = chunkId, packId = packId, lang = lang, text = c.text,
+            contextSentence = c.context, translation = c.translation,
+            targetStart = c.targetStart, targetEnd = c.targetEnd, freqRank = c.freqRank,
+            audioRef = c.audioRef, ipa = c.ipa, ipaContext = c.ipaContext
+        )
+        memberships += PackChunkEntity(
+            packId = packId, chunkId = chunkId, freqRank = c.freqRank,
+            primaryContextId = c.contextId, primaryMeaningId = c.meaningId
+        )
+        val marked = Shapes.hasContext(c.context.length, c.targetStart, c.targetEnd)
+        c.tokens.forEachIndexed { i, t ->
+            val inTarget = marked && isInTarget(c, i)
+            tokens += ChunkTokenEntity(
+                chunkId = chunkId, position = i, surface = t.surface, lemma = t.lemma,
+                pos = t.pos, isTarget = inTarget, isContent = t.isContent,
+                weight = weightFor(inTarget, t.isContent)
+            )
+        }
+        contexts += contextEntity(packId, chunkId, c)
+        c.contexts.forEach { contexts += contextEntity(packId, chunkId, it) }
+    }
+
+    private fun contextEntity(packId: String, chunkId: String, c: PackChunk): ChunkContextEntity =
+        ChunkContextEntity(
             packId = packId,
-            lang = lang,
-            text = c.text,
+            chunkId = chunkId,
+            contextId = c.contextId ?: "legacy:${c.id}",
+            meaningId = c.meaningId ?: "legacy:${c.id}",
+            sourceFamily = c.sourceFamily ?: "legacy",
             contextSentence = c.context,
             translation = c.translation,
             targetStart = c.targetStart,
             targetEnd = c.targetEnd,
             freqRank = c.freqRank,
-            audioRef = c.audioRef,
-            // Carried through untouched, including when it is absent. Nothing
-            // here validates the IPA: a deck is content, the renderer already
-            // survives anything, and a strict importer would reject a whole
-            // deck over one odd symbol.
-            ipa = c.ipa,
-            ipaContext = c.ipaContext
+            ipaContext = c.ipaContext,
+            tokensJson = json.encodeToString(c.tokens)
         )
-        // A span covering the text end to end singles nothing out: an
-        // imported card is its own context. Marking every word as the target
-        // there tells the component layer that the whole sentence is the thing
-        // being learned, so every word carries full blame for a lapse and no
-        // word is ever the weak one.
-        val marked = Shapes.hasContext(c.context.length, c.targetStart, c.targetEnd)
-        c.tokens.forEachIndexed { i, t ->
-            val inTarget = marked && isInTarget(c, i)
-            tokens += ChunkTokenEntity(
-                chunkId = c.id,
-                position = i,
-                surface = t.surface,
-                lemma = t.lemma,
-                pos = t.pos,
-                isTarget = inTarget,
-                isContent = t.isContent,
-                weight = weightFor(inTarget, t.isContent)
-            )
-        }
-    }
+
+    private fun contextEntity(packId: String, chunkId: String, c: PackContext): ChunkContextEntity =
+        ChunkContextEntity(
+            packId = packId,
+            chunkId = chunkId,
+            contextId = c.contextId,
+            meaningId = c.meaningId,
+            sourceFamily = c.sourceFamily,
+            contextSentence = c.context,
+            translation = c.translation,
+            targetStart = c.targetStart,
+            targetEnd = c.targetEnd,
+            freqRank = c.freqRank,
+            ipaContext = c.ipaContext,
+            tokensJson = json.encodeToString(c.tokens)
+        )
 
     // Token positions are word indices into `context`; the target span is a
     // character range, so map words to characters once per chunk.

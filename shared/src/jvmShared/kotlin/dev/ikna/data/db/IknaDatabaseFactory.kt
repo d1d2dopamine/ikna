@@ -62,6 +62,8 @@ suspend fun IknaDatabase.wipeAllData() = inTransaction {
     wipe.clearDailyStats()
     wipe.clearGovernorLog()
     wipe.clearDailyPlan()
+    wipe.clearChunkContexts()
+    wipe.clearPackChunks()
     wipe.clearChunkTokens()
     wipe.clearChunks()
     wipe.clearPacks()

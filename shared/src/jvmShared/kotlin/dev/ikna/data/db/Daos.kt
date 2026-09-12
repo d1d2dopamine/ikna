@@ -18,6 +18,12 @@ private const val NOT_RETRACTED =
 interface ChunkDao {
     @Upsert suspend fun upsertChunks(chunks: List<ChunkEntity>)
     @Upsert suspend fun upsertTokens(tokens: List<ChunkTokenEntity>)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertChunksIgnore(chunks: List<ChunkEntity>)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertTokensIgnore(tokens: List<ChunkTokenEntity>)
+    @Upsert suspend fun upsertPackChunks(rows: List<PackChunkEntity>)
+    @Upsert suspend fun upsertChunkContexts(rows: List<ChunkContextEntity>)
     @Upsert suspend fun upsertPack(pack: PackEntity)
 
     @Query("SELECT * FROM packs WHERE id = :id")
@@ -39,28 +45,54 @@ interface ChunkDao {
     @Query("UPDATE packs SET title = :title WHERE id = :id")
     suspend fun setPackTitle(id: String, title: String)
 
-    // Deleting a deck, in the order the rows depend on each other: cards, then
-    // tokens, then chunks, then the pack itself. The `reviews` table is never
-    // touched by any of this - it is append-only and it is what the statistics
-    // are computed from, so a deck deleted in a tidying mood must not take
-    // months of history with it.
+    // A Catalogue v2 target can belong to several decks. Remove only this
+    // membership; shared schedule/content survives while another deck owns it.
     @Query(
-        "DELETE FROM cards WHERE chunkId IN " +
-            "(SELECT id FROM chunks WHERE packId = :packId)"
+        "UPDATE chunks SET packId = (SELECT MIN(other.packId) FROM pack_chunks other " +
+            "WHERE other.chunkId = chunks.id AND other.packId != :packId) " +
+            "WHERE packId = :packId AND EXISTS (SELECT 1 FROM pack_chunks other " +
+            "WHERE other.chunkId = chunks.id AND other.packId != :packId)"
     )
-    suspend fun deleteCardsForPack(packId: String)
+    suspend fun rehomeChunksForPack(packId: String)
 
     @Query(
-        "DELETE FROM chunk_tokens WHERE chunkId IN " +
-            "(SELECT id FROM chunks WHERE packId = :packId)"
+        "DELETE FROM cards WHERE chunkId IN (SELECT mine.chunkId FROM pack_chunks mine " +
+            "WHERE mine.packId = :packId AND NOT EXISTS (SELECT 1 FROM pack_chunks other " +
+            "WHERE other.chunkId = mine.chunkId AND other.packId != :packId))"
     )
-    suspend fun deleteTokensForPack(packId: String)
+    suspend fun deleteCardsExclusiveToPack(packId: String)
 
-    @Query("DELETE FROM chunks WHERE packId = :packId")
-    suspend fun deleteChunksForPack(packId: String)
+    @Query(
+        "DELETE FROM chunk_tokens WHERE chunkId IN (SELECT mine.chunkId FROM pack_chunks mine " +
+            "WHERE mine.packId = :packId AND NOT EXISTS (SELECT 1 FROM pack_chunks other " +
+            "WHERE other.chunkId = mine.chunkId AND other.packId != :packId))"
+    )
+    suspend fun deleteTokensExclusiveToPack(packId: String)
+
+    @Query(
+        "DELETE FROM chunks WHERE id IN (SELECT mine.chunkId FROM pack_chunks mine " +
+            "WHERE mine.packId = :packId AND NOT EXISTS (SELECT 1 FROM pack_chunks other " +
+            "WHERE other.chunkId = mine.chunkId AND other.packId != :packId))"
+    )
+    suspend fun deleteChunksExclusiveToPack(packId: String)
+
+    @Query("DELETE FROM chunk_contexts WHERE packId = :packId")
+    suspend fun deleteContextsForPack(packId: String)
+
+    @Query("DELETE FROM pack_chunks WHERE packId = :packId")
+    suspend fun deletePackChunkLinks(packId: String)
 
     @Query("DELETE FROM packs WHERE id = :id")
     suspend fun deletePack(id: String)
+
+    @Query("SELECT * FROM pack_chunks WHERE packId = :packId ORDER BY freqRank ASC, chunkId ASC")
+    suspend fun packChunks(packId: String): List<PackChunkEntity>
+
+    @Query("SELECT * FROM pack_chunks WHERE chunkId IN (:chunkIds)")
+    suspend fun membershipsFor(chunkIds: List<String>): List<PackChunkEntity>
+
+    @Query("SELECT * FROM chunk_contexts WHERE chunkId = :chunkId ORDER BY packId, freqRank, contextId")
+    suspend fun contextsFor(chunkId: String): List<ChunkContextEntity>
 
     @Query("SELECT * FROM chunks WHERE id = :id")
     suspend fun chunk(id: String): ChunkEntity?
@@ -133,9 +165,10 @@ interface ChunkDao {
     // Candidate pool: chunks with no card yet, cheapest first by frequency.
     // Only active packs contribute, which is what the deck switch controls.
     @Query(
-        "SELECT * FROM chunks WHERE packId IN (SELECT id FROM packs WHERE isActive = 1) " +
-            "AND id NOT IN (SELECT DISTINCT chunkId FROM cards) " +
-            "ORDER BY freqRank ASC LIMIT :limit"
+        "SELECT c.* FROM chunks c WHERE EXISTS (SELECT 1 FROM pack_chunks pc " +
+            "JOIN packs p ON p.id = pc.packId WHERE pc.chunkId = c.id AND p.isActive = 1) " +
+            "AND c.id NOT IN (SELECT DISTINCT chunkId FROM cards) " +
+            "ORDER BY c.freqRank ASC LIMIT :limit"
     )
     suspend fun unintroducedByFrequency(limit: Int): List<ChunkEntity>
 
@@ -144,9 +177,9 @@ interface ChunkDao {
     // asked it for more, which is a plainer statement of intent than the switch
     // on the list is.
     @Query(
-        "SELECT * FROM chunks WHERE packId = :packId " +
-            "AND id NOT IN (SELECT DISTINCT chunkId FROM cards) " +
-            "ORDER BY freqRank ASC LIMIT :limit"
+        "SELECT c.* FROM chunks c JOIN pack_chunks pc ON pc.chunkId = c.id " +
+            "WHERE pc.packId = :packId AND c.id NOT IN (SELECT DISTINCT chunkId FROM cards) " +
+            "ORDER BY pc.freqRank ASC, c.id ASC LIMIT :limit"
     )
     suspend fun unintroducedByFrequencyFor(packId: String, limit: Int): List<ChunkEntity>
 
@@ -158,8 +191,9 @@ interface ChunkDao {
     // look identical in an empty plan, and only one of them means new cards are
     // coming tomorrow.
     @Query(
-        "SELECT COUNT(*) FROM chunks WHERE packId IN (SELECT id FROM packs WHERE isActive = 1) " +
-            "AND id NOT IN (SELECT DISTINCT chunkId FROM cards)"
+        "SELECT COUNT(*) FROM chunks c WHERE EXISTS (SELECT 1 FROM pack_chunks pc " +
+            "JOIN packs p ON p.id = pc.packId WHERE pc.chunkId = c.id AND p.isActive = 1) " +
+            "AND c.id NOT IN (SELECT DISTINCT chunkId FROM cards)"
     )
     suspend fun untouchedCount(): Int
 
@@ -167,9 +201,9 @@ interface ChunkDao {
     // the same isActive filter, or the deck list and the session screen disagree
     // about whether a switched-off deck still has anything left in it.
     @Query(
-        "SELECT COUNT(*) FROM chunks WHERE packId = :packId " +
-            "AND packId IN (SELECT id FROM packs WHERE isActive = 1) " +
-            "AND id NOT IN (SELECT DISTINCT chunkId FROM cards)"
+        "SELECT COUNT(*) FROM pack_chunks pc JOIN chunks c ON c.id = pc.chunkId " +
+            "JOIN packs p ON p.id = pc.packId WHERE pc.packId = :packId AND p.isActive = 1 " +
+            "AND c.id NOT IN (SELECT DISTINCT chunkId FROM cards)"
     )
     suspend fun untouchedCountFor(packId: String): Int
 
@@ -180,10 +214,10 @@ interface ChunkDao {
      * share sheet: a deck leaves this phone as the same three columns it
      * arrived as, so what one person sends another person can import.
      */
-    @Query("SELECT * FROM chunks WHERE packId = :packId ORDER BY freqRank ASC")
+    @Query("SELECT c.* FROM chunks c JOIN pack_chunks pc ON pc.chunkId = c.id WHERE pc.packId = :packId ORDER BY pc.freqRank ASC, c.id ASC")
     suspend fun chunksForPack(packId: String): List<ChunkEntity>
 
-    @Query("SELECT COUNT(*) FROM chunks WHERE packId = :packId")
+    @Query("SELECT COUNT(*) FROM pack_chunks WHERE packId = :packId")
     suspend fun chunkCountFor(packId: String): Int
 
     /**
@@ -200,8 +234,8 @@ interface ChunkDao {
      * phonetics step answers false, and the section stays off the screen.
      */
     @Query(
-        "SELECT EXISTS(SELECT 1 FROM chunks " +
-            "WHERE packId = :packId AND ipa IS NOT NULL AND ipa != '')"
+        "SELECT EXISTS(SELECT 1 FROM pack_chunks pc JOIN chunks c ON c.id = pc.chunkId " +
+            "WHERE pc.packId = :packId AND c.ipa IS NOT NULL AND c.ipa != '')"
     )
     suspend fun hasPhonetics(packId: String): Boolean
 
@@ -213,15 +247,15 @@ interface ChunkDao {
     // came from the catalogue.
     @Query(
         "SELECT COUNT(DISTINCT c.chunkId) FROM cards c " +
-            "JOIN chunks ch ON ch.id = c.chunkId " +
-            "WHERE ch.packId = :packId AND c.lastReviewAt IS NOT NULL " +
+            "JOIN pack_chunks pc ON pc.chunkId = c.chunkId " +
+            "WHERE pc.packId = :packId AND c.lastReviewAt IS NOT NULL " +
             "AND c.lastReviewAt >= :since"
     )
     suspend fun introducedCountFor(packId: String, since: Long): Int
 
     @Query(
-        "SELECT COUNT(*) FROM cards c JOIN chunks ch ON ch.id = c.chunkId " +
-            "WHERE ch.packId = :packId AND c.level = 0 AND c.stability >= :minStability"
+        "SELECT COUNT(*) FROM cards c JOIN pack_chunks pc ON pc.chunkId = c.chunkId " +
+            "WHERE pc.packId = :packId AND c.level = 0 AND c.stability >= :minStability"
     )
     suspend fun knownCountFor(packId: String, minStability: Double): Int
 }
@@ -304,8 +338,8 @@ interface CardDao {
     // Whenever those fifty came from elsewhere the button returned nothing and
     // reported that nothing was due - in a deck that was full of it.
     @Query(
-        "SELECT c.* FROM cards c JOIN chunks ch ON ch.id = c.chunkId " +
-            "WHERE ch.packId = :packId AND c.inAmnesty = 0 AND c.dueAt <= :until " +
+        "SELECT c.* FROM cards c JOIN pack_chunks pc ON pc.chunkId = c.chunkId " +
+            "WHERE pc.packId = :packId AND c.inAmnesty = 0 AND c.dueAt <= :until " +
             "AND (c.chunkId || ':' || c.level) NOT IN (:exclude) " +
             "ORDER BY c.dueAt ASC LIMIT :limit"
     )
@@ -317,8 +351,8 @@ interface CardDao {
     ): List<CardEntity>
 
     @Query(
-        "SELECT c.* FROM cards c JOIN chunks ch ON ch.id = c.chunkId " +
-            "WHERE ch.packId = :packId AND c.inAmnesty = 1 " +
+        "SELECT c.* FROM cards c JOIN pack_chunks pc ON pc.chunkId = c.chunkId " +
+            "WHERE pc.packId = :packId AND c.inAmnesty = 1 " +
             "AND (c.chunkId || ':' || c.level) NOT IN (:exclude) " +
             "ORDER BY c.dueAt ASC LIMIT :limit"
     )
@@ -329,8 +363,8 @@ interface CardDao {
     ): List<CardEntity>
 
     @Query(
-        "SELECT c.* FROM cards c JOIN chunks ch ON ch.id = c.chunkId " +
-            "WHERE ch.packId = :packId AND c.inAmnesty = 0 AND c.isNew = 0 " +
+        "SELECT c.* FROM cards c JOIN pack_chunks pc ON pc.chunkId = c.chunkId " +
+            "WHERE pc.packId = :packId AND c.inAmnesty = 0 AND c.isNew = 0 " +
             "AND c.dueAt > :after " +
             "AND (c.chunkId || ':' || c.level) NOT IN (:exclude) " +
             "ORDER BY c.dueAt ASC LIMIT :limit"
@@ -348,8 +382,8 @@ interface CardDao {
      * three study days, no answer today, no suppression and no recent Browse.
      */
     @Query(
-        "SELECT c.* FROM cards c JOIN chunks ch ON ch.id = c.chunkId " +
-            "WHERE ch.packId = :packId AND c.level = 0 AND c.isNew = 0 " +
+        "SELECT c.* FROM cards c JOIN pack_chunks pc ON pc.chunkId = c.chunkId " +
+            "WHERE pc.packId = :packId AND c.level = 0 AND c.isNew = 0 " +
             "AND c.inAmnesty = 0 AND c.dueAt > :after " +
             "ORDER BY c.dueAt ASC LIMIT :limit"
     )
@@ -663,6 +697,12 @@ interface WipeDao {
 
     @Query("DELETE FROM daily_plan")
     suspend fun clearDailyPlan()
+
+    @Query("DELETE FROM chunk_contexts")
+    suspend fun clearChunkContexts()
+
+    @Query("DELETE FROM pack_chunks")
+    suspend fun clearPackChunks()
 
     @Query("DELETE FROM chunk_tokens")
     suspend fun clearChunkTokens()

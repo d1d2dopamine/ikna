@@ -26,7 +26,7 @@ from typing import Any, Iterable
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-import build_catalog as legacy
+import catalogue_core as core
 from catalogue_v2 import TARGET_IDENTITY_METHOD, TARGET_IDENTITY_VERSION, target_id
 from ingest.model import Candidate
 from ingest.registry import SourceRegistry
@@ -194,37 +194,38 @@ def build_ranks(db: sqlite3.Connection, collection: str, lang: str) -> dict[str,
         "SELECT context FROM context WHERE collection=? AND lang=? ORDER BY rowid",
         (collection, lang),
     ):
-        counts.update(word.casefold() for word in legacy.words(text, lang))
+        counts.update(word.lower() for word in core.words(text, lang))
     return {form: position for position, (form, _n) in enumerate(counts.most_common(), start=1)}
 
 
-def pick_phrase_limited(
+def phrase_choices(
     sentence: str,
     ranks: dict[str, int],
-    target_counts: Counter[str],
     lang: str,
-    max_contexts_per_target: int,
-) -> tuple[str, int, str] | None:
-    found = legacy.words(sentence, lang)
-    choices: list[tuple[int, str, str]] = []
+    function_top: int,
+) -> list[tuple[int, str, str, str]]:
+    """Eligible exact targets in rarest-first order.
+
+    The v1 sieve is preserved: glue is ignored, the target must be one complete
+    token, and it must occur exactly once so the UTF-16 span is unambiguous.
+    Catalogue v2 changes only ownership: repeated targets become contexts of one
+    target instead of independent scheduling units.
+    """
+    found = core.words(sentence, lang)
+    choices: list[tuple[int, str, str, str]] = []
     for surface in found:
-        low = surface.casefold()
+        low = surface.lower()
         rank = ranks.get(low)
-        if rank is None or rank <= legacy.FUNCTION_TOP:
+        if rank is None or rank <= function_top:
             continue
-        if len(surface) < legacy.minimum_phrase(lang) or utf16_length(surface) > legacy.MAX_PHRASE:
+        if len(surface) < core.minimum_phrase(lang) or utf16_length(surface) > core.MAX_PHRASE:
             continue
-        if sum(1 for other in found if other.casefold() == low) != 1:
+        if sum(1 for other in found if other.lower() == low) != 1:
             continue
         tid = target_id(lang, surface)
-        if target_counts[tid] >= max_contexts_per_target:
-            continue
-        choices.append((rank, surface, tid))
-    if not choices:
-        return None
-    # Rare word inside easier surrounding material, matching the v1 intuition.
-    rank, surface, tid = max(choices, key=lambda item: (item[0], item[1].casefold()))
-    return surface, rank, tid
+        choices.append((rank, surface, tid, core.level_of(rank)))
+    choices.sort(key=lambda item: item[0], reverse=True)
+    return choices
 
 
 def tatoeba_credit(context_ref: str) -> str | None:
@@ -286,29 +287,48 @@ def pair_candidates(
         yield row
 
 
-def make_card(
+def make_context(
     row: tuple,
     lang: str,
     ranks: dict[str, int],
-    target_counts: Counter[str],
+    selected: dict[str, dict[str, dict[str, Any]]],
+    seen_contexts: dict[str, set[str]],
+    max_targets_per_level: int,
     max_contexts_per_target: int,
+    function_top: int,
     phonetics: Any,
     morphology: MorphologyResolver | None,
     stats: Counter[str],
+    existing_only: bool,
 ) -> tuple[str, str, dict[str, Any]] | None:
     (_seq, sentence, meaning, source_family, _source_version, context_ref, meaning_ref, _score, _attrib) = row
-    if len(sentence) < (6 if lang in legacy.CJK else legacy.MIN_SENTENCE) or utf16_length(sentence) > legacy.MAX_SENTENCE:
+    if len(sentence) < (6 if lang in core.CJK else core.MIN_SENTENCE) or utf16_length(sentence) > core.MAX_SENTENCE:
         stats["sentence length"] += 1
         return None
-    if not meaning or utf16_length(meaning) > legacy.MAX_TRANSLATION:
+    if not meaning or utf16_length(meaning) > core.MAX_TRANSLATION:
         stats["translation length"] += 1
         return None
-    chosen = pick_phrase_limited(sentence, ranks, target_counts, lang, max_contexts_per_target)
-    if chosen is None:
+
+    choice = None
+    choices = phrase_choices(sentence, ranks, lang, function_top)
+    for rank, surface, tid, level in choices:
+        if context_ref in seen_contexts.get(tid, set()):
+            continue
+        existing = selected[level].get(tid)
+        if existing_only:
+            if existing is not None and 1 + len(existing.get("contexts", [])) < max_contexts_per_target:
+                choice = (rank, surface, tid, level)
+                break
+        else:
+            if existing is None and len(selected[level]) < max_targets_per_level:
+                choice = (rank, surface, tid, level)
+                break
+    if choice is None:
         stats["nothing to teach"] += 1
         return None
-    surface, rank, tid = chosen
-    span = legacy.offsets(sentence, surface, lang)
+
+    rank, surface, tid, level = choice
+    span = core.offsets(sentence, surface, lang)
     if span is None:
         stats["phrase not in sentence"] += 1
         return None
@@ -316,45 +336,70 @@ def make_card(
     translation = meaning
     credit = tatoeba_credit(context_ref)
     if credit:
-        translation += legacy.SOURCE_MARK + credit
+        translation += core.SOURCE_MARK + credit
 
-    card: dict[str, Any] = {
-        "text": surface,
+    item: dict[str, Any] = {
         "context": sentence,
         "translation": translation,
         "targetStart": span[0],
         "targetEnd": span[1],
         "freqRank": rank,
-        "tokens": legacy.token_list(sentence, ranks, {}, lang),
-        "targetId": tid,
+        "tokens": core.token_list(sentence, ranks, {}, lang, function_top),
         "contextId": context_ref,
         "meaningId": meaning_ref,
         "sourceFamily": source_family,
     }
     if phonetics:
-        ipa = phonetics.line(surface)
         ipa_context = phonetics.line(sentence)
-        if ipa:
-            card["ipa"] = ipa
         if ipa_context:
-            card["ipaContext"] = ipa_context
-        stats["card transcribed" if (ipa or ipa_context) else "card not transcribed"] += 1
+            item["ipaContext"] = ipa_context
     if morphology is not None:
-        card, morph_stats = morphology.enrich_card(card, lang)
+        item, morph_stats = morphology.enrich_card(item, lang)
         stats.update({"morphology " + key: value for key, value in morph_stats.items()})
-    return legacy.level_of(rank), tid, card
+    return level, tid, {"text": surface, **item}
 
 
-def write_deck(path: Path, deck_id: str, cards: list[dict[str, Any]]) -> int:
+def add_context_to_group(
+    group: dict[str, Any],
+    context: dict[str, Any],
+    phonetics: Any,
+    stats: Counter[str],
+) -> None:
+    """Append a distinct natural context without creating another card row."""
+    if context["contextId"] == group["contextId"]:
+        return
+    alt = {key: value for key, value in context.items() if key != "text"}
+    group.setdefault("contexts", []).append(alt)
+    stats["alternative contexts retained"] += 1
+
+
+def new_target_group(
+    tid: str,
+    context: dict[str, Any],
+    phonetics: Any,
+    stats: Counter[str],
+) -> dict[str, Any]:
+    group = {"targetId": tid, **context}
+    if phonetics:
+        ipa = phonetics.line(context["text"])
+        if ipa:
+            group["ipa"] = ipa
+        stats["card transcribed" if (ipa or context.get("ipaContext")) else "card not transcribed"] += 1
+    return group
+
+
+def write_deck(path: Path, deck_id: str, targets: list[dict[str, Any]]) -> int:
     with path.open("w", encoding="utf-8", newline="\n") as handle:
-        for position, card in enumerate(cards, start=1):
-            row = {"id": "%s-%05d" % (deck_id, position), **card}
+        for position, target in enumerate(targets, start=1):
+            # id remains deck-local for v1-compatible import. targetId is global
+            # catalogue identity; runtime shared scheduling is introduced only
+            # when the learner database can represent deck membership safely.
+            row = {"id": "%s-%05d" % (deck_id, position), **target}
             handle.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
     size = path.stat().st_size
     if size > MAX_DECK_BYTES:
         raise ValueError("%s is %.1f MiB; deck assets must stay below 24 MiB" % (path.name, size / 1048576))
     return size
-
 
 def tier(chunk_count: int, threshold: int) -> str:
     return "full" if chunk_count >= threshold else "thin"
@@ -373,10 +418,9 @@ def source_family_dict(policy) -> dict[str, Any]:
 def build(args: argparse.Namespace) -> dict[str, Any]:
     learn = [part.strip().lower() for part in args.learn.split(",") if part.strip()]
     meanings = [part.strip().lower() for part in args.meanings.split(",") if part.strip()]
-    unsupported = (set(learn) - set(legacy.LEARNABLE)) | (set(meanings) - set(legacy.MEANINGS))
+    unsupported = (set(learn) - set(core.LEARNABLE)) | (set(meanings) - set(core.MEANINGS))
     if unsupported:
         raise ValueError("unsupported languages: %s" % ", ".join(sorted(unsupported)))
-    legacy.FUNCTION_TOP = args.function_top
     try:
         segmentation = prepare(learn)
     except IcuUnavailable as exc:
@@ -431,60 +475,91 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
             if not ranks:
                 continue
 
-            cards_by_level: dict[str, list[dict[str, Any]]] = {level: [] for level in legacy.LEVELS}
-            target_counts: Counter[str] = Counter()
+            targets_by_level: dict[str, dict[str, dict[str, Any]]] = {level: {} for level in core.LEVELS}
+            seen_contexts: dict[str, set[str]] = defaultdict(set)
             pair_stats = Counter()
             transcriber = phonetics_for(lang)
+
+            # Pass 1: choose unique learning targets with the mature v1 sieve.
+            # A repeated exact target is not another card.
             for row in pair_candidates(db, collection, lang, meaning_lang):
-                if all(len(cards_by_level[level]) >= args.max_deck for level in legacy.LEVELS):
-                    break
-                made = make_card(
-                    row,
-                    lang,
-                    ranks,
-                    target_counts,
-                    args.contexts_per_target,
-                    transcriber,
-                    morphology,
-                    pair_stats,
+                made = make_context(
+                    row, lang, ranks, targets_by_level, seen_contexts,
+                    args.max_deck, args.contexts_per_target, args.function_top,
+                    transcriber, morphology, pair_stats, existing_only=False,
                 )
                 if made is None:
                     continue
-                level, tid, card = made
-                if len(cards_by_level[level]) >= args.max_deck:
-                    continue
-                target_counts[tid] += 1
-                cards_by_level[level].append(card)
-                output_contexts.add((lang, card["contextId"]))
-                output_targets.add((lang, card["targetId"]))
+                level, tid, context = made
+                seen_contexts[tid].add(context["contextId"])
+                targets_by_level[level][tid] = new_target_group(tid, context, transcriber, pair_stats)
+                output_targets.add((lang, tid))
+                output_contexts.add((lang, context["contextId"]))
+                if all(len(targets_by_level[level]) >= args.max_deck for level in core.LEVELS):
+                    break
 
-            pair_count = sum(len(rows) for rows in cards_by_level.values())
-            if pair_count < args.min_deck:
+            # Pass 2: revisit the same corpus only to attach unseen natural
+            # contexts to targets already selected above. No scheduling unit is
+            # created in this pass.
+            if args.contexts_per_target > 1:
+                open_targets = {
+                    tid
+                    for groups in targets_by_level.values()
+                    for tid, group in groups.items()
+                    if 1 + len(group.get("contexts", [])) < args.contexts_per_target
+                }
+                for row in pair_candidates(db, collection, lang, meaning_lang):
+                    if not open_targets:
+                        break
+                    made = make_context(
+                        row, lang, ranks, targets_by_level, seen_contexts,
+                        args.max_deck, args.contexts_per_target, args.function_top,
+                        transcriber, morphology, pair_stats, existing_only=True,
+                    )
+                    if made is None:
+                        continue
+                    level, tid, context = made
+                    seen_contexts[tid].add(context["contextId"])
+                    group = targets_by_level[level][tid]
+                    add_context_to_group(group, context, transcriber, pair_stats)
+                    output_contexts.add((lang, context["contextId"]))
+                    if 1 + len(group.get("contexts", [])) >= args.contexts_per_target:
+                        open_targets.discard(tid)
+
+            pair_target_count = sum(len(groups) for groups in targets_by_level.values())
+            pair_context_count = sum(
+                1 + len(group.get("contexts", []))
+                for groups in targets_by_level.values()
+                for group in groups.values()
+            )
+            if pair_target_count < args.min_deck:
                 stats["pair below minimum"] += 1
                 continue
             active_sources.add(source_family)
             pair_decks = 0
-            for level in legacy.LEVELS:
-                cards = cards_by_level[level]
-                if len(cards) < args.min_deck:
+            for level in core.LEVELS:
+                targets = list(targets_by_level[level].values())
+                if len(targets) < args.min_deck:
                     continue
                 deck_id = "%s-%s-%s-%s" % (lang, meaning_lang, collection, level)
                 path = out / (deck_id + ".jsonl")
-                size = write_deck(path, deck_id, cards)
+                size = write_deck(path, deck_id, targets)
                 pair_decks += 1
+                deck_contexts = sum(1 + len(target.get("contexts", [])) for target in targets)
                 decks.append(
                     {
                         "id": deck_id,
                         "title": "%s from %s - %s - %s"
                         % (
-                            legacy.NAMES.get(lang, lang),
-                            legacy.NAMES.get(meaning_lang, meaning_lang),
+                            core.NAMES.get(lang, lang),
+                            core.NAMES.get(meaning_lang, meaning_lang),
                             COLLECTIONS[collection]["title"],
                             level,
                         ),
                         "lang": lang,
                         "meaningLang": meaning_lang,
-                        "chunkCount": len(cards),
+                        "chunkCount": len(targets),
+                        "contextCount": deck_contexts,
                         "file": path.name,
                         "sizeBytes": size,
                         "subject": "",
@@ -492,7 +567,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                         "licence": policy.licence_name,
                         "attribution": policy.attribution,
                         "sources": ["%s, %s" % (policy.title, policy.licence_name)],
-                        "phonetics": any(card.get("ipa") or card.get("ipaContext") for card in cards),
+                        "phonetics": any(target.get("ipa") or target.get("ipaContext") for target in targets),
                         "version": 2,
                         "collection": collection,
                         "sourceFamily": source_family,
@@ -509,23 +584,32 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                         "collection": collection,
                         "lang": lang,
                         "meaningLang": meaning_lang,
-                        "tier": tier(pair_count, args.full_threshold),
+                        "tier": tier(pair_target_count, args.full_threshold),
                         "deckCount": pair_decks,
-                        "chunkCount": pair_count,
+                        "chunkCount": pair_target_count,
+                        "contextCount": pair_context_count,
                     }
                 )
             stats.update(pair_stats)
             print(
-                "  %s %s->%s: %d cards (%s)"
-                % (collection, lang, meaning_lang, pair_count, ", ".join("%s=%d" % (l, len(cards_by_level[l])) for l in legacy.LEVELS)),
+                "  %s %s->%s: %d targets / %d contexts (%s)"
+                % (
+                    collection,
+                    lang,
+                    meaning_lang,
+                    pair_target_count,
+                    pair_context_count,
+                    ", ".join("%s=%d" % (level, len(targets_by_level[level])) for level in core.LEVELS),
+                ),
                 flush=True,
             )
 
-        aggregate: dict[tuple[str, str], dict[str, int]] = defaultdict(lambda: {"deckCount": 0, "chunkCount": 0})
+        aggregate: dict[tuple[str, str], dict[str, int]] = defaultdict(lambda: {"deckCount": 0, "chunkCount": 0, "contextCount": 0})
         for row in collection_pairs:
             item = aggregate[(row["lang"], row["meaningLang"])]
             item["deckCount"] += row["deckCount"]
             item["chunkCount"] += row["chunkCount"]
+            item["contextCount"] += row.get("contextCount", row["chunkCount"])
         pairs = [
             {
                 "lang": lang,
@@ -533,6 +617,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                 "tier": tier(value["chunkCount"], args.full_threshold),
                 "deckCount": value["deckCount"],
                 "chunkCount": value["chunkCount"],
+                "contextCount": value["contextCount"],
             }
             for (lang, meaning), value in sorted(aggregate.items())
         ]
@@ -573,7 +658,8 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
             "catalogueVersion": 2,
             "stage": stage_stats,
             "output": {
-                "cards": sum(deck["chunkCount"] for deck in decks),
+                "targetDeckMemberships": sum(deck["chunkCount"] for deck in decks),
+                "contexts": sum(deck.get("contextCount", deck["chunkCount"]) for deck in decks),
                 "decks": len(decks),
                 "pairs": len(pairs),
                 "collectionPairs": len(collection_pairs),
@@ -581,9 +667,9 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                 "uniqueTargets": len(output_targets),
             },
             "limits": {
-                "maxDeckCards": args.max_deck,
+                "maxDeckTargets": args.max_deck,
                 "maxContextsPerTarget": args.contexts_per_target,
-                "minDeckCards": args.min_deck,
+                "minDeckTargets": args.min_deck,
                 "fullThreshold": args.full_threshold,
                 "functionTop": args.function_top,
             },
@@ -597,22 +683,28 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
             "",
             "| metric | value |",
             "| --- | ---: |",
-            "| cards | %s |" % f"{build_info['output']['cards']:,}",
+            "| unique exact targets | %s |" % f"{len(output_targets):,}",
+            "| target-deck memberships | %s |" % f"{build_info['output']['targetDeckMemberships']:,}",
+            "| natural contexts retained | %s |" % f"{build_info['output']['contexts']:,}",
+            "| unique source contexts | %s |" % f"{len(output_contexts):,}",
             "| decks | %s |" % f"{len(decks):,}",
             "| pairs | %s |" % f"{len(pairs):,}",
-            "| unique source contexts in output | %s |" % f"{len(output_contexts):,}",
-            "| unique exact targets in output | %s |" % f"{len(output_targets):,}",
             "",
             "## Collections",
             "",
-            "| collection | cards | decks |",
-            "| --- | ---: | ---: |",
+            "| collection | target memberships | contexts | decks |",
+            "| --- | ---: | ---: | ---: |",
         ]
         for collection in ("everyday", "knowledge", "world"):
             selected = [deck for deck in decks if deck["collection"] == collection]
             lines.append(
-                "| %s | %s | %s |"
-                % (COLLECTIONS[collection]["title"], f"{sum(d['chunkCount'] for d in selected):,}", f"{len(selected):,}")
+                "| %s | %s | %s | %s |"
+                % (
+                    COLLECTIONS[collection]["title"],
+                    f"{sum(d['chunkCount'] for d in selected):,}",
+                    f"{sum(d.get('contextCount', d['chunkCount']) for d in selected):,}",
+                    f"{len(selected):,}",
+                )
             )
         lines.extend(
             [
@@ -636,12 +728,12 @@ def parser() -> argparse.ArgumentParser:
     root.add_argument("--candidates", nargs="+", required=True, help="candidate JSONL/JSONL.GZ files")
     root.add_argument("--out", required=True)
     root.add_argument("--registry", default=str(DEFAULT_REGISTRY))
-    root.add_argument("--learn", default=",".join(legacy.LEARNABLE))
-    root.add_argument("--meanings", default=",".join(legacy.MEANINGS))
-    root.add_argument("--max-deck", type=int, default=8000)
+    root.add_argument("--learn", default=",".join(core.LEARNABLE))
+    root.add_argument("--meanings", default=",".join(core.MEANINGS))
+    root.add_argument("--max-deck", type=int, default=3000)
     root.add_argument("--min-deck", type=int, default=40)
     root.add_argument("--full-threshold", type=int, default=3000)
-    root.add_argument("--function-top", type=int, default=legacy.FUNCTION_TOP)
+    root.add_argument("--function-top", type=int, default=core.FUNCTION_TOP)
     root.add_argument("--contexts-per-target", type=int, default=3)
     root.add_argument("--morphology-db")
     root.add_argument("--phonetics", action="store_true")

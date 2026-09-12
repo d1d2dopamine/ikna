@@ -28,18 +28,21 @@
       "title": "English from Russian - Everyday - beginner",
       "lang": "en",
       "meaningLang": "ru",
-      "chunkCount": 2,
+      "chunkCount": 1,
       "file": "en-ru-everyday-beginner.jsonl",
       "sizeBytes": 1024,
       "subject": "",
       "level": "beginner",
       "licence": "CC BY 2.0 FR",
       "attribution": "Sentences by Tatoeba contributors, tatoeba.org",
-      "sources": ["Tatoeba, CC BY 2.0 FR"],
+      "sources": [
+        "Tatoeba, CC BY 2.0 FR"
+      ],
       "phonetics": true,
       "version": 2,
       "collection": "everyday",
-      "sourceFamily": "tatoeba"
+      "sourceFamily": "tatoeba",
+      "contextCount": 2
     }
   ],
   "pairs": [
@@ -48,7 +51,8 @@
       "meaningLang": "ru",
       "tier": "thin",
       "deckCount": 1,
-      "chunkCount": 2
+      "chunkCount": 1,
+      "contextCount": 2
     }
   ],
   "collectionPairs": [
@@ -58,7 +62,8 @@
       "meaningLang": "ru",
       "tier": "thin",
       "deckCount": 1,
-      "chunkCount": 2
+      "chunkCount": 1,
+      "contextCount": 2
     }
   ]
 }

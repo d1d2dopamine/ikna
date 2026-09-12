@@ -5,11 +5,13 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 
-const val IKNA_DATABASE_VERSION = 9
+const val IKNA_DATABASE_VERSION = 10
 
 @Database(
     entities = [
         ChunkEntity::class,
+        PackChunkEntity::class,
+        ChunkContextEntity::class,
         ChunkTokenEntity::class,
         PackEntity::class,
         CardEntity::class,
@@ -32,9 +34,11 @@ const val IKNA_DATABASE_VERSION = 9
     // v8: immutable FSRS parameter snapshots, without rescheduling existing cards.
     // v9: a separate append-only log for optional Browse exposures. These are
     //     not reviews and never enter FSRS, accuracy or governor statistics.
+    // v10: deck/target membership is many-to-many and natural source contexts
+    //      are stored beside the target instead of becoming extra FSRS cards.
     // Kept as a literal because SchemaTest deliberately reads this source line:
     // changing it must force a migration and a committed Room schema.
-    version = 9,
+    version = 10,
     // KSP writes the schema history into app/schemas (see the ksp block in
     // shared/build.gradle.kts -- it stays under app/ so that the workflow step
     // that uploads it and the one that checks it is committed do not move).

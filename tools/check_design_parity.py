@@ -313,18 +313,18 @@ class DesignContracts(unittest.TestCase):
             self.assertIn(required, factory)
         wipe_dao = daos.split('interface WipeDao {', 1)[1]
         wiped_tables = set(re.findall(r'@Query\("DELETE FROM ([a-z_]+)"\)', wipe_dao))
-        schema = read(ROOT, 'app/schemas/dev.ikna.data.db.IknaDatabase/9.json')
+        schema = read(ROOT, 'app/schemas/dev.ikna.data.db.IknaDatabase/10.json')
         schema_tables = set(re.findall(r'"tableName"\s*:\s*"([a-z_]+)"', schema))
         self.assertEqual(schema_tables, wiped_tables)
-        self.assertEqual(10, len(wiped_tables))
+        self.assertEqual(12, len(wiped_tables))
         self.assertNotIn('clearAllTables', android + desktop)
         self.assertIn('withContext(Dispatchers.IO)', settings)
         self.assertIn('container.wipeAllData()', settings)
         self.assertIn('onWiped()', settings)
         self.assertNotIn('container.deckRepository.delete(deck.id)', settings)
 
-    def test_wipe_queries_execute_and_empty_every_schema_nine_table(self):
-        schema_path = ROOT / 'app/schemas/dev.ikna.data.db.IknaDatabase/9.json'
+    def test_wipe_queries_execute_and_empty_every_current_table(self):
+        schema_path = ROOT / 'app/schemas/dev.ikna.data.db.IknaDatabase/10.json'
         entities = json.loads(schema_path.read_text(encoding='utf-8'))['database']['entities']
         database = sqlite3.connect(':memory:')
         tables = []
@@ -358,7 +358,7 @@ class DesignContracts(unittest.TestCase):
         daos = read(SHARED, 'data/db/Daos.kt')
         wipe_dao = daos.split('interface WipeDao {', 1)[1]
         queries = re.findall(r'@Query\("(DELETE FROM [a-z_]+)"\)', wipe_dao)
-        self.assertEqual(10, len(queries))
+        self.assertEqual(12, len(queries))
         database.execute('BEGIN')
         for query in queries:
             database.execute(query)

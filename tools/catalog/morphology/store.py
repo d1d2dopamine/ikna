@@ -14,8 +14,8 @@ from .model import MORPHOLOGY_POLICY, MORPHOLOGY_RULE_VERSION, canonical_feats, 
 
 
 SCHEMA = """
-PRAGMA journal_mode=WAL;
-PRAGMA synchronous=NORMAL;
+PRAGMA journal_mode=DELETE;
+PRAGMA synchronous=OFF;
 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE datasets (
     id TEXT PRIMARY KEY,

@@ -82,6 +82,26 @@ class MetaInfoTests(unittest.TestCase):
             self.assertEqual(data["targets"]["targetsWithAtLeast2Contexts"], 1)
             self.assertEqual(len(groups), 1)
 
+
+    def test_v2_grouped_contexts_count_as_one_target_membership(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            first = card("a", "care", "I care about this.", 1)
+            first.update({"targetId":"t2:en:0000000000000000","contextId":"tatoeba:1","meaningId":"tatoeba:101","sourceFamily":"tatoeba"})
+            alt = card("ignored", "care", "They care about it.", 2)
+            first["contexts"] = [{
+                "context": alt["context"], "translation": alt["translation"],
+                "targetStart": alt["targetStart"], "targetEnd": alt["targetEnd"],
+                "freqRank": alt["freqRank"], "tokens": alt["tokens"],
+                "contextId": "tatoeba:2", "meaningId": "tatoeba:102", "sourceFamily": "tatoeba"
+            }]
+            write_deck(root, "en-ru-everyday-beginner.jsonl", [first])
+            data, groups = meta_info.analyse(root)
+            self.assertEqual(data["catalogue"]["targetDeckMemberships"], 1)
+            self.assertEqual(data["catalogue"]["contexts"], 2)
+            self.assertEqual(data["targets"]["targetsWithAtLeast2Contexts"], 1)
+            self.assertEqual(len(groups), 1)
+
     def test_real_lemma_metadata_is_measured_without_using_it_for_grouping(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

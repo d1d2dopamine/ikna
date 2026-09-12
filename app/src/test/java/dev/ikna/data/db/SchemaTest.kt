@@ -26,7 +26,7 @@ import java.io.File
  * on disk agrees with the migration that is supposed to produce it, and that
  * every version step has a migration at all.
  */
-private const val DB_VERSION = 9
+private const val DB_VERSION = 10
 
 private const val SCHEMA_DIR = "schemas/dev.ikna.data.db.IknaDatabase"
 
@@ -131,6 +131,18 @@ class SchemaTest {
 		assertFalse(previous.contains("browse_exposures"))
 		assertTrue(current.contains("browse_exposures"))
 		assertTrue(current.contains("index_browse_exposures_day_chunkId"))
+	}
+
+	@Test
+	fun `catalogue v2 membership and contexts are separate in schema ten`() {
+		val previous = schema(9)!!.readText()
+		val current = schema(10)?.readText() ?: return
+		assertFalse(previous.contains("pack_chunks"))
+		assertFalse(previous.contains("chunk_contexts"))
+		assertTrue(current.contains("pack_chunks"))
+		assertTrue(current.contains("chunk_contexts"))
+		assertTrue(current.contains("index_pack_chunks_chunkId"))
+		assertTrue(current.contains("index_chunk_contexts_chunkId"))
 	}
 
 	@Test

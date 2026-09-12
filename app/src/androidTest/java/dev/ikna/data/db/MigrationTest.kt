@@ -148,6 +148,11 @@ private val V7_DDL = V6_DDL + listOf(
 private val V8_DDL = V7_DDL + listOf(
     "ALTER TABLE reviews ADD COLUMN fsrsParameters TEXT"
 )
+private val V9_DDL = V8_DDL + listOf(
+    "CREATE TABLE IF NOT EXISTS browse_exposures (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, day TEXT NOT NULL, chunkId TEXT NOT NULL, packId TEXT NOT NULL, ts INTEGER NOT NULL)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS index_browse_exposures_day_chunkId ON browse_exposures (day, chunkId)",
+    "CREATE INDEX IF NOT EXISTS index_browse_exposures_chunkId ON browse_exposures (chunkId)"
+)
 private const val DB_NAME = "ikna-migration-test.db"
 
 /**
@@ -521,6 +526,21 @@ class MigrationTest {
             assertEquals(0, count(db, "SELECT COUNT(*) FROM browse_exposures"))
             db.execSQL("INSERT INTO browse_exposures (day,chunkId,packId,ts) VALUES ('2026-09-09','kept','deck',1700000000001)")
             assertEquals(1, count(db, "SELECT COUNT(*) FROM browse_exposures WHERE chunkId='kept'"))
+        }
+    }
+
+    @Test
+    fun version9AddsDeckTargetMembershipWithoutTouchingReviews() {
+        createOldDatabase(9, V9_DDL) { db ->
+            db.execSQL("INSERT INTO packs (id,version,lang,chunkCount,installedAt,title,isActive) VALUES ('deck',1,'en',1,1,'Deck',1)")
+            db.execSQL("INSERT INTO chunks (id,packId,lang,text,contextSentence,translation,targetStart,targetEnd,freqRank,audioRef,ipa,ipaContext) VALUES ('old-target','deck','en','care','Take care.','Cuídate.',5,9,100,NULL,NULL,NULL)")
+            db.execSQL("INSERT INTO reviews (id,chunkId,level,ts,rating,elapsedDays,stabilityBefore,stabilityAfter,difficultyBefore,difficultyAfter,durationMs,wasAmnesty,fsrsParameters) VALUES (101,'old-target',0,1700000000000,3,1,2,4,5,5,6000,0,'0.1,0.2')")
+        }
+        withMigratedDatabase { db ->
+            assertEquals(IKNA_DATABASE_VERSION, count(db, "PRAGMA user_version"))
+            assertEquals(1, count(db, "SELECT COUNT(*) FROM reviews WHERE id=101 AND chunkId='old-target'"))
+            assertEquals(1, count(db, "SELECT COUNT(*) FROM pack_chunks WHERE packId='deck' AND chunkId='old-target'"))
+            assertEquals(1, count(db, "SELECT COUNT(*) FROM chunk_contexts WHERE packId='deck' AND chunkId='old-target' AND sourceFamily='legacy'"))
         }
     }
 

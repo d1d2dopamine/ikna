@@ -87,7 +87,7 @@ fun BrowsePane(
                 saving = true
                 scope.launch {
                     val recorded = runCatching {
-                        container.learningRepository.recordBrowse(next)
+                        container.learningRepository.recordBrowse(next, deckId)
                     }.getOrDefault(false)
                     if (recorded) index = nextIndex else finished = true
                     saving = false

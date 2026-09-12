@@ -109,6 +109,7 @@ class TargetGroup:
 @dataclass
 class Stats:
     cards: int = 0
+    contexts: int = 0
     files: int = 0
     parse_errors: int = 0
     empty_lines: int = 0
@@ -188,23 +189,9 @@ def analyse(root: Path) -> tuple[dict[str, Any], list[TargetGroup]]:
                     seen_ids.add(card_id)
 
                 text = str(card.get("text") or "")
-                context = str(card.get("context") or "")
-                translation = str(card.get("translation") or "")
                 target_norm = normalized(text)
                 if not target_norm:
                     continue
-
-                sid = source_id(translation)
-                explicit_context = str(card.get("contextId") or "").strip()
-                if explicit_context:
-                    context_key = explicit_context
-                elif sid is not None:
-                    context_key = "tatoeba:" + sid
-                else:
-                    stats.provenance_missing += 1
-                    context_key = fallback_context_key(context)
-                unique_source_keys.add((lang, context_key))
-                unique_target_source.add((lang, target_norm, context_key))
 
                 key = (lang, target_norm)
                 group = targets.get(key)
@@ -212,48 +199,70 @@ def analyse(root: Path) -> tuple[dict[str, Any], list[TargetGroup]]:
                     group = TargetGroup(lang=lang, display=text)
                     targets[key] = group
                 group.cards += 1
-                group.source_keys.add(context_key)
-                if sid is not None:
-                    group.source_ids.add(sid)
-                group.contexts.setdefault(context_key, context)
                 group.decks.add(deck_id)
                 group.meanings.add(meaning)
                 group.levels.add(level)
 
                 if card.get("ipa"):
                     stats.ipa_cards += 1
-                if card.get("ipaContext"):
-                    stats.ipa_context_cards += 1
 
-                try:
-                    start = int(card.get("targetStart"))
-                    end = int(card.get("targetEnd"))
-                    if utf16_slice(context, start, end) != text:
+                contexts = [card]
+                alternatives = card.get("contexts")
+                if isinstance(alternatives, list):
+                    contexts.extend(item for item in alternatives if isinstance(item, dict))
+
+                for item in contexts:
+                    stats.contexts += 1
+                    context = str(item.get("context") or "")
+                    translation = str(item.get("translation") or "")
+                    sid = source_id(translation)
+                    explicit_context = str(item.get("contextId") or "").strip()
+                    if explicit_context:
+                        context_key = explicit_context
+                    elif sid is not None:
+                        context_key = "tatoeba:" + sid
+                    else:
+                        stats.provenance_missing += 1
+                        context_key = fallback_context_key(context)
+                    unique_source_keys.add((lang, context_key))
+                    unique_target_source.add((lang, target_norm, context_key))
+                    group.source_keys.add(context_key)
+                    if sid is not None:
+                        group.source_ids.add(sid)
+                    group.contexts.setdefault(context_key, context)
+
+                    if item.get("ipaContext"):
+                        stats.ipa_context_cards += 1
+
+                    try:
+                        start = int(item.get("targetStart"))
+                        finish = int(item.get("targetEnd"))
+                        if normalized(utf16_slice(context, start, finish)) != target_norm:
+                            stats.offsets_bad += 1
+                    except (TypeError, ValueError, UnicodeError):
                         stats.offsets_bad += 1
-                except (TypeError, ValueError, UnicodeError):
-                    stats.offsets_bad += 1
 
-                tokens = card.get("tokens")
-                if isinstance(tokens, list):
-                    for token in tokens:
-                        if not isinstance(token, dict):
-                            continue
-                        stats.tokens += 1
-                        surface = str(token.get("surface") or "")
-                        lemma = str(token.get("lemma") or "")
-                        if not lemma:
-                            stats.lemma_missing += 1
-                        elif normalized(lemma) != normalized(surface):
-                            stats.lemma_informative += 1
-                        pos = token.get("pos")
-                        if pos:
-                            stats.pos_values[str(pos)] += 1
-                        if token.get("isContent") is True:
-                            stats.content_tokens += 1
+                    tokens = item.get("tokens")
+                    if isinstance(tokens, list):
+                        for token in tokens:
+                            if not isinstance(token, dict):
+                                continue
+                            stats.tokens += 1
+                            surface = str(token.get("surface") or "")
+                            lemma = str(token.get("lemma") or "")
+                            if not lemma:
+                                stats.lemma_missing += 1
+                            elif normalized(lemma) != normalized(surface):
+                                stats.lemma_informative += 1
+                            pos = token.get("pos")
+                            if pos:
+                                stats.pos_values[str(pos)] += 1
+                            if token.get("isContent") is True:
+                                stats.content_tokens += 1
 
     groups = list(targets.values())
     context_histogram = Counter(len(group.source_keys) for group in groups)
-    duplicate_cards = stats.cards - len(unique_target_source)
+    duplicate_cards = stats.cards - len(groups)
     multi_context = [group for group in groups if len(group.source_keys) >= 2]
     cross_meaning = [group for group in groups if len(group.meanings) >= 2]
     cross_level = [group for group in groups if len(group.levels) >= 2]
@@ -272,7 +281,8 @@ def analyse(root: Path) -> tuple[dict[str, Any], list[TargetGroup]]:
             "indexPairs": len(index.get("pairs", [])) if index else None,
         },
         "catalogue": {
-            "cards": stats.cards,
+            "targetDeckMemberships": stats.cards,
+            "contexts": stats.contexts,
             "parseErrors": stats.parse_errors,
             "emptyLines": stats.empty_lines,
             "duplicateCardIds": stats.duplicate_card_ids,
@@ -281,7 +291,7 @@ def analyse(root: Path) -> tuple[dict[str, Any], list[TargetGroup]]:
         "targets": {
             "uniqueExactTargets": len(groups),
             "uniqueTargetSourcePairs": len(unique_target_source),
-            "cardsBeyondUniqueTargetSource": duplicate_cards,
+            "targetMembershipsBeyondUniqueTargets": duplicate_cards,
             "targetsWithAtLeast2Contexts": count_at_least(2),
             "targetsWithAtLeast3Contexts": count_at_least(3),
             "targetsWithAtLeast5Contexts": count_at_least(5),
@@ -304,6 +314,15 @@ def analyse(root: Path) -> tuple[dict[str, Any], list[TargetGroup]]:
             "posValues": dict(stats.pos_values.most_common()),
         },
         "breakdown": {
+            "targetMembershipsByLearningLanguage": dict(sorted(stats.per_language_cards.items())),
+            "targetMembershipsByLevel": dict(sorted(stats.per_level_cards.items())),
+            "targetMembershipsByPair": {
+                f"{lang}->{meaning}": count
+                for (lang, meaning), count in sorted(stats.per_pair_cards.items())
+            },
+            "targetMembershipsByCollection": dict(sorted(stats.per_collection_cards.items())),
+            "targetMembershipsBySourceFamily": dict(sorted(stats.per_source_family_cards.items())),
+            # Compatibility aliases for older report consumers.
             "cardsByLearningLanguage": dict(sorted(stats.per_language_cards.items())),
             "cardsByLevel": dict(sorted(stats.per_level_cards.items())),
             "cardsByPair": {
@@ -332,7 +351,8 @@ def markdown_report(data: dict[str, Any], groups: list[TargetGroup], top: int) -
     meta = data["metadata"]
     inp = data["input"]
     field_coverage = meta["fieldCoverage"]
-    cards = cat["cards"]
+    cards = cat["targetDeckMemberships"]
+    contexts = cat["contexts"]
 
     lines = [
         "# Catalogue meta-info",
@@ -345,11 +365,12 @@ def markdown_report(data: dict[str, Any], groups: list[TargetGroup], top: int) -
         "| metric | value |",
         "| --- | ---: |",
         f"| deck assets analysed | {inp['deckFiles']:,} |",
-        f"| cards | {cards:,} |",
+        f"| target-deck memberships | {cards:,} |",
+        f"| natural contexts retained | {contexts:,} |",
         f"| unique source contexts | {cat['uniqueSourceContexts']:,} |",
         f"| unique exact targets | {tar['uniqueExactTargets']:,} |",
         f"| unique target + source-context pairs | {tar['uniqueTargetSourcePairs']:,} |",
-        f"| cards beyond unique target/context pairs | {tar['cardsBeyondUniqueTargetSource']:,} |",
+        f"| target memberships beyond unique exact targets | {tar['targetMembershipsBeyondUniqueTargets']:,} |",
         "",
         "## Context reuse",
         "",
@@ -400,16 +421,16 @@ def markdown_report(data: dict[str, Any], groups: list[TargetGroup], top: int) -
             "",
             "`pos` values: " + (", ".join(f"`{name}` {count:,}" for name, count in meta["posValues"].items()) or "none"),
             "",
-            "## Cards by learning language",
+            "## Target memberships by learning language",
             "",
-            "| language | cards |",
+            "| language | target memberships |",
             "| --- | ---: |",
         ]
     )
-    for lang, count in data["breakdown"]["cardsByLearningLanguage"].items():
+    for lang, count in data["breakdown"]["targetMembershipsByLearningLanguage"].items():
         lines.append(f"| `{lang}` | {count:,} |")
 
-    lines.extend(["", "## Cards by collection", "", "| collection | cards |", "| --- | ---: |"])
+    lines.extend(["", "## Target memberships by collection", "", "| collection | target memberships |", "| --- | ---: |"])
     for collection, count in data["breakdown"].get("cardsByCollection", {}).items():
         lines.append(f"| `{collection}` | {count:,} |")
 
@@ -433,7 +454,7 @@ def markdown_report(data: dict[str, Any], groups: list[TargetGroup], top: int) -
                 "",
                 f"Meaning languages: {meanings or '?'}  ",
                 f"Levels: {levels or '?'}  ",
-                f"Cards carrying this target: {group.cards}",
+                f"Deck memberships carrying this target: {group.cards}",
                 "",
             ]
         )
@@ -487,6 +508,7 @@ def main(argv: list[str] | None = None) -> int:
                     "language": group.lang,
                     "target": group.display,
                     "distinctContextCount": len(group.source_keys),
+                    "targetDeckMembershipCount": group.cards,
                     "cardCount": group.cards,
                     "meaningLanguages": sorted(group.meanings),
                     "levels": sorted(group.levels),

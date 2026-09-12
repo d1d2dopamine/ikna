@@ -216,6 +216,50 @@ object IknaMigrations {
             )
         }
     }
+    /**
+     * v9 -> v10: a learning target may belong to several installed decks.
+     * Existing content is backfilled one-to-one, so no schedule or review row
+     * changes meaning during the migration.
+     */
+    private val MIGRATION_9_10 = object : Migration(9, 10) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL(
+                "CREATE TABLE IF NOT EXISTS pack_chunks (" +
+                    "packId TEXT NOT NULL, chunkId TEXT NOT NULL, freqRank INTEGER NOT NULL, " +
+                    "primaryContextId TEXT, primaryMeaningId TEXT, " +
+                    "PRIMARY KEY(packId, chunkId))"
+            )
+            connection.execSQL(
+                "CREATE INDEX IF NOT EXISTS index_pack_chunks_chunkId ON pack_chunks (chunkId)"
+            )
+            connection.execSQL(
+                "INSERT OR IGNORE INTO pack_chunks(packId,chunkId,freqRank,primaryContextId,primaryMeaningId) " +
+                    "SELECT packId,id,freqRank,NULL,NULL FROM chunks"
+            )
+            connection.execSQL(
+                "CREATE TABLE IF NOT EXISTS chunk_contexts (" +
+                    "packId TEXT NOT NULL, chunkId TEXT NOT NULL, contextId TEXT NOT NULL, " +
+                    "meaningId TEXT NOT NULL, sourceFamily TEXT NOT NULL, contextSentence TEXT NOT NULL, " +
+                    "translation TEXT NOT NULL, targetStart INTEGER NOT NULL, targetEnd INTEGER NOT NULL, " +
+                    "freqRank INTEGER NOT NULL, ipaContext TEXT, tokensJson TEXT NOT NULL, " +
+                    "PRIMARY KEY(packId, chunkId, contextId, meaningId))"
+            )
+            connection.execSQL(
+                "CREATE INDEX IF NOT EXISTS index_chunk_contexts_chunkId ON chunk_contexts (chunkId)"
+            )
+            connection.execSQL(
+                "CREATE INDEX IF NOT EXISTS index_chunk_contexts_packId ON chunk_contexts (packId)"
+            )
+            connection.execSQL(
+                "INSERT OR IGNORE INTO chunk_contexts(" +
+                    "packId,chunkId,contextId,meaningId,sourceFamily,contextSentence,translation," +
+                    "targetStart,targetEnd,freqRank,ipaContext,tokensJson) " +
+                    "SELECT packId,id,'legacy:' || id,'legacy:' || id,'legacy',contextSentence,translation," +
+                    "targetStart,targetEnd,freqRank,ipaContext,'[]' FROM chunks"
+            )
+        }
+    }
+
     val ALL: Array<Migration> =
         arrayOf(
             MIGRATION_1_2,
@@ -225,6 +269,7 @@ object IknaMigrations {
             MIGRATION_5_6,
             MIGRATION_6_7,
             MIGRATION_7_8,
-            MIGRATION_8_9
+            MIGRATION_8_9,
+            MIGRATION_9_10
         )
 }

@@ -54,10 +54,11 @@ full rebuild; UniMorph remains supported but is not required by the first v2 run
 - Rule v1 prefers identity morphology to source disagreement and does not convert UniMorph features into UD FEATS.
 - Morphology rule version 1 does not alter `targetId`; a later morphology-aware target identity must increment its own identity version.
 
-### Part 4 - Catalogue expansion and census
+### Part 4 / 4.1 - Catalogue expansion, grouped contexts and census
 
 Status: experimental full-build pipeline and GitHub Actions workflow implemented;
-the first full CI census is intentionally pending review before publication.
+Part 4.1 corrected target/context ownership before the first reviewed rebuild. The
+public `catalog` release remains unchanged.
 
 - `catalogue v2 build` keeps `publish=false` by default and leaves the current
   release untouched while a complete build is inspected as an Actions artifact.
@@ -67,20 +68,28 @@ the first full CI census is intentionally pending review before publication.
   limit, while still adding both learning directions.
 - `World` remains empty in the automatic build until Global Voices article URL and
   contributor attribution can be supplied for every retained segment.
-- The source-independent v2 sieve can retain up to three natural source contexts
-  per exact target and pair instead of forcing one written target to one card.
-- The build tracks card count, exact targets and unique source contexts separately.
-  At least one million useful cards is the acceptance target; 1.5-2 million remains
-  a scale goal only if the census shows the quality sieve supports it.
-- An audited permissive UD 2.18 treebank set can enrich the selected cards. The
+- One deck JSONL row is one target membership. Up to three natural source contexts
+  can belong to that row; extra contexts are not independent scheduling cards.
+- `targetId` is catalogue-global for an exact target in one learning language and
+  stays stable across collection, level and meaning-language decks.
+- The v2 extraction core is parity-tested against the mature v1 segmentation,
+  length/function-word sieve, level boundaries, token classification and UTF-16
+  offsets. The existing phonetics pipeline remains the v2 phonetics implementation.
+- The build tracks unique exact targets, target-deck memberships, retained natural
+  contexts and unique source contexts separately. Scale goals are evaluated against
+  those separate measures instead of inflating a card count with alternative contexts.
+- An audited permissive UD 2.18 treebank set can enrich the selected target contexts. The
   generated manifest records file SHA-256 values for the exact run.
 - `catalogue meta-info` runs against the finished v2 assets before any publication.
 - An explicit reviewed publish still uses the existing `catalog` tag, uploads deck
   assets first and `index.json` last, and changes the release title to `Catalogue v2`.
 
-### Part 5 - Target/context relations
+### Part 5 - Richer target/context relations
 
-- Start with exact NFKC + case-fold target groups.
+The exact global target/context structure now exists in Catalogue v2. Part 5 adds
+only relationships that require more evidence than exact written identity.
+
+- Start from the existing exact NFKC + case-fold target groups.
 - Use source-corpus sentences; never generate filler contexts to reach a quota.
 - Keep one-context targets valid.
 - Add morphology-aware grouping only where its precision is demonstrated.
@@ -88,11 +97,19 @@ the first full CI census is intentionally pending review before publication.
 
 ### Part 6 - Learning-engine integration
 
+Part 4.1 already added the minimum learner-database bridge required for shared
+exact targets: schema v10 has explicit deck/target membership and source-context
+tables, and Catalogue v2 imports use `targetId` as one shared FSRS key. Part 6 is
+therefore about policy, not re-creating that storage layer.
+
 - Keep scheduling, workload, target choice, context choice, transfer and grading as
   separate responsibilities.
-- Add runtime support for catalogue `targetId` and `contextId` without changing
-  scheduling semantics first.
-- Let learner history distinguish seen and unseen contexts.
+- Choose which stored context represents a shared target in a session; do not
+  silently rotate it on every review.
+- Let learner history distinguish seen and unseen contexts before transfer policy
+  can use that distinction.
+- Add any sense-splitting policy for ambiguous exact forms only with evidence and
+  versioned identity/migration rules.
 - Preserve deterministic replay where a policy decision affects history.
 
 ### Part 7 - Conservative contextual-diversity experiment

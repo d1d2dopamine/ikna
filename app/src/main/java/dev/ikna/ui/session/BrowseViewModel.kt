@@ -63,7 +63,7 @@ class BrowseViewModel(
                     return@withLock
                 }
 
-                val recorded = repo.recordBrowse(next)
+                val recorded = repo.recordBrowse(next, deckId)
                 _state.value = if (recorded) {
                     current.copy(index = nextIndex, advancing = false)
                 } else {

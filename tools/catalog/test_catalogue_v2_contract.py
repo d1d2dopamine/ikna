@@ -98,15 +98,22 @@ def main():
             raise AssertionError("meaningId must be namespaced by sourceFamily")
         if card["targetId"] != target_id(decks[0]["lang"], card["text"]):
             raise AssertionError("targetId does not match the declared exact identity method")
-        if utf16_slice(card["context"], card["targetStart"], card["targetEnd"]) != card["text"]:
-            raise AssertionError("stored target offsets do not select text from context")
-        for token in card["tokens"]:
-            require_keys(token, V1_TOKEN_FIELDS, "token")
-        seen_contexts.add(card["contextId"])
+        contexts = [card] + [row for row in (card.get("contexts") or []) if isinstance(row, dict)]
+        for context in contexts:
+            selected = utf16_slice(context["context"], context["targetStart"], context["targetEnd"])
+            if target_id(decks[0]["lang"], selected) != card["targetId"]:
+                raise AssertionError("stored target offsets do not select the declared exact target")
+            for token in context["tokens"]:
+                require_keys(token, V1_TOKEN_FIELDS, "token")
+            if not context["contextId"].startswith(context["sourceFamily"] + ":"):
+                raise AssertionError("contextId must be namespaced by sourceFamily")
+            seen_contexts.add(context["contextId"])
         seen_target_ids.add(card["targetId"])
 
-    if len(seen_target_ids) != 1 or len(seen_contexts) < 2:
-        raise AssertionError("fixture must prove one target can have multiple source contexts")
+    if len(cards) != 1 or len(seen_target_ids) != 1 or len(seen_contexts) < 2:
+        raise AssertionError("fixture must prove one target row can own multiple source contexts")
+    if decks[0].get("contextCount") != len(seen_contexts):
+        raise AssertionError("fixture deck contextCount must count primary plus alternative contexts")
 
     aggregate_pairs = {(p["lang"], p["meaningLang"]) for p in index.get("pairs", [])}
     for pair in index.get("collectionPairs", []):
@@ -117,7 +124,7 @@ def main():
 
     print("Catalogue v2 contract fixtures: OK")
     print("  decks: %d" % len(decks))
-    print("  cards: %d" % len(cards))
+    print("  target rows: %d" % len(cards))
     print("  exact target ids: %d" % len(seen_target_ids))
     print("  distinct source contexts: %d" % len(seen_contexts))
     return 0

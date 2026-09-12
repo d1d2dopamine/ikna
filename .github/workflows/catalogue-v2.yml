@@ -13,8 +13,8 @@ on:
         description: "Languages meanings may use"
         default: "en,ru,pl,es,fr,de,it,pt,zh,ja,ko"
       max_deck:
-        description: "Cards per collection/level deck at most"
-        default: "8000"
+        description: "Unique learning targets per collection/level deck at most"
+        default: "3000"
       contexts_per_target:
         description: "Natural source contexts kept per exact target and pair"
         default: "3"
@@ -28,11 +28,11 @@ on:
         description: "Retained aligned rows per WikiMatrix hub pair"
         default: "120000"
       morphology:
-        description: "Enrich selected cards with audited UD 2.18 morphology"
+        description: "Enrich selected target contexts with audited UD 2.18 morphology"
         type: boolean
         default: true
       phonetics:
-        description: "Transcribe selected cards (slow)"
+        description: "Transcribe selected target contexts (slow)"
         type: boolean
         default: false
       publish:
@@ -63,6 +63,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq libicu-dev
           python3 tools/catalog/test_segmentation.py
+          python3 tools/catalog/test_v1_v2_parity.py
           python3 tools/catalog/test_catalogue_v2_contract.py
           python3 tools/catalog/test_ingestion.py
           python3 tools/catalog/test_morphology.py

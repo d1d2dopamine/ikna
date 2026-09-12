@@ -52,10 +52,21 @@ The fourth step adds the first full Catalogue v2 rebuild path without publishing
 by default. Tatoeba is ingested in one matrix pass for `Everyday`; bounded WikiMatrix
 hub pairs add both directions for `Knowledge`; Global Voices remains blocked from
 automatic publication until record-level article/contributor attribution is present.
-The new sieve can retain several real source contexts for one exact target, reports
-card/target/context counts separately, optionally enriches selected cards from an
-audited UD 2.18 set, and runs a full meta-info census before publication. The
-existing `catalog` release is changed only by an explicit reviewed publish.
+
+Part 4.1 corrects the target/context model before that rebuild is accepted. One deck
+row is now one learning-target membership; additional natural source contexts are
+nested under that target instead of masquerading as independent cards. `targetId`
+is catalogue-global for the same exact target across collection, level and meaning
+language decks. Local database schema 10 adds explicit many-to-many deck membership
+and stored source contexts, so installing the same exact v2 target from Beginner,
+Middle or another collection reuses one FSRS history instead of creating parallel
+cards. Existing v1/hand-made chunks keep their old ids and migration 9 -> 10 only
+backfills membership/context rows; review rows are untouched. The builder reports
+unique targets, deck memberships and contexts separately and returns the per-level
+target cap to 3,000. Mature v1 segmentation, sieve, level and UTF-16 rules are
+frozen in a source-independent core and parity tested; the existing phonetics
+pipeline remains available for the final v2 rebuild. The public `catalog` release
+is still changed only by an explicit reviewed publish.
 
 See [`docs/CATALOGUE-V2.md`](docs/CATALOGUE-V2.md),
 [`docs/MORPHOLOGY.md`](docs/MORPHOLOGY.md),

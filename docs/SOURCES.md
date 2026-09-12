@@ -317,7 +317,7 @@ history or device data.
 ## Catalogue v2 expansion path
 
 The experimental `catalogue v2 build` workflow is the Part 4 rebuild path. It is
-manual and defaults to `publish=false`, so testing a million-card-scale build does
+manual and defaults to `publish=false`, so testing a million-target/context-scale build does
 not change the public `catalog` release.
 
 It currently acquires Tatoeba for the `Everyday` collection and a bounded set of
@@ -335,6 +335,8 @@ selected merely because they exist; the committed map is the allowlist used by t
 workflow.
 
 The v2 builder writes `BUILD.md`/`BUILD.json`, then `tools/catalog/meta_info.py`
-runs over the finished assets. Card count, unique exact targets and unique source
-contexts are reported separately. Scale is therefore measured after the sieve,
-not inferred from the size of the downloaded corpora.
+runs over the finished assets. One JSONL row is one target membership; alternative
+natural contexts are nested on that row instead of becoming extra cards. The reports
+therefore separate unique exact targets, target-deck memberships, retained natural
+contexts and unique source contexts. Scale is measured after the sieve, not inferred
+from the size of the downloaded corpora or inflated by context variants.

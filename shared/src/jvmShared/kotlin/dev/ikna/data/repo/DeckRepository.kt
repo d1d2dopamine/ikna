@@ -184,9 +184,15 @@ class DeckRepository(
      * lines the old answers back up with it.
      */
     suspend fun delete(id: String) {
-        chunkDao.deleteCardsForPack(id)
-        chunkDao.deleteTokensForPack(id)
-        chunkDao.deleteChunksForPack(id)
+        // Catalogue v2 targets can be shared by several installed decks.
+        // Removing one deck removes its membership and source contexts; the
+        // schedule survives while another deck still references the target.
+        chunkDao.rehomeChunksForPack(id)
+        chunkDao.deleteCardsExclusiveToPack(id)
+        chunkDao.deleteTokensExclusiveToPack(id)
+        chunkDao.deleteChunksExclusiveToPack(id)
+        chunkDao.deleteContextsForPack(id)
+        chunkDao.deletePackChunkLinks(id)
         chunkDao.deletePack(id)
     }
 

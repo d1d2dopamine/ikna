@@ -735,7 +735,8 @@ class LearningRepository(
         val hiddenNow = suppressedNow()
         val all = builder().materialize(plan.ids)
             .filterNot { it.chunk.id in hiddenNow }
-        val scope = if (deckId == null) all else all.filter { it.chunk.packId == deckId }
+        val deckTargets = deckId?.let { id -> chunkDao.packChunks(id).mapTo(HashSet()) { it.chunkId } }
+        val scope = if (deckTargets == null) all else all.filter { it.chunk.id in deckTargets }
         val pending = scope.filterNot { it.card.key in answered }
 
         val storedReason = runCatching { GovernorReason.valueOf(plan.reason) }
@@ -786,10 +787,18 @@ class LearningRepository(
     suspend fun remainingByDeck(now: Long = System.currentTimeMillis()): Map<String, Int> {
         val plan = ensureDailyPlan(now)
         val answered = reviewDao.answeredKeysSince(startOfDay(now)).toSet()
-        return builder().materialize(plan.ids)
+        val pending = builder().materialize(plan.ids)
             .filterNot { it.card.key in answered }
-            .groupingBy { it.chunk.packId }
-            .eachCount()
+        if (pending.isEmpty()) return emptyMap()
+        val memberships = chunkDao.membershipsFor(pending.map { it.chunk.id }.distinct())
+            .groupBy { it.chunkId }
+        val counts = linkedMapOf<String, Int>()
+        for (card in pending) {
+            for (membership in memberships[card.chunk.id].orEmpty()) {
+                counts[membership.packId] = (counts[membership.packId] ?: 0) + 1
+            }
+        }
+        return counts
     }
 
     /** One state per deck, so an unavailable control can explain itself. */
@@ -840,7 +849,7 @@ class LearningRepository(
         val cards = browseCandidates(deckId, limit = room, now = now)
         val first = cards.firstOrNull()
             ?: return@withLock BrowsePlan(emptyList(), deckId, title)
-        if (!insertBrowseExposure(first, now)) {
+        if (!insertBrowseExposure(first, deckId, now)) {
             return@withLock BrowsePlan(emptyList(), deckId, title)
         }
         BrowsePlan(cards, deckId, title)
@@ -849,10 +858,11 @@ class LearningRepository(
     /** Records the next card before the interface puts its answer on screen. */
     suspend fun recordBrowse(
         card: SessionCard,
+        deckId: String? = null,
         now: Long = System.currentTimeMillis()
     ): Boolean = writeLock.withLock {
         val plan = ensureDailyPlanLocked(now)
-        browseRoom(plan, now) > 0 && insertBrowseExposure(card, now)
+        browseRoom(plan, now) > 0 && insertBrowseExposure(card, deckId, now)
     }
 
     /** Required questions are the fixed prefix; explicit extras are appended. */
@@ -960,15 +970,18 @@ class LearningRepository(
         return builder().materialize(eligible.map { it.key })
     }
 
-    private suspend fun insertBrowseExposure(card: SessionCard, now: Long): Boolean =
-        browseDao.insert(
-            BrowseExposureEntity(
-                day = dayKey(now),
-                chunkId = card.chunk.id,
-                packId = card.chunk.packId,
-                ts = now
-            )
-        ) != -1L
+    private suspend fun insertBrowseExposure(
+        card: SessionCard,
+        deckId: String?,
+        now: Long
+    ): Boolean = browseDao.insert(
+        BrowseExposureEntity(
+            day = dayKey(now),
+            chunkId = card.chunk.id,
+            packId = deckId ?: card.chunk.packId,
+            ts = now
+        )
+    ) != -1L
 
     /**
      * "Ещё немного". Adds cards that are already due to today's plan and
