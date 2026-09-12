@@ -388,18 +388,116 @@ def new_target_group(
     return group
 
 
-def write_deck(path: Path, deck_id: str, targets: list[dict[str, Any]]) -> int:
-    with path.open("w", encoding="utf-8", newline="\n") as handle:
+def _deck_row_bytes(deck_id: str, position: int, target: dict[str, Any]) -> bytes:
+    # id remains deck-local for v1-compatible import. targetId is global
+    # catalogue identity; runtime shared scheduling is introduced only when the
+    # learner database can represent deck membership safely.
+    row = {"id": "%s-%05d" % (deck_id, position), **target}
+    return (json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8")
+
+
+def fit_deck_to_byte_cap(
+    deck_id: str,
+    targets: list[dict[str, Any]],
+    max_bytes: int = MAX_DECK_BYTES,
+) -> tuple[int, int]:
+    """Fit a logical deck under the client byte ceiling without losing targets.
+
+    Alternative contexts are optional evidence around one learning target.  If a
+    very rich 8k-target deck grows beyond the static-download ceiling, dropping a
+    few alternatives is safer than either rejecting the whole catalogue or
+    silently reducing the number of learning targets.  Every target always keeps
+    its primary context.
+
+    Returns ``(final_size, removed_alternative_contexts)``.  The function mutates
+    only each target's optional ``contexts`` list.
+    """
+    row_sizes = [_deck_row_bytes(deck_id, i, target) for i, target in enumerate(targets, start=1)]
+    total = sum(map(len, row_sizes))
+    if total <= max_bytes:
+        return total, 0
+
+    # First prove that all primary contexts fit.  If they do not, there is no
+    # honest way to keep the requested target count within the client's hard
+    # download ceiling; fail with a useful diagnostic rather than dropping
+    # learning targets behind the caller's back.
+    primary_sizes: list[int] = []
+    for i, target in enumerate(targets, start=1):
+        base = dict(target)
+        base.pop("contexts", None)
+        primary_sizes.append(len(_deck_row_bytes(deck_id, i, base)))
+    primary_total = sum(primary_sizes)
+    if primary_total > max_bytes:
+        raise ValueError(
+            "%s primary contexts alone are %.1f MiB; reduce --max-deck or split the logical deck"
+            % (deck_id, primary_total / 1048576)
+        )
+
+    # Remove the largest optional context contribution first.  This reaches the
+    # cap with the fewest removals in the common case and is deterministic.  A
+    # target with three contexts may lose its third before another target loses
+    # its second, but no target ever loses the primary context.
+    import heapq
+
+    heap: list[tuple[int, int]] = []
+
+    def marginal_saving(index: int) -> int:
+        target = targets[index]
+        contexts = target.get("contexts") or []
+        if not contexts:
+            return 0
+        before = len(_deck_row_bytes(deck_id, index + 1, target))
+        trial = dict(target)
+        remain = list(contexts[:-1])
+        if remain:
+            trial["contexts"] = remain
+        else:
+            trial.pop("contexts", None)
+        after = len(_deck_row_bytes(deck_id, index + 1, trial))
+        return before - after
+
+    for index, target in enumerate(targets):
+        if target.get("contexts"):
+            saving = marginal_saving(index)
+            if saving > 0:
+                heapq.heappush(heap, (-saving, index))
+
+    removed = 0
+    while total > max_bytes and heap:
+        neg_saving, index = heapq.heappop(heap)
+        saving = -neg_saving
+        contexts = list(targets[index].get("contexts") or [])
+        if not contexts:
+            continue
+        contexts.pop()
+        if contexts:
+            targets[index]["contexts"] = contexts
+        else:
+            targets[index].pop("contexts", None)
+        total -= saving
+        removed += 1
+        next_saving = marginal_saving(index)
+        if next_saving > 0:
+            heapq.heappush(heap, (-next_saving, index))
+
+    # Recompute exactly instead of trusting accumulated deltas; this also makes
+    # the size returned to index.json byte-for-byte identical to the file we
+    # are about to write.
+    total = sum(len(_deck_row_bytes(deck_id, i, target)) for i, target in enumerate(targets, start=1))
+    if total > max_bytes:
+        raise ValueError("%s could not be fitted below the deck byte ceiling" % deck_id)
+    return total, removed
+
+
+def write_deck(path: Path, deck_id: str, targets: list[dict[str, Any]]) -> tuple[int, int]:
+    expected_size, removed = fit_deck_to_byte_cap(deck_id, targets)
+    with path.open("wb") as handle:
         for position, target in enumerate(targets, start=1):
-            # id remains deck-local for v1-compatible import. targetId is global
-            # catalogue identity; runtime shared scheduling is introduced only
-            # when the learner database can represent deck membership safely.
-            row = {"id": "%s-%05d" % (deck_id, position), **target}
-            handle.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
+            handle.write(_deck_row_bytes(deck_id, position, target))
     size = path.stat().st_size
-    if size > MAX_DECK_BYTES:
-        raise ValueError("%s is %.1f MiB; deck assets must stay below 24 MiB" % (path.name, size / 1048576))
-    return size
+    if size != expected_size or size > MAX_DECK_BYTES:
+        raise ValueError("%s deck byte accounting mismatch" % path.name)
+    return size, removed
 
 def tier(chunk_count: int, threshold: int) -> str:
     return "full" if chunk_count >= threshold else "thin"
@@ -493,8 +591,6 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                 level, tid, context = made
                 seen_contexts[tid].add(context["contextId"])
                 targets_by_level[level][tid] = new_target_group(tid, context, transcriber, pair_stats)
-                output_targets.add((lang, tid))
-                output_contexts.add((lang, context["contextId"]))
                 if all(len(targets_by_level[level]) >= args.max_deck for level in core.LEVELS):
                     break
 
@@ -522,7 +618,6 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                     seen_contexts[tid].add(context["contextId"])
                     group = targets_by_level[level][tid]
                     add_context_to_group(group, context, transcriber, pair_stats)
-                    output_contexts.add((lang, context["contextId"]))
                     if 1 + len(group.get("contexts", [])) >= args.contexts_per_target:
                         open_targets.discard(tid)
 
@@ -543,9 +638,16 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                     continue
                 deck_id = "%s-%s-%s-%s" % (lang, meaning_lang, collection, level)
                 path = out / (deck_id + ".jsonl")
-                size = write_deck(path, deck_id, targets)
+                size, contexts_trimmed = write_deck(path, deck_id, targets)
+                if contexts_trimmed:
+                    pair_stats["alternative contexts dropped for deck byte cap"] += contexts_trimmed
                 pair_decks += 1
                 deck_contexts = sum(1 + len(target.get("contexts", [])) for target in targets)
+                for target in targets:
+                    output_targets.add((lang, target["targetId"]))
+                    output_contexts.add((lang, target["contextId"]))
+                    for alt in target.get("contexts", []):
+                        output_contexts.add((lang, alt["contextId"]))
                 decks.append(
                     {
                         "id": deck_id,
@@ -579,26 +681,43 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                     }
                 )
             if pair_decks:
+                written_decks = [
+                    deck for deck in decks
+                    if deck["collection"] == collection
+                    and deck["lang"] == lang
+                    and deck["meaningLang"] == meaning_lang
+                ]
+                written_targets = sum(deck["chunkCount"] for deck in written_decks)
+                written_contexts = sum(deck["contextCount"] for deck in written_decks)
                 collection_pairs.append(
                     {
                         "collection": collection,
                         "lang": lang,
                         "meaningLang": meaning_lang,
-                        "tier": tier(pair_target_count, args.full_threshold),
+                        "tier": tier(written_targets, args.full_threshold),
                         "deckCount": pair_decks,
-                        "chunkCount": pair_target_count,
-                        "contextCount": pair_context_count,
+                        "chunkCount": written_targets,
+                        "contextCount": written_contexts,
                     }
                 )
             stats.update(pair_stats)
+            retained_contexts = (
+                collection_pairs[-1]["contextCount"]
+                if pair_decks and collection_pairs
+                else pair_context_count
+            )
+            trimmed_note = ""
+            if retained_contexts != pair_context_count:
+                trimmed_note = " / %d selected before byte cap" % pair_context_count
             print(
-                "  %s %s->%s: %d targets / %d contexts (%s)"
+                "  %s %s->%s: %d targets / %d contexts%s (%s)"
                 % (
                     collection,
                     lang,
                     meaning_lang,
                     pair_target_count,
-                    pair_context_count,
+                    retained_contexts,
+                    trimmed_note,
                     ", ".join("%s=%d" % (level, len(targets_by_level[level])) for level in core.LEVELS),
                 ),
                 flush=True,

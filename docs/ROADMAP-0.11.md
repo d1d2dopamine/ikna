@@ -17,7 +17,7 @@ Status: specified in [`CATALOGUE-V2.md`](CATALOGUE-V2.md).
 - Add the `Everyday`, `Knowledge` and `World` collection dimension.
 - Preserve v1 index/card fields so older builds can still read v2 files.
 - Define structured source provenance, target/context identity and morphology fields.
-- Keep the current 2 MiB index cap and 24 MiB per-deck cap during migration.
+- Keep the current 2 MiB index cap and 24 MiB per-deck cap during migration. Catalogue v2 preserves selected targets under that cap by trimming only optional alternative contexts when necessary.
 
 ### Part 2 - New corpus ingestion
 

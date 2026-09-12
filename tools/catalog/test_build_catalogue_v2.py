@@ -12,6 +12,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 from catalogue_v2 import target_id
+from build_catalogue_v2 import fit_deck_to_byte_cap
 from ingest.model import Candidate, Origin, write_jsonl
 from segmentation import utf16_slice
 
@@ -29,7 +30,54 @@ def candidate(context: str, meaning: str, context_ref: str, meaning_ref: str, co
     )
 
 
+def check_deck_byte_cap_keeps_targets() -> None:
+    # A rich deck may exceed the static 24 MiB production ceiling only because
+    # of optional contexts.  The fitter must remove alternatives, never primary
+    # contexts or learning targets.  Use a tiny cap here so the regression test
+    # stays fast.
+    targets = []
+    for i in range(6):
+        targets.append(
+            {
+                "targetId": f"t2:en:{i}",
+                "text": f"target-{i}",
+                "context": f"Primary context {i}.",
+                "translation": "meaning",
+                "targetStart": 0,
+                "targetEnd": 6,
+                "freqRank": i + 1,
+                "tokens": [],
+                "contextId": f"tatoeba:{i}",
+                "meaningId": f"tatoeba:{100+i}",
+                "sourceFamily": "tatoeba",
+                "contexts": [
+                    {
+                        "context": "A" * 900,
+                        "translation": "B" * 500,
+                        "targetStart": 0,
+                        "targetEnd": 1,
+                        "freqRank": i + 1,
+                        "tokens": [],
+                        "contextId": f"tatoeba:{i}:alt:{j}",
+                        "meaningId": f"tatoeba:{100+i}:alt:{j}",
+                        "sourceFamily": "tatoeba",
+                    }
+                    for j in range(2)
+                ],
+            }
+        )
+    before_targets = [target["targetId"] for target in targets]
+    before_contexts = sum(1 + len(target.get("contexts", [])) for target in targets)
+    size, removed = fit_deck_to_byte_cap("fixture-deck", targets, max_bytes=7_000)
+    assert size <= 7_000
+    assert removed > 0
+    assert [target["targetId"] for target in targets] == before_targets
+    assert all(target.get("context") for target in targets)
+    assert sum(1 + len(target.get("contexts", [])) for target in targets) == before_contexts - removed
+
+
 def main() -> int:
+    check_deck_byte_cap_keeps_targets()
     rows = [
         # Repeated exact target "zebra" in distinct source contexts proves that the
         # v2 builder no longer enforces one card per written target.

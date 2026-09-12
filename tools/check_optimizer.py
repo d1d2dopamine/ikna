@@ -69,7 +69,16 @@ class OptimizerChecks(unittest.TestCase):
   self.assertIn('boundDerivedMemoryV1',(S/'domain/fsrs/Scheduler.kt').read_text())
  def test_version_and_ci_test_targets(self):
   text=(ROOT/'app/build.gradle.kts').read_text();self.assertIn('"0.10.0 press"',text);self.assertIn('200100000',text)
-  for p in ('app/build.gradle.kts','shared/build.gradle.kts','desktop/build.gradle.kts'):self.assertIn('"2.2.20"',(ROOT/p).read_text())
+  # Kotlin plugin versions are deliberately centralized in the root project so
+  # Gradle loads one plugin classloader for :app, :shared and :desktop.  The old
+  # assertion required each subproject to repeat the version and therefore
+  # contradicted Gradle's own warning/fix.
+  root=(ROOT/'build.gradle.kts').read_text()
+  for plugin in ('org.jetbrains.kotlin.android','org.jetbrains.kotlin.multiplatform','org.jetbrains.kotlin.jvm','org.jetbrains.kotlin.plugin.compose','org.jetbrains.kotlin.plugin.serialization'):
+   self.assertIn(f'id("{plugin}") version "2.2.20" apply false',root)
+  for p in ('app/build.gradle.kts','shared/build.gradle.kts','desktop/build.gradle.kts'):
+   module=(ROOT/p).read_text()
+   self.assertNotRegex(module,r'id\("org\.jetbrains\.kotlin[^"]*"\)\s+version\s+"')
   text=(ROOT/'desktop/build.gradle.kts').read_text()
   for name in ('optimizer','fsrs'):self.assertIn('app/src/test/java/dev/ikna/domain/'+name,text)
 if __name__=='__main__':unittest.main(verbosity=2)

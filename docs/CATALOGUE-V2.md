@@ -316,7 +316,7 @@ During the transition:
 - all v1 required card fields remain present;
 - `licence`, `attribution` and `sources` remain populated;
 - the source credit remains inside `translation`;
-- no individual deck may exceed the current 24 MiB app download cap;
+- no individual deck may exceed the current 24 MiB app download cap; if a rich multi-context deck would cross that ceiling, the builder keeps every selected learning target and its primary context, then removes only optional alternative contexts (largest byte contributions first) until the asset fits;
 - `index.json` must remain below the current 2 MiB app cap;
 - the bundled starter pack is repinned only when v2 is actually published.
 
