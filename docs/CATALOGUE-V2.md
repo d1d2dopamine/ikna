@@ -54,7 +54,9 @@ en-ru-knowledge-beginner
 en-ru-world-beginner
 ```
 
-The asset name is the deck id plus `.jsonl`. The collection is intentionally part
+The asset name is the deck id plus `.jsonl.gz`. The payload is still the same
+newline-delimited JSON contract after decompression; gzip is only a lossless
+storage/transfer layer. The collection is intentionally part
 of the local deck identity too. A v2 `Everyday` deck is not imported over an
 already installed v1 deck: the rebuild changes card membership and positional
 card ids, so reusing the old pack id could attach existing review history to
@@ -310,13 +312,20 @@ Existing readers use Kotlin serialization with `ignoreUnknownKeys = true` for bo
 the catalogue index and pack JSONL. Therefore new optional fields do not make an
 older app reject the catalogue.
 
+That schema compatibility does **not** mean pre-0.11 clients can install the new
+compressed assets: older `catalogDeckUrl` code only accepts `.jsonl`. Publication
+therefore remains gated on shipping the 0.11 reader first (or atomically with the
+catalogue rollout). The old public v1 catalogue stays untouched until then.
+
 During the transition:
 
 - all v1 required deck fields remain present;
 - all v1 required card fields remain present;
 - `licence`, `attribution` and `sources` remain populated;
 - the source credit remains inside `translation`;
-- no individual deck may exceed the current 24 MiB app download cap; if a rich multi-context deck would cross that ceiling, the builder keeps every selected learning target and its primary context, then removes only optional alternative contexts (largest byte contributions first) until the asset fits;
+- no individual deck may exceed the current 24 MiB **decompressed** app import cap; if a rich multi-context deck would cross that ceiling, the builder keeps every selected learning target and its primary context, then removes only optional alternative contexts (largest byte contributions first) until the logical JSONL fits;
+- v2 deck assets are then gzip-compressed deterministically (`mtime=0`). `sizeBytes` is the actual network size and `uncompressedSizeBytes` records the separately enforced import size;
+- compressed decks carry three preview rows in `index.json`, so preview never needs to download or partially decode a gzip stream;
 - `index.json` must remain below the current 2 MiB app cap;
 - the bundled starter pack is repinned only when v2 is actually published.
 
@@ -333,6 +342,11 @@ The eventual rollout is atomic from the index's point of view:
 1. Build and validate all v2 assets.
 2. Upload deck assets to the existing `catalog` release.
 3. Publish `index.json` last.
+
+Before publication the census is run directly over the freshly built directory,
+including `.jsonl.gz` assets, and is cross-checked against that build's
+`BUILD.json`. A mismatch is fatal; a report from the old public `catalog` release
+cannot accidentally pass as evidence for the new build.
 4. Rename the release title to `Catalogue v2` as part of the v2 publish.
 5. Repin the bundled starter deck and run application CI.
 

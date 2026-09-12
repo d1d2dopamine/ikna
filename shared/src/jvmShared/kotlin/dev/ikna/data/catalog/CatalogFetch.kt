@@ -5,9 +5,11 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import dev.ikna.data.pack.PackChunk
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.zip.GZIPInputStream
 
 /*
  * The static requests the catalogue can make, and nothing else.
@@ -48,6 +50,7 @@ private const val BUFFER_BYTES = 64 * 1024
  */
 private const val MAX_INDEX_BYTES = 2 * 1024 * 1024
 private const val MAX_DECK_BYTES = 24 * 1024 * 1024
+private const val MAX_DECK_DOWNLOAD_BYTES = 24 * 1024 * 1024
 private const val MAX_PREVIEW_BYTES = 96 * 1024
 private const val PREVIEW_SCAN_LINES = 12
 const val CATALOG_PREVIEW_COUNT = 3
@@ -69,7 +72,7 @@ fun catalogDeckUrl(fileName: String): String? {
         return null
     }
     if (name.startsWith(".") || name.contains("..")) return null
-    if (!name.endsWith(".jsonl", ignoreCase = true)) return null
+    if (!name.endsWith(".jsonl", ignoreCase = true) && !name.endsWith(".jsonl.gz", ignoreCase = true)) return null
     return CATALOG_BASE_URL + name
 }
 
@@ -103,10 +106,10 @@ class CatalogFetch(
      * percent, exactly as the updater's download reports itself -- the band on
      * screen is the same band, so it had better be fed the same way.
      *
-     * The file is held in memory rather than written to the cache. A deck is a
-     * couple of megabytes of text on its way into the database in one go; a file
-     * on disk would be a second copy to delete afterwards and a half-written one
-     * to explain when the network drops.
+     * Catalogue v2 deck assets are gzip-compressed on the release. The download
+     * ceiling and the decompressed ceiling are checked independently: compression
+     * is a storage optimisation, never a way around the amount of text the app is
+     * willing to hold and import.
      */
     suspend fun deck(
         deck: CatalogDeck,
@@ -120,23 +123,29 @@ class CatalogFetch(
 
             val declared = connection.contentLengthLong
             val total = if (declared > 0L) declared else deck.sizeBytes
-            if (total > MAX_DECK_BYTES) return@withContext null
+            if (total > MAX_DECK_DOWNLOAD_BYTES) return@withContext null
+            if (deck.uncompressedSizeBytes > MAX_DECK_BYTES) return@withContext null
 
-            val text = StringBuilder()
+            val bytes = ByteArrayOutputStream(
+                minOf(
+                    if (total in 1..Int.MAX_VALUE.toLong()) total.toInt() else BUFFER_BYTES,
+                    MAX_DECK_DOWNLOAD_BYTES
+                )
+            )
             var read = 0L
             var shown = -1
             onProgress(0L, total)
-            connection.inputStream.reader(Charsets.UTF_8).use { reader ->
-                val buffer = CharArray(BUFFER_BYTES)
+            connection.inputStream.use { input ->
+                val buffer = ByteArray(BUFFER_BYTES)
                 while (true) {
                     // Leaving the screen has to stop the socket, not just stop
                     // looking at it.
                     if (!isActive) return@withContext null
-                    val count = reader.read(buffer)
+                    val count = input.read(buffer)
                     if (count < 0) break
-                    text.append(buffer, 0, count)
+                    bytes.write(buffer, 0, count)
                     read += count
-                    if (read > MAX_DECK_BYTES) return@withContext null
+                    if (read > MAX_DECK_DOWNLOAD_BYTES) return@withContext null
                     val percent = progressPercentOf(read, total)
                     if (percent != shown) {
                         shown = percent
@@ -144,9 +153,9 @@ class CatalogFetch(
                     }
                 }
             }
-            if (text.isEmpty()) return@withContext null
+            if (bytes.size() == 0) return@withContext null
             onProgress(read, total)
-            text.toString()
+            decodeCatalogDeckBytes(bytes.toByteArray(), deck)
         } catch (failed: Exception) {
             null
         } finally {
@@ -163,6 +172,9 @@ class CatalogFetch(
      */
     suspend fun preview(deck: CatalogDeck): List<CatalogPreviewCard>? =
         withContext(Dispatchers.IO) {
+            if (deck.preview.isNotEmpty()) {
+                return@withContext deck.preview.take(CATALOG_PREVIEW_COUNT)
+            }
             val url = catalogDeckUrl(deck.file) ?: return@withContext null
             val text = runCatching { prefix(url, MAX_PREVIEW_BYTES) }.getOrNull()
                 ?: return@withContext null
@@ -231,6 +243,35 @@ class CatalogFetch(
             // can be counted.
             setRequestProperty("User-Agent", "ikna/" + installedVersion)
         }
+}
+
+/** Pure decoder so the compressed catalogue contract is unit-testable without a socket. */
+internal fun decodeCatalogDeckBytes(bytes: ByteArray, deck: CatalogDeck): String? {
+    val compressed = deck.compression.equals("gzip", ignoreCase = true) ||
+        deck.file.endsWith(".gz", ignoreCase = true)
+    if (!compressed) {
+        if (bytes.size > MAX_DECK_BYTES) return null
+        return bytes.toString(Charsets.UTF_8)
+    }
+
+    val out = ByteArrayOutputStream(
+        when {
+            deck.uncompressedSizeBytes in 1..MAX_DECK_BYTES.toLong() -> deck.uncompressedSizeBytes.toInt()
+            else -> BUFFER_BYTES
+        }
+    )
+    return runCatching {
+        GZIPInputStream(ByteArrayInputStream(bytes)).use { input ->
+            val buffer = ByteArray(BUFFER_BYTES)
+            while (true) {
+                val count = input.read(buffer)
+                if (count < 0) break
+                out.write(buffer, 0, count)
+                if (out.size() > MAX_DECK_BYTES) return null
+            }
+        }
+        out.toString(Charsets.UTF_8.name()).takeIf { it.isNotEmpty() }
+    }.getOrNull()
 }
 
 /** Pure parser kept outside the socket so malformed-prefix cases are unit tested. */

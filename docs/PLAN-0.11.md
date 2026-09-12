@@ -81,6 +81,16 @@ tag: catalog
 `max_deck` counts unique target memberships in a collection/level deck, not raw
 context rows. Alternative contexts are measured separately.
 
+The first complete scale build retained **443,366 unique exact targets**,
+**1,187,151 target/deck memberships**, **2,613,071 natural contexts** and
+**1,533,669 unique source contexts** across **383 decks / 109 language pairs**.
+That run also exposed a storage problem: the raw self-contained JSONL assets were
+close to 400 MB as a whole. The content is not being reduced to solve that. The
+next checkpoint keeps the same targets, contexts and provenance but stores v2
+deck assets as deterministic `.jsonl.gz`; the client decompresses them under the
+existing 24 MiB logical-deck cap. Representative catalogue JSONL compresses to
+roughly one seventh of its raw size.
+
 The workflow may take substantially longer than Catalogue v1 because it stages
 and deduplicates millions of source candidates, assigns global target/context
 relations and performs a full census. Runtime is a performance concern, but it
@@ -103,6 +113,7 @@ Do not judge the result by a single `cards` number. Review these separately:
 - invalid-offset count;
 - provenance/licence failures;
 - deck assets that approached the 24 MiB client cap.
+- compressed deck bytes, raw JSONL bytes and their storage ratio.
 
 The first artifacts to keep are the build summary and `catalogue-meta-info`
 report. A successful workflow is evidence that the pipeline ran, not evidence
@@ -112,7 +123,8 @@ that the material is ready to publish.
 
 ### Part 4 follow-up - full corpus evidence
 
-- Complete at least one full `publish=false` Catalogue v2 build.
+- Re-run the full `publish=false` Catalogue v2 build with compressed deck assets
+  and require the fresh census to match that build's `BUILD.json`.
 - Review the census and samples from large and thin language pairs.
 - Measure where the 8,000-target safety cap is actually binding.
 - Profile the builder if full rebuild time remains excessive; optimize passes and indexes without changing target/context semantics.

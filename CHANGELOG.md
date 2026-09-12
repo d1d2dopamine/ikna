@@ -15,6 +15,14 @@ words mean and what a number promises inside an epoch is written down once, in
 
 ## 0.11.0 press (in development)
 
+Catalogue v2 deck storage is now losslessly compacted as deterministic gzip
+JSONL. The importer still receives the exact same logical rows after
+decompression, while `index.json` records compressed and uncompressed sizes
+separately and carries three preview rows per deck. The pre-publication census
+now reads compressed assets directly and cross-checks its totals against the
+same build's `BUILD.json`, so an old public-catalogue report cannot be confused
+with the current v2 build.
+
 Catalogue v2 CI corpus downloads are atomic, resumable and retried on transport failures (including connection resets); downloaded archives are validated before ingestion, and UD clones retry over HTTP/1.1.
 
 The 0.11 checkpoint also fixes the compact Android home-screen widget: the count and its localized noun now share one baseline inside the declared 2 x 1 cell, and the provider no longer advertises an unrealistically short 40dp minimum height that allowed launchers to clip the number. Major README sections regain their emoji navigation markers, and `CONTRIBUTING.md` plus `docs/PLAN-0.11.md` now document how to work on the repository and what still blocks the release.

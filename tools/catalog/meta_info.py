@@ -13,6 +13,7 @@ Input is a directory containing the assets from the GitHub release tagged
 from __future__ import annotations
 
 import argparse
+import gzip
 import hashlib
 import json
 import re
@@ -28,7 +29,7 @@ SOURCE_RE = re.compile(r"(?:^|\n)\u2014\s*Tatoeba\s+#(\d+)\s*$")
 DECK_RE = re.compile(
     r"^(?P<lang>[a-z]{2})-(?P<meaning>[a-z]{2})-"
     r"(?:(?P<collection>everyday|knowledge|world)-)?"
-    r"(?P<level>beginner|middle|advanced)(?P<pd>-pd)?\.jsonl$"
+    r"(?P<level>beginner|middle|advanced)(?P<pd>-pd)?\.jsonl(?:\.gz)?$"
 )
 REQUIRED_FIELDS = (
     "id",
@@ -75,6 +76,12 @@ def deck_from_filename(path: Path) -> dict[str, str]:
         "collection": match.group("collection") or "legacy",
         "family": "public-domain" if match.group("pd") else "attributed",
     }
+
+
+def open_deck(path: Path):
+    if path.name.endswith(".gz"):
+        return gzip.open(path, "rt", encoding="utf-8")
+    return path.open(encoding="utf-8")
 
 
 def load_index(root: Path) -> tuple[dict[str, dict[str, Any]], dict[str, Any] | None]:
@@ -133,11 +140,17 @@ class Stats:
 
 def analyse(root: Path) -> tuple[dict[str, Any], list[TargetGroup]]:
     deck_index, index = load_index(root)
-    paths = sorted(root.glob("*.jsonl"))
+    paths = sorted([*root.glob("*.jsonl"), *root.glob("*.jsonl.gz")])
     if not paths:
-        raise SystemExit(f"no .jsonl catalogue assets found in {root}")
+        raise SystemExit(f"no .jsonl/.jsonl.gz catalogue assets found in {root}")
 
     stats = Stats(files=len(paths))
+    deck_asset_bytes = sum(path.stat().st_size for path in paths)
+    declared_uncompressed_bytes = sum(
+        int(item.get("uncompressedSizeBytes") or item.get("sizeBytes") or 0)
+        for item in (index or {}).get("decks", [])
+        if isinstance(item, dict)
+    )
     seen_ids: set[str] = set()
     targets: dict[tuple[str, str], TargetGroup] = {}
     unique_target_source: set[tuple[str, str, str]] = set()
@@ -154,7 +167,7 @@ def analyse(root: Path) -> tuple[dict[str, Any], list[TargetGroup]]:
         source_family = str(deck.get("sourceFamily") or "legacy")
 
         try:
-            handle = path.open(encoding="utf-8")
+            handle = open_deck(path)
         except OSError as error:
             raise SystemExit(f"cannot read {path}: {error}")
         with handle:
@@ -275,6 +288,8 @@ def analyse(root: Path) -> tuple[dict[str, Any], list[TargetGroup]]:
         "input": {
             "directory": str(root),
             "indexPresent": index is not None,
+            "indexVersion": index.get("version") if index else None,
+            "catalogueVersion": index.get("catalogueVersion") if index else None,
             "indexBuiltAt": index.get("builtAt") if index else None,
             "deckFiles": stats.files,
             "indexDecks": len(index.get("decks", [])) if index else None,
@@ -283,6 +298,8 @@ def analyse(root: Path) -> tuple[dict[str, Any], list[TargetGroup]]:
         "catalogue": {
             "targetDeckMemberships": stats.cards,
             "contexts": stats.contexts,
+            "deckAssetBytes": deck_asset_bytes,
+            "declaredUncompressedBytes": declared_uncompressed_bytes,
             "parseErrors": stats.parse_errors,
             "emptyLines": stats.empty_lines,
             "duplicateCardIds": stats.duplicate_card_ids,
@@ -360,6 +377,9 @@ def markdown_report(data: dict[str, Any], groups: list[TargetGroup], top: int) -
         "This report inspects the published catalogue as data. It does not rebuild or modify it.",
         "Exact targets use Unicode NFKC + case-folding only; morphology is deliberately not inferred.",
         "",
+        f"Catalogue index version: **{inp.get('indexVersion') or '?'}** · generation: **{inp.get('catalogueVersion') or '?'}** · built: **{inp.get('indexBuiltAt') or '?'}**.",
+        *(["BUILD.json cross-check: **verified**."] if inp.get("buildVerified") else []),
+        "",
         "## Snapshot",
         "",
         "| metric | value |",
@@ -371,6 +391,9 @@ def markdown_report(data: dict[str, Any], groups: list[TargetGroup], top: int) -
         f"| unique exact targets | {tar['uniqueExactTargets']:,} |",
         f"| unique target + source-context pairs | {tar['uniqueTargetSourcePairs']:,} |",
         f"| target memberships beyond unique exact targets | {tar['targetMembershipsBeyondUniqueTargets']:,} |",
+        f"| deck assets on disk | {cat['deckAssetBytes'] / 1048576:.1f} MiB |",
+        f"| declared raw JSONL | {cat['declaredUncompressedBytes'] / 1048576:.1f} MiB |",
+        f"| storage ratio | {100.0 * cat['deckAssetBytes'] / max(1, cat['declaredUncompressedBytes']):.1f}% |",
         "",
         "## Context reuse",
         "",
@@ -484,7 +507,12 @@ def markdown_report(data: dict[str, Any], groups: list[TargetGroup], top: int) -
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Inspect metadata and target/context reuse in an ikna catalogue.")
-    parser.add_argument("--dir", required=True, type=Path, help="directory containing index.json and deck .jsonl assets")
+    parser.add_argument("--dir", required=True, type=Path, help="directory containing index.json and deck .jsonl/.jsonl.gz assets")
+    parser.add_argument(
+        "--expect-build",
+        type=Path,
+        help="optional BUILD.json from this exact build; fail if census totals disagree",
+    )
     parser.add_argument("--json", dest="json_out", type=Path, help="write machine-readable report here")
     parser.add_argument("--markdown", dest="md_out", type=Path, help="write human-readable report here")
     parser.add_argument("--top", type=int, default=50, help="number of multi-context target groups to show")
@@ -492,6 +520,28 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     data, groups = analyse(args.dir)
+    if args.expect_build:
+        expected = json.loads(args.expect_build.read_text(encoding="utf-8"))
+        output = expected.get("output") or {}
+        actual = data["catalogue"]
+        targets = data["targets"]
+        checks = {
+            "targetDeckMemberships": (actual["targetDeckMemberships"], output.get("targetDeckMemberships")),
+            "contexts": (actual["contexts"], output.get("contexts")),
+            "uniqueSourceContexts": (actual["uniqueSourceContexts"], output.get("uniqueSourceContexts")),
+            "uniqueTargets": (targets["uniqueExactTargets"], output.get("uniqueTargets")),
+            "decks": (data["input"]["deckFiles"], output.get("decks")),
+            "compressedDeckBytes": (actual["deckAssetBytes"], output.get("compressedDeckBytes")),
+            "uncompressedDeckBytes": (actual["declaredUncompressedBytes"], output.get("uncompressedDeckBytes")),
+        }
+        mismatches = [
+            f"{name}: census={got}, build={want}"
+            for name, (got, want) in checks.items()
+            if want is not None and got != want
+        ]
+        if mismatches:
+            raise SystemExit("census does not describe this Catalogue v2 build: " + "; ".join(mismatches))
+        data["input"]["buildVerified"] = True
     report = markdown_report(data, groups, max(0, args.top))
 
     if args.json_out:

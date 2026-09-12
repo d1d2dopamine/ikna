@@ -489,15 +489,40 @@ def fit_deck_to_byte_cap(
     return total, removed
 
 
-def write_deck(path: Path, deck_id: str, targets: list[dict[str, Any]]) -> tuple[int, int]:
-    expected_size, removed = fit_deck_to_byte_cap(deck_id, targets)
-    with path.open("wb") as handle:
-        for position, target in enumerate(targets, start=1):
-            handle.write(_deck_row_bytes(deck_id, position, target))
+def write_deck(path: Path, deck_id: str, targets: list[dict[str, Any]]) -> tuple[int, int, int]:
+    """Write one self-contained deck as deterministic gzip-compressed JSONL.
+
+    Catalogue v2 intentionally keeps each user-visible deck independently
+    downloadable.  The first full build showed that the *raw* JSONL representation
+    repeats a lot of natural-language text and token metadata across memberships:
+    443k exact targets produced 1.18M deck memberships and 2.61M retained contexts.
+    Gzip is a lossless storage compaction layer that removes most of that physical
+    repetition without changing a single target, context, id or importer semantic.
+
+    The 24 MiB safety ceiling still applies to the decompressed JSONL because that
+    is what the client holds in memory and imports. ``sizeBytes`` in index.json is
+    the actual network/download size; ``uncompressedSizeBytes`` records the safety
+    size separately.
+
+    Returns ``(compressed_size, uncompressed_size, removed_alternative_contexts)``.
+    """
+    expected_raw_size, removed = fit_deck_to_byte_cap(deck_id, targets)
+    raw = b"".join(
+        _deck_row_bytes(deck_id, position, target)
+        for position, target in enumerate(targets, start=1)
+    )
+    if len(raw) != expected_raw_size or len(raw) > MAX_DECK_BYTES:
+        raise ValueError("%s deck raw byte accounting mismatch" % path.name)
+
+    # mtime=0 makes the bytes reproducible: identical source data produces the
+    # same release asset and SHA-256 instead of changing because the build ran a
+    # minute later.
+    compressed = gzip.compress(raw, compresslevel=9, mtime=0)
+    path.write_bytes(compressed)
     size = path.stat().st_size
-    if size != expected_size or size > MAX_DECK_BYTES:
-        raise ValueError("%s deck byte accounting mismatch" % path.name)
-    return size, removed
+    if size != len(compressed):
+        raise ValueError("%s deck compressed byte accounting mismatch" % path.name)
+    return size, len(raw), removed
 
 def tier(chunk_count: int, threshold: int) -> str:
     return "full" if chunk_count >= threshold else "thin"
@@ -637,8 +662,8 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                 if len(targets) < args.min_deck:
                     continue
                 deck_id = "%s-%s-%s-%s" % (lang, meaning_lang, collection, level)
-                path = out / (deck_id + ".jsonl")
-                size, contexts_trimmed = write_deck(path, deck_id, targets)
+                path = out / (deck_id + ".jsonl.gz")
+                size, raw_size, contexts_trimmed = write_deck(path, deck_id, targets)
                 if contexts_trimmed:
                     pair_stats["alternative contexts dropped for deck byte cap"] += contexts_trimmed
                 pair_decks += 1
@@ -664,6 +689,24 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                         "contextCount": deck_contexts,
                         "file": path.name,
                         "sizeBytes": size,
+                        "uncompressedSizeBytes": raw_size,
+                        "compression": "gzip",
+                        # Preview data belongs in the small index for compressed
+                        # assets.  A HTTP Range prefix of a gzip stream is not a
+                        # reliable independently-decodable preview.
+                        "preview": [
+                            {
+                                "text": target["text"],
+                                "context": target["context"],
+                                "translation": target["translation"].split(core.SOURCE_MARK, 1)[0],
+                                **(
+                                    {"tatoebaId": target["contextId"].split(":", 1)[1]}
+                                    if target.get("contextId", "").startswith("tatoeba:")
+                                    else {}
+                                ),
+                            }
+                            for target in targets[:3]
+                        ],
                         "subject": "",
                         "level": level,
                         "licence": policy.licence_name,
@@ -784,6 +827,8 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                 "collectionPairs": len(collection_pairs),
                 "uniqueSourceContexts": len(output_contexts),
                 "uniqueTargets": len(output_targets),
+                "compressedDeckBytes": sum(deck["sizeBytes"] for deck in decks),
+                "uncompressedDeckBytes": sum(deck.get("uncompressedSizeBytes", deck["sizeBytes"]) for deck in decks),
             },
             "limits": {
                 "maxDeckTargets": args.max_deck,
@@ -808,6 +853,12 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
             "| unique source contexts | %s |" % f"{len(output_contexts):,}",
             "| decks | %s |" % f"{len(decks):,}",
             "| pairs | %s |" % f"{len(pairs):,}",
+            "| deck assets, compressed | %.1f MiB |" % (build_info["output"]["compressedDeckBytes"] / 1048576),
+            "| deck assets, raw JSONL | %.1f MiB |" % (build_info["output"]["uncompressedDeckBytes"] / 1048576),
+            "| storage ratio | %.1f%% |" % (
+                100.0 * build_info["output"]["compressedDeckBytes"]
+                / max(1, build_info["output"]["uncompressedDeckBytes"])
+            ),
             "",
             "## Collections",
             "",

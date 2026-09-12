@@ -14,7 +14,7 @@ on:
         default: "en,ru,pl,es,fr,de,it,pt,zh,ja,ko"
       max_deck:
         description: "Unique learning targets per collection/level deck at most"
-        default: "3000"
+        default: "8000"
       contexts_per_target:
         description: "Natural source contexts kept per exact target and pair"
         default: "3"
@@ -215,9 +215,11 @@ jobs:
         run: |
           python3 tools/catalog/meta_info.py \
             --dir catalog-v2 \
+            --expect-build catalog-v2/BUILD.json \
             --json reports/catalogue-meta-info.json \
             --markdown reports/catalogue-meta-info.md \
             --top 50
+          cp reports/catalogue-meta-info.md catalog-v2/CATALOGUE-V2-CENSUS.md
           cat reports/catalogue-meta-info.md >> "$GITHUB_STEP_SUMMARY"
           cat catalog-v2/BUILD.md >> "$GITHUB_STEP_SUMMARY"
 
@@ -232,6 +234,10 @@ jobs:
             morphology/manifest.json
           if-no-files-found: error
           retention-days: 14
+          # Deck assets are already deterministic gzip streams. Recompressing
+          # hundreds of them in the artifact ZIP wastes runner time for almost
+          # no size gain.
+          compression-level: 0
 
       - name: Prepare release notes
         if: ${{ inputs.publish }}

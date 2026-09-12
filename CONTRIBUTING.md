@@ -208,8 +208,8 @@ intentionally separate from the application build and can run in parallel.
 For a scale/census run, keep publication off. The current working configuration
 for 0.11 is up to 8,000 unique targets per collection/level deck, up to three
 natural contexts per exact target, morphology enabled and phonetics disabled for
-the first census pass. The workflow keeps a conservative lower default for
-manual safety, so set the scale input explicitly when a full census is intended.
+the first census pass. Those values are also the current workflow defaults; do
+not raise them merely to inflate catalogue counts before reviewing the census.
 
 The build may be much slower than Catalogue v1 because it stages and deduplicates
 millions of normalized candidates and keeps global target/context relations.
@@ -217,6 +217,17 @@ Long runtime by itself is not a reason to bypass the quality or provenance gates
 
 The outputs to inspect first are the build summary and `catalogue-meta-info`
 report. Do not publish merely because the workflow succeeded.
+
+Catalogue v2 release decks are `.jsonl.gz`. The JSONL inside remains the pack
+contract used by the importer; compression must never change target selection or
+context grouping. `CatalogDeck.sizeBytes` is the compressed transfer size and
+`uncompressedSizeBytes` is the separately capped logical import size. Preview
+rows live in `index.json` so the UI does not Range-read a partial gzip stream.
+
+The census workflow must use `--dir catalog-v2 --expect-build
+catalog-v2/BUILD.json`. That cross-check exists specifically to prevent a report
+from the currently published v1 `catalog` release being mistaken for evidence
+about a just-built v2 catalogue.
 
 ## 🗄️ Room and migrations
 

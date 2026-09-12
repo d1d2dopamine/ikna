@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import gzip
 import subprocess
 import sys
 import tempfile
@@ -122,9 +123,13 @@ def main() -> int:
         all_contexts = []
         target_collections = {}
         for deck in index["decks"]:
-            assert deck["file"] == deck["id"] + ".jsonl"
+            assert deck["file"] == deck["id"] + ".jsonl.gz"
+            assert deck["compression"] == "gzip"
+            assert deck["sizeBytes"] < deck["uncompressedSizeBytes"]
+            assert 1 <= len(deck.get("preview") or []) <= 3
             assert ("-" + deck["collection"] + "-") in deck["id"]
-            lines = [json.loads(line) for line in (out / deck["file"]).read_text(encoding="utf-8").splitlines() if line]
+            with gzip.open(out / deck["file"], "rt", encoding="utf-8") as handle:
+                lines = [json.loads(line) for line in handle if line.strip()]
             assert len(lines) == deck["chunkCount"]
             for card in lines:
                 assert card["targetId"] == target_id("en", card["text"])
@@ -151,7 +156,8 @@ def main() -> int:
         # Repeated exact targets are represented by one scheduling row with
         # additional natural contexts, never by duplicate rows in one deck.
         for deck in index["decks"]:
-            lines = [json.loads(line) for line in (out / deck["file"]).read_text(encoding="utf-8").splitlines() if line]
+            with gzip.open(out / deck["file"], "rt", encoding="utf-8") as handle:
+                lines = [json.loads(line) for line in handle if line.strip()]
             ids = [card["targetId"] for card in lines]
             assert len(ids) == len(set(ids))
         assert any(card.get("contexts") for card in all_targets)
@@ -160,6 +166,7 @@ def main() -> int:
         assert build["output"]["targetDeckMemberships"] == len(all_targets)
         assert build["output"]["contexts"] == len(all_contexts)
         assert build["output"]["uniqueSourceContexts"] > 0
+        assert build["output"]["compressedDeckBytes"] < build["output"]["uncompressedDeckBytes"]
         assert build["limits"]["maxContextsPerTarget"] == 3
         assert (out / "BUILD.md").exists()
 

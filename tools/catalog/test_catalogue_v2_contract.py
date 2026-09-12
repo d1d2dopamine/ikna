@@ -44,12 +44,17 @@ def check_workflow_download_resilience():
         "gzip -t \"$raw\"",
         "tar -tjf corpus/sentences.tar.bz2",
         "git -c http.version=HTTP/1.1 clone",
+        "--expect-build catalog-v2/BUILD.json",
     ):
         if required not in workflow:
             raise AssertionError("catalogue workflow is missing resilient download contract: %s" % required)
     for required in ("--http1.1", "--continue-at", '${dest}.part'):
         if required not in fetcher:
             raise AssertionError("fetch helper is missing resilience behavior: %s" % required)
+
+    publisher = (root / "tools/catalog/publish.py").read_text(encoding="utf-8")
+    if 'name.endswith(".jsonl.gz")' not in publisher:
+        raise AssertionError("Catalogue v2 publisher must upload compressed deck assets")
 
 
 def main():

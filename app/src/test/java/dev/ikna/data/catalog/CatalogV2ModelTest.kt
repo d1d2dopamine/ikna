@@ -33,7 +33,7 @@ class CatalogV2ModelTest {
               "collections":[{"id":"everyday","title":"Everyday","description":"General language"}],
               "sourceFamilies":[{"id":"tatoeba","title":"Tatoeba","homepage":"https://tatoeba.org","licence":"CC BY 2.0 FR","attribution":"Tatoeba contributors"}],
               "morphology":{"ruleVersion":1,"policy":"ud-exact-context-then-unanimous-form","targetIdentityAffected":false,"datasets":[{"id":"unimorph-eng","sourceFamily":"unimorph","kind":"unimorph","lang":"en","sourceVersion":"pinned","sourceUrl":"https://github.com/unimorph/eng","licence":"CC BY-SA 3.0","licenceUrl":"https://creativecommons.org/licenses/by-sa/3.0/","attribution":"UniMorph English"}]},
-              "decks":[{"id":"en-ru-everyday-beginner","title":"English from Russian - Everyday - beginner","lang":"en","meaningLang":"ru","collection":"everyday","sourceFamily":"tatoeba","morphologySources":["unimorph-eng"]}],
+              "decks":[{"id":"en-ru-everyday-beginner","title":"English from Russian - Everyday - beginner","lang":"en","meaningLang":"ru","collection":"everyday","sourceFamily":"tatoeba","morphologySources":["unimorph-eng"],"file":"en-ru-everyday-beginner.jsonl.gz","sizeBytes":1234,"uncompressedSizeBytes":9876,"compression":"gzip","preview":[{"text":"care","context":"I care.","translation":"Мне не все равно."}]}],
               "pairs":[],
               "collectionPairs":[]
             }"""
@@ -44,6 +44,9 @@ class CatalogV2ModelTest {
         assertEquals("tatoeba", index.sourceFamilies.single().id)
         assertEquals("everyday", index.decks.single().collection)
         assertEquals(listOf("unimorph-eng"), index.decks.single().morphologySources)
+        assertEquals("gzip", index.decks.single().compression)
+        assertEquals(9876L, index.decks.single().uncompressedSizeBytes)
+        assertEquals("care", index.decks.single().preview.single().text)
         assertEquals("nfkc-casefold-exact", index.targetIdentity?.method)
         assertEquals(1, index.morphology?.ruleVersion)
         assertEquals("unimorph-eng", index.morphology?.datasets?.single()?.id)

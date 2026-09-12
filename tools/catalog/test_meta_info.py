@@ -2,6 +2,7 @@
 """Small deterministic checks for tools/catalog/meta_info.py."""
 
 import json
+import gzip
 import tempfile
 import unittest
 from pathlib import Path
@@ -35,7 +36,8 @@ def card(card_id, text, context, source, lemma=None):
 
 def write_deck(root, name, records):
     path = root / name
-    with path.open("w", encoding="utf-8") as handle:
+    opener = gzip.open if name.endswith(".gz") else open
+    with opener(path, "wt", encoding="utf-8") as handle:
         for record in records:
             handle.write(json.dumps(record, ensure_ascii=False) + "\n")
 
@@ -109,6 +111,14 @@ class MetaInfoTests(unittest.TestCase):
             data, _ = meta_info.analyse(root)
             self.assertEqual(data["metadata"]["tokensWithNonIdentityLemma"], 1)
             self.assertEqual(data["targets"]["uniqueExactTargets"], 1)
+
+    def test_gzip_v2_assets_are_analysed(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            write_deck(root, "en-ru-everyday-beginner.jsonl.gz", [card("a", "care", "I care about this.", 1)])
+            data, _ = meta_info.analyse(root)
+            self.assertEqual(data["input"]["deckFiles"], 1)
+            self.assertEqual(data["catalogue"]["targetDeckMemberships"], 1)
 
 
 if __name__ == "__main__":

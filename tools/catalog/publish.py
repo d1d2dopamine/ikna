@@ -213,7 +213,8 @@ def local_files(folder):
     names = sorted(
         name
         for name in os.listdir(folder)
-        if name.endswith(".jsonl") and os.path.isfile(os.path.join(folder, name))
+        if (name.endswith(".jsonl") or name.endswith(".jsonl.gz"))
+        and os.path.isfile(os.path.join(folder, name))
     )
     if os.path.isfile(os.path.join(folder, INDEX)):
         names.append(INDEX)

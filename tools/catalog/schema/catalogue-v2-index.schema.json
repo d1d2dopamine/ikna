@@ -209,11 +209,32 @@
         },
         "file": {
           "type": "string",
-          "pattern": "^[^/]+\\.jsonl$"
+          "pattern": "^[^/]+\\.jsonl(?:\\.gz)?$"
         },
         "sizeBytes": {
           "type": "integer",
           "minimum": 1
+        },
+        "uncompressedSizeBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "compression": {
+          "enum": ["", "gzip"]
+        },
+        "preview": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "required": ["text", "context", "translation"],
+            "properties": {
+              "text": {"type": "string", "minLength": 1},
+              "context": {"type": "string", "minLength": 1},
+              "translation": {"type": "string", "minLength": 1}
+            },
+            "additionalProperties": true
+          }
         },
         "subject": {
           "type": "string"

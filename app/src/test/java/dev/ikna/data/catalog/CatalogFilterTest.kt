@@ -145,6 +145,7 @@ class CatalogFilterTest {
     @Test
     fun `a deck address is built from the release, never from the index`() {
         assertEquals(CATALOG_BASE_URL + "en-ru-core.jsonl", catalogDeckUrl("en-ru-core.jsonl"))
+        assertEquals(CATALOG_BASE_URL + "en-ru-core.jsonl.gz", catalogDeckUrl("en-ru-core.jsonl.gz"))
         // Anything trying to leave the release, or to be something other than a
         // deck, is not fetched at all.
         assertNull(catalogDeckUrl("../../etc/passwd"))

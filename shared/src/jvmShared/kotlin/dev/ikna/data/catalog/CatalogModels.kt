@@ -31,7 +31,14 @@ data class CatalogDeck(
     val contextCount: Int = 0,
     /** File name inside the catalogue release. Never a URL. */
     val file: String = "",
+    /** Bytes transferred over the network for [file]. */
     val sizeBytes: Long = 0L,
+    /** Size after decompression. Zero for legacy indexes that did not publish it. */
+    val uncompressedSizeBytes: Long = 0L,
+    /** Empty for legacy plain JSONL; `gzip` for compact Catalogue v2 assets. */
+    val compression: String = "",
+    /** Three self-contained examples so compressed decks never need a Range preview. */
+    val preview: List<CatalogPreviewCard> = emptyList(),
     /** Empty for general vocabulary; otherwise a topic, already translated. */
     val subject: String = "",
     /** "beginner", "middle", "advanced", or empty when the deck is not levelled. */
@@ -158,6 +165,7 @@ data class CatalogIndex(
 )
 
 /** A small, read-only glimpse of a deck before its full file is downloaded. */
+@Serializable
 data class CatalogPreviewCard(
     val text: String,
     val context: String,
