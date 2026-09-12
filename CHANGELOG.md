@@ -13,6 +13,24 @@ replace the space with a dash: `0.1.1 press` is tagged `v0.1.1-press`. What the
 words mean and what a number promises inside an epoch is written down once, in
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
+## 0.11.0 press (in development)
+
+The 0.11 cycle starts with an architecture contract rather than a UI feature. The
+learning engine is being split conceptually into scheduling, workload, target,
+context, transfer and grading responsibilities, and learning claims now carry an
+explicit evidence status in `docs/SCIENCE.md`.
+
+The proposed **Ikna Database** is a public content layer upstream of Catalogue, not
+the user's local Room database and not telemetry. Its first job is to represent a
+learning target separately from its real corpus occurrences and contexts, so future
+reviews can distinguish a familiar card from retrieval in an unseen source context.
+No runtime context-rotation policy or FSRS weighting changes in this foundation
+step.
+
+See [`docs/ROADMAP-0.11.md`](docs/ROADMAP-0.11.md),
+[`docs/LEARNING-ENGINE.md`](docs/LEARNING-ENGINE.md) and
+[`docs/IKNA-DATABASE.md`](docs/IKNA-DATABASE.md).
+
 ## 0.10.0 press
 
 One study system, three platforms. The same scheduler, governor, decks and review

@@ -1,0 +1,73 @@
+name: catalogue meta-info
+
+# Read-only census of the catalogue already published in GitHub Releases.
+#
+# It deliberately does not rebuild corpora and does not publish anything. The
+# point is to answer data questions before 0.11 changes the learning model:
+# how many exact targets already occur in genuinely different source contexts,
+# how much metadata the shipped JSONL already carries, and how much repetition
+# is merely the same source sentence appearing in another translation deck.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Catalogue release tag to inspect"
+        default: "catalog"
+      top_groups:
+        description: "Multi-context target groups to include in the report"
+        default: "50"
+
+permissions:
+  contents: read
+
+jobs:
+  meta-info:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Meta-info analyser self-test
+        run: python3 tools/catalog/test_meta_info.py
+
+      - name: Download published catalogue assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p catalogue-assets
+          gh release download "${{ inputs.tag }}" \
+            --repo "$GITHUB_REPOSITORY" \
+            --dir catalogue-assets \
+            --pattern '*.jsonl' \
+            --pattern 'index.json'
+          echo "Downloaded $(find catalogue-assets -maxdepth 1 -name '*.jsonl' -type f | wc -l) deck assets"
+          du -sh catalogue-assets
+
+      - name: Analyse catalogue metadata and context reuse
+        run: |
+          mkdir -p reports
+          python3 tools/catalog/meta_info.py \
+            --dir catalogue-assets \
+            --json reports/catalogue-meta-info.json \
+            --markdown reports/catalogue-meta-info.md \
+            --groups-jsonl reports/multi-context-targets.jsonl \
+            --top "${{ inputs.top_groups }}"
+
+      - name: Add report to workflow summary
+        if: always()
+        run: |
+          if [ -f reports/catalogue-meta-info.md ]; then
+            cat reports/catalogue-meta-info.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Keep reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: catalogue-meta-info-${{ inputs.tag }}
+          path: reports/
+          if-no-files-found: error

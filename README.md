@@ -217,6 +217,10 @@ Versioning rules: [`docs/VERSIONS.md`](docs/VERSIONS.md).
 ## Documentation
 
 [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
+[`LEARNING-ENGINE.md`](docs/LEARNING-ENGINE.md) ·
+[`SCIENCE.md`](docs/SCIENCE.md) ·
+[`IKNA-DATABASE.md`](docs/IKNA-DATABASE.md) ·
+[`ROADMAP-0.11.md`](docs/ROADMAP-0.11.md) ·
 [`DESIGN.md`](docs/DESIGN.md) ·
 [`GOVERNOR.md`](docs/GOVERNOR.md) ·
 [`GRADING.md`](docs/GRADING.md) ·
@@ -460,6 +464,10 @@ Release workflow проверяет совпадение тега и build-фа�
 ## Документация
 
 [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
+[`LEARNING-ENGINE.md`](docs/LEARNING-ENGINE.md) ·
+[`SCIENCE.md`](docs/SCIENCE.md) ·
+[`IKNA-DATABASE.md`](docs/IKNA-DATABASE.md) ·
+[`ROADMAP-0.11.md`](docs/ROADMAP-0.11.md) ·
 [`DESIGN.md`](docs/DESIGN.md) ·
 [`GOVERNOR.md`](docs/GOVERNOR.md) ·
 [`GRADING.md`](docs/GRADING.md) ·

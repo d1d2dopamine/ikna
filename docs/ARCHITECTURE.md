@@ -2,17 +2,29 @@
 
 ## Layers
 
+```text
+corpora -> Ikna Database -> catalogue packs
+                              |
+                              v
+UI (Compose) -> SessionViewModel -> learning engine
+                                      |
+                         Scheduler / Governor
+                         Target / Context / Transfer policy
+                         Grading
+                                      |
+                                      v
+repositories -> local learner database
+                (append-only reviews + rebuildable state)
 ```
-UI (Compose)
-  |
-SessionViewModel  <- SessionBuilder
-  |                     |
-  |                LoadGovernor + ChunkSelector
-  |                     |
-repositories -> Room (append-only reviews + derived tables)
-                  ^
-            PackLoader (assets/packs/*.jsonl)
-```
+
+The content-side **Ikna Database** and the app's local learner database are different
+systems. The first contains public corpus relationships and provenance; the second
+contains private learner history and installed content. See
+[`IKNA-DATABASE.md`](IKNA-DATABASE.md).
+
+The learning responsibilities are specified in
+[`LEARNING-ENGINE.md`](LEARNING-ENGINE.md). Their research status and the rules for
+making scientific claims are in [`SCIENCE.md`](SCIENCE.md).
 
 ## Two memory layers
 
