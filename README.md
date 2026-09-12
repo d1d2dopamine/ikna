@@ -32,7 +32,7 @@
   <a href="docs/ARCHITECTURE.md">Developer docs</a>
 </p>
 
-## What is ikna?
+## 🧩 What is ikna?
 
 ikna teaches languages through **chunks**: a useful phrase, a natural sentence that contains it, and its meaning.
 
@@ -51,7 +51,7 @@ The app is designed around a simple idea: studying should take attention, not ad
 - Import ready-made decks, generate your own, or move from Anki.
 - Keep review history on your device.
 
-## Download
+## ⬇️ Download
 
 | Platform | File in the release |
 | --- | --- |
@@ -75,7 +75,7 @@ Desktop data is stored outside the application files, so replacing the executabl
 
 Android speech is included in the app but ships without a voice model. You can add a Kokoro or Piper model yourself; until then, ikna uses the voice already available on the phone. ikna never downloads voice models on its own. See [`docs/VOICE.md`](docs/VOICE.md).
 
-## Why it feels different
+## 🧠 Why it feels different
 
 ### Two answers, not four ratings
 
@@ -109,7 +109,7 @@ With enough scored history, ikna can fit FSRS parameters locally and validate th
 
 Details: [`docs/FSRS-OPTIMIZER.md`](docs/FSRS-OPTIMIZER.md) · [`docs/FSRS-OPTIMIZER-INTEGRATION.md`](docs/FSRS-OPTIMIZER-INTEGRATION.md)
 
-## Decks
+## 🃏 Decks
 
 You have three ways to get material into ikna:
 
@@ -153,13 +153,13 @@ Repeated imports update the same imported decks instead of creating duplicates. 
 
 More: [`docs/ANKI.md`](docs/ANKI.md).
 
-## Pronunciation
+## 🔊 Pronunciation
 
 Catalogue cards can include IPA pronunciation. Per deck, ikna can show IPA, a readable English respelling, or no pronunciation line.
 
 Production prompts do not reveal the missing answer through pronunciation. See [`docs/PHONETICS.md`](docs/PHONETICS.md).
 
-## Privacy and data
+## 🔒 Privacy and data
 
 ikna has no accounts and no telemetry.
 
@@ -169,7 +169,7 @@ Review history is append-only. Android can export the log and settings to `Docum
 
 See [`PRIVACY.md`](PRIVACY.md) and [`docs/UPDATES.md`](docs/UPDATES.md).
 
-## Interface
+## 🎨 Interface
 
 ikna includes twelve palettes in two lightings, optional imported fonts and motion that can be disabled.
 
@@ -177,7 +177,7 @@ The interface is available in Russian, English, Polish, Spanish, French, German 
 
 Android also provides a home-screen widget and one daily reminder. Desktop currently ships without speech, widget or reminders.
 
-## Build
+## 🔨 Build
 
 Push to `main`, or run the `build` workflow manually, then download the `ikna-apk` artifact. CI provisions Gradle; the wrapper jar is not committed.
 
@@ -214,7 +214,7 @@ The release workflow verifies that the tag matches the build file, runs release 
 
 Versioning rules: [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
-## Documentation
+## 📚 Documentation
 
 [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
 [`DESIGN.md`](docs/DESIGN.md) ·
@@ -235,7 +235,7 @@ Versioning rules: [`docs/VERSIONS.md`](docs/VERSIONS.md).
 [`CHANGELOG.md`](CHANGELOG.md) ·
 [`PRIVACY.md`](PRIVACY.md)
 
-## License
+## ⚖️ License
 
 ikna is free software under the **GNU General Public License, version 3 or (at your option) any later version**. See [LICENSE](LICENSE).
 
@@ -275,7 +275,7 @@ ikna is free software under the **GNU General Public License, version 3 or (at y
   <a href="docs/ARCHITECTURE.md">Документация</a>
 </p>
 
-## Что такое ikna?
+## 🧩 Что такое ikna?
 
 ikna учит язык **кусками**: полезная фраза, естественное предложение с ней и её смысл.
 
@@ -294,7 +294,7 @@ ikna учит язык **кусками**: полезная фраза, есте
 - Можно брать готовые колоды, делать свои или переехать из Anki.
 - История ответов остаётся на устройстве.
 
-## Скачать
+## ⬇️ Скачать
 
 | Платформа | Файл в релизе |
 | --- | --- |
@@ -318,7 +318,7 @@ ikna учит язык **кусками**: полезная фраза, есте
 
 На Android движок озвучки уже входит в приложение, но голосовой модели внутри нет. Можно добавить свою модель Kokoro или Piper; до этого ikna использует системный голос телефона. Само приложение голосовые модели не скачивает. Подробнее: [`docs/VOICE.md`](docs/VOICE.md).
 
-## Чем ikna отличается
+## 🧠 Чем ikna отличается
 
 ### Два ответа вместо четырёх оценок
 
@@ -352,7 +352,7 @@ FSRS-6 планирует их независимо. Отдельные слов
 
 Подробности: [`docs/FSRS-OPTIMIZER.md`](docs/FSRS-OPTIMIZER.md) · [`docs/FSRS-OPTIMIZER-INTEGRATION.md`](docs/FSRS-OPTIMIZER-INTEGRATION.md)
 
-## Колоды
+## 🃏 Колоды
 
 Есть три способа добавить материал.
 
@@ -396,13 +396,13 @@ ikna может выдать готовый промпт для этого фо�
 
 Подробнее: [`docs/ANKI.md`](docs/ANKI.md).
 
-## Произношение
+## 🔊 Произношение
 
 Каталожные карточки могут содержать IPA. Для каждой колоды можно выбрать IPA, читаемую английскую respelling-строку или полностью скрыть произношение.
 
 На production-заданиях произношение не раскрывает пропущенный ответ. Подробнее: [`docs/PHONETICS.md`](docs/PHONETICS.md).
 
-## Приватность и данные
+## 🔒 Приватность и данные
 
 В ikna нет аккаунтов и телеметрии.
 
@@ -412,7 +412,7 @@ ikna может выдать готовый промпт для этого фо�
 
 Подробнее: [`PRIVACY.md`](PRIVACY.md) и [`docs/UPDATES.md`](docs/UPDATES.md).
 
-## Интерфейс
+## 🎨 Интерфейс
 
 В ikna есть двенадцать палитр в двух вариантах освещения, импорт собственных шрифтов и возможность полностью отключить анимации.
 
@@ -420,7 +420,7 @@ ikna может выдать готовый промпт для этого фо�
 
 На Android также есть виджет и одно ежедневное напоминание. Desktop сейчас выходит без озвучки, виджета и напоминаний.
 
-## Сборка
+## 🔨 Сборка
 
 Пуш в `main` или ручной запуск workflow `build`, затем скачать артефакт `ikna-apk`. Gradle ставится в CI; jar wrapper в репозитории не хранится.
 
@@ -457,7 +457,7 @@ Release workflow проверяет совпадение тега и build-фа�
 
 Правила версионирования: [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
-## Документация
+## 📚 Документация
 
 [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
 [`DESIGN.md`](docs/DESIGN.md) ·
@@ -480,6 +480,6 @@ Release workflow проверяет совпадение тега и build-фа�
 
 Документация в `docs/` ведётся на английском.
 
-## Лицензия
+## ⚖️ Лицензия
 
 ikna распространяется под **GNU General Public License версии 3 или, по твоему выбору, любой более поздней версии**. Полный текст: [LICENSE](LICENSE).
