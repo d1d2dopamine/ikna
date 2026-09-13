@@ -6,6 +6,8 @@ data, and what still blocks publication.
 
 The longer sequence and rationale remain in [`ROADMAP-0.11.md`](ROADMAP-0.11.md).
 Scientific confidence and claim wording remain in [`SCIENCE.md`](SCIENCE.md).
+Ideas with no release/date commitment live separately in
+[`UNSCHEDULED.md`](UNSCHEDULED.md); they are not 0.11 obligations.
 
 ## 🎯 Release theme
 
@@ -82,15 +84,25 @@ tag: catalog
 `max_deck` counts unique target memberships in a collection/level deck, not raw
 context rows. Alternative contexts are measured separately.
 
-The first complete scale build retained **443,366 unique exact targets**,
+The verified scale build retains **443,366 unique exact targets**,
 **1,187,151 target/deck memberships**, **2,613,071 natural contexts** and
 **1,533,669 unique source contexts** across **383 decks / 109 language pairs**.
-That run also exposed a storage problem: the raw self-contained JSONL assets were
-close to 400 MB as a whole. The content is not being reduced to solve that. The
-next checkpoint keeps the same targets, contexts and provenance but stores v2
-deck assets as deterministic `.jsonl.gz`; the client decompresses them under the
-existing 24 MiB logical-deck cap. Representative catalogue JSONL compresses to
-roughly one seventh of its raw size.
+The fresh census is cross-checked against that build's `BUILD.json`.
+
+The storage experiment is now measured rather than estimated. Self-contained v2
+decks occupy **3,108.4 MiB** as raw JSONL and **387.1 MiB** as deterministic
+`.jsonl.gz`, a **12.5%** storage ratio. Gzip therefore works well on the raw
+representation, but it did **not** materially shrink the overall GitHub Actions
+artifact compared with the earlier run because that artifact was already applying
+compression to the raw JSONL. Another compression layer is not the solution.
+Meaningful further reduction requires removing repeated physical content across
+deck assets while preserving the same targets, contexts, translations and
+provenance. This is a storage-layout problem, not a reason to discard evidence.
+
+The same census confirms that production morphology is now real rather than an
+identity placeholder: **16.9%** of inspected tokens have a lemma different from
+the written surface. Phonetics is intentionally still disabled for this scale
+build, and `World` remains empty until Global Voices attribution is production-ready.
 
 The workflow may take substantially longer than Catalogue v1 because it stages
 and deduplicates millions of source candidates, assigns global target/context
@@ -124,9 +136,11 @@ that the material is ready to publish.
 
 ### Part 4 follow-up - full corpus evidence
 
-- Re-run the full `publish=false` Catalogue v2 build with compressed deck assets
-  and require the fresh census to match that build's `BUILD.json`.
+- Treat the completed compressed scale build and its verified census as the current
+  storage baseline; do not spend another full rebuild merely changing compression.
 - Review the census and samples from large and thin language pairs.
+- Prototype physical cross-deck deduplication on existing build output before any
+  new full corpus run. Measure savings first; preserve target/context semantics.
 - Measure where the 8,000-target safety cap is actually binding.
 - Profile the builder if full rebuild time remains excessive; optimize passes and indexes without changing target/context semantics.
 - Add production Global Voices acquisition only when canonical article URLs and contributor attribution are available at scale.
@@ -174,6 +188,8 @@ that the material is ready to publish.
 - context selection can accidentally create a second learner memory for the same exact target;
 - Room migration tests do not preserve existing learner data;
 - final catalogue assets have not passed meta-info and size checks;
+- the storage layout for the final v2 publication has not been accepted after the
+  measured 387.1 MiB compressed baseline;
 - `publish=true` would be the first time the exact build configuration is exercised.
 
 ## 🧹 Cleanup/checkpoint work

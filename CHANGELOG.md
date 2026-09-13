@@ -23,6 +23,11 @@ words mean and what a number promises inside an epoch is written down once, in
 
 ## 0.11.0 press (in development)
 
+### Documentation checkpoint
+
+- Recorded the measured Catalogue v2 storage baseline: 3,108.4 MiB raw, 387.1 MiB gzip (12.5%), and clarified that compression alone does not remove cross-deck duplication.
+- Added `docs/UNSCHEDULED.md` for ideas with no release/date commitment; those ideas may be changed or rejected freely and do not block 0.11.
+
 Android release unit tests can now exercise the shared Catalogue v2 gzip decoder across the `:app`/`:shared` module boundary; the decoder remains a pure bounded helper and the catalogue format itself is unchanged.
 
 Catalogue v2 deck storage is now losslessly compacted as deterministic gzip

@@ -2,7 +2,9 @@
 
 Theme: **evidence first**.
 
-Operational checkpoint: [`PLAN-0.11.md`](PLAN-0.11.md).
+Operational checkpoint: [`PLAN-0.11.md`](PLAN-0.11.md). Unscheduled, easily
+rejectable ideas are kept separately in [`UNSCHEDULED.md`](UNSCHEDULED.md) and
+are not release commitments.
 
 0.11 is primarily an architecture, content-data and learning-science release. The
 interface is not the project to optimize in this cycle unless a learning-engine
