@@ -507,6 +507,7 @@ class LearningRepository(
             cleanDays = cleanDays,
             newIntroducedLastWeek = statsDao.newIntroducedSince(valveWindowStart) ?: 0,
             totalReviews = reviewDao.total(),
+            hasScheduledCards = cardDao.hasAny(),
             daysSinceReturn = daysSinceReturn(now),
             overheated = overheating(now)
         )
@@ -775,6 +776,27 @@ class LearningRepository(
      */
     private suspend fun untouchedIn(deckId: String?): Int =
         if (deckId == null) chunkDao.untouchedCount() else chunkDao.untouchedCountFor(deckId)
+
+    /**
+     * How many unique questions are still owed by the whole app today.
+     *
+     * This must never be derived by summing [remainingByDeck]: a Catalogue v2
+     * target can belong to several decks at once, so per-deck membership counts
+     * intentionally overlap. The Home counter and widget represent the global
+     * daily plan and therefore count each scheduled card key once.
+     */
+    suspend fun remainingTodayCount(now: Long = System.currentTimeMillis()): Int {
+        val plan = ensureDailyPlan(now)
+        val answered = reviewDao.answeredKeysSince(startOfDay(now)).toSet()
+        val hidden = suppressedNow()
+        return builder().materialize(plan.ids)
+            .asSequence()
+            .filterNot { it.chunk.id in hidden }
+            .filterNot { it.card.key in answered }
+            .map { it.card.key }
+            .distinct()
+            .count()
+    }
 
     /**
      * What each deck still owes today.

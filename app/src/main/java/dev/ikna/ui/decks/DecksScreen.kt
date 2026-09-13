@@ -67,6 +67,9 @@ class DecksHomeState {
     var today by mutableStateOf<Map<String, Int>>(emptyMap())
         private set
 
+    var todayTotal by mutableStateOf(0)
+        private set
+
     var browseAvailability by mutableStateOf<Map<String, BrowseAvailability>>(emptyMap())
         private set
 
@@ -75,6 +78,9 @@ class DecksHomeState {
         val nextToday = runCatching {
             container.learningRepository.remainingByDeck()
         }.getOrDefault(emptyMap())
+        val nextTodayTotal = runCatching {
+            container.learningRepository.remainingTodayCount()
+        }.getOrDefault(0)
         val nextBrowseAvailability = runCatching {
             container.learningRepository.browseDeckAvailability(nextDecks.map { it.id })
         }.getOrElse {
@@ -84,6 +90,7 @@ class DecksHomeState {
         }
         decks = nextDecks
         today = nextToday
+        todayTotal = nextTodayTotal
         browseAvailability = nextBrowseAvailability
     }
 }
@@ -123,6 +130,7 @@ fun DecksScreen(
     val scope = rememberCoroutineScope()
     val decks = state.decks
     val today = state.today
+    val todayTotal = state.todayTotal
 
     // Re-runs whenever this screen comes back to the front, so the counts are
     // right after a session instead of a minute stale. Coming back from the
@@ -130,7 +138,6 @@ fun DecksScreen(
     // is already in the list and already counted.
     LaunchedEffect(Unit) { state.reload(container) }
 
-    val todayTotal = today.values.sum()
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
 
     // The number on the home screen widget comes from here. A widget cannot read

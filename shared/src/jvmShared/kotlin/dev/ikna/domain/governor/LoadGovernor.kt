@@ -59,6 +59,16 @@ data class GovernorSignals(
     val newIntroducedLastWeek: Int,
     val totalReviews: Int,
     /**
+     * Whether there is already scheduled learning state in the cards table.
+     *
+     * `totalReviews == 0` alone does not mean a brand-new install: a person can
+     * open the app, receive the first six cards, answer none of them, and cross
+     * the 04:00 study-day boundary. Those six cards are still the first batch;
+     * handing out another six would make Today grow 6 -> 12 -> 18 without a
+     * single answer.
+     */
+    val hasScheduledCards: Boolean = false,
+    /**
      * Days since the first session after the last real absence, or null when
      * the history has no such gap.
      *
@@ -182,10 +192,13 @@ class LoadGovernor(private val config: GovernorConfig) {
             newCeiling = newCeiling
         )
 
-        // Cold start: nothing learned yet, hand out a first batch unconditionally.
+        // Cold start. A zero review count is not enough to prove that the
+        // account is empty: the first batch may already have been scheduled but
+        // not answered. Keep serving that batch until the first answer instead
+        // of issuing another one after every 04:00 day boundary.
         if (s.totalReviews == 0) {
             return GovernorDecision(
-                allowedNew = config.maxNewPerDay,
+                allowedNew = if (s.hasScheduledCards) 0 else config.maxNewPerDay,
                 capacity = capacity,
                 projected = projected,
                 headroom = headroom,

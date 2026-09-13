@@ -24,7 +24,7 @@ class DailyPlanWorker(context: Context, params: WorkerParameters) :
             // opening the app. The number is refreshed here; the words around it
             // stay as the deck list last wrote them, because a worker has no
             // business loading the string catalogue.
-            val remaining = container.learningRepository.remainingByDeck().values.sum()
+            val remaining = container.learningRepository.remainingTodayCount()
             TodayWidget.publishCount(applicationContext, remaining)
         }.fold(onSuccess = { Result.success() }, onFailure = { Result.retry() })
     }

@@ -1,5 +1,12 @@
 # Changelog
 
+### 0.11.0 runtime correctness checkpoint
+
+- Fixed cold-start rollover: an unanswered first batch is reused after the 04:00 study-day boundary instead of issuing another six cards.
+- Fixed Catalogue v2 shared-target counting: the global Today counter and Android widget now count unique scheduled card keys, not the sum of overlapping deck memberships. Per-deck counters remain membership views.
+- Added a governor regression test for the unanswered first-batch rollover.
+
+
 Every release is built by GitHub Actions from the tag it is attached to. Android,
 Windows and Linux artefacts on a release page come from that exact commit. Versions
 are `MAJOR.MINOR.PATCH` plus an epoch word; Android also carries a monotonically

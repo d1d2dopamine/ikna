@@ -269,6 +269,10 @@ interface CardDao {
     @Query("SELECT * FROM cards ORDER BY chunkId ASC, level ASC")
     suspend fun all(): List<CardEntity>
 
+    /** True after the first batch has actually been scheduled. */
+    @Query("SELECT EXISTS(SELECT 1 FROM cards)")
+    suspend fun hasAny(): Boolean
+
     @Query("SELECT * FROM cards WHERE chunkId = :chunkId AND level = :level")
     suspend fun card(chunkId: String, level: Int): CardEntity?
 

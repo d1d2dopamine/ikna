@@ -568,6 +568,29 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('IknaIconButton[', controls)
         self.assertIn('IknaDeckRow[', deck_rows)
 
+    def test_today_count_is_unique_and_first_batch_does_not_multiply(self):
+        repo = read(SHARED, 'data/repo/LearningRepository.kt')
+        governor = read(SHARED, 'domain/governor/LoadGovernor.kt')
+        dao = read(SHARED, 'data/db/Daos.kt')
+        android_home = read(ANDROID, 'ui/decks/DecksScreen.kt')
+        worker = read(ANDROID, 'work/DailyPlanWorker.kt')
+        desktop = read(DESKTOP, 'Shell.kt')
+
+        self.assertIn('suspend fun remainingTodayCount(', repo)
+        self.assertIn('.map { it.card.key }', repo)
+        self.assertIn('.distinct()', repo)
+        self.assertIn('hasScheduledCards = cardDao.hasAny()', repo)
+        self.assertIn('suspend fun hasAny(): Boolean', dao)
+        self.assertIn('allowedNew = if (s.hasScheduledCards) 0 else config.maxNewPerDay', governor)
+
+        self.assertIn('container.learningRepository.remainingTodayCount()', android_home)
+        self.assertNotIn('today.values.sum()', android_home)
+        self.assertIn('container.learningRepository.remainingTodayCount()', worker)
+        self.assertNotIn('remainingByDeck().values.sum()', worker)
+        self.assertIn('container.learningRepository.remainingTodayCount()', desktop)
+        self.assertNotIn('remaining.values.sum()', desktop)
+
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

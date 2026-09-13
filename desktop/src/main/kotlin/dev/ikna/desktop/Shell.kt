@@ -242,6 +242,7 @@ private fun DesktopShell(
     val deckListState = rememberLazyListState()
     var decks by remember { mutableStateOf<List<DeckSummary>>(emptyList()) }
     var remaining by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
+    var remainingTotal by remember { mutableStateOf(0) }
     var browseAvailability by remember { mutableStateOf<Map<String, BrowseAvailability>>(emptyMap()) }
 
     LaunchedEffect(ui.reload) {
@@ -249,6 +250,8 @@ private fun DesktopShell(
         decks = nextDecks
         remaining = runCatching { container.learningRepository.remainingByDeck() }
             .getOrDefault(emptyMap())
+        remainingTotal = runCatching { container.learningRepository.remainingTodayCount() }
+            .getOrDefault(0)
         browseAvailability = runCatching {
             container.learningRepository.browseDeckAvailability(nextDecks.map { it.id })
         }.getOrElse {
@@ -277,7 +280,7 @@ private fun DesktopShell(
         if (wide) {
             Row(Modifier.fillMaxSize()) {
                 Box(Modifier.width(listWidth).fillMaxHeight()) {
-                    DecksColumn(container, settings, palette, ui, decks, remaining, browseAvailability, deckListState)
+                    DecksColumn(container, settings, palette, ui, decks, remaining, remainingTotal, browseAvailability, deckListState)
                 }
                 VerticalRule(palette)
                 Box(Modifier.weight(1f).fillMaxHeight()) {
@@ -285,7 +288,7 @@ private fun DesktopShell(
                 }
             }
         } else if (ui.listOpen) {
-            DecksColumn(container, settings, palette, ui, decks, remaining, browseAvailability, deckListState)
+            DecksColumn(container, settings, palette, ui, decks, remaining, remainingTotal, browseAvailability, deckListState)
         } else {
             PaneContent(container, settings, palette, ui, decks, wide = false)
         }
@@ -314,11 +317,12 @@ private fun DecksColumn(
     ui: DesktopUi,
     decks: List<DeckSummary>,
     remaining: Map<String, Int>,
+    remainingTotal: Int,
     browseAvailability: Map<String, BrowseAvailability>,
     listState: LazyListState
 ) {
     val scope = rememberCoroutineScope()
-    val todayTotal = remaining.values.sum()
+    val todayTotal = remainingTotal
     var notice by remember { mutableStateOf<String?>(null) }
 
     Box(Modifier.fillMaxSize().iknaInspect("DecksColumn")) {

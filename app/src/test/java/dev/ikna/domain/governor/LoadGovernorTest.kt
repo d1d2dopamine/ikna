@@ -26,6 +26,7 @@ class LoadGovernorTest {
         cleanDays: Int = 0,
         newIntroducedLastWeek: Int = 3,
         totalReviews: Int = 500,
+        hasScheduledCards: Boolean = false,
         daysSinceReturn: Int? = null,
         overheated: Boolean = false
     ) = GovernorSignals(
@@ -40,6 +41,7 @@ class LoadGovernorTest {
         cleanDays = cleanDays,
         newIntroducedLastWeek = newIntroducedLastWeek,
         totalReviews = totalReviews,
+        hasScheduledCards = hasScheduledCards,
         daysSinceReturn = daysSinceReturn,
         overheated = overheated
     )
@@ -49,6 +51,15 @@ class LoadGovernorTest {
         val decision = governor.decide(signals(totalReviews = 0))
         assertEquals(GovernorReason.FIRST_RUN, decision.reason)
         assertEquals(config.maxNewPerDay, decision.allowedNew)
+    }
+
+    @Test
+    fun `an unanswered first batch is not issued again after the day boundary`() {
+        val decision = governor.decide(
+            signals(totalReviews = 0, hasScheduledCards = true, dueToday = config.maxNewPerDay)
+        )
+        assertEquals(GovernorReason.FIRST_RUN, decision.reason)
+        assertEquals(0, decision.allowedNew)
     }
 
     @Test
