@@ -4,10 +4,10 @@ package dev.ikna.data.repo
  * What the statistics screen shows beyond a single counter.
  *
  * Everything here is a measurement of the schedule or of the material, never a
- * score for the person. Retention says whether the intervals fit; the hours say
- * when answering is cheap; the minutes replace "how many cards" with the only
- * unit anyone actually budgets an evening in; the leeches point at phrases that
- * are not working. None of them can go down in a way that means "you failed",
+ * score for the person. History is an append-only fact, retention says whether
+ * the intervals fit, the hours wait for enough evidence before naming a pattern,
+ * and the leeches point at targets that are not working. None of them can go
+ * down in a way that means "you failed",
  * and none of them reset.
  *
  * Nullable fields mean "not enough data yet" and must be rendered as an absence,
@@ -16,14 +16,14 @@ package dev.ikna.data.repo
  * thing it has.
  */
 data class StatsDigest(
+    /** Unique global learning targets that have at least one non-retracted answer. */
+    val targetsWithHistory: Int = 0,
+    /** All non-retracted answers in the append-only review log. */
+    val totalAnswers: Int = 0,
     /** Share of reviews recalled, 0..1, or null until there are enough of them. */
     val retention: Double? = null,
     /** How many reviews that share was computed from. */
     val retentionSample: Int = 0,
-    val minutesToday: Int = 0,
-    val minutesLast7: Int = 0,
-    /** Median seconds per answer, or null while the estimate would be a guess. */
-    val medianSeconds: Int? = null,
     /** Hours of the day that have any answers at all, ascending. */
     val hours: List<HourSlice> = emptyList(),
     /** The hour with the best recall among those with enough answers behind them. */

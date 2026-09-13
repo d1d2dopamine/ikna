@@ -40,21 +40,21 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// Каждая метка — день с занятием, справа сегодня. Пропуск ничего не обнуляет и не обрывает:
 	"stats.003" to "Each mark is a day with a session, today on the right. A skip zeroes nothing and breaks nothing: there is no streak here, nothing to break.",
 	// НОРМА ДНЯ
-	"stats.004" to "DAILY NORM",
+	"stats.004" to "HISTORY",
 	// Карточек в день. Посчитано по твоим последним дням, пересчитывается само.
-	"stats.005" to "Cards a day. Counted from your own recent days, recalculated by itself.",
+	"stats.005" to "TARGETS WITH HISTORY",
 	// Ориентир на первые дни, а не измерение. Свою цифру посчитаю, когда наберётся хотя бы три д
-	"stats.006" to "A starting guess, not a measurement. I will count your own figure once at least three days with sessions add up — before that it would be made up.",
+	"stats.006" to "ANSWERS",
 	// СЛОВ В ПАМЯТИ
-	"stats.007" to "WORDS IN MEMORY",
+	"stats.007" to "ACTIVE DAYS · 30",
 	// ОТВЕЧЕНО СЕГОДНЯ
-	"stats.008" to "ANSWERED TODAY",
+	"stats.008" to "A target appears here after its first real answer. Targets and answers are all-time; active days are for the last 30 days. This is a record, not a quota.",
 	// Слова считаются отдельно от чанков: одно слово встречается в разных фразах и держится креп
 	"stats.009" to "Words are counted apart from chunks: one word appears in different phrases and holds on better than any of them.",
 	// ВЕРНЁТСЯ ЗА 14 ДНЕЙ
-	"stats.010" to "DUE WITHIN 14 DAYS",
+	"stats.010" to "UPCOMING REVIEWS",
 	// Сколько карточек подошлёт по сроку. Если где-то вырастает гора — новые чанки в те дни доба
-	"stats.011" to "How many cards fall due. If a mountain grows somewhere, new chunks will not be added on those days.",
+	"stats.011" to "Forecast from the current schedule for the next 14 days. It changes after new answers; it is neither a promise nor a daily quota.",
 	// УДЕРЖАНИЕ
 	"stats.012" to "RETENTION",
 	// Нужно хотя бы 20 повторений, чтобы это была цифра, а не догадка. Сейчас их
@@ -66,11 +66,11 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// %. Считаются только повторения — первую встречу забыть нельзя.
 	"stats.016" to "%. Only reviews count — a first meeting cannot be forgotten.",
 	// Расписание метит примерно в 90%. Ниже 80% — интервалы для тебя длинноваты. Нагрузка подстр
-	"stats.017" to "The schedule aims at about 90%. Below 80% the intervals are too long for you. The load adjusts itself, but if it stays like this for weeks — take a smaller norm.",
+	"stats.017" to "The schedule aims at about 90%. Below 80% means the current intervals may be too long; the scheduler will adapt the next intervals from new answers. This is about the schedule, not about you.",
 	// Расписание метит примерно в 90%. Выше 95% — повторов больше, чем нужно: память выдержала б
-	"stats.018" to "The schedule aims at about 90%. Above 95% there are more reviews than needed: memory would have held rarer passes, and that is spare minutes.",
+	"stats.018" to "The schedule aims at about 90%. Above 95% means the intervals may be shorter than necessary. The scheduler will adapt from later answers; there is no need to chase the percentage.",
 	// Расписание метит примерно в 90%, и сейчас всё в этом коридоре. Трогать ничего не надо.
-	"stats.019" to "The schedule aims at about 90%, and right now everything is inside that corridor. Nothing needs touching.",
+	"stats.019" to "The schedule aims at about 90%; the current observations are inside that corridor. This is a measurement, not a target.",
 	// МИНУТ СЕГОДНЯ
 	"stats.020" to "MINUTES TODAY",
 	// ЗА НЕДЕЛЮ
@@ -82,21 +82,21 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// Считается только время с карточкой на экране: паузы, когда телефон отложен, сюда не попада
 	"stats.024" to "Only time with a card on screen counts: pauses with the phone put down do not get in here.",
 	// КОГДА ИДЁТ ЛУЧШЕ
-	"stats.025" to "WHEN IT GOES BEST",
+	"stats.025" to "WHEN RECALL GOES BETTER",
 	// Лучше всего вспоминается около
-	"stats.026" to "Recall works best around ",
+	"stats.026" to "From the observed reviews, recall is strongest around ",
 	// . Это не приказ заниматься именно тогда — просто в этот час тебе дешевле, и напоминание ра
-	"stats.027" to ". This is not an order to study exactly then — it is simply cheaper for you at that hour, and a reminder is sensibly set an hour before it.",
+	"stats.027" to ". This is an observation, not a recommendation to study at that hour.",
 	// Пока рано выделять час: нужно хотя бы 12 повторений внутри одного часа. Бледные столбики —
-	"stats.028" to "Too early to name an hour: at least 12 reviews inside one hour are needed. Pale bars are hours with too little data yet.",
+	"stats.028" to "Too early to name an hour: at least 12 reviews are needed in each of three different hours. Until then this block waits for evidence instead of inventing a “best time”.",
 	// НЕ ДЕРЖИТСЯ
-	"stats.029" to "WILL NOT STICK",
+	"stats.029" to "REQUIRES ATTENTION",
 	// Пока таких нет: ничего не забывалось по четыре раза и больше.
-	"stats.030" to "None so far: nothing has been forgotten four times or more.",
+	"stats.030" to "None so far. Targets forgotten four times or more will appear here.",
 	// Справа — сколько раз фраза забывалась. Это про фразу, а не про тебя: обычно она слишком дл
-	"stats.031" to "On the right: how often the phrase was forgotten. That is about the phrase, not about you.",
+	"stats.031" to "On the right: how many times the target was forgotten. This is a signal about the target or its context, not a score for you.",
 	// СЕГОДНЯ
-	"stats.032" to "TODAY",
+	"stats.032" to "+1",
 	// Не удалось открыть файл
 	"set.001" to "Could not open the file",
 	// Не удалось открыть файл

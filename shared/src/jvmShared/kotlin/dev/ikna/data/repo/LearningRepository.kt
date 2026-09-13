@@ -1537,7 +1537,7 @@ class LearningRepository(
     }
 
     /**
-     * The four measurements added to the statistics screen, in one read.
+     * Evidence-backed measurements for the statistics screen, in one read.
      *
      * Deliberately computed here rather than in SQL: the day starts at 04:00,
      * the hour of an answer depends on the phone's timezone, and a review has to
@@ -1568,15 +1568,12 @@ class LearningRepository(
             .map { (hour, slot) ->
                 HourSlice(hour = hour, answers = slot[0], accuracy = slot[1].toDouble() / slot[0])
             }
-        val bestHour = hours
-            .filter { it.answers >= HOUR_MIN_SAMPLE }
-            .maxWithOrNull(compareBy<HourSlice> { it.accuracy }.thenBy { it.answers })
-            ?.hour
-
-        // Minutes come from the daily counters rather than from the log: they
-        // already exclude the gaps where the phone was put down mid-session.
-        val todayMs = statsDao.day(dayKey(now))?.activeMs ?: 0L
-        val weekMs = statsDao.lastDays(7).sumOf { it.activeMs }
+        val confidentHours = hours.filter { it.answers >= HOUR_MIN_SAMPLE }
+        val bestHour = if (confidentHours.size >= HOUR_MIN_BUCKETS) {
+            confidentHours
+                .maxWithOrNull(compareBy<HourSlice> { it.accuracy }.thenBy { it.answers })
+                ?.hour
+        } else null
 
         val leechCards = cardDao.leeches(LEECH_MIN_LAPSES, LEECH_LIMIT)
         val chunks = chunkDao.chunks(leechCards.map { it.chunkId }.distinct()).associateBy { it.id }
@@ -1594,11 +1591,10 @@ class LearningRepository(
             .distinctBy { it.text }
 
         return StatsDigest(
+            targetsWithHistory = reviewDao.distinctTargetCount(),
+            totalAnswers = reviewDao.total(),
             retention = retention,
             retentionSample = reviews.size,
-            minutesToday = (todayMs / 60_000L).toInt(),
-            minutesLast7 = (weekMs / 60_000L).toInt(),
-            medianSeconds = medianAnswerMs()?.let { ((it + 500L) / 1000L).toInt() },
             hours = hours,
             bestHour = bestHour,
             leeches = leeches
@@ -1628,13 +1624,15 @@ class LearningRepository(
          *
          * The two sample floors are the difference between a measurement and a
          * rumour: twenty reviews before a retention figure is shown at all, and
-         * twelve answers inside one hour before that hour may compete for
-         * "best". Four forgettings is where a phrase stops being hard and starts
+         * twelve answers in each of three different hours before the screen may
+         * claim that one hour works better. Four forgettings is where a phrase
+         * stops being hard and starts
          * being broken.
          */
         const val STATS_WINDOW_DAYS = 30L
         const val RETENTION_MIN_SAMPLE = 20
         const val HOUR_MIN_SAMPLE = 12
+        const val HOUR_MIN_BUCKETS = 3
         const val LEECH_MIN_LAPSES = 4
         const val LEECH_LIMIT = 8
     }

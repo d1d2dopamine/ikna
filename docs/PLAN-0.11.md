@@ -42,6 +42,7 @@ These are not open design questions for the rest of 0.11:
 - Removing one deck must not delete a target that another installed deck still references.
 - The application build has reached a clean GitHub Actions build after the Part 4.1 compile fixes.
 - The Android home-screen widget has a compact 2 x 1 layout so the count and its label share one line instead of being pushed below the launcher cell.
+- Statistics is an evidence dashboard rather than a goal screen: there is no daily quota or duplicate Today block; it shows accumulated history, waits for sufficient samples before retention/time-of-day claims, flags repeatedly forgotten targets, and treats the 14-day view as a forecast.
 
 ### Catalogue v2 foundation
 

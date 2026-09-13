@@ -2,6 +2,7 @@
 
 ### 0.11.0 runtime correctness checkpoint
 
+- Reworked Statistics around evidence rather than obligations: the invented daily norm and duplicate Today counters are gone; History now reports unique targets with review history, total answers and active days in the last 30 days. Low-sample retention and time-of-day analysis use the app's lattice waiting state, troublesome targets are labelled as requiring attention, and the 14-day chart is explicitly a scheduler forecast rather than a quota.
 - Fixed cold-start rollover: an unanswered first batch is reused after the 04:00 study-day boundary instead of issuing another six cards.
 - Fixed Catalogue v2 shared-target counting: the global Today counter and Android widget now count unique scheduled card keys, not the sum of overlapping deck memberships. Per-deck counters remain membership views.
 - Added a governor regression test for the unanswered first-batch rollover.

@@ -40,21 +40,21 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// Каждая метка — день с занятием, справа сегодня. Пропуск ничего не обнуляет и не обрывает:
 	"stats.003" to "Każdy znacznik to dzień z nauką, dziś po prawej. Przerwa niczego nie zeruje i nie przerywa: nie ma tu serii, nie ma czego łamać.",
 	// НОРМА ДНЯ
-	"stats.004" to "NORMA DNIA",
+	"stats.004" to "HISTORIA",
 	// Карточек в день. Посчитано по твоим последним дням, пересчитывается само.
-	"stats.005" to "Kart dziennie. Policzone z twoich ostatnich dni, przelicza się samo.",
+	"stats.005" to "CELE Z HISTORIĄ",
 	// Ориентир на первые дни, а не измерение. Свою цифру посчитаю, когда наберётся хотя бы три д
-	"stats.006" to "Na razie punkt wyjścia, a nie pomiar. Własną liczbę policzę, gdy uzbiera się choćby trzy dni z nauką — wcześniej byłaby zmyślona.",
+	"stats.006" to "ODPOWIEDZI",
 	// СЛОВ В ПАМЯТИ
-	"stats.007" to "SŁÓW W PAMIĘCI",
+	"stats.007" to "AKTYWNE DNI · 30",
 	// ОТВЕЧЕНО СЕГОДНЯ
-	"stats.008" to "ODPOWIEDZI DZIŚ",
+	"stats.008" to "Cel trafia tutaj po pierwszej prawdziwej odpowiedzi. Cele i odpowiedzi liczone są z całej historii, aktywne dni — z ostatnich 30 dni. To zapis faktów, nie norma.",
 	// Слова считаются отдельно от чанков: одно слово встречается в разных фразах и держится креп
 	"stats.009" to "Słowa liczone są osobno od chunków: jedno słowo pojawia się w różnych zwrotach i trzyma się mocniej niż każdy z nich.",
 	// ВЕРНЁТСЯ ЗА 14 ДНЕЙ
-	"stats.010" to "WRÓCI W 14 DNI",
+	"stats.010" to "NAJBLIŻSZE POWTÓRKI",
 	// Сколько карточек подошлёт по сроку. Если где-то вырастает гора — новые чанки в те дни доба
-	"stats.011" to "Ile kart przypadnie na termin. Jeśli gdzieś rośnie góra — w te dni nowe chunki nie dojdą.",
+	"stats.011" to "Prognoza z bieżącego harmonogramu na następne 14 dni. Zmieni się po nowych odpowiedziach; nie jest obietnicą ani dzienną normą.",
 	// УДЕРЖАНИЕ
 	"stats.012" to "UTRZYMANIE",
 	// Нужно хотя бы 20 повторений, чтобы это была цифра, а не догадка. Сейчас их
@@ -66,11 +66,11 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// %. Считаются только повторения — первую встречу забыть нельзя.
 	"stats.016" to "%. Liczą się tylko powtórki — pierwszego spotkania nie da się zapomnieć.",
 	// Расписание метит примерно в 90%. Ниже 80% — интервалы для тебя длинноваты. Нагрузка подстр
-	"stats.017" to "Rozkład celuje w około 90%. Poniżej 80% odstępy są dla ciebie za długie. Obciążenie dostroi się samo, ale jeśli tak trzyma tygodniami — weź mniejszą normę.",
+	"stats.017" to "Harmonogram celuje w około 90%. Poniżej 80% oznacza, że obecne odstępy mogą być za długie; planista dostosuje kolejne po nowych odpowiedziach. To mówi o harmonogramie, nie o tobie.",
 	// Расписание метит примерно в 90%. Выше 95% — повторов больше, чем нужно: память выдержала б
-	"stats.018" to "Rozkład celuje w około 90%. Powyżej 95% powtórek jest więcej niż trzeba: pamięć wytrzymałaby rzadsze podejścia, a to zbędne minuty.",
+	"stats.018" to "Harmonogram celuje w około 90%. Powyżej 95% odstępy mogą być krótsze niż potrzeba. Planista dostosuje je po kolejnych odpowiedziach; nie trzeba gonić za procentem.",
 	// Расписание метит примерно в 90%, и сейчас всё в этом коридоре. Трогать ничего не надо.
-	"stats.019" to "Rozkład celuje w około 90% i teraz wszystko mieści się w tym korytarzu. Nic nie trzeba ruszać.",
+	"stats.019" to "Harmonogram celuje w około 90%; obecne obserwacje mieszczą się w tym przedziale. To pomiar, nie cel.",
 	// МИНУТ СЕГОДНЯ
 	"stats.020" to "MINUT DZIŚ",
 	// ЗА НЕДЕЛЮ
@@ -82,21 +82,21 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// Считается только время с карточкой на экране: паузы, когда телефон отложен, сюда не попада
 	"stats.024" to "Liczy się tylko czas z kartą na ekranie: przerwy, gdy telefon leży, tu nie wchodzą.",
 	// КОГДА ИДЁТ ЛУЧШЕ
-	"stats.025" to "KIEDY IDZIE LEPIEJ",
+	"stats.025" to "KIEDY ŁATWIEJ SOBIE PRZYPOMNIEĆ",
 	// Лучше всего вспоминается около
-	"stats.026" to "Najlepiej przypomina się około ",
+	"stats.026" to "Z zebranych danych najlepiej przypomina się około ",
 	// . Это не приказ заниматься именно тогда — просто в этот час тебе дешевле, и напоминание ра
-	"stats.027" to ". To nie nakaz nauki właśnie wtedy — po prostu o tej godzinie jest ci taniej, a przypomnienie rozsądnie ustawić godzinę wcześniej.",
+	"stats.027" to ". To obserwacja, nie zalecenie, by uczyć się właśnie o tej porze.",
 	// Пока рано выделять час: нужно хотя бы 12 повторений внутри одного часа. Бледные столбики —
-	"stats.028" to "Za wcześnie, by wskazać godzinę: potrzeba co najmniej 12 powtórek w jednej godzinie. Blade słupki to godziny, o których danych jest jeszcze mało.",
+	"stats.028" to "Za wcześnie, by wskazać godzinę: potrzeba co najmniej 12 powtórek w każdej z trzech różnych godzin. Do tego czasu blok czeka na dane zamiast wymyślać „najlepszą porę”.",
 	// НЕ ДЕРЖИТСЯ
-	"stats.029" to "NIE TRZYMA SIĘ",
+	"stats.029" to "WYMAGA UWAGI",
 	// Пока таких нет: ничего не забывалось по четыре раза и больше.
-	"stats.030" to "Na razie takich nie ma: nic nie zostało zapomniane cztery razy ani więcej.",
+	"stats.030" to "Na razie takich celów nie ma. Pojawią się tu te zapomniane cztery razy lub więcej.",
 	// Справа — сколько раз фраза забывалась. Это про фразу, а не про тебя: обычно она слишком дл
-	"stats.031" to "Po prawej: ile razy zapomniano tę frazę. To o frazie, nie o tobie.",
+	"stats.031" to "Po prawej: ile razy cel został zapomniany. To sygnał o celu lub jego kontekście, nie ocena ciebie.",
 	// СЕГОДНЯ
-	"stats.032" to "DZIŚ",
+	"stats.032" to "+1",
 	// Не удалось открыть файл
 	"set.001" to "Nie udało się otworzyć pliku",
 	// Не удалось открыть файл

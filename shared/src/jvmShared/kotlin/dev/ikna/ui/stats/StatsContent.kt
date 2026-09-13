@@ -15,8 +15,7 @@ import dev.ikna.data.repo.*
 import java.util.Locale
 
 @Composable
-fun IknaStatsContent(days: List<Boolean>, norm: Int, measured: Boolean, known: Int,
-    answered: Int, forecast: List<Int>, digest: StatsDigest) {
+fun IknaStatsContent(days: List<Boolean>, forecast: List<Int>, digest: StatsDigest) {
     Column(Modifier.fillMaxWidth()) {
         Block(label = S.t("stats.002"), note = S.t("stats.003")) {
             ActivityMap(days = days)
@@ -24,53 +23,35 @@ fun IknaStatsContent(days: List<Boolean>, norm: Int, measured: Boolean, known: I
 
         StatsDivider()
 
-        Block(
-            label = S.t("stats.004"),
-            // Honesty about where the figure comes from. Until there are enough
-            // of your own days behind it, it is a starting guess and says so.
-            note = if (measured) S.t("stats.005") else S.t("stats.006")
-        ) {
-            Text(
-                text = norm.toString(),
-                style = MaterialTheme.typography.displayLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        }
-
-        StatsDivider()
-
-        // Two figures that belong to one question, so they share one block and
-        // one explanation instead of being asked about twice.
-        Block(note = S.t("stats.009")) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Label(S.t("stats.007"))
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = known.toString(),
-                        style = MaterialTheme.typography.displayMedium,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Label(S.t("stats.008"))
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = answered.toString(),
-                        style = MaterialTheme.typography.displayMedium,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                }
+        // Facts accumulated by the review log. There is deliberately no daily
+        // target here: today's queue already lives on the deck screen, and the
+        // governor's load is not a goal the user promised to complete.
+        Block(label = S.t("stats.004"), note = S.t("stats.008")) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                HistoryMetric(
+                    label = S.t("stats.005"),
+                    value = digest.targetsWithHistory,
+                    modifier = Modifier.weight(1f)
+                )
+                HistoryMetric(
+                    label = S.t("stats.006"),
+                    value = digest.totalAnswers,
+                    modifier = Modifier.weight(1f)
+                )
+                HistoryMetric(
+                    label = S.t("stats.007"),
+                    value = days.count { it },
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
 
         StatsDivider()
 
         Retention(digest)
-
-        StatsDivider()
-
-        Minutes(digest)
 
         StatsDivider()
 
@@ -85,7 +66,29 @@ fun IknaStatsContent(days: List<Boolean>, norm: Int, measured: Boolean, known: I
         Block(label = S.t("stats.010"), note = S.t("stats.011")) {
             ForecastBars(values = forecast)
         }
+    }
+}
 
+@Composable
+private fun HistoryMetric(label: String, value: Int, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        // Three metrics share one row on phone and desktop. Reserve the same
+        // label height so a translated two-line label does not push only one
+        // number down and make the row look broken.
+        Box(Modifier.height(44.dp), contentAlignment = Alignment.TopStart) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 3
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = value.toString(),
+            style = MaterialTheme.typography.displayMedium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
     }
 }
 
@@ -180,46 +183,12 @@ private fun Retention(digest: StatsDigest) {
     }
 }
 
-/** Time, because "сколько карточек" is not a unit anyone plans an evening in. */
-@Composable
-private fun Minutes(digest: StatsDigest) {
-    Block(
-        note = if (digest.medianSeconds != null) {
-            S.t("stats.022") + digest.medianSeconds + S.t("stats.023")
-        } else {
-            S.t("stats.024")
-        }
-    ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.weight(1f)) {
-                Label(S.t("stats.020"))
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = digest.minutesToday.toString(),
-                    style = MaterialTheme.typography.displayMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Label(S.t("stats.021"))
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = digest.minutesLast7.toString(),
-                    style = MaterialTheme.typography.displayMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-        }
-    }
-}
-
 /**
  * When answering actually goes well.
  *
- * Not "when you study most" — that would only show the habit back. Each column
- * is how much came back at that hour. Hours with too little behind them are
- * drawn faintly and kept out of the verdict rather than hidden, so a pale column
- * reads as "not enough yet" instead of "bad hour".
+ * Not "when you study most" — that would only show the habit back. The block
+ * stays in the familiar lattice waiting state until three different hours have
+ * enough reviews to compare. Only then are the observed hourly bars shown.
  */
 @Composable
 private fun BestHours(digest: StatsDigest) {
@@ -232,17 +201,16 @@ private fun BestHours(digest: StatsDigest) {
             S.t("stats.028")
         }
     ) {
-        HourBars(digest.hours)
+        if (best == null) IknaLatticePlaceholder() else HourBars(digest.hours)
     }
 }
 
 /**
- * Phrases that keep being forgotten.
+ * Learning targets that keep being forgotten.
  *
- * Anki calls these leeches and suspends them silently. Nothing is suspended
- * here: the list exists so a phrase that will not stick can be recognised as a
- * bad phrase — too long, or translated in a way that does not match how the word
- * is actually used — instead of being read as a personal failure.
+ * Nothing is suspended here. The list exists so a target or one of its contexts
+ * can be inspected when the evidence says it repeatedly fails to stick, instead
+ * of turning that pattern into a score for the learner.
  */
 @Composable
 private fun Leeches(items: List<LeechItem>) {

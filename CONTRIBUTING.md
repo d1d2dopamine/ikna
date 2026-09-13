@@ -266,6 +266,9 @@ A few project conventions are intentional:
 
 - no streaks, XP, confetti or praise popups;
 - no visible backlog counter that pressures the learner;
+- Statistics reports evidence, not obligations: do not add a daily quota or
+  duplicate the deck screen's Today count there; low-sample claims use the
+  lattice waiting state instead of confident zeroes;
 - do not add choices when the system can make a defensible choice itself;
 - animations must obey the existing animations preference;
 - major README sections keep their emoji markers because they are navigation

@@ -77,10 +77,26 @@ class DesignContracts(unittest.TestCase):
 
     def test_same_stats_renderer_and_empty_states(self):
         for base, name in [(ANDROID, 'ui/stats/StatsScreen.kt'), (DESKTOP, 'StatsPane.kt')]:
-            self.assertIn('IknaStatsContent(', read(base, name))
+            platform = read(base, name)
+            self.assertIn('IknaStatsContent(', platform)
+            # Statistics describes evidence; today's governor load already lives
+            # on the deck screen and must never come back as a quota here.
+            for forbidden in ['currentDailyTarget()', 'normIsMeasured()', 'knownWordCount()', 'answeredToday()']:
+                self.assertNotIn(forbidden, platform)
         source = read(SHARED, 'ui/stats/StatsContent.kt')
-        for required in ['ActivityMap(', 'HourBars(', 'ForecastBars(', 'Leeches(', 'stats.030', 'displayLarge']:
+        for required in ['ActivityMap(', 'HourBars(', 'ForecastBars(', 'Leeches(', 'HistoryMetric(',
+                         'targetsWithHistory', 'totalAnswers', 'stats.030', 'IknaLatticePlaceholder()', 'displayLarge']:
             self.assertIn(required, source)
+        self.assertNotIn('Minutes(digest)', source)
+
+    def test_stats_history_uses_global_targets_and_best_hour_waits_for_evidence(self):
+        dao = read(SHARED, 'data/db/Daos.kt')
+        repo = read(SHARED, 'data/repo/LearningRepository.kt')
+        self.assertIn('COUNT(DISTINCT chunkId)', dao)
+        self.assertIn('targetsWithHistory = reviewDao.distinctTargetCount()', repo)
+        self.assertIn('totalAnswers = reviewDao.total()', repo)
+        self.assertIn('HOUR_MIN_BUCKETS = 3', repo)
+        self.assertIn('confidentHours.size >= HOUR_MIN_BUCKETS', repo)
 
     def test_settings_navigation_and_section_order(self):
         mobile = read(ANDROID, 'ui/settings/SettingsScreen.kt')

@@ -485,6 +485,10 @@ interface ReviewDao {
     @Query("SELECT COUNT(*) FROM reviews WHERE " + NOT_RETRACTED)
     suspend fun total(): Int
 
+    /** Global learning targets that have ever received a real answer. */
+    @Query("SELECT COUNT(DISTINCT chunkId) FROM reviews WHERE " + NOT_RETRACTED)
+    suspend fun distinctTargetCount(): Int
+
     /**
      * The questions already answered today. This is what makes the session
      * counter monotonic: today's remaining set is the day's plan minus these,

@@ -33,17 +33,17 @@ import dev.ikna.ui.theme.IknaIconButton
  * The old screen printed "N of 30" above a sentence promising there were no
  * streaks, which is a streak with extra steps: one number that climbs while you
  * show up and drops the moment you miss. Everything here measures the schedule
- * or the material instead. Retention says whether the intervals fit. The hours
- * say when answering is cheap. The minutes replace "how many cards" with the
- * only unit anyone plans an evening in. The last block names the phrases that
- * are not working, which is a fact about the phrases.
+ * or the material instead. The history block reports only accumulated facts,
+ * retention says whether the intervals fit, the hours wait for enough evidence
+ * before naming a pattern, and the last blocks show troublesome targets and the
+ * scheduler's near-term forecast.
  *
  * Nothing here can be broken or lost, and every figure without enough data
  * behind it says so in words instead of printing a confident zero.
  *
- * Why the words are hidden now. Every figure on this screen had its explanation
- * printed under it permanently, and there are nine figures: the screen came out
- * as thirty-odd sentences of small grey prose that has to be read in order,
+ * Why the words are hidden now. Every figure on this screen once had its explanation
+ * printed under it permanently, and the screen came out as thirty-odd sentences
+ * of small grey prose that had to be read in order,
  * which is precisely the thing this app exists to avoid. The explanations were
  * not wrong, they were just always on. Each block keeps its own "?" and hands
  * the sentence over when it is asked for, so the default state of the screen is
@@ -56,19 +56,11 @@ private val EDGE = 20.dp
 @Composable
 fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
     var days by remember { mutableStateOf(emptyList<Boolean>()) }
-    var norm by remember { mutableStateOf(0) }
-    var measured by remember { mutableStateOf(true) }
-    var known by remember { mutableStateOf(0) }
-    var answered by remember { mutableStateOf(0) }
     var forecast by remember { mutableStateOf(emptyList<Int>()) }
     var digest by remember { mutableStateOf(StatsDigest()) }
 
     LaunchedEffect(Unit) {
         days = container.learningRepository.activityMap()
-        norm = container.learningRepository.currentDailyTarget()
-        measured = container.learningRepository.normIsMeasured()
-        known = container.components.knownWordCount()
-        answered = container.learningRepository.answeredToday()
         forecast = container.learningRepository.forecast(14)
         digest = container.learningRepository.statsDigest()
     }
@@ -88,7 +80,7 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
             )
 
             Spacer(Modifier.height(32.dp))
-            IknaStatsContent(days, norm, measured, known, answered, forecast, digest)
+            IknaStatsContent(days, forecast, digest)
 
             // Room for the bar to sit over nothing but background.
             Spacer(Modifier.height(96.dp))
