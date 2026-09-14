@@ -33,6 +33,7 @@ jobs:
           sudo apt-get install -y -qq libicu-dev
           python3 tools/catalog/test_ingestion.py
           python3 tools/catalog/test_knowledge_rebuild.py
+          python3 tools/catalog/test_wikimatrix_stream_status.py
           python3 tools/catalog/test_selection_policy.py
 
   knowledge-preview:
@@ -82,9 +83,10 @@ jobs:
               curl_status=${status[0]}
               gzip_status=${status[1]}
               python_status=${status[2]}
-              if [ "$python_status" -eq 0 ] \
-                && { [ "$curl_status" -eq 0 ] || [ "$curl_status" -eq 23 ]; } \
-                && { [ "$gzip_status" -eq 0 ] || [ "$gzip_status" -eq 141 ]; }; then
+              if python3 tools/catalog/wikimatrix_stream_status.py \
+                --out "$out" --max-rows "$max_rows" \
+                --curl-status "$curl_status" --gzip-status "$gzip_status" \
+                --python-status "$python_status"; then
                 break
               fi
               if [ "$attempt" -ge 5 ]; then

@@ -42,6 +42,7 @@ words mean and what a number promises inside an epoch is written down once, in
 
 - Added a non-publishing `catalogue v2 supply census` workflow and `tools/catalog/supply_census.py`. The census measures all eligible exact targets before `max_deck` separately from what the current capped first pass selects, so a thin source can be distinguished from an artificially truncated deck.
 - WikiMatrix planning can now enumerate every direct pair among the supported languages. The Part 5 workflow probes those files and streams only the measured high-score prefix into ingestion, recording missing pairs and acquisition-capped lower bounds instead of silently treating either as corpus scarcity.
+- Hardened bounded WikiMatrix streaming for GNU gzip broken-pipe behavior: a `curl=23` / `gzip=1|141` early stop is accepted only when the downstream reader exited cleanly and a complete valid `max_rows` prefix was written. Supply and Knowledge workflows share the same tested validator.
 - Normalized candidate staging now keeps per-pair input/unique/duplicate counts for diagnostics without changing deck output. WikiMatrix TSV ingestion accepts stdin for bounded streaming in CI.
 - Removed the repository-wide GitHub download-count badge from both README language headers because the counter is not reliable enough to present as product evidence.
 
