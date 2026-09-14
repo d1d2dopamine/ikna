@@ -172,9 +172,11 @@ blocker; `WARN` is evidence to inspect, not an automatic reason to delete conten
 
 The user-facing collections are categories, not permanent aliases for one corpus:
 
-- `Everyday` — initially Tatoeba;
-- `Knowledge` — initially WikiMatrix/Wikipedia-derived material;
-- `World` — initially Global Voices once record-level attribution is available.
+- `Everyday` — Tatoeba remains the baseline; MASSIVE 1.1 may supplement it only after the measured 0.11 admission gate;
+- `Knowledge` — WikiMatrix/Wikipedia-derived material, using direct source pairs rather than hidden translation pivots;
+- `World` — Global Voices once record-level attribution is available.
+
+The fixed 0.11 corpus scope and admission rules are in [`docs/CORPORA-0.11.md`](docs/CORPORA-0.11.md). Do not add a new corpus to fix a thin deck without first changing that policy deliberately.
 
 Study sentences must come from the source corpus. Do not generate filler
 sentences to reach a quota.

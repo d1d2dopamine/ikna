@@ -1,13 +1,15 @@
 # 0.11.0 press working plan
 
-This is the operational checkpoint for the 0.11 cycle. It answers three
-questions: what is already implemented, what is currently waiting on real build
-data, and what still blocks publication.
+This is the operational checkpoint for the 0.11 cycle. It answers four questions:
+what is already implemented, what the current full-catalogue evidence actually
+shows, which corpus decisions are fixed for this release, and what still blocks
+publication.
 
 The longer sequence and rationale remain in [`ROADMAP-0.11.md`](ROADMAP-0.11.md).
-Scientific confidence and claim wording remain in [`SCIENCE.md`](SCIENCE.md).
-Ideas with no release/date commitment live separately in
-[`UNSCHEDULED.md`](UNSCHEDULED.md); they are not 0.11 obligations.
+The corpus/source policy is in [`CORPORA-0.11.md`](CORPORA-0.11.md). Scientific
+confidence and claim wording remain in [`SCIENCE.md`](SCIENCE.md). Ideas with no
+release/date commitment live separately in [`UNSCHEDULED.md`](UNSCHEDULED.md);
+they are not 0.11 obligations.
 
 ## 🎯 Release theme
 
@@ -34,6 +36,9 @@ These are not open design questions for the rest of 0.11:
 - Morphology is an offline catalogue-build concern, not a runtime model dependency.
 - Scheduler decides **when**; Governor **how much**; Target Policy **what**; Context Policy **which context**; Transfer Policy **unseen context**; Grading **what the response means**.
 - Contextual transfer does not get XP, confetti or praise popups.
+- 0.11 uses a fixed, small corpus scope: Tatoeba, WikiMatrix and Global Voices remain the production families already in the project; MASSIVE 1.1 is the only new production candidate to evaluate for Everyday; FLORES-200 is reference/QA material rather than deck supply.
+- Direct or truly multiway-parallel source alignment is allowed; hidden machine-translation pivots are not.
+- Ordinary catalogue warnings must not create ad-hoc `Part 5.1`, `5.2`, etc. The remaining work is deliberately split into smaller integer-numbered parts. A genuine blocker may interrupt a part, but cleanup discovered during normal work belongs in the next planned part or in the part that owns it.
 
 ## 📍 Current checkpoint
 
@@ -42,7 +47,7 @@ These are not open design questions for the rest of 0.11:
 - Android/shared/desktop code contains the Catalogue v2 compatibility model.
 - Shared exact targets use explicit deck/target membership in the learner database.
 - Removing one deck must not delete a target that another installed deck still references.
-- The application build has reached a clean GitHub Actions build after the Part 4.1 compile fixes.
+- The application build reached a clean GitHub Actions build after the Part 4.1 compile fixes.
 - The Android home-screen widget has a compact 2 x 1 layout so the count and its label share one line instead of being pushed below the launcher cell.
 - Statistics is an evidence dashboard rather than a goal screen: there is no daily quota or duplicate Today block; it shows accumulated history, waits for sufficient samples before retention/time-of-day claims, flags repeatedly forgotten targets, and treats the 14-day view as a forecast.
 
@@ -62,15 +67,14 @@ Implemented:
 - audited UD production-manifest path;
 - v1/v2 extraction parity checks for mature segmentation/sieve behaviour;
 - census/meta-info tooling;
+- deterministic manual-review sampling and readiness audit;
 - guarded publication using the existing `catalog` tag;
-- retry/resume logic for large corpus downloads.
+- retry/resume logic for large corpus downloads;
+- a bounded storage-layout experiment that can repack an already-built artefact without rebuilding corpora.
 
-### Catalogue v2 build status
+### Current measured catalogue snapshot
 
-The current full build is intentionally experimental and must run with
-`publish=false` until its census is reviewed.
-
-For the scale run, use:
+The reviewed scale build used:
 
 ```text
 max_deck: 8000
@@ -81,135 +85,246 @@ publish: false
 tag: catalog
 ```
 
-`max_deck` counts unique target memberships in a collection/level deck, not raw
-context rows. Alternative contexts are measured separately.
+It contains:
 
-The verified scale build retains **443,366 unique exact targets**,
-**1,187,151 target/deck memberships**, **2,613,071 natural contexts** and
-**1,533,669 unique source contexts** across **383 decks / 109 language pairs**.
-The fresh census is cross-checked against that build's `BUILD.json`.
+- **443,366 unique exact targets**;
+- **1,187,151 target/deck memberships**;
+- **2,613,071 retained natural contexts**;
+- **1,533,669 unique source contexts**;
+- **383 decks / 109 language pairs**;
+- **387.1 MiB** of deterministic `.jsonl.gz` deck assets representing **3,108.4 MiB** raw JSONL.
 
-The storage experiment is now measured rather than estimated. Self-contained v2
-decks occupy **3,108.4 MiB** as raw JSONL and **387.1 MiB** as deterministic
-`.jsonl.gz`, a **12.5%** storage ratio. Gzip therefore works well on the raw
-representation, but it did **not** materially shrink the overall GitHub Actions
-artifact compared with the earlier run because that artifact was already applying
-compression to the raw JSONL. Another compression layer is not the solution.
-Meaningful further reduction requires removing repeated physical content across
-deck assets while preserving the same targets, contexts, translations and
-provenance. This is a storage-layout problem, not a reason to discard evidence.
+The final Part 4.5 readiness audit is **WARN**, not PASS and not FAIL.
+Structural integrity, provenance, BUILD cross-check, morphology and target/context
+shape pass. There are no structural blockers. The warnings are material product
+shape evidence that the next catalogue parts must resolve deliberately:
 
-Part 4.3 is intentionally a bounded branch from the roadmap. The repository now
-contains a standalone lossless repacker and a manual workflow that runs it against
-an existing Actions artifact. It compares pair-local pooling with a
-learning-language diagnostic upper bound and uploads only the measurement report.
-No application reader or publication format changes until that report clears the
-explicit acceptance gate.
+- **72 decks contain fewer than 1,000 cards; 13 contain fewer than 100**;
+- **69 decks hit the configured 8,000-target cap**;
+- **31 decks are at or above 90% of the 24 MiB raw client cap, none are over it**;
+- **177,764 of 443,366 exact targets have only one distinct source context**;
+- morphology is real: **3,764,969 of 22,277,253 tokens (16.9%)** have a lemma different from the written surface.
 
-The same census confirms that production morphology is now real rather than an
-identity placeholder: **16.9%** of inspected tokens have a lemma different from
-the written surface. Phonetics is intentionally still disabled for this scale
-build, and `World` remains empty until Global Voices attribution is production-ready.
+This means the foundation is structurally healthy, but the current deck shape is
+not the final content decision. Thin decks may reflect source scarcity; capped
+decks may hide much more usable supply; both must be measured before freezing the
+published catalogue.
 
-The workflow may take substantially longer than Catalogue v1 because it stages
-and deduplicates millions of source candidates, assigns global target/context
-relations and performs a full census. Runtime is a performance concern, but it
-must not be "fixed" by weakening provenance or turning contexts back into fake
-independent cards.
+### What the current card count does and does not mean
 
-## 📊 What to inspect after the full build
+`1,187,151` is the number of target/deck memberships in the current capped build.
+It is **not** the maximum number of cards available from the current corpora.
 
-Do not judge the result by a single `cards` number. Review these separately:
+The build report does not retain an uncapped eligible-target count for every deck.
+Therefore 0.11 must measure supply before deciding that a thin pair needs another
+corpus or that an 8,000-card deck is correctly sized.
 
-- unique learning targets;
-- target/deck memberships;
-- retained contexts;
-- unique source contexts;
-- targets with 2+, 3+ and 5+ contexts;
-- collection distribution;
-- level distribution;
-- language-pair coverage;
+A corpus also does not need to contain ready-made flash cards. It supplies real
+parallel material. The Catalogue pipeline chooses a useful target inside a source
+sentence, keeps the source sentence as context, keeps the aligned meaning and
+records provenance. The details and source scope are fixed in
+[`CORPORA-0.11.md`](CORPORA-0.11.md).
+
+## 📊 Rules for interpreting future catalogue evidence
+
+Do not judge a build by one `cards` number. Review separately:
+
+- source rows before the target sieve;
+- eligible targets before deck caps;
+- selected target/deck memberships after ranking/caps;
+- unique exact targets;
+- retained contexts and unique source contexts;
+- targets with 2+, 3+ and 5+ distinct source contexts;
+- collection, level and language-pair coverage;
+- source-family balance;
 - morphology coverage;
 - invalid-offset count;
 - provenance/licence failures;
-- deck assets that approached the 24 MiB client cap.
-- compressed deck bytes, raw JSONL bytes and their storage ratio.
+- deck assets approaching the client cap;
+- compressed/raw bytes and the final publication layout.
 
-The first artifacts to keep are the build summary and `catalogue-meta-info`
-report. A successful workflow is evidence that the pipeline ran, not evidence
-that the material is ready to publish.
+A successful workflow proves that the pipeline ran. It does not by itself prove
+that the material is useful enough to publish.
 
 ## 🧱 Remaining 0.11 work
 
-### Part 4 follow-up - full corpus evidence
+The remaining work is intentionally split more finely than the original Part
+5-8 plan so each part has one clear output and ordinary findings do not force
+mid-stream subparts.
 
-- [x] Treat the completed compressed scale build and its verified census as the current
-  storage baseline; do not spend another full rebuild merely changing compression.
-- [x] Part 4.3 adds a bounded lossless storage experiment that downloads an existing
-  `catalogue-v2` Actions artifact instead of rebuilding corpora. Its one decision is
-  still explicit: implement pair pooling only if the measured report clears the
-  220 MiB total / 24 MiB cold-deck gate; otherwise retain self-contained gzip.
-- [x] Part 4.4 makes census output concrete: the first page now says how many cards
-  are in all decks, how many are unique targets, what the last `index.json` deck
-  contains, where the 8,000-target cap binds, and lists every deck with cards,
-  contexts, compressed/raw bytes and raw-cap utilisation.
-- [x] Part 4.5 is the final planned Catalogue foundation audit. It generates
-  deterministic manual-review samples for every deck and a separate readiness
-  report with `PASS`/`WARN`/`FAIL` for integrity, provenance, build cross-check,
-  storage cap, deck coverage, morphology and target/context shape. Thin material
-  is a warning; broken JSON/ids/offsets/provenance/index declarations are blockers.
-- [x] The manual `catalogue meta-info` workflow can inspect the latest successful
-  v2 Actions artifact directly, so these reports do not require another corpus build.
-- Do not invent Part 4.6 for optional cleanup. If Part 4.5 finds no blocker, freeze
-  this foundation and move to the full Part 5 implementation. A genuine blocker
-  may interrupt that move; ordinary warnings do not.
-- Production Global Voices, optional UniMorph expansion and the final phonetics pass
-  remain later measured choices; they are not reasons to keep extending Part 4.
+### Part 5 - supply census of existing sources
 
-### Part 5 - richer target/context relations
+**Question:** how much usable material do Tatoeba and the full direct-pair
+WikiMatrix source set already contain before final deck caps?
+
+- Measure Tatoeba and every available direct WikiMatrix pair among the eleven supported languages.
+- Record source rows, rows surviving basic quality/provenance gates, eligible targets before `max_deck`, and selected targets after the current sieve.
+- Separate `beginner`, `middle` and `advanced` supply.
+- Record why material disappears: no direct pair, malformed text, duplicate, no usable target, level/sieve rejection, or deck cap.
+- Do not publish or change learner behaviour in this part.
+
+**Done when:** one deterministic report can distinguish real corpus starvation
+from artificial truncation for every planned pair/collection/level.
+
+### Part 6 - corpus admission and MASSIVE experiment
+
+**Question:** which additional human source material is good enough to enter 0.11?
+
+- Implement/measure MASSIVE 1.1 as an `Everyday` candidate without publishing it.
+- Keep Tatoeba as the broad Everyday baseline; MASSIVE supplements it and must not dominate the collection merely because its matrix is convenient.
+- Measure how many **new** targets and useful additional contexts MASSIVE contributes after the normal sieve and deduplication.
+- Review deterministic samples across all eleven languages, with extra attention to previously thin pairs.
+- Confirm source/version identity, CC BY 4.0 attribution and direct multiway-pair mapping.
+- Use FLORES-200 only as a multilingual quality/reference set; do not count it toward production deck supply.
+- Freeze the 0.11 production source set at the end of this part. Do not add another corpus later just because one deck remains small.
+
+**Acceptance:** MASSIVE enters production only if the retained material is
+natural/useful in manual samples and adds meaningful coverage without weakening
+the existing quality sieve. Otherwise 0.11 continues with Tatoeba-only Everyday.
+
+### Part 7 - Everyday rebuild
+
+**Question:** what should the final Everyday candidate pool contain?
+
+- Rebuild Everyday from the admitted source set from Part 6.
+- Preserve per-record provenance and source-family identity.
+- Deduplicate exact content without erasing distinct source origins.
+- Preserve multiple useful natural contexts for the same target.
+- Report source balance so a narrow corpus cannot crowd out broader material.
+- Keep source rows separate from selected cards in the report.
+
+**Done when:** Everyday has a reproducible candidate pool and coverage report,
+not merely a larger card count.
+
+### Part 8 - Knowledge direct-pair rebuild
+
+**Question:** how much Knowledge coverage exists without the current English hub?
+
+- Expand WikiMatrix acquisition from the bounded English hub to available direct pairs among the eleven supported languages.
+- Never create an absent pair by translating or pivoting through English.
+- Retain alignment scores and measure quality thresholds on real samples.
+- Allow pair-specific rejection when a WikiMatrix pair is too noisy; the existence of an upstream file is not sufficient evidence of quality.
+- Produce the same before-cap/after-sieve/after-selection census used for Everyday.
+
+**Done when:** Knowledge coverage is based on measured direct source pairs rather
+than the convenience of an English-hub build.
+
+### Part 9 - World attribution build
+
+**Question:** can Global Voices become real production material without weakening provenance?
+
+- Build/recover canonical article URL and contributor attribution for each retained aligned segment.
+- Keep the existing hard gate: aligned text without record-level attribution is not publishable.
+- Produce World candidates only for pairs that pass the attribution and quality rules.
+- Accept naturally thin or empty World pairs rather than generating filler.
+
+**Done when:** every retained World context is traceable to the article and credited contributors required by the source policy.
+
+### Part 10 - catalogue selection policy
+
+**Question:** from the available human material, which targets and contexts should each deck actually contain?
+
+- Replace "first useful targets until 8,000" as the final product policy with an explicit deterministic ranking/selection policy.
+- Keep `8,000` as a safety budget during experiments; do not treat it as a goal every deck must reach.
+- Prefer useful frequency coverage, clean contexts and source/context diversity over raw size.
+- Use morphology as evidence for selection/diversity without changing exact `targetId` identity.
+- Prevent near-duplicate contexts from consuming the context budget.
+- Define what happens to very small decks: publish a genuinely useful thin deck, merge/relabel only when product semantics remain true, or omit it with an explicit reason. Never pad it with weak material.
+- Define deterministic tie-breaking so the same source snapshot produces the same deck.
+
+**Done when:** deck size is a result of an inspectable quality policy, not source order or an arbitrary stop condition.
+
+### Part 11 - final Catalogue v2 content census and freeze
+
+**Question:** is the resulting catalogue content good enough to freeze?
+
+- Run the complete build with the admitted sources and final selection policy.
+- Produce full census, per-deck inventory and deterministic review samples.
+- Audit integrity, provenance, build cross-check, language-pair/level coverage, source balance, morphology, target/context shape and thin/capped material.
+- Inspect samples from every collection, every language and the smallest/highest-risk pairs.
+- Treat structural/reproducibility/provenance failures as blockers.
+- Treat unavoidable corpus scarcity as an explicit documented limitation, not corruption.
+
+**Done when:** the content foundation has a reviewed release decision and its exact source/build inputs are frozen.
+
+### Part 12 - final storage and publication format
+
+**Question:** how should the frozen final catalogue be packaged for download?
+
+- Re-run the lossless storage-layout experiment on the **final** Part 11 content, not on the old capped baseline.
+- Use the existing self-contained gzip baseline and Part 4.3 experiment as evidence, not as a forced answer for changed content.
+- Accept pooling only if it materially reduces total publication bytes without violating the cold-deck/client-size gate or complicating integrity/recovery beyond the measured benefit.
+- Implement the chosen reader/publication format only after the measurement decision.
+- Keep publication lossless: storage optimisation must not discard contexts, translations or provenance.
+
+**Done when:** final assets fit the accepted client/release constraints and the app can read the chosen format deterministically.
+
+### Part 13 - richer target relations
+
+**Question:** which exact targets can be related safely without silently changing identity?
 
 - Keep exact NFKC + case-fold identity as the baseline.
 - Add morphology-aware relations only where precision is demonstrated.
-- Do not merge ambiguous written forms merely because their surface text matches.
-- Keep source occurrence and context provenance inspectable.
+- Treat relation as relation, not automatic memory merge.
+- Do not merge ambiguous written forms merely because their surface or lemma matches.
+- Keep source occurrence and morphology evidence inspectable.
 
-### Part 6 - learning-engine policy integration
+### Part 14 - context evidence history
 
-- Choose the stored context used for a target deliberately; do not rotate on every review.
-- Record enough history to distinguish seen and unseen contexts.
-- Keep one learner memory for a shared exact target across installed decks.
-- Add sense splitting only with versioned identity/migration rules and evidence.
+**Question:** can learner history say which real context was actually shown and why?
 
-### Part 7 - contextual-diversity experiment
+- Record stable context identity for study/review observations where policy can choose among contexts.
+- Record enough policy/version information for deterministic replay when a choice matters.
+- Define `seen`/`unseen` from inspectable history rather than a transient UI flag.
+- Keep Browse exposure semantics explicit; browsing must not silently become retrieval evidence.
+- Preserve one learner memory for a shared exact target across installed decks.
 
-- Introduce Context/Transfer Policy only after history can represent the decision.
-- Test unseen contexts conservatively on mature targets.
-- Do not let novel-context success change FSRS intervals until a documented policy has been validated.
+### Part 15 - Context Policy
 
-### Part 8 - validation and release gate
+**Question:** which stored context should represent a target during ordinary study/review?
 
+- Choose deliberately; do not rotate contexts on every review.
+- Use deterministic policy rules for the same learner history.
+- Keep normal context choice separate from transfer testing.
+- Avoid accidental meaning-language/source leakage between deck memberships.
+
+### Part 16 - Transfer Policy and contextual-diversity experiment
+
+**Question:** when is an unseen context useful evidence of transfer?
+
+- Introduce unseen-context tests only after Part 14 history can represent them.
+- Use mature targets and conservative eligibility rules.
 - Compare policy variants against the same deterministic histories.
+- Do not let novel-context success change FSRS intervals until a documented policy has been validated.
+- Do not add XP/confetti/praise mechanics around transfer.
+
+### Part 17 - release validation and publication
+
 - Keep evidence labels in sync with `SCIENCE.md`.
 - Run application CI on Android and desktop.
-- Run Catalogue contracts, ingestion, morphology, parity and census checks.
-- Inspect real catalogue samples by collection/level/language pair.
-- Publish deck assets first and `index.json` last.
+- Run Catalogue contracts, ingestion, morphology, parity, census and migration checks.
+- Verify deterministic replay and final policy fixtures.
+- Inspect final real catalogue samples by collection/level/language pair.
+- Exercise the exact final build configuration with `publish=false` before publication.
+- Publish deck/data assets first and `index.json` last.
 - Only then rename the fixed-tag release to `Catalogue v2`.
 
 ## 🚧 Release blockers
 
 0.11 is not ready to publish while any of these are true:
 
-- no reviewed full Catalogue v2 census exists;
-- target/context counts are only inferred from smoke fixtures;
-- a large source can enter without auditable licence/provenance;
-- Global Voices material lacks record-level attribution/canonical URLs;
+- the supply census cannot distinguish source scarcity from build caps;
+- a production corpus can enter without an explicit 0.11 admission decision and auditable licence/provenance;
+- final Everyday/Knowledge/World source inputs are not reproducibly pinned;
+- Global Voices material lacks required record-level attribution/canonical URLs;
+- deck selection still depends primarily on input order / reaching an arbitrary cap instead of the final deterministic selection policy;
+- no reviewed final Catalogue v2 content census exists after the source/selection changes;
 - context selection can accidentally create a second learner memory for the same exact target;
+- context history cannot identify the context/policy decision required for the transfer experiment;
 - Room migration tests do not preserve existing learner data;
-- final catalogue assets have not passed meta-info and size checks;
-- the storage layout for the final v2 publication has not been accepted after the
-  measured 387.1 MiB compressed baseline;
-- `publish=true` would be the first time the exact build configuration is exercised.
+- final catalogue assets have not passed meta-info, integrity and size checks;
+- the final storage layout has not been accepted on the frozen final content;
+- `publish=true` would be the first time the exact final build configuration is exercised.
 
 ## 🧹 Cleanup/checkpoint work
 
@@ -220,6 +335,7 @@ inside catalogue tasks:
 - [x] add a contributor guide with build, migration and Catalogue v2 rules;
 - [x] fix the Android widget's compact layout on launchers that provide less usable 1-cell height;
 - [x] document the active 0.11 plan separately from the architectural roadmap;
+- [x] record the current Catalogue v2 WARN findings and corpus scope before continuing implementation;
 - [ ] collect any further small app bugs found while testing the current build;
 - [ ] avoid mixing those UI fixes with Catalogue identity or corpus changes unless they are actually related.
 
@@ -233,9 +349,11 @@ For the first 0.11 release, do not add:
 - a server/account/telemetry stack;
 - automatic merging of all morphological forms;
 - gamified rewards;
-- a broad UI redesign.
+- machine-translated/pivoted filler for missing catalogue pairs;
+- a broad UI redesign;
+- an open-ended corpus search after the Part 6 source freeze.
 
-The release goal is not "more features". It is a catalogue and learning engine
-that can distinguish a learning target from the contexts in which that target is
-observed, preserve that identity across decks, and make later transfer experiments
-possible without corrupting the learner's memory state.
+The release goal is not "more cards". It is a measured human-source catalogue and
+learning engine that can distinguish a learning target from the contexts in which
+that target is observed, preserve that identity across decks, and make later
+transfer experiments possible without corrupting the learner's memory state.

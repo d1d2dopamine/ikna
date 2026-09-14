@@ -220,6 +220,7 @@ Versioning rules: [`docs/VERSIONS.md`](docs/VERSIONS.md).
 [`LEARNING-ENGINE.md`](docs/LEARNING-ENGINE.md) ·
 [`SCIENCE.md`](docs/SCIENCE.md) ·
 [`CATALOGUE-V2.md`](docs/CATALOGUE-V2.md) ·
+[`CORPORA-0.11.md`](docs/CORPORA-0.11.md) ·
 [`ROADMAP-0.11.md`](docs/ROADMAP-0.11.md) ·
 [`PLAN-0.11.md`](docs/PLAN-0.11.md) ·
 [`CONTRIBUTING.md`](CONTRIBUTING.md) ·
@@ -470,6 +471,7 @@ Release workflow проверяет совпадение тега и build-фа�
 [`LEARNING-ENGINE.md`](docs/LEARNING-ENGINE.md) ·
 [`SCIENCE.md`](docs/SCIENCE.md) ·
 [`CATALOGUE-V2.md`](docs/CATALOGUE-V2.md) ·
+[`CORPORA-0.11.md`](docs/CORPORA-0.11.md) ·
 [`ROADMAP-0.11.md`](docs/ROADMAP-0.11.md) ·
 [`PLAN-0.11.md`](docs/PLAN-0.11.md) ·
 [`CONTRIBUTING.md`](CONTRIBUTING.md) ·

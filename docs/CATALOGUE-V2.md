@@ -36,13 +36,16 @@ The initial collections are:
 
 | id | display name | initial source family | intended material |
 | --- | --- | --- | --- |
-| `everyday` | Everyday | Tatoeba | short, general and everyday language |
+| `everyday` | Everyday | Tatoeba; MASSIVE only if it passes the 0.11 admission gate | short, general and everyday language |
 | `knowledge` | Knowledge | WikiMatrix / Wikipedia | neutral and explanatory language |
 | `world` | World | Global Voices | journalism, society and culture |
 
 A collection is a product category, not a permanent alias for one corpus. A
 future source can join a collection without inventing a fourth user-facing
-category. Source provenance remains separate and explicit.
+category. Source provenance remains separate and explicit. The fixed 0.11 source
+scope and admission rules are documented in [`CORPORA-0.11.md`](CORPORA-0.11.md);
+adding a source there does not make it publishable until its adapter, provenance
+and quality gate have passed.
 
 ## File names and deck ids
 
@@ -225,9 +228,9 @@ form such as `bank` can still need sense separation later. Part 4.1 deliberately
 uses this exact `targetId` as the shared learner-memory key across installed v2
 decks, because duplicate Beginner/Middle/collection memberships must not create
 parallel FSRS histories for the same exact target. This is an explicit temporary
-product policy, not a claim that spelling proves sense identity. Part 5 may split
-ambiguous forms when corpus evidence supports a safer sense distinction; such a
-change must be versioned rather than silently changing old ids.
+product policy, not a claim that spelling proves sense identity. Part 13 may add
+richer morphology/sense relations when corpus evidence supports them; any actual
+identity split must be versioned rather than silently changing old ids.
 
 The index records an identity version and method. A later morphology-aware method
 must increment the identity version instead of silently changing the meaning of
