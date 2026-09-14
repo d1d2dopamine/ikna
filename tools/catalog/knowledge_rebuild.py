@@ -132,11 +132,15 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
             if keep:
                 accepted_counts[key] += 1
                 pool_handle.write(json.dumps(record.to_dict(), ensure_ascii=False, sort_keys=True) + "\n")
-            if args.sample_per_pair > 0:
-                bucket = heaps[key]
-                bucket.append((_sample_score(record), record))
-                bucket.sort(key=lambda item: item[0])
-                del bucket[args.sample_per_pair:]
+                # Manual-review samples must represent material that survived the
+                # current threshold. Sampling rejected rows made a stricter policy
+                # look worse than the actual preview and obscured whether the new
+                # floor removed the known low-score mismatches.
+                if args.sample_per_pair > 0:
+                    bucket = heaps[key]
+                    bucket.append((_sample_score(record), record))
+                    bucket.sort(key=lambda item: item[0])
+                    del bucket[args.sample_per_pair:]
 
     if not raw_counts:
         raise ValueError("Knowledge experiment received no candidates")
@@ -153,12 +157,17 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
             "inputRows": raw_counts[key],
             "retainedRows": accepted_counts[key],
             "rejectedRows": raw_counts[key] - accepted_counts[key],
+            "retainedRate": (accepted_counts[key] / raw_counts[key]) if raw_counts[key] else 0.0,
             "score": _score_public(score_stats[key]),
+            "qualityBand": rule.get("qualityBand", "unspecified"),
+            "diagnosticMeanScore": rule.get("diagnosticMeanScore"),
             "note": rule.get("note", ""),
         })
 
     samples = []
     for key in sorted(heaps):
+        first, second = key.split("-", 1)
+        sample_rule = rule_for(policy, first, second)
         for _score, record in sorted(heaps[key], key=lambda item: item[0]):
             origin_score = max(origin.alignment_score for origin in record.origins if origin.alignment_score is not None)
             samples.append({
@@ -168,6 +177,7 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
                 "context": record.context,
                 "meaning": record.meaning,
                 "alignmentScore": origin_score,
+                "minScore": sample_rule.get("minScore"),
                 "candidateId": record.id,
             })
 
@@ -209,13 +219,15 @@ def markdown(report: dict[str, Any]) -> str:
         f"- pairs still requiring review: **{s['reviewPairs']}**",
         f"- rejected pairs: **{s['rejectedPairs']}**",
         "",
-        "| pair | action | min score | input | retained | score mean |",
-        "| --- | --- | ---: | ---: | ---: | ---: |",
+        "| pair | action | min score | input | retained | retained % | score mean | band |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |",
     ]
     for row in report["pairs"]:
-        lines.append("| {pair} | {action} | {minScore} | {inputRows:,} | {retainedRows:,} | {median} |".format(
+        lines.append("| {pair} | {action} | {minScore} | {inputRows:,} | {retainedRows:,} | {retainedRate:.1%} | {median} | {band} |".format(
             pair=row["pair"], action=row["action"], minScore=row["minScore"] if row["minScore"] is not None else "-",
-            inputRows=row["inputRows"], retainedRows=row["retainedRows"], median=("%.3f" % row["score"]["mean"]) if row["score"]["mean"] is not None else "-",
+            inputRows=row["inputRows"], retainedRows=row["retainedRows"], retainedRate=row["retainedRate"],
+            median=("%.3f" % row["score"]["mean"]) if row["score"]["mean"] is not None else "-",
+            band=row.get("qualityBand") or "-",
         ))
     if report["reviewPairs"]:
         lines += ["", "Pairs still marked `review`: " + ", ".join(report["reviewPairs"])]
@@ -224,10 +236,15 @@ def markdown(report: dict[str, Any]) -> str:
 
 
 def samples_markdown(report: dict[str, Any]) -> str:
-    lines = ["# WikiMatrix deterministic manual-review samples", ""]
+    lines = [
+        "# WikiMatrix deterministic manual-review samples",
+        "",
+        "Only rows retained by the current pair-specific score policy are sampled here.",
+        "",
+    ]
     for row in report["samples"]:
         lines += [
-            f"## {row['lang']} -> {row['meaningLang']} · score {row['alignmentScore']:.3f}",
+            f"## {row['lang']} -> {row['meaningLang']} · score {row['alignmentScore']:.3f} · floor {row['minScore'] if row['minScore'] is not None else '-'}",
             "",
             row["context"],
             "",

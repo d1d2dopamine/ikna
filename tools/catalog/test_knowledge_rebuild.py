@@ -4,7 +4,7 @@ import json, tempfile
 from pathlib import Path
 
 from ingest.model import Candidate, Origin, read_jsonl, write_jsonl
-from knowledge_rebuild import build_report, parser, pair_key
+from knowledge_rebuild import DEFAULT_POLICY, build_report, load_policy, parser, pair_key
 
 
 def candidate(score: float, text: str, lang: str="en", meaning: str="es") -> Candidate:
@@ -17,6 +17,10 @@ def candidate(score: float, text: str, lang: str="en", meaning: str="es") -> Can
 
 def main() -> int:
     assert pair_key("es", "en") == "en-es"
+    default_policy = load_policy(str(DEFAULT_POLICY))
+    assert len(default_policy["pairs"]) == 55
+    assert {rule["action"] for rule in default_policy["pairs"].values()} == {"review"}
+    assert {rule["minScore"] for rule in default_policy["pairs"].values()} <= {1.10, 1.11, 1.12}
     with tempfile.TemporaryDirectory(prefix="ikna-knowledge-") as td:
         root = Path(td)
         inp = root / "in.jsonl.gz"
@@ -32,6 +36,9 @@ def main() -> int:
         assert report["status"] == "requires-manual-review"
         assert report["summary"]["retainedCandidates"] == 1
         assert len(read_jsonl(str(root/"pool.jsonl.gz"))) == 1
+        assert len(report["samples"]) == 1
+        assert report["samples"][0]["alignmentScore"] == 1.30
+        assert report["pairs"][0]["retainedRate"] == 0.5
 
         policy.write_text(json.dumps({
             "policyVersion":1,
@@ -41,6 +48,7 @@ def main() -> int:
         report = build_report(args)
         assert report["summary"]["retainedCandidates"] == 0
         assert report["rejectedPairs"] == ["en-es"]
+        assert report["samples"] == []
     print("Knowledge Part 8 contracts: OK")
     return 0
 

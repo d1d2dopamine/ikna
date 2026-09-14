@@ -26,6 +26,27 @@ The two WikiMatrix-heavy workflows (supply census and knowledge experiment) shou
 not be started at the same time. Run them sequentially to avoid unnecessary load on
 the upstream bucket.
 
+
+## After the first full evidence run
+
+The first Part 5 census is complete and does not need to be repeated for this
+stabilization patch. After committing the post-run fixes, rerun **Everyday**,
+**Knowledge**, and **World**; they are independent and may run at the same time.
+
+- Everyday now uploads only compact reports, manual MASSIVE samples, and a bounded
+  selection preview. The multi-hundred-megabyte merged candidate pool stays on the
+  runner and is not uploaded as evidence.
+- Knowledge uses provisional pair-specific review floors derived from the first
+  50k-row diagnostic: `1.10`, `1.11`, or `1.12`. These floors only filter the next
+  review pool; every pair still has action `review` until retained samples are
+  inspected.
+- World resolves XCES document + sentence ids directly against native OPUS XML.
+  Moses line numbers are no longer used for provenance. Article URL/contributor
+  attribution remains fail-closed and requires trustworthy document metadata.
+- Part 10 precomputes target choices once per exact context, bulk-loads SQLite
+  before creating the pair index, and keeps only a small evidence preview per deck.
+  Selection ordering and deck decisions are unchanged.
+
 ## Do not run yet
 
 - Do not enable `publish` in **catalogue v2 build**.
@@ -43,7 +64,7 @@ From the workflow artifacts/workflow summaries, keep:
 - `EVERYDAY-SOURCE-ADMISSION.*`, `EVERYDAY-MASSIVE-SAMPLES.md`, and
   `EVERYDAY-SELECTION.*`;
 - `KNOWLEDGE-PREVIEW.*`, `KNOWLEDGE-SAMPLES.md`, and `KNOWLEDGE-SELECTION.*`;
-- `WORLD-ATTRIBUTION.*` plus the missing-document list.
+- `WORLD-NATIVE-XCES.*`, `WORLD-NATIVE-SAMPLES.md`, and `WORLD-ATTRIBUTION.*` plus the missing-document list.
 
 Those reports are the input to the next review. They determine corpus admission,
 pair-specific WikiMatrix thresholds/rejections, remaining World attribution work,

@@ -8,11 +8,23 @@ metadata.  This tool never guesses a URL or contributor from text.
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 from collections import Counter
 from pathlib import Path
+from itertools import zip_longest
 from typing import Any
 from urllib.parse import urlparse
+
+
+def _open_text(path: str, mode: str = "rt"):
+    if path.endswith(".gz"):
+        if "r" in mode:
+            return gzip.open(path, mode, encoding="utf-8", errors="replace")
+        return gzip.open(path, mode, encoding="utf-8", newline="", compresslevel=6)
+    if "r" in mode:
+        return open(path, mode.replace("t", ""), encoding="utf-8", errors="replace")
+    return open(path, mode.replace("t", ""), encoding="utf-8", newline="")
 
 
 def valid_globalvoices_url(value: str) -> bool:
@@ -26,7 +38,7 @@ def valid_globalvoices_url(value: str) -> bool:
 
 def load_articles(path: str) -> dict[str, dict[str, Any]]:
     rows: dict[str, dict[str, Any]] = {}
-    with open(path, encoding="utf-8") as handle:
+    with _open_text(path) as handle:
         for physical, line in enumerate(handle, start=1):
             line = line.strip()
             if not line:
@@ -50,7 +62,7 @@ def load_articles(path: str) -> dict[str, dict[str, Any]]:
 def load_alignment_map(path: str) -> list[dict[str, Any]]:
     rows = []
     seen = set()
-    with open(path, encoding="utf-8") as handle:
+    with _open_text(path) as handle:
         for physical, line in enumerate(handle, start=1):
             line = line.strip()
             if not line:
@@ -157,7 +169,7 @@ def parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
     rows, report = resolve(args.alignment_map, args.article_manifest)
-    with open(args.out, "w", encoding="utf-8") as handle:
+    with _open_text(args.out, "wt") as handle:
         for row in rows:
             handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
 
@@ -166,10 +178,12 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("aligned filtering requires --learn-file, --meaning-file, --filtered-learn, --filtered-meaning and --filtered-attribution together")
     if all(filtering):
         keep = {row["line"]: row for row in rows}
-        with open(args.learn_file, encoding="utf-8", errors="replace") as left, open(args.meaning_file, encoding="utf-8", errors="replace") as right, open(args.filtered_learn, "w", encoding="utf-8") as out_left, open(args.filtered_meaning, "w", encoding="utf-8") as out_right, open(args.filtered_attribution, "w", encoding="utf-8") as out_attr:
+        with _open_text(args.learn_file) as left, _open_text(args.meaning_file) as right, _open_text(args.filtered_learn, "wt") as out_left, _open_text(args.filtered_meaning, "wt") as out_right, _open_text(args.filtered_attribution, "wt") as out_attr:
             emitted = 0
-            for number, pair in enumerate(zip(left, right), start=1):
+            for number, pair in enumerate(zip_longest(left, right), start=1):
                 lline, rline = pair
+                if lline is None or rline is None:
+                    raise ValueError("aligned Global Voices files have different line counts")
                 attribution = keep.get(number)
                 if attribution is None:
                     continue
@@ -179,8 +193,6 @@ def main(argv: list[str] | None = None) -> int:
                 rewritten = dict(attribution)
                 rewritten["line"] = emitted
                 out_attr.write(json.dumps(rewritten, ensure_ascii=False, sort_keys=True) + "\n")
-            if next(left, None) is not None or next(right, None) is not None:
-                raise ValueError("aligned Global Voices files have different line counts")
         report["summary"]["filteredRows"] = emitted
 
     Path(args.json).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

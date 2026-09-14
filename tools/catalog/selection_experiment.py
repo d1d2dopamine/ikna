@@ -45,25 +45,49 @@ SCHEMA = """
 PRAGMA journal_mode=OFF;
 PRAGMA synchronous=OFF;
 PRAGMA temp_store=FILE;
+PRAGMA locking_mode=EXCLUSIVE;
+PRAGMA cache_size=-262144;
+PRAGMA mmap_size=268435456;
 CREATE TABLE candidate(
  id TEXT PRIMARY KEY, collection TEXT, lang TEXT, meaning_lang TEXT,
- context TEXT, meaning TEXT, origins_json TEXT, max_alignment REAL
+ context_key TEXT, context TEXT, meaning TEXT, origins_json TEXT, max_alignment REAL
 );
-CREATE INDEX candidate_pair ON candidate(collection,lang,meaning_lang);
 CREATE TABLE context(
  collection TEXT, lang TEXT, context_key TEXT, context TEXT,
  PRIMARY KEY(collection,lang,context_key)
 );
-CREATE INDEX context_group ON context(collection,lang);
+CREATE TABLE context_analysis(
+ collection TEXT, lang TEXT, context_key TEXT, token_count INTEGER, choices_json TEXT,
+ PRIMARY KEY(collection,lang,context_key)
+);
+"""
+
+POST_STAGE_INDEXES = """
+CREATE INDEX candidate_pair ON candidate(collection,lang,meaning_lang,id);
 """
 
 
-def stage(paths: Iterable[str], db_path: str) -> dict[str, int]:
+def _flush_stage(db: sqlite3.Connection, candidates: list[tuple], contexts: list[tuple]) -> None:
+    if candidates:
+        db.executemany(
+            "INSERT OR IGNORE INTO candidate VALUES(?,?,?,?,?,?,?,?,?)", candidates
+        )
+    if contexts:
+        db.executemany(
+            "INSERT OR IGNORE INTO context VALUES(?,?,?,?)", contexts
+        )
+    candidates.clear()
+    contexts.clear()
+
+
+def stage(paths: Iterable[str], db_path: str, batch_size: int = 50000) -> dict[str, int]:
     path = Path(db_path)
     if path.exists():
         path.unlink()
     db = sqlite3.connect(path)
     stats = Counter()
+    candidate_batch: list[tuple] = []
+    context_batch: list[tuple] = []
     try:
         db.executescript(SCHEMA)
         for source in paths:
@@ -78,19 +102,26 @@ def stage(paths: Iterable[str], db_path: str) -> dict[str, int]:
                     stats["inputCandidates"] += 1
                     origins=[origin.to_dict() for origin in record.origins]
                     scores=[origin.alignment_score for origin in record.origins if origin.alignment_score is not None]
-                    cursor=db.execute(
-                        "INSERT OR IGNORE INTO candidate VALUES(?,?,?,?,?,?,?,?)",
-                        (record.id,record.collection,record.lang,record.meaning_lang,record.context,record.meaning,
-                         json.dumps(origins,ensure_ascii=False,sort_keys=True), max(scores) if scores else None)
-                    )
-                    if cursor.rowcount:
-                        stats["uniqueCandidates"] += 1
-                        db.execute("INSERT OR IGNORE INTO context VALUES(?,?,?,?)",
-                                   (record.collection,record.lang,_context_key(record.collection,record.lang,record.context),record.context))
-                    else:
-                        stats["duplicateCandidates"] += 1
-                    if stats["inputCandidates"] % 20000 == 0: db.commit()
+                    ckey=_context_key(record.collection,record.lang,record.context)
+                    candidate_batch.append((
+                        record.id,record.collection,record.lang,record.meaning_lang,ckey,
+                        record.context,record.meaning,
+                        json.dumps(origins,ensure_ascii=False,separators=(",", ":")),
+                        max(scores) if scores else None,
+                    ))
+                    context_batch.append((record.collection,record.lang,ckey,record.context))
+                    if len(candidate_batch) >= batch_size:
+                        _flush_stage(db,candidate_batch,context_batch)
+        _flush_stage(db,candidate_batch,context_batch)
         db.commit()
+        # Building the pair index after the bulk load is materially faster than
+        # maintaining it for every one of millions of inserts. The primary-key
+        # indexes still preserve the exact same deduplication semantics.
+        db.executescript(POST_STAGE_INDEXES)
+        db.commit()
+        stats["uniqueCandidates"] = db.execute("SELECT COUNT(*) FROM candidate").fetchone()[0]
+        stats["duplicateCandidates"] = stats["inputCandidates"] - stats["uniqueCandidates"]
+        stats["uniqueContexts"] = db.execute("SELECT COUNT(*) FROM context").fetchone()[0]
         return dict(stats)
     finally:
         db.close()
@@ -101,6 +132,44 @@ def build_ranks(db: sqlite3.Connection, collection: str, lang: str) -> dict[str,
     for (text,) in db.execute("SELECT context FROM context WHERE collection=? AND lang=? ORDER BY context_key",(collection,lang)):
         counts.update(word.lower() for word in core.words(text,lang))
     return {form:i for i,(form,_n) in enumerate(counts.most_common(),start=1)}
+
+
+def build_context_analysis(
+    db: sqlite3.Connection, collection: str, lang: str, ranks: dict[str,int], function_top: int,
+    batch_size: int = 5000,
+) -> None:
+    # A context is shared by many meaning languages (especially MASSIVE).  The
+    # historical experiment tokenised and ranked that same sentence once per
+    # directed pair.  Precompute target choices once per exact context instead;
+    # this changes no selection semantics, only the amount of repeated work.
+    existing=db.execute(
+        "SELECT COUNT(*) FROM context_analysis WHERE collection=? AND lang=?",
+        (collection,lang),
+    ).fetchone()[0]
+    expected=db.execute(
+        "SELECT COUNT(*) FROM context WHERE collection=? AND lang=?",
+        (collection,lang),
+    ).fetchone()[0]
+    if existing == expected and expected:
+        return
+    db.execute("DELETE FROM context_analysis WHERE collection=? AND lang=?",(collection,lang))
+    batch=[]
+    for context_key,text in db.execute(
+        "SELECT context_key,context FROM context WHERE collection=? AND lang=? ORDER BY context_key",
+        (collection,lang),
+    ):
+        token_count=len(core.words(text,lang))
+        choices=phrase_choices(text,ranks,lang,function_top)
+        batch.append((
+            collection,lang,context_key,token_count,
+            json.dumps(choices,ensure_ascii=False,separators=(",", ":")),
+        ))
+        if len(batch) >= batch_size:
+            db.executemany("INSERT INTO context_analysis VALUES(?,?,?,?,?)",batch)
+            batch.clear()
+    if batch:
+        db.executemany("INSERT INTO context_analysis VALUES(?,?,?,?,?)",batch)
+    db.commit()
 
 
 def _origin_families(origins_json: str) -> tuple[list[dict[str,Any]], list[str]]:
@@ -120,23 +189,26 @@ def _target_lemma(morphology: MorphologyResolver|None, lang: str, surface: str, 
 
 
 def pair_evidence(db: sqlite3.Connection, collection: str, lang: str, meaning_lang: str,
-                  ranks: dict[str,int], function_top: int, morphology: MorphologyResolver|None,
-                  evidence_context_limit: int) -> tuple[list[dict[str,Any]], Counter]:
+                  morphology: MorphologyResolver|None, evidence_context_limit: int) -> tuple[list[dict[str,Any]], Counter]:
     targets: dict[str,dict[str,Any]]={}
     stats=Counter()
-    rows=db.execute("SELECT id,context,meaning,origins_json,max_alignment FROM candidate WHERE collection=? AND lang=? AND meaning_lang=? ORDER BY id",
-                    (collection,lang,meaning_lang))
-    for candidate_id,context,meaning,origins_json,max_alignment in rows:
+    rows=db.execute(
+        "SELECT c.id,c.context,c.meaning,c.origins_json,c.max_alignment,a.token_count,a.choices_json "
+        "FROM candidate c JOIN context_analysis a "
+        "ON a.collection=c.collection AND a.lang=c.lang AND a.context_key=c.context_key "
+        "WHERE c.collection=? AND c.lang=? AND c.meaning_lang=? ORDER BY c.id",
+        (collection,lang,meaning_lang),
+    )
+    for candidate_id,context,meaning,origins_json,max_alignment,token_count,choices_json in rows:
         stats["candidateRows"] += 1
         if len(context) < (6 if lang in core.CJK else core.MIN_SENTENCE) or utf16_length(context) > core.MAX_SENTENCE:
             stats["sentenceLengthRejected"] += 1; continue
         if not meaning or utf16_length(meaning) > core.MAX_TRANSLATION:
             stats["translationLengthRejected"] += 1; continue
-        choices=phrase_choices(context,ranks,lang,function_top)
+        choices=json.loads(choices_json)
         if not choices:
             stats["noUsableTarget"] += 1; continue
         origins,families=_origin_families(origins_json)
-        token_count=len(core.words(context,lang))
         for rank,surface,tid,level in choices:
             item=targets.get(tid)
             if item is None:
@@ -183,9 +255,12 @@ def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,
         for collection,lang,meaning_lang in pairs:
             if lang not in langs or meaning_lang not in meanings or lang==meaning_lang: continue
             key=(collection,lang)
-            if key not in rank_cache: rank_cache[key]=build_ranks(db,collection,lang)
-            ranks=rank_cache[key]
-            targets,pair_stats=pair_evidence(db,collection,lang,meaning_lang,ranks,args.function_top,morphology,args.evidence_context_limit)
+            if key not in rank_cache:
+                rank_cache[key]=build_ranks(db,collection,lang)
+                build_context_analysis(db,collection,lang,rank_cache[key],args.function_top)
+            targets,pair_stats=pair_evidence(
+                db,collection,lang,meaning_lang,morphology,args.evidence_context_limit
+            )
             levels={level:[] for level in core.LEVELS}
             for target in targets: levels[target["level"]].append(target)
             for level in core.LEVELS:
@@ -224,7 +299,8 @@ def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,
                 elif count < args.thin_deck: decision="publish-thin"
                 else: decision="publish"
                 if decision.startswith("publish"):
-                    for row in selected_rows:
+                    evidence_rows = selected_rows if args.preview_limit_per_deck == 0 else selected_rows[:args.preview_limit_per_deck]
+                    for row in evidence_rows:
                         preview.append({"deckId":deck_id,"collection":collection,"lang":lang,"meaningLang":meaning_lang,"level":level,**row})
                 deck={
                     "deckId":deck_id,"collection":collection,"lang":lang,"meaningLang":meaning_lang,"level":level,
@@ -246,8 +322,10 @@ def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,
                 "targetOrder":["frequency rank","context evidence","source diversity","stable target id"],
                 "morphology":"confident lemma is diversity evidence only; exact targetId never changes",
                 "smallDeck":"omit below minDeck; never pad with weak material",
+                "previewLimitPerDeck":args.preview_limit_per_deck,
             },
-            "morphologyUsed":bool(args.morphology_db),"stage":stage_stats,"summary":dict(summary),"decks":decks,
+            "morphologyUsed":bool(args.morphology_db),"stage":stage_stats,"summary":dict(summary),
+            "previewRows":len(preview),"decks":decks,
         }
         return report,preview
     finally:
@@ -291,6 +369,7 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("--max-deck",type=int,default=8000); ap.add_argument("--min-deck",type=int,default=40); ap.add_argument("--thin-deck",type=int,default=1000)
     ap.add_argument("--contexts-per-target",type=int,default=3); ap.add_argument("--evidence-context-limit",type=int,default=12)
     ap.add_argument("--near-duplicate-threshold",type=float,default=.85); ap.add_argument("--function-top",type=int,default=core.FUNCTION_TOP)
+    ap.add_argument("--preview-limit-per-deck",type=int,default=0,help="evidence rows kept per publishable deck; 0 keeps all")
     ap.add_argument("--morphology-db")
     return ap
 
@@ -299,6 +378,7 @@ def main(argv=None)->int:
     args=parser().parse_args(argv)
     if min(args.max_deck,args.min_deck,args.thin_deck,args.contexts_per_target,args.evidence_context_limit)<1: raise SystemExit("selection limits must be positive")
     if args.min_deck>args.max_deck: raise SystemExit("--min-deck cannot exceed --max-deck")
+    if args.preview_limit_per_deck < 0: raise SystemExit("--preview-limit-per-deck must be non-negative")
     if not 0 < args.near_duplicate_threshold <= 1: raise SystemExit("near duplicate threshold must be in (0,1]")
     report,preview=build_report(args)
     Path(args.json).write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")

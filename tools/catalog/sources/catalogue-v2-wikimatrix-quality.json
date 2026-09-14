@@ -1,10 +1,402 @@
 {
   "policyVersion": 1,
   "status": "review-required",
+  "basis": {
+    "diagnostic": "catalogue v2 knowledge experiment run 34885000156",
+    "acquisitionRowsPerPhysicalPair": 50000,
+    "rule": "Use 1.10 as the conservative floor; raise to 1.11 for diagnostic mean <1.085 and 1.12 for mean <1.065. These are review thresholds, not automatic admission.",
+    "reason": "The 1.04 historical baseline retained obvious semantic mismatches, especially in lower-scoring CJK/Korean pairs."
+  },
   "default": {
     "action": "review",
-    "minScore": 1.04,
-    "note": "Historical baseline only. Pair-specific review must decide whether to accept, raise the threshold, or reject the pair."
+    "minScore": 1.1,
+    "note": "Conservative fallback for an unreviewed direct pair. Explicit pair rules are required before production admission."
   },
-  "pairs": {}
+  "pairs": {
+    "de-en": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.113527,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "de-es": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.092625,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "de-fr": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.100385,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "de-it": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.090044,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "de-ja": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.06883,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "de-ko": {
+      "action": "review",
+      "minScore": 1.12,
+      "diagnosticMeanScore": 1.054798,
+      "qualityBand": "very-weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "de-pl": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.077941,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "de-pt": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.086351,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "de-ru": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.08343,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "de-zh": {
+      "action": "review",
+      "minScore": 1.12,
+      "diagnosticMeanScore": 1.064034,
+      "qualityBand": "very-weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "en-es": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.133506,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "en-fr": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.126544,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "en-it": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.123809,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "en-ja": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.093365,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "en-ko": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.086137,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "en-pl": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.100632,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "en-pt": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.132133,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "en-ru": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.114432,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "en-zh": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.096975,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "es-fr": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.118674,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "es-it": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.113051,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "es-ja": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.071614,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "es-ko": {
+      "action": "review",
+      "minScore": 1.12,
+      "diagnosticMeanScore": 1.061269,
+      "qualityBand": "very-weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "es-pl": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.079531,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "es-pt": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.130587,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "es-ru": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.091475,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "es-zh": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.072301,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "fr-it": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.113119,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "fr-ja": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.069789,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "fr-ko": {
+      "action": "review",
+      "minScore": 1.12,
+      "diagnosticMeanScore": 1.05641,
+      "qualityBand": "very-weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "fr-pl": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.078532,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "fr-pt": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.111757,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "fr-ru": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.089831,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "fr-zh": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.068921,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "it-ja": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.068096,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "it-ko": {
+      "action": "review",
+      "minScore": 1.12,
+      "diagnosticMeanScore": 1.056572,
+      "qualityBand": "very-weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "it-pl": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.077243,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "it-pt": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.108375,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "it-ru": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.084932,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "it-zh": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.067669,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "ja-ko": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.081159,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "ja-pl": {
+      "action": "review",
+      "minScore": 1.12,
+      "diagnosticMeanScore": 1.059989,
+      "qualityBand": "very-weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "ja-pt": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.070202,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "ja-ru": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.067452,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "ja-zh": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.077726,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "ko-pl": {
+      "action": "review",
+      "minScore": 1.12,
+      "diagnosticMeanScore": 1.052181,
+      "qualityBand": "very-weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "ko-pt": {
+      "action": "review",
+      "minScore": 1.12,
+      "diagnosticMeanScore": 1.060587,
+      "qualityBand": "very-weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "ko-ru": {
+      "action": "review",
+      "minScore": 1.12,
+      "diagnosticMeanScore": 1.056835,
+      "qualityBand": "very-weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "ko-zh": {
+      "action": "review",
+      "minScore": 1.12,
+      "diagnosticMeanScore": 1.053224,
+      "qualityBand": "very-weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "pl-pt": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.079067,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "pl-ru": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.08284,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "pl-zh": {
+      "action": "review",
+      "minScore": 1.12,
+      "diagnosticMeanScore": 1.05832,
+      "qualityBand": "very-weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "pt-ru": {
+      "action": "review",
+      "minScore": 1.1,
+      "diagnosticMeanScore": 1.089605,
+      "qualityBand": "standard-conservative",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "pt-zh": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.073818,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    },
+    "ru-zh": {
+      "action": "review",
+      "minScore": 1.11,
+      "diagnosticMeanScore": 1.066912,
+      "qualityBand": "weak-diagnostic",
+      "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
+    }
+  }
 }

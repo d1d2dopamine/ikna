@@ -14,6 +14,9 @@ on:
       max_deck:
         description: "Part 10 safety budget per level"
         default: "8000"
+      preview_limit_per_deck:
+        description: "Small evidence preview rows kept per publishable deck"
+        default: "25"
 
 permissions:
   contents: read
@@ -130,7 +133,8 @@ jobs:
             --preview reports/knowledge-selection-preview.jsonl.gz \
             --staging reports/knowledge-selection.sqlite3 \
             --learn "${{ inputs.langs }}" --meanings "${{ inputs.langs }}" \
-            --max-deck "${{ inputs.max_deck }}"
+            --max-deck "${{ inputs.max_deck }}" \
+            --preview-limit-per-deck "${{ inputs.preview_limit_per_deck }}"
           printf '\n---\n\n' >> "$GITHUB_STEP_SUMMARY"
           cat reports/KNOWLEDGE-SELECTION.md >> "$GITHUB_STEP_SUMMARY"
 
@@ -144,6 +148,7 @@ jobs:
             reports/KNOWLEDGE-SAMPLES.md
             reports/KNOWLEDGE-SELECTION.json
             reports/KNOWLEDGE-SELECTION.md
+            reports/knowledge-selection-preview.jsonl.gz
             reports/wikimatrix-plan.tsv
             reports/wikimatrix-inventory.tsv
           if-no-files-found: error

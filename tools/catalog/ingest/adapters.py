@@ -675,7 +675,7 @@ def iter_wikimatrix_tsv_pair(
 def read_attribution_sidecar(path: str) -> dict[int, dict]:
     """Read line-number keyed record attribution for sources that require it."""
     rows: dict[int, dict] = {}
-    with open(path, encoding="utf-8") as handle:
+    with _open_text(path) as handle:
         for physical_line, line in enumerate(handle, start=1):
             line = line.strip()
             if not line:
@@ -706,8 +706,8 @@ def iter_globalvoices(
 ) -> Iterator[Candidate]:
     """Read aligned Global Voices segments with explicit record attribution.
 
-    The sidecar is mandatory. A plain Moses pair contains useful text but does not
-    carry enough article/contributor metadata for ikna's publication gate.
+    The sidecar is mandatory. Native OPUS text is useful, but document identity
+    alone does not carry enough article/contributor metadata for ikna's publication gate.
     """
     version = policy.resolve_source_version(source_version)
     attribution = read_attribution_sidecar(attribution_path)

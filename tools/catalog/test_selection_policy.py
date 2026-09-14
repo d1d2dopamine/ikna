@@ -39,6 +39,12 @@ def main()->int:
         assert report["summary"]["budgetRejected"]>0
         assert preview
         assert all(row["deckId"].startswith("en-es-everyday-") for row in preview)
+
+        limited_args=parser().parse_args(["--candidates",str(inp),"--json",str(root/"r2.json"),"--markdown",str(root/"r2.md"),"--preview",str(root/"p2.jsonl.gz"),"--staging",str(root/"s2.db"),"--learn","en","--meanings","es","--function-top","0","--max-deck","2","--min-deck","1","--thin-deck","2","--preview-limit-per-deck","1"])
+        limited_report,limited_preview=build_report(limited_args)
+        assert limited_report["summary"] == report["summary"]
+        assert [(x["deckId"],x["selectedTargets"],x["decision"]) for x in limited_report["decks"]] == [(x["deckId"],x["selectedTargets"],x["decision"]) for x in report["decks"]]
+        assert len(limited_preview) <= len(preview)
     print("Catalogue Part 10 selection contracts: OK"); return 0
 
 if __name__=="__main__": raise SystemExit(main())

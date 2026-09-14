@@ -104,12 +104,14 @@ be used in both directions. ikna must **not** manufacture a `ko -> pl` meaning b
 pivoting through English.
 
 WikiMatrix reports 135 million mined parallel sentences across 1,620 language
-pairs. The alignment score remains provenance/quality evidence. Part 8 now keeps the
+pairs. The alignment score remains provenance/quality evidence. Part 8 keeps the
 decision in `tools/catalog/sources/catalogue-v2-wikimatrix-quality.json`: every
 physical pair can remain under review, be accepted with its own minimum score, or
-be rejected entirely. The default is intentionally still `review` at 1.04 until
-the real direct-pair samples are inspected; that historical value is not treated
-as a universal truth.
+be rejected entirely. The first 55-pair diagnostic showed that `1.04` is too
+permissive for some pairs. The next review pool therefore uses explicit provisional
+floors of `1.10`, `1.11`, or `1.12` according to the observed pair quality band.
+All 55 rules still say `review`; the floors are filters for human review, not a
+claim that a pair is production-safe.
 
 Evidence:
 
@@ -127,11 +129,13 @@ blocked until every retained segment can carry the canonical article URL and
 credited contributors required by the existing Catalogue v2 gate.
 
 The source is not allowed to fall back to corpus-level attribution just to make
-World non-empty. Part 9 therefore separates OPUS document identity from article
-attribution: XCES alignments provide the two source document ids, and an explicit
-article manifest must resolve each id to a real `globalvoices.org` URL and credited
-contributors. Missing documents are reported and their aligned rows are excluded;
-URLs or names are never inferred from sentence text.
+World non-empty. Part 9 therefore separates native aligned text from article
+attribution: XCES document names **and sentence ids** are resolved directly against
+the native OPUS XML archives, rather than assuming that XCES link N equals Moses
+line N. An explicit trustworthy article manifest must then resolve each document id
+to a real `globalvoices.org` URL and credited contributors. Missing documents are
+reported and their aligned rows are excluded; URLs or names are never inferred
+from sentence text.
 
 Evidence:
 

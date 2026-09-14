@@ -204,7 +204,7 @@ not merely a larger card count.
 
 ### Part 8 - Knowledge direct-pair rebuild
 
-**Implementation status:** direct-pair acquisition/preview tooling is implemented. `knowledge_rebuild.py` retains WikiMatrix alignment scores and applies an explicit per-physical-pair `review / accept / reject` policy from `catalogue-v2-wikimatrix-quality.json`. The default remains `review` until the real workflow evidence is inspected, so this part cannot silently turn the historical 1.04 threshold into a permanent global rule.
+**Implementation status:** direct-pair acquisition/preview tooling is implemented. The first 55-pair diagnostic proved that the historical `1.04` floor retains obvious semantic mismatches. `catalogue-v2-wikimatrix-quality.json` now records provisional per-pair review floors (`1.10`, `1.11`, or `1.12`) derived from that run. Every pair still remains `review`: the stricter floors define the next human-review pool, not automatic production admission.
 
 **Question:** how much Knowledge coverage exists without the current English hub?
 
@@ -219,7 +219,7 @@ than the convenience of an English-hub build.
 
 ### Part 9 - World attribution build
 
-**Implementation status:** OPUS XCES document-identity extraction and a fail-closed article-attribution resolver are implemented. Only document ids present in an explicit Global Voices article manifest may produce an attribution sidecar; unresolved rows are reported and excluded. URLs are restricted to `globalvoices.org` or its subdomains. The real OPUS run must now show how much of v2018q4 can actually be resolved.
+**Implementation status:** the first OPUS run disproved line-number attribution: non-empty XCES links do not have a 1:1 row count with the derived Moses export. Part 9 now resolves XCES document names and sentence ids directly against the native OPUS XML archives, including 1:n/n:1 links. Article attribution remains fail-closed: only document ids present in trustworthy article metadata may produce a sidecar, unresolved rows are excluded, and URLs are restricted to `globalvoices.org` or its subdomains.
 
 **Question:** can Global Voices become real production material without weakening provenance?
 
@@ -232,7 +232,7 @@ than the convenience of an English-hub build.
 
 ### Part 10 - catalogue selection policy
 
-**Implementation status:** a disk-backed non-publishing selection experiment is implemented and wired into the Everyday and Knowledge preview workflows. It ranks only after measuring the full bounded candidate pool, uses confident morphology only as diversity evidence, suppresses near-duplicate alternate contexts, never pads a small deck, and records every omit/thin/budget decision. The real workflows must now validate its behaviour on full source snapshots before Part 11 can freeze content.
+**Implementation status:** a disk-backed non-publishing selection experiment is implemented and wired into the Everyday and Knowledge preview workflows. After the first full run, its hot path was tightened without changing selection semantics: candidate/context rows are bulk-loaded before the pair index is built, target choices are precomputed once per exact context instead of once per directed pair, and evidence previews are bounded. It still ranks only after measuring the full bounded pool, suppresses near-duplicates, never pads a small deck, and records every omit/thin/budget decision.
 
 **Question:** from the available human material, which targets and contexts should each deck actually contain?
 

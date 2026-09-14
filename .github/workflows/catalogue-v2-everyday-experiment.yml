@@ -31,6 +31,9 @@ on:
       max_deck:
         description: "Part 10 safety budget per level"
         default: "8000"
+      preview_limit_per_deck:
+        description: "Small evidence preview rows kept per publishable deck"
+        default: "25"
 
 permissions:
   contents: read
@@ -169,7 +172,8 @@ jobs:
             --preview preview/everyday-selection-preview.jsonl.gz \
             --staging reports/everyday-selection.sqlite3 \
             --learn "${{ inputs.learn }}" --meanings "${{ inputs.meanings }}" \
-            --max-deck "${{ inputs.max_deck }}"
+            --max-deck "${{ inputs.max_deck }}" \
+            --preview-limit-per-deck "${{ inputs.preview_limit_per_deck }}"
           printf '\n---\n\n' >> "$GITHUB_STEP_SUMMARY"
           cat reports/EVERYDAY-SELECTION.md >> "$GITHUB_STEP_SUMMARY"
 
@@ -186,6 +190,6 @@ jobs:
             reports/massive-archive-sha256.txt
             reports/EVERYDAY-SELECTION.json
             reports/EVERYDAY-SELECTION.md
-            preview/everyday-candidates-preview.jsonl.gz
+            preview/everyday-selection-preview.jsonl.gz
           if-no-files-found: error
           retention-days: 14
