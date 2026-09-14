@@ -21,6 +21,8 @@ jobs:
           java-version: "17"
       - name: Android SDK
         uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
       - name: Gradle 8.10.2
         uses: gradle/actions/setup-gradle@v5
         with:
@@ -121,6 +123,8 @@ jobs:
           python3 tools/check_android_ci.py
       - name: Android SDK
         uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
       - uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: "8.10.2"

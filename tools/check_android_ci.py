@@ -175,6 +175,17 @@ class AndroidCiChecks(unittest.TestCase):
             text = path.read_text()
             self.assertNotIn("gradle/actions/setup-gradle@v4", text)
             self.assertNotIn("actions/upload-artifact@v4", text)
+            self.assertNotIn("packages: tools platform-tools", text)
+            # setup-android@v4 currently defaults to the retired SDK package
+            # `tools`. Keep every use explicit so an upstream default cannot
+            # break JVM/desktop/release jobs before Gradle even starts.
+            for match in re.finditer(r"android-actions/setup-android@v4", text):
+                block = text[match.start():match.start() + 180]
+                self.assertRegex(
+                    block,
+                    r"android-actions/setup-android@v4\n\s+with:\n\s+packages: platform-tools",
+                    f"{path}: setup-android must explicitly request only platform-tools",
+                )
 
 
 if __name__ == "__main__":

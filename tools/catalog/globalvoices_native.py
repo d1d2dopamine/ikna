@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import gzip
+import html
 import json
 import re
 import xml.etree.ElementTree as ET
@@ -50,6 +51,42 @@ def _sentence_text(element: ET.Element) -> str:
     return " ".join("".join(element.itertext()).split())
 
 
+_XML_INVALID_CONTROLS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+_SENTENCE_BLOCK = re.compile(r"<s\b(?P<attrs>[^>]*)>(?P<body>.*?)</s\s*>", re.IGNORECASE | re.DOTALL)
+_SENTENCE_ID_ATTR = re.compile(r"(?:^|\s)(?:xml:)?id\s*=\s*([\"'])(?P<id>.*?)\1", re.IGNORECASE | re.DOTALL)
+_TAG = re.compile(r"<[^>]+>", re.DOTALL)
+
+
+def _salvage_sentences(data: bytes) -> dict[str, str]:
+    """Recover sentence ids/text from a malformed OPUS raw XML document.
+
+    Some historical Global Voices raw files are not well-formed XML.  The
+    fallback is deliberately narrow: it never changes the document identity or
+    invents sentence ids; it only recovers literal <s id=...> blocks from the
+    same archive member.  That keeps XCES provenance exact while allowing a
+    broken character/entity elsewhere in the document to be non-fatal.
+    """
+    text = data.decode("utf-8", errors="replace")
+    text = _XML_INVALID_CONTROLS.sub("", text)
+    sentences: dict[str, str] = {}
+    for match in _SENTENCE_BLOCK.finditer(text):
+        id_match = _SENTENCE_ID_ATTR.search(match.group("attrs"))
+        if not id_match:
+            continue
+        sid = html.unescape(id_match.group("id")).strip()
+        if not sid:
+            continue
+        # Raw Global Voices sentences can contain lightweight inline markup or
+        # HTML-ish entities.  Remove markup and decode entities only inside the
+        # already identified sentence block.
+        body = _TAG.sub(" ", match.group("body"))
+        body = html.unescape(body)
+        body = " ".join(body.split())
+        if body:
+            sentences[sid] = body
+    return sentences
+
+
 class XmlArchive:
     """Resolve XCES document paths inside one OPUS monolingual ZIP archive."""
 
@@ -58,6 +95,9 @@ class XmlArchive:
         self.archive = zipfile.ZipFile(path)
         self.cache_size = max(1, cache_size)
         self.cache: OrderedDict[str, dict[str, str]] = OrderedDict()
+        self.parse_failures: dict[str, str] = {}
+        self.salvaged_members: set[str] = set()
+        self.unrecoverable_members: set[str] = set()
         self.exact: dict[str, str] = {}
         suffixes: dict[str, str | None] = {}
         for info in self.archive.infolist():
@@ -110,20 +150,29 @@ class XmlArchive:
         data = self.archive.read(member)
         if member.endswith(".gz"):
             data = gzip.decompress(data)
+        sentences: dict[str, str] = {}
         try:
             root = ET.fromstring(data)
         except ET.ParseError as exc:
-            raise ValueError(f"invalid OPUS XML member {member}: {exc}") from exc
-        sentences: dict[str, str] = {}
-        for element in root.iter():
-            if element.tag.rsplit("}", 1)[-1] != "s":
-                continue
-            sid = _sentence_id(element)
-            if not sid:
-                continue
-            text = _sentence_text(element)
-            if text:
-                sentences[sid] = text
+            # Real OPUS Global Voices contains a small number of malformed raw
+            # XML documents.  Do not abort the whole pair and do not guess a
+            # mapping: salvage only explicit sentence ids from this same member.
+            self.parse_failures.setdefault(member, str(exc))
+            sentences = _salvage_sentences(data)
+            if sentences:
+                self.salvaged_members.add(member)
+            else:
+                self.unrecoverable_members.add(member)
+        else:
+            for element in root.iter():
+                if element.tag.rsplit("}", 1)[-1] != "s":
+                    continue
+                sid = _sentence_id(element)
+                if not sid:
+                    continue
+                text = _sentence_text(element)
+                if text:
+                    sentences[sid] = text
         self.cache[member] = sentences
         self.cache.move_to_end(member)
         while len(self.cache) > self.cache_size:
@@ -139,9 +188,22 @@ class XmlArchive:
         for sid in sentence_ids:
             text = sentences.get(sid)
             if text is None:
+                if member in self.unrecoverable_members:
+                    return None, "malformed-document"
                 return None, "missing-sentence"
             values.append(text)
         return values, None
+
+    def parse_report(self, side: str) -> list[dict[str, str | bool]]:
+        return [
+            {
+                "side": side,
+                "member": member,
+                "error": error,
+                "salvaged": member in self.salvaged_members,
+            }
+            for member, error in sorted(self.parse_failures.items())
+        ]
 
 
 def _lang_hint(document: str) -> str:
@@ -228,11 +290,11 @@ def extract_native(
                         meaning_parts, meaning_error = meaning_archive.texts(meaning_doc, meaning_ids)
                         if context_error or meaning_error:
                             stats["unresolvedNativeRows"] += 1
-                            if context_error == "missing-document":
+                            if context_error in {"missing-document", "malformed-document"}:
                                 missing_documents[context_doc] += 1
                             elif context_error == "missing-sentence":
                                 missing_sentences[f"{context_doc}#{' '.join(context_ids)}"] += 1
-                            if meaning_error == "missing-document":
+                            if meaning_error in {"missing-document", "malformed-document"}:
                                 missing_documents[meaning_doc] += 1
                             elif meaning_error == "missing-sentence":
                                 missing_sentences[f"{meaning_doc}#{' '.join(meaning_ids)}"] += 1
@@ -264,6 +326,7 @@ def extract_native(
 
     nonempty = stats["alignmentLinks"] - stats["emptySideSkipped"]
     unresolved = stats["unresolvedNativeRows"] + stats["emptyNativeTextSkipped"]
+    parse_failures = context_archive.parse_report("context") + meaning_archive.parse_report("meaning")
     report = {
         "reportVersion": 1,
         "part": 9,
@@ -271,6 +334,12 @@ def extract_native(
         "summary": dict(stats),
         "nonEmptyAlignmentLinks": nonempty,
         "nativeResolutionRate": (stats["emittedRows"] / nonempty) if nonempty else 0.0,
+        "nativeXml": {
+            "strictParseFailures": len(parse_failures),
+            "salvagedMembers": sum(1 for row in parse_failures if row["salvaged"]),
+            "unrecoverableMembers": sum(1 for row in parse_failures if not row["salvaged"]),
+            "members": parse_failures[:200],
+        },
         "missingDocuments": [
             {"document": key, "affectedRows": value}
             for key, value in sorted(missing_documents.items(), key=lambda item: (-item[1], item[0]))[:200]
@@ -297,6 +366,11 @@ def markdown(report: dict[str, Any]) -> str:
         f"- native rows emitted: **{s.get('emittedRows', 0):,}**",
         f"- unresolved native rows: **{s.get('unresolvedNativeRows', 0):,}**",
         f"- native resolution rate: **{report['nativeResolutionRate']:.3%}**",
+        f"- malformed native XML members seen: **{report['nativeXml']['strictParseFailures']:,}**",
+        f"- malformed members safely salvaged by explicit sentence id: **{report['nativeXml']['salvagedMembers']:,}**",
+        f"- malformed members not recoverable: **{report['nativeXml']['unrecoverableMembers']:,}**",
+        "",
+        "Malformed native XML is never mapped by line number. The fallback only recovers explicit `<s id=...>` blocks from the same archive member.",
         "",
         "1:n and n:1 alignments are preserved by joining their referenced sentence ids in order.",
         "",

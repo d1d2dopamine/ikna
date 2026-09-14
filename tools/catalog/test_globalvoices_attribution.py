@@ -70,10 +70,15 @@ def main() -> int:
             '<doc><s id="1">Hello world.</s><s id="2">This is</s><s id="3">one alignment.</s></doc>',
             gzip_member=True,
         )
+        # OPUS Global Voices contains a few historical raw XML files with
+        # malformed text (for example an unescaped ampersand).  Native
+        # extraction must salvage explicit sentence ids from the same member
+        # rather than aborting the whole language pair or falling back to line
+        # numbers.
         _write_zip(
             es_zip,
             "es/a.xml",
-            '<doc><s id="1">Hola mundo.</s><s id="2">Esta es una alineación.</s></doc>',
+            '<doc><s id="1">Hola & mundo.</s><s id="2">Esta es una alineación.</s></doc>',
         )
         native_report, samples = extract_native(
             str(xces), str(en_zip), str(es_zip), "en", "es",
@@ -83,6 +88,10 @@ def main() -> int:
         assert native_report["summary"]["emittedRows"] == 2
         assert native_report["summary"]["emptySideSkipped"] == 1
         assert native_report["nativeResolutionRate"] == 1.0
+        assert native_report["nativeXml"]["strictParseFailures"] == 1
+        assert native_report["nativeXml"]["salvagedMembers"] == 1
+        assert native_report["nativeXml"]["unrecoverableMembers"] == 0
+        assert samples[0]["meaning"] == "Hola & mundo."
         assert samples[1]["context"] == "This is one alignment."
         with gzip.open(root / "native.en.txt.gz", "rt", encoding="utf-8") as handle:
             assert handle.read().splitlines() == ["Hello world.", "This is one alignment."]

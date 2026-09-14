@@ -143,6 +143,8 @@ jobs:
 
       - name: Android SDK
         uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
 
       - name: Gradle
         uses: gradle/actions/setup-gradle@v5
