@@ -23,6 +23,28 @@ words mean and what a number promises inside an epoch is written down once, in
 
 ## 0.11.0 press (in development)
 
+### Parts 8-10 direct Knowledge, World provenance and deterministic selection
+
+- Added an all-direct-pair WikiMatrix Knowledge experiment with an explicit per-pair `review / accept / reject` score policy; missing pairs are never pivoted through English and no reviewed threshold is inferred from file existence alone.
+- Added OPUS XCES document mapping plus a fail-closed Global Voices attribution resolver. World rows require a real `globalvoices.org` article URL and credited contributors; unresolved documents are reported and excluded instead of receiving guessed metadata.
+- Added a disk-backed, non-publishing catalogue selection engine. It measures eligible exact targets before choosing them, ranks deterministically by frequency/evidence/source diversity, can use confident lemma evidence only for diversity, rejects near-duplicate alternate contexts, and never pads thin decks.
+- Wired Part 10 selection reports into the Everyday and Knowledge experiment workflows so the next real-data run exposes selection/budget/thin-deck behaviour before Part 11 content freeze.
+
+### Parts 6-7 Everyday source experiment
+
+- Added MASSIVE 1.1 as a source-registry `candidate`, not a production-ready source. Candidate corpora can be normalized and audited, while the normal Catalogue v2 builder fails closed if asked to publish them.
+- Added a direct multiway MASSIVE adapter for the eleven supported ikna languages. Shared MASSIVE ids align locale utterances without an English or machine-translation pivot; stable locale/id source references are kept in candidate provenance.
+- Added a conservative human-judgment pre-filter for localized MASSIVE rows using naturalness, spelling, target-language and intent judgments before the ordinary ikna target sieve. The original `en-US` SLURP seed has no localization judgments by upstream design, so it skips only this source-specific vote gate and still goes through the ordinary sieve and manual samples.
+- Added the non-publishing `catalogue v2 everyday experiment` workflow and `everyday_rebuild.py`. It measures MASSIVE-only eligible targets and potential extra contexts relative to Tatoeba in one combined frequency space, produces deterministic samples for every directed pair, and writes an exact-deduplicated Everyday preview pool that preserves both source origins on cross-source duplicates.
+- The workflow records the MASSIVE 1.1 archive SHA-256 and embeds its prefix in `sourceVersion`; no source is promoted automatically from counts alone.
+
+### Part 5 supply census
+
+- Added a non-publishing `catalogue v2 supply census` workflow and `tools/catalog/supply_census.py`. The census measures all eligible exact targets before `max_deck` separately from what the current capped first pass selects, so a thin source can be distinguished from an artificially truncated deck.
+- WikiMatrix planning can now enumerate every direct pair among the supported languages. The Part 5 workflow probes those files and streams only the measured high-score prefix into ingestion, recording missing pairs and acquisition-capped lower bounds instead of silently treating either as corpus scarcity.
+- Normalized candidate staging now keeps per-pair input/unique/duplicate counts for diagnostics without changing deck output. WikiMatrix TSV ingestion accepts stdin for bounded streaming in CI.
+- Removed the repository-wide GitHub download-count badge from both README language headers because the counter is not reliable enough to present as product evidence.
+
 ### Documentation checkpoint
 
 - Reworked the remaining 0.11 roadmap into smaller integer parts (5-17) so supply census, corpus admission, collection rebuilds, selection policy, final census/storage, target relations, context history/policy, transfer experiment and release validation each have one owner. Added `docs/CORPORA-0.11.md`: Tatoeba remains the Everyday baseline, MASSIVE 1.1 is the only new 0.11 production candidate and must pass a measured quality gate, WikiMatrix moves toward measured direct-pair coverage, Global Voices keeps its record-attribution gate, and FLORES-200 is reference/QA material rather than deck supply.

@@ -92,6 +92,35 @@
           "contributors"
         ]
       }
+    },
+    {
+      "id": "massive",
+      "title": "MASSIVE 1.1",
+      "collection": "everyday",
+      "adapter": "massive",
+      "homepage": "https://github.com/alexa/massive",
+      "distribution": "https://amazon-massive-nlu-dataset.s3.amazonaws.com/amazon-massive-dataset-1.1.tar.gz",
+      "defaultSourceVersion": "1.1",
+      "requiresExplicitSourceVersion": false,
+      "licence": {
+        "id": "CC-BY-4.0",
+        "name": "CC BY 4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "attribution": "MASSIVE by Amazon; cite FitzGerald et al. (2022) and SLURP as requested by the upstream dataset documentation",
+      "audit": {
+        "status": "approved",
+        "checked": "2026-09-14",
+        "evidence": [
+          "https://github.com/alexa/massive",
+          "https://huggingface.co/datasets/AmazonScience/massive"
+        ],
+        "note": "MASSIVE 1.1 is a 52-language parallel localization dataset. The upstream dataset card identifies the data license as CC BY 4.0 and the official repository documents stable per-locale JSONL files plus shared SLURP ids. It remains an ikna publication candidate until Part 6 manual quality review is accepted."
+      },
+      "publication": {
+        "status": "candidate",
+        "requiredRecordAttribution": []
+      }
     }
   ]
 }

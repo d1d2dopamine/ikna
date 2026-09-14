@@ -77,8 +77,43 @@ def check_deck_byte_cap_keeps_targets() -> None:
     assert sum(1 + len(target.get("contexts", [])) for target in targets) == before_contexts - removed
 
 
+
+def check_candidate_source_cannot_publish() -> None:
+    with tempfile.TemporaryDirectory(prefix="ikna-v2-candidate-source-") as td:
+        root = Path(td)
+        candidates = root / "massive.jsonl.gz"
+        write_jsonl(
+            str(candidates),
+            [
+                Candidate(
+                    collection="everyday", lang="en", meaning_lang="es",
+                    context="Please set another useful alarm tomorrow morning.",
+                    meaning="Pon otra alarma útil para mañana por la mañana.",
+                    origins=[Origin(
+                        "massive", "1.1-fixture",
+                        "massive:1.1-fixture:en-US:1",
+                        "massive:1.1-fixture:es-ES:1",
+                    )],
+                )
+            ],
+        )
+        result = subprocess.run(
+            [
+                sys.executable, str(HERE / "build_catalogue_v2.py"),
+                "--candidates", str(candidates),
+                "--out", str(root / "out"),
+                "--learn", "en", "--meanings", "es",
+                "--min-deck", "1", "--max-deck", "20",
+                "--function-top", "0", "--contexts-per-target", "1",
+            ],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+        )
+        assert result.returncode != 0
+        assert "experimental candidate" in (result.stdout + result.stderr)
+
 def main() -> int:
     check_deck_byte_cap_keeps_targets()
+    check_candidate_source_cannot_publish()
     rows = [
         # Repeated exact target "zebra" in distinct source contexts proves that the
         # v2 builder no longer enforces one card per written target.

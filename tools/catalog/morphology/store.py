@@ -374,6 +374,15 @@ class MorphologyResolver:
             return out, "legacy"
         return out, "identity"
 
+    def resolve_surface(self, lang: str, surface: str) -> dict[str, Any]:
+        """Return conservative form-level morphology for selection/diversity.
+
+        This is evidence only: callers must not use it to replace Catalogue v2
+        exact target identity.
+        """
+        token, _status = self._resolve_form(lang, {"surface": surface})
+        return token
+
     def enrich_card(self, card: dict[str, Any], lang: str) -> tuple[dict[str, Any], Counter]:
         out = dict(card)
         tokens = [dict(token) for token in card.get("tokens") or []]

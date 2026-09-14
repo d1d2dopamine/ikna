@@ -18,6 +18,7 @@ sys.path.insert(0, HERE)
 from ingest.adapters import (
     infer_wikimatrix_tsv_languages,
     iter_globalvoices,
+    iter_massive_matrix,
     iter_tatoeba,
     iter_tatoeba_matrix,
     iter_wikimatrix,
@@ -89,6 +90,17 @@ def parser() -> argparse.ArgumentParser:
     wp.add_argument("--out", required=True)
     wp.add_argument("--source-version")
 
+    mm = sub.add_parser("massive-matrix")
+    mm.add_argument("--dump-dir", required=True)
+    mm.add_argument("--learn", required=True, help="comma-separated learning languages")
+    mm.add_argument("--meanings", required=True, help="comma-separated meaning languages")
+    mm.add_argument("--out", required=True)
+    mm.add_argument("--source-version", default="1.1")
+    mm.add_argument("--min-natural-votes", type=int, default=2)
+    mm.add_argument("--min-spelling-votes", type=int, default=2)
+    mm.add_argument("--min-target-language-votes", type=int, default=2)
+    mm.add_argument("--min-intent-votes", type=int, default=2)
+
     g = sub.add_parser("globalvoices")
     g.add_argument("--learn-file", required=True)
     g.add_argument("--meaning-file", required=True)
@@ -128,6 +140,7 @@ def main(argv: list[str] | None = None) -> int:
         "wikimatrix": "wikimatrix",
         "wikimatrix-pair": "wikimatrix",
         "globalvoices": "globalvoices",
+        "massive-matrix": "massive",
     }[args.command]
     policy = registry.get(source_id)
 
@@ -140,6 +153,26 @@ def main(argv: list[str] | None = None) -> int:
             parser().error("--learn and --meanings must contain at least one language")
         records = iter_tatoeba_matrix(
             args.dump_dir, policy, learn, meanings, source_version=args.source_version
+        )
+    elif args.command == "massive-matrix":
+        learn = {part.strip().lower() for part in args.learn.split(",") if part.strip()}
+        meanings = {part.strip().lower() for part in args.meanings.split(",") if part.strip()}
+        if not learn or not meanings:
+            parser().error("--learn and --meanings must contain at least one language")
+        for value, name in [
+            (args.min_natural_votes, "--min-natural-votes"),
+            (args.min_spelling_votes, "--min-spelling-votes"),
+            (args.min_target_language_votes, "--min-target-language-votes"),
+            (args.min_intent_votes, "--min-intent-votes"),
+        ]:
+            if value < 0:
+                parser().error(name + " must be non-negative")
+        records = iter_massive_matrix(
+            args.dump_dir, policy, learn, meanings, source_version=args.source_version,
+            min_natural_votes=args.min_natural_votes,
+            min_spelling_votes=args.min_spelling_votes,
+            min_target_language_votes=args.min_target_language_votes,
+            min_intent_votes=args.min_intent_votes,
         )
     elif args.command == "wikimatrix-pair":
         if args.first == args.second:

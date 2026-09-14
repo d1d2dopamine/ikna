@@ -59,6 +59,33 @@ python3 tools/catalog/ingest_sources.py tatoeba-matrix \
   --out work/tatoeba.jsonl.gz
 ```
 
+## MASSIVE 1.1
+
+MASSIVE is an experimental `Everyday` source for Parts 6-7. The official dump
+contains one JSONL file per locale and uses a shared SLURP-derived `id` across
+localizations. ikna aligns requested locales only by that id; it never pivots or
+generates a translation.
+
+Before normalization, each localized row passes a conservative human-judgment
+gate. By default at least two judgments must rate it natural (grammar 3-4),
+correctly spelled, target-language-only and consistent with the intent. MASSIVE
+intentionally provides no localization judgments for the original `en-US` SLURP
+seed, so those English seed rows skip only this source-specific vote gate. The
+ordinary Catalogue target sieve still runs for every language.
+
+```bash
+python3 tools/catalog/ingest_sources.py massive-matrix \
+  --dump-dir corpus/massive \
+  --learn en,ru,es,fr,de,it,pt,zh,ja,ko,pl \
+  --meanings en,ru,es,fr,de,it,pt,zh,ja,ko,pl \
+  --source-version 1.1-<archive-hash-prefix> \
+  --out work/massive.jsonl.gz
+```
+
+MASSIVE remains `publication.status = candidate` until manual Part 6 review.
+Candidate sources may be normalized for experiments, but the production builder
+refuses to publish them.
+
 ## WikiMatrix
 
 The adapter reads the upstream scored `WikiMatrix.xx-yy.tsv.gz` directly. The
@@ -137,3 +164,18 @@ Run the contracts with:
 ```bash
 python3 tools/catalog/test_ingestion.py
 ```
+
+## Global Voices attribution recovery
+
+OPUS aligned text alone is insufficient for the `world` collection because it can
+lose article/contributor metadata. Part 9 therefore uses two explicit steps before
+`ingest_sources.py globalvoices`:
+
+1. `globalvoices_xces_map.py` records the OPUS `fromDoc`/`toDoc` identity carried
+   by XCES alignment groups for every non-empty aligned line.
+2. `globalvoices_attribution.py` resolves those document ids against an explicit
+   JSONL article manifest. The manifest must contain a real Global Voices HTTPS URL
+   and at least one credited contributor for every document used by a retained row.
+
+Unresolved rows are filtered out. The tools never derive authors or article URLs
+from the sentence text.

@@ -1,0 +1,10 @@
+{
+  "policyVersion": 1,
+  "status": "review-required",
+  "default": {
+    "action": "review",
+    "minScore": 1.04,
+    "note": "Historical baseline only. Pair-specific review must decide whether to accept, raise the threshold, or reject the pair."
+  },
+  "pairs": {}
+}

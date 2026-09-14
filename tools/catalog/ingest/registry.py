@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from typing import Any
+from urllib.parse import urlparse
 
 # Deliberately narrow. A new licence is a source-audit change, not a string that
 # an adapter is allowed to invent while ingesting data.
@@ -18,8 +19,8 @@ ALLOWED_CONTENT_LICENCES = {
     "CC-BY-SA-4.0",
 }
 ALLOWED_COLLECTIONS = {"everyday", "knowledge", "world"}
-ALLOWED_ADAPTERS = {"tatoeba", "wikimatrix", "globalvoices"}
-ALLOWED_PUBLICATION_STATUSES = {"ready", "record-attribution-required"}
+ALLOWED_ADAPTERS = {"tatoeba", "wikimatrix", "globalvoices", "massive"}
+ALLOWED_PUBLICATION_STATUSES = {"ready", "candidate", "record-attribution-required"}
 
 
 def _expect_keys(value: dict[str, Any], required: set[str], optional: set[str], where: str) -> None:
@@ -136,8 +137,11 @@ class SourcePolicy:
             raise ValueError("source %s licence audit is not approved" % self.id)
         if self.publication_status not in ALLOWED_PUBLICATION_STATUSES:
             raise ValueError("source %s has unknown publication status %s" % (self.id, self.publication_status))
-        if self.publication_status == "ready" and self.required_record_attribution:
-            raise ValueError("source %s is ready but also requires record attribution" % self.id)
+        if self.publication_status in {"ready", "candidate"} and self.required_record_attribution:
+            raise ValueError(
+                "source %s is %s but also requires record attribution"
+                % (self.id, self.publication_status)
+            )
         if self.publication_status == "record-attribution-required" and not self.required_record_attribution:
             raise ValueError("source %s requires record attribution but declares no fields" % self.id)
 
@@ -150,7 +154,14 @@ class SourcePolicy:
             )
         return self.default_source_version
 
-    def validate_origin_for_publication(self, origin: dict[str, Any]) -> None:
+    def validate_origin_for_ingestion(self, origin: dict[str, Any]) -> None:
+        """Validate provenance that must be true even for an experimental source.
+
+        Candidate sources may be ingested and audited, but they are deliberately
+        not publishable until their source policy is promoted to ``ready``.
+        Record-level attribution remains mandatory during experiments because a
+        later publication decision must not require reconstructing lost credit.
+        """
         self.validate_static()
         if origin.get("sourceFamily") != self.id:
             raise ValueError("origin/source policy mismatch")
@@ -169,12 +180,27 @@ class SourcePolicy:
             for name in self.required_record_attribution:
                 item = attribution[name]
                 if name.lower().endswith("url"):
-                    _https_url(item, "%s attribution %s" % (self.id, name))
+                    url = _https_url(item, "%s attribution %s" % (self.id, name))
+                    if self.id == "globalvoices":
+                        host = (urlparse(url).hostname or "").lower().rstrip(".")
+                        if host != "globalvoices.org" and not host.endswith(".globalvoices.org"):
+                            raise ValueError("source globalvoices article URL must belong to globalvoices.org")
                 elif name == "contributors":
                     if not isinstance(item, list) or not item or not all(
                         isinstance(part, str) and part.strip() for part in item
                     ):
                         raise ValueError("source %s contributors must be a non-empty string list" % self.id)
+
+    def require_publication_ready(self) -> None:
+        self.validate_static()
+        if self.publication_status == "candidate":
+            raise ValueError(
+                "source %s is still an experimental candidate and cannot be published" % self.id
+            )
+
+    def validate_origin_for_publication(self, origin: dict[str, Any]) -> None:
+        self.validate_origin_for_ingestion(origin)
+        self.require_publication_ready()
 
 
 class SourceRegistry:

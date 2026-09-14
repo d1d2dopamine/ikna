@@ -154,6 +154,8 @@ mid-stream subparts.
 
 ### Part 5 - supply census of existing sources
 
+**Implementation status:** census tooling is implemented; the full 11-language evidence run is the next action. Use the manual `catalogue v2 supply census` workflow. It never publishes assets. A bounded WikiMatrix run that reaches its acquisition row limit is reported as a **lower bound**, not as proof that the source is thin; rerun the same Part 5 workflow with a larger limit for unresolved pairs.
+
 **Question:** how much usable material do Tatoeba and the full direct-pair
 WikiMatrix source set already contain before final deck caps?
 
@@ -167,6 +169,8 @@ WikiMatrix source set already contain before final deck caps?
 from artificial truncation for every planned pair/collection/level.
 
 ### Part 6 - corpus admission and MASSIVE experiment
+
+**Implementation status:** the source gate, MASSIVE 1.1 adapter and non-publishing Everyday experiment workflow are implemented. MASSIVE is registered as `candidate`, so the normal Catalogue v2 builder refuses to publish it. The full evidence run and manual sample review are still required before promotion to `ready`.
 
 **Question:** which additional human source material is good enough to enter 0.11?
 
@@ -184,6 +188,8 @@ the existing quality sieve. Otherwise 0.11 continues with Tatoeba-only Everyday.
 
 ### Part 7 - Everyday rebuild
 
+**Implementation status:** the same non-publishing workflow can now exact-deduplicate Tatoeba + quality-gated MASSIVE into an Everyday preview pool while retaining every source origin, and it reports source balance, new targets, overlap and possible additional contexts. This remains a preview until the Part 6 manual decision admits or rejects MASSIVE.
+
 **Question:** what should the final Everyday candidate pool contain?
 
 - Rebuild Everyday from the admitted source set from Part 6.
@@ -198,6 +204,8 @@ not merely a larger card count.
 
 ### Part 8 - Knowledge direct-pair rebuild
 
+**Implementation status:** direct-pair acquisition/preview tooling is implemented. `knowledge_rebuild.py` retains WikiMatrix alignment scores and applies an explicit per-physical-pair `review / accept / reject` policy from `catalogue-v2-wikimatrix-quality.json`. The default remains `review` until the real workflow evidence is inspected, so this part cannot silently turn the historical 1.04 threshold into a permanent global rule.
+
 **Question:** how much Knowledge coverage exists without the current English hub?
 
 - Expand WikiMatrix acquisition from the bounded English hub to available direct pairs among the eleven supported languages.
@@ -211,6 +219,8 @@ than the convenience of an English-hub build.
 
 ### Part 9 - World attribution build
 
+**Implementation status:** OPUS XCES document-identity extraction and a fail-closed article-attribution resolver are implemented. Only document ids present in an explicit Global Voices article manifest may produce an attribution sidecar; unresolved rows are reported and excluded. URLs are restricted to `globalvoices.org` or its subdomains. The real OPUS run must now show how much of v2018q4 can actually be resolved.
+
 **Question:** can Global Voices become real production material without weakening provenance?
 
 - Build/recover canonical article URL and contributor attribution for each retained aligned segment.
@@ -221,6 +231,8 @@ than the convenience of an English-hub build.
 **Done when:** every retained World context is traceable to the article and credited contributors required by the source policy.
 
 ### Part 10 - catalogue selection policy
+
+**Implementation status:** a disk-backed non-publishing selection experiment is implemented and wired into the Everyday and Knowledge preview workflows. It ranks only after measuring the full bounded candidate pool, uses confident morphology only as diversity evidence, suppresses near-duplicate alternate contexts, never pads a small deck, and records every omit/thin/budget decision. The real workflows must now validate its behaviour on full source snapshots before Part 11 can freeze content.
 
 **Question:** from the available human material, which targets and contexts should each deck actually contain?
 

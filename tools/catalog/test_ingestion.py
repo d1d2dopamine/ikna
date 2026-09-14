@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import subprocess
@@ -17,6 +18,8 @@ sys.path.insert(0, str(HERE))
 from ingest.adapters import (
     infer_wikimatrix_tsv_languages,
     iter_globalvoices,
+    iter_massive_matrix,
+    read_massive_locale,
     iter_tatoeba,
     iter_tatoeba_matrix,
     iter_wikimatrix,
@@ -42,11 +45,13 @@ def expect_raises(fn, needle: str) -> None:
 
 def test_registry() -> SourceRegistry:
     registry = SourceRegistry.load(str(REGISTRY))
-    assert set(registry.policies) == {"tatoeba", "wikimatrix", "globalvoices"}
+    assert set(registry.policies) == {"tatoeba", "wikimatrix", "globalvoices", "massive"}
     assert registry.get("tatoeba").collection == "everyday"
     assert registry.get("tatoeba").requires_explicit_source_version is True
     assert registry.get("wikimatrix").licence_id == "CC-BY-SA-4.0"
     assert registry.get("globalvoices").required_record_attribution == ("articleUrl", "contributors")
+    assert registry.get("massive").publication_status == "candidate"
+    expect_raises(lambda: registry.get("massive").require_publication_ready(), "experimental candidate")
 
     raw = json.loads(REGISTRY.read_text(encoding="utf-8"))
     raw["sources"][0]["licence"]["id"] = "CC-BY-NC-4.0"
@@ -97,6 +102,32 @@ def test_tatoeba(registry: SourceRegistry) -> list[Candidate]:
     )
     assert len(merge_candidates(matrix)) == 4
     assert {(row.lang, row.meaning_lang) for row in matrix} == {("en", "es"), ("es", "en")}
+    return rows
+
+
+def test_massive(registry: SourceRegistry) -> list[Candidate]:
+    base = FIXTURES / "massive"
+    english, stats = read_massive_locale(str(base), "en")
+    assert set(english) == {"1", "2", "3"}
+    assert stats["sourceRows"] == 3
+    assert stats["qualityAcceptedRows"] == 3
+    assert stats.get("qualityRejectedRows", 0) == 0
+    assert stats["qualityUnjudgedSeedRows"] == 3
+
+    rows = list(
+        iter_massive_matrix(
+            str(base), registry.get("massive"),
+            {"en", "es", "ko"}, {"en", "es", "ko"}, source_version="1.1-fixture",
+        )
+    )
+    assert len(rows) == 12  # two shared ids x six directed language pairs
+    assert {(row.lang, row.meaning_lang) for row in rows} == {
+        ("en", "es"), ("es", "en"), ("en", "ko"), ("ko", "en"), ("es", "ko"), ("ko", "es")
+    }
+    sample = next(row for row in rows if row.lang == "en" and row.meaning_lang == "ko")
+    assert sample.collection == "everyday"
+    assert sample.origins[0].context_ref == "massive:1.1-fixture:en-US:1"
+    assert sample.origins[0].meaning_ref == "massive:1.1-fixture:ko-KR:1"
     return rows
 
 
@@ -155,6 +186,21 @@ def test_wikimatrix(registry: SourceRegistry) -> list[Candidate]:
         )
     )
     assert len(pair_rows) == 2
+
+    # Part 5 can stream a decompressed upstream TSV over stdin instead of
+    # downloading the complete WikiMatrix archive first.
+    old_stdin = sys.stdin
+    try:
+        sys.stdin = io.StringIO((base / "sample.tsv").read_text(encoding="utf-8"))
+        streamed = list(
+            iter_wikimatrix_tsv_pair(
+                "-", registry.get("wikimatrix"), "en", "es",
+                min_score=1.0, source_version="v1-fixture", max_rows=1,
+            )
+        )
+    finally:
+        sys.stdin = old_stdin
+    assert [row.to_dict() for row in streamed] == [row.to_dict() for row in pair_rows]
     assert {(row.lang, row.meaning_lang) for row in pair_rows} == {("en", "es"), ("es", "en")}
     assert infer_wikimatrix_tsv_languages("WikiMatrix.de-en.tsv.gz") == ("de", "en")
     assert infer_wikimatrix_tsv_languages("sample.tsv") is None
@@ -345,6 +391,18 @@ def test_cli(registry: SourceRegistry) -> None:
         )
         assert len(read_jsonl(str(pair_out))) == 2
 
+        massive_out = td_path / "massive.jsonl.gz"
+        subprocess.run(
+            [
+                sys.executable, str(CLI), "massive-matrix",
+                "--dump-dir", str(FIXTURES / "massive"),
+                "--learn", "en,es,ko", "--meanings", "en,es,ko",
+                "--source-version", "1.1-fixture", "--out", str(massive_out),
+            ],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+        )
+        assert len(read_jsonl(str(massive_out))) == 12
+
         gv_out = td_path / "globalvoices.jsonl"
         subprocess.run(
             [
@@ -393,10 +451,11 @@ def test_cli(registry: SourceRegistry) -> None:
 def main() -> int:
     registry = test_registry()
     tatoeba = test_tatoeba(registry)
+    massive = test_massive(registry)
     wikimatrix = test_wikimatrix(registry)
     globalvoices = test_globalvoices(registry)
     test_identity_and_collection_boundary(registry)
-    test_round_trip(tatoeba + wikimatrix + globalvoices)
+    test_round_trip(tatoeba + massive + wikimatrix + globalvoices)
     test_cli(registry)
     print("Catalogue v2 ingestion contracts: OK")
     return 0

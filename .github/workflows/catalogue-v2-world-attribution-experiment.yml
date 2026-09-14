@@ -1,0 +1,128 @@
+name: catalogue v2 world attribution experiment
+
+# Part 9 provenance experiment. It recovers OPUS document identity and resolves
+# only document ids present in an explicit article manifest. Missing attribution
+# remains an evidence result; it is never guessed.
+on:
+  workflow_dispatch:
+    inputs:
+      learn:
+        description: "Learning language for one diagnostic Global Voices pair"
+        default: "en"
+      meaning:
+        description: "Meaning language"
+        default: "es"
+      article_manifest_url:
+        description: "Optional JSONL document -> Global Voices URL/contributors manifest"
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  world-attribution:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Contracts
+        run: |
+          python3 tools/catalog/test_globalvoices_attribution.py
+          python3 tools/catalog/test_ingestion.py
+
+      - name: Resolve OPUS download URLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p opus reports
+          python3 - "${{ inputs.learn }}" "${{ inputs.meaning }}" <<'PY' > reports/opus-urls.tsv
+          import json,sys,urllib.parse,urllib.request
+          source,target=sys.argv[1:3]
+          base='https://opus.nlpl.eu/opusapi/'
+          for prep in ('moses','xml'):
+              query=urllib.parse.urlencode({'corpus':'GlobalVoices','source':source,'target':target,'preprocessing':prep,'version':'v2018q4'})
+              with urllib.request.urlopen(base+'?'+query, timeout=60) as r:
+                  data=json.load(r)
+              rows=data.get('corpora') or []
+              if not rows:
+                  raise SystemExit(f'OPUS has no GlobalVoices {prep} data for {source}-{target}')
+              print(prep+'\t'+rows[0]['url'])
+          PY
+          cat reports/opus-urls.tsv
+
+      - name: Download aligned text and XCES alignment
+        shell: bash
+        run: |
+          set -euo pipefail
+          moses_url=$(awk -F'\t' '$1=="moses"{print $2}' reports/opus-urls.tsv)
+          xml_url=$(awk -F'\t' '$1=="xml"{print $2}' reports/opus-urls.tsv)
+          bash tools/ci/fetch-url.sh "$moses_url" opus/moses.zip
+          bash tools/ci/fetch-url.sh "$xml_url" opus/alignment.xml.gz
+          unzip -q opus/moses.zip -d opus/moses
+          learn="${{ inputs.learn }}"; meaning="${{ inputs.meaning }}"
+          learn_file=$(find opus/moses -type f -name "*.$learn" | head -1)
+          meaning_file=$(find opus/moses -type f -name "*.$meaning" | head -1)
+          [ -n "$learn_file" ] && [ -n "$meaning_file" ] || { echo "Could not locate Moses language files" >&2; exit 1; }
+          printf '%s\n' "$learn_file" > reports/learn-file.txt
+          printf '%s\n' "$meaning_file" > reports/meaning-file.txt
+          lines=$(wc -l < "$learn_file" | tr -d ' ')
+          [ "$lines" = "$(wc -l < "$meaning_file" | tr -d ' ')" ] || { echo "Moses files differ in line count" >&2; exit 1; }
+          python3 tools/catalog/globalvoices_xces_map.py \
+            --xces opus/alignment.xml.gz --context-side auto --context-lang "$learn" \
+            --expected-lines "$lines" --out reports/globalvoices-alignment-map.jsonl
+
+      - name: Resolve article attribution without guessing
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > reports/article-manifest.jsonl
+          if [ -n "${{ inputs.article_manifest_url }}" ]; then
+            bash tools/ci/fetch-url.sh "${{ inputs.article_manifest_url }}" reports/article-manifest.jsonl
+          fi
+          learn_file=$(cat reports/learn-file.txt)
+          meaning_file=$(cat reports/meaning-file.txt)
+          python3 tools/catalog/globalvoices_attribution.py \
+            --alignment-map reports/globalvoices-alignment-map.jsonl \
+            --article-manifest reports/article-manifest.jsonl \
+            --out reports/globalvoices-attribution-original-lines.jsonl \
+            --learn-file "$learn_file" --meaning-file "$meaning_file" \
+            --filtered-learn reports/world.learn.txt \
+            --filtered-meaning reports/world.meaning.txt \
+            --filtered-attribution reports/world-attribution.jsonl \
+            --json reports/WORLD-ATTRIBUTION.json \
+            --markdown reports/WORLD-ATTRIBUTION.md
+          cat reports/WORLD-ATTRIBUTION.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Normalize fully attributed World rows
+        shell: bash
+        run: |
+          set -euo pipefail
+          rows=$(wc -l < reports/world.learn.txt | tr -d ' ')
+          if [ "$rows" -eq 0 ]; then
+            echo "No fully attributed World rows yet; this is a Part 9 evidence result." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          python3 tools/catalog/ingest_sources.py globalvoices \
+            --learn-file reports/world.learn.txt \
+            --meaning-file reports/world.meaning.txt \
+            --attribution-file reports/world-attribution.jsonl \
+            --learn "${{ inputs.learn }}" --meaning "${{ inputs.meaning }}" \
+            --source-version v2018q4 \
+            --out reports/world-candidates.jsonl.gz
+
+      - name: Keep Part 9 evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: catalogue-v2-world-attribution-experiment
+          path: |
+            reports/WORLD-ATTRIBUTION.json
+            reports/WORLD-ATTRIBUTION.md
+            reports/globalvoices-alignment-map.jsonl
+            reports/globalvoices-attribution-original-lines.jsonl
+            reports/article-manifest.jsonl
+            reports/world-candidates.jsonl.gz
+          if-no-files-found: warn
+          retention-days: 14

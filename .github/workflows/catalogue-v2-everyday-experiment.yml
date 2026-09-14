@@ -1,0 +1,191 @@
+name: catalogue v2 everyday experiment
+
+# Parts 6-7: evaluate MASSIVE 1.1 against the approved Tatoeba Everyday
+# baseline and build a merged preview candidate pool. This workflow never
+# publishes catalogue assets and MASSIVE remains blocked from production while
+# its source-registry status is `candidate`.
+on:
+  workflow_dispatch:
+    inputs:
+      learn:
+        description: "Languages to teach, comma separated"
+        default: "en,ru,pl,es,fr,de,it,pt,zh,ja,ko"
+      meanings:
+        description: "Languages meanings may use"
+        default: "en,ru,pl,es,fr,de,it,pt,zh,ja,ko"
+      min_natural_votes:
+        description: "Localized MASSIVE judgments with grammar score >=3 required per utterance"
+        default: "2"
+      min_spelling_votes:
+        description: "Localized MASSIVE judgments with spelling score 2 required per utterance"
+        default: "2"
+      min_target_language_votes:
+        description: "Localized MASSIVE target-language-only judgments required per utterance"
+        default: "2"
+      min_intent_votes:
+        description: "Localized MASSIVE intent judgments rated yes/reasonable required per utterance"
+        default: "2"
+      sample_per_pair:
+        description: "Deterministic MASSIVE examples kept for each directed pair"
+        default: "5"
+      max_deck:
+        description: "Part 10 safety budget per level"
+        default: "8000"
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Parts 6-7 contracts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libicu-dev
+          python3 tools/catalog/test_ingestion.py
+          python3 tools/catalog/test_build_catalogue_v2.py
+          python3 tools/catalog/test_everyday_rebuild.py
+          python3 tools/catalog/test_selection_policy.py
+
+  everyday-experiment:
+    needs: contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Prepare workspace
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libicu-dev
+          mkdir -p corpus/tatoeba corpus/massive candidates preview reports
+
+      - name: Tatoeba approved Everyday baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=https://downloads.tatoeba.org/exports
+          bash tools/ci/fetch-url.sh \
+            "$base/sentences.tar.bz2" corpus/tatoeba/sentences.tar.bz2 corpus/tatoeba/sentences.headers
+          bash tools/ci/fetch-url.sh "$base/links.tar.bz2" corpus/tatoeba/links.tar.bz2
+          tar -tjf corpus/tatoeba/sentences.tar.bz2 >/dev/null
+          tar -tjf corpus/tatoeba/links.tar.bz2 >/dev/null
+          tar -xjf corpus/tatoeba/sentences.tar.bz2 -C corpus/tatoeba
+          tar -xjf corpus/tatoeba/links.tar.bz2 -C corpus/tatoeba
+
+          last_modified=$(tr -d '\r' < corpus/tatoeba/sentences.headers | awk -F': ' 'tolower($1)=="last-modified"{v=$2} END{print v}')
+          [ -n "$last_modified" ] || { echo "Tatoeba export did not provide Last-Modified" >&2; exit 1; }
+          tatoeba_version=$(python3 - "$last_modified" <<'PY'
+          import sys
+          from email.utils import parsedate_to_datetime
+          print(parsedate_to_datetime(sys.argv[1]).date().isoformat())
+          PY
+          )
+          echo "$tatoeba_version" > reports/tatoeba-version.txt
+
+          python3 tools/catalog/ingest_sources.py tatoeba-matrix \
+            --dump-dir corpus/tatoeba \
+            --learn "${{ inputs.learn }}" \
+            --meanings "${{ inputs.meanings }}" \
+            --source-version "$tatoeba_version" \
+            --out candidates/tatoeba.jsonl.gz
+          rm -rf corpus/tatoeba
+          ls -lh candidates/tatoeba.jsonl.gz
+
+      - name: MASSIVE 1.1 experimental Everyday candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          url=https://amazon-massive-nlu-dataset.s3.amazonaws.com/amazon-massive-dataset-1.1.tar.gz
+          archive=corpus/massive-1.1.tar.gz
+          bash tools/ci/fetch-url.sh "$url" "$archive"
+          tar -tzf "$archive" >/dev/null
+          tar -tzf "$archive" | grep -Eq '(^|/)LICENSE$' || {
+            echo "MASSIVE archive has no LICENSE file" >&2
+            exit 1
+          }
+          sha=$(sha256sum "$archive" | awk '{print $1}')
+          printf '%s  %s\n' "$sha" "$url" > reports/massive-archive-sha256.txt
+          source_version="1.1-${sha:0:16}"
+          echo "$source_version" > reports/massive-source-version.txt
+          tar -xzf "$archive" -C corpus/massive
+
+          python3 tools/catalog/ingest_sources.py massive-matrix \
+            --dump-dir corpus/massive \
+            --learn "${{ inputs.learn }}" \
+            --meanings "${{ inputs.meanings }}" \
+            --source-version "$source_version" \
+            --min-natural-votes "${{ inputs.min_natural_votes }}" \
+            --min-spelling-votes "${{ inputs.min_spelling_votes }}" \
+            --min-target-language-votes "${{ inputs.min_target_language_votes }}" \
+            --min-intent-votes "${{ inputs.min_intent_votes }}" \
+            --out candidates/massive.jsonl.gz
+          rm -f "$archive"
+          ls -lh candidates/massive.jsonl.gz
+
+      - name: Compare sources and rebuild Everyday preview pool
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/catalog/everyday_rebuild.py \
+            --tatoeba candidates/tatoeba.jsonl.gz \
+            --massive candidates/massive.jsonl.gz \
+            --massive-dump corpus/massive \
+            --pool preview/everyday-candidates-preview.jsonl.gz \
+            --json reports/EVERYDAY-SOURCE-ADMISSION.json \
+            --markdown reports/EVERYDAY-SOURCE-ADMISSION.md \
+            --samples reports/EVERYDAY-MASSIVE-SAMPLES.md \
+            --staging reports/everyday-experiment.sqlite3 \
+            --learn "${{ inputs.learn }}" \
+            --meanings "${{ inputs.meanings }}" \
+            --sample-per-pair "${{ inputs.sample_per_pair }}" \
+            --min-natural-votes "${{ inputs.min_natural_votes }}" \
+            --min-spelling-votes "${{ inputs.min_spelling_votes }}" \
+            --min-target-language-votes "${{ inputs.min_target_language_votes }}" \
+            --min-intent-votes "${{ inputs.min_intent_votes }}"
+
+          cat reports/EVERYDAY-SOURCE-ADMISSION.md >> "$GITHUB_STEP_SUMMARY"
+          printf '\n---\n' >> "$GITHUB_STEP_SUMMARY"
+          printf 'The preview pool is not publication-safe while MASSIVE remains a candidate source.\n' >> "$GITHUB_STEP_SUMMARY"
+          ls -lh preview/everyday-candidates-preview.jsonl.gz
+
+      - name: Part 10 deterministic selection over Everyday preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/catalog/selection_experiment.py \
+            --candidates preview/everyday-candidates-preview.jsonl.gz \
+            --json reports/EVERYDAY-SELECTION.json \
+            --markdown reports/EVERYDAY-SELECTION.md \
+            --preview preview/everyday-selection-preview.jsonl.gz \
+            --staging reports/everyday-selection.sqlite3 \
+            --learn "${{ inputs.learn }}" --meanings "${{ inputs.meanings }}" \
+            --max-deck "${{ inputs.max_deck }}"
+          printf '\n---\n\n' >> "$GITHUB_STEP_SUMMARY"
+          cat reports/EVERYDAY-SELECTION.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep Parts 6-7 and 10 evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: catalogue-v2-everyday-experiment
+          path: |
+            reports/EVERYDAY-SOURCE-ADMISSION.json
+            reports/EVERYDAY-SOURCE-ADMISSION.md
+            reports/EVERYDAY-MASSIVE-SAMPLES.md
+            reports/tatoeba-version.txt
+            reports/massive-source-version.txt
+            reports/massive-archive-sha256.txt
+            reports/EVERYDAY-SELECTION.json
+            reports/EVERYDAY-SELECTION.md
+            preview/everyday-candidates-preview.jsonl.gz
+          if-no-files-found: error
+          retention-days: 14

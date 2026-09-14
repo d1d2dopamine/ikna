@@ -104,6 +104,16 @@ CREATE TABLE candidate (
     attribution_json TEXT NOT NULL
 );
 CREATE INDEX candidate_pair ON candidate(collection, lang, meaning_lang, seq);
+CREATE TABLE input_stat (
+    collection TEXT NOT NULL,
+    lang TEXT NOT NULL,
+    meaning_lang TEXT NOT NULL,
+    source_family TEXT NOT NULL,
+    input_candidates INTEGER NOT NULL DEFAULT 0,
+    unique_candidates INTEGER NOT NULL DEFAULT 0,
+    duplicate_candidates INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY(collection, lang, meaning_lang, source_family)
+);
 CREATE TABLE context (
     collection TEXT NOT NULL,
     lang TEXT NOT NULL,
@@ -121,6 +131,7 @@ def stage_candidates(inputs: Iterable[str], db_path: Path) -> dict[str, Any]:
         db_path.unlink()
     db = sqlite3.connect(db_path)
     counts = Counter()
+    input_stats: dict[tuple[str, str, str, str], Counter[str]] = defaultdict(Counter)
     try:
         db.executescript(STAGING_SCHEMA)
         for input_path in inputs:
@@ -135,8 +146,7 @@ def stage_candidates(inputs: Iterable[str], db_path: Path) -> dict[str, Any]:
                     except Exception as exc:
                         raise ValueError("%s:%d: %s" % (input_path, number, exc)) from exc
                     counts["inputCandidates"] += 1
-                    before = db.total_changes
-                    db.execute(
+                    cursor = db.execute(
                         """
                         INSERT OR IGNORE INTO candidate(
                             id,collection,lang,meaning_lang,context,meaning,source_family,
@@ -158,7 +168,12 @@ def stage_candidates(inputs: Iterable[str], db_path: Path) -> dict[str, Any]:
                             json.dumps(origin.get("attribution") or {}, ensure_ascii=False, sort_keys=True),
                         ),
                     )
-                    inserted = db.total_changes > before
+                    inserted = cursor.rowcount == 1
+                    stat = input_stats[(
+                        record.collection, record.lang, record.meaning_lang, origin["sourceFamily"]
+                    )]
+                    stat["inputCandidates"] += 1
+                    stat["uniqueCandidates" if inserted else "duplicateCandidates"] += 1
                     if inserted:
                         counts["uniqueCandidates"] += 1
                         db.execute(
@@ -175,6 +190,19 @@ def stage_candidates(inputs: Iterable[str], db_path: Path) -> dict[str, Any]:
                         counts["duplicateCandidates"] += 1
                     if counts["inputCandidates"] % 25000 == 0:
                         db.commit()
+        db.executemany(
+            """
+            INSERT INTO input_stat(
+                collection,lang,meaning_lang,source_family,
+                input_candidates,unique_candidates,duplicate_candidates
+            ) VALUES(?,?,?,?,?,?,?)
+            """,
+            [
+                (collection, lang, meaning_lang, source_family,
+                 stat["inputCandidates"], stat["uniqueCandidates"], stat["duplicateCandidates"])
+                for (collection, lang, meaning_lang, source_family), stat in sorted(input_stats.items())
+            ],
+        )
         db.commit()
         counts["uniqueContexts"] = db.execute("SELECT COUNT(*) FROM context").fetchone()[0]
         counts["pairs"] = db.execute(
@@ -590,6 +618,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
             policy = registry.get(source_family)
             if policy.collection != collection:
                 raise ValueError("source %s is not registered for collection %s" % (source_family, collection))
+            policy.require_publication_ready()
             key = (collection, lang)
             if key not in rank_cache:
                 print("ranking %s/%s" % key, flush=True)

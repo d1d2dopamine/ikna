@@ -1,0 +1,3 @@
+{"id":"1","locale":"en-US","partition":"train","scenario":"alarm","intent":"alarm_set","utt":"Set an alarm for seven tomorrow morning."}
+{"id":"2","locale":"en-US","partition":"train","scenario":"weather","intent":"weather_query","utt":"Will it rain in the city this afternoon?"}
+{"id":"3","locale":"en-US","partition":"train","scenario":"music","intent":"play_music","utt":"Bad source row should be rejected."}

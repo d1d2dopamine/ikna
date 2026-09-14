@@ -71,6 +71,11 @@ jobs:
           python3 tools/catalog/test_meta_info.py
           python3 tools/catalog/test_readiness_audit.py
           python3 tools/catalog/test_storage_experiment.py
+          python3 tools/catalog/test_supply_census.py
+          python3 tools/catalog/test_everyday_rebuild.py
+          python3 tools/catalog/test_knowledge_rebuild.py
+          python3 tools/catalog/test_globalvoices_attribution.py
+          python3 tools/catalog/test_selection_policy.py
 
   catalogue-v2:
     needs: contracts

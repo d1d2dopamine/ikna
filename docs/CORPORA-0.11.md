@@ -47,37 +47,45 @@ Status: already approved, implemented and used by the current scale build.
 The existing weekly export, stable sentence ids and contributor-aware provenance
 remain the baseline. Tatoeba is not replaced by another corpus.
 
-#### MASSIVE 1.1 - planned production candidate
+#### MASSIVE 1.1 - experimental production candidate
 
-Role: fill Everyday coverage holes with professionally localized, parallel
-utterances, especially direct pairs that are thin in Tatoeba.
+Role: fill Everyday coverage holes with a multiway parallel dataset: the original
+English SLURP seed plus human-localized, human-reviewed utterances in the other
+supported MASSIVE locales, especially for direct pairs that are thin in Tatoeba.
 
 Why it is useful:
 
-- MASSIVE 1.1 contains more than one million utterances across 52 languages;
-- it contains 19,521 utterances per language;
+- MASSIVE 1.1 contains more than one million utterances across 52 languages; the localized languages are roughly 19.5k rows each, while `en-US` is the smaller original SLURP seed;
 - all eleven languages currently supported by ikna are represented;
 - the material is parallel, so the same underlying utterance can be paired
   directly between two supported locales without inventing a translation pivot;
-- Amazon describes the dataset as localized by professional translators;
+- localized source rows include human judgments for naturalness, spelling, target-language identity and intent fit;
 - the dataset is published under CC BY 4.0.
 
 Evidence checked for this decision:
 
-- https://www.amazon.science/code-and-datasets/massive
-- https://www.amazon.science/blog/amazon-releases-51-language-dataset-for-language-understanding
-- https://huggingface.co/datasets/AmazonScience/massive
 - https://github.com/alexa/massive
+- https://huggingface.co/datasets/AmazonScience/massive
 
 Important limitation: MASSIVE is voice-assistant material. It is human language,
 but its domain mix is narrower than Tatoeba. Therefore MASSIVE must **supplement**
 Everyday rather than dominate it.
 
-MASSIVE is admitted to the 0.11 implementation queue, but it is not automatically
-publishable. Before its rows can enter final Catalogue v2 assets, Part 6 must
-measure how many new targets and useful contexts survive the normal sieve and a
-manual review sample must confirm that the resulting cards are natural and useful.
-If the quality gate fails, 0.11 keeps Tatoeba-only Everyday rather than lowering
+MASSIVE is implemented as an experimental source, but it is not automatically
+publishable. Its registry status is `candidate`; the normal Catalogue v2 builder
+refuses candidate sources. For localized rows, the Part 6 experiment first requires at least two human
+judgments that call an utterance natural (grammar score 3-4), correctly spelled,
+in the target language, and consistent with the intent. The upstream `en-US`
+file is the original SLURP seed and intentionally has no localization judgments,
+so those seed rows skip only this MASSIVE-specific vote gate; they still pass
+through the ordinary ikna target/length/duplicate sieve and the deterministic
+manual review. This is an ikna conservative experiment gate, not an upstream
+MASSIVE rule.
+
+The experiment then measures how many **new** targets and useful additional
+contexts survive on top of Tatoeba, and writes deterministic samples for manual
+review. Only a reviewed decision may change MASSIVE from `candidate` to `ready`.
+If that review fails, 0.11 keeps Tatoeba-only Everyday rather than lowering
 quality to fill counts.
 
 ### Knowledge
@@ -96,9 +104,12 @@ be used in both directions. ikna must **not** manufacture a `ko -> pl` meaning b
 pivoting through English.
 
 WikiMatrix reports 135 million mined parallel sentences across 1,620 language
-pairs. The alignment score remains provenance/quality evidence and its final
-threshold must be chosen from measured samples rather than copied blindly across
-all pairs.
+pairs. The alignment score remains provenance/quality evidence. Part 8 now keeps the
+decision in `tools/catalog/sources/catalogue-v2-wikimatrix-quality.json`: every
+physical pair can remain under review, be accepted with its own minimum score, or
+be rejected entirely. The default is intentionally still `review` at 1.04 until
+the real direct-pair samples are inspected; that historical value is not treated
+as a universal truth.
 
 Evidence:
 
@@ -116,7 +127,11 @@ blocked until every retained segment can carry the canonical article URL and
 credited contributors required by the existing Catalogue v2 gate.
 
 The source is not allowed to fall back to corpus-level attribution just to make
-World non-empty.
+World non-empty. Part 9 therefore separates OPUS document identity from article
+attribution: XCES alignments provide the two source document ids, and an explicit
+article manifest must resolve each id to a real `globalvoices.org` URL and credited
+contributors. Missing documents are reported and their aligned rows are excluded;
+URLs or names are never inferred from sentence text.
 
 Evidence:
 

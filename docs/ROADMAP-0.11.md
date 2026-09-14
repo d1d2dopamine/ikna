@@ -73,6 +73,10 @@ Part 4 is not extended again for ordinary cleanup.
 
 ### Part 5 - existing-source supply census
 
+Status: tooling implemented; full 11-language census run pending.
+
+The manual `catalogue v2 supply census` workflow enumerates every direct WikiMatrix pair, records unavailable files, and reports bounded source scans explicitly as lower bounds rather than calling them thin. `tools/catalog/supply_census.py` measures all unique sieve-eligible exact targets before `max_deck` separately from the targets chosen by the current capped first pass.
+
 Purpose: establish what the current corpora can supply **before** final deck caps.
 
 - Census Tatoeba across the supported language matrix.
@@ -85,19 +89,23 @@ Exit condition: every current thin/capped deck has a measured explanation.
 
 ### Part 6 - source admission and MASSIVE measurement
 
+Status: adapter/gates/workflow implemented; full evidence run and manual review pending. MASSIVE remains an experimental `candidate` and cannot be published by the normal builder.
+
 Purpose: freeze the 0.11 source set before rebuilding content.
 
 The policy source is [`CORPORA-0.11.md`](CORPORA-0.11.md).
 
 - Tatoeba remains the broad `Everyday` baseline.
-- MASSIVE 1.1 is the only new production candidate in 0.11. It provides professionally localized parallel utterances across all eleven supported languages, but its voice-assistant domain is intentionally narrower than Tatoeba.
-- Measure MASSIVE through the normal sieve rather than counting its raw 19,521 utterances per language as cards.
+- MASSIVE 1.1 is the only new production candidate in 0.11. It provides one shared multilingual utterance set across all eleven supported languages: the original English SLURP seed plus human-localized, human-reviewed rows for the localized languages. Its voice-assistant domain is intentionally narrower than Tatoeba.
+- Measure MASSIVE through the normal sieve rather than counting its raw source rows as cards. Localized rows use the human-review vote gate; the original unjudged `en-US` seed still goes through the normal ikna sieve and manual samples.
 - Review deterministic samples across languages and previously thin pairs.
 - Admit MASSIVE only if it adds useful targets/contexts without weakening quality.
 - FLORES-200 remains reference/QA material and does not inflate production deck counts.
 - Freeze the source set at the end of the part; later thinness is not permission to add another corpus ad hoc.
 
 ### Part 7 - final Everyday candidate pool
+
+Status: preview-pool tooling implemented; final source composition waits on the Part 6 manual admission decision. Exact cross-source duplicates retain both provenance origins.
 
 Purpose: build the human-source Everyday material from the admitted sources.
 
@@ -111,6 +119,8 @@ Exit condition: a reproducible Everyday candidate pool exists independently of f
 
 ### Part 8 - direct-pair Knowledge rebuild
 
+Status: direct-pair preview/pair-policy tooling implemented; real all-pair evidence and manual threshold decisions pending.
+
 Purpose: remove the English-hub convenience restriction from the Knowledge evidence base.
 
 - Acquire available direct WikiMatrix pairs among the supported eleven languages.
@@ -121,6 +131,8 @@ Purpose: remove the English-hub convenience restriction from the Knowledge evide
 
 ### Part 9 - World attribution build
 
+Status: XCES document mapping, article-manifest resolver and strict Global Voices URL/contributor gate implemented; real OPUS attribution coverage pending.
+
 Purpose: make Global Voices publishable without weakening the existing provenance contract.
 
 - Recover canonical article URLs and credited contributors for every retained aligned segment.
@@ -128,6 +140,8 @@ Purpose: make Global Voices publishable without weakening the existing provenanc
 - Publish no synthetic filler when a World pair is naturally thin or absent.
 
 ### Part 10 - deterministic catalogue selection policy
+
+Status: non-publishing deterministic selection engine implemented and connected to Everyday/Knowledge experiments; real-data review pending before it becomes the Part 11 production policy.
 
 Purpose: turn the available material into intentionally selected decks.
 

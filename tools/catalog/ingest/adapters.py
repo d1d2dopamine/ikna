@@ -8,6 +8,8 @@ import hashlib
 import json
 import os
 import re
+import sys
+from contextlib import nullcontext
 from collections import defaultdict
 from itertools import zip_longest
 from typing import Iterator
@@ -33,6 +35,11 @@ _WIKIMATRIX_NAME = re.compile(r"^WikiMatrix\.([a-z]{2,3})-([a-z]{2,3})\.tsv(?:\.
 
 
 def _open_text(path: str):
+    # ``-`` is useful for large, score-sorted corpora in CI: a downloader can
+    # stream decompressed TSV into the adapter and the adapter can stop as soon
+    # as the requested high-score prefix has been measured.
+    if path == "-":
+        return nullcontext(sys.stdin)
     if path.endswith(".gz"):
         return gzip.open(path, "rt", encoding="utf-8", errors="replace")
     return open(path, encoding="utf-8", errors="replace")
@@ -155,7 +162,7 @@ def iter_tatoeba(
                 meaning_ref="tatoeba:%s" % meaning_id,
                 attribution=attribution,
             )
-            policy.validate_origin_for_publication(origin.to_dict())
+            policy.validate_origin_for_ingestion(origin.to_dict())
             yield _candidate(policy, lang, meaning_lang, context, meaning_row[1], origin)
 
 
@@ -201,7 +208,7 @@ def iter_tatoeba_matrix(
             meaning_ref="tatoeba:%s" % meaning_id,
             attribution=attribution,
         )
-        policy.validate_origin_for_publication(origin.to_dict())
+        policy.validate_origin_for_ingestion(origin.to_dict())
         return _candidate(policy, lang, meaning_lang, context, meaning, origin)
 
     with open(links_path, encoding="utf-8", errors="replace") as handle:
@@ -227,6 +234,252 @@ def iter_tatoeba_matrix(
             second = emit(right, left)
             if second is not None:
                 yield second
+
+
+MASSIVE_LOCALES = {
+    "de": "de-DE",
+    "en": "en-US",
+    "es": "es-ES",
+    "fr": "fr-FR",
+    "it": "it-IT",
+    "ja": "ja-JP",
+    "ko": "ko-KR",
+    "pl": "pl-PL",
+    "pt": "pt-PT",
+    "ru": "ru-RU",
+    "zh": "zh-CN",
+}
+
+
+def _massive_data_dir(directory: str) -> str:
+    candidates = [
+        os.path.join(directory, "data"),
+        os.path.join(directory, "1.1", "data"),
+        directory,
+    ]
+    for candidate in candidates:
+        if os.path.isdir(candidate) and any(
+            os.path.exists(os.path.join(candidate, locale + ".jsonl"))
+            for locale in MASSIVE_LOCALES.values()
+        ):
+            return candidate
+    raise ValueError(
+        "MASSIVE dump has no data/<locale>.jsonl files under %s" % directory
+    )
+
+
+def massive_judgment_counts(value: dict) -> dict[str, int]:
+    """Return inspectable quality-vote counts from one MASSIVE source row.
+
+    MASSIVE asks reviewers of localized rows whether the utterance sounds
+    natural, is spelled correctly, is in the target language and matches the
+    requested intent. The adapter uses those human judgments as a conservative
+    pre-filter; the original en-US SLURP seed is unjudged by design. The later
+    ikna phrase sieve still decides whether the utterance contains a useful
+    learning target.
+    """
+    judgments = value.get("judgments")
+    if not isinstance(judgments, list):
+        judgments = []
+    counts = {
+        "judgments": 0,
+        "natural": 0,
+        "spelling": 0,
+        "targetLanguage": 0,
+        "intent": 0,
+    }
+    for judgment in judgments:
+        if not isinstance(judgment, dict):
+            continue
+        counts["judgments"] += 1
+        grammar = judgment.get("grammar_score")
+        spelling = judgment.get("spelling_score")
+        language = judgment.get("language_identification")
+        intent = judgment.get("intent_score")
+        if isinstance(grammar, (int, float)) and grammar >= 3:
+            counts["natural"] += 1
+        if isinstance(spelling, (int, float)) and spelling >= 2:
+            counts["spelling"] += 1
+        if language in {"target", 1, "1"}:
+            counts["targetLanguage"] += 1
+        if intent in {1, 2, "1", "2"}:
+            counts["intent"] += 1
+    return counts
+
+
+def massive_row_passes_quality(
+    value: dict,
+    min_natural_votes: int = 2,
+    min_spelling_votes: int = 2,
+    min_target_language_votes: int = 2,
+    min_intent_votes: int = 2,
+) -> bool:
+    counts = massive_judgment_counts(value)
+    return (
+        counts["natural"] >= min_natural_votes
+        and counts["spelling"] >= min_spelling_votes
+        and counts["targetLanguage"] >= min_target_language_votes
+        and counts["intent"] >= min_intent_votes
+    )
+
+
+def read_massive_locale(
+    directory: str,
+    language: str,
+    *,
+    min_natural_votes: int = 2,
+    min_spelling_votes: int = 2,
+    min_target_language_votes: int = 2,
+    min_intent_votes: int = 2,
+) -> tuple[dict[str, dict], dict[str, int]]:
+    """Read one MASSIVE locale and retain rows that pass its applicable quality gate.
+
+    MASSIVE's ``en-US`` file is the original SLURP seed.  Upstream deliberately
+    does not attach localization judgments to those rows, so an unjudged English
+    seed row is allowed through this *source* gate and is still subjected to the
+    normal ikna phrase/target sieve later.  Localized rows must pass the human
+    review thresholds below.
+    """
+    locale = MASSIVE_LOCALES.get(language)
+    if locale is None:
+        raise ValueError("MASSIVE has no pinned ikna locale for %s" % language)
+    path = os.path.join(_massive_data_dir(directory), locale + ".jsonl")
+    if not os.path.exists(path):
+        raise ValueError("MASSIVE locale file is missing: %s" % path)
+
+    rows: dict[str, dict] = {}
+    stats = defaultdict(int)
+    with open(path, encoding="utf-8", errors="replace") as handle:
+        for number, line in enumerate(handle, start=1):
+            line = line.strip()
+            if not line:
+                continue
+            stats["sourceRows"] += 1
+            try:
+                value = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise ValueError("%s:%d: invalid MASSIVE JSON" % (path, number)) from exc
+            if not isinstance(value, dict):
+                raise ValueError("%s:%d: MASSIVE row must be an object" % (path, number))
+            if value.get("locale") != locale:
+                raise ValueError(
+                    "%s:%d: locale %r does not match %s"
+                    % (path, number, value.get("locale"), locale)
+                )
+            source_id = str(value.get("id", "")).strip()
+            utterance = _clean_segment(str(value.get("utt", "")))
+            if not source_id or not utterance:
+                stats["malformedRows"] += 1
+                continue
+            if source_id in rows:
+                raise ValueError("%s:%d: duplicate MASSIVE id %s" % (path, number, source_id))
+            quality = massive_judgment_counts(value)
+            stats["judgments"] += quality["judgments"]
+            judgments = value.get("judgments")
+            is_unjudged_english_seed = locale == "en-US" and (
+                not isinstance(judgments, list) or not judgments
+            )
+            if is_unjudged_english_seed:
+                # The upstream en-US rows are the original SLURP seed, not a
+                # localization, so MASSIVE intentionally provides no reviewer
+                # judgments for them.  Do not fabricate votes or reject the
+                # entire English side of the matrix.
+                stats["qualityUnjudgedSeedRows"] += 1
+            elif not massive_row_passes_quality(
+                value,
+                min_natural_votes=min_natural_votes,
+                min_spelling_votes=min_spelling_votes,
+                min_target_language_votes=min_target_language_votes,
+                min_intent_votes=min_intent_votes,
+            ):
+                stats["qualityRejectedRows"] += 1
+                continue
+            stats["qualityAcceptedRows"] += 1
+            rows[source_id] = {
+                "id": source_id,
+                "locale": locale,
+                "utt": utterance,
+                "partition": str(value.get("partition", "")),
+                "scenario": str(value.get("scenario", "")),
+                "intent": str(value.get("intent", "")),
+                "quality": quality,
+            }
+    return rows, dict(stats)
+
+
+def _massive_id_key(value: str) -> tuple[int, int | str]:
+    return (0, int(value)) if value.isdigit() else (1, value)
+
+
+def iter_massive_matrix(
+    directory: str,
+    policy: SourcePolicy,
+    learn: set[str],
+    meanings: set[str],
+    source_version: str | None = None,
+    *,
+    min_natural_votes: int = 2,
+    min_spelling_votes: int = 2,
+    min_target_language_votes: int = 2,
+    min_intent_votes: int = 2,
+) -> Iterator[Candidate]:
+    """Emit direct multiway-aligned MASSIVE candidates for requested languages.
+
+    A shared MASSIVE ``id`` points back to the same SLURP seed utterance across
+    locales.  We therefore align locales only by that stable id and never create
+    a machine-translation pivot.  Rows must also agree on partition/scenario/
+    intent so a corrupted or mismatched dump fails loudly.
+    """
+    version = policy.resolve_source_version(source_version)
+    requested = sorted((set(learn) | set(meanings)) & set(MASSIVE_LOCALES))
+    locale_rows: dict[str, dict[str, dict]] = {}
+    for lang in requested:
+        rows, _stats = read_massive_locale(
+            directory,
+            lang,
+            min_natural_votes=min_natural_votes,
+            min_spelling_votes=min_spelling_votes,
+            min_target_language_votes=min_target_language_votes,
+            min_intent_votes=min_intent_votes,
+        )
+        locale_rows[lang] = rows
+
+    for lang in sorted(learn):
+        left = locale_rows.get(lang, {})
+        if not left:
+            continue
+        for meaning_lang in sorted(meanings):
+            if lang == meaning_lang:
+                continue
+            right = locale_rows.get(meaning_lang, {})
+            if not right:
+                continue
+            common = sorted(set(left) & set(right), key=_massive_id_key)
+            for source_id in common:
+                context_row = left[source_id]
+                meaning_row = right[source_id]
+                context_meta = (context_row["partition"], context_row["scenario"], context_row["intent"])
+                meaning_meta = (meaning_row["partition"], meaning_row["scenario"], meaning_row["intent"])
+                if context_meta != meaning_meta:
+                    raise ValueError(
+                        "MASSIVE id %s metadata mismatch between %s and %s"
+                        % (source_id, context_row["locale"], meaning_row["locale"])
+                    )
+                origin = Origin(
+                    source_family=policy.id,
+                    source_version=version,
+                    context_ref="massive:%s:%s:%s" % (version, context_row["locale"], source_id),
+                    meaning_ref="massive:%s:%s:%s" % (version, meaning_row["locale"], source_id),
+                )
+                policy.validate_origin_for_ingestion(origin.to_dict())
+                yield _candidate(
+                    policy,
+                    lang,
+                    meaning_lang,
+                    context_row["utt"],
+                    meaning_row["utt"],
+                    origin,
+                )
 
 def _aligned_lines(learn_path: str, meaning_path: str) -> Iterator[tuple[int, str, str]]:
     with _open_text(learn_path) as left, _open_text(meaning_path) as right:
@@ -284,7 +537,7 @@ def iter_wikimatrix(
             meaning_ref=_derived_ref(policy.id, version, pair_name, number, meaning),
             alignment_score=score,
         )
-        policy.validate_origin_for_publication(origin.to_dict())
+        policy.validate_origin_for_ingestion(origin.to_dict())
         yield _candidate(policy, lang, meaning_lang, context, meaning, origin)
 
 
@@ -352,7 +605,7 @@ def iter_wikimatrix_tsv(
                 meaning_ref=_derived_ref(policy.id, version, pair_name, number, meaning),
                 alignment_score=score,
             )
-            policy.validate_origin_for_publication(origin.to_dict())
+            policy.validate_origin_for_ingestion(origin.to_dict())
             yield _candidate(policy, lang, meaning_lang, context, meaning, origin)
             emitted += 1
             if max_rows is not None and emitted >= max_rows:
@@ -413,7 +666,7 @@ def iter_wikimatrix_tsv_pair(
                     meaning_ref=meaning_ref,
                     alignment_score=score,
                 )
-                policy.validate_origin_for_publication(origin.to_dict())
+                policy.validate_origin_for_ingestion(origin.to_dict())
                 yield _candidate(policy, lang, meaning_lang, context, meaning, origin)
             emitted += 1
             if max_rows is not None and emitted >= max_rows:
@@ -471,5 +724,5 @@ def iter_globalvoices(
             attribution=row,
         )
         # Fail during ingestion, not after a million-line build.
-        policy.validate_origin_for_publication(origin.to_dict())
+        policy.validate_origin_for_ingestion(origin.to_dict())
         yield _candidate(policy, lang, meaning_lang, context, meaning, origin)

@@ -112,6 +112,51 @@ A v2 publication must never contain a source family without a resolved licence
 and attribution policy. Planned sources may be documented in this repository,
 but only active, audited sources belong in a published `index.json`.
 
+## Part 5 supply census
+
+The supply census is deliberately separate from a catalogue build. It uses the same normalized candidates, language frequency ranks and phrase sieve, but writes **reports only**. For each `collection / learning language / meaning language` pair it records:
+
+- normalized candidate rows before exact-candidate deduplication;
+- unique source contexts seen by the target sieve;
+- every unique exact target eligible before `max_deck`;
+- the targets the current capped first pass would select;
+- current `min_deck` publication effect;
+- sentence/translation-length rejection, no-usable-target rows, duplicate-target rows and cap-blocked rows.
+
+WikiMatrix availability is measured separately from target supply. A missing direct upstream file is reported as such. If the workflow stops at its configured high-score row limit, that pair is marked `source-scan-lower-bound`; the count is evidence that **at least** that much material exists, not evidence of corpus scarcity. The workflow is `.github/workflows/catalogue-v2-supply-census.yml`; the report implementation is `tools/catalog/supply_census.py`. It has no publication step.
+
+## Parts 8-10 content experiments
+
+Part 8 removes the English-hub assumption from Knowledge evidence. The manual
+`catalogue v2 knowledge experiment` workflow probes every direct WikiMatrix pair
+among the requested languages, keeps the upstream alignment score, applies the
+explicit pair policy in `catalogue-v2-wikimatrix-quality.json`, and then runs the
+Part 10 selection policy over the retained preview. A pair can be rejected even
+when its upstream file exists. No missing pair is manufactured through an English
+pivot.
+
+Part 9 keeps World fail-closed. `globalvoices_xces_map.py` recovers OPUS document
+identity for each non-empty aligned row. `globalvoices_attribution.py` accepts only
+a supplied document-to-article manifest, requires real Global Voices HTTPS URLs
+and contributor lists, reports unresolved document ids, and can filter the aligned
+text so the existing adapter sees only fully attributed rows. It never guesses a
+URL or author.
+
+Part 10 is deliberately non-publishing until the full evidence run is reviewed.
+`selection_experiment.py` stages candidates on disk, builds frequency ranks from
+deduplicated natural contexts, measures all eligible exact targets before selection,
+and then chooses targets deterministically. Frequency usefulness is primary; target
+context evidence and independent source support break ties. When a morphology DB
+is supplied, a confidently resolved lemma is used only to diversify the first pass
+so several inflected surfaces of one lemma do not crowd out other useful targets.
+The exact `targetId` is never merged or rewritten.
+
+Alternate contexts are selected separately and near-duplicate sentences are
+suppressed with an inspectable token-overlap rule. The 8,000 value is a safety
+budget, not a fill target. Decks below `minDeck` are omitted with an explicit
+reason, genuinely small decks above that threshold are reported as `publish-thin`,
+and no source material is weakened or fabricated merely to reach a count.
+
 ## Ingestion boundary
 
 Part 2 adds an offline source-normalization layer before deck selection. Source

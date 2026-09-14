@@ -35,7 +35,7 @@
         "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
         "title": {"type": "string", "minLength": 1},
         "collection": {"enum": ["everyday", "knowledge", "world"]},
-        "adapter": {"enum": ["tatoeba", "wikimatrix", "globalvoices"]},
+        "adapter": {"enum": ["tatoeba", "wikimatrix", "globalvoices", "massive"]},
         "homepage": {"type": "string", "pattern": "^https://"},
         "distribution": {"type": "string", "pattern": "^https://"},
         "defaultSourceVersion": {"type": "string", "minLength": 1},
@@ -76,7 +76,7 @@
       "additionalProperties": false,
       "required": ["status", "requiredRecordAttribution"],
       "properties": {
-        "status": {"enum": ["ready", "record-attribution-required"]},
+        "status": {"enum": ["ready", "candidate", "record-attribution-required"]},
         "requiredRecordAttribution": {
           "type": "array",
           "items": {"type": "string", "minLength": 1},
