@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/logo.png" alt="ikna" width="420">
+  <img src="docs/assets/brand/ikna-banner-en.png" alt="ikna — Learn. Discover. Remember." width="900">
 </p>
 
 <h1 align="center" id="ikna"></h1>
@@ -249,7 +249,7 @@ ikna is free software under the **GNU General Public License, version 3 or (at y
 ---
 
 <p align="center">
-  <img src="docs/logo.png" alt="ikna" width="420">
+  <img src="docs/assets/brand/ikna-banner-ru.png" alt="ikna — Учись. Открывай. Помни." width="900">
 </p>
 
 <h1 align="center" id="русский"></h1>

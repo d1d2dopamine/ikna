@@ -103,7 +103,7 @@ compose.desktop {
                 // jpackage refuses an .ico here, and it copies whatever this
                 // names into the application image as lib/Ikna.png -- which
                 // is the first place build-appimage.sh looks for the icon.
-                // The same 512px mark the running window loads from
+                // The same 512px raster artwork the running window loads from
                 // resources, so the file on a Fedora dock, the window and the
                 // phone launcher cannot drift apart.
                 iconFile.set(project.file("src/main/resources/icon.png"))
@@ -116,7 +116,7 @@ compose.desktop {
             windows {
                 // jpackage stamps the launcher in the application image. The
                 // checked-in NSIS recipe owns setup, upgrades and shortcuts.
-                // icon.ico comes from the same wordmark as the phone launcher.
+                // icon.ico is a raster derivative of the same square artwork as the phone launcher.
                 iconFile.set(project.file("icon.ico"))
             }
         }

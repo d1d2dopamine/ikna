@@ -4,8 +4,8 @@
     app, on Android 11 and earlier. Newer versions draw their own launch screen;
     values-v31 tells them to use the same mark and the same field.
 
-    Same wordmark as the launcher icon, same field, so the icon appears to grow
-    into the app instead of being replaced by it. No text and no spinner: the app
+    Same raster artwork as the launcher icon, same field, so the icon appears
+    to grow into the app instead of being replaced by it. No extra text or spinner: the app
     is ready in well under a second, and anything readable here would only be
     readable if something were wrong.
 -->
