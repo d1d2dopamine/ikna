@@ -25,6 +25,9 @@ words mean and what a number promises inside an epoch is written down once, in
 
 ### Documentation checkpoint
 
+- Finished the Part 4.5 Catalogue readiness gate: meta-info now reports human card counts, the last index deck, full per-deck inventory, collection/level/language/pair/source breakdowns and per-language morphology; deterministic manual samples and a separate `CATALOGUE-V2-READINESS` report distinguish blockers from review warnings.
+- The standalone meta-info workflow now defaults to the latest successful Catalogue v2 Actions artifact (or can inspect the public release), so an experimental build can be audited without rebuilding corpora. Catalogue v2 publication now keeps `BUILD.json`/`BUILD.md` beside the deck assets before uploading `index.json` last, allowing later release census runs to verify the exact build.
+- Added Part 4.3 as a bounded, lossless storage experiment: a standalone repacker plus manual workflow now downloads an existing Catalogue v2 Actions artifact, measures pair-local and learning-language pooling without rebuilding corpora, verifies row/census integrity, and reports cold-install cost before any client-format decision.
 - Recorded the measured Catalogue v2 storage baseline: 3,108.4 MiB raw, 387.1 MiB gzip (12.5%), and clarified that compression alone does not remove cross-deck duplication.
 - Added `docs/UNSCHEDULED.md` for ideas with no release/date commitment; those ideas may be changed or rejected freely and do not block 0.11.
 

@@ -69,6 +69,8 @@ jobs:
           python3 tools/catalog/test_morphology.py
           python3 tools/catalog/test_build_catalogue_v2.py
           python3 tools/catalog/test_meta_info.py
+          python3 tools/catalog/test_readiness_audit.py
+          python3 tools/catalog/test_storage_experiment.py
 
   catalogue-v2:
     needs: contracts
@@ -211,17 +213,51 @@ jobs:
           "${args[@]}"
           cat catalog-v2/BUILD.md
 
-      - name: Census before publication
+      - name: Census and concrete deck inventory before publication
+        shell: bash
         run: |
+          set -euo pipefail
+          mkdir -p reports/samples
           python3 tools/catalog/meta_info.py \
             --dir catalog-v2 \
             --expect-build catalog-v2/BUILD.json \
             --json reports/catalogue-meta-info.json \
             --markdown reports/catalogue-meta-info.md \
+            --samples-dir reports/samples \
+            --sample-per-deck 20 \
             --top 50
           cp reports/catalogue-meta-info.md catalog-v2/CATALOGUE-V2-CENSUS.md
-          cat reports/catalogue-meta-info.md >> "$GITHUB_STEP_SUMMARY"
-          cat catalog-v2/BUILD.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Part 4.5 readiness audit
+        id: readiness
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          status=0
+          python3 tools/catalog/readiness_audit.py \
+            --meta-json reports/catalogue-meta-info.json \
+            --samples-dir reports/samples \
+            --json reports/CATALOGUE-V2-READINESS.json \
+            --markdown reports/CATALOGUE-V2-READINESS.md || status=$?
+          cp reports/CATALOGUE-V2-READINESS.md catalog-v2/CATALOGUE-V2-READINESS.md
+          exit "$status"
+
+      - name: Add build/readiness/census to workflow summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f catalog-v2/BUILD.md ]; then
+            cat catalog-v2/BUILD.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f reports/CATALOGUE-V2-READINESS.md ]; then
+            printf '\n---\n\n' >> "$GITHUB_STEP_SUMMARY"
+            cat reports/CATALOGUE-V2-READINESS.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f reports/catalogue-meta-info.md ]; then
+            printf '\n---\n\n' >> "$GITHUB_STEP_SUMMARY"
+            cat reports/catalogue-meta-info.md >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Keep the complete experimental build
         uses: actions/upload-artifact@v6
@@ -230,6 +266,7 @@ jobs:
           path: |
             catalog-v2/
             reports/
+            !reports/samples/**
             wikimatrix-plan.tsv
             morphology/manifest.json
           if-no-files-found: error
@@ -239,10 +276,24 @@ jobs:
           # no size gain.
           compression-level: 0
 
+      - name: Keep deterministic manual-review samples
+        uses: actions/upload-artifact@v6
+        with:
+          name: catalogue-v2-readiness-samples
+          path: reports/samples/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Enforce Part 4.5 blockers
+        if: ${{ steps.readiness.outcome == 'failure' }}
+        run: |
+          echo "Catalogue v2 readiness contains a release blocker; inspect CATALOGUE-V2-READINESS.md" >&2
+          exit 1
+
       - name: Prepare release notes
         if: ${{ inputs.publish }}
         run: |
-          cat catalog-v2/BUILD.md reports/catalogue-meta-info.md > reports/release-notes.md
+          cat catalog-v2/BUILD.md reports/CATALOGUE-V2-READINESS.md reports/catalogue-meta-info.md > reports/release-notes.md
 
       - name: Publish reviewed Catalogue v2
         if: ${{ inputs.publish }}

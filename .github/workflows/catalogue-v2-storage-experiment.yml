@@ -1,0 +1,86 @@
+name: catalogue v2 storage experiment
+
+# Repack an already-built Catalogue v2 artifact. This workflow never downloads
+# corpora, never reruns target selection and never publishes the catalogue.
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Completed catalogue v2 build run id"
+        required: false
+        default: ""
+      artifact_name:
+        description: "Catalogue artifact from that run"
+        required: true
+        default: "catalogue-v2"
+      target_mib:
+        description: "Total-size acceptance gate for pair pooling"
+        required: true
+        default: "220"
+      cold_cap_mib:
+        description: "Maximum cold one-deck download accepted for pair pooling"
+        required: true
+        default: "24"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  storage-experiment:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Storage experiment contracts
+        run: python3 tools/catalog/test_storage_experiment.py
+
+      - name: Download existing Catalogue v2 artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p imported
+          run_id="${{ inputs.run_id }}"
+          if [ -z "$run_id" ]; then
+            run_id=$(gh run list \
+              --repo "$GITHUB_REPOSITORY" \
+              --workflow catalogue-v2.yml \
+              --status success \
+              --limit 1 \
+              --json databaseId \
+              --jq '.[0].databaseId')
+          fi
+          [ -n "$run_id" ] || { echo "No successful catalogue v2 run found" >&2; exit 1; }
+          echo "Using catalogue run $run_id"
+          gh run download "$run_id" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name "${{ inputs.artifact_name }}" \
+            --dir imported
+          test -f imported/catalog-v2/index.json
+          test -f imported/catalog-v2/BUILD.json
+          du -sh imported/catalog-v2
+
+      - name: Measure pair and language pooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p storage-report
+          python3 tools/catalog/storage_experiment.py \
+            --dir imported/catalog-v2 \
+            --report storage-report/CATALOGUE-V2-STORAGE-EXPERIMENT.md \
+            --json storage-report/CATALOGUE-V2-STORAGE-EXPERIMENT.json \
+            --modes pair,language \
+            --target-mib "${{ inputs.target_mib }}" \
+            --cold-cap-mib "${{ inputs.cold_cap_mib }}"
+          cat storage-report/CATALOGUE-V2-STORAGE-EXPERIMENT.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep only the measurement report
+        uses: actions/upload-artifact@v6
+        with:
+          name: catalogue-v2-storage-experiment
+          path: storage-report/
+          if-no-files-found: error
+          retention-days: 14

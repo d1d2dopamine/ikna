@@ -85,8 +85,12 @@ public `catalog` release remains unchanged.
 - An audited permissive UD 2.18 treebank set can enrich the selected target contexts. The
   generated manifest records file SHA-256 values for the exact run.
 - `catalogue meta-info` runs against the finished v2 assets before any publication.
+- Part 4.4/4.5 adds concrete cards-per-deck inventory, deterministic per-deck review
+  samples and a final readiness report that separates structural blockers from
+  warnings such as thin pairs. This is the last planned Part 4 checkpoint.
 - An explicit reviewed publish still uses the existing `catalog` tag, uploads deck
-  assets first and `index.json` last, and changes the release title to `Catalogue v2`.
+  assets and exact `BUILD.json`/`BUILD.md` metadata first, then `index.json` last,
+  and changes the release title to `Catalogue v2`.
 
 ### Part 5 - Richer target/context relations
 

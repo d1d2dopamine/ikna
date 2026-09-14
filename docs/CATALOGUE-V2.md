@@ -420,3 +420,72 @@ GitHub release constraints are treated as build constraints: index/deck size cap
 remain enforced and the builder refuses an asset count close to the release limit.
 The initial WikiMatrix hub plan is intentionally narrower than every possible
 language pair for the same reason.
+
+## Part 4.3 storage experiment
+
+The measured 8,000-target scale build made the physical-storage question
+separate from the content model: self-contained deck assets total 3,108.4 MiB as
+raw JSONL and 387.1 MiB as deterministic gzip. Gzip is therefore already doing
+its job; another compression wrapper cannot remove content repeated across deck
+assets.
+
+`tools/catalog/storage_experiment.py` tests that question against an **existing**
+Catalogue v2 build. It does not ingest corpora, rerun target selection, mutate the
+input build or publish a new index. Every membership is split into a target-local
+shell plus ordered context and meaning payloads, then reconstructed immediately;
+the experiment aborts if any field other than the deterministic deck-local `id`
+changes. `BUILD.json` membership/context totals are checked again when available.
+
+Two layouts are measured:
+
+- `pair`: context/meaning pools are shared only by decks with the same learning
+  and meaning languages;
+- `language`: pools are shared by every meaning language for one learning
+  language. This is diagnostic only because its cold-install dependency is much
+  larger.
+
+The experiment reports total compressed bytes, exact payload reuse, and both
+cold- and warm-deck costs. The current acceptance gate for considering pair
+pooling is deliberately concrete: at most 220 MiB total and at most 24 MiB for
+the largest cold one-deck dependency. Passing those numbers still does not make
+the prototype a public format; client/index work would be a separate reviewed
+change. Missing the gate means the self-contained gzip layout stays in place and
+0.11 returns to the main plan instead of accumulating storage architecture.
+
+The manual `catalogue v2 storage experiment` workflow can download the latest
+successful `catalogue-v2` Actions artifact, or a specified run id, and uploads
+only the Markdown/JSON measurement report. This keeps the experiment cheap and
+avoids another corpus build.
+## Part 4.4 / 4.5 inventory and readiness
+
+The final Catalogue-foundation checkpoint makes the build inspectable without
+requiring knowledge of internal names such as `targetDeckMemberships`.
+`tools/catalog/meta_info.py` now begins with human-facing counts for **cards in all
+decks**, **unique learning targets**, retained contexts and deck count. It records
+the last entry in `index.json`, full per-deck cards/contexts/bytes, deck-size
+distribution, cap-bound/thin decks, and collection/level/language/pair/source
+breakdowns. The technical membership terminology remains in the same report so
+the two meanings cannot be confused.
+
+A deterministic sample (SHA-256 priority, up to 20 cards per deck by default) can
+be emitted during the same scan. Samples preserve target/context/source fields
+needed for manual content review without changing the catalogue or selecting new
+material.
+
+`tools/catalog/readiness_audit.py` consumes the machine-readable census and emits
+`CATALOGUE-V2-READINESS.md`/`.json`. Its statuses have deliberately narrow meaning:
+
+- `FAIL` -- structural/reproducibility blocker such as broken JSON, duplicate card
+  ids, bad offsets, missing required fields/provenance, index/file mismatches or a
+  deck over the 24 MiB decompressed client cap;
+- `WARN` -- review evidence such as thin decks, long-text candidates or a deck near
+  the import cap;
+- `PASS` -- no configured blocker/warning remains.
+
+The manual `catalogue meta-info` workflow defaults to the latest successful
+`catalogue-v2` Actions artifact and can instead inspect the public `catalog`
+release. A reviewed v2 publication also uploads `BUILD.json` and `BUILD.md` before
+`index.json`, so a later read-only release census can cross-check the exact build.
+Part 4.5 is the final planned Part 4 checkpoint; absent a real blocker, work moves
+to Part 5 rather than adding more pre-policy catalogue machinery.
+

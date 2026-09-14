@@ -1,29 +1,52 @@
 name: catalogue meta-info
 
-# Read-only census of the catalogue already published in GitHub Releases.
-#
-# It deliberately does not rebuild corpora and does not publish anything. The
-# point is to answer data questions before 0.11 changes the learning model:
-# how many exact targets already occur in genuinely different source contexts,
-# how much metadata the shipped JSONL already carries, and how much repetition
-# is merely the same source sentence appearing in another translation deck.
+# Read-only inventory/census of an already-built catalogue. By default it
+# inspects the latest successful Catalogue v2 Actions artifact, so the report can
+# answer concrete questions (including per-deck card counts) before publication.
+# It can also inspect the fixed public `catalog` release.
 on:
   workflow_dispatch:
     inputs:
+      source:
+        description: "Catalogue source to inspect"
+        type: choice
+        options:
+          - artifact
+          - release
+        default: artifact
+      run_id:
+        description: "Catalogue v2 build run id (artifact source; blank = latest successful)"
+        required: false
+        default: ""
+      artifact_name:
+        description: "Actions artifact name"
+        required: true
+        default: "catalogue-v2"
       tag:
-        description: "Catalogue release tag to inspect"
+        description: "Catalogue release tag (release source)"
+        required: true
         default: "catalog"
       top_groups:
         description: "Multi-context target groups to include in the report"
+        required: true
         default: "50"
+      sample_per_deck:
+        description: "Deterministic cards kept per deck for manual readiness review"
+        required: true
+        default: "20"
+      all_groups:
+        description: "Also export every multi-context target group (large)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   meta-info:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5
 
@@ -31,43 +54,118 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Meta-info analyser self-test
-        run: python3 tools/catalog/test_meta_info.py
+      - name: Census/readiness self-tests
+        run: |
+          python3 tools/catalog/test_meta_info.py
+          python3 tools/catalog/test_readiness_audit.py
 
-      - name: Download published catalogue assets
+      - name: Download Catalogue v2 Actions artifact
+        if: ${{ inputs.source == 'artifact' }}
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
+          mkdir -p imported
+          run_id="${{ inputs.run_id }}"
+          if [ -z "$run_id" ]; then
+            run_id=$(gh run list \
+              --repo "$GITHUB_REPOSITORY" \
+              --workflow catalogue-v2.yml \
+              --status success \
+              --limit 1 \
+              --json databaseId \
+              --jq '.[0].databaseId')
+          fi
+          [ -n "$run_id" ] || { echo "No successful catalogue v2 run found" >&2; exit 1; }
+          echo "Using catalogue build run $run_id"
+          gh run download "$run_id" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name "${{ inputs.artifact_name }}" \
+            --dir imported
+          if [ -f imported/catalog-v2/index.json ]; then
+            root=imported/catalog-v2
+          elif [ -f imported/index.json ]; then
+            root=imported
+          else
+            echo "Downloaded artifact does not contain index.json" >&2
+            find imported -maxdepth 3 -type f -print >&2
+            exit 1
+          fi
+          echo "CATALOGUE_DIR=$root" >> "$GITHUB_ENV"
+          if [ -f "$root/BUILD.json" ]; then
+            echo "BUILD_JSON=$root/BUILD.json" >> "$GITHUB_ENV"
+          fi
+          du -sh "$root"
+
+      - name: Download published catalogue release
+        if: ${{ inputs.source == 'release' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
           mkdir -p catalogue-assets
           gh release download "${{ inputs.tag }}" \
             --repo "$GITHUB_REPOSITORY" \
-            --dir catalogue-assets \
-            --pattern '*.jsonl' \
-            --pattern 'index.json'
-          echo "Downloaded $(find catalogue-assets -maxdepth 1 -name '*.jsonl' -type f | wc -l) deck assets"
+            --dir catalogue-assets
+          test -f catalogue-assets/index.json
+          echo "CATALOGUE_DIR=catalogue-assets" >> "$GITHUB_ENV"
+          if [ -f catalogue-assets/BUILD.json ]; then
+            echo "BUILD_JSON=catalogue-assets/BUILD.json" >> "$GITHUB_ENV"
+          fi
+          echo "Downloaded $(find catalogue-assets -maxdepth 1 \( -name '*.jsonl' -o -name '*.jsonl.gz' \) -type f | wc -l) deck assets"
           du -sh catalogue-assets
 
-      - name: Analyse catalogue metadata and context reuse
+      - name: Analyse concrete card/deck inventory
+        shell: bash
         run: |
-          mkdir -p reports
-          python3 tools/catalog/meta_info.py \
-            --dir catalogue-assets \
-            --json reports/catalogue-meta-info.json \
-            --markdown reports/catalogue-meta-info.md \
-            --groups-jsonl reports/multi-context-targets.jsonl \
+          set -euo pipefail
+          mkdir -p reports/samples
+          args=(
+            python3 tools/catalog/meta_info.py
+            --dir "$CATALOGUE_DIR"
+            --json reports/catalogue-meta-info.json
+            --markdown reports/catalogue-meta-info.md
+            --samples-dir reports/samples
+            --sample-per-deck "${{ inputs.sample_per_deck }}"
             --top "${{ inputs.top_groups }}"
+          )
+          if [ -n "${BUILD_JSON:-}" ] && [ -f "$BUILD_JSON" ]; then
+            args+=(--expect-build "$BUILD_JSON")
+          fi
+          if [ "${{ inputs.all_groups }}" = "true" ]; then
+            args+=(--groups-jsonl reports/multi-context-targets.jsonl)
+          fi
+          "${args[@]}"
 
-      - name: Add report to workflow summary
-        if: always()
+      - name: Part 4.5 readiness audit
+        shell: bash
         run: |
+          set -euo pipefail
+          python3 tools/catalog/readiness_audit.py \
+            --meta-json reports/catalogue-meta-info.json \
+            --samples-dir reports/samples \
+            --json reports/CATALOGUE-V2-READINESS.json \
+            --markdown reports/CATALOGUE-V2-READINESS.md
+
+      - name: Add reports to workflow summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f reports/CATALOGUE-V2-READINESS.md ]; then
+            cat reports/CATALOGUE-V2-READINESS.md >> "$GITHUB_STEP_SUMMARY"
+          fi
           if [ -f reports/catalogue-meta-info.md ]; then
+            printf '\n---\n\n' >> "$GITHUB_STEP_SUMMARY"
             cat reports/catalogue-meta-info.md >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - name: Keep reports
+      - name: Keep reports and deterministic samples
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: catalogue-meta-info-${{ inputs.tag }}
+          name: catalogue-meta-info-${{ inputs.source }}
           path: reports/
           if-no-files-found: error
+          retention-days: 14

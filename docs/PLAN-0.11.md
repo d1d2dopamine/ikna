@@ -99,6 +99,13 @@ Meaningful further reduction requires removing repeated physical content across
 deck assets while preserving the same targets, contexts, translations and
 provenance. This is a storage-layout problem, not a reason to discard evidence.
 
+Part 4.3 is intentionally a bounded branch from the roadmap. The repository now
+contains a standalone lossless repacker and a manual workflow that runs it against
+an existing Actions artifact. It compares pair-local pooling with a
+learning-language diagnostic upper bound and uploads only the measurement report.
+No application reader or publication format changes until that report clears the
+explicit acceptance gate.
+
 The same census confirms that production morphology is now real rather than an
 identity placeholder: **16.9%** of inspected tokens have a lemma different from
 the written surface. Phonetics is intentionally still disabled for this scale
@@ -136,16 +143,28 @@ that the material is ready to publish.
 
 ### Part 4 follow-up - full corpus evidence
 
-- Treat the completed compressed scale build and its verified census as the current
+- [x] Treat the completed compressed scale build and its verified census as the current
   storage baseline; do not spend another full rebuild merely changing compression.
-- Review the census and samples from large and thin language pairs.
-- Prototype physical cross-deck deduplication on existing build output before any
-  new full corpus run. Measure savings first; preserve target/context semantics.
-- Measure where the 8,000-target safety cap is actually binding.
-- Profile the builder if full rebuild time remains excessive; optimize passes and indexes without changing target/context semantics.
-- Add production Global Voices acquisition only when canonical article URLs and contributor attribution are available at scale.
-- Decide whether production UniMorph adds enough coverage beyond the audited UD set to justify inclusion in the full rebuild.
-- Run the final phonetics pass only after target/context quality and scale are accepted.
+- [x] Part 4.3 adds a bounded lossless storage experiment that downloads an existing
+  `catalogue-v2` Actions artifact instead of rebuilding corpora. Its one decision is
+  still explicit: implement pair pooling only if the measured report clears the
+  220 MiB total / 24 MiB cold-deck gate; otherwise retain self-contained gzip.
+- [x] Part 4.4 makes census output concrete: the first page now says how many cards
+  are in all decks, how many are unique targets, what the last `index.json` deck
+  contains, where the 8,000-target cap binds, and lists every deck with cards,
+  contexts, compressed/raw bytes and raw-cap utilisation.
+- [x] Part 4.5 is the final planned Catalogue foundation audit. It generates
+  deterministic manual-review samples for every deck and a separate readiness
+  report with `PASS`/`WARN`/`FAIL` for integrity, provenance, build cross-check,
+  storage cap, deck coverage, morphology and target/context shape. Thin material
+  is a warning; broken JSON/ids/offsets/provenance/index declarations are blockers.
+- [x] The manual `catalogue meta-info` workflow can inspect the latest successful
+  v2 Actions artifact directly, so these reports do not require another corpus build.
+- Do not invent Part 4.6 for optional cleanup. If Part 4.5 finds no blocker, freeze
+  this foundation and move to the full Part 5 implementation. A genuine blocker
+  may interrupt that move; ordinary warnings do not.
+- Production Global Voices, optional UniMorph expansion and the final phonetics pass
+  remain later measured choices; they are not reasons to keep extending Part 4.
 
 ### Part 5 - richer target/context relations
 

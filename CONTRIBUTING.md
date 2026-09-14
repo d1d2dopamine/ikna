@@ -111,6 +111,8 @@ python3 tools/catalog/test_morphology.py
 python3 tools/catalog/test_build_catalogue_v2.py
 python3 tools/catalog/test_v1_v2_parity.py
 python3 tools/catalog/test_meta_info.py
+python3 tools/catalog/test_readiness_audit.py
+python3 tools/catalog/test_storage_experiment.py
 ```
 
 Do not replace a failing check by weakening the check unless the documented
@@ -160,6 +162,11 @@ learning targets. Census reports should keep at least these measures separate:
 - target/deck memberships;
 - retained contexts;
 - unique source contexts.
+
+Part 4.5 also requires a **full deck inventory** in the census. A reviewer must be
+able to answer how many cards and contexts are in any named deck without inferring
+it from aggregate totals. `FAIL` in `CATALOGUE-V2-READINESS.md` is a real release
+blocker; `WARN` is evidence to inspect, not an automatic reason to delete content.
 
 ### Sources and collections
 
@@ -217,6 +224,23 @@ Long runtime by itself is not a reason to bypass the quality or provenance gates
 
 The outputs to inspect first are the build summary and `catalogue-meta-info`
 report. Do not publish merely because the workflow succeeded.
+
+### Storage experiments
+
+Do not rerun the corpora merely to test a physical file layout. The manual
+`catalogue v2 storage experiment` workflow downloads an already completed
+`catalogue-v2` Actions artifact and runs `tools/catalog/storage_experiment.py`.
+It never publishes anything. With an empty `run_id` it uses the latest successful
+Catalogue v2 build; a specific run id can be supplied when a census must be tied
+to one known artifact.
+
+The experiment currently measures two lossless normalized layouts: pair-local
+pooling and learning-language pooling. Pair pooling is the only simple layout
+considered a possible client candidate; language pooling is a diagnostic storage
+upper bound because requiring a whole learning-language pool for one deck would
+be a poor cold-install trade-off. The default gate is 220 MiB total and no more
+than 24 MiB for a cold one-deck pair dependency. A passing number is evidence to
+consider a format change, not permission to publish it.
 
 Catalogue v2 release decks are `.jsonl.gz`. The JSONL inside remains the pack
 contract used by the importer; compression must never change target selection or

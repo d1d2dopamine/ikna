@@ -45,6 +45,8 @@ def check_workflow_download_resilience():
         "tar -tjf corpus/sentences.tar.bz2",
         "git -c http.version=HTTP/1.1 clone",
         "--expect-build catalog-v2/BUILD.json",
+        "tools/catalog/readiness_audit.py",
+        "--samples-dir reports/samples",
     ):
         if required not in workflow:
             raise AssertionError("catalogue workflow is missing resilient download contract: %s" % required)
@@ -55,6 +57,18 @@ def check_workflow_download_resilience():
     publisher = (root / "tools/catalog/publish.py").read_text(encoding="utf-8")
     if 'name.endswith(".jsonl.gz")' not in publisher:
         raise AssertionError("Catalogue v2 publisher must upload compressed deck assets")
+    if 'BUILD_METADATA = ("BUILD.json", "BUILD.md")' not in publisher:
+        raise AssertionError("Catalogue v2 publisher must keep exact build metadata beside release assets")
+
+    meta_workflow = (root / ".github/workflows/catalogue-meta-info.yml").read_text(encoding="utf-8")
+    for required in (
+        "gh run download",
+        "*.jsonl.gz",
+        "tools/catalog/readiness_audit.py",
+        "--sample-per-deck",
+    ):
+        if required not in meta_workflow:
+            raise AssertionError("meta-info workflow is missing concrete v2 inventory/readiness contract: %s" % required)
 
 
 def main():

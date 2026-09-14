@@ -120,6 +120,87 @@ class MetaInfoTests(unittest.TestCase):
             self.assertEqual(data["input"]["deckFiles"], 1)
             self.assertEqual(data["catalogue"]["targetDeckMemberships"], 1)
 
+    def test_human_inventory_exposes_cards_last_deck_and_breakdowns(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            first = card("a", "care", "I care about this.", 1, lemma="care")
+            first.update({"targetId":"t2:en:0000000000000000","contextId":"tatoeba:1","meaningId":"tatoeba:101","sourceFamily":"tatoeba"})
+            second = card("b", "work", "We work together.", 2, lemma="work")
+            second.update({"targetId":"t2:en:1111111111111111","contextId":"tatoeba:2","meaningId":"tatoeba:102","sourceFamily":"tatoeba"})
+            write_deck(root, "en-ru-everyday-beginner.jsonl", [first])
+            write_deck(root, "en-es-everyday-middle.jsonl", [first | {"id":"c"}, second])
+            decks = []
+            for deck_id, file_name, level, meaning, contexts in (
+                ("en-ru-everyday-beginner", "en-ru-everyday-beginner.jsonl", "beginner", "ru", 1),
+                ("en-es-everyday-middle", "en-es-everyday-middle.jsonl", "middle", "es", 2),
+            ):
+                path = root / file_name
+                decks.append({
+                    "id": deck_id, "file": file_name, "lang": "en", "meaningLang": meaning,
+                    "collection": "everyday", "level": level, "sourceFamily": "tatoeba",
+                    "chunkCount": 1 if meaning == "ru" else 2, "contextCount": contexts,
+                    "sizeBytes": path.stat().st_size, "uncompressedSizeBytes": path.stat().st_size,
+                })
+            (root / "index.json").write_text(json.dumps({
+                "version": 2, "catalogueVersion": 2, "builtAt": "fixture", "decks": decks,
+                "pairs": [{"lang":"en","meaningLang":"ru"},{"lang":"en","meaningLang":"es"}],
+            }), encoding="utf-8")
+            data, groups, samples = meta_info._analyse(root, sample_per_deck=1)
+            self.assertEqual(data["catalogue"]["cardsInDecks"], 3)
+            self.assertEqual(data["inventory"]["lastIndexDeck"]["id"], "en-es-everyday-middle")
+            self.assertEqual(data["inventory"]["lastIndexDeck"]["cards"], 2)
+            self.assertEqual(data["breakdown"]["byCollection"][0]["cards"], 3)
+            self.assertEqual(data["breakdown"]["byCollection"][0]["uniqueTargets"], 2)
+            self.assertEqual(len(samples), 2)
+            report = meta_info.markdown_report(data, groups, 0)
+            self.assertIn("cards in all decks", report)
+            self.assertIn("Full deck inventory", report)
+            self.assertIn("en-es-everyday-middle", report)
+
+    def test_build_cross_check_adds_target_cap_inventory(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            row = card("a", "care", "I care about this.", 1)
+            write_deck(root, "en-ru-everyday-beginner.jsonl", [row])
+            path = root / "en-ru-everyday-beginner.jsonl"
+            (root / "index.json").write_text(json.dumps({
+                "version": 1, "builtAt": "fixture",
+                "decks": [{"id":"en-ru-everyday-beginner","file":path.name,"lang":"en","meaningLang":"ru",
+                           "level":"beginner","collection":"everyday","sourceFamily":"tatoeba",
+                           "chunkCount":1,"contextCount":1,"sizeBytes":path.stat().st_size,
+                           "uncompressedSizeBytes":path.stat().st_size}],
+                "pairs": [{"lang":"en","meaningLang":"ru"}],
+            }), encoding="utf-8")
+            data, _ = meta_info.analyse(root)
+            build = root / "BUILD.json"
+            build.write_text(json.dumps({
+                "output": {
+                    "targetDeckMemberships":1,"contexts":1,"uniqueSourceContexts":1,"uniqueTargets":1,
+                    "decks":1,"compressedDeckBytes":path.stat().st_size,"uncompressedDeckBytes":path.stat().st_size,
+                },
+                "limits":{"maxDeckTargets":1},
+            }), encoding="utf-8")
+            meta_info.verify_build(data, build)
+            self.assertTrue(data["input"]["buildVerified"])
+            self.assertEqual(data["inventory"]["decksAtTargetCap"], 1)
+
+    def test_v2_target_identity_mismatch_is_audited(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            row = card("a", "care", "I care about this.", 1)
+            row.update({"targetId":"t2:en:ffffffffffffffff","contextId":"tatoeba:1","meaningId":"tatoeba:101","sourceFamily":"tatoeba"})
+            write_deck(root, "en-ru-everyday-beginner.jsonl", [row])
+            path = root / "en-ru-everyday-beginner.jsonl"
+            (root / "index.json").write_text(json.dumps({
+                "version":2,"catalogueVersion":2,"targetIdentity":{"version":2,"method":"nfkc-casefold-exact"},
+                "decks":[{"id":"en-ru-everyday-beginner","file":path.name,"lang":"en","meaningLang":"ru",
+                          "level":"beginner","collection":"everyday","sourceFamily":"tatoeba",
+                          "chunkCount":1,"contextCount":1,"sizeBytes":path.stat().st_size,
+                          "uncompressedSizeBytes":path.stat().st_size}],"pairs":[]
+            }), encoding="utf-8")
+            data, _ = meta_info.analyse(root)
+            self.assertEqual(data["metadata"]["targetIdMismatches"], 1)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -48,8 +48,12 @@ import subprocess
 import sys
 import time
 
-# The index is uploaded after every deck it describes.
+# The index is uploaded after every deck it describes. Build metadata is
+# published before it so later read-only census runs can cross-check the exact
+# Catalogue v2 build without changing the client-visible commit point.
 INDEX = "index.json"
+BUILD_METADATA = ("BUILD.json", "BUILD.md")
+ALWAYS_REPLACE = set(BUILD_METADATA + (INDEX,))
 
 # GitHub does not name the limit it enforced, so the wording is matched loosely.
 # A false positive here costs a minute of waiting; a false negative costs the
@@ -209,13 +213,16 @@ def assets_of(release):
 
 
 def local_files(folder):
-    """Every deck, in name order, with the index last."""
+    """Every deck, optional build metadata, and the client index last."""
     names = sorted(
         name
         for name in os.listdir(folder)
         if (name.endswith(".jsonl") or name.endswith(".jsonl.gz"))
         and os.path.isfile(os.path.join(folder, name))
     )
+    for name in BUILD_METADATA:
+        if os.path.isfile(os.path.join(folder, name)):
+            names.append(name)
     if os.path.isfile(os.path.join(folder, INDEX)):
         names.append(INDEX)
     return names
@@ -331,7 +338,7 @@ def main():
         path = os.path.join(args.dir, name)
         size = os.path.getsize(path)
         there = attached.get(name)
-        if not args.replace_all and there == size:
+        if not args.replace_all and name not in ALWAYS_REPLACE and there == size:
             skipped.append(name)
             continue
         print(
