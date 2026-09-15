@@ -3,8 +3,8 @@
 These are the committed raster masters used by the repository and application packaging.
 They are intentionally raster artwork rather than vector redraws.
 
-- `ikna-banner-en.png` — English repository header (`Learn. Discover. Remember.`)
-- `ikna-banner-ru.png` — Russian repository header (`Учись. Открывай. Помни.`)
+- `ikna-banner-en-press.png` — English repository header (`Learn. Discover. Remember.`)
+- `ikna-banner-ru-press.png` — Russian repository header (`Учись. Открывай. Помни.`)
 - `ikna-app-icon.png` — square application/repository icon master
 
 The dark field is part of the app-icon and banner artwork. The in-app wordmark is
