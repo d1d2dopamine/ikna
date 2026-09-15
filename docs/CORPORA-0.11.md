@@ -142,7 +142,12 @@ page. A document is emitted only when the fetched/resolved URL remains on
 `globalvoices.org`, a canonical Global Voices article URL is recovered, and at
 least one credited contributor is present in page metadata/markup. Missing or
 unverifiable documents are reported and their aligned rows are excluded; URLs or
-names are never inferred from sentence text.
+names are never inferred from sentence text. The first bounded live pass verified
+300 of 400 selected documents and retained 20,881 en-es aligned rows with both
+documents verified. Full coverage is built by `catalogue v2 world full provenance`:
+SHA-256 document shards restore per-shard caches across reruns, transient fetch
+failures are retried, and the merged manifest is accepted as a freeze input only
+when every alignment document was attempted.
 
 Evidence:
 

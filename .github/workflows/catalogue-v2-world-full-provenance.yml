@@ -1,0 +1,321 @@
+name: catalogue v2 world full provenance
+
+# Part 9 full provenance pass. Native OPUS document identity is prepared once,
+# article verification is split into deterministic SHA-256 shards, and each
+# shard restores a persistent cache so reruns only revisit transient failures.
+# The final merge is deterministic and the workflow fails its last gate unless
+# every referenced document was either verified or stably rejected.
+on:
+  workflow_dispatch:
+    inputs:
+      learn:
+        description: "Learning language for one Global Voices pair"
+        default: "en"
+      meaning:
+        description: "Meaning language"
+        default: "es"
+      manifest_shards:
+        description: "Deterministic manifest shards (16-64 recommended; 32 default)"
+        default: "32"
+      workers_per_shard:
+        description: "Concurrent page fetches inside each shard (1-4 recommended)"
+        default: "2"
+      cache_epoch:
+        description: "Change only when intentionally invalidating saved provenance caches"
+        default: "1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: catalogue-v2-world-full-${{ inputs.learn }}-${{ inputs.meaning }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    outputs:
+      shard_matrix: ${{ steps.matrix.outputs.shard_matrix }}
+      shard_count: ${{ steps.matrix.outputs.shard_count }}
+      pair_key: ${{ steps.matrix.outputs.pair_key }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Contracts
+        run: |
+          python3 tools/catalog/test_globalvoices_attribution.py
+          python3 tools/catalog/test_ingestion.py
+
+      - name: Validate shard plan
+        id: matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - "${{ inputs.manifest_shards }}" "${{ inputs.workers_per_shard }}" "${{ inputs.learn }}" "${{ inputs.meaning }}" "$GITHUB_OUTPUT" <<'PY'
+          import json,sys
+          shards=int(sys.argv[1]); workers=int(sys.argv[2])
+          learn=sys.argv[3].strip().lower(); meaning=sys.argv[4].strip().lower(); output=sys.argv[5]
+          if not 1 <= shards <= 64:
+              raise SystemExit("manifest_shards must be in 1..64")
+          if not 1 <= workers <= 8:
+              raise SystemExit("workers_per_shard must be in 1..8")
+          if not learn or not meaning or learn == meaning:
+              raise SystemExit("World languages must be non-empty and different")
+          with open(output,"a",encoding="utf-8") as handle:
+              handle.write("shard_matrix="+json.dumps(list(range(shards)),separators=(",",":"))+"\n")
+              handle.write(f"shard_count={shards}\n")
+              handle.write(f"pair_key={learn}-{meaning}\n")
+          PY
+
+      - name: Resolve OPUS native download URLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p opus reports
+          python3 - "${{ inputs.learn }}" "${{ inputs.meaning }}" <<'PY' > reports/opus-urls.tsv
+          import json,sys,urllib.parse,urllib.request
+          learn,meaning=(x.strip().lower() for x in sys.argv[1:3])
+          opus_code={"ja":"jp","zh":"zhs"}
+          source=opus_code.get(learn,learn); target=opus_code.get(meaning,meaning)
+          base='https://opus.nlpl.eu/opusapi/'
+          query=urllib.parse.urlencode({
+              'corpus':'GlobalVoices','source':source,'target':target,
+              'preprocessing':'xml','version':'v2018q4'
+          })
+          with urllib.request.urlopen(base+'?'+query, timeout=60) as r:
+              data=json.load(r)
+          rows=data.get('corpora') or []
+          if not rows:
+              raise SystemExit(f'OPUS has no GlobalVoices XML alignment for {source}-{target}')
+          xml_url=rows[0]['url']; marker='/xml/'
+          if marker not in xml_url:
+              raise SystemExit(f'unexpected OPUS XML URL: {xml_url}')
+          root=xml_url.split(marker,1)[0]
+          print('iknaLearn\t'+learn); print('iknaMeaning\t'+meaning)
+          print('opusLearn\t'+source); print('opusMeaning\t'+target)
+          print('alignment\t'+xml_url)
+          print('contextArchive\t'+root+'/raw/'+source+'.zip')
+          print('meaningArchive\t'+root+'/raw/'+target+'.zip')
+          PY
+          cat reports/opus-urls.tsv
+
+      - name: Download XCES and native XML archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          alignment_url=$(awk -F'\t' '$1=="alignment"{print $2}' reports/opus-urls.tsv)
+          context_url=$(awk -F'\t' '$1=="contextArchive"{print $2}' reports/opus-urls.tsv)
+          meaning_url=$(awk -F'\t' '$1=="meaningArchive"{print $2}' reports/opus-urls.tsv)
+          bash tools/ci/fetch-url.sh "$alignment_url" opus/alignment.xml.gz
+          bash tools/ci/fetch-url.sh "$context_url" opus/context-raw.zip
+          bash tools/ci/fetch-url.sh "$meaning_url" opus/meaning-raw.zip
+          gzip -t opus/alignment.xml.gz
+          unzip -tq opus/context-raw.zip >/dev/null
+          unzip -tq opus/meaning-raw.zip >/dev/null
+          sha256sum opus/alignment.xml.gz opus/context-raw.zip opus/meaning-raw.zip > reports/opus-native-sha256.txt
+
+      - name: Resolve XCES sentence ids against native XML
+        shell: bash
+        run: |
+          set -euo pipefail
+          opus_learn=$(awk -F'\t' '$1=="opusLearn"{print $2}' reports/opus-urls.tsv)
+          opus_meaning=$(awk -F'\t' '$1=="opusMeaning"{print $2}' reports/opus-urls.tsv)
+          python3 tools/catalog/globalvoices_native.py \
+            --xces opus/alignment.xml.gz \
+            --context-archive opus/context-raw.zip \
+            --meaning-archive opus/meaning-raw.zip \
+            --context-lang "$opus_learn" --meaning-lang "$opus_meaning" \
+            --learn-out reports/world-native.learn.txt.gz \
+            --meaning-out reports/world-native.meaning.txt.gz \
+            --alignment-map reports/globalvoices-alignment-map.jsonl.gz \
+            --json reports/WORLD-NATIVE-XCES.json \
+            --markdown reports/WORLD-NATIVE-XCES.md \
+            --samples reports/WORLD-NATIVE-SAMPLES.md
+          cat reports/WORLD-NATIVE-XCES.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload manifest input
+        uses: actions/upload-artifact@v6
+        with:
+          name: world-provenance-manifest-input
+          path: reports/globalvoices-alignment-map.jsonl.gz
+          retention-days: 7
+          overwrite: true
+
+      - name: Upload native evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: world-provenance-native
+          path: |
+            reports/opus-urls.tsv
+            reports/opus-native-sha256.txt
+            reports/WORLD-NATIVE-XCES.json
+            reports/WORLD-NATIVE-XCES.md
+            reports/WORLD-NATIVE-SAMPLES.md
+            reports/globalvoices-alignment-map.jsonl.gz
+            reports/world-native.learn.txt.gz
+            reports/world-native.meaning.txt.gz
+          retention-days: 7
+          overwrite: true
+
+  manifest-shard:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 16
+      matrix:
+        shard: ${{ fromJSON(needs.prepare.outputs.shard_matrix) }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v5
+        with:
+          name: world-provenance-manifest-input
+          path: reports
+
+      - name: Restore resumable provenance cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/globalvoices/${{ needs.prepare.outputs.pair_key }}/shard-${{ matrix.shard }}.jsonl
+          key: gv-v2018q4-${{ needs.prepare.outputs.pair_key }}-s${{ needs.prepare.outputs.shard_count }}-e${{ inputs.cache_epoch }}-shard-${{ matrix.shard }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          restore-keys: |
+            gv-v2018q4-${{ needs.prepare.outputs.pair_key }}-s${{ needs.prepare.outputs.shard_count }}-e${{ inputs.cache_epoch }}-shard-${{ matrix.shard }}-
+
+      - name: Verify article manifest shard
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p reports/shards ".cache/globalvoices/${{ needs.prepare.outputs.pair_key }}"
+          printf -v sid '%03d' "${{ matrix.shard }}"
+          python3 tools/catalog/globalvoices_manifest.py \
+            --alignment-map reports/globalvoices-alignment-map.jsonl.gz \
+            --out "reports/shards/article-manifest-shard-${sid}.jsonl" \
+            --json "reports/shards/WORLD-ARTICLE-MANIFEST-SHARD-${sid}.json" \
+            --markdown "reports/shards/WORLD-ARTICLE-MANIFEST-SHARD-${sid}.md" \
+            --max-documents 0 \
+            --workers "${{ inputs.workers_per_shard }}" \
+            --shard-count "${{ needs.prepare.outputs.shard_count }}" \
+            --shard-index "${{ matrix.shard }}" \
+            --cache ".cache/globalvoices/${{ needs.prepare.outputs.pair_key }}/shard-${{ matrix.shard }}.jsonl"
+          cat "reports/shards/WORLD-ARTICLE-MANIFEST-SHARD-${sid}.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload shard evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: world-provenance-shard-${{ matrix.shard }}
+          path: reports/shards/
+          if-no-files-found: warn
+          retention-days: 7
+          overwrite: true
+
+  merge:
+    needs: [prepare, manifest-shard]
+    if: ${{ always() && needs.prepare.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v5
+        with:
+          name: world-provenance-native
+          path: reports
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: world-provenance-shard-*
+          path: reports/shards
+          merge-multiple: true
+
+      - name: Merge deterministic verified manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/catalog/globalvoices_manifest_merge.py \
+            --alignment-map reports/globalvoices-alignment-map.jsonl.gz \
+            --manifest-glob 'reports/shards/article-manifest-shard-*.jsonl' \
+            --report-glob 'reports/shards/WORLD-ARTICLE-MANIFEST-SHARD-*.json' \
+            --expected-shards "${{ needs.prepare.outputs.shard_count }}" \
+            --out reports/article-manifest.jsonl \
+            --json reports/WORLD-ARTICLE-MANIFEST-FULL.json \
+            --markdown reports/WORLD-ARTICLE-MANIFEST-FULL.md
+          cat reports/WORLD-ARTICLE-MANIFEST-FULL.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Resolve article attribution without guessing
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/catalog/globalvoices_attribution.py \
+            --alignment-map reports/globalvoices-alignment-map.jsonl.gz \
+            --article-manifest reports/article-manifest.jsonl \
+            --out reports/globalvoices-attribution-original-lines.jsonl.gz \
+            --learn-file reports/world-native.learn.txt.gz \
+            --meaning-file reports/world-native.meaning.txt.gz \
+            --filtered-learn reports/world.learn.txt.gz \
+            --filtered-meaning reports/world.meaning.txt.gz \
+            --filtered-attribution reports/world-attribution.jsonl.gz \
+            --json reports/WORLD-ATTRIBUTION.json \
+            --markdown reports/WORLD-ATTRIBUTION.md
+          printf '\n---\n\n' >> "$GITHUB_STEP_SUMMARY"
+          cat reports/WORLD-ATTRIBUTION.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Normalize fully attributed World rows
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/catalog/ingest_sources.py globalvoices \
+            --learn-file reports/world.learn.txt.gz \
+            --meaning-file reports/world.meaning.txt.gz \
+            --attribution-file reports/world-attribution.jsonl.gz \
+            --learn "${{ inputs.learn }}" --meaning "${{ inputs.meaning }}" \
+            --source-version v2018q4 \
+            --out reports/world-candidates.jsonl.gz
+
+      - name: Keep full Part 9 evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: catalogue-v2-world-full-provenance
+          path: |
+            reports/opus-urls.tsv
+            reports/opus-native-sha256.txt
+            reports/WORLD-NATIVE-XCES.json
+            reports/WORLD-NATIVE-XCES.md
+            reports/WORLD-NATIVE-SAMPLES.md
+            reports/WORLD-ARTICLE-MANIFEST-FULL.json
+            reports/WORLD-ARTICLE-MANIFEST-FULL.md
+            reports/WORLD-ATTRIBUTION.json
+            reports/WORLD-ATTRIBUTION.md
+            reports/article-manifest.jsonl
+            reports/globalvoices-attribution-original-lines.jsonl.gz
+            reports/world-candidates.jsonl.gz
+          if-no-files-found: warn
+          retention-days: 14
+          overwrite: true
+
+      - name: Require complete provenance scan
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          report=json.load(open('reports/WORLD-ARTICLE-MANIFEST-FULL.json',encoding='utf-8'))
+          if not report.get('completeScan'):
+              s=report.get('summary',{})
+              raise SystemExit(
+                  'Full World provenance scan is incomplete: '
+                  f"missingShards={s.get('missingShards',0)}, "
+                  f"unattemptedDocuments={s.get('unattemptedDocuments',0)}, "
+                  f"retryableUnresolvedDocuments={s.get('retryableUnresolvedDocuments',0)}. "
+                  'Rerun the workflow; verified/stable outcomes will be restored from cache.'
+              )
+          print('Full World provenance scan complete and publication-safe.')
+          PY

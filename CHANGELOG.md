@@ -29,6 +29,7 @@ words mean and what a number promises inside an epoch is written down once, in
 - Tightened the experimental MASSIVE adapter for future re-evaluation: localized rows now require positive slot judgments, consistent `annot_utt`/`slot_method` metadata, and reject upstream slot values marked `localization`, preventing locally substituted people/places/artists from being treated as literal bilingual equivalents.
 - Added a fail-closed Global Voices live article-manifest builder. OPUS document date/slug identity may propose one page, but a manifest row is written only after the page is fetched, the resolved/canonical URL remains on `globalvoices.org`, and credited contributor metadata is present.
 - Recorded the decisions and evidence in `docs/PARTS-6-9-DECISION-RECORD.md`; the World workflow now builds bounded live attribution evidence automatically when no pre-audited manifest override is supplied.
+- Confirmed the World gate on live data: the bounded en-es run verified 300/400 selected Global Voices documents and retained 20,881 fully attributed aligned rows. Added a separate full-provenance workflow that partitions all referenced documents into stable SHA-256 shards, restores per-shard caches across reruns, retries transport failures, merges manifests deterministically, and fails the completeness gate until every document has a final provenance outcome.
 
 ### Parts 8-10 direct Knowledge, World provenance and deterministic selection
 

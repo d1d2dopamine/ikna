@@ -219,7 +219,7 @@ than the convenience of an English-hub build.
 
 ### Part 9 - World attribution build
 
-**Implementation status:** native XCES identity is solved: the latest diagnostic resolved 752,051 of 752,052 aligned rows against the native OPUS XML archives. `globalvoices_manifest.py` now turns an OPUS date/slug document id into one URL candidate and verifies that candidate against the live Global Voices page, requiring a Global Voices canonical URL and credited contributor metadata. The existing attribution resolver remains fail-closed and filters every unresolved document. A bounded live-manifest rerun is the remaining Part 9 evidence step before Part 11.
+**Implementation status:** native XCES identity is solved: 752,051 of 752,052 diagnostic aligned rows resolve against the native OPUS XML archives. The bounded live article-manifest run verified 300/400 selected documents and produced 20,881 fully attributed en-es rows, proving the fail-closed gate end-to-end. `catalogue v2 world full provenance` now performs the remaining all-document pass as deterministic SHA-256 shards with resumable caches and a strict merge/completeness gate. Part 11 waits for that full scan, not for further provenance architecture work.
 
 **Question:** can Global Voices become real production material without weakening provenance?
 

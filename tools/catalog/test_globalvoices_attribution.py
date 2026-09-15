@@ -9,7 +9,8 @@ from pathlib import Path
 
 from globalvoices_attribution import resolve, valid_globalvoices_url
 from globalvoices_native import extract_native
-from globalvoices_manifest import FetchResult, build_manifest, candidate_url, parse_article_metadata, resolve_document
+from globalvoices_manifest import FetchResult, build_manifest, candidate_url, parse_article_metadata, resolve_document, shard_index_for_document
+from globalvoices_manifest_merge import merge as merge_manifest_shards
 from globalvoices_xces_map import extract
 from ingest.model import Origin
 from ingest.registry import SourceRegistry
@@ -107,6 +108,48 @@ def main() -> int:
         assert len(built) == 2
         assert built_report["publicationSafe"] is True
         assert built_report["summary"]["resolvedDocuments"] == 2
+
+        # Full provenance builds shard by a stable SHA-256 mapping and reuse a
+        # JSONL cache. A second run must perform no live fetches for cached
+        # verified documents.
+        cache = root / "manifest-cache.jsonl"
+        fetch_calls = 0
+        def counted_fetch(url: str) -> FetchResult:
+            nonlocal fetch_calls
+            fetch_calls += 1
+            return fixture_fetch(url)
+        first, first_report = build_manifest(
+            str(manifest_map), workers=1, fetcher=counted_fetch, cache_path=str(cache)
+        )
+        assert len(first) == 2 and fetch_calls == 2
+        fetch_calls = 0
+        second, second_report = build_manifest(
+            str(manifest_map), workers=1, fetcher=counted_fetch, cache_path=str(cache)
+        )
+        assert second == first and fetch_calls == 0
+        assert second_report["summary"]["cacheHits"] == 2
+        assert second_report["summary"]["networkAttempts"] == 0
+
+        assignments = {doc: shard_index_for_document(doc, 2) for doc in (spanish_doc, "en/2012_07_06_example_.xml")}
+        assert set(assignments.values()) <= {0, 1}
+        shard_rows = []
+        shard_reports = []
+        for index in range(2):
+            rows, report = build_manifest(
+                str(manifest_map), workers=1, fetcher=fixture_fetch, shard_count=2, shard_index=index
+            )
+            mp = root / f"shard-{index}.jsonl"
+            rp = root / f"shard-{index}.json"
+            mp.write_text("".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n" for row in rows), encoding="utf-8")
+            rp.write_text(json.dumps(report), encoding="utf-8")
+            shard_rows.append(str(mp))
+            shard_reports.append(str(rp))
+        merged, merged_report = merge_manifest_shards(
+            str(manifest_map), shard_rows, shard_reports, expected_shards=2
+        )
+        assert len(merged) == 2
+        assert merged_report["completeScan"] is True
+        assert merged_report["summary"]["verifiedAlignmentRows"] == 1
 
         xces = root / "pair.xml"
         xces.write_text(

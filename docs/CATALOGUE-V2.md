@@ -141,7 +141,11 @@ uses the date/slug encoded by a document id only to propose one Global Voices pa
 then verifies the live page, canonical URL and contributor metadata. The resulting
 manifest is consumed by `globalvoices_attribution.py`, which reports unresolved
 document ids and filters aligned text so the existing adapter sees only fully
-attributed rows. No URL or author is guessed from sentence text.
+attributed rows. No URL or author is guessed from sentence text. The bounded live
+run retained 20,881 fully attributed en-es rows. The all-document pass is split by
+stable SHA-256 document shards, resumes from per-shard caches, and is merged by
+`globalvoices_manifest_merge.py`; Part 11 requires that merge to report a complete
+scan, while unresolved documents remain excluded from the publishable subset.
 
 Part 10 is deliberately non-publishing until the full evidence run is reviewed.
 `selection_experiment.py` stages candidates on disk, builds frequency ranks from

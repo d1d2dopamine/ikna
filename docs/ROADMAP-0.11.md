@@ -131,7 +131,7 @@ Purpose: remove the English-hub convenience restriction from the Knowledge evide
 
 ### Part 9 - World attribution build
 
-Status: native XCES mapping is proven (752,051/752,052 diagnostic rows resolved). A live article-manifest builder and strict Global Voices URL/contributor gate are implemented; bounded live attribution coverage is the remaining evidence run.
+Status: native XCES mapping is proven (752,051/752,052 diagnostic rows resolved), and the bounded live gate produced 20,881 fully attributed en-es rows from 300 verified documents. The remaining step is the sharded/resumable all-document provenance scan before Part 11.
 
 Purpose: make Global Voices publishable without weakening the existing provenance contract.
 

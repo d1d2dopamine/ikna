@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import gzip
+import hashlib
 import html
 import json
 import re
@@ -66,6 +67,71 @@ def normalize_document(value: str) -> str:
     while value.startswith("../"):
         value = value[3:]
     return re.sub(r"/+", "/", value).lstrip("/")
+
+
+CACHE_VERSION = 1
+
+
+def shard_index_for_document(document: str, shard_count: int) -> int:
+    """Return a stable shard index independent of Python hash randomization."""
+    if shard_count < 1:
+        raise ValueError("shard_count must be >= 1")
+    digest = hashlib.sha256(normalize_document(document).encode("utf-8")).digest()
+    return int.from_bytes(digest[:8], "big") % shard_count
+
+
+def _cacheable_unresolved(reason: str) -> bool:
+    # Transport errors are deliberately retried on the next run. Structural
+    # provenance failures are stable enough to cache and keep the full scan
+    # resumable without hammering Global Voices again.
+    return not reason.startswith("fetch-error:")
+
+
+def load_cache(path: str | None) -> dict[str, dict[str, Any]]:
+    if not path or not Path(path).exists():
+        return {}
+    out: dict[str, dict[str, Any]] = {}
+    with _open_text(path) as handle:
+        for physical, line in enumerate(handle, start=1):
+            line = line.strip()
+            if not line:
+                continue
+            value = json.loads(line)
+            if value.get("cacheVersion") != CACHE_VERSION:
+                continue
+            document = normalize_document(str(value.get("document") or ""))
+            outcome = value.get("outcome")
+            if not document or outcome not in {"resolved", "unresolved"}:
+                raise ValueError(f"{path}:{physical}: invalid cache record")
+            if outcome == "resolved":
+                row = value.get("row")
+                if not isinstance(row, dict) or normalize_document(str(row.get("document") or "")) != document:
+                    raise ValueError(f"{path}:{physical}: invalid resolved cache row")
+                if not valid_globalvoices_url(str(row.get("articleUrl") or "")):
+                    raise ValueError(f"{path}:{physical}: invalid cached articleUrl")
+                contributors = row.get("contributors")
+                if not isinstance(contributors, list) or not contributors:
+                    raise ValueError(f"{path}:{physical}: invalid cached contributors")
+            else:
+                reason = value.get("reason")
+                if not isinstance(reason, str) or not reason:
+                    raise ValueError(f"{path}:{physical}: invalid unresolved cache reason")
+            if document in out:
+                raise ValueError(f"{path}:{physical}: duplicate cache document {document}")
+            out[document] = value
+    return out
+
+
+def write_cache(path: str | None, records: dict[str, dict[str, Any]]) -> None:
+    if not path:
+        return
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temp = target.with_suffix(target.suffix + ".tmp")
+    with open(temp, "w", encoding="utf-8", newline="") as handle:
+        for document in sorted(records):
+            handle.write(json.dumps(records[document], ensure_ascii=False, sort_keys=True) + "\n")
+    temp.replace(target)
 
 
 def candidate_url(document: str) -> str | None:
@@ -313,8 +379,16 @@ def build_manifest(
     *,
     max_documents: int = 0,
     workers: int = 8,
+    shard_count: int = 1,
+    shard_index: int = 0,
+    cache_path: str | None = None,
     fetcher: Callable[[str], FetchResult] = fetch_page,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    if shard_count < 1:
+        raise ValueError("shard_count must be >= 1")
+    if shard_index < 0 or shard_index >= shard_count:
+        raise ValueError("shard_index must be in 0..shard_count-1")
+
     counts, pair_counts = alignment_inventory(alignment_map)
     ranked = sorted(counts, key=lambda doc: (-counts[doc], doc))
     if max_documents > 0:
@@ -330,36 +404,70 @@ def build_manifest(
             selected_set.update(additions)
             if len(selected_set) >= max_documents:
                 break
-        selected = sorted(selected_set, key=lambda doc: (-counts[doc], doc))
+        bounded = sorted(selected_set, key=lambda doc: (-counts[doc], doc))
     else:
-        selected = ranked
+        bounded = ranked
+
+    selected = [
+        doc for doc in bounded
+        if shard_index_for_document(doc, shard_count) == shard_index
+    ]
+    selected_global = set(bounded)
     rows: list[dict[str, Any]] = []
     unresolved: list[dict[str, Any]] = []
     reasons = Counter()
+    cache = load_cache(cache_path)
+    cache_hits = 0
+    network_attempts = 0
+    retryable_unresolved = 0
 
     def one(document: str):
+        cached = cache.get(document)
+        if cached is not None:
+            if cached["outcome"] == "resolved":
+                return document, dict(cached["row"]), "resolved", True
+            return document, None, str(cached["reason"]), True
         row, reason = resolve_document(document, fetcher=fetcher)
-        return document, row, reason
+        return document, row, reason, False
+
+    def consume(document: str, row: dict[str, Any] | None, reason: str, from_cache: bool) -> None:
+        nonlocal cache_hits, network_attempts, retryable_unresolved
+        if from_cache:
+            cache_hits += 1
+        else:
+            network_attempts += 1
+        reasons[reason] += 1
+        if row is None:
+            unresolved.append({"document": document, "affectedRows": counts[document], "reason": reason})
+            if reason.startswith("fetch-error:"):
+                retryable_unresolved += 1
+            elif not from_cache and _cacheable_unresolved(reason):
+                cache[document] = {
+                    "cacheVersion": CACHE_VERSION,
+                    "document": document,
+                    "outcome": "unresolved",
+                    "reason": reason,
+                }
+        else:
+            rows.append(row)
+            if not from_cache:
+                cache[document] = {
+                    "cacheVersion": CACHE_VERSION,
+                    "document": document,
+                    "outcome": "resolved",
+                    "row": row,
+                }
 
     if workers <= 1:
-        results = (one(document) for document in selected)
-        for document, row, reason in results:
-            reasons[reason] += 1
-            if row is None:
-                unresolved.append({"document": document, "affectedRows": counts[document], "reason": reason})
-            else:
-                rows.append(row)
+        for result in (one(document) for document in selected):
+            consume(*result)
     else:
         with ThreadPoolExecutor(max_workers=workers) as executor:
             futures = {executor.submit(one, document): document for document in selected}
             for future in as_completed(futures):
-                document, row, reason = future.result()
-                reasons[reason] += 1
-                if row is None:
-                    unresolved.append({"document": document, "affectedRows": counts[document], "reason": reason})
-                else:
-                    rows.append(row)
+                consume(*future.result())
 
+    write_cache(cache_path, cache)
     rows.sort(key=lambda row: row["document"])
     unresolved.sort(key=lambda row: (-row["affectedRows"], row["document"]))
     selected_docs = set(selected)
@@ -368,27 +476,42 @@ def build_manifest(
         affected for (left, right), affected in pair_counts.items()
         if left in selected_docs and right in selected_docs
     )
+    globally_selected_alignment_rows = sum(
+        affected for (left, right), affected in pair_counts.items()
+        if left in selected_global and right in selected_global
+    )
     verified_alignment_rows = sum(
         affected for (left, right), affected in pair_counts.items()
         if left in resolved_docs and right in resolved_docs
     )
+    shard_complete = len(selected) == len(rows) + len(unresolved)
     report = {
-        "reportVersion": 1,
+        "reportVersion": 2,
         "part": 9,
-        "status": "pass" if len(rows) == len(selected) and len(selected) == len(ranked) else "partial-evidence",
-        "publicationSafe": len(rows) == len(ranked),
+        "status": "pass" if shard_complete and retryable_unresolved == 0 else "retry-required",
+        "publicationSafe": True,
+        "completeShardScan": shard_complete and retryable_unresolved == 0,
+        "shard": {"index": shard_index, "count": shard_count},
         "summary": {
             "alignmentDocuments": len(ranked),
+            "globallySelectedDocuments": len(bounded),
             "selectedDocuments": len(selected),
             "resolvedDocuments": len(rows),
             "unresolvedSelectedDocuments": len(unresolved),
-            "deferredDocuments": len(ranked) - len(selected),
-            "selectedAlignmentRows": selected_alignment_rows,
-            "verifiedAlignmentRows": verified_alignment_rows,
+            "retryableUnresolvedDocuments": retryable_unresolved,
+            "deferredDocuments": len(ranked) - len(bounded),
+            "selectedAlignmentRowsWithinShard": selected_alignment_rows,
+            "globallySelectedAlignmentRows": globally_selected_alignment_rows,
+            "verifiedAlignmentRowsWithinShard": verified_alignment_rows,
             "resolvedAffectedRowReferences": sum(counts[row["document"]] for row in rows),
+            "cacheHits": cache_hits,
+            "networkAttempts": network_attempts,
+            "cacheEntries": len(cache),
         },
         "reasons": dict(sorted(reasons.items())),
-        "unresolved": unresolved[:500],
+        # Full shard reports retain every unresolved document so the deterministic
+        # merger can prove that no alignment document was silently skipped.
+        "unresolved": unresolved,
     }
     return rows, report
 
@@ -401,12 +524,14 @@ def markdown(report: dict[str, Any]) -> str:
         f"Status: **{report['status']}**",
         "",
         f"- documents referenced by alignment: **{s['alignmentDocuments']:,}**",
-        f"- documents selected for live verification: **{s['selectedDocuments']:,}**",
+        f"- documents selected globally: **{s.get('globallySelectedDocuments', s['selectedDocuments']):,}**",
+        f"- documents assigned to this shard: **{s['selectedDocuments']:,}**",
         f"- verified document/article mappings: **{s['resolvedDocuments']:,}**",
         f"- unresolved selected documents: **{s['unresolvedSelectedDocuments']:,}**",
+        f"- retryable transport failures: **{s.get('retryableUnresolvedDocuments', 0):,}**",
         f"- deferred by diagnostic bound: **{s['deferredDocuments']:,}**",
-        f"- aligned rows covered by selected document pairs: **{s['selectedAlignmentRows']:,}**",
-        f"- aligned rows with both documents verified: **{s['verifiedAlignmentRows']:,}**",
+        f"- globally selected aligned rows: **{s.get('globallySelectedAlignmentRows', 0):,}**",
+        f"- cache hits / network attempts: **{s.get('cacheHits', 0):,} / {s.get('networkAttempts', 0):,}**",
         "",
         "A document enters the manifest only after its date/slug-derived Global Voices URL is fetched, the resolved/canonical URL stays on globalvoices.org, and at least one credited contributor is recovered. Failures remain rejected evidence.",
     ]
@@ -430,6 +555,9 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("--markdown", required=True)
     ap.add_argument("--max-documents", type=int, default=0, help="0 = verify every referenced document")
     ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--shard-count", type=int, default=1)
+    ap.add_argument("--shard-index", type=int, default=0)
+    ap.add_argument("--cache", help="resumable JSONL cache; stable failures and verified rows are reused")
     return ap
 
 
@@ -439,10 +567,17 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("--max-documents must be non-negative")
     if args.workers < 1 or args.workers > 32:
         raise SystemExit("--workers must be in 1..32")
+    if args.shard_count < 1 or args.shard_count > 256:
+        raise SystemExit("--shard-count must be in 1..256")
+    if args.shard_index < 0 or args.shard_index >= args.shard_count:
+        raise SystemExit("--shard-index must be in 0..shard-count-1")
     rows, report = build_manifest(
         args.alignment_map,
         max_documents=args.max_documents,
         workers=args.workers,
+        shard_count=args.shard_count,
+        shard_index=args.shard_index,
+        cache_path=args.cache,
     )
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     with open(args.out, "w", encoding="utf-8", newline="") as handle:
