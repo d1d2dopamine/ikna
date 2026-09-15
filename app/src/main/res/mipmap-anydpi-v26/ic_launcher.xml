@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    The launcher icon on Android 8 and later: two layers the system moves,
-    masks and clips as it likes.
-
-    The foreground is the supplied square brand artwork, resampled as a raster.
-    It is never traced into vector paths. The system applies its launcher mask
-    around the complete dark plate.
+    Android 8+ adaptive launcher icon. The patterned field and the transparent
+    wordmark are separate raster layers. Keeping the wordmark inside the adaptive
+    safe zone prevents launcher masks from clipping it or shifting it off-centre.
 -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@color/ic_launcher_background" />
+    <background android:drawable="@drawable/ic_launcher_background_art" />
     <foreground android:drawable="@drawable/ic_launcher_wordmark" />
 </adaptive-icon>

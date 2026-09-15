@@ -2,8 +2,8 @@
 <!--
     Android 12 and later draw the launch screen themselves and ignore
     windowBackground for it. On those versions the system splash is told to use
-    the same mark and the same field as the drawable in res/drawable, so the two
-    code paths look identical and nobody has to own a second design.
+    the same centred transparent wordmark foreground used by the legacy launch screen.
+    The launcher background is deliberately not baked into the splash drawable.
 -->
 <resources>
     <style name="Theme.Ikna.Launch" parent="Theme.Ikna">
