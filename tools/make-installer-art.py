@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Build the NSIS bitmaps and standalone pixel icon from ikna artwork.
 
-The installer does not maintain a second logo. Its letters come from the same
-alpha artwork Compose tints in the application; the square above the i is drawn
-from the same measured proportions and in the default Ink palette's accent.
+The installer does not maintain a second logo. It uses the same two transparent
+wordmark masks as Compose: the letterforms are tinted with the default Ink
+palette's ink colour and the rounded cap above the i is tinted with its accent.
 
 Outputs:
   desktop/installer/sidebar.bmp  164 x 314, welcome and finish pages
@@ -31,14 +31,13 @@ except ImportError:
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "shared/src/desktopMain/resources/drawable/ikna_wordmark.png"
+ACCENT_SOURCE = ROOT / "shared/src/desktopMain/resources/drawable/ikna_wordmark_accent.png"
 OUT = ROOT / "desktop/installer"
 DOCS = ROOT / "docs"
 BACKGROUND = (0xD0, 0xD3, 0xD9)
 INK = (0x0E, 0x15, 0x26)
 MUTED = (0x48, 0x51, 0x62)
 ACCENT = (0x93, 0x2D, 0x19)
-DOT_WIDTH = 0.077982
-DOT_HEIGHT = 0.198198
 PIXEL_CELLS = {
     (0, 0), (1, 0), (2, 0), (4, 0), (5, 0),
     (0, 1), (2, 1), (3, 1), (5, 1),
@@ -51,19 +50,23 @@ PIXEL_CELLS = {
 PIXEL_HIGHLIGHTS = {(5, 0), (4, 2), (0, 3), (2, 6)}
 
 
+def tinted_layer(source: Image.Image, size: tuple[int, int], color: tuple[int, int, int]) -> Image.Image:
+    resized = source.resize(size, Image.Resampling.LANCZOS)
+    layer = Image.new("RGBA", size, (*color, 0))
+    layer.putalpha(resized.getchannel("A"))
+    return layer
+
+
 def tinted_wordmark(width: int) -> Image.Image:
-    source = Image.open(SOURCE).convert("RGBA")
-    height = round(width / 2.454955)
-    resized = source.resize((width, height), Image.Resampling.LANCZOS)
-    alpha = resized.getchannel("A")
-    mark = Image.new("RGBA", resized.size, (*INK, 0))
-    mark.putalpha(alpha)
-    draw = ImageDraw.Draw(mark)
-    draw.rectangle(
-        (0, 0, max(1, round(width * DOT_WIDTH)) - 1,
-         max(1, round(height * DOT_HEIGHT)) - 1),
-        fill=(*ACCENT, 255),
-    )
+    letters = Image.open(SOURCE).convert("RGBA")
+    accent = Image.open(ACCENT_SOURCE).convert("RGBA")
+    if letters.size != accent.size:
+        sys.exit(f"wordmark masks disagree: {letters.size} vs {accent.size}")
+    height = max(1, round(width * letters.height / letters.width))
+    size = (width, height)
+    mark = Image.new("RGBA", size, (0, 0, 0, 0))
+    mark.alpha_composite(tinted_layer(letters, size, INK))
+    mark.alpha_composite(tinted_layer(accent, size, ACCENT))
     return mark
 
 

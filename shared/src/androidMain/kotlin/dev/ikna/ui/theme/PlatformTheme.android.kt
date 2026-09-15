@@ -12,3 +12,6 @@ actual fun iknaFontFamily(file: File): FontFamily = FontFamily(Font(file))
 
 @Composable
 actual fun iknaWordmarkPainter(): Painter = painterResource(R.drawable.ikna_wordmark)
+
+@Composable
+actual fun iknaWordmarkAccentPainter(): Painter = painterResource(R.drawable.ikna_wordmark_accent)

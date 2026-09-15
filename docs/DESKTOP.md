@@ -55,10 +55,11 @@ Two facts make this much cheaper than it looks:
 - **The interface text is Kotlin, not resources.** All seven translations live in
   `ui/text/Strings*.kt` as 568 keys per table. There is no `values-ru/strings.xml`
   to reimplement, and `S.t("dp.014")` works unchanged on a desktop.
-- **Two drawables are used, in total.** `R.drawable.ikna_wordmark` in
-  `ui/theme/Wordmark.kt` and `R.drawable.ic_notification` in
-  `work/ReminderWorker.kt`. Everything else in `res/drawable` is a launcher
-  icon or a widget background. The rest of the interface is drawn in code.
+- **The branded wordmark uses two tint masks.** `R.drawable.ikna_wordmark` and
+  `R.drawable.ikna_wordmark_accent` are layered in `ui/theme/Wordmark.kt`; the
+  only other interface drawable is `R.drawable.ic_notification` in
+  `work/ReminderWorker.kt`. Everything else in `res/drawable` is a launcher icon
+  or a widget background. The rest of the interface is drawn in code.
 
 Of the 53 test files, three touch an Android type at all, and only for
 `Color` and `TweenSpec`. The test suite moves to `commonTest` nearly for free,

@@ -22,12 +22,18 @@ private object NothingPainter : Painter() {
     override fun DrawScope.onDraw() = Unit
 }
 
-private fun loadWordmark(): Painter {
-    val stream = WordmarkAnchor.javaClass.getResourceAsStream("/drawable/ikna_wordmark.png")
-        ?: return NothingPainter
+private fun loadWordmark(resource: String): Painter {
+    val stream = WordmarkAnchor.javaClass.getResourceAsStream(resource) ?: return NothingPainter
     val image = runCatching { stream.use { ImageIO.read(it) } }.getOrNull() ?: return NothingPainter
     return BitmapPainter(image.toComposeImageBitmap())
 }
 
 @Composable
-actual fun iknaWordmarkPainter(): Painter = remember { loadWordmark() }
+actual fun iknaWordmarkPainter(): Painter = remember {
+    loadWordmark("/drawable/ikna_wordmark.png")
+}
+
+@Composable
+actual fun iknaWordmarkAccentPainter(): Painter = remember {
+    loadWordmark("/drawable/ikna_wordmark_accent.png")
+}

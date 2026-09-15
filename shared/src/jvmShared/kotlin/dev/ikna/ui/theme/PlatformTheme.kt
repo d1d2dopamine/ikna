@@ -12,8 +12,12 @@ import java.io.File
 expect fun iknaFontFamily(file: File): FontFamily
 
 /**
- * The wordmark bitmap. A drawable resource on Android, a classpath resource on
- * the desktop; Wordmark.kt tints and draws it identically either way.
+ * Transparent masks for the in-app wordmark. Android loads drawable resources;
+ * desktop loads the same PNGs from the classpath. Wordmark.kt applies the active
+ * palette to them identically on both platforms.
  */
 @Composable
 expect fun iknaWordmarkPainter(): Painter
+
+@Composable
+expect fun iknaWordmarkAccentPainter(): Painter
