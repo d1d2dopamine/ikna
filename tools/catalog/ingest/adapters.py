@@ -269,14 +269,14 @@ def _massive_data_dir(directory: str) -> str:
 
 
 def massive_judgment_counts(value: dict) -> dict[str, int]:
-    """Return inspectable quality-vote counts from one MASSIVE source row.
+    """Return inspectable human-review vote counts from one MASSIVE row.
 
-    MASSIVE asks reviewers of localized rows whether the utterance sounds
-    natural, is spelled correctly, is in the target language and matches the
-    requested intent. The adapter uses those human judgments as a conservative
-    pre-filter; the original en-US SLURP seed is unjudged by design. The later
-    ikna phrase sieve still decides whether the utterance contains a useful
-    learning target.
+    For ikna, a localized utterance is useful only if reviewers confirm not just
+    naturalness/language/intent but also the slot annotations.  MASSIVE's slot
+    judgments are important because slot-bearing utterances can be *localized*
+    to a different named entity, place, date, artist, etc. while preserving the
+    NLU intent.  That is valid for MASSIVE, but it is not necessarily a literal
+    translation suitable for a language-learning context pair.
     """
     judgments = value.get("judgments")
     if not isinstance(judgments, list):
@@ -287,6 +287,7 @@ def massive_judgment_counts(value: dict) -> dict[str, int]:
         "spelling": 0,
         "targetLanguage": 0,
         "intent": 0,
+        "slots": 0,
     }
     for judgment in judgments:
         if not isinstance(judgment, dict):
@@ -296,6 +297,7 @@ def massive_judgment_counts(value: dict) -> dict[str, int]:
         spelling = judgment.get("spelling_score")
         language = judgment.get("language_identification")
         intent = judgment.get("intent_score")
+        slots = judgment.get("slots_score")
         if isinstance(grammar, (int, float)) and grammar >= 3:
             counts["natural"] += 1
         if isinstance(spelling, (int, float)) and spelling >= 2:
@@ -304,7 +306,44 @@ def massive_judgment_counts(value: dict) -> dict[str, int]:
             counts["targetLanguage"] += 1
         if intent in {1, 2, "1", "2"}:
             counts["intent"] += 1
+        # MASSIVE: 1 = all annotated terms match their slot categories;
+        # 2 = utterance has no slots.  Both are acceptable confirmations.
+        if slots in {1, 2, "1", "2"}:
+            counts["slots"] += 1
     return counts
+
+
+_MASSIVE_SLOT = re.compile(r"\[\s*([^:\]\[]+?)\s*:\s*[^\]]*\]")
+
+
+def massive_slot_metadata(value: dict) -> tuple[list[str], list[dict], str | None]:
+    """Return annotated slot labels, normalized slot methods and an error reason.
+
+    Localized MASSIVE rows are required to keep their slot metadata internally
+    consistent.  We deliberately do not infer or repair missing slot methods:
+    record-level uncertainty is safer to reject than to turn into a false
+    bilingual equivalence.
+    """
+    annotated = str(value.get("annot_utt") or "")
+    labels = [match.group(1).strip() for match in _MASSIVE_SLOT.finditer(annotated)]
+    raw_methods = value.get("slot_method")
+    if not isinstance(raw_methods, list):
+        return labels, [], "missing-slot-method"
+    methods: list[dict] = []
+    for item in raw_methods:
+        if not isinstance(item, dict):
+            return labels, [], "malformed-slot-method"
+        slot = str(item.get("slot") or "").strip()
+        method = str(item.get("method") or "").strip().lower()
+        if not slot or method not in {"translation", "localization", "unchanged"}:
+            return labels, [], "malformed-slot-method"
+        methods.append({"slot": slot, "method": method})
+    # Require every annotated slot type to have method evidence and reject method
+    # entries for slot types absent from annot_utt.  Compare sets because some
+    # upstream rows may repeat a slot label more than once in one utterance.
+    if set(labels) != {item["slot"] for item in methods}:
+        return labels, methods, "slot-method-mismatch"
+    return labels, methods, None
 
 
 def massive_row_passes_quality(
@@ -313,6 +352,7 @@ def massive_row_passes_quality(
     min_spelling_votes: int = 2,
     min_target_language_votes: int = 2,
     min_intent_votes: int = 2,
+    min_slots_votes: int = 2,
 ) -> bool:
     counts = massive_judgment_counts(value)
     return (
@@ -320,6 +360,7 @@ def massive_row_passes_quality(
         and counts["spelling"] >= min_spelling_votes
         and counts["targetLanguage"] >= min_target_language_votes
         and counts["intent"] >= min_intent_votes
+        and counts["slots"] >= min_slots_votes
     )
 
 
@@ -331,14 +372,16 @@ def read_massive_locale(
     min_spelling_votes: int = 2,
     min_target_language_votes: int = 2,
     min_intent_votes: int = 2,
+    min_slots_votes: int = 2,
+    reject_localized_slots: bool = True,
 ) -> tuple[dict[str, dict], dict[str, int]]:
-    """Read one MASSIVE locale and retain rows that pass its applicable quality gate.
+    """Read one MASSIVE locale through ikna's conservative source-quality gate.
 
-    MASSIVE's ``en-US`` file is the original SLURP seed.  Upstream deliberately
-    does not attach localization judgments to those rows, so an unjudged English
-    seed row is allowed through this *source* gate and is still subjected to the
-    normal ikna phrase/target sieve later.  Localized rows must pass the human
-    review thresholds below.
+    The en-US file is the original SLURP seed and is intentionally unjudged.
+    Localized rows must pass all configured human-review vote floors.  In
+    addition, ikna rejects rows whose slot values were intentionally localized
+    to different entities/expressions: those rows can be excellent NLU examples
+    while being unsafe as literal bilingual learning contexts.
     """
     locale = MASSIVE_LOCALES.get(language)
     if locale is None:
@@ -368,7 +411,8 @@ def read_massive_locale(
                 )
             source_id = str(value.get("id", "")).strip()
             utterance = _clean_segment(str(value.get("utt", "")))
-            if not source_id or not utterance:
+            annotated = _clean_segment(str(value.get("annot_utt", "")))
+            if not source_id or not utterance or not annotated:
                 stats["malformedRows"] += 1
                 continue
             if source_id in rows:
@@ -379,32 +423,46 @@ def read_massive_locale(
             is_unjudged_english_seed = locale == "en-US" and (
                 not isinstance(judgments, list) or not judgments
             )
+            slot_labels: list[str] = []
+            slot_methods: list[dict] = []
             if is_unjudged_english_seed:
-                # The upstream en-US rows are the original SLURP seed, not a
-                # localization, so MASSIVE intentionally provides no reviewer
-                # judgments for them.  Do not fabricate votes or reject the
-                # entire English side of the matrix.
                 stats["qualityUnjudgedSeedRows"] += 1
-            elif not massive_row_passes_quality(
-                value,
-                min_natural_votes=min_natural_votes,
-                min_spelling_votes=min_spelling_votes,
-                min_target_language_votes=min_target_language_votes,
-                min_intent_votes=min_intent_votes,
-            ):
-                stats["qualityRejectedRows"] += 1
-                continue
+            else:
+                slot_labels, slot_methods, slot_error = massive_slot_metadata(value)
+                if slot_error is not None:
+                    stats["qualityMalformedSlotMetadataRows"] += 1
+                    stats["qualityRejectedRows"] += 1
+                    continue
+                if reject_localized_slots and any(item["method"] == "localization" for item in slot_methods):
+                    stats["qualityLocalizedSlotRejectedRows"] += 1
+                    stats["qualityRejectedRows"] += 1
+                    continue
+                if not massive_row_passes_quality(
+                    value,
+                    min_natural_votes=min_natural_votes,
+                    min_spelling_votes=min_spelling_votes,
+                    min_target_language_votes=min_target_language_votes,
+                    min_intent_votes=min_intent_votes,
+                    min_slots_votes=min_slots_votes,
+                ):
+                    stats["qualityVoteRejectedRows"] += 1
+                    stats["qualityRejectedRows"] += 1
+                    continue
             stats["qualityAcceptedRows"] += 1
             rows[source_id] = {
                 "id": source_id,
                 "locale": locale,
                 "utt": utterance,
+                "annotUtt": annotated,
                 "partition": str(value.get("partition", "")),
                 "scenario": str(value.get("scenario", "")),
                 "intent": str(value.get("intent", "")),
+                "slotLabels": slot_labels,
+                "slotMethods": slot_methods,
                 "quality": quality,
             }
     return rows, dict(stats)
+
 
 
 def _massive_id_key(value: str) -> tuple[int, int | str]:
@@ -422,6 +480,8 @@ def iter_massive_matrix(
     min_spelling_votes: int = 2,
     min_target_language_votes: int = 2,
     min_intent_votes: int = 2,
+    min_slots_votes: int = 2,
+    reject_localized_slots: bool = True,
 ) -> Iterator[Candidate]:
     """Emit direct multiway-aligned MASSIVE candidates for requested languages.
 
@@ -441,6 +501,8 @@ def iter_massive_matrix(
             min_spelling_votes=min_spelling_votes,
             min_target_language_votes=min_target_language_votes,
             min_intent_votes=min_intent_votes,
+            min_slots_votes=min_slots_votes,
+            reject_localized_slots=reject_localized_slots,
         )
         locale_rows[lang] = rows
 

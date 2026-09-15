@@ -73,20 +73,20 @@ Everyday rather than dominate it.
 
 MASSIVE is implemented as an experimental source, but it is not automatically
 publishable. Its registry status is `candidate`; the normal Catalogue v2 builder
-refuses candidate sources. For localized rows, the Part 6 experiment first requires at least two human
-judgments that call an utterance natural (grammar score 3-4), correctly spelled,
-in the target language, and consistent with the intent. The upstream `en-US`
-file is the original SLURP seed and intentionally has no localization judgments,
-so those seed rows skip only this MASSIVE-specific vote gate; they still pass
-through the ordinary ikna target/length/duplicate sieve and the deterministic
-manual review. This is an ikna conservative experiment gate, not an upstream
-MASSIVE rule.
+refuses candidate sources. The completed 0.11 review found that the first gate
+missed an important distinction: MASSIVE is an NLU localization corpus, so a
+slot value may deliberately change to a different local person, place, artist or
+service while the intent remains correct. That is useful upstream behavior but
+is unsafe as a literal bilingual learning context.
 
-The experiment then measures how many **new** targets and useful additional
-contexts survive on top of Tatoeba, and writes deterministic samples for manual
-review. Only a reviewed decision may change MASSIVE from `candidate` to `ready`.
-If that review fails, 0.11 keeps Tatoeba-only Everyday rather than lowering
-quality to fill counts.
+The experimental adapter now requires at least two positive votes for naturalness,
+spelling, target-language identity, intent **and slot correctness**. It also
+requires `annot_utt` and `slot_method` to agree and rejects rows containing any
+upstream `slot_method = localization`. The original `en-US` SLURP seed remains
+unjudged by design and skips only this localization-specific gate. These stricter
+rules are retained for future evidence runs, but the 0.11 admission decision is
+conservative: **MASSIVE is not admitted; Tatoeba remains the production Everyday
+source for the Part 11 freeze.** See `PARTS-6-9-DECISION-RECORD.md`.
 
 ### Knowledge
 
@@ -111,7 +111,11 @@ be rejected entirely. The first 55-pair diagnostic showed that `1.04` is too
 permissive for some pairs. The next review pool therefore uses explicit provisional
 floors of `1.10`, `1.11`, or `1.12` according to the observed pair quality band.
 All 55 rules still say `review`; the floors are filters for human review, not a
-claim that a pair is production-safe.
+claim that a pair is production-safe. The second retained-sample review still
+found obvious semantic mismatches above those floors, including mismatches above
+1.20. Therefore the all-direct-pair expansion is **not admitted for 0.11**. The
+already approved production WikiMatrix scope remains; score-only retuning is not
+accepted as a substitute for an independent semantic-quality signal.
 
 Evidence:
 
@@ -132,10 +136,13 @@ The source is not allowed to fall back to corpus-level attribution just to make
 World non-empty. Part 9 therefore separates native aligned text from article
 attribution: XCES document names **and sentence ids** are resolved directly against
 the native OPUS XML archives, rather than assuming that XCES link N equals Moses
-line N. An explicit trustworthy article manifest must then resolve each document id
-to a real `globalvoices.org` URL and credited contributors. Missing documents are
-reported and their aligned rows are excluded; URLs or names are never inferred
-from sentence text.
+line N. `globalvoices_manifest.py` now constructs the single date/slug URL candidate
+encoded by an OPUS document id and verifies it against the live Global Voices
+page. A document is emitted only when the fetched/resolved URL remains on
+`globalvoices.org`, a canonical Global Voices article URL is recovered, and at
+least one credited contributor is present in page metadata/markup. Missing or
+unverifiable documents are reported and their aligned rows are excluded; URLs or
+names are never inferred from sentence text.
 
 Evidence:
 

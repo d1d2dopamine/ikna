@@ -23,6 +23,13 @@ words mean and what a number promises inside an epoch is written down once, in
 
 ## 0.11.0 press (in development)
 
+### Parts 6/8/9 corpus decision gates
+
+- Froze the conservative 0.11 admission decisions from the completed evidence runs: MASSIVE is not admitted to production and Tatoeba remains the Everyday source; the all-direct-pair WikiMatrix expansion is not admitted and remains behind explicit `review` rules rather than score-only promotion.
+- Tightened the experimental MASSIVE adapter for future re-evaluation: localized rows now require positive slot judgments, consistent `annot_utt`/`slot_method` metadata, and reject upstream slot values marked `localization`, preventing locally substituted people/places/artists from being treated as literal bilingual equivalents.
+- Added a fail-closed Global Voices live article-manifest builder. OPUS document date/slug identity may propose one page, but a manifest row is written only after the page is fetched, the resolved/canonical URL remains on `globalvoices.org`, and credited contributor metadata is present.
+- Recorded the decisions and evidence in `docs/PARTS-6-9-DECISION-RECORD.md`; the World workflow now builds bounded live attribution evidence automatically when no pre-audited manifest override is supplied.
+
 ### Parts 8-10 direct Knowledge, World provenance and deterministic selection
 
 - Added an all-direct-pair WikiMatrix Knowledge experiment with an explicit per-pair `review / accept / reject` score policy; missing pairs are never pivoted through English and no reviewed threshold is inferred from file existence alone.

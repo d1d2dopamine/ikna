@@ -1,3 +1,4 @@
-{"id":"1","locale":"en-US","partition":"train","scenario":"alarm","intent":"alarm_set","utt":"Set an alarm for seven tomorrow morning."}
-{"id":"2","locale":"en-US","partition":"train","scenario":"weather","intent":"weather_query","utt":"Will it rain in the city this afternoon?"}
-{"id":"3","locale":"en-US","partition":"train","scenario":"music","intent":"play_music","utt":"Bad source row should be rejected."}
+{"id":"1","locale":"en-US","partition":"train","scenario":"alarm","intent":"alarm_set","utt":"Set an alarm for seven tomorrow morning.","annot_utt":"Set an alarm for [time : seven] [date : tomorrow morning]."}
+{"id":"2","locale":"en-US","partition":"train","scenario":"weather","intent":"weather_query","utt":"Will it rain in the city this afternoon?","annot_utt":"Will it rain in the [place_name : city] [date : this afternoon]?"}
+{"id":"3","locale":"en-US","partition":"train","scenario":"music","intent":"play_music","utt":"Bad source row should be rejected.","annot_utt":"Bad source row should be rejected."}
+{"id":"4","locale":"en-US","partition":"train","scenario":"weather","intent":"weather_query","utt":"What is the weather in Chicago?","annot_utt":"What is the weather in [place_name : Chicago]?"}

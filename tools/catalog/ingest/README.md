@@ -67,11 +67,14 @@ localizations. ikna aligns requested locales only by that id; it never pivots or
 generates a translation.
 
 Before normalization, each localized row passes a conservative human-judgment
-gate. By default at least two judgments must rate it natural (grammar 3-4),
-correctly spelled, target-language-only and consistent with the intent. MASSIVE
-intentionally provides no localization judgments for the original `en-US` SLURP
-seed, so those English seed rows skip only this source-specific vote gate. The
-ordinary Catalogue target sieve still runs for every language.
+and slot-equivalence gate. By default at least two judgments must rate it natural
+(grammar 3-4), correctly spelled, target-language-only, consistent with the intent,
+and correct for its slot annotations. `annot_utt` must agree with `slot_method`,
+and any upstream slot explicitly marked `localization` is rejected because its
+entity/value may intentionally differ across locales. MASSIVE intentionally
+provides no localization judgments or slot methods for the original `en-US` SLURP
+seed, so those English seed rows skip only this source-specific localization gate.
+The ordinary Catalogue target sieve still runs for every language.
 
 ```bash
 python3 tools/catalog/ingest_sources.py massive-matrix \
@@ -171,11 +174,15 @@ OPUS aligned text alone is insufficient for the `world` collection because it ca
 lose article/contributor metadata. Part 9 therefore uses two explicit steps before
 `ingest_sources.py globalvoices`:
 
-1. `globalvoices_xces_map.py` records the OPUS `fromDoc`/`toDoc` identity carried
-   by XCES alignment groups for every non-empty aligned line.
-2. `globalvoices_attribution.py` resolves those document ids against an explicit
-   JSONL article manifest. The manifest must contain a real Global Voices HTTPS URL
-   and at least one credited contributor for every document used by a retained row.
+1. `globalvoices_native.py` resolves XCES document/sentence ids directly against
+   the native OPUS XML archives.
+2. `globalvoices_manifest.py` reads the document ids, constructs only the
+   date/slug URL encoded by each id, then fetches and verifies the live Global
+   Voices page. It emits a manifest row only when the resolved/canonical URL is a
+   real Global Voices HTTPS URL and credited contributor metadata is present.
+3. `globalvoices_attribution.py` joins that verified manifest back to original
+   aligned rows and filters out every unresolved document.
 
-Unresolved rows are filtered out. The tools never derive authors or article URLs
-from the sentence text.
+An explicit pre-audited manifest may still be supplied to the workflow. The tools
+never derive authors or article URLs from sentence text, search results or fuzzy
+title matching.

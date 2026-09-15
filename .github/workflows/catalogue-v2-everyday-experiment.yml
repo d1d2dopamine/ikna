@@ -25,6 +25,9 @@ on:
       min_intent_votes:
         description: "Localized MASSIVE intent judgments rated yes/reasonable required per utterance"
         default: "2"
+      min_slots_votes:
+        description: "Localized MASSIVE slot judgments rated correct/no-slots required per utterance"
+        default: "2"
       sample_per_pair:
         description: "Deterministic MASSIVE examples kept for each directed pair"
         default: "5"
@@ -131,6 +134,7 @@ jobs:
             --min-spelling-votes "${{ inputs.min_spelling_votes }}" \
             --min-target-language-votes "${{ inputs.min_target_language_votes }}" \
             --min-intent-votes "${{ inputs.min_intent_votes }}" \
+            --min-slots-votes "${{ inputs.min_slots_votes }}" \
             --out candidates/massive.jsonl.gz
           rm -f "$archive"
           ls -lh candidates/massive.jsonl.gz
@@ -154,7 +158,8 @@ jobs:
             --min-natural-votes "${{ inputs.min_natural_votes }}" \
             --min-spelling-votes "${{ inputs.min_spelling_votes }}" \
             --min-target-language-votes "${{ inputs.min_target_language_votes }}" \
-            --min-intent-votes "${{ inputs.min_intent_votes }}"
+            --min-intent-votes "${{ inputs.min_intent_votes }}" \
+            --min-slots-votes "${{ inputs.min_slots_votes }}"
 
           cat reports/EVERYDAY-SOURCE-ADMISSION.md >> "$GITHUB_STEP_SUMMARY"
           printf '\n---\n' >> "$GITHUB_STEP_SUMMARY"

@@ -108,11 +108,18 @@ def test_tatoeba(registry: SourceRegistry) -> list[Candidate]:
 def test_massive(registry: SourceRegistry) -> list[Candidate]:
     base = FIXTURES / "massive"
     english, stats = read_massive_locale(str(base), "en")
-    assert set(english) == {"1", "2", "3"}
-    assert stats["sourceRows"] == 3
-    assert stats["qualityAcceptedRows"] == 3
+    assert set(english) == {"1", "2", "3", "4"}
+    assert stats["sourceRows"] == 4
+    assert stats["qualityAcceptedRows"] == 4
     assert stats.get("qualityRejectedRows", 0) == 0
-    assert stats["qualityUnjudgedSeedRows"] == 3
+    assert stats["qualityUnjudgedSeedRows"] == 4
+
+    spanish, spanish_stats = read_massive_locale(str(base), "es")
+    assert set(spanish) == {"1", "2"}
+    assert spanish_stats["qualityVoteRejectedRows"] == 1
+    assert spanish_stats["qualityLocalizedSlotRejectedRows"] == 1
+    assert spanish_stats["qualityRejectedRows"] == 2
+    assert spanish_stats["qualityAcceptedRows"] == 2
 
     rows = list(
         iter_massive_matrix(

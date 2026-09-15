@@ -211,6 +211,7 @@ def massive_locale_quality(
             min_spelling_votes=args.min_spelling_votes,
             min_target_language_votes=args.min_target_language_votes,
             min_intent_votes=args.min_intent_votes,
+            min_slots_votes=args.min_slots_votes,
         )
         result[lang] = stats
     return result
@@ -322,17 +323,19 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
     return {
         "reportVersion": 1,
         "part": "6-7",
-        "status": "requires-manual-review",
+        "status": "not-admitted-0.11-re-evaluation-evidence",
         "publicationSafe": False,
         "sourceDecision": {
             "tatoeba": "approved-baseline",
-            "massive": "candidate-pending-manual-review",
+            "massive": "not-admitted-0.11-candidate-only",
         },
         "qualityGate": {
             "minNaturalVotes": args.min_natural_votes,
             "minSpellingVotes": args.min_spelling_votes,
             "minTargetLanguageVotes": args.min_target_language_votes,
             "minIntentVotes": args.min_intent_votes,
+            "minSlotsVotes": args.min_slots_votes,
+            "rejectLocalizedSlots": True,
         },
         "massiveLocaleQuality": quality,
         "massiveQualitySummary": dict(sorted(quality_summary.items())),
@@ -365,7 +368,7 @@ def markdown(report: dict[str, Any]) -> str:
         "# Everyday source admission and rebuild preview",
         "",
         "Parts 6-7 evidence. This report **does not admit or publish MASSIVE**.",
-        "MASSIVE remains a candidate source until the deterministic samples are reviewed.",
+        "The 0.11 decision is Tatoeba-only Everyday; MASSIVE remains a candidate for later re-evaluation.",
         "",
         "## Snapshot",
         "",
@@ -373,7 +376,10 @@ def markdown(report: dict[str, Any]) -> str:
         "| --- | ---: |",
         "| MASSIVE locale source rows inspected | %s |" % f"{q.get('sourceRows', 0):,}",
         "| MASSIVE locale rows accepted by source gate | %s |" % f"{q.get('qualityAcceptedRows', 0):,}",
-        "| MASSIVE localized rows rejected by human-review gate | %s |" % f"{q.get('qualityRejectedRows', 0):,}",
+        "| MASSIVE localized rows rejected by source gate | %s |" % f"{q.get('qualityRejectedRows', 0):,}",
+        "| rejected for vote thresholds | %s |" % f"{q.get('qualityVoteRejectedRows', 0):,}",
+        "| rejected for localized slot values | %s |" % f"{q.get('qualityLocalizedSlotRejectedRows', 0):,}",
+        "| rejected for malformed slot metadata | %s |" % f"{q.get('qualityMalformedSlotMetadataRows', 0):,}",
         "| MASSIVE unjudged en-US seed rows accepted | %s |" % f"{q.get('qualityUnjudgedSeedRows', 0):,}",
         "| directed language pairs compared | %s |" % f"{s.get('directedPairs', 0):,}",
         "| pairs where MASSIVE adds at least one new eligible target | %s |" % f"{s.get('pairsWithNewMassiveTargets', 0):,}",
@@ -426,7 +432,7 @@ def markdown(report: dict[str, Any]) -> str:
         "",
         "## Decision rule",
         "",
-        "Do not promote MASSIVE to `ready` from these counts alone. Review the deterministic sample file for naturalness, usefulness, translation/localization fit and obvious assistant-domain repetition. If quality is acceptable and the new-target/context contribution is material, promote the source in the registry in the later integration batch. Otherwise keep Tatoeba-only Everyday.",
+        "The 0.11 admission decision is already fail-closed: MASSIVE is not promoted to `ready`. This rerun exists to measure the stricter slot-aware gate for future work; changing the 0.11 decision requires a new explicit reviewed decision record rather than counts alone.",
         "",
         "The merged preview pool intentionally preserves all origins for exact cross-source duplicates. It is an input/evidence artefact, not a release asset.",
         "",
@@ -438,7 +444,7 @@ def samples_markdown(report: dict[str, Any]) -> str:
     lines = [
         "# MASSIVE deterministic manual-review samples",
         "",
-        "These are candidates that passed the applicable MASSIVE source gate and ikna's ordinary phrase sieve. Localized rows require the configured human-review votes; the original en-US seed is unjudged upstream. Review the sentence itself, the aligned meaning, the selected target and whether the material feels useful for Everyday learning.",
+        "These are candidates that passed the stricter MASSIVE source gate and ikna's ordinary phrase sieve. Localized rows require the configured human-review and slot votes, consistent slot metadata, and no upstream localized slot values; the original en-US seed is unjudged upstream. The samples are re-evaluation evidence, not 0.11 admission material.",
         "",
     ]
     current: tuple[str, str] | None = None
@@ -475,6 +481,7 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("--min-spelling-votes", type=int, default=2)
     ap.add_argument("--min-target-language-votes", type=int, default=2)
     ap.add_argument("--min-intent-votes", type=int, default=2)
+    ap.add_argument("--min-slots-votes", type=int, default=2)
     return ap
 
 
@@ -487,6 +494,7 @@ def main(argv: list[str] | None = None) -> int:
         (args.min_spelling_votes, "--min-spelling-votes"),
         (args.min_target_language_votes, "--min-target-language-votes"),
         (args.min_intent_votes, "--min-intent-votes"),
+        (args.min_slots_votes, "--min-slots-votes"),
     ]:
         if value < 0:
             raise SystemExit(name + " must be non-negative")

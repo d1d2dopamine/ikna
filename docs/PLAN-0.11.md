@@ -170,7 +170,7 @@ from artificial truncation for every planned pair/collection/level.
 
 ### Part 6 - corpus admission and MASSIVE experiment
 
-**Implementation status:** the source gate, MASSIVE 1.1 adapter and non-publishing Everyday experiment workflow are implemented. MASSIVE is registered as `candidate`, so the normal Catalogue v2 builder refuses to publish it. The full evidence run and manual sample review are still required before promotion to `ready`.
+**Implementation status:** evidence run reviewed. The 0.11 admission decision is **do not admit MASSIVE**: deterministic samples exposed NLU slot-localization changes that are unsafe as literal bilingual contexts. Tatoeba is the production Everyday source for the Part 11 freeze. MASSIVE remains `candidate`; its experimental adapter is tightened to require slot judgments/metadata consistency and reject `slot_method = localization` for any future re-evaluation.
 
 **Question:** which additional human source material is good enough to enter 0.11?
 
@@ -204,7 +204,7 @@ not merely a larger card count.
 
 ### Part 8 - Knowledge direct-pair rebuild
 
-**Implementation status:** direct-pair acquisition/preview tooling is implemented. The first 55-pair diagnostic proved that the historical `1.04` floor retains obvious semantic mismatches. `catalogue-v2-wikimatrix-quality.json` now records provisional per-pair review floors (`1.10`, `1.11`, or `1.12`) derived from that run. Every pair still remains `review`: the stricter floors define the next human-review pool, not automatic production admission.
+**Implementation status:** direct-pair acquisition/preview tooling is implemented and the 0.11 expansion decision is **do not admit the all-direct-pair rebuild**. The historical `1.04` floor was unsafe, and deterministic samples retained by the provisional `1.10`/`1.11`/`1.12` floors still contain clear semantic mismatches, including examples above `1.20`. Pair rules therefore remain `review` and cannot publish. Part 11 retains the already approved production WikiMatrix scope rather than lowering quality to force wider direct-pair coverage.
 
 **Question:** how much Knowledge coverage exists without the current English hub?
 
@@ -219,7 +219,7 @@ than the convenience of an English-hub build.
 
 ### Part 9 - World attribution build
 
-**Implementation status:** the first OPUS run disproved line-number attribution: non-empty XCES links do not have a 1:1 row count with the derived Moses export. Part 9 now resolves XCES document names and sentence ids directly against the native OPUS XML archives, including 1:n/n:1 links. Article attribution remains fail-closed: only document ids present in trustworthy article metadata may produce a sidecar, unresolved rows are excluded, and URLs are restricted to `globalvoices.org` or its subdomains.
+**Implementation status:** native XCES identity is solved: the latest diagnostic resolved 752,051 of 752,052 aligned rows against the native OPUS XML archives. `globalvoices_manifest.py` now turns an OPUS date/slug document id into one URL candidate and verifies that candidate against the live Global Voices page, requiring a Global Voices canonical URL and credited contributor metadata. The existing attribution resolver remains fail-closed and filters every unresolved document. A bounded live-manifest rerun is the remaining Part 9 evidence step before Part 11.
 
 **Question:** can Global Voices become real production material without weakening provenance?
 

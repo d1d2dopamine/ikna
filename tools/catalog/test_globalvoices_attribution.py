@@ -9,6 +9,7 @@ from pathlib import Path
 
 from globalvoices_attribution import resolve, valid_globalvoices_url
 from globalvoices_native import extract_native
+from globalvoices_manifest import FetchResult, build_manifest, candidate_url, parse_article_metadata, resolve_document
 from globalvoices_xces_map import extract
 from ingest.model import Origin
 from ingest.registry import SourceRegistry
@@ -27,6 +28,44 @@ def main() -> int:
     assert valid_globalvoices_url("https://es.globalvoices.org/example/")
     assert not valid_globalvoices_url("https://globalvoices.org.evil.example/x")
     assert not valid_globalvoices_url("http://globalvoices.org/x")
+
+    # OPUS document identity may propose exactly one date/slug URL, but it is
+    # not admitted until a live page proves canonical URL + contributor data.
+    spanish_doc = "es/2012_07_06_puerto-rico-escuelas-bilingues-reviven-el-debate-sobre-el-idioma_.xml"
+    assert candidate_url(spanish_doc) == (
+        "https://es.globalvoices.org/2012/07/06/"
+        "puerto-rico-escuelas-bilingues-reviven-el-debate-sobre-el-idioma/"
+    )
+    assert candidate_url("jp/2018_01_02_example_.xml") == "https://jp.globalvoices.org/2018/01/02/example/"
+    assert candidate_url("zhs/2018_01_02_example_.xml") == "https://zhs.globalvoices.org/2018/01/02/example/"
+    assert candidate_url("es/not-a-date.xml") is None
+
+    article_html = '''
+    <html><head>
+      <link rel="canonical" href="https://es.globalvoices.org/2012/07/06/example/">
+      <script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"NewsArticle",
+         "url":"https://es.globalvoices.org/2012/07/06/example/",
+         "author":{"@type":"Person","name":"Ángel Carrión"},
+         "translator":{"@type":"Person","name":"Traductora Ejemplo"}}
+      </script>
+    </head><body><a rel="author">Ángel Carrión</a></body></html>
+    '''
+    canonical, contributors = parse_article_metadata("https://es.globalvoices.org/x/", article_html)
+    assert canonical == "https://es.globalvoices.org/2012/07/06/example/"
+    assert contributors == ["Ángel Carrión", "Traductora Ejemplo"]
+
+    def good_fetch(_url: str) -> FetchResult:
+        return FetchResult("https://es.globalvoices.org/2012/07/06/example/", article_html)
+
+    resolved, reason = resolve_document(spanish_doc, fetcher=good_fetch)
+    assert reason == "resolved" and resolved is not None
+    assert resolved["contributors"] == ["Ángel Carrión", "Traductora Ejemplo"]
+
+    def evil_fetch(_url: str) -> FetchResult:
+        return FetchResult("https://example.org/stolen/", article_html)
+
+    assert resolve_document(spanish_doc, fetcher=evil_fetch)[1] == "redirect-outside-globalvoices"
 
     registry = SourceRegistry.load(str(Path(__file__).resolve().parent / "sources" / "catalogue-v2-sources.json"))
     bad_origin = Origin(
@@ -48,6 +87,27 @@ def main() -> int:
 
     with tempfile.TemporaryDirectory(prefix="ikna-gv-") as td:
         root = Path(td)
+
+        manifest_map = root / "manifest-map.jsonl.gz"
+        with gzip.open(manifest_map, "wt", encoding="utf-8") as handle:
+            handle.write(json.dumps({
+                "line": 1,
+                "contextDocument": spanish_doc,
+                "meaningDocument": "en/2012_07_06_example_.xml",
+            }) + "\n")
+        english_html = article_html.replace(
+            "https://es.globalvoices.org/2012/07/06/example/",
+            "https://globalvoices.org/2012/07/06/example/",
+        ).replace("Ángel Carrión", "Example Author")
+        def fixture_fetch(url: str) -> FetchResult:
+            if url.startswith("https://es.globalvoices.org/"):
+                return FetchResult("https://es.globalvoices.org/2012/07/06/example/", article_html)
+            return FetchResult("https://globalvoices.org/2012/07/06/example/", english_html)
+        built, built_report = build_manifest(str(manifest_map), workers=1, fetcher=fixture_fetch)
+        assert len(built) == 2
+        assert built_report["publicationSafe"] is True
+        assert built_report["summary"]["resolvedDocuments"] == 2
+
         xces = root / "pair.xml"
         xces.write_text(
             '<?xml version="1.0"?><cesAlign><linkGrp fromDoc="en/a.xml" toDoc="es/a.xml">'

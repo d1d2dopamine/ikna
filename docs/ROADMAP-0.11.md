@@ -89,7 +89,7 @@ Exit condition: every current thin/capped deck has a measured explanation.
 
 ### Part 6 - source admission and MASSIVE measurement
 
-Status: adapter/gates/workflow implemented; full evidence run and manual review pending. MASSIVE remains an experimental `candidate` and cannot be published by the normal builder.
+Status: 0.11 decision complete — MASSIVE is **not admitted** after review exposed localized slot values that can change bilingual meaning. Tatoeba remains the production Everyday source. MASSIVE stays an experimental `candidate`; the stricter slot-aware gate is kept for future re-evaluation.
 
 Purpose: freeze the 0.11 source set before rebuilding content.
 
@@ -119,7 +119,7 @@ Exit condition: a reproducible Everyday candidate pool exists independently of f
 
 ### Part 8 - direct-pair Knowledge rebuild
 
-Status: direct-pair preview/pair-policy tooling implemented; real all-pair evidence and manual threshold decisions pending.
+Status: 0.11 expansion decision complete — the all-direct-pair rebuild is **not admitted** because retained samples still contain semantic mismatches above the provisional pair floors. Existing approved WikiMatrix production scope remains; all expansion rules stay `review` and fail closed.
 
 Purpose: remove the English-hub convenience restriction from the Knowledge evidence base.
 
@@ -131,7 +131,7 @@ Purpose: remove the English-hub convenience restriction from the Knowledge evide
 
 ### Part 9 - World attribution build
 
-Status: XCES document mapping, article-manifest resolver and strict Global Voices URL/contributor gate implemented; real OPUS attribution coverage pending.
+Status: native XCES mapping is proven (752,051/752,052 diagnostic rows resolved). A live article-manifest builder and strict Global Voices URL/contributor gate are implemented; bounded live attribution coverage is the remaining evidence run.
 
 Purpose: make Global Voices publishable without weakening the existing provenance contract.
 

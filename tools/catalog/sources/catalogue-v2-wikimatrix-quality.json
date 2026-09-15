@@ -1,11 +1,13 @@
 {
   "policyVersion": 1,
-  "status": "review-required",
+  "status": "0.11-direct-expansion-not-admitted",
   "basis": {
     "diagnostic": "catalogue v2 knowledge experiment run 34885000156",
     "acquisitionRowsPerPhysicalPair": 50000,
     "rule": "Use 1.10 as the conservative floor; raise to 1.11 for diagnostic mean <1.085 and 1.12 for mean <1.065. These are review thresholds, not automatic admission.",
-    "reason": "The 1.04 historical baseline retained obvious semantic mismatches, especially in lower-scoring CJK/Korean pairs."
+    "reason": "The 1.04 historical baseline retained obvious semantic mismatches, especially in lower-scoring CJK/Korean pairs.",
+    "secondDiagnostic": "catalogue v2 knowledge experiment run 34896496417",
+    "secondDiagnosticResult": "Retained deterministic samples still contained obvious semantic mismatches above 1.10/1.11/1.12, including a sampled de-ko mismatch at 1.234. Score-only retuning is not accepted for 0.11 admission."
   },
   "default": {
     "action": "review",
@@ -398,5 +400,6 @@
       "qualityBand": "weak-diagnostic",
       "note": "Provisional 0.11 threshold from the first 50k-row direct-pair diagnostic. Retained rows still require human sample review before accept."
     }
-  }
+  },
+  "releaseDecision": "Keep existing approved WikiMatrix production scope for 0.11; all-direct-pair expansion remains non-publishing review evidence."
 }

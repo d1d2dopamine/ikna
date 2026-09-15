@@ -100,6 +100,7 @@ def parser() -> argparse.ArgumentParser:
     mm.add_argument("--min-spelling-votes", type=int, default=2)
     mm.add_argument("--min-target-language-votes", type=int, default=2)
     mm.add_argument("--min-intent-votes", type=int, default=2)
+    mm.add_argument("--min-slots-votes", type=int, default=2)
 
     g = sub.add_parser("globalvoices")
     g.add_argument("--learn-file", required=True)
@@ -164,6 +165,7 @@ def main(argv: list[str] | None = None) -> int:
             (args.min_spelling_votes, "--min-spelling-votes"),
             (args.min_target_language_votes, "--min-target-language-votes"),
             (args.min_intent_votes, "--min-intent-votes"),
+            (args.min_slots_votes, "--min-slots-votes"),
         ]:
             if value < 0:
                 parser().error(name + " must be non-negative")
@@ -173,6 +175,7 @@ def main(argv: list[str] | None = None) -> int:
             min_spelling_votes=args.min_spelling_votes,
             min_target_language_votes=args.min_target_language_votes,
             min_intent_votes=args.min_intent_votes,
+            min_slots_votes=args.min_slots_votes,
         )
     elif args.command == "wikimatrix-pair":
         if args.first == args.second:

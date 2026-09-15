@@ -64,11 +64,12 @@ def main() -> int:
             "--function-top", "0", "--sample-per-pair", "2",
         ])
         report = build_report(args)
-        assert report["status"] == "requires-manual-review"
+        assert report["status"] == "not-admitted-0.11-re-evaluation-evidence"
         assert report["publicationSafe"] is False
         assert report["massiveLocaleQuality"]["en"].get("qualityRejectedRows", 0) == 0
-        assert report["massiveLocaleQuality"]["en"]["qualityUnjudgedSeedRows"] == 3
-        assert report["massiveLocaleQuality"]["es"]["qualityRejectedRows"] == 1
+        assert report["massiveLocaleQuality"]["en"]["qualityUnjudgedSeedRows"] == 4
+        assert report["massiveLocaleQuality"]["es"]["qualityRejectedRows"] == 2
+        assert report["massiveLocaleQuality"]["es"]["qualityLocalizedSlotRejectedRows"] == 1
         assert report["mergedPreviewPool"]["exactCrossSourceOverlaps"] == 1
         assert report["summary"]["massiveNewTargets"] > 0
         assert report["samples"]

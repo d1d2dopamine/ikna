@@ -189,6 +189,8 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
         "status": "requires-manual-review" if unresolved else "policy-resolved",
         "publicationSafe": False,
         "policyFile": str(args.policy),
+        "policyStatus": policy.get("status"),
+        "releaseDecision": policy.get("releaseDecision"),
         "summary": {
             "physicalPairsSeen": len(all_pairs),
             "inputCandidates": sum(raw_counts.values()),
@@ -212,6 +214,9 @@ def markdown(report: dict[str, Any]) -> str:
         "This is a non-publishing Part 8 preview. A WikiMatrix file existing upstream is not by itself a quality decision.",
         "",
         f"Status: **{report['status']}**",
+        "",
+        (f"0.11 policy status: **{report['policyStatus']}**" if report.get("policyStatus") else ""),
+        (report.get("releaseDecision") or ""),
         "",
         f"- physical pairs seen: **{s['physicalPairsSeen']}**",
         f"- input candidates: **{s['inputCandidates']:,}**",

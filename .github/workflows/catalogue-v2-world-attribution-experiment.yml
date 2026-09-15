@@ -2,8 +2,9 @@ name: catalogue v2 world attribution experiment
 
 # Part 9 provenance experiment. XCES document/sentence ids are resolved against
 # the native OPUS XML archives. Moses line numbers are deliberately not used.
-# Article URLs/contributors still require an explicit trustworthy manifest;
-# unresolved documents are evidence, never guessed attribution.
+# Article URLs/contributors are verified against live Global Voices pages. OPUS
+# document names only propose a candidate URL; unresolved pages remain evidence
+# and are never guessed into attribution.
 on:
   workflow_dispatch:
     inputs:
@@ -14,8 +15,14 @@ on:
         description: "Meaning language"
         default: "es"
       article_manifest_url:
-        description: "Optional JSONL document -> Global Voices URL/contributors manifest"
+        description: "Optional pre-audited JSONL document -> Global Voices URL/contributors manifest override"
         default: ""
+      manifest_max_documents:
+        description: "Live article documents to verify in this diagnostic run; 0 means all"
+        default: "400"
+      manifest_workers:
+        description: "Concurrent Global Voices page fetches (1-16 recommended)"
+        default: "8"
 
 permissions:
   contents: read
@@ -107,14 +114,29 @@ jobs:
             --samples reports/WORLD-NATIVE-SAMPLES.md
           cat reports/WORLD-NATIVE-XCES.md >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Build or fetch verified article manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${{ inputs.article_manifest_url }}" ]; then
+            bash tools/ci/fetch-url.sh "${{ inputs.article_manifest_url }}" reports/article-manifest.jsonl
+            printf '# Global Voices article-manifest builder\n\nUsing an explicit pre-audited manifest override.\n' > reports/WORLD-ARTICLE-MANIFEST.md
+            printf '{"reportVersion":1,"part":9,"status":"external-audited-manifest"}\n' > reports/WORLD-ARTICLE-MANIFEST.json
+          else
+            python3 tools/catalog/globalvoices_manifest.py \
+              --alignment-map reports/globalvoices-alignment-map.jsonl.gz \
+              --out reports/article-manifest.jsonl \
+              --json reports/WORLD-ARTICLE-MANIFEST.json \
+              --markdown reports/WORLD-ARTICLE-MANIFEST.md \
+              --max-documents "${{ inputs.manifest_max_documents }}" \
+              --workers "${{ inputs.manifest_workers }}"
+          fi
+          cat reports/WORLD-ARTICLE-MANIFEST.md >> "$GITHUB_STEP_SUMMARY"
+
       - name: Resolve article attribution without guessing
         shell: bash
         run: |
           set -euo pipefail
-          : > reports/article-manifest.jsonl
-          if [ -n "${{ inputs.article_manifest_url }}" ]; then
-            bash tools/ci/fetch-url.sh "${{ inputs.article_manifest_url }}" reports/article-manifest.jsonl
-          fi
           python3 tools/catalog/globalvoices_attribution.py \
             --alignment-map reports/globalvoices-alignment-map.jsonl.gz \
             --article-manifest reports/article-manifest.jsonl \
@@ -156,6 +178,8 @@ jobs:
             reports/WORLD-NATIVE-XCES.json
             reports/WORLD-NATIVE-XCES.md
             reports/WORLD-NATIVE-SAMPLES.md
+            reports/WORLD-ARTICLE-MANIFEST.json
+            reports/WORLD-ARTICLE-MANIFEST.md
             reports/WORLD-ATTRIBUTION.json
             reports/WORLD-ATTRIBUTION.md
             reports/article-manifest.jsonl

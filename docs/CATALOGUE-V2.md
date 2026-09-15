@@ -135,12 +135,13 @@ Part 10 selection policy over the retained preview. A pair can be rejected even
 when its upstream file exists. No missing pair is manufactured through an English
 pivot.
 
-Part 9 keeps World fail-closed. `globalvoices_xces_map.py` recovers OPUS document
-identity for each non-empty aligned row. `globalvoices_attribution.py` accepts only
-a supplied document-to-article manifest, requires real Global Voices HTTPS URLs
-and contributor lists, reports unresolved document ids, and can filter the aligned
-text so the existing adapter sees only fully attributed rows. It never guesses a
-URL or author.
+Part 9 keeps World fail-closed. `globalvoices_native.py` resolves XCES document
+and sentence ids against the native OPUS XML archives. `globalvoices_manifest.py`
+uses the date/slug encoded by a document id only to propose one Global Voices page,
+then verifies the live page, canonical URL and contributor metadata. The resulting
+manifest is consumed by `globalvoices_attribution.py`, which reports unresolved
+document ids and filters aligned text so the existing adapter sees only fully
+attributed rows. No URL or author is guessed from sentence text.
 
 Part 10 is deliberately non-publishing until the full evidence run is reviewed.
 `selection_experiment.py` stages candidates on disk, builds frequency ranks from
