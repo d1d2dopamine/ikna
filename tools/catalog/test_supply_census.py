@@ -13,7 +13,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 from ingest.model import Candidate, Origin, write_jsonl
-from supply_census import build_report, markdown, parser
+from supply_census import build_report, classify_pair, markdown, parser
 from wikimatrix_plan import planned_pairs
 
 
@@ -33,6 +33,21 @@ def main() -> int:
         ("en", "es"), ("en", "ko"), ("es", "ko")
     ]
     assert planned_pairs(["en", "es", "ko"], "en", False) == [("en", "es"), ("en", "ko")]
+
+    # A bounded WikiMatrix acquisition is still only a lower bound even if the
+    # measured prefix already proves that max_deck truncates the deck. Part 5
+    # must not present that prefix as a complete source-supply measurement.
+    capped_prefix = {
+        "currentSelectedTargets": {"beginner": 1, "middle": 0, "advanced": 0},
+        "eligibleTargets": {"beginner": 2, "middle": 0, "advanced": 0},
+        "eligibleTotal": 2,
+    }
+    assert classify_pair(
+        "knowledge",
+        capped_prefix,
+        {"status": "available", "acquisitionCapped": True},
+        1,
+    ) == "source-scan-lower-bound"
 
     with tempfile.TemporaryDirectory(prefix="ikna-supply-census-") as td:
         root = Path(td)
@@ -77,6 +92,7 @@ def main() -> int:
         assert knowledge_row["diagnosis"] == "no-direct-source-file"
         text = markdown(report)
         assert "deck-cap-truncated" in text and "no-direct-source-file" in text
+        assert "Knowledge directed pairs that are only a lower bound" in text
 
         # The CLI writes the same two machine/human report forms used by CI.
         subprocess.run(

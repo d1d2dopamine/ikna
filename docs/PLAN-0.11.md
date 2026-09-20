@@ -154,7 +154,7 @@ mid-stream subparts.
 
 ### Part 5 - supply census of existing sources
 
-**Implementation status:** census tooling is implemented; the full 11-language evidence run is the next action. Use the manual `catalogue v2 supply census` workflow. It never publishes assets. A bounded WikiMatrix run that reaches its acquisition row limit is reported as a **lower bound**, not as proof that the source is thin; rerun the same Part 5 workflow with a larger limit for unresolved pairs.
+**Implementation status:** census tooling is implemented and the first full 11-language evidence run completed successfully on 2026-09-14. Review of that artifact found one reporting bug: an acquisition-capped WikiMatrix pair could be labelled `deck-cap-truncated` before `source-scan-lower-bound`, hiding the fact that the source measurement was incomplete. The classifier now gives the acquisition bound precedence. Rerun the manual `catalogue v2 supply census` workflow with a larger `wikimatrix_max_rows` before marking Part 5 complete, and repeat for any pair that still reaches the acquisition bound. The first run reached the 50,000-row acquisition limit for all 55 physical WikiMatrix pairs, so its Knowledge measurements remain lower bounds rather than proof of complete source supply. The workflow never publishes assets.
 
 **Question:** how much usable material do Tatoeba and the full direct-pair
 WikiMatrix source set already contain before final deck caps?

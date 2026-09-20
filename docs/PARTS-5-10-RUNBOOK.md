@@ -29,9 +29,15 @@ the upstream bucket.
 
 ## After the first full evidence run
 
-The first Part 5 census is complete and does not need to be repeated for this
-stabilization patch. After committing the post-run fixes, rerun **Everyday**,
-**Knowledge**, and **World**; they are independent and may run at the same time.
+The first Part 5 census ran successfully, but its report review exposed a
+lower-bound classification bug: acquisition-capped WikiMatrix rows could be
+reported as `deck-cap-truncated` instead of `source-scan-lower-bound`. The first
+run hit the 50k acquisition limit for all 55 physical WikiMatrix pairs. After the
+classifier fix, rerun **supply census** with a larger `wikimatrix_max_rows`; any
+pair that reaches the new bound is still unresolved and must remain a lower bound.
+Only close Part 5 once the evidence distinguishes source supply from acquisition
+truncation. Then rerun **Everyday**, **Knowledge**, and **World** as needed; those
+three are independent and may run at the same time.
 
 - Everyday now uploads only compact reports, manual MASSIVE samples, and a bounded
   selection preview. The multi-hundred-megabyte merged candidate pool stays on the

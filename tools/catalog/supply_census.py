@@ -186,12 +186,17 @@ def classify_pair(
 ) -> str:
     if collection == "knowledge" and source_meta.get("status") == "missing":
         return "no-direct-source-file"
+    # A bounded source scan is incomplete evidence even when the measured prefix
+    # already contains enough targets to hit max_deck. Report the acquisition
+    # bound first so a capped WikiMatrix prefix can never be mistaken for a
+    # complete measurement of source supply. The per-level counts still expose
+    # whether the current deck cap also truncates the measured prefix.
+    if source_meta.get("acquisitionCapped"):
+        return "source-scan-lower-bound"
     selected = measured["currentSelectedTargets"]
     eligible = measured["eligibleTargets"]
     if any(selected[level] >= max_deck and eligible[level] > selected[level] for level in core.LEVELS):
         return "deck-cap-truncated"
-    if source_meta.get("acquisitionCapped"):
-        return "source-scan-lower-bound"
     if measured["eligibleTotal"] == 0:
         return "no-usable-supply"
     return "measured"
@@ -339,7 +344,7 @@ def markdown(report: dict[str, Any]) -> str:
         "| deck levels proven truncated by max_deck | %s |" % f"{s['deckLevelsArtificiallyTruncated']:,}",
         "| deck levels below 1,000 current selections | %s |" % f"{s['deckLevelsBelow1000CurrentTargets']:,}",
         "| deck levels below min_deck | %s |" % f"{s['deckLevelsBelowMinDeck']:,}",
-        "| Knowledge pairs that are only a lower bound | %s |" % f"{s['knowledgePairsWithLowerBoundOnly']:,}",
+        "| Knowledge directed pairs that are only a lower bound | %s |" % f"{s['knowledgePairsWithLowerBoundOnly']:,}",
         "| Knowledge directed pairs without a direct WikiMatrix file | %s |" % f"{s['knowledgeDirectedPairsWithoutDirectSourceFile']:,}",
         "| eligible target memberships before deck caps | %s |" % f"{s['eligibleTargetsAcrossPairLevels']:,}",
         "| targets selected by the current capped first pass | %s |" % f"{s['currentSelectedTargetsAcrossPairLevels']:,}",
