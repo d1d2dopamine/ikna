@@ -683,8 +683,15 @@ def iter_wikimatrix_tsv_pair(
     min_score: float | None = None,
     source_version: str | None = None,
     max_rows: int | None = None,
+    stop_state: dict[str, object] | None = None,
 ) -> Iterator[Candidate]:
-    """Read one upstream WikiMatrix TSV once and emit both learning directions."""
+    """Read one upstream WikiMatrix TSV once and emit both learning directions.
+
+    ``stop_state`` is optional diagnostic state for streaming callers. It records
+    whether iteration ended at clean EOF, the score floor, or ``max_rows`` so a
+    downstream workflow can distinguish an intentional pipe close from a real
+    truncated download.
+    """
     physical = infer_wikimatrix_tsv_languages(path)
     if physical is None:
         physical = (first_lang, second_lang)
@@ -694,6 +701,9 @@ def iter_wikimatrix_tsv_pair(
     # one pass here and materialize the two symmetric learning directions.
     version = policy.resolve_source_version(source_version)
     emitted = 0
+    if stop_state is not None:
+        stop_state.clear()
+        stop_state.update({"reason": "eof", "emittedSourceRows": 0})
     with _open_text(path) as handle:
         for number, line in enumerate(handle, start=1):
             parts = line.rstrip("\n").split("\t", 2)
@@ -704,6 +714,8 @@ def iter_wikimatrix_tsv_pair(
             except ValueError as exc:
                 raise ValueError("WikiMatrix line %d has invalid alignment score" % number) from exc
             if min_score is not None and score < min_score:
+                if stop_state is not None:
+                    stop_state.update({"reason": "score-threshold", "emittedSourceRows": emitted})
                 break
             left = _clean_segment(parts[1])
             right = _clean_segment(parts[2])
@@ -731,7 +743,11 @@ def iter_wikimatrix_tsv_pair(
                 policy.validate_origin_for_ingestion(origin.to_dict())
                 yield _candidate(policy, lang, meaning_lang, context, meaning, origin)
             emitted += 1
+            if stop_state is not None:
+                stop_state["emittedSourceRows"] = emitted
             if max_rows is not None and emitted >= max_rows:
+                if stop_state is not None:
+                    stop_state["reason"] = "max-rows"
                 break
 
 def read_attribution_sidecar(path: str) -> dict[int, dict]:

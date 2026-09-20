@@ -186,28 +186,52 @@ def test_wikimatrix(registry: SourceRegistry) -> list[Candidate]:
     )
     assert reversed_rows[0].context == "El agua se congela a cero grados Celsius."
     assert reversed_rows[0].meaning == "Water freezes at zero degrees Celsius."
+    max_stop: dict[str, object] = {}
     pair_rows = list(
         iter_wikimatrix_tsv_pair(
             str(base / "sample.tsv"), registry.get("wikimatrix"), "en", "es",
-            min_score=1.0, source_version="v1-fixture", max_rows=1,
+            min_score=1.0, source_version="v1-fixture", max_rows=1, stop_state=max_stop,
         )
     )
     assert len(pair_rows) == 2
+    assert max_stop == {"reason": "max-rows", "emittedSourceRows": 1}
 
     # Part 5 can stream a decompressed upstream TSV over stdin instead of
     # downloading the complete WikiMatrix archive first.
     old_stdin = sys.stdin
     try:
         sys.stdin = io.StringIO((base / "sample.tsv").read_text(encoding="utf-8"))
+        streamed_stop: dict[str, object] = {}
         streamed = list(
             iter_wikimatrix_tsv_pair(
                 "-", registry.get("wikimatrix"), "en", "es",
-                min_score=1.0, source_version="v1-fixture", max_rows=1,
+                min_score=1.0, source_version="v1-fixture", max_rows=1, stop_state=streamed_stop,
             )
         )
     finally:
         sys.stdin = old_stdin
     assert [row.to_dict() for row in streamed] == [row.to_dict() for row in pair_rows]
+    assert streamed_stop == {"reason": "max-rows", "emittedSourceRows": 1}
+
+    threshold_stop: dict[str, object] = {}
+    threshold_rows = list(
+        iter_wikimatrix_tsv_pair(
+            str(base / "sample.tsv"), registry.get("wikimatrix"), "en", "es",
+            min_score=1.0, source_version="v1-fixture", max_rows=50, stop_state=threshold_stop,
+        )
+    )
+    assert len(threshold_rows) == 6
+    assert threshold_stop == {"reason": "score-threshold", "emittedSourceRows": 3}
+
+    eof_stop: dict[str, object] = {}
+    eof_rows = list(
+        iter_wikimatrix_tsv_pair(
+            str(base / "sample.tsv"), registry.get("wikimatrix"), "en", "es",
+            min_score=0.5, source_version="v1-fixture", max_rows=50, stop_state=eof_stop,
+        )
+    )
+    assert len(eof_rows) == 8
+    assert eof_stop == {"reason": "eof", "emittedSourceRows": 4}
     assert {(row.lang, row.meaning_lang) for row in pair_rows} == {("en", "es"), ("es", "en")}
     assert infer_wikimatrix_tsv_languages("WikiMatrix.de-en.tsv.gz") == ("de", "en")
     assert infer_wikimatrix_tsv_languages("sample.tsv") is None
@@ -389,14 +413,19 @@ def test_cli(registry: SourceRegistry) -> None:
         assert wiki_rows[0].context.startswith("El agua")
 
         pair_out = td_path / "wikimatrix-pair.jsonl.gz"
+        pair_status = td_path / "wikimatrix-pair-status.json"
         subprocess.run(
             [sys.executable, str(CLI), "wikimatrix-pair",
              "--tsv", str(FIXTURES / "wikimatrix" / "sample.tsv"),
              "--first", "en", "--second", "es", "--min-score", "1.0",
-             "--max-rows", "1", "--out", str(pair_out)],
+             "--max-rows", "1", "--out", str(pair_out),
+             "--stream-status", str(pair_status)],
             check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
         )
         assert len(read_jsonl(str(pair_out))) == 2
+        assert json.loads(pair_status.read_text(encoding="utf-8")) == {
+            "reason": "max-rows", "emittedSourceRows": 1
+        }
 
         massive_out = td_path / "massive.jsonl.gz"
         subprocess.run(

@@ -32,12 +32,16 @@ the upstream bucket.
 The first Part 5 census ran successfully, but its report review exposed a
 lower-bound classification bug: acquisition-capped WikiMatrix rows could be
 reported as `deck-cap-truncated` instead of `source-scan-lower-bound`. The first
-run hit the 50k acquisition limit for all 55 physical WikiMatrix pairs. After the
-classifier fix, rerun **supply census** with a larger `wikimatrix_max_rows`; any
-pair that reaches the new bound is still unresolved and must remain a lower bound.
-Only close Part 5 once the evidence distinguishes source supply from acquisition
-truncation. Then rerun **Everyday**, **Knowledge**, and **World** as needed; those
-three are independent and may run at the same time.
+run hit the 50k acquisition limit for all 55 physical WikiMatrix pairs. The first
+200k rerun then stopped at `de-ko` after 82,280 retained source rows because the
+score floor intentionally closed the streaming pipe before `max_rows`, while the
+old verifier only recognized max-row closes. The workflow now records the reader
+stop reason and accepts verified score-threshold closes without accepting a plain
+short EOF after an upstream failure. Rerun **supply census** at 200k; any pair that
+reaches that bound is still unresolved and must remain a lower bound. Only close
+Part 5 once the evidence distinguishes source supply from acquisition truncation.
+Then rerun **Everyday**, **Knowledge**, and **World** as needed; those three are
+independent and may run at the same time.
 
 - Everyday now uploads only compact reports, manual MASSIVE samples, and a bounded
   selection preview. The multi-hundred-megabyte merged candidate pool stays on the

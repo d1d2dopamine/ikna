@@ -9,6 +9,7 @@ pipeline planned for 0.11.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 
@@ -89,6 +90,10 @@ def parser() -> argparse.ArgumentParser:
     wp.add_argument("--max-rows", type=int)
     wp.add_argument("--out", required=True)
     wp.add_argument("--source-version")
+    wp.add_argument(
+        "--stream-status",
+        help="optional JSON sidecar describing why streamed WikiMatrix reading stopped",
+    )
 
     mm = sub.add_parser("massive-matrix")
     mm.add_argument("--dump-dir", required=True)
@@ -180,9 +185,11 @@ def main(argv: list[str] | None = None) -> int:
     elif args.command == "wikimatrix-pair":
         if args.first == args.second:
             parser().error("WikiMatrix pair languages must differ")
+        stream_state: dict[str, object] | None = {} if args.stream_status else None
         records = iter_wikimatrix_tsv_pair(
             args.tsv, policy, args.first.lower(), args.second.lower(),
             min_score=args.min_score, source_version=args.source_version, max_rows=args.max_rows,
+            stop_state=stream_state,
         )
     elif args.command == "wikimatrix":
         if args.tsv:
@@ -230,6 +237,10 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     count = write_jsonl(args.out, records)
+    if args.command == "wikimatrix-pair" and args.stream_status:
+        with open(args.stream_status, "w", encoding="utf-8") as handle:
+            json.dump(stream_state, handle, sort_keys=True)
+            handle.write("\n")
     print("wrote %d %s candidates to %s" % (count, source_id, args.out))
     return 0
 

@@ -127,12 +127,14 @@ jobs:
 
             out="candidates/wikimatrix-${first}-${second}.jsonl.gz"
             log="reports/wikimatrix-${first}-${second}.log"
+            reader_status="reports/wikimatrix-${first}-${second}.stream.json"
             cmd=(
               python3 tools/catalog/ingest_sources.py wikimatrix-pair
               --tsv - --first "$first" --second "$second"
               --min-score "${{ inputs.wikimatrix_min_score }}"
               --source-version v1
               --out "$out"
+              --stream-status "$reader_status"
             )
             if [ "$max_rows" -gt 0 ]; then
               cmd+=(--max-rows "$max_rows")
@@ -143,7 +145,7 @@ jobs:
             # storing the complete (sometimes very large) upstream archive.
             attempt=1
             while :; do
-              rm -f "$out" "$log"
+              rm -f "$out" "$log" "$reader_status"
               set +e
               curl --fail --location --silent --show-error --http1.1 \
                 --connect-timeout 30 "$url" \
@@ -158,7 +160,7 @@ jobs:
               if python3 tools/catalog/wikimatrix_stream_status.py \
                 --out "$out" --max-rows "$max_rows" \
                 --curl-status "$curl_status" --gzip-status "$gzip_status" \
-                --python-status "$python_status"; then
+                --python-status "$python_status" --reader-status "$reader_status"; then
                 break
               fi
               if [ "$attempt" -ge 5 ]; then
@@ -214,5 +216,6 @@ jobs:
             reports/wikimatrix-inventory.tsv
             reports/tatoeba-version.txt
             reports/wikimatrix-*.log
+            reports/wikimatrix-*.stream.json
           if-no-files-found: error
           retention-days: 14
