@@ -162,6 +162,15 @@ dialog, update check that opens the release page.
 
 **Stage 4 -- voice, if the artefact exists. Not shipped.**
 
+### Window-state contract
+
+The custom Windows title bar treats floating geometry as durable user state.
+Maximized and fullscreen bounds are transient and must never overwrite the size
+and position used by Restore or by the next launch. A maximized title bar still
+accepts the maximize/restore button and double-click, but it is not draggable.
+F11 returns to the placement that was active before fullscreen, including a
+maximized window. Fullscreen itself is not persisted across launches.
+
 ## Build
 
 `build.yml` runs three independent platform jobs:

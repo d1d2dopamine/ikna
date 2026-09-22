@@ -1,6 +1,7 @@
 package dev.ikna.desktop
 
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -188,6 +189,33 @@ private class Geometry(
     val placement: WindowPlacement
 )
 
+private class WindowGeometryMemory(initial: Geometry) {
+    var floatingSize: DpSize = initial.size
+    var floatingPosition: WindowPosition = initial.position
+
+    fun capture(state: WindowState) {
+        floatingSize = state.size
+        floatingPosition = state.position
+    }
+
+    fun restore(state: WindowState) {
+        state.size = floatingSize
+        state.position = floatingPosition
+    }
+}
+
+private fun WindowPlacement.asDesktopPlacement(): DesktopWindowPlacement = when (this) {
+    WindowPlacement.Floating -> DesktopWindowPlacement.FLOATING
+    WindowPlacement.Maximized -> DesktopWindowPlacement.MAXIMIZED
+    WindowPlacement.Fullscreen -> DesktopWindowPlacement.FULLSCREEN
+}
+
+private fun DesktopWindowPlacement.asComposePlacement(): WindowPlacement = when (this) {
+    DesktopWindowPlacement.FLOATING -> WindowPlacement.Floating
+    DesktopWindowPlacement.MAXIMIZED -> WindowPlacement.Maximized
+    DesktopWindowPlacement.FULLSCREEN -> WindowPlacement.Fullscreen
+}
+
 private fun geometryFile(home: File) = File(home, "window.properties")
 
 private fun loadGeometry(home: File): Geometry {
@@ -223,19 +251,23 @@ private fun loadGeometry(home: File): Geometry {
     }.getOrDefault(fallback)
 }
 
-private fun saveGeometry(home: File, state: WindowState) {
+private fun saveGeometry(
+    home: File,
+    size: DpSize,
+    position: WindowPosition,
+    placement: DesktopWindowPlacement
+) {
     runCatching {
         val properties = Properties()
-        properties.setProperty("width", state.size.width.value.toString())
-        properties.setProperty("height", state.size.height.value.toString())
-        val position = state.position
+        properties.setProperty("width", size.width.value.toString())
+        properties.setProperty("height", size.height.value.toString())
         if (position.isSpecified) {
             properties.setProperty("x", position.x.value.toString())
             properties.setProperty("y", position.y.value.toString())
         }
         properties.setProperty(
             "maximized",
-            (state.placement == WindowPlacement.Maximized).toString()
+            (placement == DesktopWindowPlacement.MAXIMIZED).toString()
         )
         geometryFile(home).outputStream().use { properties.store(it, "Ikna window") }
     }
@@ -381,9 +413,41 @@ fun main(args: Array<String>) {
             position = geometry.position,
             placement = geometry.placement
         )
+        val geometryMemory = remember { WindowGeometryMemory(geometry) }
+        val placementMemory = remember { WindowPlacementMemory(geometry.placement.asDesktopPlacement()) }
 
+        // WindowState.size/position are rewritten by Compose when placement changes.
+        // Keep the user's floating bounds separately so maximized/fullscreen sizes
+        // can never become the next restore geometry.
+        LaunchedEffect(windowState.placement, windowState.size, windowState.position) {
+            val placement = windowState.placement.asDesktopPlacement()
+            placementMemory.observe(placement)
+            if (placement == DesktopWindowPlacement.FLOATING) geometryMemory.capture(windowState)
+        }
+
+        val toggleMaximize: () -> Unit = {
+            val current = windowState.placement.asDesktopPlacement()
+            if (current == DesktopWindowPlacement.FLOATING) geometryMemory.capture(windowState)
+            val target = placementMemory.toggleMaximize(current)
+            windowState.placement = target.asComposePlacement()
+            if (target == DesktopWindowPlacement.FLOATING) geometryMemory.restore(windowState)
+        }
+        val toggleFullscreen: () -> Unit = {
+            val current = windowState.placement.asDesktopPlacement()
+            if (current == DesktopWindowPlacement.FLOATING) geometryMemory.capture(windowState)
+            val target = placementMemory.toggleFullscreen(current)
+            windowState.placement = target.asComposePlacement()
+            if (target == DesktopWindowPlacement.FLOATING) geometryMemory.restore(windowState)
+        }
         val closeWindow: () -> Unit = {
-            saveGeometry(home, windowState)
+            val current = windowState.placement.asDesktopPlacement()
+            if (current == DesktopWindowPlacement.FLOATING) geometryMemory.capture(windowState)
+            saveGeometry(
+                home,
+                geometryMemory.floatingSize,
+                geometryMemory.floatingPosition,
+                placementMemory.persisted(current)
+            )
             logLine("exit")
             exitApplication()
         }
@@ -400,7 +464,7 @@ fun main(args: Array<String>) {
             // what it shows afterwards, and both have to be set to match.
             icon = painterResource("icon.png"),
             state = windowState,
-            onKeyEvent = { event -> handleWindowKey(event, ui, windowState) }
+            onKeyEvent = { event -> handleWindowKey(event, ui, toggleFullscreen) }
         ) {
             // Compose has no minimum size of its own: the window state only says
             // how big the window opens, and after that the frame can be dragged
@@ -417,7 +481,13 @@ fun main(args: Array<String>) {
             }
             IknaDesktopApp(container, ui, titleBar = { palette, showWordmark ->
                 if (customTitleBar && windowState.placement != WindowPlacement.Fullscreen) {
-                    IknaWindowTitleBar(windowState, palette, closeWindow, showWordmark)
+                    IknaWindowTitleBar(
+                        windowState,
+                        palette,
+                        closeWindow,
+                        toggleMaximize,
+                        showWordmark
+                    )
                 }
             })
         }
@@ -481,14 +551,6 @@ fun openFolder(home: File) {
     }.onFailure { error -> logLine("could not open the data folder: " + error) }
 }
 
-private fun toggleFullScreen(state: WindowState) {
-    state.placement = if (state.placement == WindowPlacement.Fullscreen) {
-        WindowPlacement.Floating
-    } else {
-        WindowPlacement.Fullscreen
-    }
-}
-
 /**
  * Window-level keys.
  *
@@ -496,10 +558,10 @@ private fun toggleFullScreen(state: WindowState) {
  * responds to -- space, the answer arrows and undo -- stays inside the session,
  * where it can be read next to the thing it acts on.
  */
-private fun handleWindowKey(event: KeyEvent, ui: DesktopUi, state: WindowState): Boolean {
+private fun handleWindowKey(event: KeyEvent, ui: DesktopUi, toggleFullscreen: () -> Unit): Boolean {
     if (event.type != KeyEventType.KeyDown) return false
     if (event.key == Key.F11) {
-        toggleFullScreen(state)
+        toggleFullscreen()
         return true
     }
     if (event.key == Key.F1) {

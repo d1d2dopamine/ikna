@@ -28,13 +28,17 @@ class DesignContracts(unittest.TestCase):
         shell = read(DESKTOP, 'Shell.kt')
         for text in ['undecorated = customTitleBar', 'resizable = !customTitleBar',
                      'windowState.placement != WindowPlacement.Fullscreen',
-                     'IknaWindowTitleBar(windowState, palette, closeWindow, showWordmark)',
-                     'onCloseRequest = closeWindow', 'saveGeometry(home, windowState)']:
+                     'IknaWindowTitleBar(', 'toggleMaximize',
+                     'onCloseRequest = closeWindow', 'geometryMemory.floatingSize',
+                     'geometryMemory.floatingPosition', 'placementMemory.persisted(current)']:
             self.assertIn(text, main)
-        for text in ['WindowDraggableArea(', 'state.isMinimized = true',
-                     'WindowPlacement.Maximized', 'WindowPlacement.Floating',
-                     'PointerEventPass.Initial', 'LocalWindowInfo', 'Role.Button',
-                     'IknaWordmark(', 'palette.background', 'collectIsFocusedAsState']:
+        for text in ['if (state.placement == WindowPlacement.Floating)',
+                     'WindowDraggableArea(modifier = titleModifier)',
+                     'Box(modifier = titleModifier) { titleContent() }',
+                     'state.isMinimized = true', 'WindowPlacement.Maximized',
+                     'WindowPlacement.Floating', 'PointerEventPass.Initial',
+                     'LocalWindowInfo', 'Role.Button', 'IknaWordmark(',
+                     'palette.background', 'collectIsFocusedAsState']:
             self.assertIn(text, bar)
         self.assertNotIn('.consume(', bar)
         self.assertIn('titleBar(palette, settings.onboardingDone)', shell)

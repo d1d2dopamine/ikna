@@ -57,25 +57,21 @@ fun WindowScope.IknaWindowTitleBar(
     state: WindowState,
     palette: IknaPalette,
     onClose: () -> Unit,
+    onToggleMaximize: () -> Unit,
     showWordmark: Boolean = true
 ) {
     val active = LocalWindowInfo.current.isWindowFocused
     val ink = if (active) palette.ink else palette.muted
-    val maximize: () -> Unit = {
-        state.placement = if (state.placement == WindowPlacement.Maximized) {
-            WindowPlacement.Floating
-        } else {
-            WindowPlacement.Maximized
-        }
-    }
     val clickInterval = remember {
         (Toolkit.getDefaultToolkit().getDesktopProperty("awt.multiClickInterval") as? Int)?.toLong() ?: 500L
     }
     Column(Modifier.fillMaxWidth().background(palette.background)) {
         Row(Modifier.fillMaxWidth().height((WINDOWS_TITLE_BAR_HEIGHT - 1).dp)) {
-            // Controls are siblings, not children of the draggable surface.
-            WindowDraggableArea(
-                modifier = Modifier.weight(1f).fillMaxHeight().pointerInput(state, clickInterval) {
+            // Controls are siblings, not children of the title surface. The
+            // draggable wrapper exists only while floating: a maximized window
+            // may still receive a double click to restore, but it must not move.
+            val titleModifier = Modifier.weight(1f).fillMaxHeight()
+                .pointerInput(state.placement, clickInterval) {
                     val clicks = TitleBarClicks(clickInterval, 4.dp.toPx())
                     awaitPointerEventScope {
                         while (true) {
@@ -86,19 +82,24 @@ fun WindowScope.IknaWindowTitleBar(
                                     point.uptimeMillis, point.position.x, point.position.y,
                                     window.x, window.y, event.buttons.isPrimaryPressed
                                 )
-                                PointerEventType.Move -> clicks.move(point.position.x, point.position.y, window.x, window.y)
+                                PointerEventType.Move -> clicks.move(
+                                    point.position.x, point.position.y, window.x, window.y
+                                )
                                 PointerEventType.Release -> if (clicks.release(
-                                    point.uptimeMillis, point.position.x, point.position.y, window.x, window.y
-                                )) maximize()
+                                    point.uptimeMillis, point.position.x, point.position.y,
+                                    window.x, window.y
+                                )) onToggleMaximize()
                                 else -> Unit
                             }
-                            // Observe only; consuming would break the drag handler.
+                            // Observe only; consuming would break WindowDraggableArea.
                         }
                     }
                 }
-            ) {
-                Box(Modifier.fillMaxWidth().fillMaxHeight().padding(start = Edge),
-                    contentAlignment = Alignment.CenterStart) {
+            val titleContent: @Composable () -> Unit = {
+                Box(
+                    Modifier.fillMaxWidth().fillMaxHeight().padding(start = Edge),
+                    contentAlignment = Alignment.CenterStart
+                ) {
                     if (showWordmark) {
                         IknaWordmark(
                             height = 16.dp,
@@ -108,10 +109,15 @@ fun WindowScope.IknaWindowTitleBar(
                     }
                 }
             }
+            if (state.placement == WindowPlacement.Floating) {
+                WindowDraggableArea(modifier = titleModifier) { titleContent() }
+            } else {
+                Box(modifier = titleModifier) { titleContent() }
+            }
             WindowButton(WindowMark.MINIMIZE, S.t("pc.017"), ink, palette) { state.isMinimized = true }
             val maximized = state.placement == WindowPlacement.Maximized
             WindowButton(if (maximized) WindowMark.RESTORE else WindowMark.MAXIMIZE,
-                S.t(if (maximized) "pc.019" else "pc.018"), ink, palette, maximize)
+                S.t(if (maximized) "pc.019" else "pc.018"), ink, palette, onToggleMaximize)
             WindowButton(WindowMark.CLOSE, S.t("pc.020"), ink, palette, onClose)
         }
         Box(Modifier.fillMaxWidth().height(1.dp).background(palette.line))
