@@ -1,7 +1,10 @@
 name: catalogue v2 supply census
 
-# Part 5 diagnostic workflow. It measures source supply and never writes to the
-# public `catalog` release or changes application behaviour.
+# Part 5 diagnostic workflow. It never writes to the public `catalog` release
+# or changes application behaviour. Large WikiMatrix acquisition is split into
+# rank and pair-measurement jobs; raw candidate JSONL stays local to each runner.
+# The shard contracts are tested against the original monolithic census so the
+# parallel workflow changes execution shape, not supply/selection semantics.
 on:
   workflow_dispatch:
     inputs:
@@ -21,16 +24,20 @@ on:
         description: "Minimum WikiMatrix margin score"
         default: "1.04"
       wikimatrix_max_rows:
-        description: "High-score WikiMatrix rows measured per physical pair; 0 = no row cap"
-        default: "50000"
+        description: "Part 5 evidence bound per physical pair; 0 = no row cap"
+        default: "500000"
 
 permissions:
   contents: read
 
+concurrency:
+  group: catalogue-v2-supply-census
+  cancel-in-progress: false
+
 jobs:
   contracts:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
@@ -43,25 +50,237 @@ jobs:
           python3 tools/catalog/test_ingestion.py
           python3 tools/catalog/test_build_catalogue_v2.py
           python3 tools/catalog/test_supply_census.py
+          python3 tools/catalog/test_supply_census_shards.py
           python3 tools/catalog/test_wikimatrix_stream_status.py
 
-  supply-census:
+  plan-wikimatrix:
     needs: contracts
     runs-on: ubuntu-24.04
-    timeout-minutes: 360
+    timeout-minutes: 10
+    outputs:
+      pairs: ${{ steps.matrix.outputs.pairs }}
+      pair_count: ${{ steps.matrix.outputs.pair_count }}
+      rank_languages: ${{ steps.matrix.outputs.rank_languages }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Plan direct pairs and shard matrices
+        id: matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p reports handoff
+          python3 tools/catalog/wikimatrix_plan.py \
+            --langs "${{ inputs.learn }},${{ inputs.meanings }}" \
+            --all-direct > reports/wikimatrix-plan.tsv
+          cat reports/wikimatrix-plan.tsv
+          python3 - "${{ inputs.learn }}" "${{ inputs.meanings }}" "$GITHUB_OUTPUT" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
 
-      - name: Prepare census workspace
+          def codes(raw):
+              return list(dict.fromkeys(part.strip().lower() for part in raw.split(",") if part.strip()))
+
+          learn = codes(sys.argv[1])
+          meanings = codes(sys.argv[2])
+          if not learn or not meanings:
+              raise SystemExit("learn/meanings must not be empty")
+          planned = {}
+          for number, raw in enumerate(Path("reports/wikimatrix-plan.tsv").read_text(encoding="utf-8").splitlines(), start=1):
+              parts = raw.split("\t")
+              if len(parts) != 3 or not all(parts):
+                  raise SystemExit(f"invalid WikiMatrix plan row {number}: {raw!r}")
+              first, second, url = parts
+              key = tuple(sorted((first, second)))
+              if key in planned:
+                  raise SystemExit(f"duplicate WikiMatrix plan pair: {key}")
+              planned[key] = (first, second, url)
+
+          union = sorted(set(learn) | set(meanings))
+          expected = {
+              (union[left], union[right])
+              for left in range(len(union))
+              for right in range(left + 1, len(union))
+          }
+          missing = sorted(expected - set(planned))
+          extra = sorted(set(planned) - expected)
+          if missing or extra:
+              raise SystemExit(f"WikiMatrix planner mismatch: missing={missing} extra={extra}")
+
+          pairs = []
+          for key in sorted(expected):
+              first, second, url = planned[key]
+              pairs.append({
+                  "first": first,
+                  "second": second,
+                  "url": url,
+                  "firstLearn": first in learn,
+                  "secondLearn": second in learn,
+              })
+          with open(sys.argv[3], "a", encoding="utf-8") as handle:
+              handle.write("pairs=" + json.dumps(pairs, separators=(",", ":")) + "\n")
+              handle.write(f"pair_count={len(pairs)}\n")
+              handle.write("rank_languages=" + json.dumps(learn, separators=(",", ":")) + "\n")
+          PY
+          cp reports/wikimatrix-plan.tsv handoff/
+      - name: Upload pair plan
+        uses: actions/upload-artifact@v6
+        with:
+          name: supply-census-plan
+          path: handoff/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  knowledge-ranks:
+    needs: [contracts, plan-wikimatrix]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      # Each rank job streams only the physical pairs involving one learning
+      # language. Four concurrent jobs avoid hammering the upstream host.
+      max-parallel: 4
+      matrix:
+        lang: ${{ fromJSON(needs.plan-wikimatrix.outputs.rank_languages) }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v5
+        with:
+          name: supply-census-plan
+          path: plan
+      - name: Prepare segmentation runtime when needed
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "${{ matrix.lang }}" in
+            zh|ja|ko)
+              sudo apt-get update -qq
+              sudo apt-get install -y -qq libicu-dev
+              ;;
+          esac
+      - name: Build global Knowledge ranks for one learning language
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p candidates reports/rank-parts handoff
+          lang="${{ matrix.lang }}"
+          max_rows="${{ inputs.wikimatrix_max_rows }}"
+          rank_parts=()
+          case "$max_rows" in (*[!0-9]*|'') echo "wikimatrix_max_rows must be a non-negative integer" >&2; exit 2;; esac
+
+          while IFS=$'\t' read -r first second url; do
+            if [ "$first" != "$lang" ] && [ "$second" != "$lang" ]; then
+              continue
+            fi
+            echo "Ranking WikiMatrix $first-$second for $lang"
+            http_code=$(curl --location --silent --show-error --http1.1 \
+              --connect-timeout 30 --retry 4 --retry-all-errors \
+              --head --output /dev/null --write-out '%{http_code}' "$url" || true)
+            if [ "$http_code" = "404" ]; then
+              continue
+            fi
+            case "$http_code" in
+              200|206) ;;
+              *) echo "WikiMatrix availability probe returned HTTP $http_code for $url" >&2; exit 1;;
+            esac
+
+            out="candidates/wikimatrix-${first}-${second}.jsonl.gz"
+            log="reports/rank-${first}-${second}.log"
+            reader_status="reports/rank-${first}-${second}.stream.json"
+            cmd=(
+              python3 tools/catalog/ingest_sources.py wikimatrix-pair
+              --tsv - --first "$first" --second "$second"
+              --min-score "${{ inputs.wikimatrix_min_score }}"
+              --source-version v1
+              --out "$out"
+              --stream-status "$reader_status"
+            )
+            if [ "$max_rows" -gt 0 ]; then
+              cmd+=(--max-rows "$max_rows")
+            fi
+
+            attempt=1
+            while :; do
+              rm -f "$out" "$log" "$reader_status"
+              set +e
+              curl --fail --location --silent --show-error --http1.1 \
+                --connect-timeout 30 "$url" \
+                | gzip -dc \
+                | "${cmd[@]}" >"$log" 2>&1
+              status=("${PIPESTATUS[@]}")
+              set -e
+              if python3 tools/catalog/wikimatrix_stream_status.py \
+                --out "$out" --max-rows "$max_rows" \
+                --curl-status "${status[0]}" --gzip-status "${status[1]}" \
+                --python-status "${status[2]}" --reader-status "$reader_status"; then
+                break
+              fi
+              if [ "$attempt" -ge 5 ]; then
+                cat "$log" || true
+                echo "WikiMatrix rank stream failed for $first-$second" >&2
+                exit 1
+              fi
+              attempt=$((attempt + 1))
+              sleep $((attempt * 3))
+            done
+
+            if [ "$first" = "$lang" ]; then
+              meaning="$second"
+            else
+              meaning="$first"
+            fi
+            part="reports/rank-parts/rank-counts-${lang}-${meaning}.tsv.gz"
+            python3 tools/catalog/supply_census_shards.py rank-part \
+              --candidate "$out" \
+              --collection knowledge \
+              --lang "$lang" \
+              --meaning "$meaning" \
+              --out "$part"
+            rank_parts+=("$part")
+            # The global rank needs token counts, not the multi-million-line
+            # candidate JSONL. Keep only the compact contribution before
+            # moving to the next physical pair so runner disk remains bounded.
+            rm -f "$out"
+          done < plan/wikimatrix-plan.tsv
+
+          python3 tools/catalog/supply_census_shards.py ranks \
+            --parts "${rank_parts[@]}" \
+            --collection knowledge \
+            --lang "$lang" \
+            --out "reports/ranks-${lang}.tsv.gz"
+          cp "reports/ranks-${lang}.tsv.gz" handoff/
+          ls -lh "reports/ranks-${lang}.tsv.gz"
+      - name: Upload compact Knowledge ranks
+        uses: actions/upload-artifact@v6
+        with:
+          name: supply-ranks-${{ matrix.lang }}
+          path: handoff/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  tatoeba:
+    needs: contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Prepare Everyday workspace
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq libicu-dev
-          mkdir -p corpus candidates reports
-
-      - name: Tatoeba Everyday candidates
+          mkdir -p corpus candidates reports handoff/shards
+      - name: Measure Tatoeba Everyday locally
         shell: bash
         run: |
           set -euo pipefail
@@ -91,43 +310,94 @@ jobs:
             --source-version "$tatoeba_version" \
             --out candidates/tatoeba.jsonl.gz
           rm -rf corpus
-          ls -lh candidates/tatoeba.jsonl.gz
 
-      - name: Plan every direct WikiMatrix pair
+          python3 tools/catalog/supply_census_shards.py measure-everyday \
+            --candidate candidates/tatoeba.jsonl.gz \
+            --learn "${{ inputs.learn }}" \
+            --meanings "${{ inputs.meanings }}" \
+            --max-deck "${{ inputs.max_deck }}" \
+            --min-deck "${{ inputs.min_deck }}" \
+            --staging reports/everyday.sqlite3 \
+            --out reports/everyday.json
+          cp reports/everyday.json handoff/shards/
+          cp reports/tatoeba-version.txt handoff/
+      - name: Upload Everyday metrics
+        uses: actions/upload-artifact@v6
+        with:
+          name: supply-census-everyday
+          path: handoff/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  knowledge-pair:
+    needs: [contracts, plan-wikimatrix, knowledge-ranks]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        pair: ${{ fromJSON(needs.plan-wikimatrix.outputs.pairs) }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Prepare pair workspace
         shell: bash
         run: |
           set -euo pipefail
-          python3 tools/catalog/wikimatrix_plan.py \
-            --langs "${{ inputs.learn }},${{ inputs.meanings }}" \
-            --all-direct > reports/wikimatrix-plan.tsv
-          cat reports/wikimatrix-plan.tsv
-          printf 'first\tsecond\tstatus\tretained_rows\tacquisition_capped\turl\n' > reports/wikimatrix-inventory.tsv
-
-      - name: Stream bounded direct WikiMatrix candidates
+          first="${{ matrix.pair.first }}"
+          second="${{ matrix.pair.second }}"
+          case "$first,$second" in
+            *zh*|*ja*|*ko*)
+              sudo apt-get update -qq
+              sudo apt-get install -y -qq libicu-dev
+              ;;
+          esac
+          mkdir -p candidates reports ranks handoff/shards handoff/inventory handoff/logs
+      - name: Download first-language ranks
+        if: ${{ matrix.pair.firstLearn }}
+        uses: actions/download-artifact@v5
+        with:
+          name: supply-ranks-${{ matrix.pair.first }}
+          path: ranks
+      - name: Download second-language ranks
+        if: ${{ matrix.pair.secondLearn }}
+        uses: actions/download-artifact@v5
+        with:
+          name: supply-ranks-${{ matrix.pair.second }}
+          path: ranks
+      - name: Measure one physical WikiMatrix pair
         shell: bash
         run: |
           set -euo pipefail
+          first="${{ matrix.pair.first }}"
+          second="${{ matrix.pair.second }}"
+          url="${{ matrix.pair.url }}"
           max_rows="${{ inputs.wikimatrix_max_rows }}"
           case "$max_rows" in (*[!0-9]*|'') echo "wikimatrix_max_rows must be a non-negative integer" >&2; exit 2;; esac
 
-          while IFS=$'\t' read -r first second url; do
-            [ -n "$url" ] || continue
-            echo "Checking WikiMatrix $first-$second"
-            http_code=$(curl --location --silent --show-error --http1.1 \
-              --connect-timeout 30 --retry 4 --retry-all-errors \
-              --head --output /dev/null --write-out '%{http_code}' "$url" || true)
-            if [ "$http_code" = "404" ]; then
-              printf '%s\t%s\tmissing\t0\tfalse\t%s\n' "$first" "$second" "$url" >> reports/wikimatrix-inventory.tsv
-              continue
-            fi
+          out="candidates/wikimatrix-${first}-${second}.jsonl.gz"
+          log="reports/wikimatrix-${first}-${second}.log"
+          reader_status="reports/wikimatrix-${first}-${second}.stream.json"
+          inventory="reports/wikimatrix-${first}-${second}.inventory.tsv"
+          printf 'first\tsecond\tstatus\tretained_rows\tacquisition_capped\turl\n' > "$inventory"
+
+          echo "Checking WikiMatrix $first-$second"
+          http_code=$(curl --location --silent --show-error --http1.1 \
+            --connect-timeout 30 --retry 4 --retry-all-errors \
+            --head --output /dev/null --write-out '%{http_code}' "$url" || true)
+          if [ "$http_code" = "404" ]; then
+            printf '%s\t%s\tmissing\t0\tfalse\t%s\n' "$first" "$second" "$url" >> "$inventory"
+            gzip -c </dev/null > "$out"
+          else
             case "$http_code" in
               200|206) ;;
               *) echo "WikiMatrix availability probe returned HTTP $http_code for $url" >&2; exit 1;;
             esac
 
-            out="candidates/wikimatrix-${first}-${second}.jsonl.gz"
-            log="reports/wikimatrix-${first}-${second}.log"
-            reader_status="reports/wikimatrix-${first}-${second}.stream.json"
             cmd=(
               python3 tools/catalog/ingest_sources.py wikimatrix-pair
               --tsv - --first "$first" --second "$second"
@@ -140,9 +410,6 @@ jobs:
               cmd+=(--max-rows "$max_rows")
             fi
 
-            # WikiMatrix is score-sorted. Feeding decompressed TSV over stdin lets
-            # the adapter stop at the requested high-score prefix without first
-            # storing the complete (sometimes very large) upstream archive.
             attempt=1
             while :; do
               rm -f "$out" "$log" "$reader_status"
@@ -153,22 +420,17 @@ jobs:
                 | "${cmd[@]}" >"$log" 2>&1
               status=("${PIPESTATUS[@]}")
               set -e
-
-              curl_status=${status[0]}
-              gzip_status=${status[1]}
-              python_status=${status[2]}
               if python3 tools/catalog/wikimatrix_stream_status.py \
                 --out "$out" --max-rows "$max_rows" \
-                --curl-status "$curl_status" --gzip-status "$gzip_status" \
-                --python-status "$python_status" --reader-status "$reader_status"; then
+                --curl-status "${status[0]}" --gzip-status "${status[1]}" \
+                --python-status "${status[2]}" --reader-status "$reader_status"; then
                 break
               fi
               if [ "$attempt" -ge 5 ]; then
                 cat "$log" || true
-                echo "WikiMatrix stream failed for $first-$second (curl=$curl_status gzip=$gzip_status python=$python_status)" >&2
+                echo "WikiMatrix stream failed for $first-$second" >&2
                 exit 1
               fi
-              echo "WikiMatrix stream failed for $first-$second on attempt $attempt/5; retrying..." >&2
               attempt=$((attempt + 1))
               sleep $((attempt * 3))
             done
@@ -182,28 +444,116 @@ jobs:
               capped=true
             fi
             printf '%s\t%s\tavailable\t%s\t%s\t%s\n' \
-              "$first" "$second" "$retained_rows" "$capped" "$url" >> reports/wikimatrix-inventory.tsv
-            sleep 1
-          done < reports/wikimatrix-plan.tsv
+              "$first" "$second" "$retained_rows" "$capped" "$url" >> "$inventory"
+          fi
 
-          cat reports/wikimatrix-inventory.tsv
-          du -sh candidates
-
-      - name: Measure pre-cap supply and current capped selection
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tools/catalog/supply_census.py \
-            --candidates candidates/*.jsonl.gz \
+          python3 tools/catalog/supply_census_shards.py measure-pair \
+            --candidate "$out" \
+            --inventory "$inventory" \
+            --first "$first" --second "$second" \
+            --ranks-dir ranks \
             --learn "${{ inputs.learn }}" \
             --meanings "${{ inputs.meanings }}" \
             --max-deck "${{ inputs.max_deck }}" \
             --min-deck "${{ inputs.min_deck }}" \
-            --wikimatrix-inventory reports/wikimatrix-inventory.tsv \
-            --staging reports/supply-census.sqlite3 \
+            --staging "reports/${first}-${second}.sqlite3" \
+            --out "reports/knowledge-${first}-${second}.json"
+
+          cp "reports/knowledge-${first}-${second}.json" handoff/shards/
+          cp "$inventory" handoff/inventory/
+          if [ -f "$log" ]; then cp "$log" handoff/logs/; fi
+          if [ -f "$reader_status" ]; then cp "$reader_status" handoff/logs/; fi
+      - name: Upload compact pair evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: supply-pair-${{ matrix.pair.first }}-${{ matrix.pair.second }}
+          path: handoff/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  supply-census:
+    needs: [contracts, plan-wikimatrix, tatoeba, knowledge-pair]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download plan and measured shards
+        uses: actions/download-artifact@v5
+        with:
+          name: supply-census-plan
+          path: parts/plan
+      - uses: actions/download-artifact@v5
+        with:
+          name: supply-census-everyday
+          path: parts
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: supply-pair-*
+          path: parts
+          merge-multiple: true
+
+      - name: Assemble and verify Part 5 report
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          python3 tools/catalog/supply_census_shards.py assemble \
+            --everyday parts/shards/everyday.json \
+            --knowledge-shards parts/shards/knowledge-*.json \
+            --learn "${{ inputs.learn }}" \
+            --meanings "${{ inputs.meanings }}" \
+            --max-deck "${{ inputs.max_deck }}" \
+            --min-deck "${{ inputs.min_deck }}" \
             --json reports/CATALOGUE-V2-SUPPLY.json \
             --markdown reports/CATALOGUE-V2-SUPPLY.md
+
+          python3 - "${{ needs.plan-wikimatrix.outputs.pair_count }}" "${{ inputs.learn }}" "${{ inputs.meanings }}" <<'PY'
+          import csv
+          import sys
+          from pathlib import Path
+
+          expected_count = int(sys.argv[1])
+          learn = {part.strip().lower() for part in sys.argv[2].split(",") if part.strip()}
+          meanings = {part.strip().lower() for part in sys.argv[3].split(",") if part.strip()}
+          union = sorted(learn | meanings)
+          expected = {
+              (union[left], union[right])
+              for left in range(len(union))
+              for right in range(left + 1, len(union))
+          }
+          if len(expected) != expected_count:
+              raise SystemExit(f"pair-count mismatch: output={expected_count} matrix={len(expected)}")
+
+          rows = []
+          for shard in sorted(Path("parts/inventory").glob("wikimatrix-*.inventory.tsv")):
+              with shard.open(encoding="utf-8", newline="") as handle:
+                  parsed = list(csv.DictReader(handle, delimiter="\t"))
+              if len(parsed) != 1:
+                  raise SystemExit(f"inventory shard must contain one row: {shard}")
+              rows.append(parsed[0])
+          actual = [tuple(sorted((row["first"], row["second"]))) for row in rows]
+          if len(rows) != expected_count or set(actual) != expected or len(actual) != len(set(actual)):
+              raise SystemExit(
+                  f"WikiMatrix inventory completeness failure: expected={expected_count} rows={len(rows)} unique={len(set(actual))}"
+              )
+          rows.sort(key=lambda row: (row["first"], row["second"]))
+          fields = ["first", "second", "status", "retained_rows", "acquisition_capped", "url"]
+          with Path("reports/wikimatrix-inventory.tsv").open("w", encoding="utf-8", newline="") as handle:
+              writer = csv.DictWriter(handle, fieldnames=fields, delimiter="\t", lineterminator="\n")
+              writer.writeheader()
+              writer.writerows(rows)
+          PY
+
+          cp parts/plan/wikimatrix-plan.tsv reports/
+          cp parts/tatoeba-version.txt reports/
+          if [ -d parts/logs ]; then cp -f parts/logs/* reports/ 2>/dev/null || true; fi
           cat reports/CATALOGUE-V2-SUPPLY.md >> "$GITHUB_STEP_SUMMARY"
+          cat reports/wikimatrix-inventory.tsv
 
       - name: Keep Part 5 evidence
         uses: actions/upload-artifact@v6

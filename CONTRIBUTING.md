@@ -113,6 +113,9 @@ python3 tools/catalog/test_v1_v2_parity.py
 python3 tools/catalog/test_meta_info.py
 python3 tools/catalog/test_readiness_audit.py
 python3 tools/catalog/test_storage_experiment.py
+python3 tools/catalog/test_supply_census.py
+python3 tools/catalog/test_supply_census_shards.py
+python3 tools/catalog/test_wikimatrix_stream_status.py
 ```
 
 Do not replace a failing check by weakening the check unless the documented

@@ -202,6 +202,117 @@ def classify_pair(
     return "measured"
 
 
+def build_pair_row(
+    db: sqlite3.Connection,
+    collection: str,
+    source_family: str,
+    lang: str,
+    meaning_lang: str,
+    ranks: dict[str, int],
+    max_deck: int,
+    min_deck: int,
+    function_top: int,
+    inventory: dict[tuple[str, str], dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Measure one directed pair using already-established collection ranks."""
+    input_stats = pair_input_stats(db, collection, lang, meaning_lang, source_family)
+    measured = measure_pair(
+        db,
+        collection,
+        lang,
+        meaning_lang,
+        ranks,
+        max_deck,
+        min_deck,
+        function_top,
+    )
+    inventory = inventory or {}
+    if collection == "knowledge":
+        source_meta = dict(inventory.get(tuple(sorted((lang, meaning_lang))), {}))
+        if not source_meta:
+            source_meta = {
+                "status": "available" if input_stats["inputCandidates"] else "unknown",
+                "retainedRows": input_stats["inputCandidates"],
+                "acquisitionCapped": False,
+                "url": "",
+            }
+    else:
+        source_meta = {
+            "status": "available" if input_stats["inputCandidates"] else "no-direct-rows",
+            "retainedRows": input_stats["inputCandidates"],
+            "acquisitionCapped": False,
+            "url": "",
+        }
+    return {
+        "collection": collection,
+        "sourceFamily": source_family,
+        "lang": lang,
+        "meaningLang": meaning_lang,
+        "source": source_meta,
+        "input": input_stats,
+        **measured,
+        "diagnosis": classify_pair(collection, measured, source_meta, max_deck),
+    }
+
+
+def report_from_rows(
+    learn: list[str],
+    meanings: list[str],
+    max_deck: int,
+    min_deck: int,
+    function_top: int,
+    stage: dict[str, Any],
+    rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Build the stable Part 5 report envelope from measured directed rows."""
+    deck_levels = [
+        (row, level)
+        for row in rows
+        for level in core.LEVELS
+        if row["currentSelectedTargets"][level] > 0 or row["eligibleTargets"][level] > 0
+    ]
+    capped_levels = sum(
+        1
+        for row, level in deck_levels
+        if row["currentSelectedTargets"][level] >= max_deck
+        and row["eligibleTargets"][level] > row["currentSelectedTargets"][level]
+    )
+    thin_levels = sum(1 for row, level in deck_levels if row["currentSelectedTargets"][level] < 1000)
+    below_min_levels = sum(1 for row, level in deck_levels if row["currentSelectedTargets"][level] < min_deck)
+    lower_bound_pairs = sum(1 for row in rows if row["diagnosis"] == "source-scan-lower-bound")
+    missing_wikimatrix = sum(
+        1 for row in rows if row["collection"] == "knowledge" and row["diagnosis"] == "no-direct-source-file"
+    )
+
+    return {
+        "reportVersion": 1,
+        "purpose": "Catalogue v2 Part 5 supply census",
+        "limits": {
+            "maxDeckTargets": max_deck,
+            "minDeckTargets": min_deck,
+            "functionTop": function_top,
+        },
+        "staging": stage,
+        "summary": {
+            "plannedDirectedPairsPerCollection": sum(1 for lang in learn for meaning in meanings if lang != meaning),
+            "pairCollectionRows": len(rows),
+            "deckLevelsWithSupply": len(deck_levels),
+            "deckLevelsArtificiallyTruncated": capped_levels,
+            "deckLevelsBelow1000CurrentTargets": thin_levels,
+            "deckLevelsBelowMinDeck": below_min_levels,
+            "knowledgePairsWithLowerBoundOnly": lower_bound_pairs,
+            "knowledgeDirectedPairsWithoutDirectSourceFile": missing_wikimatrix,
+            "eligibleTargetsAcrossPairLevels": sum(
+                sum(row["eligibleTargets"].values()) for row in rows
+            ),
+            "currentSelectedTargetsAcrossPairLevels": sum(
+                sum(row["currentSelectedTargets"].values()) for row in rows
+            ),
+        },
+        "pairs": rows,
+    }
+
+
 def build_report(args: argparse.Namespace) -> dict[str, Any]:
     learn = parse_codes(args.learn)
     meanings = parse_codes(args.meanings)
@@ -229,96 +340,34 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
                 for meaning_lang in meanings:
                     if lang == meaning_lang:
                         continue
-                    input_stats = pair_input_stats(db, collection, lang, meaning_lang, source_family)
-                    measured = measure_pair(
-                        db,
-                        collection,
-                        lang,
-                        meaning_lang,
-                        ranks,
-                        args.max_deck,
-                        args.min_deck,
-                        args.function_top,
-                    )
-                    if collection == "knowledge":
-                        source_meta = dict(inventory.get(tuple(sorted((lang, meaning_lang))), {}))
-                        if not source_meta:
-                            source_meta = {
-                                "status": "available" if input_stats["inputCandidates"] else "unknown",
-                                "retainedRows": input_stats["inputCandidates"],
-                                "acquisitionCapped": False,
-                                "url": "",
-                            }
-                    else:
-                        source_meta = {
-                            "status": "available" if input_stats["inputCandidates"] else "no-direct-rows",
-                            "retainedRows": input_stats["inputCandidates"],
-                            "acquisitionCapped": False,
-                            "url": "",
-                        }
                     rows.append(
-                        {
-                            "collection": collection,
-                            "sourceFamily": source_family,
-                            "lang": lang,
-                            "meaningLang": meaning_lang,
-                            "source": source_meta,
-                            "input": input_stats,
-                            **measured,
-                            "diagnosis": classify_pair(collection, measured, source_meta, args.max_deck),
-                        }
+                        build_pair_row(
+                            db,
+                            collection,
+                            source_family,
+                            lang,
+                            meaning_lang,
+                            ranks,
+                            args.max_deck,
+                            args.min_deck,
+                            args.function_top,
+                            inventory,
+                        )
                     )
     finally:
         db.close()
         if not args.keep_staging and staging.exists():
             staging.unlink()
 
-    deck_levels = [
-        (row, level)
-        for row in rows
-        for level in core.LEVELS
-        if row["currentSelectedTargets"][level] > 0 or row["eligibleTargets"][level] > 0
-    ]
-    capped_levels = sum(
-        1
-        for row, level in deck_levels
-        if row["currentSelectedTargets"][level] >= args.max_deck
-        and row["eligibleTargets"][level] > row["currentSelectedTargets"][level]
+    return report_from_rows(
+        learn,
+        meanings,
+        args.max_deck,
+        args.min_deck,
+        args.function_top,
+        stage,
+        rows,
     )
-    thin_levels = sum(1 for row, level in deck_levels if row["currentSelectedTargets"][level] < 1000)
-    below_min_levels = sum(1 for row, level in deck_levels if row["currentSelectedTargets"][level] < args.min_deck)
-    lower_bound_pairs = sum(1 for row in rows if row["diagnosis"] == "source-scan-lower-bound")
-    missing_wikimatrix = sum(
-        1 for row in rows if row["collection"] == "knowledge" and row["diagnosis"] == "no-direct-source-file"
-    )
-
-    return {
-        "reportVersion": 1,
-        "purpose": "Catalogue v2 Part 5 supply census",
-        "limits": {
-            "maxDeckTargets": args.max_deck,
-            "minDeckTargets": args.min_deck,
-            "functionTop": args.function_top,
-        },
-        "staging": stage,
-        "summary": {
-            "plannedDirectedPairsPerCollection": sum(1 for lang in learn for meaning in meanings if lang != meaning),
-            "pairCollectionRows": len(rows),
-            "deckLevelsWithSupply": len(deck_levels),
-            "deckLevelsArtificiallyTruncated": capped_levels,
-            "deckLevelsBelow1000CurrentTargets": thin_levels,
-            "deckLevelsBelowMinDeck": below_min_levels,
-            "knowledgePairsWithLowerBoundOnly": lower_bound_pairs,
-            "knowledgeDirectedPairsWithoutDirectSourceFile": missing_wikimatrix,
-            "eligibleTargetsAcrossPairLevels": sum(
-                sum(row["eligibleTargets"].values()) for row in rows
-            ),
-            "currentSelectedTargetsAcrossPairLevels": sum(
-                sum(row["currentSelectedTargets"].values()) for row in rows
-            ),
-        },
-        "pairs": rows,
-    }
 
 
 def counts_cell(row: dict[str, Any], field: str) -> str:
