@@ -26,12 +26,17 @@ class DesignContracts(unittest.TestCase):
         main = read(DESKTOP, 'Main.kt')
         bar = read(DESKTOP, 'WindowTitleBar.kt')
         shell = read(DESKTOP, 'Shell.kt')
-        for text in ['undecorated = customTitleBar', 'resizable = !customTitleBar',
+        for text in ['WindowDecoration.Undecorated(', 'WindowDecoration.SystemDefault',
+                     'WindowDecorationDefaults.ResizerThickness', 'resizable = true',
                      'windowState.placement != WindowPlacement.Fullscreen',
                      'IknaWindowTitleBar(', 'toggleMaximize',
                      'onCloseRequest = closeWindow', 'geometryMemory.floatingSize',
-                     'geometryMemory.floatingPosition', 'placementMemory.persisted(current)']:
+                     'geometryMemory.floatingPosition', 'placementMemory.persisted(current)',
+                     'LaunchedEffect(windowState.placement)', 'geometryMemory.requestRestore()',
+                     'geometryMemory.restoreAfterPlacement(windowState)']:
             self.assertIn(text, main)
+        self.assertNotIn('LaunchedEffect(windowState.placement, windowState.size, windowState.position)', main)
+        self.assertNotIn('resizable = !customTitleBar || windowState.placement', main)
         for text in ['if (state.placement == WindowPlacement.Floating)',
                      'WindowDraggableArea(modifier = titleModifier)',
                      'Box(modifier = titleModifier) { titleContent() }',

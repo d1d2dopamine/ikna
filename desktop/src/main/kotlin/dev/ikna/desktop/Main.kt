@@ -2,6 +2,7 @@ package dev.ikna.desktop
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -191,16 +192,35 @@ private class Geometry(
 
 private class WindowGeometryMemory(initial: Geometry) {
     var floatingSize: DpSize = initial.size
+        private set
     var floatingPosition: WindowPosition = initial.position
+        private set
+    private var restorePending = false
 
     fun capture(state: WindowState) {
+        // A placement transition rewrites WindowState.size/position. Never let
+        // those transient maximized/fullscreen bounds replace the last real
+        // floating bounds while Restore is still settling.
+        if (restorePending) return
         floatingSize = state.size
         floatingPosition = state.position
     }
 
-    fun restore(state: WindowState) {
-        state.size = floatingSize
-        state.position = floatingPosition
+    fun requestRestore() {
+        restorePending = true
+    }
+
+    fun restoreAfterPlacement(state: WindowState) {
+        if (!restorePending) return
+        // Compose Desktop applies state in size -> position -> placement order.
+        // Restoring bounds in the same state change as placement therefore
+        // resizes the native window while it is still maximized/fullscreen.
+        // This method runs from a placement effect, after the native placement
+        // update has been committed, so at most one cheap corrective bounds
+        // update is needed and normally the native restore already matches.
+        if (state.size != floatingSize) state.size = floatingSize
+        if (state.position != floatingPosition) state.position = floatingPosition
+        restorePending = false
     }
 }
 
@@ -328,6 +348,7 @@ private fun selfTest(home: File): Int = try {
     1
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 fun main(args: Array<String>) {
     if (args.any { it == "--selftest" }) {
         // Where the test runs is an input, because the packaged launcher is a
@@ -416,28 +437,36 @@ fun main(args: Array<String>) {
         val geometryMemory = remember { WindowGeometryMemory(geometry) }
         val placementMemory = remember { WindowPlacementMemory(geometry.placement.asDesktopPlacement()) }
 
-        // WindowState.size/position are rewritten by Compose when placement changes.
-        // Keep the user's floating bounds separately so maximized/fullscreen sizes
-        // can never become the next restore geometry.
-        LaunchedEffect(windowState.placement, windowState.size, windowState.position) {
+        // WindowState.size/position change for every native resize/move event. Do
+        // not key an effect on them: doing so cancels and relaunches a coroutine
+        // for every pixel while the user drags an edge, which made the window
+        // itself feel much heavier than the UI it contains. Floating bounds are
+        // captured only at the transitions that can destroy them, and on close.
+        LaunchedEffect(windowState.placement) {
             val placement = windowState.placement.asDesktopPlacement()
             placementMemory.observe(placement)
-            if (placement == DesktopWindowPlacement.FLOATING) geometryMemory.capture(windowState)
+            if (placement == DesktopWindowPlacement.FLOATING) {
+                geometryMemory.restoreAfterPlacement(windowState)
+            }
         }
 
         val toggleMaximize: () -> Unit = {
             val current = windowState.placement.asDesktopPlacement()
             if (current == DesktopWindowPlacement.FLOATING) geometryMemory.capture(windowState)
             val target = placementMemory.toggleMaximize(current)
+            if (target == DesktopWindowPlacement.FLOATING) geometryMemory.requestRestore()
+            // Placement changes alone in this frame. If Restore needs a bounds
+            // correction it happens after the native placement update above,
+            // not before it inside Compose Desktop's size -> position -> placement
+            // update order.
             windowState.placement = target.asComposePlacement()
-            if (target == DesktopWindowPlacement.FLOATING) geometryMemory.restore(windowState)
         }
         val toggleFullscreen: () -> Unit = {
             val current = windowState.placement.asDesktopPlacement()
             if (current == DesktopWindowPlacement.FLOATING) geometryMemory.capture(windowState)
             val target = placementMemory.toggleFullscreen(current)
+            if (target == DesktopWindowPlacement.FLOATING) geometryMemory.requestRestore()
             windowState.placement = target.asComposePlacement()
-            if (target == DesktopWindowPlacement.FLOATING) geometryMemory.restore(windowState)
         }
         val closeWindow: () -> Unit = {
             val current = windowState.placement.asDesktopPlacement()
@@ -453,10 +482,23 @@ fun main(args: Array<String>) {
         }
         Window(
             onCloseRequest = closeWindow,
-            undecorated = customTitleBar,
-            // Compose handles floating-window resizing. Do not leave resize
-            // handles over the maximize/close controls in a maximized window.
-            resizable = !customTitleBar || windowState.placement == WindowPlacement.Floating,
+            decoration = if (customTitleBar) {
+                // Keep JFrame resizable=true for the lifetime of the window.
+                // Toggling Frame.setResizable together with maximize/fullscreen
+                // changes the native Windows frame style and adds another costly
+                // window transition. Zero-width Compose resizers disable edge
+                // resizing outside Floating without rebuilding the native frame.
+                WindowDecoration.Undecorated(
+                    resizerThickness = if (windowState.placement == WindowPlacement.Floating) {
+                        WindowDecorationDefaults.ResizerThickness
+                    } else {
+                        0.dp
+                    }
+                )
+            } else {
+                WindowDecoration.SystemDefault
+            },
+            resizable = true,
             title = "Ikna",
             // The icon on the window and in the taskbar of a running instance.
             // Separate from the .ico jpackage puts on the executable: that one

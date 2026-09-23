@@ -171,6 +171,18 @@ accepts the maximize/restore button and double-click, but it is not draggable.
 F11 returns to the placement that was active before fullscreen, including a
 maximized window. Fullscreen itself is not persisted across launches.
 
+Window motion is intentionally kept off the coroutine/effect hot path. Native
+resize and move events update `WindowState.size` and `WindowState.position` many
+times while the pointer is moving, so those values must not be keys of a
+`LaunchedEffect`. Floating bounds are captured only before transitions that can
+destroy them and on close. Restore changes placement first and reapplies saved
+floating bounds only after the native window reports `Floating`; this avoids
+asking Compose Desktop to write floating bounds while the native frame is still
+maximized/fullscreen. The underlying AWT frame stays resizable for its lifetime;
+for the custom undecorated Windows frame only the Compose edge-resizer thickness
+is switched to zero outside `Floating`, avoiding a native frame-style rebuild
+during maximize/fullscreen transitions.
+
 ## Build
 
 `build.yml` runs three independent platform jobs:
@@ -459,8 +471,10 @@ Double-click toggles maximize/restore without consuming drag events. Minimize,
 maximize/restore and close have keyboard-focus indication and names in all six
 interface languages. Closing follows the existing geometry-save/exit path.
 F11 hides the bar in full screen. Compose handles edge/corner resizing for a
-floating undecorated window; resize handles are disabled when maximized/full
-screen. The title strip occupies 45 dp including its rule; each button is 44 dp.
+floating undecorated window; outside Floating their resizer thickness becomes
+zero while the native frame remains resizable, so maximize/fullscreen does not
+flip the AWT frame style. The title strip occupies 45 dp including its rule; each
+button is 44 dp.
 
 This is a Compose title bar, not a Win32 non-client-area implementation. The
 Windows 11 Snap Layout flyout on hovering the maximize button is not implemented;

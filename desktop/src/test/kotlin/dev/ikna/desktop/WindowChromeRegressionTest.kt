@@ -21,6 +21,31 @@ class WindowChromeRegressionTest {
         assertTrue(source.contains("placementMemory.persisted(current)"))
     }
 
+    @Test
+    fun `window resize does not relaunch an effect for every bounds event`() {
+        val source = source("Main.kt")
+        assertTrue(source.contains("LaunchedEffect(windowState.placement)"))
+        assertTrue(!source.contains("LaunchedEffect(windowState.placement, windowState.size, windowState.position)"))
+    }
+
+    @Test
+    fun `restore bounds are deferred until placement is floating`() {
+        val source = source("Main.kt")
+        assertTrue(source.contains("geometryMemory.requestRestore()"))
+        assertTrue(source.contains("geometryMemory.restoreAfterPlacement(windowState)"))
+        assertTrue(!source.contains("geometryMemory.restore(windowState)"))
+    }
+
+    @Test
+    fun `native resizable style stays stable across placement changes`() {
+        val source = source("Main.kt")
+        assertTrue(source.contains("WindowDecoration.Undecorated("))
+        assertTrue(source.contains("WindowDecorationDefaults.ResizerThickness"))
+        assertTrue(source.contains("0.dp"))
+        assertTrue(source.contains("resizable = true"))
+        assertTrue(!source.contains("resizable = !customTitleBar || windowState.placement"))
+    }
+
     private fun source(name: String): String {
         val start = File(System.getProperty("user.dir")).canonicalFile
         val file = generateSequence(start) { it.parentFile }
