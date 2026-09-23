@@ -12,6 +12,7 @@ from supply_census import build_report, parser as monolithic_parser
 from supply_census_shards import (
     assemble_report,
     build_rank_counts,
+    build_rank_counts_for_pair,
     build_rank_map,
     build_rank_map_from_parts,
     measure_everyday_shard,
@@ -134,29 +135,51 @@ def main() -> int:
         )
         monolithic = build_report(args)
 
+        pair_paths = {
+            ("en", "es"): wm_en_es,
+            ("en", "ko"): wm_en_ko,
+            ("es", "ko"): wm_es_ko,
+        }
         rank_inputs = {
             "en": [wm_en_es, wm_en_ko],
             "es": [wm_en_es, wm_es_ko],
             "ko": [wm_en_ko, wm_es_ko],
         }
+        pair_rank_counts = {
+            pair: build_rank_counts_for_pair(str(path), "knowledge", *pair)
+            for pair, path in pair_paths.items()
+        }
+        rank_parts_root = root / "rank-parts"
+        rank_parts_root.mkdir()
+        for (first, second), pair_counts in pair_rank_counts.items():
+            path = pair_paths[(first, second)]
+            for lang, meaning in ((first, second), (second, first)):
+                single, found_meaning = build_rank_counts(
+                    str(path), "knowledge", lang, expected_meaning=meaning
+                )
+                if found_meaning != meaning or pair_counts[lang] != single:
+                    raise AssertionError(
+                        f"single-pass physical rank reduction changed {lang}->{meaning} counts/order"
+                    )
+                write_rank_counts(
+                    rank_parts_root / f"rank-counts-{lang}-{meaning}.tsv.gz",
+                    "knowledge", lang, meaning, pair_counts[lang],
+                )
+
         rank_paths: dict[str, Path] = {}
         for lang, paths in rank_inputs.items():
             ranks = build_rank_map([str(path) for path in paths], "knowledge", lang)
-            part_paths: list[str] = []
-            for path in paths:
-                first, second = path.name.removeprefix("wikimatrix-").removesuffix(".jsonl.gz").split("-")
-                meaning = second if first == lang else first
-                counts, found_meaning = build_rank_counts(
-                    str(path), "knowledge", lang, expected_meaning=meaning
-                )
-                if found_meaning != meaning:
-                    raise AssertionError(f"rank count shard missed {lang}->{meaning}")
-                part_path = root / f"rank-counts-{lang}-{meaning}.tsv.gz"
-                write_rank_counts(part_path, "knowledge", lang, meaning, counts)
-                part_paths.append(str(part_path))
+            # Match the workflow exactly: pair jobs upload compact parts, then
+            # the aggregate job sorts the per-language filenames before merging.
+            part_paths = sorted(
+                str(path)
+                for path in rank_parts_root.glob(f"rank-counts-{lang}-*.tsv.gz")
+            )
+            if len(part_paths) != len(paths):
+                raise AssertionError(f"rank-count shard completeness changed for {lang}")
             from_parts = build_rank_map_from_parts(part_paths, "knowledge", lang)
             if from_parts != ranks:
-                raise AssertionError(f"rank-count shards changed {lang} rank order")
+                raise AssertionError(f"physical-pair rank shards changed {lang} rank order")
             rank_path = root / f"ranks-{lang}.tsv.gz"
             write_ranks(rank_path, "knowledge", lang, from_parts)
             rank_paths[lang] = rank_path

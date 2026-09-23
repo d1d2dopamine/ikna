@@ -24,8 +24,8 @@ on:
         description: "Minimum WikiMatrix margin score"
         default: "1.04"
       wikimatrix_max_rows:
-        description: "Part 5 evidence bound per physical pair; 0 = no row cap"
-        default: "500000"
+        description: "Optional debug bound per physical pair; 0 = full scan to the score floor"
+        default: "0"
 
 permissions:
   contents: read
@@ -59,6 +59,7 @@ jobs:
     timeout-minutes: 10
     outputs:
       pairs: ${{ steps.matrix.outputs.pairs }}
+      rank_pairs: ${{ steps.matrix.outputs.rank_pairs }}
       pair_count: ${{ steps.matrix.outputs.pair_count }}
       rank_languages: ${{ steps.matrix.outputs.rank_languages }}
     steps:
@@ -122,6 +123,14 @@ jobs:
               })
           with open(sys.argv[3], "a", encoding="utf-8") as handle:
               handle.write("pairs=" + json.dumps(pairs, separators=(",", ":")) + "\n")
+              handle.write(
+                  "rank_pairs="
+                  + json.dumps(
+                      [pair for pair in pairs if pair["firstLearn"] or pair["secondLearn"]],
+                      separators=(",", ":"),
+                  )
+                  + "\n"
+              )
               handle.write(f"pair_count={len(pairs)}\n")
               handle.write("rank_languages=" + json.dumps(learn, separators=(",", ":")) + "\n")
           PY
@@ -135,65 +144,61 @@ jobs:
           retention-days: 1
           compression-level: 0
 
-  knowledge-ranks:
+  knowledge-rank-pair:
     needs: [contracts, plan-wikimatrix]
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     strategy:
       fail-fast: false
-      # Each rank job streams only the physical pairs involving one learning
-      # language. Four concurrent jobs avoid hammering the upstream host.
+      # One upstream stream per physical pair. The large candidate JSONL stays
+      # local and is reduced to compact token-count shards for both directions.
+      # Keep rank acquisition conservative toward the upstream host.
       max-parallel: 4
       matrix:
-        lang: ${{ fromJSON(needs.plan-wikimatrix.outputs.rank_languages) }}
+        pair: ${{ fromJSON(needs.plan-wikimatrix.outputs.rank_pairs) }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - uses: actions/download-artifact@v5
-        with:
-          name: supply-census-plan
-          path: plan
-      - name: Prepare segmentation runtime when needed
+      - name: Prepare pair rank workspace
         shell: bash
         run: |
           set -euo pipefail
-          case "${{ matrix.lang }}" in
-            zh|ja|ko)
+          first="${{ matrix.pair.first }}"
+          second="${{ matrix.pair.second }}"
+          case "$first,$second" in
+            *zh*|*ja*|*ko*)
               sudo apt-get update -qq
               sudo apt-get install -y -qq libicu-dev
               ;;
           esac
-      - name: Build global Knowledge ranks for one learning language
+          mkdir -p candidates reports handoff/rank-parts
+      - name: Reduce one physical WikiMatrix pair to rank counts
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p candidates reports/rank-parts handoff
-          lang="${{ matrix.lang }}"
+          first="${{ matrix.pair.first }}"
+          second="${{ matrix.pair.second }}"
+          url="${{ matrix.pair.url }}"
           max_rows="${{ inputs.wikimatrix_max_rows }}"
-          rank_parts=()
           case "$max_rows" in (*[!0-9]*|'') echo "wikimatrix_max_rows must be a non-negative integer" >&2; exit 2;; esac
 
-          while IFS=$'\t' read -r first second url; do
-            if [ "$first" != "$lang" ] && [ "$second" != "$lang" ]; then
-              continue
-            fi
-            echo "Ranking WikiMatrix $first-$second for $lang"
-            http_code=$(curl --location --silent --show-error --http1.1 \
-              --connect-timeout 30 --retry 4 --retry-all-errors \
-              --head --output /dev/null --write-out '%{http_code}' "$url" || true)
-            if [ "$http_code" = "404" ]; then
-              continue
-            fi
+          out="candidates/wikimatrix-${first}-${second}.jsonl.gz"
+          log="reports/rank-${first}-${second}.log"
+          reader_status="reports/rank-${first}-${second}.stream.json"
+          echo "Ranking WikiMatrix $first-$second"
+          http_code=$(curl --location --silent --show-error --http1.1 \
+            --connect-timeout 30 --retry 4 --retry-all-errors \
+            --head --output /dev/null --write-out '%{http_code}' "$url" || true)
+          if [ "$http_code" = "404" ]; then
+            gzip -c </dev/null > "$out"
+          else
             case "$http_code" in
               200|206) ;;
               *) echo "WikiMatrix availability probe returned HTTP $http_code for $url" >&2; exit 1;;
             esac
 
-            out="candidates/wikimatrix-${first}-${second}.jsonl.gz"
-            log="reports/rank-${first}-${second}.log"
-            reader_status="reports/rank-${first}-${second}.stream.json"
             cmd=(
               python3 tools/catalog/ingest_sources.py wikimatrix-pair
               --tsv - --first "$first" --second "$second"
@@ -230,37 +235,77 @@ jobs:
               attempt=$((attempt + 1))
               sleep $((attempt * 3))
             done
+          fi
 
-            if [ "$first" = "$lang" ]; then
-              meaning="$second"
-            else
-              meaning="$first"
-            fi
-            part="reports/rank-parts/rank-counts-${lang}-${meaning}.tsv.gz"
-            python3 tools/catalog/supply_census_shards.py rank-part \
-              --candidate "$out" \
-              --collection knowledge \
-              --lang "$lang" \
-              --meaning "$meaning" \
-              --out "$part"
-            rank_parts+=("$part")
-            # The global rank needs token counts, not the multi-million-line
-            # candidate JSONL. Keep only the compact contribution before
-            # moving to the next physical pair so runner disk remains bounded.
-            rm -f "$out"
-          done < plan/wikimatrix-plan.tsv
-
-          python3 tools/catalog/supply_census_shards.py ranks \
-            --parts "${rank_parts[@]}" \
+          python3 tools/catalog/supply_census_shards.py rank-pair \
+            --candidate "$out" \
             --collection knowledge \
-            --lang "$lang" \
-            --out "reports/ranks-${lang}.tsv.gz"
-          cp "reports/ranks-${lang}.tsv.gz" handoff/
-          ls -lh "reports/ranks-${lang}.tsv.gz"
-      - name: Upload compact Knowledge ranks
+            --first "$first" --second "$second" \
+            --out-dir handoff/rank-parts
+          rm -f "$out"
+      - name: Upload compact pair rank counts
         uses: actions/upload-artifact@v6
         with:
-          name: supply-ranks-${{ matrix.lang }}
+          name: supply-rank-pair-${{ matrix.pair.first }}-${{ matrix.pair.second }}
+          path: handoff/rank-parts/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  knowledge-ranks:
+    needs: [contracts, plan-wikimatrix, knowledge-rank-pair]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Prepare rank aggregation runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libicu-dev
+          mkdir -p parts reports handoff
+      - name: Download compact physical-pair rank counts
+        uses: actions/download-artifact@v5
+        with:
+          pattern: supply-rank-pair-*
+          path: parts
+          merge-multiple: true
+      - name: Build all global Knowledge ranks
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected_parts=$(python3 - "${{ inputs.learn }}" "${{ inputs.meanings }}" <<'PY'
+          import sys
+          union = {part.strip().lower() for raw in sys.argv[1:] for part in raw.split(",") if part.strip()}
+          print(max(0, len(union) - 1))
+          PY
+          )
+          python3 - '${{ needs.plan-wikimatrix.outputs.rank_languages }}' > reports/rank-languages.txt <<'PY'
+          import json
+          import sys
+          for lang in json.loads(sys.argv[1]):
+              print(lang)
+          PY
+          while IFS= read -r lang; do
+            [ -n "$lang" ] || continue
+            mapfile -t rank_parts < <(find parts -type f -name "rank-counts-${lang}-*.tsv.gz" | sort)
+            if [ "${#rank_parts[@]}" -ne "$expected_parts" ]; then
+              echo "rank shard completeness failure for $lang: expected=$expected_parts found=${#rank_parts[@]}" >&2
+              exit 1
+            fi
+            python3 tools/catalog/supply_census_shards.py ranks \
+              --parts "${rank_parts[@]}" \
+              --collection knowledge \
+              --lang "$lang" \
+              --out "handoff/ranks-${lang}.tsv.gz"
+          done < reports/rank-languages.txt
+          ls -lh handoff/ranks-*.tsv.gz
+      - name: Upload global Knowledge ranks
+        uses: actions/upload-artifact@v6
+        with:
+          name: supply-ranks
           path: handoff/
           if-no-files-found: error
           retention-days: 1
@@ -357,17 +402,10 @@ jobs:
               ;;
           esac
           mkdir -p candidates reports ranks handoff/shards handoff/inventory handoff/logs
-      - name: Download first-language ranks
-        if: ${{ matrix.pair.firstLearn }}
+      - name: Download global Knowledge ranks
         uses: actions/download-artifact@v5
         with:
-          name: supply-ranks-${{ matrix.pair.first }}
-          path: ranks
-      - name: Download second-language ranks
-        if: ${{ matrix.pair.secondLearn }}
-        uses: actions/download-artifact@v5
-        with:
-          name: supply-ranks-${{ matrix.pair.second }}
+          name: supply-ranks
           path: ranks
       - name: Measure one physical WikiMatrix pair
         shell: bash
@@ -512,14 +550,16 @@ jobs:
             --json reports/CATALOGUE-V2-SUPPLY.json \
             --markdown reports/CATALOGUE-V2-SUPPLY.md
 
-          python3 - "${{ needs.plan-wikimatrix.outputs.pair_count }}" "${{ inputs.learn }}" "${{ inputs.meanings }}" <<'PY'
+          python3 - "${{ needs.plan-wikimatrix.outputs.pair_count }}" "${{ inputs.learn }}" "${{ inputs.meanings }}" "${{ inputs.wikimatrix_max_rows }}" <<'PY'
           import csv
+          import json
           import sys
           from pathlib import Path
 
           expected_count = int(sys.argv[1])
           learn = {part.strip().lower() for part in sys.argv[2].split(",") if part.strip()}
           meanings = {part.strip().lower() for part in sys.argv[3].split(",") if part.strip()}
+          max_rows = int(sys.argv[4])
           union = sorted(learn | meanings)
           expected = {
               (union[left], union[right])
@@ -542,6 +582,14 @@ jobs:
                   f"WikiMatrix inventory completeness failure: expected={expected_count} rows={len(rows)} unique={len(set(actual))}"
               )
           rows.sort(key=lambda row: (row["first"], row["second"]))
+          if max_rows == 0:
+              capped = [f"{row['first']}-{row['second']}" for row in rows if row["acquisition_capped"] == "true"]
+              report = json.loads(Path("reports/CATALOGUE-V2-SUPPLY.json").read_text(encoding="utf-8"))
+              lower_bound = int(report["summary"]["knowledgePairsWithLowerBoundOnly"])
+              if capped or lower_bound:
+                  raise SystemExit(
+                      f"unbounded Part 5 evidence still reports truncation: capped={capped} lowerBoundDirected={lower_bound}"
+                  )
           fields = ["first", "second", "status", "retained_rows", "acquisition_capped", "url"]
           with Path("reports/wikimatrix-inventory.tsv").open("w", encoding="utf-8", newline="") as handle:
               writer = csv.DictWriter(handle, fieldnames=fields, delimiter="\t", lineterminator="\n")

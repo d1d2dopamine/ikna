@@ -5,8 +5,10 @@ The production census semantics still live in :mod:`supply_census`. This module
 only lets GitHub Actions split expensive WikiMatrix acquisition across jobs
 without shipping the multi-gigabyte candidate pool between runners:
 
-* ``ranks`` builds one learning-language frequency ranking from that language's
-  physical WikiMatrix pair files, preserving the monolithic file/context order;
+* ``rank-pair`` reduces one physical WikiMatrix candidate file to compact token
+  counts for both learning directions in a single local pass;
+* ``ranks`` merges those compact pair contributions into one learning-language
+  frequency ranking while preserving the monolithic file/context order;
 * ``measure-pair`` measures one physical WikiMatrix pair with those global ranks;
 * ``measure-everyday`` measures the Tatoeba-only Everyday collection locally;
 * ``assemble`` validates all shards and builds the normal Part 5 report envelope.
@@ -115,6 +117,55 @@ def build_rank_counts(
             f"{candidate_path} contains {lang}->{meaning}, expected {lang}->{expected_meaning}"
         )
     return counts, meaning
+
+
+def build_rank_counts_for_pair(
+    candidate_path: str,
+    collection: str,
+    first: str,
+    second: str,
+) -> dict[str, Counter[str]]:
+    """Count both learning directions from one physical-pair candidate file.
+
+    ``wikimatrix-pair`` emits the two directions next to each other. The old
+    sharded workflow reopened that large gzip once per learning language; this
+    keeps identical per-language de-duplication and first-seen token order while
+    reducing the local candidate file in one pass.
+    """
+    if first == second:
+        raise ValueError("physical pair languages must differ")
+    _prepare_languages([first, second])
+    other = {first: second, second: first}
+    counts = {first: Counter(), second: Counter()}
+    seen_ids = {first: set(), second: set()}
+    seen_contexts = {first: set(), second: set()}
+    with open_jsonl(candidate_path) as handle:
+        for number, line in enumerate(handle, start=1):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                record = Candidate.from_dict(json.loads(line))
+            except Exception as exc:
+                raise ValueError(f"{candidate_path}:{number}: {exc}") from exc
+            if record.collection != collection or record.lang not in counts:
+                continue
+            lang = record.lang
+            if record.meaning_lang != other[lang]:
+                raise ValueError(
+                    f"{candidate_path} contains {lang}->{record.meaning_lang}, "
+                    f"expected {lang}->{other[lang]}"
+                )
+            if record.id in seen_ids[lang]:
+                continue
+            seen_ids[lang].add(record.id)
+            origin = primary_origin(record)
+            context_key = (origin["sourceFamily"], origin["contextRef"])
+            if context_key in seen_contexts[lang]:
+                continue
+            seen_contexts[lang].add(context_key)
+            counts[lang].update(word.lower() for word in core.words(record.context, lang))
+    return counts
 
 
 def build_rank_map(candidate_paths: list[str], collection: str, lang: str) -> dict[str, int]:
@@ -446,12 +497,12 @@ def parser() -> argparse.ArgumentParser:
     ranks.add_argument("--lang", required=True)
     ranks.add_argument("--out", required=True)
 
-    rank_part = commands.add_parser("rank-part")
-    rank_part.add_argument("--candidate", required=True)
-    rank_part.add_argument("--collection", default="knowledge")
-    rank_part.add_argument("--lang", required=True)
-    rank_part.add_argument("--meaning", required=True)
-    rank_part.add_argument("--out", required=True)
+    rank_pair = commands.add_parser("rank-pair")
+    rank_pair.add_argument("--candidate", required=True)
+    rank_pair.add_argument("--collection", default="knowledge")
+    rank_pair.add_argument("--first", required=True)
+    rank_pair.add_argument("--second", required=True)
+    rank_pair.add_argument("--out-dir", required=True)
 
     pair = commands.add_parser("measure-pair")
     pair.add_argument("--candidate", required=True)
@@ -510,15 +561,22 @@ def main(argv: list[str] | None = None) -> int:
         write_ranks(args.out, args.collection, args.lang, ranks)
         print(json.dumps({"lang": args.lang, "rankCount": len(ranks)}, ensure_ascii=False))
         return 0
-    if args.command == "rank-part":
-        counts, meaning = build_rank_counts(
-            args.candidate, args.collection, args.lang, expected_meaning=args.meaning
+    if args.command == "rank-pair":
+        counts = build_rank_counts_for_pair(
+            args.candidate, args.collection, args.first, args.second
         )
-        if meaning is None:
-            meaning = args.meaning
-        write_rank_counts(args.out, args.collection, args.lang, meaning, counts)
+        out_dir = Path(args.out_dir)
+        outputs = []
+        for lang, meaning in ((args.first, args.second), (args.second, args.first)):
+            path = out_dir / f"rank-counts-{lang}-{meaning}.tsv.gz"
+            write_rank_counts(path, args.collection, lang, meaning, counts[lang])
+            outputs.append({
+                "lang": lang,
+                "meaningLang": meaning,
+                "forms": len(counts[lang]),
+            })
         print(json.dumps(
-            {"lang": args.lang, "meaningLang": meaning, "forms": len(counts)},
+            {"physicalPair": [args.first, args.second], "outputs": outputs},
             ensure_ascii=False,
         ))
         return 0
