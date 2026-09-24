@@ -348,6 +348,11 @@ inside catalogue tasks:
 - [x] fix the Android widget's compact layout on launchers that provide less usable 1-cell height;
 - [x] document the active 0.11 plan separately from the architectural roadmap;
 - [x] record the current Catalogue v2 WARN findings and corpus scope before continuing implementation;
+- [x] add an isolated Developer Sandbox with separate data/settings, deterministic
+  synthetic learner scenarios, persistent DEV indication and an explicit forced-access
+  layer that preserves production policy verdicts;
+- [ ] verify Developer Sandbox profile switching, reseed and forced Browse access on
+  real Android and packaged desktop builds;
 - [ ] collect any further small app bugs found while testing the current build;
   - 2026-09-22: desktop window-state cleanup now keeps floating geometry separate from maximized/fullscreen bounds, disables title-bar dragging while maximized, and makes F11 restore the previous non-fullscreen placement. A follow-up performance pass removes `size`/`position` from the window effect hot path, defers floating-bound restoration until the native placement is actually Floating, and keeps the native AWT resizable style stable while only Compose edge-resizers are disabled outside Floating. Source/static checks pass. The first Gradle CI run exposed a cwd-sensitive regression-test fixture path (not a product-code failure); that locator is fixed and the Gradle/Windows rerun remains required.
 - [ ] avoid mixing those UI fixes with Catalogue identity or corpus changes unless they are actually related.

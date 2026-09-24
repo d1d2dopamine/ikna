@@ -12,6 +12,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -44,6 +48,16 @@ fun BrowseScreen(
     val state by vm.state.collectAsState()
     val settings by container.settings.flow.collectAsState(initial = IknaSettings())
     val card = state.current
+    var developerBlockers by remember(deckId) { mutableStateOf<String?>(null) }
+    LaunchedEffect(deckId, settings.developerIgnoreRestrictions) {
+        developerBlockers = if (container.isDeveloperMode && settings.developerIgnoreRestrictions) {
+            val availability = runCatching {
+                container.learningRepository.browseDeckAvailability(listOf(deckId))[deckId]
+            }.getOrNull()
+            availability?.takeIf { it.forcedByDeveloper && it.blockers.isNotEmpty() }
+                ?.let { S.t("dev.001") + " · " + browseUnavailableText(it) }
+        } else null
+    }
 
     val view = LocalView.current
     val keepScreenAwake = card != null && !state.loading && !state.finished
@@ -55,6 +69,13 @@ fun BrowseScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         IknaBrowseTopBar(deckTitle = state.deckTitle)
+        developerBlockers?.let { note ->
+            Text(
+                text = note,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()

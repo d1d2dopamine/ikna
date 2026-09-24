@@ -11,13 +11,13 @@ actual fun iknaSqliteDriver(): SQLiteDriver = AndroidSQLiteDriver()
  * The same file the app has always used.
  *
  * The absolute path from getDatabasePath is passed rather than the bare name so
- * that the driver-based builder resolves to the very database an installed copy
- * already has, instead of creating a second one beside it.
+ * The default keeps the historical real profile path. Developer Sandbox passes
+ * a different file name before the dependency graph is constructed.
  */
-fun openIknaDatabase(context: Context): IknaDatabase =
+fun openIknaDatabase(context: Context, fileName: String = "ikna.db"): IknaDatabase =
     buildIknaDatabase(
         Room.databaseBuilder<IknaDatabase>(
             context = context.applicationContext,
-            name = context.getDatabasePath("ikna.db").absolutePath
+            name = context.getDatabasePath(fileName).absolutePath
         )
     )

@@ -14,6 +14,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalDensity
 import androidx.navigation.NavType
@@ -38,6 +41,7 @@ import dev.ikna.ui.settings.SettingsScreen
 import dev.ikna.ui.settings.VoiceScreen
 import dev.ikna.ui.stats.StatsScreen
 import dev.ikna.ui.theme.Motion
+import dev.ikna.ui.theme.IknaDeveloperBadge
 import androidx.compose.material3.MaterialTheme
 import dev.ikna.ui.update.UpdateGate
 
@@ -322,5 +326,12 @@ fun IknaNavHost(
         // launch and cannot be re-asked by walking between screens. It draws
         // nothing at all until there is something to say.
         UpdateGate(container = container, settings = settings)
+        if (container.isDeveloperMode) {
+            IknaDeveloperBadge(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 4.dp)
+            )
+        }
     }
 }

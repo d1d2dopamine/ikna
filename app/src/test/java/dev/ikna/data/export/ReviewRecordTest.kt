@@ -131,4 +131,12 @@ class ReviewRecordTest {
         assertEquals(0, rec.level)
         assertTrue(rec.signature.startsWith("a:1:"))
     }
+    @Test
+    fun `developer export is explicitly synthetic`() {
+        val record = ReviewRecord.of(entity(), synthetic = true)
+        assertTrue(record.synthetic)
+        val line = ReviewRecord.json.encodeToString(ReviewRecord.serializer(), record)
+        assertTrue(ReviewRecord.json.decodeFromString(ReviewRecord.serializer(), line).synthetic)
+    }
+
 }

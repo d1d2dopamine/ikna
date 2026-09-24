@@ -118,4 +118,11 @@ class SettingsBackupTest {
         val text = "{\"kind\":\"ikna-settings\",\"version\":9,\"theme\":\"LIGHT\",\"somethingNew\":42}"
         assertEquals("LIGHT", SettingsBackup.decode(text)?.theme)
     }
+    @Test
+    fun `developer settings backup cannot restore into a normal profile`() {
+        val text = SettingsBackup.encode(IknaSettings(), synthetic = true)
+        assertTrue(SettingsBackup.looksLikeSettings(text))
+        assertNull(SettingsBackup.decode(text))
+    }
+
 }

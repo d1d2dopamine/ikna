@@ -54,6 +54,7 @@ import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaDeckHeaderPaint
+import dev.ikna.ui.theme.IknaDeveloperBadge
 import dev.ikna.ui.theme.IknaElementInspector
 import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaMemoryField
@@ -142,6 +143,7 @@ class DesktopUi {
 fun IknaDesktopApp(
     container: DesktopContainer,
     ui: DesktopUi,
+    onRestartRequested: () -> Unit = {},
     titleBar: @Composable (IknaPalette, Boolean) -> Unit = { _, _ -> }
 ) {
     // Null means the DataStore has not answered yet. Using a default settings
@@ -205,11 +207,18 @@ fun IknaDesktopApp(
                 } else if (!settings.onboardingDone) {
                     DesktopOnboardingPane(container) { ui.resetForFirstRun() }
                 } else {
-                    DesktopShell(container, settings, palette, ui)
+                    DesktopShell(container, settings, palette, ui, onRestartRequested)
                 }
 
                 if (ui.showShortcuts) {
                     ShortcutsOverlay(palette, settings) { ui.showShortcuts = false }
+                }
+                if (container.isDeveloperMode) {
+                    IknaDeveloperBadge(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 4.dp)
+                    )
                 }
             }
             }
@@ -237,7 +246,8 @@ private fun DesktopShell(
     container: DesktopContainer,
     settings: IknaSettings,
     palette: IknaPalette,
-    ui: DesktopUi
+    ui: DesktopUi,
+    onRestartRequested: () -> Unit
 ) {
     val deckListState = rememberLazyListState()
     var decks by remember { mutableStateOf<List<DeckSummary>>(emptyList()) }
@@ -557,6 +567,7 @@ private fun PaneContent(
                 palette = palette,
                 onOpenBackup = { ui.show(Pane.BACKUP) },
                 onWiped = { ui.resetForFirstRun() },
+                onRestartRequested = onRestartRequested,
                 onBack = back
             )
 

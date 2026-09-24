@@ -295,18 +295,6 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"set.102" to "JASNY",
 	// СВОЯ
 	"set.103" to "WŁASNY",
-	// ПОЛЬСКИЙ
-	"set.104" to "POLSKI",
-	// РУССКИЙ
-	"set.105" to "ROSYJSKI",
-	// АНГЛИЙСКИЙ
-	"set.106" to "ANGIELSKI",
-	// НЕМЕЦКИЙ
-	"set.107" to "NIEMIECKI",
-	// ИСПАНСКИЙ
-	"set.108" to "HISZPAŃSKI",
-	// ФРАНЦУЗСКИЙ
-	"set.109" to "FRANCUSKI",
 	// шрифт
 	"set.110" to "czcionka",
 	// ПАЛИТРА
@@ -1007,4 +995,27 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "keys.020" to "Esc anuluje wprowadzanie",
     "keys.021" to "Tego klawisza nie można użyć",
 
+    "dev.001" to "DEV",
+    "dev.002" to "Tryb deweloperski",
+    "dev.003" to "Używa oddzielnego profilu testowego. Odpowiedzi, historia, statystyki i ustawienia nigdy nie zmieniają zwykłych danych nauki.",
+    "dev.004" to "Tryb deweloperski służy do testów, nie do zwykłej nauki. Dane mogą być syntetyczne, a ograniczenia mogą być omijane.",
+    "dev.005" to "WŁĄCZ TRYB DEWELOPERSKI",
+    "dev.006" to "WRÓĆ DO ZWYKŁEGO TRYBU",
+    "dev.007" to "Ikna uruchomi się ponownie z wybranym profilem danych.",
+    "dev.008" to "Ignoruj ograniczenia",
+    "dev.009" to "Pozwala testować nawet wtedy, gdy historia, dzisiejszy plan, pora, Governor, cooldown lub limity użycia normalnie blokują funkcję. Zwykłe powody blokady nadal są obliczane.",
+    "dev.010" to "Scenariusz syntetyczny",
+    "dev.011" to "PUSTY",
+    "dev.012" to "WCZESNA HISTORIA",
+    "dev.013" to "DOJRZAŁA HISTORIA",
+    "dev.014" to "BROWSE GOTOWE",
+    "dev.015" to "BOGATE STATYSTYKI",
+    "dev.016" to "POWRÓT PO PRZERWIE",
+    "dev.017" to "ODBUDUJ DANE TESTOWE",
+    "dev.018" to "Zastępuje wyłącznie dane trybu deweloperskiego deterministyczną historią syntetyczną.",
+    "dev.019" to "Dane testowe odbudowane",
+    "dev.020" to "Dane deweloperskie",
+    "dev.021" to "WŁĄCZ I URUCHOM PONOWNIE",
+    "dev.022" to "ANULUJ",
+    "dev.023" to "Ikna zostanie zamknięta. Otwórz ją ponownie, aby użyć wybranego profilu danych.",
 )

@@ -210,6 +210,11 @@ private class WindowGeometryMemory(initial: Geometry) {
         restorePending = true
     }
 
+    /** Drop a saved monitor position after the monitor layout made it unusable. */
+    fun forgetPosition() {
+        floatingPosition = WindowPosition.PlatformDefault
+    }
+
     fun restoreAfterPlacement(state: WindowState) {
         if (!restorePending) return
         // Compose Desktop applies state in size -> position -> placement order.
@@ -499,7 +504,7 @@ fun main(args: Array<String>) {
                 WindowDecoration.SystemDefault
             },
             resizable = true,
-            title = "Ikna",
+            title = if (container.isDeveloperMode) "Ikna · DEV" else "Ikna",
             // The icon on the window and in the taskbar of a running instance.
             // Separate from the .ico jpackage puts on the executable: that one
             // is what Windows shows before the application starts, this one is
@@ -519,9 +524,20 @@ fun main(args: Array<String>) {
                     MIN_WINDOW_WIDTH,
                     MIN_WINDOW_HEIGHT + if (customTitleBar) WINDOWS_TITLE_BAR_HEIGHT else 0
                 )
+                if (windowState.placement == WindowPlacement.Floating && recoverOffScreenWindow(window)) {
+                    // Keep the repaired native location for this session, but do
+                    // not write the stale coordinates back if the user closes
+                    // before Compose reports the native move into WindowState.
+                    geometryMemory.forgetPosition()
+                    logLine("window position repaired after display-layout change")
+                }
                 installDropTarget(window, ui)
             }
-            IknaDesktopApp(container, ui, titleBar = { palette, showWordmark ->
+            IknaDesktopApp(
+                container = container,
+                ui = ui,
+                onRestartRequested = { exitApplication() },
+                titleBar = { palette, showWordmark ->
                 if (customTitleBar && windowState.placement != WindowPlacement.Fullscreen) {
                     IknaWindowTitleBar(
                         windowState,

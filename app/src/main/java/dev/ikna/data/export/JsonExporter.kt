@@ -27,7 +27,8 @@ import java.time.format.DateTimeFormatter
  */
 class JsonExporter(
     private val context: Context,
-    private val reviewDao: ReviewDao
+    private val reviewDao: ReviewDao,
+    private val synthetic: Boolean = false
 ) {
 
     /**
@@ -54,7 +55,7 @@ class JsonExporter(
                 out.write(
                     ReviewRecord.json.encodeToString(
                         ReviewRecord.serializer(),
-                        ReviewRecord.of(r)
+                        ReviewRecord.of(r, synthetic = synthetic)
                     )
                 )
                 out.newLine()

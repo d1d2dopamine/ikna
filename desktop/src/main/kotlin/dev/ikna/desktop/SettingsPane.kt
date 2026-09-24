@@ -30,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import dev.ikna.data.dev.DeveloperScenario
+import dev.ikna.data.dev.IknaDataProfile
 import dev.ikna.data.prefs.FontStore
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.LANGUAGE_SYSTEM
@@ -74,6 +76,7 @@ fun SettingsPane(
     palette: IknaPalette,
     onOpenBackup: () -> Unit = {},
     onWiped: () -> Unit = {},
+    onRestartRequested: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
@@ -99,6 +102,10 @@ fun SettingsPane(
     var updateNote by remember { mutableStateOf<String?>(null) }
     var checking by remember { mutableStateOf(false) }
     var advancedOpen by remember { mutableStateOf(false) }
+    var developerArmed by remember { mutableStateOf(false) }
+    var selectedDeveloperScenario by remember(settings.developerScenario) {
+        mutableStateOf(DeveloperScenario.fromId(settings.developerScenario))
+    }
     var resetAsking by remember { mutableStateOf(false) }
     var wipeArmed by remember { mutableStateOf(false) }
     var diagOpen by remember { mutableStateOf(false) }
@@ -469,6 +476,107 @@ fun SettingsPane(
 
                     if (advancedOpen) {
                         Spacer(Modifier.height(12.dp))
+                        Text(
+                            text = S.t("dev.002"),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = palette.ink
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = S.t("dev.003"),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.muted
+                        )
+                        Spacer(Modifier.height(10.dp))
+
+                        if (!container.isDeveloperMode) {
+                            if (!developerArmed) {
+                                IknaButton(
+                                    label = S.t("dev.005"),
+                                    palette = palette
+                                ) { developerArmed = true }
+                            } else {
+                                Text(
+                                    text = S.t("dev.004"),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = palette.ink
+                                )
+                                Spacer(Modifier.height(10.dp))
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    IknaButton(
+                                        label = S.t("dev.021"),
+                                        palette = palette,
+                                        filled = true
+                                    ) {
+                                        container.requestDataProfile(IknaDataProfile.DEVELOPER)
+                                        onRestartRequested()
+                                    }
+                                    IknaButton(
+                                        label = S.t("dev.022"),
+                                        palette = palette
+                                    ) { developerArmed = false }
+                                }
+                            }
+                        } else {
+                            IknaSettingsToggleRow(
+                                title = S.t("dev.008"),
+                                subtitle = S.t("dev.009"),
+                                checked = settings.developerIgnoreRestrictions,
+                                onCheckedChange = { on ->
+                                    save { container.settings.setDeveloperIgnoreRestrictions(on) }
+                                }
+                            )
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                text = S.t("dev.010"),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = palette.muted
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            DeveloperScenario.entries.chunked(2).forEach { row ->
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    row.forEach { scenario ->
+                                        IknaChip(
+                                            label = S.t(developerScenarioLabelKey(scenario)),
+                                            selected = selectedDeveloperScenario == scenario,
+                                            modifier = Modifier.weight(1f),
+                                            onClick = { selectedDeveloperScenario = scenario }
+                                        )
+                                    }
+                                }
+                                Spacer(Modifier.height(6.dp))
+                            }
+                            Text(
+                                text = S.t("dev.018"),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = palette.muted
+                            )
+                            Spacer(Modifier.height(10.dp))
+                            IknaButton(
+                                label = S.t("dev.017"),
+                                palette = palette,
+                                filled = true
+                            ) {
+                                val sandbox = container.developerSandbox ?: return@IknaButton
+                                scope.launch {
+                                    val result = withContext(Dispatchers.IO) {
+                                        runCatching { sandbox.seed(selectedDeveloperScenario) }
+                                    }
+                                    if (result.isSuccess) onRestartRequested()
+                                    else dataNote = S.t("diag.008")
+                                }
+                            }
+                            Spacer(Modifier.height(8.dp))
+                            IknaButton(
+                                label = S.t("dev.006"),
+                                palette = palette
+                            ) {
+                                container.requestDataProfile(IknaDataProfile.REAL)
+                                onRestartRequested()
+                            }
+                        }
+
+                        Spacer(Modifier.height(16.dp))
                         IknaSettingsToggleRow(
                             title = S.t("pseudo.001"),
                             subtitle = S.t("pseudo.002"),
@@ -713,6 +821,15 @@ private const val APP_VERSION = "0.10.0 press"
  * the whole point is that a person can paste this into a bug report without
  * reading it first.
  */
+private fun developerScenarioLabelKey(scenario: DeveloperScenario): String = when (scenario) {
+    DeveloperScenario.EMPTY -> "dev.011"
+    DeveloperScenario.EARLY_HISTORY -> "dev.012"
+    DeveloperScenario.MATURE_HISTORY -> "dev.013"
+    DeveloperScenario.BROWSE_READY -> "dev.014"
+    DeveloperScenario.RICH_STATISTICS -> "dev.015"
+    DeveloperScenario.RETURN_AFTER_BREAK -> "dev.016"
+}
+
 private suspend fun diagnosticsText(container: DesktopContainer): String {
     val decks = container.deckRepository.decks()
     val known = runCatching { container.componentRepository.knownWordCount() }.getOrNull()

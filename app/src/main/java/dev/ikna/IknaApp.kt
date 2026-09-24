@@ -1,6 +1,10 @@
 package dev.ikna
 
 import dev.ikna.ui.text.S
+import dev.ikna.data.dev.DATA_PROFILE_FILE
+import dev.ikna.data.dev.DataProfileStore
+import dev.ikna.data.dev.IknaDataProfile
+import java.io.File
 
 import android.app.Application
 import android.app.NotificationChannel
@@ -17,9 +21,14 @@ class IknaApp : Application() {
         super.onCreate()
         // Before anything can ask the theme for the chosen font.
         FontStore.baseDir = filesDir
-        container = AppContainer(this)
+        val profile = DataProfileStore(File(filesDir, DATA_PROFILE_FILE)).current()
+        container = AppContainer(this, profile)
         createReminderChannel()
-        WorkScheduler.schedule(this)
+        if (profile == IknaDataProfile.REAL) {
+            WorkScheduler.schedule(this)
+        } else {
+            WorkScheduler.cancelAllIknaWork(this)
+        }
     }
 
     /**

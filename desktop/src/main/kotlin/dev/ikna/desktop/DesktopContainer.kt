@@ -2,6 +2,14 @@ package dev.ikna.desktop
 
 import dev.ikna.data.db.openIknaDatabase
 import dev.ikna.data.db.wipeAllData
+import dev.ikna.data.dev.DATA_PROFILE_FILE
+import dev.ikna.data.dev.DEVELOPER_SETTINGS_FILE
+import dev.ikna.data.dev.DataProfileStore
+import dev.ikna.data.dev.DeveloperAccess
+import dev.ikna.data.dev.DeveloperSandboxSeeder
+import dev.ikna.data.dev.DeveloperScenario
+import dev.ikna.data.dev.IknaDataProfile
+import dev.ikna.data.dev.databaseFileName
 import dev.ikna.data.pack.PackLoader
 import dev.ikna.data.prefs.SETTINGS_DATASTORE_FILE
 import dev.ikna.data.prefs.SettingsStore
@@ -36,13 +44,23 @@ import java.io.File
  * No scheduler migration here: that re-derives FSRS state for histories written
  * by older versions, and a desktop database is created by this version.
  */
-class DesktopContainer(val home: File) {
+class DesktopContainer(
+    val home: File,
+    val dataProfile: IknaDataProfile = DataProfileStore(File(home, DATA_PROFILE_FILE)).current()
+) {
+
+    val profileStore = DataProfileStore(File(home, DATA_PROFILE_FILE))
+    val isDeveloperMode: Boolean get() = dataProfile == IknaDataProfile.DEVELOPER
 
     val config: GovernorConfig = GovernorConfig.load(ClasspathAssets)
 
-    internal val db = openIknaDatabase(File(home, "ikna.db"))
+    internal val db = openIknaDatabase(File(home, databaseFileName(dataProfile)))
 
-    val settings = SettingsStore(createSettingsDataStore(File(home, SETTINGS_DATASTORE_FILE)))
+    val settings = SettingsStore(
+        createSettingsDataStore(
+            File(home, if (isDeveloperMode) DEVELOPER_SETTINGS_FILE else SETTINGS_DATASTORE_FILE)
+        )
+    )
     private val optimizerScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default)
     val optimizer = dev.ikna.data.repo.LocalOptimizer(settings,
         FsrsParams(desiredRetention = config.desiredRetention), optimizerScope,
@@ -99,6 +117,19 @@ class DesktopContainer(val home: File) {
         config = config
     )
 
+    val developerSandbox: DeveloperSandboxSeeder? = if (isDeveloperMode) {
+        DeveloperSandboxSeeder(
+            db = db,
+            settings = settings,
+            components = componentRepository,
+            config = config
+        )
+    } else null
+
+    fun requestDataProfile(profile: IknaDataProfile) {
+        profileStore.set(profile)
+    }
+
     val ankiImporter = AnkiImporter(
         db = db,
         chunkDao = db.chunkDao(),
@@ -121,6 +152,13 @@ class DesktopContainer(val home: File) {
             settings.settleBrowseCredits(day, completed, exposures).availablePoints
         }
         learningRepository.clearBrowseCredits = { settings.clearBrowseCredits() }
+        learningRepository.developerAccess = {
+            val current = settings.flow.first()
+            DeveloperAccess(
+                active = isDeveloperMode,
+                ignoreRestrictions = isDeveloperMode && current.developerIgnoreRestrictions
+            )
+        }
         learningRepository.derivedGradingEnabled = { dev.ikna.domain.optimizer.AutomaticLearningPolicy.DERIVED_WHEN_READY }
         learningRepository.loadSettings = {
             val s = settings.flow.first()
@@ -161,6 +199,9 @@ class DesktopContainer(val home: File) {
     /** Installs the decks shipped inside the application. Safe to call twice. */
     suspend fun install() {
         if (installed) return
+        if (isDeveloperMode && !settings.current().onboardingDone) {
+            developerSandbox?.seed(DeveloperScenario.MATURE_HISTORY)
+        }
         optimizer.initialize()
         packLoader.installBundledPacks()
         installed = true

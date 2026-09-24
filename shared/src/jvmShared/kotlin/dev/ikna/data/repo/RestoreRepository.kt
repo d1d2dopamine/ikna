@@ -9,7 +9,6 @@ import dev.ikna.data.db.ReviewEntity
 import dev.ikna.data.db.StatsDao
 import dev.ikna.data.export.ReviewRecord
 import dev.ikna.domain.fsrs.DAY_MS
-import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.fsrs.Scheduler
 import dev.ikna.domain.governor.GovernorConfig
 import dev.ikna.domain.time.DayBoundary
@@ -236,12 +235,6 @@ class RestoreRepository(
         return answers.size
     }
 
-    private fun ratingOf(value: Int): Rating = when (value) {
-        1 -> Rating.AGAIN
-        2 -> Rating.HARD
-        3 -> Rating.GOOD
-        else -> Rating.EASY
-    }
 
     private companion object {
         const val INSERT_BATCH = 500

@@ -1,6 +1,8 @@
 package dev.ikna.ui.settings
 
 import dev.ikna.data.prefs.suppressedOf
+import dev.ikna.data.dev.DeveloperScenario
+import dev.ikna.data.dev.IknaDataProfile
 import dev.ikna.ui.text.S
 import dev.ikna.ui.text.UI_LANGUAGES
 import dev.ikna.ui.text.uiLanguageLabel
@@ -143,6 +145,10 @@ fun SettingsScreen(
     // The rare and the irreversible live behind one expander. Closed by default,
     // so nothing here can be hit while scrolling past it.
     var advancedOpen by remember { mutableStateOf(false) }
+    var developerArmed by remember { mutableStateOf(false) }
+    var selectedDeveloperScenario by remember(settings.developerScenario) {
+        mutableStateOf(DeveloperScenario.fromId(settings.developerScenario))
+    }
 
     // The update section keeps its own answer rather than reading a stored one:
     // a check made here is a question asked on purpose, and its result belongs to
@@ -164,6 +170,14 @@ fun SettingsScreen(
     var diagnosticsOpen by remember { mutableStateOf(false) }
     var diagnosticsBusy by remember { mutableStateOf(false) }
     var diagnostics by remember { mutableStateOf<String?>(null) }
+
+    fun restartWithProfile(profile: IknaDataProfile) {
+        container.requestDataProfile(profile)
+        val restart = Intent(context, MainActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        context.startActivity(restart)
+        exitProcess(0)
+    }
 
     // Navigation keeps both destinations composed until Shared Axis X finishes.
     // This screen also starts database reads, optional speech-engine warm-up and
@@ -706,7 +720,7 @@ fun SettingsScreen(
                                     )
                                     WorkScheduler.scheduleReminder(
                                         context,
-                                        enabled,
+                                        !container.isDeveloperMode && enabled,
                                         settings.reminderHour,
                                         settings.reminderMinute
                                     )
@@ -729,7 +743,12 @@ fun SettingsScreen(
                                         onClick = {
                                             scope.launch {
                                                 container.settings.setReminder(true, hour, minute)
-                                                WorkScheduler.scheduleReminder(context, true, hour, minute)
+                                                WorkScheduler.scheduleReminder(
+                                                    context,
+                                                    !container.isDeveloperMode,
+                                                    hour,
+                                                    minute
+                                                )
                                             }
                                         }
                                     )
@@ -875,7 +894,10 @@ fun SettingsScreen(
                                             runCatching {
                                                 val log = container.jsonExporter.export()
                                                 container.jsonExporter.exportSettings(
-                                                    SettingsBackup.encode(current)
+                                                    SettingsBackup.encode(
+                                                        current,
+                                                        synthetic = container.isDeveloperMode
+                                                    )
                                                 )
                                                 log
                                             }
@@ -1005,6 +1027,112 @@ fun SettingsScreen(
 
                         if (advancedOpen) {
                             Spacer(Modifier.height(16.dp))
+                            Text(
+                                text = S.t("dev.002"),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = S.t("dev.003"),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.height(10.dp))
+
+                            if (!container.isDeveloperMode) {
+                                if (!developerArmed) {
+                                    IknaWideButton(
+                                        label = S.t("dev.005"),
+                                        height = 52.dp,
+                                        onClick = { developerArmed = true }
+                                    )
+                                } else {
+                                    Text(
+                                        text = S.t("dev.004"),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                    Spacer(Modifier.height(10.dp))
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        IknaWideButton(
+                                            label = S.t("dev.021"),
+                                            modifier = Modifier.weight(1f),
+                                            height = 52.dp,
+                                            onClick = { restartWithProfile(IknaDataProfile.DEVELOPER) }
+                                        )
+                                        IknaWideButton(
+                                            label = S.t("dev.022"),
+                                            modifier = Modifier.weight(1f),
+                                            height = 52.dp,
+                                            onClick = { developerArmed = false }
+                                        )
+                                    }
+                                }
+                            } else {
+                                IknaSettingsToggleRow(
+                                    title = S.t("dev.008"),
+                                    subtitle = S.t("dev.009"),
+                                    checked = settings.developerIgnoreRestrictions,
+                                    onCheckedChange = { on ->
+                                        scope.launch { container.settings.setDeveloperIgnoreRestrictions(on) }
+                                    }
+                                )
+                                Spacer(Modifier.height(14.dp))
+                                Text(
+                                    text = S.t("dev.010"),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                DeveloperScenario.entries.chunked(2).forEach { row ->
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        row.forEach { scenario ->
+                                            IknaChip(
+                                                label = S.t(scenarioLabelKey(scenario)),
+                                                selected = selectedDeveloperScenario == scenario,
+                                                modifier = Modifier.weight(1f),
+                                                onClick = { selectedDeveloperScenario = scenario }
+                                            )
+                                        }
+                                    }
+                                    Spacer(Modifier.height(6.dp))
+                                }
+                                Text(
+                                    text = S.t("dev.018"),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(Modifier.height(10.dp))
+                                IknaWideButton(
+                                    label = S.t("dev.017"),
+                                    height = 52.dp,
+                                    enabled = !busy,
+                                    onClick = {
+                                        val sandbox = container.developerSandbox ?: return@IknaWideButton
+                                        busy = true
+                                        scope.launch {
+                                            val result = withContext(Dispatchers.IO) {
+                                                runCatching { sandbox.seed(selectedDeveloperScenario) }
+                                            }
+                                            busy = false
+                                            if (result.isSuccess) {
+                                                restartWithProfile(IknaDataProfile.DEVELOPER)
+                                            } else {
+                                                message = S.t("diag.008")
+                                            }
+                                        }
+                                    }
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                IknaTextButton(
+                                    label = S.t("dev.006"),
+                                    onClick = { restartWithProfile(IknaDataProfile.REAL) },
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            Spacer(Modifier.height(18.dp))
                             IknaSettingsToggleRow(
                                 title = S.t("pseudo.001"),
                                 subtitle = S.t("pseudo.002"),
@@ -1371,6 +1499,15 @@ private const val ID_FONT = "font"
 private const val ID_REMINDER = "reminder"
 private const val ID_DATA = "data"
 private const val ID_UPDATE = "update"
+private fun scenarioLabelKey(scenario: DeveloperScenario): String = when (scenario) {
+    DeveloperScenario.EMPTY -> "dev.011"
+    DeveloperScenario.EARLY_HISTORY -> "dev.012"
+    DeveloperScenario.MATURE_HISTORY -> "dev.013"
+    DeveloperScenario.BROWSE_READY -> "dev.014"
+    DeveloperScenario.RICH_STATISTICS -> "dev.015"
+    DeveloperScenario.RETURN_AFTER_BREAK -> "dev.016"
+}
+
 private const val ID_ADVANCED = "advanced"
 
 /**
@@ -1436,15 +1573,6 @@ private fun themeLabel(mode: ThemeMode): String = when (mode) {
 private fun timeText(hour: Int, minute: Int): String =
     String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
 
-private fun langLabel(lang: String): String = when (lang.substringBefore('-').lowercase()) {
-    "pl" -> S.t("set.104")
-    "ru" -> S.t("set.105")
-    "en" -> S.t("set.106")
-    "de" -> S.t("set.107")
-    "es" -> S.t("set.108")
-    "fr" -> S.t("set.109")
-    else -> lang.uppercase()
-}
 
 /**
  * Opens the phone's speech settings. Not every ROM has this screen, so the

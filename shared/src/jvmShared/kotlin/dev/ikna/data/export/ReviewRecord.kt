@@ -113,7 +113,7 @@ data class ReviewRecord(
     )
 
     companion object {
-        fun of(r: ReviewEntity): ReviewRecord = ReviewRecord(
+        fun of(r: ReviewEntity, synthetic: Boolean = false): ReviewRecord = ReviewRecord(
             id = r.id,
             chunkId = r.chunkId,
             level = r.level,
@@ -145,7 +145,8 @@ data class ReviewRecord(
             inputMethod = r.inputMethod,
             peekSemantics = r.peekSemantics,
             fsrsParameters = r.fsrsParameters,
-            timingDiscardReason = r.timingDiscardReason
+            timingDiscardReason = r.timingDiscardReason,
+            synthetic = synthetic
         )
 
         /**

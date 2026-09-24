@@ -146,6 +146,30 @@ class BrowsePolicyTest {
     }
 
     @Test
+    fun `developer override bypasses policy blockers but not broken checks or absent content`() {
+        assertTrue(
+            BrowsePolicy.developerOverrideAllowed(
+                listOf(
+                    BrowseUnavailableReason.PLAN_NOT_COMPLETE,
+                    BrowseUnavailableReason.LATE_NIGHT,
+                    BrowseUnavailableReason.NO_CREDITS,
+                    BrowseUnavailableReason.BACKLOG_GUARD
+                )
+            )
+        )
+        assertFalse(
+            BrowsePolicy.developerOverrideAllowed(
+                listOf(BrowseUnavailableReason.CHECK_FAILED)
+            )
+        )
+        assertFalse(
+            BrowsePolicy.developerOverrideAllowed(
+                listOf(BrowseUnavailableReason.NO_CANDIDATES)
+            )
+        )
+    }
+
+    @Test
     fun `only familiar future cards are eligible`() {
         val now = 1_000L
         assertTrue(

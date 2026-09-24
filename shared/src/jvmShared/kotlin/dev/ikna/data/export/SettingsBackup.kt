@@ -47,6 +47,8 @@ data class SettingsSnapshot(
      */
     val kind: String,
     val version: Int = 1,
+    /** Developer-sandbox settings are useful for bug reports but never restorable as real data. */
+    val synthetic: Boolean = false,
     val theme: String = ThemeMode.DARK.name,
     // A file written before palettes existed has no id in it, and the default is
     // the right answer for it: that build had exactly one dark scheme, and the
@@ -107,8 +109,9 @@ object SettingsBackup {
         encodeDefaults = true
     }
 
-    fun snapshotOf(settings: IknaSettings): SettingsSnapshot = SettingsSnapshot(
+    fun snapshotOf(settings: IknaSettings, synthetic: Boolean = false): SettingsSnapshot = SettingsSnapshot(
         kind = SETTINGS_BACKUP_KIND,
+        synthetic = synthetic,
         theme = settings.theme.name,
         paletteId = settings.paletteId,
         customBackground = settings.customBackground,
@@ -136,9 +139,9 @@ object SettingsBackup {
         hotkeys = settings.hotkeys
     )
 
-    fun encode(settings: IknaSettings): String = json.encodeToString(
+    fun encode(settings: IknaSettings, synthetic: Boolean = false): String = json.encodeToString(
         SettingsSnapshot.serializer(),
-        snapshotOf(settings)
+        snapshotOf(settings, synthetic)
     )
 
     /**
@@ -151,7 +154,7 @@ object SettingsBackup {
     fun decode(text: String): SettingsSnapshot? =
         runCatching { json.decodeFromString(SettingsSnapshot.serializer(), text) }
             .getOrNull()
-            ?.takeIf { it.kind == SETTINGS_BACKUP_KIND }
+            ?.takeIf { it.kind == SETTINGS_BACKUP_KIND && !it.synthetic }
 
     /**
      * Cheap check used to route a picked file to the right restore path, so the
@@ -167,6 +170,7 @@ object SettingsBackup {
      * it was restored.
      */
     suspend fun apply(store: SettingsStore, snapshot: SettingsSnapshot) {
+        require(!snapshot.synthetic) { "Synthetic developer settings cannot be restored" }
         // Experiments require consent on this installation, never in a backup.
         store.setDerivedGrading(false)
         store.disableLocalOptimizer()

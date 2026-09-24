@@ -71,6 +71,15 @@ which is what makes it safe to change the component model later.
    record of everything the user has studied, and PRIVACY.md says it stays on the
    phone. Device-to-device transfer is still allowed.
 
+## Developer data isolation
+
+Developer Mode uses the same Room schema, repositories and learning engine against
+a physically separate database and settings store. The active profile is selected
+before the dependency graph is constructed and changing it requires a process
+restart, so real learner history and synthetic development history cannot share an
+open DAO or in-memory repository. Synthetic exports are marked and rejected by
+normal restore. See [`DEVELOPER-MODE.md`](DEVELOPER-MODE.md).
+
 ## Restore is a replay, not a copy
 
 `RestoreRepository` reads the exported log, inserts the answers, and then rebuilds

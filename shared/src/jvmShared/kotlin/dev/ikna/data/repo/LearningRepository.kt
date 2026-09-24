@@ -1,5 +1,6 @@
 package dev.ikna.data.repo
 
+import dev.ikna.data.dev.DeveloperAccess
 import dev.ikna.data.db.CardDao
 import dev.ikna.data.db.CardEntity
 import dev.ikna.data.db.BrowseDao
@@ -77,7 +78,8 @@ class LearningRepository(
     data class LoadSetting(val auto: Boolean, val manual: Int)
     private data class BrowseGate(
         val room: Int,
-        val blockers: List<BrowseUnavailableReason> = emptyList()
+        val blockers: List<BrowseUnavailableReason> = emptyList(),
+        val forcedByDeveloper: Boolean = false
     )
 
     /**
@@ -101,6 +103,9 @@ class LearningRepository(
 
     /** Clears allowance together with a deliberate learning-progress reset. */
     @Volatile var clearBrowseCredits: (suspend () -> Unit)? = null
+
+    /** Sandbox-only access override; production policy still reports its blockers. */
+    @Volatile var developerAccess: (suspend () -> DeveloperAccess)? = null
 
     /**
      * The chunks the learner has marked as wrong, read on demand.
@@ -833,11 +838,17 @@ class LearningRepository(
         val gate = browseGate(plan, now)
         return deckIds.associateWith { deckId ->
             val blockers = gate.blockers.toMutableList()
-            if (browseCandidates(deckId, limit = 1, now = now).isEmpty()) {
+            if (browseCandidates(deckId, limit = 1, now = now, force = gate.forcedByDeveloper).isEmpty()) {
                 blockers += BrowseUnavailableReason.NO_CANDIDATES
             }
-            if (blockers.isEmpty() && gate.room > 0) {
-                BrowseAvailability(remaining = gate.room)
+            val forced = gate.forcedByDeveloper && BrowsePolicy.developerOverrideAllowed(blockers)
+            if ((blockers.isEmpty() || forced) && gate.room > 0) {
+                BrowseAvailability(
+                    remaining = gate.room,
+                    reason = blockers.firstOrNull(),
+                    additionalReasons = blockers.drop(1),
+                    forcedByDeveloper = forced
+                )
             } else {
                 BrowseAvailability.blocked(blockers)
             }
@@ -865,10 +876,10 @@ class LearningRepository(
     ): BrowsePlan = writeLock.withLock {
         val title = chunkDao.pack(deckId)?.title ?: deckId
         val plan = ensureDailyPlanLocked(now)
-        val room = browseRoom(plan, now)
-        if (room <= 0) return@withLock BrowsePlan(emptyList(), deckId, title)
+        val gate = browseGate(plan, now)
+        if (gate.room <= 0) return@withLock BrowsePlan(emptyList(), deckId, title)
 
-        val cards = browseCandidates(deckId, limit = room, now = now)
+        val cards = browseCandidates(deckId, limit = gate.room, now = now, force = gate.forcedByDeveloper)
         val first = cards.firstOrNull()
             ?: return@withLock BrowsePlan(emptyList(), deckId, title)
         if (!insertBrowseExposure(first, deckId, now)) {
@@ -940,22 +951,43 @@ class LearningRepository(
             else if (creditRoom == 0) blockers += BrowseUnavailableReason.NO_CREDITS
         }
 
-        val room = min(dailyRoom, creditRoom)
+        val productionRoom = min(dailyRoom, creditRoom)
         val unique = blockers.distinct()
+        val access = developerAccess?.invoke() ?: DeveloperAccess.NONE
+        val forced = access.active && access.ignoreRestrictions &&
+            BrowsePolicy.developerOverrideAllowed(unique)
         return BrowseGate(
-            room = if (unique.isEmpty()) room else 0,
-            blockers = unique
+            room = when {
+                forced -> BrowsePolicy.CANDIDATE_SCAN_LIMIT
+                unique.isEmpty() -> productionRoom
+                else -> 0
+            },
+            blockers = unique,
+            forcedByDeveloper = forced
         )
     }
 
     private suspend fun browseCandidates(
         deckId: String,
         limit: Int,
-        now: Long
+        now: Long,
+        force: Boolean = false
     ): List<SessionCard> {
         if (limit <= 0) return emptyList()
 
         val hidden = suppressedNow()
+        if (force) {
+            val keys = chunkDao.packChunks(deckId)
+                .asSequence()
+                .filterNot { it.chunkId in hidden }
+                .map { it.chunkId + ":0" }
+                .take(BrowsePolicy.CANDIDATE_SCAN_LIMIT)
+                .toList()
+            if (keys.isEmpty()) return emptyList()
+            val cards = cardDao.byKeys(keys).associateBy { it.key }
+            val ordered = keys.mapNotNull(cards::get).take(limit)
+            return builder().materialize(ordered.map { it.key })
+        }
         val candidates = cardDao.browseCandidatesForPack(
             packId = deckId,
             after = now,

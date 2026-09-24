@@ -54,6 +54,14 @@ object WorkScheduler {
      * the running worker: it is applied after the current run finishes, unlike
      * REPLACE, which would cancel the worker doing the asking.
      */
+    /** Developer profile never runs real reminders, planning or automatic exports. */
+    fun cancelAllIknaWork(context: Context) {
+        val wm = WorkManager.getInstance(context)
+        wm.cancelUniqueWork(DailyPlanWorker.NAME)
+        wm.cancelUniqueWork(ExportWorker.NAME)
+        wm.cancelUniqueWork(ReminderWorker.NAME)
+    }
+
     fun scheduleReminder(context: Context, enabled: Boolean, hour: Int, minute: Int) {
         val wm = WorkManager.getInstance(context)
         if (!enabled) {

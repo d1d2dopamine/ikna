@@ -295,18 +295,6 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"set.102" to "LIGHT",
 	// СВОЯ
 	"set.103" to "OWN",
-	// ПОЛЬСКИЙ
-	"set.104" to "POLISH",
-	// РУССКИЙ
-	"set.105" to "RUSSIAN",
-	// АНГЛИЙСКИЙ
-	"set.106" to "ENGLISH",
-	// НЕМЕЦКИЙ
-	"set.107" to "GERMAN",
-	// ИСПАНСКИЙ
-	"set.108" to "SPANISH",
-	// ФРАНЦУЗСКИЙ
-	"set.109" to "FRENCH",
 	// шрифт
 	"set.110" to "font",
 	// ПАЛИТРА
@@ -1007,4 +995,27 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "keys.020" to "Esc cancels input",
     "keys.021" to "That key cannot be used",
 
+    "dev.001" to "DEV",
+    "dev.002" to "Developer mode",
+    "dev.003" to "Uses a separate test profile. Answers, history, statistics and settings here never modify your normal learner data.",
+    "dev.004" to "Developer mode is for testing, not normal learning. Test data can be artificial and restrictions can be bypassed.",
+    "dev.005" to "ENABLE DEVELOPER MODE",
+    "dev.006" to "RETURN TO NORMAL MODE",
+    "dev.007" to "Ikna will restart with the selected data profile.",
+    "dev.008" to "Ignore restrictions",
+    "dev.009" to "Allows testing even when history, today’s plan, time, Governor, cooldown or usage limits would normally block a feature. Production blockers are still calculated.",
+    "dev.010" to "Synthetic scenario",
+    "dev.011" to "EMPTY",
+    "dev.012" to "EARLY HISTORY",
+    "dev.013" to "MATURE HISTORY",
+    "dev.014" to "BROWSE READY",
+    "dev.015" to "RICH STATISTICS",
+    "dev.016" to "RETURN AFTER BREAK",
+    "dev.017" to "REBUILD TEST DATA",
+    "dev.018" to "Replaces only Developer Mode data with deterministic synthetic history.",
+    "dev.019" to "Test data rebuilt",
+    "dev.020" to "Developer data",
+    "dev.021" to "ENABLE AND RESTART",
+    "dev.022" to "CANCEL",
+    "dev.023" to "Ikna will close. Open it again to use the selected data profile.",
 )

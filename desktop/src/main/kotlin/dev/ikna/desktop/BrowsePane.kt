@@ -36,6 +36,7 @@ import dev.ikna.ui.session.BrowseChunkCard
 import dev.ikna.ui.session.BrowseableCard
 import dev.ikna.ui.session.IknaBrowseEmptyState
 import dev.ikna.ui.session.IknaBrowseTopBar
+import dev.ikna.ui.session.browseUnavailableText
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
@@ -60,6 +61,17 @@ fun BrowsePane(
     var loading by remember(deckId) { mutableStateOf(true) }
     var saving by remember(deckId) { mutableStateOf(false) }
     var finished by remember(deckId) { mutableStateOf(false) }
+    var developerBlockers by remember(deckId) { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(deckId, settings.developerIgnoreRestrictions) {
+        developerBlockers = if (container.isDeveloperMode && settings.developerIgnoreRestrictions) {
+            val availability = runCatching {
+                container.learningRepository.browseDeckAvailability(listOf(deckId))[deckId]
+            }.getOrNull()
+            availability?.takeIf { it.forcedByDeveloper && it.blockers.isNotEmpty() }
+                ?.let { S.t("dev.001") + " · " + browseUnavailableText(it) }
+        } else null
+    }
 
     LaunchedEffect(deckId) {
         loading = true
@@ -115,6 +127,13 @@ fun BrowsePane(
             }
     ) {
         IknaBrowseTopBar(plan?.deckTitle.orEmpty())
+        developerBlockers?.let { note ->
+            Text(
+                text = note,
+                style = MaterialTheme.typography.labelSmall,
+                color = palette.accent
+            )
+        }
         BoxWithConstraints(
             modifier = Modifier
                 .weight(1f)

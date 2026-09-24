@@ -83,8 +83,13 @@ object IknaBundle {
      */
     suspend fun write(container: DesktopContainer, target: File): BundleWrite {
         val reviews = container.db.reviewDao().all()
-        val settings = SettingsBackup.encode(container.settings.current())
-        val decks = container.deckRepository.decks()
+        val settings = SettingsBackup.encode(
+            container.settings.current(),
+            synthetic = container.isDeveloperMode
+        )
+        // Developer fixtures may include synthetic packs. Never put them in a
+        // portable bundle that a real profile could later import as content.
+        val decks = if (container.isDeveloperMode) emptyList() else container.deckRepository.decks()
 
         target.parentFile?.mkdirs()
         var deckCount = 0
@@ -93,7 +98,7 @@ object IknaBundle {
             for (review in reviews) {
                 val line = ReviewRecord.json.encodeToString(
                     ReviewRecord.serializer(),
-                    ReviewRecord.of(review)
+                    ReviewRecord.of(review, synthetic = container.isDeveloperMode)
                 )
                 zip.write((line + "\n").toByteArray(Charsets.UTF_8))
             }
@@ -149,7 +154,7 @@ object IknaBundle {
                     out.write(
                         ReviewRecord.json.encodeToString(
                             ReviewRecord.serializer(),
-                            ReviewRecord.of(review)
+                            ReviewRecord.of(review, synthetic = container.isDeveloperMode)
                         )
                     )
                     out.newLine()
@@ -158,7 +163,10 @@ object IknaBundle {
             written += file.name
         }
 
-        val settings = SettingsBackup.encode(container.settings.current())
+        val settings = SettingsBackup.encode(
+            container.settings.current(),
+            synthetic = container.isDeveloperMode
+        )
         if (settings.isNotBlank()) {
             val file = File(directory, "ikna-settings-" + stamp(now) + ".json")
             file.writeText(settings)

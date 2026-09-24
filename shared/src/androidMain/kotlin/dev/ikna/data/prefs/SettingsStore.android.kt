@@ -10,9 +10,9 @@ import java.io.File
  * caller in :app compiles unchanged -- Kotlin resolves the classifier and the
  * callable under one import.
  */
-fun SettingsStore(context: Context): SettingsStore =
+fun SettingsStore(context: Context, fileName: String = SETTINGS_DATASTORE_FILE): SettingsStore =
     SettingsStore(
         createSettingsDataStore(
-            File(File(context.applicationContext.filesDir, "datastore"), SETTINGS_DATASTORE_FILE)
+            File(File(context.applicationContext.filesDir, "datastore"), fileName)
         )
     )

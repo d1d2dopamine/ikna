@@ -37,6 +37,14 @@ class WindowChromeRegressionTest {
     }
 
     @Test
+    fun `offscreen recovery runs once on the native window path`() {
+        val source = source("Main.kt")
+        assertTrue(source.contains("recoverOffScreenWindow(window)"))
+        assertTrue(source.contains("geometryMemory.forgetPosition()"))
+        assertTrue(!source.contains("windowState.position, attachedScreenBounds"))
+    }
+
+    @Test
     fun `native resizable style stays stable across placement changes`() {
         val source = source("Main.kt")
         assertTrue(source.contains("WindowDecoration.Undecorated("))

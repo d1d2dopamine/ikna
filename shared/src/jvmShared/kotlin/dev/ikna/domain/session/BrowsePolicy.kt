@@ -32,13 +32,15 @@ enum class BrowseUnavailableReason {
 data class BrowseAvailability(
     val remaining: Int = 0,
     val reason: BrowseUnavailableReason? = null,
-    val additionalReasons: List<BrowseUnavailableReason> = emptyList()
+    val additionalReasons: List<BrowseUnavailableReason> = emptyList(),
+    /** Production blockers remain visible even when Developer Mode forces entry. */
+    val forcedByDeveloper: Boolean = false
 ) {
     val blockers: List<BrowseUnavailableReason>
         get() = (listOfNotNull(reason) + additionalReasons).distinct()
 
     val available: Boolean
-        get() = remaining > 0 && blockers.isEmpty()
+        get() = remaining > 0 && (blockers.isEmpty() || forcedByDeveloper)
 
     companion object {
         fun blocked(reason: BrowseUnavailableReason): BrowseAvailability =
@@ -97,6 +99,13 @@ object BrowsePolicy {
 
     fun cardsForCredits(points: Int): Int =
         min(MAX_CARDS_PER_DAY, points.coerceAtLeast(0) / POINTS_PER_BROWSE)
+
+    /** Developer access may bypass product policy, never broken checks or absent content. */
+    fun developerOverrideAllowed(blockers: Iterable<BrowseUnavailableReason>): Boolean =
+        blockers.none {
+            it == BrowseUnavailableReason.CHECK_FAILED ||
+                it == BrowseUnavailableReason.NO_CANDIDATES
+        }
 
     /**
      * Reconciles the preference ledger with the append-only exposure log.

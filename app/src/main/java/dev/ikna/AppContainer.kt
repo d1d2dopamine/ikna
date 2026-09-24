@@ -1,6 +1,14 @@
 package dev.ikna
 
 import dev.ikna.data.db.openIknaDatabase
+import dev.ikna.data.dev.DATA_PROFILE_FILE
+import dev.ikna.data.dev.DEVELOPER_SETTINGS_FILE
+import dev.ikna.data.dev.DataProfileStore
+import dev.ikna.data.dev.DeveloperAccess
+import dev.ikna.data.dev.DeveloperSandboxSeeder
+import dev.ikna.data.dev.DeveloperScenario
+import dev.ikna.data.dev.IknaDataProfile
+import dev.ikna.data.dev.databaseFileName
 import dev.ikna.data.db.wipeAllData
 import dev.ikna.domain.governor.loadGovernorConfig
 
@@ -13,6 +21,7 @@ import dev.ikna.audio.VoiceModelStore
 import dev.ikna.data.export.JsonExporter
 import dev.ikna.data.pack.PackLoader
 import dev.ikna.data.prefs.SettingsStore
+import dev.ikna.data.prefs.SETTINGS_DATASTORE_FILE
 import dev.ikna.data.repo.ComponentRepository
 import dev.ikna.data.repo.DeckRepository
 import dev.ikna.data.repo.LearningRepository
@@ -34,6 +43,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  * Manual dependency container.
@@ -41,15 +51,25 @@ import kotlinx.coroutines.launch
  * No Hilt on purpose: with a dozen dependencies a KSP graph costs a minute of CI
  * time per build and buys nothing. This is the whole DI system.
  */
-class AppContainer(context: Context) {
+class AppContainer(
+    context: Context,
+    val dataProfile: IknaDataProfile = DataProfileStore(
+        File(context.applicationContext.filesDir, DATA_PROFILE_FILE)
+    ).current()
+) {
 
     private val appContext = context.applicationContext
+    val profileStore = DataProfileStore(File(appContext.filesDir, DATA_PROFILE_FILE))
+    val isDeveloperMode: Boolean get() = dataProfile == IknaDataProfile.DEVELOPER
 
     val config: GovernorConfig = loadGovernorConfig(context)
 
-    private val db = openIknaDatabase(context)
+    private val db = openIknaDatabase(context, databaseFileName(dataProfile))
 
-    val settings = SettingsStore(context)
+    val settings = SettingsStore(
+        context,
+        if (isDeveloperMode) DEVELOPER_SETTINGS_FILE else SETTINGS_DATASTORE_FILE
+    )
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     val optimizer = dev.ikna.data.repo.LocalOptimizer(settings,
         FsrsParams(desiredRetention = config.desiredRetention), scope,
@@ -101,6 +121,19 @@ class AppContainer(context: Context) {
         config = config
     )
 
+    val developerSandbox: DeveloperSandboxSeeder? = if (isDeveloperMode) {
+        DeveloperSandboxSeeder(
+            db = db,
+            settings = settings,
+            components = componentRepository,
+            config = config
+        )
+    } else null
+
+    fun requestDataProfile(profile: IknaDataProfile) {
+        profileStore.set(profile)
+    }
+
     /** One app-lifetime, transactional bridge from Anki packages. */
     val ankiImport = AnkiImportManager(
         AnkiImporter(
@@ -136,7 +169,7 @@ class AppContainer(context: Context) {
         db.wipeAllData()
     }
 
-    val jsonExporter = JsonExporter(context, db.reviewDao())
+    val jsonExporter = JsonExporter(context, db.reviewDao(), synthetic = isDeveloperMode)
 
     /**
      * Speech, through whatever engine the phone has. Held here because starting
@@ -188,6 +221,13 @@ class AppContainer(context: Context) {
             settings.settleBrowseCredits(day, completed, exposures).availablePoints
         }
         learningRepository.clearBrowseCredits = { settings.clearBrowseCredits() }
+        learningRepository.developerAccess = {
+            val current = settings.flow.first()
+            DeveloperAccess(
+                active = isDeveloperMode,
+                ignoreRestrictions = isDeveloperMode && current.developerIgnoreRestrictions
+            )
+        }
 
         learningRepository.derivedGradingEnabled = { dev.ikna.domain.optimizer.AutomaticLearningPolicy.DERIVED_WHEN_READY }
         learningRepository.loadSettings = {
@@ -217,9 +257,9 @@ class AppContainer(context: Context) {
                     lastReminder = reminder
                     WorkScheduler.scheduleReminder(
                         appContext,
-                        s.reminderEnabled,
-                        s.reminderHour,
-                        s.reminderMinute
+                        enabled = !isDeveloperMode && s.reminderEnabled,
+                        hour = s.reminderHour,
+                        minute = s.reminderMinute
                     )
                 }
             }
@@ -233,6 +273,9 @@ class AppContainer(context: Context) {
         _schedulerMigration.value = SchedulerMigrationState.Running
         schedulerMigrationJob = scope.launch(Dispatchers.IO) {
             _schedulerMigration.value = runCatching {
+                if (isDeveloperMode && !settings.flow.first().onboardingDone) {
+                    developerSandbox?.seed(DeveloperScenario.MATURE_HISTORY)
+                }
                 optimizer.initialize()
                 schedulerMigrator.runIfNeeded().also {
                     optimizer.startAutomatic(db.reviewDao().observeOptimizerChanges())
