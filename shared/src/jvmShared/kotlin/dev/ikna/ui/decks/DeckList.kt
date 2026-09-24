@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -40,6 +42,7 @@ import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.Space
 import dev.ikna.ui.theme.deckTintColor
 import dev.ikna.ui.theme.iknaInspect
+import dev.ikna.ui.theme.iknaSignalFrame
 
 private val DECK_ROW_HEIGHT = 52.dp
 private val DECK_MARK_SIZE = 52.dp
@@ -69,10 +72,13 @@ private val DECK_PROGRESS_HEIGHT = 14.dp
 @Composable
 fun IknaTodayBlock(total: Int, onClick: () -> Unit) {
     val enabled = total > 0
+    val interaction = remember { MutableInteractionSource() }
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .hoverable(interaction)
+            .iknaSignalFrame(interaction)
+            .clickable(interactionSource = interaction, indication = null, onClick = onClick)
             .padding(vertical = Space.sm)
             .iknaInspect("IknaTodayBlock")
     ) {
@@ -132,13 +138,16 @@ fun IknaDeckRow(
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val accent = MaterialTheme.colorScheme.primary
     val owes = dueToday > 0
+    val interaction = remember { MutableInteractionSource() }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(DECK_ROW_HEIGHT)
             .clipToBounds()
-            .clickable(onClick = onOpen)
+            .hoverable(interaction)
+            .iknaSignalFrame(interaction)
+            .clickable(interactionSource = interaction, indication = null, onClick = onOpen)
             .iknaInspect("IknaDeckRow[${deck.title}]"),
         verticalAlignment = Alignment.Top
     ) {

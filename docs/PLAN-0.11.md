@@ -6,10 +6,12 @@ shows, which corpus decisions are fixed for this release, and what still blocks
 publication.
 
 The longer sequence and rationale remain in [`ROADMAP-0.11.md`](ROADMAP-0.11.md).
-The corpus/source policy is in [`CORPORA-0.11.md`](CORPORA-0.11.md). Scientific
-confidence and claim wording remain in [`SCIENCE.md`](SCIENCE.md). Ideas with no
-release/date commitment live separately in [`UNSCHEDULED.md`](UNSCHEDULED.md);
-they are not 0.11 obligations.
+Parallel stabilization, cleanup, Developer Sandbox, usability and contributor-tooling
+work is tracked separately in [`modern_PLAN-0.11.md`](modern_PLAN-0.11.md) so it
+does not become ad-hoc numbered release parts. The corpus/source policy is in
+[`CORPORA-0.11.md`](CORPORA-0.11.md). Scientific confidence and claim wording
+remain in [`SCIENCE.md`](SCIENCE.md). Ideas with no release/date commitment live
+separately in [`UNSCHEDULED.md`](UNSCHEDULED.md); they are not 0.11 obligations.
 
 ## 🎯 Release theme
 

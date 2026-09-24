@@ -260,6 +260,7 @@ fun IknaIconButton(
     /** The name a screen reader reads out. Every call site should pass one. */
     label: String? = null
 ) {
+    val interaction = remember { MutableInteractionSource() }
     Box(
         modifier = modifier
             .iknaInspect("IknaIconButton[${label ?: glyph.name}]")
@@ -268,7 +269,15 @@ fun IknaIconButton(
                 role = Role.Button
                 if (label != null) contentDescription = label
             }
-            .clickable(enabled = enabled, onClick = onClick),
+            .hoverable(interaction, enabled = enabled)
+            .iknaSignalFrame(interaction, enabled = enabled)
+            .clickable(
+                interactionSource = interaction,
+                indication = null,
+                enabled = enabled,
+                role = Role.Button,
+                onClick = onClick
+            ),
         contentAlignment = Alignment.Center
     ) {
         IknaGlyphIcon(
@@ -336,6 +345,7 @@ fun IknaWideButton(
             .background(fillColor.copy(alpha = fillColor.alpha * alpha))
             .border(if (enabled && focused) 2.dp else 1.dp, boundary.copy(alpha = alpha))
             .hoverable(interaction, enabled = enabled)
+            .iknaSignalFrame(interaction, enabled = enabled)
             .clickable(interactionSource = interaction, indication = null,
                 enabled = enabled, role = Role.Button, onClick = onClick)
             .then(if (fillWidth) Modifier else Modifier.padding(horizontal = Space.md)),
@@ -365,6 +375,7 @@ fun IknaTextButton(
     enabled: Boolean = true,
     color: Color = MaterialTheme.colorScheme.onBackground
 ) {
+    val interaction = remember { MutableInteractionSource() }
     val motionEnabled = LocalIknaMotionEnabled.current
     val alpha by animateFloatAsState(
         targetValue = if (enabled) 1f else 0.35f,
@@ -378,7 +389,15 @@ fun IknaTextButton(
         modifier = modifier
             .iknaInspect("IknaTextButton[$label]")
             .height(44.dp)
-            .clickable(enabled = enabled, onClick = onClick)
+            .hoverable(interaction, enabled = enabled)
+            .iknaSignalFrame(interaction, enabled = enabled)
+            .clickable(
+                interactionSource = interaction,
+                indication = null,
+                enabled = enabled,
+                role = Role.Button,
+                onClick = onClick
+            )
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -460,6 +479,7 @@ fun IknaToggle(
             // relying on hue. The platform still announces a real switch.
             .semantics { if (label != null) contentDescription = label }
             .hoverable(interaction, enabled = enabled)
+            .iknaSignalFrame(interaction, enabled = enabled, cornerRadius = 7.dp)
             .toggleable(
                 value = checked,
                 interactionSource = interaction,
@@ -524,6 +544,7 @@ fun IknaChip(
             .border(if (selected || focused) 2.dp else 1.dp, borderColor)
             .semantics { this.selected = selected }
             .hoverable(interaction)
+            .iknaSignalFrame(interaction, cornerRadius = 7.dp)
             .clickable(interactionSource = interaction, indication = null,
                 role = Role.Button, onClick = onClick)
             .padding(horizontal = 12.dp),
@@ -554,11 +575,14 @@ fun IknaHexField(
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
     val line = MaterialTheme.colorScheme.outline
+    val interaction = remember { MutableInteractionSource() }
 
     Box(
         modifier = modifier
             .height(40.dp)
             .border(1.dp, line)
+            .hoverable(interaction)
+            .iknaSignalFrame(interaction, cornerRadius = 7.dp)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.CenterStart
     ) {
@@ -568,6 +592,7 @@ fun IknaHexField(
             textStyle = MaterialTheme.typography.labelLarge.copy(color = ink),
             singleLine = true,
             cursorBrush = SolidColor(ink),
+            interactionSource = interaction,
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -585,10 +610,13 @@ fun IknaTextField(
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    val interaction = remember { MutableInteractionSource() }
     Box(
         modifier = modifier
             .height(48.dp)
             .border(1.dp, MaterialTheme.colorScheme.outline)
+            .hoverable(interaction)
+            .iknaSignalFrame(interaction, cornerRadius = 7.dp)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.CenterStart
     ) {
@@ -598,6 +626,7 @@ fun IknaTextField(
             textStyle = MaterialTheme.typography.bodyLarge.copy(color = ink),
             singleLine = true,
             cursorBrush = SolidColor(ink),
+            interactionSource = interaction,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = { onSearch() }),
             modifier = Modifier.fillMaxWidth(),

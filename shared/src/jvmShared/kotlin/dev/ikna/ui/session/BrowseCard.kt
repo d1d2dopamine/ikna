@@ -3,6 +3,8 @@ package dev.ikna.ui.session
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -18,8 +21,10 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.dp
 import dev.ikna.domain.session.SessionCard
 import dev.ikna.ui.theme.Space
+import dev.ikna.ui.theme.iknaSignalFrame
 
 /**
  * One item in the passive Browse feed.
@@ -37,6 +42,7 @@ fun BrowseFeedCard(
     onSource: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
+    val sourceInteraction = remember { MutableInteractionSource() }
     Column(modifier = modifier) {
         Column(
             modifier = Modifier
@@ -82,7 +88,13 @@ fun BrowseFeedCard(
                 textDecoration = TextDecoration.Underline,
                 modifier = Modifier
                     .border(Space.hair, MaterialTheme.colorScheme.outline)
-                    .clickable(onClick = onSource)
+                    .hoverable(sourceInteraction)
+                    .iknaSignalFrame(sourceInteraction, cornerRadius = 6.dp)
+                    .clickable(
+                        interactionSource = sourceInteraction,
+                        indication = null,
+                        onClick = onSource
+                    )
                     .padding(horizontal = Space.md, vertical = Space.sm)
             )
         }

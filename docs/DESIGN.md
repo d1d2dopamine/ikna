@@ -32,7 +32,7 @@ stutter. Build it and see it; it takes one `gradlew assembleDebug`.
 | Colour | twelve palettes, each in two lightings. Every pair passes 4.5:1, enforced by a test |
 | Interface languages | Russian, English, Polish, Spanish, French, German |
 | Network | static release, catalogue and optional voice files only. Nothing is uploaded, ever |
-| Motion | Material Shared Axis X: 14 dp over 280 ms; no scan, blur, bounce or looping |
+| Motion | Material Shared Axis X: 14 dp over 280 ms; local feedback only, with a pointer-active Signal Frame as the one deliberate repeating motion |
 
 ## Memory lattice
 
@@ -70,8 +70,12 @@ foreground route, so route layers cannot visually leak into each other.
 
 Control motion is deliberately local: 160 ms for switches, chips and enabled
 states, 200 ms for conditional settings height, and 260 ms for segmented progress.
-Nothing loops or bounces. Every one of these transitions reads the same Animations
-preference as navigation and snaps to its destination when motion is disabled.
+Nothing loops at rest. The deliberate exception is the **Signal Frame** used for
+pointer discoverability: while a pointer remains over an interactive object,
+several uneven rounded segments travel slowly around that object's perimeter.
+Keyboard focus shows the same frame without requiring pointer motion, pressing
+pauses it, and disabling animations makes it fully static. The frame is feedback
+for an active interaction, not ambient decoration.
 
 Empty space is divided deliberately. The card keeps a completely silent field
 because the phrase is the only object to read. Unused home space may carry a dense
@@ -118,7 +122,10 @@ session and early enough that nobody works through it by accident.
 
 Flat right angles, hand-drawn marks, no Material components anywhere — not a style
 preference but a requirement, since a Material button ignores the theme's shape
-scheme and rounds itself back at every opportunity.
+scheme and rounds itself back at every opportunity. The Signal Frame is the one
+intentional geometry exception: the control remains square, while its transient
+hover/focus outline has a small radius and rounded segment ends so it reads as a
+signal moving around the object rather than as another permanent container.
 
 Colour is two choices, not one. **Which palette:**
 

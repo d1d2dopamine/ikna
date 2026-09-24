@@ -28,9 +28,12 @@ Before changing code, read the document closest to the area you are touching:
 - release/version rules: [`docs/VERSIONS.md`](docs/VERSIONS.md)
 
 For 0.11 specifically, use [`docs/PLAN-0.11.md`](docs/PLAN-0.11.md) as the
-operational checklist. `ROADMAP-0.11.md` describes the sequence and intent;
+core release checklist. `ROADMAP-0.11.md` describes the sequence and intent;
 `PLAN-0.11.md` records what is actually done, what is waiting on evidence, and
-what blocks release.
+what blocks release. Parallel stabilization, cleanup, Developer Sandbox, UX and
+AI-contributor work lives in
+[`docs/modern_PLAN-0.11.md`](docs/modern_PLAN-0.11.md) so it does not get lost or
+turn into ad-hoc numbered release parts.
 
 ## 🗂️ Repository map
 

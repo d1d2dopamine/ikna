@@ -3,6 +3,8 @@ package dev.ikna.ui.settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
@@ -21,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaPalettes
 import dev.ikna.ui.theme.LocalIknaControlColors
+import dev.ikna.ui.theme.iknaSignalFrame
 
 private const val WORDMARK = "ikna"
 
@@ -63,13 +67,18 @@ fun IknaPaletteTiles(
                 row.forEach { spec ->
                     val p = spec.palette(light)
                     val selected = spec.id == selectedId
+                    val tileInteraction = remember(spec.id) { MutableInteractionSource() }
                     // The tap zone is the tile and its own name, never the empty
                     // space beside a name as short as "NULL": a click aimed at
                     // nothing must not repaint the entire app.
                     Column(modifier = Modifier.weight(1f)) {
                         Column(
                             modifier = Modifier
+                                .hoverable(tileInteraction)
+                                .iknaSignalFrame(tileInteraction)
                                 .clickable(
+                                    interactionSource = tileInteraction,
+                                    indication = null,
                                     role = Role.RadioButton,
                                     onClickLabel = S.t(spec.nameKey),
                                     onClick = { onPick(spec.id) }

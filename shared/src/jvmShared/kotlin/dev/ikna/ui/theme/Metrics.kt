@@ -78,8 +78,10 @@ fun Modifier.readable(): Modifier = this.widthIn(max = ReadableWidth)
  * on a string. Anything leaving the screen accelerates away and does not bounce,
  * because it is gone and a bounce would invite the eye to follow it.
  *
- * Nothing here loops, pulses or breathes. Motion in this app is feedback, and
- * feedback that repeats itself is decoration.
+ * Nothing here loops at rest. The one deliberate exception is the Signal Frame:
+ * while a pointer is actively hovering an interactive object, its broken outline
+ * may travel around that object as discoverability feedback. It stops with the
+ * hover and becomes fully static when motion is disabled.
  */
 /**
  * Whether restrained interface feedback may animate. The app-level setting is
@@ -115,6 +117,12 @@ object Motion {
 
     /** Progress follows real work while filtering noisy per-chunk updates. */
     const val progressChangeDurationMillis = 260
+
+    /** A hovered Signal Frame makes one calm perimeter circuit. */
+    const val signalFrameCycleDurationMillis = 2800
+
+    /** Signal Frame presence appears locally instead of flashing on pointer entry. */
+    const val signalFrameFadeDurationMillis = 120
 
     /** Back to rest, under the finger. Slightly underdamped: it has weight. */
     val settle: AnimationSpec<Float> =

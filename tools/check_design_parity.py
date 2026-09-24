@@ -613,6 +613,35 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('IknaIconButton[', controls)
         self.assertIn('IknaDeckRow[', deck_rows)
 
+    def test_signal_frame_is_shared_pointer_feedback_not_ambient_motion(self):
+        frame = read(SHARED, 'ui/theme/SignalFrame.kt')
+        controls = read(SHARED, 'ui/theme/Flat.kt')
+        decks = read(SHARED, 'ui/decks/DeckList.kt')
+        browse = read(SHARED, 'ui/session/BrowseCard.kt')
+        palettes = read(SHARED, 'ui/settings/PaletteTiles.kt')
+        metrics = read(SHARED, 'ui/theme/Metrics.kt')
+
+        for required in [
+            'fun Modifier.iknaSignalFrame(',
+            'collectIsHoveredAsState()',
+            'collectIsFocusedAsState()',
+            'collectIsPressedAsState()',
+            'val moving = enabled && hovered && !pressed && motionEnabled',
+            'LaunchedEffect(moving)',
+            'PathEffect.dashPathEffect(',
+            'StrokeCap.Round',
+            'cornerRadius = CornerRadius(',
+            'LocalIknaMotionEnabled.current'
+        ]:
+            self.assertIn(required, frame)
+        self.assertNotIn('rememberInfiniteTransition', frame)
+        self.assertIn('signalFrameCycleDurationMillis = 2800', metrics)
+        self.assertIn('signalFrameFadeDurationMillis = 120', metrics)
+        self.assertGreaterEqual(controls.count('.iknaSignalFrame('), 7)
+        self.assertGreaterEqual(decks.count('.iknaSignalFrame('), 2)
+        self.assertIn('.iknaSignalFrame(sourceInteraction, cornerRadius = 6.dp)', browse)
+        self.assertIn('.iknaSignalFrame(tileInteraction)', palettes)
+
     def test_developer_mode_always_bypasses_product_restrictions(self):
         mode = read(SHARED, 'data/dev/DeveloperMode.kt')
         repo = read(SHARED, 'data/repo/LearningRepository.kt')
