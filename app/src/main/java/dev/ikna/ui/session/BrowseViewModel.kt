@@ -15,19 +15,10 @@ import kotlinx.coroutines.sync.withLock
 data class BrowseUiState(
     val loading: Boolean = true,
     val queue: List<SessionCard> = emptyList(),
-    val index: Int = 0,
-    val deckTitle: String = "",
-    val advancing: Boolean = false,
-    val finished: Boolean = false
-) {
-    val current: SessionCard?
-        get() = if (finished) null else queue.getOrNull(index)
+    val deckTitle: String = ""
+)
 
-    val hadCards: Boolean
-        get() = queue.isNotEmpty()
-}
-
-/** Android state holder for the passive, always-revealed card queue. */
+/** Android state holder for the passive vertical Browse feed. */
 class BrowseViewModel(
     private val repo: LearningRepository,
     private val deckId: String
@@ -35,6 +26,7 @@ class BrowseViewModel(
     private val _state = MutableStateFlow(BrowseUiState())
     val state: StateFlow<BrowseUiState> = _state.asStateFlow()
     private val work = Mutex()
+    private val exposureAttempts = linkedSetOf<String>()
 
     init {
         viewModelScope.launch {
@@ -43,31 +35,24 @@ class BrowseViewModel(
                 _state.value = BrowseUiState(
                     loading = false,
                     queue = plan.cards,
-                    deckTitle = plan.deckTitle,
-                    finished = plan.cards.isEmpty()
+                    deckTitle = plan.deckTitle
                 )
             }
         }
     }
 
-    fun next() {
-        if (_state.value.loading || _state.value.advancing || _state.value.finished) return
-        _state.value = _state.value.copy(advancing = true)
+    /**
+     * Record only cards that the lazy list reports as meaningfully visible.
+     * Recomposition and lazy prefetch therefore cannot create Browse exposure.
+     */
+    fun recordVisible(indices: Iterable<Int>) {
         viewModelScope.launch {
             work.withLock {
-                val current = _state.value
-                val nextIndex = current.index + 1
-                val next = current.queue.getOrNull(nextIndex)
-                if (next == null) {
-                    _state.value = current.copy(advancing = false, finished = true)
-                    return@withLock
-                }
-
-                val recorded = repo.recordBrowse(next, deckId)
-                _state.value = if (recorded) {
-                    current.copy(index = nextIndex, advancing = false)
-                } else {
-                    current.copy(advancing = false, finished = true)
+                val queue = _state.value.queue
+                for (index in indices.sorted()) {
+                    val card = queue.getOrNull(index) ?: continue
+                    if (!exposureAttempts.add(card.card.key)) continue
+                    runCatching { repo.recordBrowse(card, deckId) }
                 }
             }
         }

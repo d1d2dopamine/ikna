@@ -1,12 +1,17 @@
 package dev.ikna.desktop
 
-import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,37 +19,31 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import dev.ikna.data.catalog.tatoebaSentenceUrl
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.phoneticsFor
 import dev.ikna.domain.phonetics.Phonetics
 import dev.ikna.domain.session.BrowsePlan
-import dev.ikna.ui.session.BrowseChunkCard
-import dev.ikna.ui.session.BrowseableCard
+import dev.ikna.ui.session.BrowseFeedCard
+import dev.ikna.ui.session.BrowseViewportItem
 import dev.ikna.ui.session.IknaBrowseEmptyState
 import dev.ikna.ui.session.IknaBrowseTopBar
+import dev.ikna.ui.session.browseMeaningfullyVisibleIndices
 import dev.ikna.ui.session.browseUnavailableText
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaPalette
-import kotlinx.coroutines.launch
+import dev.ikna.ui.theme.Space
+import kotlinx.coroutines.flow.distinctUntilChanged
 
-/** Desktop host for the same neutral Browse card used on Android. */
+/** Desktop host for the passive vertical Browse feed. */
 @Composable
 fun BrowsePane(
     container: DesktopContainer,
@@ -54,17 +53,14 @@ fun BrowsePane(
     onChanged: () -> Unit,
     onBack: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-    val focus = remember { FocusRequester() }
     var plan by remember(deckId) { mutableStateOf<BrowsePlan?>(null) }
-    var index by remember(deckId) { mutableStateOf(0) }
     var loading by remember(deckId) { mutableStateOf(true) }
-    var saving by remember(deckId) { mutableStateOf(false) }
-    var finished by remember(deckId) { mutableStateOf(false) }
     var developerBlockers by remember(deckId) { mutableStateOf<String?>(null) }
+    val listState = rememberLazyListState()
+    val exposureAttempts = remember(deckId) { linkedSetOf<String>() }
 
-    LaunchedEffect(deckId, settings.developerIgnoreRestrictions) {
-        developerBlockers = if (container.isDeveloperMode && settings.developerIgnoreRestrictions) {
+    LaunchedEffect(deckId) {
+        developerBlockers = if (container.isDeveloperMode) {
             val availability = runCatching {
                 container.learningRepository.browseDeckAvailability(listOf(deckId))[deckId]
             }.getOrNull()
@@ -75,70 +71,51 @@ fun BrowsePane(
 
     LaunchedEffect(deckId) {
         loading = true
-        val opened = runCatching { container.learningRepository.startBrowse(deckId) }
-            .getOrNull()
-        plan = opened
-        index = 0
-        finished = opened?.cards.isNullOrEmpty()
+        plan = runCatching { container.learningRepository.startBrowse(deckId) }.getOrNull()
         loading = false
-        if (!opened?.cards.isNullOrEmpty()) onChanged()
-        runCatching { focus.requestFocus() }
     }
 
     val cards = plan?.cards.orEmpty()
-    val current = if (finished) null else cards.getOrNull(index)
-
-    val advance: () -> Unit = {
-        if (!loading && !saving && !finished) {
-            val nextIndex = index + 1
-            val next = cards.getOrNull(nextIndex)
-            if (next == null) {
-                finished = true
-                onChanged()
-            } else {
-                saving = true
-                scope.launch {
-                    val recorded = runCatching {
-                        container.learningRepository.recordBrowse(next, deckId)
-                    }.getOrDefault(false)
-                    if (recorded) index = nextIndex else finished = true
-                    saving = false
-                    onChanged()
+    LaunchedEffect(listState, cards) {
+        if (cards.isEmpty()) return@LaunchedEffect
+        snapshotFlow {
+            val layout = listState.layoutInfo
+            browseMeaningfullyVisibleIndices(
+                viewportStart = layout.viewportStartOffset,
+                viewportEnd = layout.viewportEndOffset,
+                items = layout.visibleItemsInfo.map { item ->
+                    BrowseViewportItem(item.index, item.offset, item.size)
                 }
+            )
+        }.distinctUntilChanged().collect { indices ->
+            var changed = false
+            for (index in indices) {
+                val card = cards.getOrNull(index) ?: continue
+                if (!exposureAttempts.add(card.card.key)) continue
+                val recorded = runCatching {
+                    container.learningRepository.recordBrowse(card, deckId)
+                }.getOrDefault(false)
+                changed = changed || recorded
             }
+            if (changed) onChanged()
         }
     }
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .focusRequester(focus)
-            .focusable()
-            .onPreviewKeyEvent { event ->
-                if (loading || saving || event.type != KeyEventType.KeyDown || current == null) {
-                    false
-                } else when (event.key) {
-                    Key.DirectionRight, Key.Spacebar, Key.Enter -> {
-                        advance()
-                        true
-                    }
-                    else -> false
-                }
-            }
-    ) {
+    Column(Modifier.fillMaxSize()) {
         IknaBrowseTopBar(plan?.deckTitle.orEmpty())
         developerBlockers?.let { note ->
             Text(
                 text = note,
                 style = MaterialTheme.typography.labelSmall,
-                color = palette.accent
+                color = palette.accent,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = Space.xs)
             )
         }
-        BoxWithConstraints(
+
+        Box(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth()
-                .clipToBounds(),
+                .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
             when {
@@ -148,42 +125,42 @@ fun BrowsePane(
                     color = palette.muted
                 )
 
-                saving -> Box(Modifier.fillMaxSize())
+                cards.isEmpty() -> IknaBrowseEmptyState()
 
-                current != null -> {
-                    val swipeLine = with(LocalDensity.current) {
-                        (maxWidth.toPx() * 0.13f).coerceIn(56f, 220f)
-                    }
-                    Box(Modifier.fillMaxSize().clipToBounds()) {
-                        BrowseableCard(
-                            key = current.card.key + ":" + index,
-                            animations = settings.animations,
-                            threshold = swipeLine,
-                            onNext = advance
+                else -> LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = Space.lg),
+                    verticalArrangement = Arrangement.spacedBy(Space.lg)
+                ) {
+                    itemsIndexed(
+                        items = cards,
+                        key = { _, card -> card.card.key }
+                    ) { _, card ->
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
                         ) {
-                            BrowseChunkCard(
-                                card = current,
+                            BrowseFeedCard(
+                                card = card,
                                 transcription = Phonetics.line(
-                                    ipa = current.promptIpa,
-                                    lang = current.chunk.lang,
-                                    mode = settings.phoneticsFor(current.chunk.packId)
+                                    ipa = card.promptIpa,
+                                    lang = card.chunk.lang,
+                                    mode = settings.phoneticsFor(card.chunk.packId)
                                 ),
-                                sourceLabel = current.sourceId?.let {
+                                sourceLabel = card.sourceId?.let {
                                     S.t("src.001") + "Tatoeba #" + it
                                 },
-                                onSource = current.sourceId?.let { id ->
+                                onSource = card.sourceId?.let { id ->
                                     { tatoebaSentenceUrl(id)?.let(::openInBrowser); Unit }
                                 },
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .widthIn(max = 960.dp)
                             )
                         }
                     }
                 }
-
-                else -> IknaBrowseEmptyState(
-                    hadCards = cards.isNotEmpty(),
-                    animations = settings.animations
-                )
             }
         }
 

@@ -90,6 +90,18 @@ early.
 Undo is an inserted row, not an edit: the log is append-only, and taking an answer
 back is recorded as a retraction of it.
 
+## Browse is reading, not a session
+
+Browse is a vertical reading feed, not a second card-review interaction. Each item
+shows the source-language context and target, pronunciation when available, its
+meaning, and public provenance together. The next item is reached by ordinary
+vertical scrolling; Browse has no reveal step, horizontal swipe, rating rail or
+keyboard command that imitates grading.
+
+An exposure is recorded only after a meaningful part of that item is actually in
+the viewport. Lazy-list composition or prefetch outside the visible area is not an
+exposure, and Browse still never becomes FSRS retrieval evidence.
+
 ## When a day starts
 
 Not at midnight. `dayStartHour = 4` in `governor.json`, and every day key, daily

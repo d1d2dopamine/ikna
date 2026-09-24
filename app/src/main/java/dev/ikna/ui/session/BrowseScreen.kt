@@ -5,23 +5,32 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.ikna.AppContainer
 import dev.ikna.data.catalog.tatoebaSentenceUrl
@@ -32,8 +41,10 @@ import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
+import dev.ikna.ui.theme.Space
+import kotlinx.coroutines.flow.distinctUntilChanged
 
-/** Optional reading after the required daily plan, without ratings or reviews. */
+/** Passive reading feed after the required daily plan, without ratings or swipes. */
 @Composable
 fun BrowseScreen(
     container: AppContainer,
@@ -47,10 +58,11 @@ fun BrowseScreen(
     )
     val state by vm.state.collectAsState()
     val settings by container.settings.flow.collectAsState(initial = IknaSettings())
-    val card = state.current
+    val listState = rememberLazyListState()
     var developerBlockers by remember(deckId) { mutableStateOf<String?>(null) }
-    LaunchedEffect(deckId, settings.developerIgnoreRestrictions) {
-        developerBlockers = if (container.isDeveloperMode && settings.developerIgnoreRestrictions) {
+
+    LaunchedEffect(deckId) {
+        developerBlockers = if (container.isDeveloperMode) {
             val availability = runCatching {
                 container.learningRepository.browseDeckAvailability(listOf(deckId))[deckId]
             }.getOrNull()
@@ -59,8 +71,22 @@ fun BrowseScreen(
         } else null
     }
 
+    LaunchedEffect(listState, state.queue) {
+        if (state.queue.isEmpty()) return@LaunchedEffect
+        snapshotFlow {
+            val layout = listState.layoutInfo
+            browseMeaningfullyVisibleIndices(
+                viewportStart = layout.viewportStartOffset,
+                viewportEnd = layout.viewportEndOffset,
+                items = layout.visibleItemsInfo.map { item ->
+                    BrowseViewportItem(item.index, item.offset, item.size)
+                }
+            )
+        }.distinctUntilChanged().collect { indices -> vm.recordVisible(indices) }
+    }
+
     val view = LocalView.current
-    val keepScreenAwake = card != null && !state.loading && !state.finished
+    val keepScreenAwake = state.queue.isNotEmpty() && !state.loading
     DisposableEffect(view, keepScreenAwake) {
         val previous = view.keepScreenOn
         view.keepScreenOn = previous || keepScreenAwake
@@ -73,9 +99,11 @@ fun BrowseScreen(
             Text(
                 text = note,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = Space.xs)
             )
         }
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -89,32 +117,40 @@ fun BrowseScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                state.advancing -> Box(Modifier.fillMaxSize())
+                state.queue.isEmpty() -> IknaBrowseEmptyState()
 
-                card != null -> BrowseableCard(
-                    key = card.card.key + ":" + state.index,
-                    animations = settings.animations,
-                    onNext = vm::next
+                else -> LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = Space.lg),
+                    verticalArrangement = Arrangement.spacedBy(Space.lg)
                 ) {
-                    BrowseChunkCard(
-                        card = card,
-                        transcription = Phonetics.line(
-                            ipa = card.promptIpa,
-                            lang = card.chunk.lang,
-                            mode = settings.phoneticsFor(card.chunk.packId)
-                        ),
-                        sourceLabel = card.sourceId?.let { S.t("src.001") + "Tatoeba #" + it },
-                        onSource = card.sourceId?.let { id ->
-                            { openBrowseSource(context, id) }
-                        },
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    itemsIndexed(
+                        items = state.queue,
+                        key = { _, card -> card.card.key }
+                    ) { _, card ->
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            BrowseFeedCard(
+                                card = card,
+                                transcription = Phonetics.line(
+                                    ipa = card.promptIpa,
+                                    lang = card.chunk.lang,
+                                    mode = settings.phoneticsFor(card.chunk.packId)
+                                ),
+                                sourceLabel = card.sourceId?.let { S.t("src.001") + "Tatoeba #" + it },
+                                onSource = card.sourceId?.let { id ->
+                                    { openBrowseSource(context, id) }
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .widthIn(max = 960.dp)
+                            )
+                        }
+                    }
                 }
-
-                else -> IknaBrowseEmptyState(
-                    hadCards = state.hadCards,
-                    animations = settings.animations
-                )
             }
         }
 

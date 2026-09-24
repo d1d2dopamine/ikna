@@ -11,16 +11,19 @@ enum class IknaDataProfile {
 /**
  * Developer-only policy overrides.
  *
- * Production policies still compute their normal verdict. This flag only lets the
- * sandbox choose to continue despite that verdict, so developer testing cannot
- * accidentally teach the production policy to lie.
+ * Production policies still compute their normal verdict. An active developer
+ * profile may continue despite product blockers, so testing cannot accidentally
+ * teach the production policy to lie.
  */
 data class DeveloperAccess(
-    val active: Boolean = false,
-    val ignoreRestrictions: Boolean = false
+    val active: Boolean = false
 ) {
     companion object {
         val NONE = DeveloperAccess()
+
+        /** Developer profile always bypasses product gates; REAL never does. */
+        fun forProfile(profile: IknaDataProfile): DeveloperAccess =
+            DeveloperAccess(active = profile == IknaDataProfile.DEVELOPER)
     }
 }
 

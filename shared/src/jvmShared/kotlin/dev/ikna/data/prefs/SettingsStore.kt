@@ -113,8 +113,6 @@ data class IknaSettings(
     val pseudoLocale: Boolean = false,
     /** Local desktop development aid; not included in exported user settings. */
     val elementInspector: Boolean = false,
-    /** Developer sandbox only: allow feature access while still exposing production blockers. */
-    val developerIgnoreRestrictions: Boolean = false,
     /** Last deterministic sandbox preset selected in Developer Mode. */
     val developerScenario: String = "empty",
     /**
@@ -300,7 +298,6 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val language = stringPreferencesKey("language")
         val pseudoLocale = booleanPreferencesKey("pseudoLocale")
         val elementInspector = booleanPreferencesKey("elementInspector")
-        val developerIgnoreRestrictions = booleanPreferencesKey("developerIgnoreRestrictions")
         val developerScenario = stringPreferencesKey("developerScenario")
         val autoLoad = booleanPreferencesKey("autoLoad")
         val reminderEnabled = booleanPreferencesKey("reminderEnabled")
@@ -357,7 +354,6 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             language = p[Keys.language] ?: defaults.language,
             pseudoLocale = p[Keys.pseudoLocale] ?: defaults.pseudoLocale,
             elementInspector = p[Keys.elementInspector] ?: defaults.elementInspector,
-            developerIgnoreRestrictions = p[Keys.developerIgnoreRestrictions] ?: defaults.developerIgnoreRestrictions,
             developerScenario = p[Keys.developerScenario] ?: defaults.developerScenario,
             autoLoad = p[Keys.autoLoad] ?: defaults.autoLoad,
             reminderEnabled = p[Keys.reminderEnabled] ?: defaults.reminderEnabled,
@@ -424,7 +420,6 @@ class SettingsStore(private val store: DataStore<Preferences>) {
     suspend fun setLanguage(code: String) = put { it[Keys.language] = code }
     suspend fun setPseudoLocale(on: Boolean) = put { it[Keys.pseudoLocale] = on }
     suspend fun setElementInspector(on: Boolean) = put { it[Keys.elementInspector] = on }
-    suspend fun setDeveloperIgnoreRestrictions(on: Boolean) = put { it[Keys.developerIgnoreRestrictions] = on }
     suspend fun setDeveloperScenario(id: String) = put { it[Keys.developerScenario] = id }
 
     suspend fun setAutoLoad(on: Boolean) = put { it[Keys.autoLoad] = on }

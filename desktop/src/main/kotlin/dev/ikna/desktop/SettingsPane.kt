@@ -518,13 +518,16 @@ fun SettingsPane(
                                 }
                             }
                         } else {
-                            IknaSettingsToggleRow(
-                                title = S.t("dev.008"),
-                                subtitle = S.t("dev.009"),
-                                checked = settings.developerIgnoreRestrictions,
-                                onCheckedChange = { on ->
-                                    save { container.settings.setDeveloperIgnoreRestrictions(on) }
-                                }
+                            Text(
+                                text = S.t("dev.008"),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = palette.ink
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = S.t("dev.009"),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = palette.muted
                             )
                             Spacer(Modifier.height(12.dp))
                             Text(

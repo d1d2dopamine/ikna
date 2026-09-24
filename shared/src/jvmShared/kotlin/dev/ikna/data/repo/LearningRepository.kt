@@ -864,11 +864,11 @@ class LearningRepository(
         .keys
 
     /**
-     * Opens a bounded Browse queue and records its first visible card.
+     * Opens a bounded Browse feed without claiming that any card was seen yet.
      *
-     * Recording visibility, rather than a swipe, makes the quota honest when
-     * the user reads one card and leaves. The insert lives in the same writer
-     * lock as the allowance check, so two taps cannot spend the same slot.
+     * Lazy lists may compose or prefetch items that never enter the viewport, so
+     * exposure belongs to [recordBrowse], called only after the interface has
+     * observed meaningful on-screen visibility.
      */
     suspend fun startBrowse(
         deckId: String,
@@ -880,15 +880,10 @@ class LearningRepository(
         if (gate.room <= 0) return@withLock BrowsePlan(emptyList(), deckId, title)
 
         val cards = browseCandidates(deckId, limit = gate.room, now = now, force = gate.forcedByDeveloper)
-        val first = cards.firstOrNull()
-            ?: return@withLock BrowsePlan(emptyList(), deckId, title)
-        if (!insertBrowseExposure(first, deckId, now)) {
-            return@withLock BrowsePlan(emptyList(), deckId, title)
-        }
         BrowsePlan(cards, deckId, title)
     }
 
-    /** Records the next card before the interface puts its answer on screen. */
+    /** Records one card only after the reading feed has actually shown it. */
     suspend fun recordBrowse(
         card: SessionCard,
         deckId: String? = null,
@@ -954,7 +949,7 @@ class LearningRepository(
         val productionRoom = min(dailyRoom, creditRoom)
         val unique = blockers.distinct()
         val access = developerAccess?.invoke() ?: DeveloperAccess.NONE
-        val forced = access.active && access.ignoreRestrictions &&
+        val forced = access.active && unique.isNotEmpty() &&
             BrowsePolicy.developerOverrideAllowed(unique)
         return BrowseGate(
             room = when {

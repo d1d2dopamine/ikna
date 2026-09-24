@@ -1070,13 +1070,16 @@ fun SettingsScreen(
                                     }
                                 }
                             } else {
-                                IknaSettingsToggleRow(
-                                    title = S.t("dev.008"),
-                                    subtitle = S.t("dev.009"),
-                                    checked = settings.developerIgnoreRestrictions,
-                                    onCheckedChange = { on ->
-                                        scope.launch { container.settings.setDeveloperIgnoreRestrictions(on) }
-                                    }
+                                Text(
+                                    text = S.t("dev.008"),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    text = S.t("dev.009"),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Spacer(Modifier.height(14.dp))
                                 Text(

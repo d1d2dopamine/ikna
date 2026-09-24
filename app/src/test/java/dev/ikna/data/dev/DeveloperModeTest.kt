@@ -25,6 +25,12 @@ class DeveloperModeTest {
     }
 
     @Test
+    fun `developer profile always enables forced product access`() {
+        assertFalse(DeveloperAccess.forProfile(IknaDataProfile.REAL).active)
+        assertTrue(DeveloperAccess.forProfile(IknaDataProfile.DEVELOPER).active)
+    }
+
+    @Test
     fun `bad bootstrap value fails closed to real profile`() {
         val dir = Files.createTempDirectory("ikna-profile-invalid").toFile()
         try {

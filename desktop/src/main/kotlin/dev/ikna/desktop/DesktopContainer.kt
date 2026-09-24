@@ -152,13 +152,7 @@ class DesktopContainer(
             settings.settleBrowseCredits(day, completed, exposures).availablePoints
         }
         learningRepository.clearBrowseCredits = { settings.clearBrowseCredits() }
-        learningRepository.developerAccess = {
-            val current = settings.flow.first()
-            DeveloperAccess(
-                active = isDeveloperMode,
-                ignoreRestrictions = isDeveloperMode && current.developerIgnoreRestrictions
-            )
-        }
+        learningRepository.developerAccess = { DeveloperAccess.forProfile(dataProfile) }
         learningRepository.derivedGradingEnabled = { dev.ikna.domain.optimizer.AutomaticLearningPolicy.DERIVED_WHEN_READY }
         learningRepository.loadSettings = {
             val s = settings.flow.first()

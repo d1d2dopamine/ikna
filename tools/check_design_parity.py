@@ -287,6 +287,26 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('NOTICE_MILLIS = 5_000L', transient)
         self.assertIn('widthIn(max = 560.dp)', transient)
 
+    def test_browse_is_vertical_feed_not_a_swipe_session(self):
+        android = read(ANDROID, 'ui/session/BrowseScreen.kt')
+        desktop = read(DESKTOP, 'BrowsePane.kt')
+        card = read(SHARED, 'ui/session/BrowseCard.kt')
+        visibility = read(SHARED, 'ui/session/BrowseVisibility.kt')
+        repository = read(SHARED, 'data/repo/LearningRepository.kt')
+        for source in [android, desktop]:
+            for required in ['LazyColumn(', 'BrowseFeedCard(', 'browseMeaningfullyVisibleIndices(']:
+                self.assertIn(required, source)
+            for forbidden in ['BrowseableCard(', 'DirectionRight', 'SWIPE_THRESHOLD']:
+                self.assertNotIn(forbidden, source)
+        for required in ['browseMarked(card.prompt', 'text = card.answer',
+                         'if (!transcription.isNullOrBlank())', 'sourceLabel']:
+            self.assertIn(required, card)
+        self.assertNotIn('detectDragGestures', card)
+        self.assertNotIn('pointerInput', card)
+        self.assertIn('visible * 2 >= reference', visibility)
+        self.assertIn('val cards = browseCandidates(', repository)
+        self.assertNotIn('insertBrowseExposure(first', repository)
+
     def test_browse_credit_is_cumulative_global_and_honest(self):
         policy = read(SHARED, 'domain/session/BrowsePolicy.kt')
         repository = read(SHARED, 'data/repo/LearningRepository.kt')
@@ -592,6 +612,23 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('Modifier.animateContentSize(', settings_chrome)
         self.assertIn('IknaIconButton[', controls)
         self.assertIn('IknaDeckRow[', deck_rows)
+
+    def test_developer_mode_always_bypasses_product_restrictions(self):
+        mode = read(SHARED, 'data/dev/DeveloperMode.kt')
+        repo = read(SHARED, 'data/repo/LearningRepository.kt')
+        prefs = read(SHARED, 'data/prefs/SettingsStore.kt')
+        android_container = read(ROOT, 'app/src/main/java/dev/ikna/AppContainer.kt')
+        desktop_container = read(DESKTOP, 'DesktopContainer.kt')
+        android_settings = read(ROOT, 'app/src/main/java/dev/ikna/ui/settings/SettingsScreen.kt')
+        desktop_settings = read(DESKTOP, 'SettingsPane.kt')
+
+        self.assertIn('fun forProfile(profile: IknaDataProfile)', mode)
+        self.assertIn('DeveloperAccess.forProfile(dataProfile)', android_container)
+        self.assertIn('DeveloperAccess.forProfile(dataProfile)', desktop_container)
+        self.assertIn('val forced = access.active && unique.isNotEmpty() &&', repo)
+        self.assertIn('BrowsePolicy.developerOverrideAllowed(unique)', repo)
+        for source in [mode, prefs, android_container, desktop_container, android_settings, desktop_settings]:
+            self.assertNotIn('developerIgnoreRestrictions', source)
 
     def test_desktop_developer_restart_callback_reaches_settings_pane(self):
         shell = read(DESKTOP, 'Shell.kt')

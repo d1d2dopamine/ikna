@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/brand/ikna-banner-en-press.png" alt="ikna — Learn. Discover. Remember." width="900">
+  <img src="docs/assets/brand/ikna-banner.png" alt="ikna" width="900">
 </p>
 
 <h1 align="center" id="ikna"></h1>
@@ -100,7 +100,7 @@ The daily plan can shrink while you work. It only grows when you explicitly ask 
 
 ### Browse without grading
 
-Once the required plan is complete, familiar cards can appear in a limited Browse mode. Browse is for reading. It records exposure, not a recall result, and does not replace required review.
+Once the required plan is complete, familiar cards can appear in a limited Browse mode. Browse is a vertical reading feed: complete cards are stacked and reached by ordinary scrolling, with no swipe, reveal step or rating. It records actual on-screen exposure, not a recall result, and does not replace required review.
 
 ### Local FSRS fitting
 
@@ -249,7 +249,7 @@ ikna is free software under the **GNU General Public License, version 3 or (at y
 ---
 
 <p align="center">
-  <img src="docs/assets/brand/ikna-banner-ru-press.png" alt="ikna — Учись. Открывай. Помни." width="900">
+  <img src="docs/assets/brand/ikna-banner.png" alt="ikna" width="900">
 </p>
 
 <h1 align="center" id="русский"></h1>
@@ -350,7 +350,7 @@ FSRS-6 планирует их независимо. Отдельные слов
 
 ### Browse без оценки
 
-После обязательного плана знакомые карточки могут появляться в ограниченном режиме Browse. Это чтение, а не повторение: ikna записывает факт показа, но не превращает его в результат recall и не подменяет им обязательную сессию.
+После обязательного плана знакомые карточки могут появляться в ограниченном режиме Browse. Это вертикальная лента для чтения: карточки полностью раскрыты, идут одна под другой и листаются обычной прокруткой — без свайпа, раскрытия и оценки. ikna записывает только реально увиденный материал, не превращает его в результат recall и не подменяет им обязательную сессию.
 
 ### Локальная подгонка FSRS
 

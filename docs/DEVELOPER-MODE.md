@@ -39,20 +39,18 @@ allowed to be destructive only inside the developer database.
 
 ## Restrictions and forced access
 
-Developer Mode has two different testing paths and they must remain distinct:
-
-1. **Production-policy testing.** Synthetic history is evaluated by the normal
-   policies with no override. A feature must become available for the same reason
-   it would for a real learner.
-2. **Forced-access testing.** The developer may ask the application to continue
-   despite product restrictions such as history maturity, today's plan, time of
-   day, Governor safety gates, Browse credits or cooldowns.
+Developer Mode always bypasses product restrictions. There is no second switch to
+turn this on: entering the developer profile is the explicit consent to test past
+history maturity, today's plan, time-of-day rules, Governor safety gates, Browse
+credits, cooldowns and usage limits. This keeps the mode useful even when the
+developer cannot naturally reproduce the required learner state.
 
 Forced access must not change the production policy result. The ordinary blockers
-are still calculated and kept visible to the developer; the override only changes
-whether the developer may continue. Technical failures such as a database error,
-missing content or a failed migration are not product restrictions and must not be
-masked by Developer Mode.
+are still calculated and kept visible to the developer as diagnostics; they simply
+do not prevent entry while the developer profile is active. Tests and synthetic
+scenarios can still assert the production verdict directly. Technical failures such
+as a database error, missing content or a failed migration are not product
+restrictions and must not be masked by Developer Mode.
 
 Do not scatter `if (developerMode)` through policy code. Route overrides through
 the shared developer-access boundary so new restricted features can reuse the same
@@ -74,7 +72,7 @@ Developer Mode lives under Settings -> Rare and requires an explicit warning bef
 it is enabled. While active, a persistent `DEV` marker remains visible so the
 current profile cannot be mistaken for normal learning.
 
-The settings surface should expose scenario selection, deterministic reseed, a
-single high-level "ignore restrictions" control, and a way back to the normal
-profile. More granular override controls belong in a technical diagnostic surface
-only if a real debugging need appears.
+The settings surface should expose scenario selection, deterministic reseed, the
+fact that product restrictions are bypassed, and a way back to the normal profile.
+More granular diagnostic controls belong in a technical surface only if a real
+debugging need appears.

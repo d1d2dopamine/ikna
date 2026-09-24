@@ -40,6 +40,35 @@ class DeveloperSandboxIntegrationTest {
         }
     }
     @Test
+    fun `developer profile forces browse past late night and unfinished-plan gates`() = runBlocking {
+        val home = Files.createTempDirectory("ikna-developer-forced-browse").toFile()
+        val container = DesktopContainer(home, IknaDataProfile.DEVELOPER)
+        val now = LocalDateTime.of(2026, 9, 23, 23, 30)
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+        try {
+            requireNotNull(container.developerSandbox)
+                .seed(DeveloperScenario.EARLY_HISTORY, now = now)
+
+            val availability = requireNotNull(
+                container.learningRepository
+                    .browseDeckAvailability(listOf("developer-reading"), now)["developer-reading"]
+            )
+            assertTrue(availability.available)
+            assertTrue(availability.forcedByDeveloper)
+            assertTrue(
+                availability.blockers.contains(dev.ikna.domain.session.BrowseUnavailableReason.LATE_NIGHT) ||
+                    availability.blockers.contains(dev.ikna.domain.session.BrowseUnavailableReason.PLAN_NOT_COMPLETE)
+            )
+            assertTrue(availability.remaining > 0)
+        } finally {
+            container.db.close()
+            home.deleteRecursively()
+        }
+    }
+
+    @Test
     fun `browse ready scenario passes the production browse policy without an override`() = runBlocking {
         val home = Files.createTempDirectory("ikna-developer-browse").toFile()
         val container = DesktopContainer(home, IknaDataProfile.DEVELOPER)

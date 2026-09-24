@@ -4,8 +4,8 @@ import dev.ikna.domain.governor.GovernorReason
 import dev.ikna.domain.session.BrowseCreditLedger
 import dev.ikna.domain.session.BrowsePolicy
 import dev.ikna.domain.session.BrowseUnavailableReason
-import dev.ikna.ui.session.SWIPE_THRESHOLD
-import dev.ikna.ui.session.browseAdvances
+import dev.ikna.ui.session.BrowseViewportItem
+import dev.ikna.ui.session.browseMeaningfullyVisibleIndices
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -14,12 +14,19 @@ import org.junit.Test
 
 class BrowsePolicyTest {
     @Test
-    fun `browse only advances to the right`() {
-        assertFalse(browseAdvances(-SWIPE_THRESHOLD * 2f))
-        assertFalse(browseAdvances(-40f, velocityX = -5_000f))
-        assertFalse(browseAdvances(SWIPE_THRESHOLD - 1f))
-        assertTrue(browseAdvances(SWIPE_THRESHOLD))
-        assertTrue(browseAdvances(SWIPE_THRESHOLD / 2f, velocityX = 900f))
+    fun `browse feed records only meaningfully visible cards`() {
+        val visible = browseMeaningfullyVisibleIndices(
+            viewportStart = 0,
+            viewportEnd = 1_000,
+            items = listOf(
+                BrowseViewportItem(index = 0, offset = 0, size = 400),
+                BrowseViewportItem(index = 1, offset = 900, size = 400),
+                BrowseViewportItem(index = 2, offset = -150, size = 400),
+                BrowseViewportItem(index = 3, offset = 1_100, size = 400),
+                BrowseViewportItem(index = 4, offset = 0, size = 1_600)
+            )
+        )
+        assertEquals(listOf(0, 2, 4), visible)
     }
 
     @Test

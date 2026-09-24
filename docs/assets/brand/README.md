@@ -3,8 +3,7 @@
 These are the committed raster masters used by the repository and application packaging.
 They are intentionally raster artwork rather than vector redraws.
 
-- `ikna-banner-en-press.png` — English repository header (`Learn. Discover. Remember.`)
-- `ikna-banner-ru-press.png` — Russian repository header (`Учись. Открывай. Помни.`)
+- `ikna-banner.png` — shared repository header used by both the English and Russian README sections
 - `ikna-wordmark-master.png` — high-resolution transparent wordmark master
 - `ikna-icon-background.png` — clean patterned icon background without lettering
 - `ikna-app-icon.png` — 2048px square application icon master assembled from those two rasters
