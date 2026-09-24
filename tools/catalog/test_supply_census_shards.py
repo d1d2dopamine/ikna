@@ -264,6 +264,21 @@ def main() -> int:
         if asym_sharded != asym_monolithic:
             raise AssertionError("asymmetric sharded census differs from monolithic census")
 
+    workflow = (Path(__file__).resolve().parents[2] / ".github/workflows/catalogue-v2-supply-census.yml").read_text(encoding="utf-8")
+    for required in [
+        "name: supply-rank-counts-${{ matrix.pair.first }}-${{ matrix.pair.second }}",
+        "name: supply-rank-counts-${{ matrix.pair.second }}-${{ matrix.pair.first }}",
+        "lang: ${{ fromJSON(needs.plan-wikimatrix.outputs.rank_languages) }}",
+        "pattern: supply-rank-counts-${{ matrix.lang }}-*",
+        "name: supply-rank-${{ matrix.lang }}",
+        "name: supply-rank-${{ matrix.pair.first }}",
+        "name: supply-rank-${{ matrix.pair.second }}",
+    ]:
+        if required not in workflow:
+            raise AssertionError(f"workflow rank-artifact contract missing: {required}")
+    if "name: supply-ranks\n" in workflow:
+        raise AssertionError("workflow must not make every pair download one all-language rank artifact")
+
     print("Catalogue v2 sharded supply census equivalence: OK")
     return 0
 

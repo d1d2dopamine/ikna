@@ -593,6 +593,16 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('IknaIconButton[', controls)
         self.assertIn('IknaDeckRow[', deck_rows)
 
+    def test_desktop_developer_restart_callback_reaches_settings_pane(self):
+        shell = read(DESKTOP, 'Shell.kt')
+        self.assertIn('onRestartRequested: () -> Unit = {}', shell)
+        self.assertIn('DesktopShell(container, settings, palette, ui, onRestartRequested)', shell)
+        self.assertIn('wide = true, onRestartRequested = onRestartRequested', shell)
+        self.assertIn('wide = false, onRestartRequested = onRestartRequested', shell)
+        pane = shell[shell.index('private fun PaneContent('):shell.index('@Composable\nprivate fun ShortcutsOverlay(')]
+        self.assertIn('onRestartRequested: () -> Unit', pane)
+        self.assertIn('onRestartRequested = onRestartRequested', pane)
+
     def test_today_count_is_unique_and_first_batch_does_not_multiply(self):
         repo = read(SHARED, 'data/repo/LearningRepository.kt')
         governor = read(SHARED, 'domain/governor/LoadGovernor.kt')

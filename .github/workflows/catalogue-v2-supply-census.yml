@@ -3,8 +3,10 @@ name: catalogue v2 supply census
 # Part 5 diagnostic workflow. It never writes to the public `catalog` release
 # or changes application behaviour. Large WikiMatrix acquisition is split into
 # rank and pair-measurement jobs; raw candidate JSONL stays local to each runner.
-# The shard contracts are tested against the original monolithic census so the
-# parallel workflow changes execution shape, not supply/selection semantics.
+# Rank-count handoffs and global ranks are partitioned by learning language so a
+# pair job downloads only the rank files it actually reads. The shard contracts
+# are tested against the original monolithic census so parallel execution changes
+# transfer shape, not supply/selection semantics.
 on:
   workflow_dispatch:
     inputs:
@@ -243,11 +245,21 @@ jobs:
             --first "$first" --second "$second" \
             --out-dir handoff/rank-parts
           rm -f "$out"
-      - name: Upload compact pair rank counts
+      - name: Upload first-language rank counts
+        if: ${{ matrix.pair.firstLearn }}
         uses: actions/upload-artifact@v6
         with:
-          name: supply-rank-pair-${{ matrix.pair.first }}-${{ matrix.pair.second }}
-          path: handoff/rank-parts/
+          name: supply-rank-counts-${{ matrix.pair.first }}-${{ matrix.pair.second }}
+          path: handoff/rank-parts/rank-counts-${{ matrix.pair.first }}-${{ matrix.pair.second }}.tsv.gz
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+      - name: Upload second-language rank counts
+        if: ${{ matrix.pair.secondLearn }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: supply-rank-counts-${{ matrix.pair.second }}-${{ matrix.pair.first }}
+          path: handoff/rank-parts/rank-counts-${{ matrix.pair.second }}-${{ matrix.pair.first }}.tsv.gz
           if-no-files-found: error
           retention-days: 1
           compression-level: 0
@@ -256,6 +268,10 @@ jobs:
     needs: [contracts, plan-wikimatrix, knowledge-rank-pair]
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        lang: ${{ fromJSON(needs.plan-wikimatrix.outputs.rank_languages) }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
@@ -265,48 +281,40 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq libicu-dev
-          mkdir -p parts reports handoff
-      - name: Download compact physical-pair rank counts
+          mkdir -p parts handoff
+      - name: Download this language's compact rank counts
         uses: actions/download-artifact@v5
         with:
-          pattern: supply-rank-pair-*
+          pattern: supply-rank-counts-${{ matrix.lang }}-*
           path: parts
           merge-multiple: true
-      - name: Build all global Knowledge ranks
+      - name: Build one global Knowledge rank
         shell: bash
         run: |
           set -euo pipefail
+          lang="${{ matrix.lang }}"
           expected_parts=$(python3 - "${{ inputs.learn }}" "${{ inputs.meanings }}" <<'PY'
           import sys
           union = {part.strip().lower() for raw in sys.argv[1:] for part in raw.split(",") if part.strip()}
           print(max(0, len(union) - 1))
           PY
           )
-          python3 - '${{ needs.plan-wikimatrix.outputs.rank_languages }}' > reports/rank-languages.txt <<'PY'
-          import json
-          import sys
-          for lang in json.loads(sys.argv[1]):
-              print(lang)
-          PY
-          while IFS= read -r lang; do
-            [ -n "$lang" ] || continue
-            mapfile -t rank_parts < <(find parts -type f -name "rank-counts-${lang}-*.tsv.gz" | sort)
-            if [ "${#rank_parts[@]}" -ne "$expected_parts" ]; then
-              echo "rank shard completeness failure for $lang: expected=$expected_parts found=${#rank_parts[@]}" >&2
-              exit 1
-            fi
-            python3 tools/catalog/supply_census_shards.py ranks \
-              --parts "${rank_parts[@]}" \
-              --collection knowledge \
-              --lang "$lang" \
-              --out "handoff/ranks-${lang}.tsv.gz"
-          done < reports/rank-languages.txt
-          ls -lh handoff/ranks-*.tsv.gz
-      - name: Upload global Knowledge ranks
+          mapfile -t rank_parts < <(find parts -type f -name "rank-counts-${lang}-*.tsv.gz" | sort)
+          if [ "${#rank_parts[@]}" -ne "$expected_parts" ]; then
+            echo "rank shard completeness failure for $lang: expected=$expected_parts found=${#rank_parts[@]}" >&2
+            exit 1
+          fi
+          python3 tools/catalog/supply_census_shards.py ranks \
+            --parts "${rank_parts[@]}" \
+            --collection knowledge \
+            --lang "$lang" \
+            --out "handoff/ranks-${lang}.tsv.gz"
+          ls -lh "handoff/ranks-${lang}.tsv.gz"
+      - name: Upload this language's global Knowledge rank
         uses: actions/upload-artifact@v6
         with:
-          name: supply-ranks
-          path: handoff/
+          name: supply-rank-${{ matrix.lang }}
+          path: handoff/ranks-${{ matrix.lang }}.tsv.gz
           if-no-files-found: error
           retention-days: 1
           compression-level: 0
@@ -402,10 +410,17 @@ jobs:
               ;;
           esac
           mkdir -p candidates reports ranks handoff/shards handoff/inventory handoff/logs
-      - name: Download global Knowledge ranks
+      - name: Download first-language Knowledge rank
+        if: ${{ matrix.pair.firstLearn }}
         uses: actions/download-artifact@v5
         with:
-          name: supply-ranks
+          name: supply-rank-${{ matrix.pair.first }}
+          path: ranks
+      - name: Download second-language Knowledge rank
+        if: ${{ matrix.pair.secondLearn }}
+        uses: actions/download-artifact@v5
+        with:
+          name: supply-rank-${{ matrix.pair.second }}
           path: ranks
       - name: Measure one physical WikiMatrix pair
         shell: bash

@@ -294,13 +294,13 @@ private fun DesktopShell(
                 }
                 VerticalRule(palette)
                 Box(Modifier.weight(1f).fillMaxHeight()) {
-                    PaneContent(container, settings, palette, ui, decks, wide = true)
+                    PaneContent(container, settings, palette, ui, decks, wide = true, onRestartRequested = onRestartRequested)
                 }
             }
         } else if (ui.listOpen) {
             DecksColumn(container, settings, palette, ui, decks, remaining, remainingTotal, browseAvailability, deckListState)
         } else {
-            PaneContent(container, settings, palette, ui, decks, wide = false)
+            PaneContent(container, settings, palette, ui, decks, wide = false, onRestartRequested = onRestartRequested)
         }
     }
 }
@@ -482,7 +482,8 @@ private fun PaneContent(
     palette: IknaPalette,
     ui: DesktopUi,
     decks: List<DeckSummary>,
-    wide: Boolean
+    wide: Boolean,
+    onRestartRequested: () -> Unit
 ) {
     val travel = with(LocalDensity.current) { Motion.sharedAxisTravel.roundToPx() }
     val motion = settings.animations
