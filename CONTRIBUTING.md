@@ -84,6 +84,15 @@ The Android CI can also build an x86_64 test APK with
 `-Pikna.abi=emulator`; published Android builds remain arm64 and legacy 32-bit
 ARM as described in the build files.
 
+### Fast desktop UI loop
+
+For UI/UX work on Windows, use [`docs/HOT-RELOAD.md`](docs/HOT-RELOAD.md) instead
+of producing a release package for every visual check. Double-click
+`dev-hot-reload.cmd`; it bootstraps the pinned local Gradle distribution, runs
+`:desktop:hotRun --auto`, keeps test data in an isolated Developer Sandbox by
+default, and records the build output outside the repository folder. A commit is
+not required for a reload.
+
 ## ✅ Checks before a pull request
 
 Run the checks relevant to your change. For a broad change, the repository-level

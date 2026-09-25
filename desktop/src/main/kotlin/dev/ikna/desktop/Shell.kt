@@ -167,7 +167,7 @@ fun IknaDesktopApp(
         if (storedSettings?.onboardingDone == false) ui.resetForFirstRun()
     }
 
-    val contentFont = rememberContentFont(settings.fontName)
+    val contentFont = rememberContentFont(settings.fontMode, settings.fontName)
 
     var ready by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -417,49 +417,62 @@ private fun DecksColumn(
 
             Spacer(Modifier.height(Space.md))
 
+            val addSelected = ui.pane == Pane.ADD || ui.pane == Pane.CATALOG || ui.pane == Pane.ANKI
+            val searchSelected = ui.pane == Pane.SEARCH
+            val settingsSelected = ui.pane == Pane.SETTINGS || ui.pane == Pane.BACKUP
+            val statsSelected = ui.pane == Pane.STATS
+
             IknaBottomBar {
                 if (settings.leftHanded) {
                     IknaIconButton(
                         glyph = IknaGlyph.PLUS,
                         onClick = { ui.show(Pane.ADD) },
+                        selected = addSelected,
                         label = S.t("a11y.004")
                     )
                     IknaIconButton(
                         glyph = IknaGlyph.SEARCH,
                         onClick = { ui.show(Pane.SEARCH) },
+                        selected = searchSelected,
                         label = S.t("a11y.011")
                     )
                     Spacer(Modifier.weight(1f))
                     IknaIconButton(
                         glyph = IknaGlyph.GEAR,
                         onClick = { ui.show(Pane.SETTINGS) },
+                        selected = settingsSelected,
                         label = S.t("a11y.002")
                     )
                     IknaIconButton(
                         glyph = IknaGlyph.BARS,
                         onClick = { ui.show(Pane.STATS) },
+                        selected = statsSelected,
                         label = S.t("a11y.003")
                     )
                 } else {
                     IknaIconButton(
                         glyph = IknaGlyph.BARS,
                         onClick = { ui.show(Pane.STATS) },
+                        selected = statsSelected,
                         label = S.t("a11y.003")
                     )
                     IknaIconButton(
                         glyph = IknaGlyph.GEAR,
                         onClick = { ui.show(Pane.SETTINGS) },
+                        selected = settingsSelected,
                         label = S.t("a11y.002")
                     )
                     Spacer(Modifier.weight(1f))
                     IknaIconButton(
                         glyph = IknaGlyph.SEARCH,
                         onClick = { ui.show(Pane.SEARCH) },
+                        selected = searchSelected,
                         label = S.t("a11y.011")
                     )
                     IknaIconButton(
                         glyph = IknaGlyph.PLUS,
                         onClick = { ui.show(Pane.ADD) },
+                        selected = addSelected,
                         label = S.t("a11y.004")
                     )
                 }

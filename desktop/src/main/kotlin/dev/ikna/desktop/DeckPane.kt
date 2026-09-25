@@ -38,6 +38,7 @@ import dev.ikna.domain.phonetics.PhoneticsMode
 import dev.ikna.ui.decks.iknaCardWord
 import dev.ikna.ui.decks.iknaPercentDone
 import dev.ikna.ui.text.S
+import dev.ikna.ui.theme.iknaNumberStyle
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.Space
@@ -165,7 +166,7 @@ fun DeckPane(
         Spacer(Modifier.height(Space.xs))
         Text(
             text = current.total.toString() + " " + iknaCardWord(current.total),
-            style = MaterialTheme.typography.labelMedium,
+            style = iknaNumberStyle(MaterialTheme.typography.labelMedium),
             color = palette.muted
         )
         Spacer(Modifier.height(Space.sm))

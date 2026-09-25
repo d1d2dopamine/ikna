@@ -42,7 +42,9 @@ kotlin {
         val commonMain by getting
         val jvmShared by creating { dependsOn(commonMain) }
         val androidMain by getting { dependsOn(jvmShared) }
-        val desktopMain by getting { dependsOn(jvmShared) }
+        val desktopMain by getting {
+            dependsOn(jvmShared)
+        }
 
         // api, not implementation: :app compiles against Compose, Room and the
         // coroutines types that appear in this module's public signatures, and
@@ -137,5 +139,5 @@ android {
     // Keep the Android resources beside the Android Kotlin rather than in a
     // src/main folder that has nothing else in it.
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-    sourceSets["main"].res.srcDirs("src/androidMain/res")
+    sourceSets["main"].res.srcDir("src/androidMain/res")
 }

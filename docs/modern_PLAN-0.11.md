@@ -127,8 +127,11 @@ Browse is passive reading, not a second review session.
 - [x] Remove Browse grading/review gestures and review-session language.
 - [x] Count an exposure only after an item actually reaches the viewport; do not
   spend Browse accounting on lazily precomposed but unseen rows.
-- [ ] Tune spacing, maximum line width and vertical rhythm on both phone and
+- [x] Tune spacing, maximum line width and vertical rhythm on both phone and
   desktop using real Catalogue examples rather than synthetic one-line strings.
+  Done as the 640dp feed measure, the 26sp titleLarge leading for multi-line
+  prompts and a 12dp gap before the provenance block; desktop verified on the
+  seed deck's real Tatoeba sentences, phone shares the same constants.
 - [ ] Verify long contexts, CJK text, transcription wrapping, large font scales
   and narrow Android windows.
 - [ ] Verify keyboard/wheel/touch scrolling parity and focus behaviour on desktop.
@@ -315,22 +318,39 @@ critical state that is unavailable as text/semantics.
 
 - [x] Use one shared README banner for the Russian and English README headers.
 - [x] Establish Signal Frame as Ikna's interactive pointer/focus motif: one-pixel
-  accent segments, softly rounded only in the transient frame, moving around the
+  accent segments, softly rounded only in the signal frame, moving around the
   hovered object and staying static for keyboard focus/reduced motion.
-- [ ] Tune Signal Frame speed, segment rhythm and radius on a real Windows build
-  before extending it to every remaining direct-click surface.
-- [ ] Prototype the top "memory lattice" ambient animation inspired by the subtle
-  appearing/disappearing block motif discussed during 0.11 work.
+- [x] Move Signal Frame motion onto one shared phase clock so rapid pointer travel
+  does not repeatedly start/stop independent control animations.
+- [x] Give nested interactive targets exclusive hover ownership: a child button
+  suppresses the parent frame while the pointer is inside the child.
+- [x] Scale segment rhythm for compact controls and keep the current desktop
+  navigation destination moving at a quieter persistent intensity.
+- [x] Tune Signal Frame speed, final segment rhythm and radius on a real Windows
+  build before extending it to every remaining direct-click surface. Closed by
+  owner decision (2026-09-25): the shipped motion is accepted as final.
+- [x] Prototype the top "memory lattice" ambient animation inspired by the subtle
+  appearing/disappearing block motif discussed during 0.11 work. Implemented as
+  `IknaMemoryAmbientStrip` on the window title bar and the bottom bar, reusing
+  the existing field's pitch, mark size and alpha ladder without new presets.
 - [ ] Make the Ikna version its own restrained visual language rather than a copy
   of another application's navigation treatment.
 - [ ] Keep movement slow, low-contrast and sparse; avoid shimmer, streak/progress
   meaning, XP language or attention-grabbing loops.
-- [ ] Implement it as one lightweight drawing surface rather than many constantly
+- [x] Implement it as one lightweight drawing surface rather than many constantly
   recomposing UI elements.
-- [ ] Respect the existing animation-off / reduced-motion behaviour and provide a
+- [x] Respect the existing animation-off / reduced-motion behaviour and provide a
   fully static state.
 - [ ] Check phone and desktop density separately; the motif may be shorter on
   mobile but should remain recognizably the same system.
+- [ ] Build a second interface appearance as a first-class variant. Variant 1 is
+  the shipped angular system - every corner a right angle, the current
+  `IknaShapes`. Variant 2 is a rounded look: the first time the application, a
+  couple of months into its life, tries corner rounding at all. Owner decision
+  recorded 2026-09-26. Both variants must come from one component tree driven
+  through the shape system rather than a forked copy of the UI, every hard
+  right-angle assumption in shared composables needs an inventory before the
+  rounded pass, and DESIGN.md gains the variant note when variant 2 lands.
 
 Acceptance: the top chrome feels alive without competing with learning content or
 making the interface less calm.
@@ -350,6 +370,54 @@ maintainability but have a much larger verification surface than ordinary cleanu
 
 These refactors may move earlier only if the current file structure becomes a
 measured blocker to correctness or verification.
+
+## Track L - fast desktop development loop
+
+The purpose of this track is to remove release-build latency from ordinary UI
+iteration without changing production behaviour or requiring a second checkout.
+Hot Reload is a development accelerator, not release evidence.
+
+- [x] Pin Compose Hot Reload `1.1.1`, the stable line that still supports the
+  current Compose Multiplatform `1.8.2` baseline.
+- [x] Apply Hot Reload only to the existing JVM desktop application; do not add a
+  fake preview app or duplicate shared UI.
+- [x] Add `dev-hot-reload.cmd` as the one-step Windows entry point and keep the
+  repository's Gradle `8.10.2` pin by bootstrapping that distribution outside the
+  source tree when necessary.
+- [x] Allow Hot Reload to provision its JetBrains Runtime while leaving normal
+  application bytecode/toolchain targeting at JVM 17.
+- [x] Run hot development against an isolated desktop home and the existing
+  Developer Mode profile by default, with an explicit `-UseRealData` escape hatch.
+- [x] Keep Gradle/tool downloads, development profile data and hot-run logs under
+  `%LOCALAPPDATA%`, so replacing the visible contents of the Git checkout with a
+  full ZIP does not throw away the expensive caches.
+- [x] Make the launcher tolerate a temporarily incomplete source tree during the
+  existing full-ZIP replacement workflow and keep the terminal/log path visible
+  if the hot-run process exits.
+- [x] Document what is suitable for Hot Reload and what still requires restart,
+  generated-code checks or a real target build.
+- [ ] Verify on a real Windows machine that edits in `shared/` (not only
+  `desktop/`) reload into the already-running Ikna window.
+- [ ] Measure first launch and repeated `shared` UI reload latency on the normal
+  development machine; the repeated path should be seconds rather than minutes.
+- [ ] Exercise a deliberate Kotlin compile error, runtime Compose error and whole
+  source-tree ZIP replacement; refine the launcher if any case loses the useful
+  error or requires avoidable manual recovery.
+- [ ] After the basic loop is proven, decide whether a richer inspector needs
+  dedicated Copy error/Open log/Restart controls beyond Compose Hot Reload's
+  built-in dev feedback and the persistent log files.
+- [ ] `REVIEW AFTER 0.11`: evaluate Compose `1.10+` and Hot Reload `1.2+` for the
+  MCP/semantic-tree/screenshot tooling instead of coupling that toolchain upgrade
+  to the first fast-loop implementation.
+- [ ] `REVIEW AFTER 0.11`: extract the proven launcher/supervisor pattern into a
+  reusable multi-project tool only after Ikna demonstrates which parts are truly
+  generic.
+
+Acceptance: from the ordinary Git/GitHub Desktop checkout, a developer can start
+one hot desktop session, replace/edit source without committing, and see a shared
+Compose UI change in the running window without producing a release package; a
+failed iteration leaves actionable build/runtime logs and never touches normal
+learner data unless `-UseRealData` was chosen deliberately.
 
 ## Modernization closeout checklist
 

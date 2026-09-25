@@ -48,9 +48,9 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "set.035" to "INSTALLER DES VOIX", "set.036" to "Le moteur ne sait pas télécharger les voix ; consultez ses réglages",
     "set.037" to "aucune voix hors ligne pour cette langue", "set.038" to "PAR DÉFAUT",
     "set.039" to "Le premier son après le lancement peut prendre une seconde : le moteur se réveille.",
-    "set.040" to "Police", "set.041" to "Votre .ttf ou .otf pour le texte des cartes. Le fichier est vérifié avant d'être appliqué.",
-    "set.042" to "MAINTENANT · SYSTÈME", "set.043" to "MAINTENANT · ", "set.044" to "CHOISIR UN FICHIER",
-    "set.045" to "RÉINITIALISER", "set.046" to "Police système restaurée", "set.047" to "Rappel",
+    "set.040" to "Police", "set.041" to "Geologica est la police principale d’Ikna. Vous pouvez utiliser la police système ou choisir votre .ttf/.otf ; le fichier est vérifié avant utilisation.",
+    "set.042" to "MAINTENANT · GEOLOGICA", "set.043" to "MAINTENANT · ", "set.044" to "CHOISIR UN FICHIER",
+    "set.045" to "RÉINITIALISER", "set.046" to "Geologica restaurée", "set.047" to "Rappel",
     "set.049" to "Me rappeler", "set.050" to "à ", "set.051" to "désactivé", "set.052" to "Données",
     "set.053" to "Le journal des réponses est la seule chose impossible à reconstruire. Tout le reste est recalculé depuis celui-ci.",
     "set.054" to "Exporter automatiquement chaque semaine", "set.055" to "Dans le dossier Documents/ikna",
@@ -393,4 +393,5 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "dev.021" to "ACTIVER ET REDÉMARRER",
     "dev.022" to "ANNULER",
     "dev.023" to "Ikna va se fermer. Ouvrez-le à nouveau pour utiliser le profil de données choisi.",
+    "set.150" to "GEOLOGICA",
 )

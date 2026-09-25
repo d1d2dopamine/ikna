@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,6 +26,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import dev.ikna.domain.session.SessionCard
 import dev.ikna.ui.theme.Space
+import dev.ikna.ui.theme.SignalFramePlacement
 import dev.ikna.ui.theme.iknaSignalFrame
 
 /**
@@ -43,6 +46,7 @@ fun BrowseFeedCard(
     modifier: Modifier = Modifier
 ) {
     val sourceInteraction = remember { MutableInteractionSource() }
+    val sourceFocused by sourceInteraction.collectIsFocusedAsState()
     Column(modifier = modifier) {
         Column(
             modifier = Modifier
@@ -80,16 +84,23 @@ fun BrowseFeedCard(
         )
 
         if (!sourceLabel.isNullOrBlank() && onSource != null) {
-            Spacer(Modifier.height(Space.sm))
+            Spacer(Modifier.height(Space.md))
             Text(
                 text = sourceLabel,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
                 textDecoration = TextDecoration.Underline,
                 modifier = Modifier
-                    .border(Space.hair, MaterialTheme.colorScheme.outline)
+                    .border(
+                        Space.hair,
+                        if (sourceFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                    )
                     .hoverable(sourceInteraction)
-                    .iknaSignalFrame(sourceInteraction, cornerRadius = 6.dp)
+                    .iknaSignalFrame(
+                        sourceInteraction,
+                        cornerRadius = 6.dp,
+                        placement = SignalFramePlacement.Outer
+                    )
                     .clickable(
                         interactionSource = sourceInteraction,
                         indication = null,

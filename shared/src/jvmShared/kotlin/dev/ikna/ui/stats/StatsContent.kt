@@ -86,7 +86,7 @@ private fun HistoryMetric(label: String, value: Int, modifier: Modifier = Modifi
         Spacer(Modifier.height(8.dp))
         Text(
             text = value.toString(),
-            style = MaterialTheme.typography.displayMedium,
+            style = iknaNumberStyle(MaterialTheme.typography.displayMedium, strong = true),
             color = MaterialTheme.colorScheme.onBackground
         )
     }
@@ -177,7 +177,7 @@ private fun Retention(digest: StatsDigest) {
     ) {
         Text(
             text = percent.toString() + "%",
-            style = MaterialTheme.typography.displayLarge,
+            style = iknaNumberStyle(MaterialTheme.typography.displayLarge, strong = true),
             color = MaterialTheme.colorScheme.onBackground
         )
     }
@@ -244,7 +244,7 @@ private fun Leeches(items: List<LeechItem>) {
                         Spacer(Modifier.width(12.dp))
                         Text(
                             text = item.lapses.toString(),
-                            style = MaterialTheme.typography.labelMedium,
+                            style = iknaNumberStyle(MaterialTheme.typography.labelMedium),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }

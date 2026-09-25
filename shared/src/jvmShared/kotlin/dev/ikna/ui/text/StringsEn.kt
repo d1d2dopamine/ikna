@@ -174,9 +174,9 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// Шрифт
 	"set.040" to "Font",
 	// Свой .ttf или .otf для текста карточек и заголовков. Служебные подписи остаются моноширинн
-	"set.041" to "Your own .ttf or .otf for card text. The file is checked before it is applied.",
+	"set.041" to "Geologica is Ikna’s main face. You can switch to the system face or pick your own .ttf/.otf; files are checked before use.",
 	// СЕЙЧАС · СИСТЕМНЫЙ
-	"set.042" to "NOW · SYSTEM",
+	"set.042" to "NOW · GEOLOGICA",
 	// СЕЙЧАС ·
 	"set.043" to "NOW · ",
 	// ВЫБРАТЬ ФАЙЛ
@@ -184,7 +184,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// СБРОСИТЬ
 	"set.045" to "RESET",
 	// Вернул системный шрифт
-	"set.046" to "The system font is back",
+	"set.046" to "Geologica is back",
 	// Напоминание
 	"set.047" to "Reminder",
 	// Одно в день, и только если минимум ещё не сделан. Никаких серий и укоров.
@@ -1013,4 +1013,5 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "dev.021" to "ENABLE AND RESTART",
     "dev.022" to "CANCEL",
     "dev.023" to "Ikna will close. Open it again to use the selected data profile.",
+    "set.150" to "GEOLOGICA",
 )

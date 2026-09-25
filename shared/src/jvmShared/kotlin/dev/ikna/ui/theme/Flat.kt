@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -257,6 +258,8 @@ fun IknaIconButton(
     size: Dp = 44.dp,
     glyphSize: Dp = 20.dp,
     color: Color = MaterialTheme.colorScheme.onBackground,
+    /** Persistent navigation state; ordinary buttons should leave this false. */
+    selected: Boolean = false,
     /** The name a screen reader reads out. Every call site should pass one. */
     label: String? = null
 ) {
@@ -267,10 +270,11 @@ fun IknaIconButton(
             .size(size)
             .semantics {
                 role = Role.Button
+                if (selected) this.selected = true
                 if (label != null) contentDescription = label
             }
             .hoverable(interaction, enabled = enabled)
-            .iknaSignalFrame(interaction, enabled = enabled)
+            .iknaSignalFrame(interaction, enabled = enabled, selected = selected)
             .clickable(
                 interactionSource = interaction,
                 indication = null,
@@ -345,7 +349,11 @@ fun IknaWideButton(
             .background(fillColor.copy(alpha = fillColor.alpha * alpha))
             .border(if (enabled && focused) 2.dp else 1.dp, boundary.copy(alpha = alpha))
             .hoverable(interaction, enabled = enabled)
-            .iknaSignalFrame(interaction, enabled = enabled)
+            .iknaSignalFrame(
+                interaction,
+                enabled = enabled,
+                placement = SignalFramePlacement.Outer
+            )
             .clickable(interactionSource = interaction, indication = null,
                 enabled = enabled, role = Role.Button, onClick = onClick)
             .then(if (fillWidth) Modifier else Modifier.padding(horizontal = Space.md)),
@@ -479,7 +487,12 @@ fun IknaToggle(
             // relying on hue. The platform still announces a real switch.
             .semantics { if (label != null) contentDescription = label }
             .hoverable(interaction, enabled = enabled)
-            .iknaSignalFrame(interaction, enabled = enabled, cornerRadius = 7.dp)
+            .iknaSignalFrame(
+                interaction,
+                enabled = enabled,
+                cornerRadius = 7.dp,
+                placement = SignalFramePlacement.Outer
+            )
             .toggleable(
                 value = checked,
                 interactionSource = interaction,
@@ -544,7 +557,11 @@ fun IknaChip(
             .border(if (selected || focused) 2.dp else 1.dp, borderColor)
             .semantics { this.selected = selected }
             .hoverable(interaction)
-            .iknaSignalFrame(interaction, cornerRadius = 7.dp)
+            .iknaSignalFrame(
+                interaction,
+                cornerRadius = 7.dp,
+                placement = SignalFramePlacement.Outer
+            )
             .clickable(interactionSource = interaction, indication = null,
                 role = Role.Button, onClick = onClick)
             .padding(horizontal = 12.dp),
@@ -576,13 +593,18 @@ fun IknaHexField(
     val ink = MaterialTheme.colorScheme.onBackground
     val line = MaterialTheme.colorScheme.outline
     val interaction = remember { MutableInteractionSource() }
+    val focused by interaction.collectIsFocusedAsState()
 
     Box(
         modifier = modifier
             .height(40.dp)
-            .border(1.dp, line)
+            .border(if (focused) 2.dp else 1.dp, if (focused) LocalIknaControlColors.current.mark else line)
             .hoverable(interaction)
-            .iknaSignalFrame(interaction, cornerRadius = 7.dp)
+            .iknaSignalFrame(
+                interaction,
+                cornerRadius = 7.dp,
+                placement = SignalFramePlacement.Outer
+            )
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.CenterStart
     ) {
@@ -611,12 +633,17 @@ fun IknaTextField(
     val ink = MaterialTheme.colorScheme.onBackground
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val interaction = remember { MutableInteractionSource() }
+    val focused by interaction.collectIsFocusedAsState()
     Box(
         modifier = modifier
             .height(48.dp)
-            .border(1.dp, MaterialTheme.colorScheme.outline)
+            .border(if (focused) 2.dp else 1.dp, if (focused) LocalIknaControlColors.current.mark else MaterialTheme.colorScheme.outline)
             .hoverable(interaction)
-            .iknaSignalFrame(interaction, cornerRadius = 7.dp)
+            .iknaSignalFrame(
+                interaction,
+                cornerRadius = 7.dp,
+                placement = SignalFramePlacement.Outer
+            )
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.CenterStart
     ) {
@@ -725,15 +752,23 @@ fun IknaBottomBar(
             .background(MaterialTheme.colorScheme.background)
     ) {
         IknaRule()
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(BarHeight)
-                .padding(horizontal = Space.sm),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Space.xs)
-        ) {
-            content()
+        Box(Modifier.fillMaxWidth().height(BarHeight)) {
+            IknaMemoryAmbientStrip(
+                seed = 0x4D5E6F,
+                modifier = Modifier.fillMaxSize(),
+                protectedStartDp = 112f,
+                protectedEndDp = 120f
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(BarHeight)
+                    .padding(horizontal = Space.sm),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Space.xs)
+            ) {
+                content()
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.*
+import dev.ikna.ui.theme.iknaNumberStyle
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.lazy.LazyListState
@@ -154,7 +155,7 @@ fun IknaSettingsStepper(
         )
         Text(
             text = value.toString(),
-            style = MaterialTheme.typography.displaySmall,
+            style = iknaNumberStyle(MaterialTheme.typography.displaySmall),
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center,
             modifier = Modifier

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.ikna.data.prefs.DEFAULT_PALETTE_ID
 import dev.ikna.data.prefs.FontStore
+import dev.ikna.data.prefs.FontMode
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.ThemeMode
 import kotlin.math.abs
@@ -493,63 +494,83 @@ private fun schemeOf(p: IknaPalette, controls: IknaControlColors) = if (p.light)
 }
 
 /**
- * Two poles and nothing in between: content is large, service text is small and
- * monospaced.
+ * Geologica is Ikna's default voice: geometric enough to belong beside the
+ * square chrome, but less anonymous than the platform sans. The middle weights
+ * are deliberate; body text must not look hairline-thin and headings do not need
+ * a 700/800 jump when their size already creates hierarchy.
  *
- * Weights come down a step from the previous version. Display text was
- * ExtraBold at 50sp in near-black, which is not emphasis, it is a stain — the
- * size already carries the emphasis and the weight was only adding ink.
- *
- * Nothing here names a font family except the labels, because no font file ships
- * with the app yet and naming one that does not exist fails the build. Content
- * therefore renders in the platform sans, which is the one honest placeholder
- * until the bundled faces are chosen.
+ * IBM Plex Mono is reserved for service labels and data. It gives counters,
+ * percentages and times stable tabular rhythm without turning prose into a
+ * developer console.
  */
-private val Mono = FontFamily.Monospace
+private val Geologica by lazy { iknaGeologicaFontFamily() }
+private val PlexMonoMedium by lazy { iknaPlexMonoMediumFontFamily() }
+private val PlexMonoSemiBold by lazy { iknaPlexMonoSemiBoldFontFamily() }
 
-private val IknaTypography = Typography(
-    displayLarge = TextStyle(
-        fontSize = 46.sp,
-        lineHeight = 52.sp,
-        fontWeight = FontWeight.SemiBold,
-        letterSpacing = (-1.0).sp
-    ),
-    displayMedium = TextStyle(
-        fontSize = 38.sp,
-        lineHeight = 44.sp,
-        fontWeight = FontWeight.SemiBold,
-        letterSpacing = (-0.7).sp
-    ),
-    displaySmall = TextStyle(
-        fontSize = 30.sp,
-        lineHeight = 36.sp,
-        fontWeight = FontWeight.SemiBold,
-        letterSpacing = (-0.4).sp
-    ),
-    headlineMedium = TextStyle(fontSize = 25.sp, lineHeight = 32.sp, fontWeight = FontWeight.SemiBold),
-    headlineSmall = TextStyle(fontSize = 20.sp, lineHeight = 27.sp, fontWeight = FontWeight.SemiBold),
-    titleMedium = TextStyle(fontSize = 16.sp, lineHeight = 22.sp, fontWeight = FontWeight.Medium),
-    bodyLarge = TextStyle(fontSize = 17.sp, lineHeight = 25.sp),
-    bodyMedium = TextStyle(fontSize = 15.sp, lineHeight = 22.sp),
-    bodySmall = TextStyle(fontSize = 13.sp, lineHeight = 19.sp),
-    labelLarge = TextStyle(
-        fontFamily = Mono,
-        fontSize = 13.sp,
-        fontWeight = FontWeight.Medium,
-        letterSpacing = 1.1.sp
-    ),
-    labelMedium = TextStyle(
-        fontFamily = Mono,
-        fontSize = 11.sp,
-        fontWeight = FontWeight.Medium,
-        letterSpacing = 1.4.sp
-    ),
-    labelSmall = TextStyle(
-        fontFamily = Mono,
-        fontSize = 10.sp,
-        fontWeight = FontWeight.Medium,
-        letterSpacing = 1.6.sp
+private val WeightBody = FontWeight.Medium
+private val WeightBodySmall = FontWeight.Normal
+private val WeightTitle = FontWeight.Medium
+private val WeightHeadline = FontWeight.SemiBold
+private val WeightDisplay = FontWeight.SemiBold
+
+private val IknaTypography by lazy {
+    Typography(
+        displayLarge = TextStyle(
+            fontFamily = Geologica,
+            fontSize = 46.sp,
+            lineHeight = 52.sp,
+            fontWeight = WeightDisplay,
+            letterSpacing = (-1.0).sp
+        ),
+        displayMedium = TextStyle(
+            fontFamily = Geologica,
+            fontSize = 38.sp,
+            lineHeight = 44.sp,
+            fontWeight = WeightDisplay,
+            letterSpacing = (-0.7).sp
+        ),
+        displaySmall = TextStyle(
+            fontFamily = Geologica,
+            fontSize = 30.sp,
+            lineHeight = 36.sp,
+            fontWeight = WeightDisplay,
+            letterSpacing = (-0.4).sp
+        ),
+        headlineLarge = TextStyle(fontFamily = Geologica, fontSize = 28.sp, lineHeight = 34.sp, fontWeight = WeightHeadline),
+        headlineMedium = TextStyle(fontFamily = Geologica, fontSize = 25.sp, lineHeight = 32.sp, fontWeight = WeightHeadline),
+        headlineSmall = TextStyle(fontFamily = Geologica, fontSize = 20.sp, lineHeight = 27.sp, fontWeight = WeightHeadline),
+        titleLarge = TextStyle(fontFamily = Geologica, fontSize = 18.sp, lineHeight = 26.sp, fontWeight = WeightTitle),
+        titleMedium = TextStyle(fontFamily = Geologica, fontSize = 16.sp, lineHeight = 22.sp, fontWeight = WeightTitle),
+        titleSmall = TextStyle(fontFamily = Geologica, fontSize = 14.sp, lineHeight = 20.sp, fontWeight = WeightTitle),
+        bodyLarge = TextStyle(fontFamily = Geologica, fontSize = 17.sp, lineHeight = 25.sp, fontWeight = WeightBody),
+        bodyMedium = TextStyle(fontFamily = Geologica, fontSize = 15.sp, lineHeight = 22.sp, fontWeight = WeightBody),
+        bodySmall = TextStyle(fontFamily = Geologica, fontSize = 13.sp, lineHeight = 19.sp, fontWeight = WeightBodySmall),
+        labelLarge = TextStyle(
+            fontFamily = PlexMonoMedium,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            letterSpacing = 1.1.sp
+        ),
+        labelMedium = TextStyle(
+            fontFamily = PlexMonoMedium,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+            letterSpacing = 1.4.sp
+        ),
+        labelSmall = TextStyle(
+            fontFamily = PlexMonoMedium,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Medium,
+            letterSpacing = 1.6.sp
+        )
     )
+}
+
+/** Stable data figures: medium for inline counts, semibold only for large focal values. */
+fun iknaNumberStyle(base: TextStyle, strong: Boolean = false): TextStyle = base.copy(
+    fontFamily = if (strong) PlexMonoSemiBold else PlexMonoMedium,
+    fontWeight = if (strong) FontWeight.SemiBold else FontWeight.Medium,
+    letterSpacing = 0.sp
 )
 
 /** Every corner in the app is a right angle. This is the whole shape system. */
@@ -564,50 +585,41 @@ private val IknaShapes = Shapes(
 )
 
 /**
- * The same scale, set in the user's own font.
- *
- * The chosen font applies everywhere, including the label styles: the caps, the
- * counters, the section marks and the button captions. Monospace survives only
- * as the fallback for when no font is installed. A font that appears on some
- * screens and not on others reads as a broken app, not as restraint, and the
- * letter spacing on the labels is what keeps them legible anyway.
+ * The selected main face changes prose/content roles only. Labels and data stay
+ * in Plex Mono so switching to the system or a custom font does not destroy the
+ * numeric rhythm that belongs to Ikna itself.
  */
 private fun typographyOf(content: FontFamily?): Typography {
-    if (content == null) return IknaTypography
+    val main = content ?: Geologica
     val base = IknaTypography
     return base.copy(
-        displayLarge = base.displayLarge.copy(fontFamily = content),
-        displayMedium = base.displayMedium.copy(fontFamily = content),
-        displaySmall = base.displaySmall.copy(fontFamily = content),
-        headlineMedium = base.headlineMedium.copy(fontFamily = content),
-        headlineSmall = base.headlineSmall.copy(fontFamily = content),
-        titleMedium = base.titleMedium.copy(fontFamily = content),
-        bodyLarge = base.bodyLarge.copy(fontFamily = content),
-        bodyMedium = base.bodyMedium.copy(fontFamily = content),
-        bodySmall = base.bodySmall.copy(fontFamily = content),
-        labelLarge = base.labelLarge.copy(fontFamily = content),
-        labelMedium = base.labelMedium.copy(fontFamily = content),
-        labelSmall = base.labelSmall.copy(fontFamily = content)
+        displayLarge = base.displayLarge.copy(fontFamily = main),
+        displayMedium = base.displayMedium.copy(fontFamily = main),
+        displaySmall = base.displaySmall.copy(fontFamily = main),
+        headlineLarge = base.headlineLarge.copy(fontFamily = main),
+        headlineMedium = base.headlineMedium.copy(fontFamily = main),
+        headlineSmall = base.headlineSmall.copy(fontFamily = main),
+        titleLarge = base.titleLarge.copy(fontFamily = main),
+        titleMedium = base.titleMedium.copy(fontFamily = main),
+        titleSmall = base.titleSmall.copy(fontFamily = main),
+        bodyLarge = base.bodyLarge.copy(fontFamily = main),
+        bodyMedium = base.bodyMedium.copy(fontFamily = main),
+        bodySmall = base.bodySmall.copy(fontFamily = main)
     )
 }
 
-/**
- * Loads the installed font file, or nothing.
- *
- * Every failure here has to end in null rather than an exception. Compose parses
- * a font at layout time, not at load time, so a bad file does not fail on the
- * screen where it was chosen — it throws on the next frame of every screen,
- * including the one with the button that would undo it. The file is validated
- * before it is ever stored (see FontStore), and this is the second line: a font
- * that disappeared, or was truncated on the way in, simply does not apply.
- */
+/** Resolve the user's main-face choice, with Geologica as the safe fallback. */
 @Composable
-fun rememberContentFont(fontName: String): FontFamily? {
-    return remember(fontName) {
-        if (fontName.isBlank()) return@remember null
-        val file = FontStore.file()
-        if (!file.exists() || file.length() <= 0) return@remember null
-        runCatching { iknaFontFamily(file) }.getOrNull()
+fun rememberContentFont(mode: FontMode, fontName: String): FontFamily {
+    return remember(mode, fontName) {
+        when (mode) {
+            FontMode.GEOLOGICA -> Geologica
+            FontMode.CUSTOM -> {
+                val file = FontStore.file()
+                if (!file.exists() || file.length() <= 0) Geologica
+                else runCatching { iknaFontFamily(file) }.getOrDefault(Geologica)
+            }
+        }
     }
 }
 
@@ -620,6 +632,7 @@ fun IknaTheme(
 ) {
     val controls = remember(palette) { controlColors(palette) }
     val scheme = remember(palette, controls) { schemeOf(palette, controls) }
+    val signalFrameCoordinator = rememberSignalFrameCoordinator(motionEnabled)
     MaterialTheme(
         colorScheme = scheme,
         typography = typographyOf(contentFont),
@@ -642,7 +655,8 @@ fun IknaTheme(
         CompositionLocalProvider(
             LocalContentColor provides palette.ink,
             LocalIknaControlColors provides controls,
-            LocalIknaMotionEnabled provides motionEnabled
+            LocalIknaMotionEnabled provides motionEnabled,
+            LocalSignalFrameCoordinator provides signalFrameCoordinator
         ) {
             Box(
                 modifier = Modifier
@@ -650,6 +664,10 @@ fun IknaTheme(
                     .background(scheme.background)
             ) {
                 content()
+                // OUTER Signal Frames live above the screen tree so scroll,
+                // transition and tight-row clipping cannot cut off one side.
+                // INNER frames still draw locally inside their own hit target.
+                SignalFrameOverlay(signalFrameCoordinator)
             }
         }
     }

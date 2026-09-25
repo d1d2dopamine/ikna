@@ -5,6 +5,7 @@ import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.HotkeyAction
 import dev.ikna.data.prefs.HotkeyBindings
 import dev.ikna.data.prefs.HotkeyChord
+import dev.ikna.data.prefs.FontMode
 import dev.ikna.data.prefs.ThemeMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -23,6 +24,7 @@ class SettingsBackupTest {
     @Test
     fun `round trips through json`() {
         assertFalse(IknaSettings().elementInspector)
+        assertEquals(FontMode.GEOLOGICA, IknaSettings().fontMode)
         val settings = IknaSettings(
             theme = ThemeMode.CUSTOM,
             paletteId = "plum",
@@ -37,6 +39,7 @@ class SettingsBackupTest {
             speechEnabled = false,
             phoneVoice = false,
             autoSpeakEvery = true,
+            fontMode = FontMode.CUSTOM,
             fontName = "Atkinson.ttf",
             hotkeys = HotkeyBindings.replace(
                 IknaSettings().hotkeys,
@@ -60,6 +63,7 @@ class SettingsBackupTest {
         assertEquals(false, decoded?.animations)
         assertEquals(false, decoded?.phoneVoice)
         assertEquals(true, decoded?.autoSpeakEvery)
+        assertEquals(FontMode.CUSTOM.name, decoded?.fontMode)
         assertEquals("Atkinson.ttf", decoded?.fontName)
         val restoredHotkeys = HotkeyBindings.decode(decoded?.hotkeys)
         assertEquals("CTRL+K", restoredHotkeys[HotkeyAction.KNOW]?.encoded)
@@ -79,6 +83,7 @@ class SettingsBackupTest {
         assertEquals(true, decoded?.speech)
         assertEquals(true, decoded?.phoneVoice)
         assertEquals(false, decoded?.autoSpeakEvery)
+        assertEquals("", decoded?.fontMode)
         assertEquals("Atkinson.ttf", decoded?.fontName)
         assertEquals(IknaSettings().hotkeys, decoded?.hotkeys)
     }

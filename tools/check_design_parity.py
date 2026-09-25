@@ -563,7 +563,7 @@ class DesignContracts(unittest.TestCase):
             'private val DECK_MARK_SIZE = 52.dp',
             'private val DECK_INFO_HEIGHT = 34.dp',
             'private val DECK_PROGRESS_HEIGHT = 14.dp',
-            '.height(DECK_ROW_HEIGHT)\n            .clipToBounds()',
+            '.iknaSignalFrame(interaction, placement = SignalFramePlacement.Outer)\n            .clipToBounds()',
             '.size(DECK_MARK_SIZE)',
             'modifier = Modifier.weight(1f).fillMaxHeight()',
             'modifier = Modifier.height(DECK_INFO_HEIGHT)',
@@ -613,34 +613,78 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('IknaIconButton[', controls)
         self.assertIn('IknaDeckRow[', deck_rows)
 
-    def test_signal_frame_is_shared_pointer_feedback_not_ambient_motion(self):
+    def test_signal_frame_uses_shared_clock_and_nested_ownership(self):
         frame = read(SHARED, 'ui/theme/SignalFrame.kt')
+        geometry = read(SHARED, 'ui/theme/SignalFrameGeometry.kt')
+        theme = read(SHARED, 'ui/theme/Theme.kt')
         controls = read(SHARED, 'ui/theme/Flat.kt')
         decks = read(SHARED, 'ui/decks/DeckList.kt')
         browse = read(SHARED, 'ui/session/BrowseCard.kt')
         palettes = read(SHARED, 'ui/settings/PaletteTiles.kt')
         metrics = read(SHARED, 'ui/theme/Metrics.kt')
+        desktop_shell = read(DESKTOP, 'Shell.kt')
 
         for required in [
-            'fun Modifier.iknaSignalFrame(',
+            'class SignalFrameCoordinator',
+            'activeHoverOwner',
+            'movingCount',
+            'rememberSignalFrameCoordinator(',
             'collectIsHoveredAsState()',
             'collectIsFocusedAsState()',
             'collectIsPressedAsState()',
-            'val moving = enabled && hovered && !pressed && motionEnabled',
-            'LaunchedEffect(moving)',
+            'val moving = enabled && motionEnabled && !pressed && when (placement) {',
+            'SignalFramePlacement.Outer -> hoverOwner || pressed',
+            'SignalFramePlacement.Inner -> hoverOwner || focused || pressed || selected',
+            'SignalFramePlacement.Outer -> hoverOwner',
+            'SignalFramePlacement.Inner -> hoverOwner || selected',
+            'drawWithCache',
             'PathEffect.dashPathEffect(',
             'StrokeCap.Round',
             'cornerRadius = CornerRadius(',
-            'LocalIknaMotionEnabled.current'
+            'LocalIknaMotionEnabled.current',
+            'SignalFrameOverlay(',
+            'registerOuter(',
+            'positionInRoot()',
+            'coordinates.size.width',
+            'coordinates.size.height'
         ]:
             self.assertIn(required, frame)
+        self.assertNotIn('LaunchedEffect(moving)', frame)
         self.assertNotIn('rememberInfiniteTransition', frame)
+        self.assertIn('LocalSignalFrameCoordinator provides signalFrameCoordinator', theme)
+        self.assertIn('SignalFrameOverlay(signalFrameCoordinator)', theme)
+        self.assertLess(theme.index('content()'), theme.index('SignalFrameOverlay(signalFrameCoordinator)'))
+        self.assertIn('signalFrameIntervalsDp(', geometry)
+        self.assertIn('shortest <= 34f || longest <= 64f', geometry)
         self.assertIn('signalFrameCycleDurationMillis = 2800', metrics)
-        self.assertIn('signalFrameFadeDurationMillis = 120', metrics)
+        self.assertIn('signalFrameFadeInDurationMillis = 80', metrics)
+        self.assertIn('signalFrameFadeOutDurationMillis = 55', metrics)
         self.assertGreaterEqual(controls.count('.iknaSignalFrame('), 7)
         self.assertGreaterEqual(decks.count('.iknaSignalFrame('), 2)
-        self.assertIn('.iknaSignalFrame(sourceInteraction, cornerRadius = 6.dp)', browse)
-        self.assertIn('.iknaSignalFrame(tileInteraction)', palettes)
+        # Outer controls answer the overlay only with pointer presence; keyboard
+        # focus on them lives in their own boundary.
+        self.assertGreaterEqual(controls.count('if (focused) 2.dp else 1.dp'), 2)
+        self.assertIn('tileFocused', palettes)
+        self.assertIn('if (sourceFocused)', browse)
+        self.assertIn('enum class SignalFramePlacement', frame)
+        self.assertIn('Inner,', frame)
+        self.assertIn('Outer', frame)
+        self.assertIn('placement: SignalFramePlacement = SignalFramePlacement.Inner', frame)
+        self.assertIn('SIGNAL_FRAME_OUTER_GAP = 2.dp', frame)
+        self.assertIn('if (placement == SignalFramePlacement.Outer)', frame)
+        self.assertIn('outerEntry.boundsInRoot = Rect(', frame)
+        self.assertIn('onDrawWithContent { drawContent() }', frame)
+        self.assertEqual(controls.count('placement = SignalFramePlacement.Outer'), 5)
+        self.assertIn('.iknaSignalFrame(interaction, placement = SignalFramePlacement.Outer)', decks)
+        self.assertIn('.iknaSignalFrame(interaction)', decks)
+        self.assertIn('placement = SignalFramePlacement.Outer', browse)
+        self.assertIn('.iknaSignalFrame(tileInteraction, placement = SignalFramePlacement.Outer)', palettes)
+        self.assertIn('.hoverable(tileInteraction)', palettes)
+        self.assertIn('selected: Boolean = false', controls)
+        self.assertIn('selected = searchSelected', desktop_shell)
+        self.assertIn('selected = settingsSelected', desktop_shell)
+        self.assertIn('selected = statsSelected', desktop_shell)
+        self.assertIn('selected = addSelected', desktop_shell)
 
     def test_developer_mode_always_bypasses_product_restrictions(self):
         mode = read(SHARED, 'data/dev/DeveloperMode.kt')

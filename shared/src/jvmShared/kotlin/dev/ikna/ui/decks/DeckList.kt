@@ -40,9 +40,11 @@ import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.Space
+import dev.ikna.ui.theme.SignalFramePlacement
 import dev.ikna.ui.theme.deckTintColor
 import dev.ikna.ui.theme.iknaInspect
 import dev.ikna.ui.theme.iknaSignalFrame
+import dev.ikna.ui.theme.iknaNumberStyle
 
 private val DECK_ROW_HEIGHT = 52.dp
 private val DECK_MARK_SIZE = 52.dp
@@ -92,8 +94,7 @@ fun IknaTodayBlock(total: Int, onClick: () -> Unit) {
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     text = total.toString(),
-                    style = MaterialTheme.typography.displayLarge,
-                    fontWeight = FontWeight.SemiBold,
+                    style = iknaNumberStyle(MaterialTheme.typography.displayLarge, strong = true),
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.alignByBaseline()
                 )
@@ -144,9 +145,9 @@ fun IknaDeckRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(DECK_ROW_HEIGHT)
-            .clipToBounds()
             .hoverable(interaction)
-            .iknaSignalFrame(interaction)
+            .iknaSignalFrame(interaction, placement = SignalFramePlacement.Outer)
+            .clipToBounds()
             .clickable(interactionSource = interaction, indication = null, onClick = onOpen)
             .iknaInspect("IknaDeckRow[${deck.title}]"),
         verticalAlignment = Alignment.Top

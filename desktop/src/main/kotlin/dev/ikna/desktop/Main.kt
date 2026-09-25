@@ -46,6 +46,14 @@ import kotlin.system.exitProcess
  * directory, so the same code on Linux or macOS lands somewhere unsurprising.
  */
 fun iknaHome(): File {
+    // Development tooling may point the desktop process at an isolated home so
+    // hot-reload experiments cannot touch the normal learner database/settings.
+    // Packaged launches never set this variable and keep the ordinary location.
+    val override = System.getenv("IKNA_HOME_OVERRIDE")?.takeIf { it.isNotBlank() }
+    if (override != null) {
+        return File(override).absoluteFile.also { it.mkdirs() }
+    }
+
     val appData = System.getenv("APPDATA")
     val base = if (!appData.isNullOrBlank()) {
         File(appData, "Ikna")

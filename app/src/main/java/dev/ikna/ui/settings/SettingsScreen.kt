@@ -24,6 +24,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -67,6 +69,7 @@ import dev.ikna.ui.update.installedVersion
 import dev.ikna.ui.update.openInBrowser
 import dev.ikna.ui.update.rememberUpdateDownload
 import dev.ikna.data.prefs.FontStore
+import dev.ikna.data.prefs.FontMode
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.LANGUAGE_SYSTEM
 import dev.ikna.data.prefs.ThemeMode
@@ -123,6 +126,7 @@ import kotlin.system.exitProcess
  * The other rule this screen keeps: every switch is either reversible or
  * explains its consequence in the same sentence.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     container: AppContainer,
@@ -144,7 +148,9 @@ fun SettingsScreen(
 
     // The rare and the irreversible live behind one expander. Closed by default,
     // so nothing here can be hit while scrolling past it.
-    var advancedOpen by remember { mutableStateOf(false) }
+    // An active developer profile must surface its way back without hunting:
+    // the advanced block starts open while Developer Mode is on.
+    var advancedOpen by remember { mutableStateOf(container.isDeveloperMode) }
     var developerArmed by remember { mutableStateOf(false) }
     var selectedDeveloperScenario by remember(settings.developerScenario) {
         mutableStateOf(DeveloperScenario.fromId(settings.developerScenario))
@@ -254,7 +260,7 @@ fun SettingsScreen(
                 }.getOrElse { S.t("set.002") }
             }
             if (problem == null) {
-                container.settings.setFontName(name)
+                container.settings.setCustomFont(name)
                 message = S.t("set.003") + name
             } else {
                 message = problem
@@ -291,11 +297,13 @@ fun SettingsScreen(
                     message = S.t("set.005")
                 } else {
                     SettingsBackup.apply(container.settings, snapshot)
-                    message = if (snapshot.fontName.isBlank()) {
-                        S.t("set.006")
+                    val restoredFontMode = snapshot.fontMode.takeIf { it.isNotBlank() }?.let { raw ->
+                        runCatching { FontMode.valueOf(raw) }.getOrNull()
+                    } ?: if (snapshot.fontName.isNotBlank()) FontMode.CUSTOM else FontMode.GEOLOGICA
+                    message = if (restoredFontMode == FontMode.CUSTOM && snapshot.fontName.isNotBlank()) {
+                        S.t("set.007") + snapshot.fontName + S.t("set.008")
                     } else {
-                        S.t("set.007") + snapshot.fontName +
-                            S.t("set.008")
+                        S.t("set.006")
                     }
                 }
                 busy = false
@@ -670,36 +678,39 @@ fun SettingsScreen(
                         S.t("set.041")
                     ) {
                         Text(
-                            text = if (settings.fontName.isBlank()) S.t("set.042")
-                            else S.t("set.043") + settings.fontName.uppercase(),
+                            text = when (settings.fontMode) {
+                                FontMode.GEOLOGICA -> S.t("set.042")
+                                FontMode.CUSTOM -> S.t("set.043") + settings.fontName.uppercase()
+                            },
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(12.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            IknaWideButton(
-                                label = S.t("set.044"),
-                                modifier = Modifier.weight(1f),
-                                height = 52.dp,
-                                enabled = !busy,
-                                onClick = { fontPicker.launch(arrayOf("*/*")) }
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            IknaChip(
+                                label = S.t("set.150"),
+                                selected = settings.fontMode == FontMode.GEOLOGICA,
+                                onClick = { scope.launch { container.settings.setFontMode(FontMode.GEOLOGICA) } }
                             )
                             if (settings.fontName.isNotBlank()) {
-                                IknaWideButton(
-                                    label = S.t("set.045"),
-                                    modifier = Modifier.weight(1f),
-                                    height = 52.dp,
-                                    enabled = !busy,
-                                    onClick = {
-                                        scope.launch {
-                                            container.settings.setFontName("")
-                                            withContext(Dispatchers.IO) { FontStore.clear() }
-                                            message = S.t("set.046")
-                                        }
-                                    }
+                                IknaChip(
+                                    label = settings.fontName.uppercase(),
+                                    selected = settings.fontMode == FontMode.CUSTOM,
+                                    onClick = { scope.launch { container.settings.setFontMode(FontMode.CUSTOM) } }
                                 )
                             }
                         }
+                        Spacer(Modifier.height(12.dp))
+                        IknaWideButton(
+                            label = S.t("set.044"),
+                            modifier = Modifier.fillMaxWidth(),
+                            height = 52.dp,
+                            enabled = !busy,
+                            onClick = { fontPicker.launch(arrayOf("*/*")) }
+                        )
                     }
                 }
 

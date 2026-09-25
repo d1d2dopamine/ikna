@@ -32,7 +32,7 @@ stutter. Build it and see it; it takes one `gradlew assembleDebug`.
 | Colour | twelve palettes, each in two lightings. Every pair passes 4.5:1, enforced by a test |
 | Interface languages | Russian, English, Polish, Spanish, French, German |
 | Network | static release, catalogue and optional voice files only. Nothing is uploaded, ever |
-| Motion | Material Shared Axis X: 14 dp over 280 ms; local feedback only, with a pointer-active Signal Frame as the one deliberate repeating motion |
+| Motion | Material Shared Axis X: 14 dp over 280 ms; local feedback only, with Signal Frame as the one deliberate repeating interaction/location motion |
 
 ## Memory lattice
 
@@ -70,12 +70,33 @@ foreground route, so route layers cannot visually leak into each other.
 
 Control motion is deliberately local: 160 ms for switches, chips and enabled
 states, 200 ms for conditional settings height, and 260 ms for segmented progress.
-Nothing loops at rest. The deliberate exception is the **Signal Frame** used for
-pointer discoverability: while a pointer remains over an interactive object,
-several uneven rounded segments travel slowly around that object's perimeter.
-Keyboard focus shows the same frame without requiring pointer motion, pressing
-pauses it, and disabling animations makes it fully static. The frame is feedback
-for an active interaction, not ambient decoration.
+The deliberate repeating exception is the **Signal Frame**. Hover uses it for
+pointer discoverability and the current desktop navigation destination may keep a
+quieter frame moving as location feedback. Every visible frame reads one shared
+phase clock, so moving quickly between controls never restarts the motion. Nested
+interactive regions have one owner: the smallest hovered target suppresses its
+interactive parent until the pointer leaves it. Keyboard focus shows the same frame
+without requiring pointer motion on the borderless controls; a bordered control
+thickens its own boundary instead, because the overlay that lets outer frames
+escape scroll clipping must not carry a focus ring over unrelated text. Pressing
+freezes its current phase, and disabling animations makes it fully static.
+
+The dash rhythm scales with the target. Small toggles and icon buttons use shorter
+marks and gaps than a whole deck row, so the affordance stays legible without
+thickening the one-pixel stroke. The shared clock sleeps whenever no hover or
+selected navigation frame needs motion.
+
+Signal Frame placement follows the control's own geometry rather than forcing one
+edge treatment everywhere. Borderless hit targets such as icon/text actions and
+the Today block keep the frame just inside their bounds, where it defines the
+interactive area. Controls with their own visible boundary place the same frame
+2 dp outside that boundary so the moving signal never competes with the control's
+static border. Deck rows use the outside placement too because their 52 dp mark
+already reaches the row edge. OUTER frames are painted by the theme-level overlay
+from each control's full root-space bounds, rather than inside the control's own
+DrawScope: scroll viewports, animated pane clips and tight rows must never cut off
+one side of the signal. INNER frames remain local. Motion, stroke, dash rhythm and
+shared phase are the same in both placements.
 
 Empty space is divided deliberately. The card keeps a completely silent field
 because the phrase is the only object to read. Unused home space may carry a dense
@@ -165,9 +186,16 @@ each lighting defines for itself and which steps aside entirely when the palette
 accent is already a warm red — is held to 4.5:1 by a unit test, and the hand-picked
 scheme gets the same check live, refusing combinations that cannot be read.
 
-Any `.ttf` or `.otf` on the phone can be used, and it is applied to the entire
-interface — headings, body, section marks, captions and counters alike. The file is
-validated before it is accepted, so a broken font cannot leave the app unreadable.
+Typography has a product default now instead of inheriting the platform sans. **Geologica**
+is the main interface face, using deliberately middle weights (400/500/600) so small
+copy is not hairline-thin and large titles do not become heavy blocks. **IBM Plex Mono**
+is the service/data face for labels, counters, percentages, times and focal statistics;
+its fixed-width figures keep changing values from visually jumping.
+
+The main face can still be switched to the platform font or to any picked `.ttf`/`.otf`.
+A picked file changes prose/content roles while Ikna's service and numeric face remains
+Plex Mono, keeping the information hierarchy stable. User files are validated before
+use so a broken font cannot leave the app unreadable.
 
 The wordmark is the real artwork, tinted at runtime: Android keeps one in its
 bottom bar, while desktop keeps one in the top-left window title bar. The letters

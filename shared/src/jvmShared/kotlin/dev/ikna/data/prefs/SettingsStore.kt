@@ -34,6 +34,9 @@ import kotlinx.coroutines.flow.map
  */
 enum class ThemeMode { DARK, LIGHT, SYSTEM, CUSTOM }
 
+/** Main interface typeface. Service labels and numeric readouts keep Ikna's mono face. */
+enum class FontMode { GEOLOGICA, CUSTOM }
+
 /**
  * The palette the app wears out of the box: "Чернила", a calm ink-blue field
  * with the warm ikna mark kept as its accent.
@@ -165,7 +168,9 @@ data class IknaSettings(
      * Whoever learns by ear turns this on and every card speaks by itself.
      */
     val autoSpeakEvery: Boolean = false,
-    /** File name of the installed content font. Empty means the built-in one. */
+    /** Main interface face. Geologica is the product default; system and a picked file remain available. */
+    val fontMode: FontMode = FontMode.GEOLOGICA,
+    /** File name of the installed custom font. Kept even while another built-in mode is selected. */
     val fontName: String = "",
     /** Legacy serialized field; current chrome keeps exactly one platform-appropriate wordmark. */
     val showWordmark: Boolean = true,
@@ -310,6 +315,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val speechEnabled = booleanPreferencesKey("speechEnabled")
         val phoneVoice = booleanPreferencesKey("phoneVoice")
         val autoSpeakEvery = booleanPreferencesKey("autoSpeakEvery")
+        val fontMode = stringPreferencesKey("fontMode")
         val fontName = stringPreferencesKey("fontName")
         val showWordmark = booleanPreferencesKey("showWordmark")
         val leftHanded = booleanPreferencesKey("leftHanded")
@@ -370,6 +376,13 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             // finding them rather than fail on them.
             phoneVoice = p[Keys.phoneVoice] ?: defaults.phoneVoice,
             autoSpeakEvery = p[Keys.autoSpeakEvery] ?: defaults.autoSpeakEvery,
+            // Existing installs had no mode: a stored file name meant the custom face,
+            // otherwise they move to the new Geologica default. A stored SYSTEM choice
+            // was retired with the system face; it migrates to Geologica.
+            fontMode = p[Keys.fontMode]?.let { name ->
+                if (name == "SYSTEM") FontMode.GEOLOGICA
+                else runCatching { FontMode.valueOf(name) }.getOrNull()
+            } ?: if (!p[Keys.fontName].isNullOrBlank()) FontMode.CUSTOM else defaults.fontMode,
             fontName = p[Keys.fontName] ?: defaults.fontName,
             showWordmark = p[Keys.showWordmark] ?: defaults.showWordmark,
             leftHanded = p[Keys.leftHanded] ?: defaults.leftHanded,
@@ -434,6 +447,15 @@ class SettingsStore(private val store: DataStore<Preferences>) {
 
     suspend fun setAutoSpeakEvery(on: Boolean) = put { it[Keys.autoSpeakEvery] = on }
 
+    suspend fun setFontMode(mode: FontMode) = put { it[Keys.fontMode] = mode.name }
+
+    /** Installing a picked face and selecting it is one preference edit, so no frame sees half the choice. */
+    suspend fun setCustomFont(name: String) = put {
+        it[Keys.fontName] = name
+        it[Keys.fontMode] = FontMode.CUSTOM.name
+    }
+
+    /** Retained for restore/tests that only need to remember the picked file name. */
     suspend fun setFontName(name: String) = put { it[Keys.fontName] = name }
 
     suspend fun setShowWordmark(on: Boolean) = put { it[Keys.showWordmark] = on }

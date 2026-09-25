@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -43,6 +44,7 @@ import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowState
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.Edge
+import dev.ikna.ui.theme.IknaMemoryAmbientStrip
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.LocalIknaControlColors
@@ -96,16 +98,23 @@ fun WindowScope.IknaWindowTitleBar(
                     }
                 }
             val titleContent: @Composable () -> Unit = {
-                Box(
-                    Modifier.fillMaxWidth().fillMaxHeight().padding(start = Edge),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    if (showWordmark) {
-                        IknaWordmark(
-                            height = 16.dp,
-                            ink = ink,
-                            dot = if (active) palette.accent else palette.muted
-                        )
+                Box(Modifier.fillMaxWidth().fillMaxHeight()) {
+                    IknaMemoryAmbientStrip(
+                        seed = 0x1A2B3C,
+                        modifier = Modifier.fillMaxSize(),
+                        protectedStartDp = 96f
+                    )
+                    Box(
+                        Modifier.fillMaxWidth().fillMaxHeight().padding(start = Edge),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        if (showWordmark) {
+                            IknaWordmark(
+                                height = 16.dp,
+                                ink = ink,
+                                dot = if (active) palette.accent else palette.muted
+                            )
+                        }
                     }
                 }
             }

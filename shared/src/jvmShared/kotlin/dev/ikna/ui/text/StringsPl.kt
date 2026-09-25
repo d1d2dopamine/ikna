@@ -174,9 +174,9 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// Шрифт
 	"set.040" to "Czcionka",
 	// Свой .ttf или .otf для текста карточек и заголовков. Служебные подписи остаются моноширинн
-	"set.041" to "Własny plik .ttf lub .otf do tekstu fiszek. Plik jest sprawdzany przed użyciem.",
+	"set.041" to "Geologica jest główną czcionką Ikna. Możesz użyć czcionki systemowej albo wybrać własny plik .ttf/.otf; plik jest sprawdzany przed użyciem.",
 	// СЕЙЧАС · СИСТЕМНЫЙ
-	"set.042" to "TERAZ · SYSTEMOWA",
+	"set.042" to "TERAZ · GEOLOGICA",
 	// СЕЙЧАС ·
 	"set.043" to "TERAZ · ",
 	// ВЫБРАТЬ ФАЙЛ
@@ -184,7 +184,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// СБРОСИТЬ
 	"set.045" to "ZRESETUJ",
 	// Вернул системный шрифт
-	"set.046" to "Wróciła czcionka systemowa",
+	"set.046" to "Wróciła Geologica",
 	// Напоминание
 	"set.047" to "Przypomnienie",
 	// Одно в день, и только если минимум ещё не сделан. Никаких серий и укоров.
@@ -1013,4 +1013,5 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "dev.021" to "WŁĄCZ I URUCHOM PONOWNIE",
     "dev.022" to "ANULUJ",
     "dev.023" to "Ikna zostanie zamknięta. Otwórz ją ponownie, aby użyć wybranego profilu danych.",
+    "set.150" to "GEOLOGICA",
 )

@@ -11,6 +11,11 @@ import java.io.File
  */
 expect fun iknaFontFamily(file: File): FontFamily
 
+/** Product typefaces shipped as verified repository resources on both platforms. */
+expect fun iknaGeologicaFontFamily(): FontFamily
+expect fun iknaPlexMonoMediumFontFamily(): FontFamily
+expect fun iknaPlexMonoSemiBoldFontFamily(): FontFamily
+
 /**
  * Transparent masks for the in-app wordmark. Android loads drawable resources;
  * desktop loads the same PNGs from the classpath. Wordmark.kt applies the active

@@ -24,3 +24,6 @@ app/src/voice/assets/kokoro/
 
 # Downloaded and hash-checked by tools/catalog/fetch-bundled-pack.sh
 app/src/main/assets/packs/en-ru-beginner.jsonl
+
+# Python bytecode from the tooling checkers.
+__pycache__/

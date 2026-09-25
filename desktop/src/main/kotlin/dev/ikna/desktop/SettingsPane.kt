@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import dev.ikna.data.dev.DeveloperScenario
 import dev.ikna.data.dev.IknaDataProfile
 import dev.ikna.data.prefs.FontStore
+import dev.ikna.data.prefs.FontMode
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.LANGUAGE_SYSTEM
 import dev.ikna.data.prefs.ThemeMode
@@ -101,7 +102,9 @@ fun SettingsPane(
     var dataNote by remember { mutableStateOf<String?>(null) }
     var updateNote by remember { mutableStateOf<String?>(null) }
     var checking by remember { mutableStateOf(false) }
-    var advancedOpen by remember { mutableStateOf(false) }
+    // An active developer profile must surface its way back without hunting:
+    // the advanced block starts open while Developer Mode is on.
+    var advancedOpen by remember { mutableStateOf(container.isDeveloperMode) }
     var developerArmed by remember { mutableStateOf(false) }
     var selectedDeveloperScenario by remember(settings.developerScenario) {
         mutableStateOf(DeveloperScenario.fromId(settings.developerScenario))
@@ -249,31 +252,40 @@ fun SettingsPane(
                     )
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        text = if (settings.fontName.isEmpty()) S.t("set.042")
-                        else S.t("set.043") + settings.fontName,
+                        text = when (settings.fontMode) {
+                            FontMode.GEOLOGICA -> S.t("set.042")
+                            FontMode.CUSTOM -> S.t("set.043") + settings.fontName
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted
                     )
                     Spacer(Modifier.height(10.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        IknaButton(label = S.t("set.044"), palette = palette) {
-                            val picked = pickFileForRead(S.t("set.040"))
-                            if (picked != null) {
-                                val problem = runCatching {
-                                    picked.inputStream().use { stream -> FontStore.install(stream) }
-                                }.getOrElse { S.t("set.057") }
-                                if (problem == null) {
-                                    save { container.settings.setFontName(picked.name) }
-                                    dataNote = null
-                                } else {
-                                    dataNote = problem
-                                }
-                            }
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        IknaChip(S.t("set.150"), selected = settings.fontMode == FontMode.GEOLOGICA, onClick = {
+                            save { container.settings.setFontMode(FontMode.GEOLOGICA) }
+                        })
+                        if (settings.fontName.isNotBlank()) {
+                            IknaChip(settings.fontName, selected = settings.fontMode == FontMode.CUSTOM, onClick = {
+                                save { container.settings.setFontMode(FontMode.CUSTOM) }
+                            })
                         }
-                        IknaButton(label = S.t("set.045"), palette = palette) {
-                            FontStore.clear()
-                            save { container.settings.setFontName("") }
-                            dataNote = S.t("set.046")
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    IknaButton(label = S.t("set.044"), palette = palette) {
+                        val picked = pickFileForRead(S.t("set.040"))
+                        if (picked != null) {
+                            val problem = runCatching {
+                                picked.inputStream().use { stream -> FontStore.install(stream) }
+                            }.getOrElse { S.t("set.057") }
+                            if (problem == null) {
+                                save { container.settings.setCustomFont(picked.name) }
+                                dataNote = null
+                            } else {
+                                dataNote = problem
+                            }
                         }
                     }
                 }

@@ -39,7 +39,7 @@ fun IknaSessionTopBar(state: SessionUiState) {
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.labelMedium,
+            style = iknaNumberStyle(MaterialTheme.typography.labelMedium),
             color = if (minimumJustMet) MaterialTheme.colorScheme.primary
             else MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,

@@ -49,6 +49,7 @@ import dev.ikna.ui.theme.IknaMemoryField
 import dev.ikna.ui.theme.IknaTransientNotice
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Space
+import dev.ikna.ui.theme.iknaNumberStyle
 import dev.ikna.widget.TodayWidget
 import kotlinx.coroutines.launch
 
@@ -375,8 +376,7 @@ private fun TodayBlock(total: Int, onClick: () -> Unit) {
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     text = total.toString(),
-                    style = MaterialTheme.typography.displayLarge,
-                    fontWeight = FontWeight.SemiBold,
+                    style = iknaNumberStyle(MaterialTheme.typography.displayLarge, strong = true),
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.alignByBaseline()
                 )

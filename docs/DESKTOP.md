@@ -1,6 +1,10 @@
 # Desktop
 
-ikna ships on Android, Windows and Linux. This file records how the desktop build
+ikna ships on Android, Windows and Linux. Fast JVM UI iteration is documented in
+[`HOT-RELOAD.md`](HOT-RELOAD.md); it is development tooling and does not change
+the release/package contracts recorded here.
+
+This file records how the desktop build
 shares the study system with Android, what is genuinely platform-specific, how the
 Windows and Linux packages are produced, and which Android-only surfaces are
 deliberately not reproduced.

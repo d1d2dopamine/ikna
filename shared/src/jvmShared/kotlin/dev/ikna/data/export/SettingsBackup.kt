@@ -6,6 +6,7 @@ import dev.ikna.data.prefs.SettingsStore
 import dev.ikna.data.prefs.DEFAULT_PALETTE_ID
 import dev.ikna.data.prefs.DEFAULT_HOTKEYS
 import dev.ikna.data.prefs.ThemeMode
+import dev.ikna.data.prefs.FontMode
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -80,6 +81,7 @@ data class SettingsSnapshot(
     // the rest of their settings.
     val phoneVoice: Boolean = true,
     val autoSpeakEvery: Boolean = false,
+    val fontMode: String = "",
     val fontName: String = "",
     // The bar's look, defaulting to what a fresh install does. A file written
     // before these existed must not be able to hide the wordmark or move the
@@ -130,6 +132,7 @@ object SettingsBackup {
         speech = settings.speechEnabled,
         phoneVoice = settings.phoneVoice,
         autoSpeakEvery = settings.autoSpeakEvery,
+        fontMode = settings.fontMode.name,
         fontName = settings.fontName,
         showWordmark = settings.showWordmark,
         leftHanded = settings.leftHanded,
@@ -193,6 +196,14 @@ object SettingsBackup {
         store.setSpeechEnabled(snapshot.speech)
         store.setPhoneVoice(snapshot.phoneVoice)
         store.setAutoSpeakEvery(snapshot.autoSpeakEvery)
+        store.setFontName(snapshot.fontName)
+        // "SYSTEM" was retired from FontMode; a backup made on the system face
+        // restores onto Geologica rather than resurrecting the removed mode.
+        val fontMode = snapshot.fontMode.takeIf { it.isNotBlank() }?.let { name ->
+            if (name == "SYSTEM") FontMode.GEOLOGICA
+            else runCatching { FontMode.valueOf(name) }.getOrNull()
+        } ?: if (snapshot.fontName.isNotBlank()) FontMode.CUSTOM else FontMode.GEOLOGICA
+        store.setFontMode(fontMode)
         store.setShowWordmark(snapshot.showWordmark)
         store.setLeftHanded(snapshot.leftHanded)
         store.setDeckLooks(snapshot.deckLooks)

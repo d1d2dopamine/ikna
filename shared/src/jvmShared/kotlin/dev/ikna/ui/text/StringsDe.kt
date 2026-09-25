@@ -48,9 +48,9 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "set.035" to "STIMMEN INSTALLIEREN", "set.036" to "Die Engine kann Stimmen nicht selbst laden; öffne ihre Einstellungen",
     "set.037" to "keine Offline-Stimme für diese Sprache", "set.038" to "STANDARD",
     "set.039" to "Der erste Ton nach dem Start braucht vielleicht eine Sekunde — die Engine wacht auf.",
-    "set.040" to "Schrift", "set.041" to "Eigene .ttf oder .otf für den Kartentext. Die Datei wird vor dem Anwenden geprüft.",
-    "set.042" to "JETZT · SYSTEM", "set.043" to "JETZT · ", "set.044" to "DATEI WÄHLEN", "set.045" to "ZURÜCKSETZEN",
-    "set.046" to "Systemschrift wiederhergestellt", "set.047" to "Erinnerung", "set.049" to "Erinnere mich", "set.050" to "um ", "set.051" to "aus",
+    "set.040" to "Schrift", "set.041" to "Geologica ist Iknas Standardschrift. Du kannst zur Systemschrift wechseln oder eine eigene .ttf/.otf wählen; Dateien werden vor der Verwendung geprüft.",
+    "set.042" to "JETZT · GEOLOGICA", "set.043" to "JETZT · ", "set.044" to "DATEI WÄHLEN", "set.045" to "ZURÜCKSETZEN",
+    "set.046" to "Geologica wiederhergestellt", "set.047" to "Erinnerung", "set.049" to "Erinnere mich", "set.050" to "um ", "set.051" to "aus",
     "set.052" to "Daten", "set.053" to "Das Antwortprotokoll ist das Einzige, was nicht rekonstruiert werden kann. Alles andere wird daraus neu berechnet.",
     "set.054" to "Wöchentlich automatisch exportieren", "set.055" to "In den Ordner Documents/ikna", "set.056" to "EXPORTIEREN",
     "set.057" to "Datei konnte nicht gespeichert werden", "set.058" to "Einstellungen gespeichert. Das Protokoll ist noch leer; nichts zu exportieren.",
@@ -373,4 +373,5 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "dev.021" to "AKTIVIEREN UND NEU STARTEN",
     "dev.022" to "ABBRECHEN",
     "dev.023" to "Ikna wird geschlossen. Öffne es erneut, um das gewählte Datenprofil zu verwenden.",
+    "set.150" to "GEOLOGICA",
 )

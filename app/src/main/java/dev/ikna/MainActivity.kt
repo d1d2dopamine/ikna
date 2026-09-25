@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
             // The font the user installed, or nothing at all if they have not.
             // Resolved once here, so every screen is set in it without any of
             // them knowing that a custom font is a possibility.
-            val contentFont = rememberContentFont(settings.fontName)
+            val contentFont = rememberContentFont(settings.fontMode, settings.fontName)
 
             IknaTheme(
                 palette = palette,

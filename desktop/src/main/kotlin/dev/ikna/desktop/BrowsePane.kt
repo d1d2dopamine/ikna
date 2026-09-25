@@ -156,7 +156,7 @@ fun BrowsePane(
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .widthIn(max = 960.dp)
+                                    .widthIn(max = 640.dp)
                             )
                         }
                     }
