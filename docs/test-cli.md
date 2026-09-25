@@ -257,6 +257,17 @@ warning=Synthetic improvement validates plumbing, NOT benefit to a real learner.
 - **Гипотеза об исправлении:** в фикстуре считать декларируемые байты так же, как census (сумма длин строк в text-mode), либо открыть `write_deck`/`open_deck` с явным `newline="\n"`; в `meta_info.py` — читать в binary или учитывать `\r`, чтобы `rawBytes` не зависел от платформы.
 - **Рекомендация:** считать S3, исправлять в рамках тулинга (не блокирует desktop-прогон).
 
+### IKNA-T-004 — S2 (major): устаревший контрактный тест валит CI (`:app:testReleaseUnitTest`)
+
+- **Компонент:** `app/src/test/java/dev/ikna/ui/decks/MobileDeckUiContractTest.kt:42` — тест `shared row restores the compact mark and bounds every line to it`.
+- **Команда:** CI `bash tools/ci/run-gradle.sh ci-logs/jvm-build.log --continue :desktop:test :app:testReleaseUnitTest :app:assembleDebug` (GitHub Actions); локально не воспроизводится — Android SDK на машине прогона нет.
+- **Ожидание:** тест проходит на снапшоте.
+- **Факт (лог CI владельца):** `:app:testReleaseUnitTest` FAILED — `MobileDeckUiContractTest › shared row … FAILED`, `java.lang.AssertionError at MobileDeckUiContractTest.kt:48`; 570 тестов, 1 провален; `:desktop:test` и `:app:assembleDebug` при этом зелёные.
+- **Диагноз (подтверждён сравнением с initial-коммитом):** тест требует точную подстроку `.height(DECK_ROW_HEIGHT)\n            .clipToBounds()` в цепочке модификаторов `IknaDeckRow`, но между ними уже стоит `.iknaSignalFrame(interaction, placement = Outer)` — прямого соседства нет. Подстрока отсутствует **уже в initial-коммите снапшота (`275452e`)**: контракт устарел, когда в цепочку вставили Signal Frame, и тест не обновили. Дефект унаследован из снапшота, сессией не привнесён; продукт-код строки корректен.
+- **Исправление:** требуемая подстрока актуализирована до текущей цепочки (`.height(DECK_ROW_HEIGHT)\n            .hoverable(interaction)\n            .iknaSignalFrame(interaction, placement = SignalFramePlacement.Outer)\n            .clipToBounds()`) — смысл контракта («строка ограничивает контент и обрезает свои границы») сохранён. Остальные 9 подстрок и проверки блока строки (68.dp, labelSmall, Ellipsis ≥ 2) совпадали всегда.
+- **Воспроизведение:** чистый снапшот → `:app:testReleaseUnitTest` → FAIL (1 из 570).
+- **Примечание к логу CI:** остальные `w:`-строки — предупреждения (deprecated Compose clipboard/painterResource, `Speaker.kt:240` override deprecated без аннотации, тип `String?` в `AnkiBridgeContractTest.kt:10`) — это материал Track F, к падению не относится.
+
 ## После прогона — партии правок (2026-09-25/26; сделано GLM 5.3 & GLM 5.3-flash, требует ревью)
 
 Каждая партия = коммит в этой копии + полный zip в `Документы\ikna_aiworks\` (актуальный всегда продублирован как `ikna-latest.zip`).
