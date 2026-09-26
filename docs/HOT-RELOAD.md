@@ -32,8 +32,10 @@ repository build baseline.
 ## Data safety
 
 By default the launcher sets `IKNA_HOME_OVERRIDE` to an isolated folder under
-`%LOCALAPPDATA%\\Ikna\\dev-hot-reload\\profile` and selects the existing
-Developer Mode profile there. Hot-reload experiments therefore do not open the
+`%LOCALAPPDATA%\\Ikna\\dev-hot-reload\\profile` and selects the Developer Mode
+profile there on the first run. After that the profile file belongs to the
+app's own Developer Mode switch, so a "return to normal mode" choice made in
+Settings survives relaunches. Hot-reload experiments therefore never open the
 normal desktop learner database or normal preferences.
 
 If real desktop data is deliberately needed for a check, run:

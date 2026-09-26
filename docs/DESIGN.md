@@ -101,7 +101,10 @@ shared phase are the same in both placements.
 Empty space is divided deliberately. The card keeps a completely silent field
 because the phrase is the only object to read. Unused home space may carry a dense
 but faint grain made from hundreds of disconnected dots and very short orthogonal
-strokes. It never joins into a route or snake. Empty search, catalogue and
+strokes. It never joins into a route or snake. The same field breathes in the
+window's top and bottom strips: a few marks dissolve while others appear on one
+deterministic slow cycle, at the deck-header ladder, fully static when animations
+are off. Empty search, catalogue and
 statistics states retain a compact unfinished structure instead of looking
 unloaded, and texture is never painted on the learning card.
 
