@@ -88,7 +88,8 @@ class MainActivity : ComponentActivity() {
             IknaTheme(
                 palette = palette,
                 contentFont = contentFont,
-                motionEnabled = settings.animations
+                motionEnabled = settings.animations,
+                appearanceVariant = settings.appearanceVariant
             ) {
                 when (schedulerMigration) {
                     is SchedulerMigrationState.Ready -> IknaNavHost(

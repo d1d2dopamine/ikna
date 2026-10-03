@@ -7,6 +7,7 @@ import dev.ikna.data.prefs.DEFAULT_PALETTE_ID
 import dev.ikna.data.prefs.DEFAULT_HOTKEYS
 import dev.ikna.data.prefs.ThemeMode
 import dev.ikna.data.prefs.FontMode
+import dev.ikna.data.prefs.IknaAppearanceVariant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -83,6 +84,7 @@ data class SettingsSnapshot(
     val autoSpeakEvery: Boolean = false,
     val fontMode: String = "",
     val fontName: String = "",
+    val appearanceVariant: String = "",
     // The bar's look, defaulting to what a fresh install does. A file written
     // before these existed must not be able to hide the wordmark or move the
     // controls of whoever restores it.
@@ -134,6 +136,7 @@ object SettingsBackup {
         autoSpeakEvery = settings.autoSpeakEvery,
         fontMode = settings.fontMode.name,
         fontName = settings.fontName,
+        appearanceVariant = settings.appearanceVariant.name,
         showWordmark = settings.showWordmark,
         leftHanded = settings.leftHanded,
         deckLooks = settings.deckLooks,
@@ -204,6 +207,12 @@ object SettingsBackup {
             else runCatching { FontMode.valueOf(name) }.getOrNull()
         } ?: if (snapshot.fontName.isNotBlank()) FontMode.CUSTOM else FontMode.GEOLOGICA
         store.setFontMode(fontMode)
+        // An unknown appearance variant reads as the shipped angular system.
+        store.setAppearanceVariant(
+            snapshot.appearanceVariant.takeIf { it.isNotBlank() }?.let { name ->
+                runCatching { IknaAppearanceVariant.valueOf(name) }.getOrNull()
+            } ?: IknaAppearanceVariant.ANGULAR
+        )
         store.setShowWordmark(snapshot.showWordmark)
         store.setLeftHanded(snapshot.leftHanded)
         store.setDeckLooks(snapshot.deckLooks)

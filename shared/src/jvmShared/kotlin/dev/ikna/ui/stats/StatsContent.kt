@@ -6,7 +6,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.unit.dp
+import dev.ikna.data.prefs.IknaAppearanceVariant
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.*
 import androidx.compose.ui.geometry.Offset
@@ -282,6 +285,7 @@ private fun ActivityMap(days: List<Boolean>) {
     val idle = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.22f)
     // Repository order is most recent first; drawing goes the other way round.
     val ordered = days.reversed()
+    val rounded = LocalIknaAppearanceVariant.current == IknaAppearanceVariant.ROUNDED
 
     Canvas(
         modifier = Modifier
@@ -291,14 +295,16 @@ private fun ActivityMap(days: List<Boolean>) {
         val count = 30
         val gap = size.width * 0.012f
         val cell = (size.width - gap * (count - 1)) / count
+        val corner = CornerRadius(if (rounded) size.height * 0.22f else 0f)
         for (i in 0 until count) {
             val active = ordered.getOrNull(i) == true
             val markHeight = if (active) size.height else size.height * 0.28f
             val top = (size.height - markHeight) / 2f
-            drawRect(
+            drawRoundRect(
                 color = if (active) accent else idle,
                 topLeft = Offset(i * (cell + gap), top),
-                size = Size(cell, markHeight)
+                size = Size(cell, markHeight),
+                cornerRadius = corner
             )
         }
     }
@@ -311,6 +317,7 @@ private fun HourBars(hours: List<HourSlice>) {
     val faint = MaterialTheme.colorScheme.primary.copy(alpha = 0.30f)
     val empty = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.18f)
     val byHour = hours.associateBy { it.hour }
+    val rounded = LocalIknaAppearanceVariant.current == IknaAppearanceVariant.ROUNDED
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Canvas(
@@ -321,18 +328,20 @@ private fun HourBars(hours: List<HourSlice>) {
             val count = 24
             val gap = size.width * 0.010f
             val cell = (size.width - gap * (count - 1)) / count
+            val corner = CornerRadius(if (rounded) cell / 2f else 0f)
             for (hour in 0 until count) {
                 val slice = byHour[hour]
                 val fraction = slice?.accuracy ?: 0.0
                 val barHeight = (size.height * fraction.toFloat()).coerceAtLeast(2f)
-                drawRect(
+                drawRoundRect(
                     color = when {
                         slice == null -> empty
                         slice.answers >= HOUR_CONFIDENT -> accent
                         else -> faint
                     },
                     topLeft = Offset(hour * (cell + gap), size.height - barHeight),
-                    size = Size(cell, barHeight)
+                    size = Size(cell, barHeight),
+                    cornerRadius = corner
                 )
             }
         }
@@ -354,6 +363,7 @@ private fun HourBars(hours: List<HourSlice>) {
 private fun ForecastBars(values: List<Int>) {
     val accent = MaterialTheme.colorScheme.primary
     val base = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.22f)
+    val rounded = LocalIknaAppearanceVariant.current == IknaAppearanceVariant.ROUNDED
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Canvas(
@@ -365,15 +375,17 @@ private fun ForecastBars(values: List<Int>) {
             val peak = (values.maxOrNull() ?: 0).coerceAtLeast(1)
             val gap = size.width * 0.014f
             val cell = (size.width - gap * (values.size - 1)) / values.size
+            val corner = CornerRadius(if (rounded) cell / 2f else 0f)
             values.forEachIndexed { i, value ->
                 val barHeight = size.height * (value.toFloat() / peak)
-                drawRect(
+                drawRoundRect(
                     color = if (value > 0) accent else base,
                     topLeft = Offset(
                         i * (cell + gap),
                         size.height - barHeight.coerceAtLeast(2f)
                     ),
-                    size = Size(cell, barHeight.coerceAtLeast(2f))
+                    size = Size(cell, barHeight.coerceAtLeast(2f)),
+                    cornerRadius = corner
                 )
             }
         }

@@ -181,7 +181,8 @@ fun IknaDesktopApp(
     IknaTheme(
         palette = palette,
         contentFont = contentFont,
-        motionEnabled = settings.animations
+        motionEnabled = settings.animations,
+        appearanceVariant = settings.appearanceVariant
     ) {
         IknaElementInspector(enabled = settings.elementInspector) {
             Column(
@@ -533,7 +534,10 @@ private fun PaneContent(
                 palette = palette,
                 deckId = ui.sessionDeck,
                 onChanged = { ui.refresh() },
-                onBack = back
+                onBack = back,
+                // In a wide window the session is the app's home: back has
+                // nowhere to take the learner, so the button stays hidden.
+                showBack = !wide
             )
 
             Pane.BROWSE -> {

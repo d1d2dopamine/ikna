@@ -151,6 +151,15 @@ intentional geometry exception: the control remains square, while its transient
 hover/focus outline has a small radius and rounded segment ends so it reads as a
 signal moving around the object rather than as another permanent container.
 
+Since the rounded-variant work there are two appearance variants served by the
+same component tree: **angular** (variant 1, every corner a right angle) and
+**rounded** (variant 2, chosen in Settings → appearance). In the rounded variant
+every corner-owning surface — chips, buttons, fields, the toggle pill, cards,
+panels, tiles, notices, window hover fills, deck marks — takes a corner radius
+from the shape system; the pixel signatures (memory lattice, progress cells,
+deck seals, wordmark) stay square in both variants, and the session card keeps
+its borderless silent field. The Signal Frame's radius follows its host control.
+
 Colour is two choices, not one. **Which palette:**
 
 | Palette | | Character |

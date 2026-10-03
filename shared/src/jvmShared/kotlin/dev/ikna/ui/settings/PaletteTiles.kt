@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -27,7 +28,9 @@ import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaPalettes
 import dev.ikna.ui.theme.LocalIknaControlColors
 import dev.ikna.ui.theme.SignalFramePlacement
+import dev.ikna.ui.theme.iknaFrameRadius
 import dev.ikna.ui.theme.iknaSignalFrame
+import dev.ikna.ui.theme.iknaTileShape
 
 private const val WORDMARK = "ikna"
 
@@ -78,8 +81,13 @@ fun IknaPaletteTiles(
                     Column(modifier = Modifier.weight(1f)) {
                         Column(
                             modifier = Modifier
+                                .clip(iknaTileShape())
                                 .hoverable(tileInteraction)
-                                .iknaSignalFrame(tileInteraction, placement = SignalFramePlacement.Outer)
+                                .iknaSignalFrame(
+                                    tileInteraction,
+                                    cornerRadius = iknaFrameRadius(rounded = 12.dp, angular = 8.dp),
+                                    placement = SignalFramePlacement.Outer
+                                )
                                 .clickable(
                                     interactionSource = tileInteraction,
                                     indication = null,
@@ -92,7 +100,8 @@ fun IknaPaletteTiles(
                                 .background(p.background)
                                 .border(
                                     if (selected || tileFocused) 2.dp else 1.dp,
-                                    if (selected || tileFocused) LocalIknaControlColors.current.mark else line
+                                    if (selected || tileFocused) LocalIknaControlColors.current.mark else line,
+                                    iknaTileShape()
                                 )
                                 .padding(8.dp)
                         ) {

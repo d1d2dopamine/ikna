@@ -37,6 +37,9 @@ enum class ThemeMode { DARK, LIGHT, SYSTEM, CUSTOM }
 /** Main interface typeface. Service labels and numeric readouts keep Ikna's mono face. */
 enum class FontMode { GEOLOGICA, CUSTOM }
 
+/** How corners look. Both variants come from one component tree (Track J). */
+enum class IknaAppearanceVariant { ANGULAR, ROUNDED }
+
 /**
  * The palette the app wears out of the box: "Чернила", a calm ink-blue field
  * with the warm ikna mark kept as its accent.
@@ -170,6 +173,8 @@ data class IknaSettings(
     val autoSpeakEvery: Boolean = false,
     /** Main interface face. Geologica is the product default; system and a picked file remain available. */
     val fontMode: FontMode = FontMode.GEOLOGICA,
+    /** Corner language of the whole interface. Both variants share one component tree. */
+    val appearanceVariant: IknaAppearanceVariant = IknaAppearanceVariant.ANGULAR,
     /** File name of the installed custom font. Kept even while another built-in mode is selected. */
     val fontName: String = "",
     /** Legacy serialized field; current chrome keeps exactly one platform-appropriate wordmark. */
@@ -316,6 +321,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val phoneVoice = booleanPreferencesKey("phoneVoice")
         val autoSpeakEvery = booleanPreferencesKey("autoSpeakEvery")
         val fontMode = stringPreferencesKey("fontMode")
+        val appearanceVariant = stringPreferencesKey("appearanceVariant")
         val fontName = stringPreferencesKey("fontName")
         val showWordmark = booleanPreferencesKey("showWordmark")
         val leftHanded = booleanPreferencesKey("leftHanded")
@@ -383,6 +389,9 @@ class SettingsStore(private val store: DataStore<Preferences>) {
                 if (name == "SYSTEM") FontMode.GEOLOGICA
                 else runCatching { FontMode.valueOf(name) }.getOrNull()
             } ?: if (!p[Keys.fontName].isNullOrBlank()) FontMode.CUSTOM else defaults.fontMode,
+            appearanceVariant = p[Keys.appearanceVariant]?.let { name ->
+                runCatching { IknaAppearanceVariant.valueOf(name) }.getOrNull()
+            } ?: defaults.appearanceVariant,
             fontName = p[Keys.fontName] ?: defaults.fontName,
             showWordmark = p[Keys.showWordmark] ?: defaults.showWordmark,
             leftHanded = p[Keys.leftHanded] ?: defaults.leftHanded,
@@ -448,6 +457,9 @@ class SettingsStore(private val store: DataStore<Preferences>) {
     suspend fun setAutoSpeakEvery(on: Boolean) = put { it[Keys.autoSpeakEvery] = on }
 
     suspend fun setFontMode(mode: FontMode) = put { it[Keys.fontMode] = mode.name }
+
+    suspend fun setAppearanceVariant(variant: IknaAppearanceVariant) =
+        put { it[Keys.appearanceVariant] = variant.name }
 
     /** Installing a picked face and selecting it is one preference edit, so no frame sees half the choice. */
     suspend fun setCustomFont(name: String) = put {

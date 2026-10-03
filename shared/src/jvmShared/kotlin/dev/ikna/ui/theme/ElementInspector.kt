@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextOverflow
@@ -88,8 +89,9 @@ fun IknaElementInspector(
                         .padding(12.dp)
                         .widthIn(max = 460.dp)
                         .zIndex(100f)
+                        .clip(iknaCardShape())
                         .background(MaterialTheme.colorScheme.background.copy(alpha = 0.96f))
-                        .border(1.dp, MaterialTheme.colorScheme.primary)
+                        .border(1.dp, MaterialTheme.colorScheme.primary, iknaCardShape())
                         .padding(horizontal = 10.dp, vertical = 7.dp)
                 ) {
                     Text(

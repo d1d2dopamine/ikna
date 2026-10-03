@@ -12,17 +12,21 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.ikna.data.prefs.DEFAULT_PALETTE_ID
 import dev.ikna.data.prefs.FontStore
 import dev.ikna.data.prefs.FontMode
+import dev.ikna.data.prefs.IknaAppearanceVariant
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.ThemeMode
 import kotlin.math.abs
@@ -585,6 +589,78 @@ private val IknaShapes = Shapes(
 )
 
 /**
+ * The rounded mirror of the angular system (Track J, variant 2). One component
+ * tree serves both: every corner-owning surface reads the variant, nothing is
+ * forked. The pixel signatures - lattice marks, progress cells, deck seals,
+ * the wordmark - stay square in both variants on purpose.
+ */
+private fun shapesFor(variant: IknaAppearanceVariant): Shapes = when (variant) {
+    IknaAppearanceVariant.ANGULAR -> IknaShapes
+    IknaAppearanceVariant.ROUNDED -> Shapes(
+        extraSmall = RoundedCornerShape(6.dp),
+        small = RoundedCornerShape(8.dp),
+        medium = RoundedCornerShape(10.dp),
+        large = RoundedCornerShape(14.dp),
+        extraLarge = RoundedCornerShape(16.dp)
+    )
+}
+
+val LocalIknaAppearanceVariant = staticCompositionLocalOf { IknaAppearanceVariant.ANGULAR }
+
+/** Chips, buttons, fields, notices: the workhorse corner of the variant. */
+@Composable
+fun iknaControlShape(): Shape = when (LocalIknaAppearanceVariant.current) {
+    IknaAppearanceVariant.ANGULAR -> Square
+    IknaAppearanceVariant.ROUNDED -> RoundedCornerShape(10.dp)
+}
+
+/** Content blocks, Browse blocks, panels: the reading surfaces. */
+@Composable
+fun iknaCardShape(): Shape = when (LocalIknaAppearanceVariant.current) {
+    IknaAppearanceVariant.ANGULAR -> Square
+    IknaAppearanceVariant.ROUNDED -> RoundedCornerShape(14.dp)
+}
+
+/** Palette tiles and other mid-size squares. */
+@Composable
+fun iknaTileShape(): Shape = when (LocalIknaAppearanceVariant.current) {
+    IknaAppearanceVariant.ANGULAR -> Square
+    IknaAppearanceVariant.ROUNDED -> RoundedCornerShape(12.dp)
+}
+
+/** Window chrome hover fills. */
+@Composable
+fun iknaWindowShape(): Shape = when (LocalIknaAppearanceVariant.current) {
+    IknaAppearanceVariant.ANGULAR -> Square
+    IknaAppearanceVariant.ROUNDED -> RoundedCornerShape(8.dp)
+}
+
+/** The toggle track: a pill in the rounded variant. */
+@Composable
+fun iknaToggleTrackShape(): Shape = when (LocalIknaAppearanceVariant.current) {
+    IknaAppearanceVariant.ANGULAR -> Square
+    IknaAppearanceVariant.ROUNDED -> RoundedCornerShape(16.dp)
+}
+
+/** The toggle knob inside the pill. */
+@Composable
+fun iknaKnobShape(): Shape = when (LocalIknaAppearanceVariant.current) {
+    IknaAppearanceVariant.ANGULAR -> Square
+    IknaAppearanceVariant.ROUNDED -> RoundedCornerShape(8.dp)
+}
+
+/**
+ * The signal frame hugs its host control, so its radius follows the variant:
+ * in the angular system the frames keep their calibrated values, in the
+ * rounded one they match the host corner.
+ */
+@Composable
+fun iknaFrameRadius(rounded: Dp, angular: Dp): Dp = when (LocalIknaAppearanceVariant.current) {
+    IknaAppearanceVariant.ANGULAR -> angular
+    IknaAppearanceVariant.ROUNDED -> rounded
+}
+
+/**
  * The selected main face changes prose/content roles only. Labels and data stay
  * in Plex Mono so switching to the system or a custom font does not destroy the
  * numeric rhythm that belongs to Ikna itself.
@@ -628,6 +704,7 @@ fun IknaTheme(
     palette: IknaPalette = DarkPalette,
     contentFont: FontFamily? = null,
     motionEnabled: Boolean = true,
+    appearanceVariant: IknaAppearanceVariant = IknaAppearanceVariant.ANGULAR,
     content: @Composable () -> Unit
 ) {
     val controls = remember(palette) { controlColors(palette) }
@@ -636,7 +713,7 @@ fun IknaTheme(
     MaterialTheme(
         colorScheme = scheme,
         typography = typographyOf(contentFont),
-        shapes = IknaShapes
+        shapes = shapesFor(appearanceVariant)
     ) {
         // Two defaults were quietly overriding the whole palette.
         //
@@ -656,6 +733,7 @@ fun IknaTheme(
             LocalContentColor provides palette.ink,
             LocalIknaControlColors provides controls,
             LocalIknaMotionEnabled provides motionEnabled,
+            LocalIknaAppearanceVariant provides appearanceVariant,
             LocalSignalFrameCoordinator provides signalFrameCoordinator
         ) {
             Box(

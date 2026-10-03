@@ -34,6 +34,7 @@ import dev.ikna.data.dev.DeveloperScenario
 import dev.ikna.data.dev.IknaDataProfile
 import dev.ikna.data.prefs.FontStore
 import dev.ikna.data.prefs.FontMode
+import dev.ikna.data.prefs.IknaAppearanceVariant
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.LANGUAGE_SYSTEM
 import dev.ikna.data.prefs.ThemeMode
@@ -205,6 +206,26 @@ fun SettingsPane(
                                 }
                             }
                         }
+                    }
+
+                    Spacer(Modifier.height(18.dp))
+                    Text(
+                        text = S.t("set.153"),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = palette.muted
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        IknaChip(
+                            label = S.t("set.151"),
+                            selected = settings.appearanceVariant == IknaAppearanceVariant.ANGULAR,
+                            onClick = { save { container.settings.setAppearanceVariant(IknaAppearanceVariant.ANGULAR) } }
+                        )
+                        IknaChip(
+                            label = S.t("set.152"),
+                            selected = settings.appearanceVariant == IknaAppearanceVariant.ROUNDED,
+                            onClick = { save { container.settings.setAppearanceVariant(IknaAppearanceVariant.ROUNDED) } }
+                        )
                     }
 
                     if (settings.theme == ThemeMode.CUSTOM) {
@@ -592,6 +613,12 @@ fun SettingsPane(
                         }
 
                         Spacer(Modifier.height(16.dp))
+                        Text(
+                            text = S.t("set.144"),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = palette.ink
+                        )
+                        Spacer(Modifier.height(8.dp))
                         IknaSettingsToggleRow(
                             title = S.t("pseudo.001"),
                             subtitle = S.t("pseudo.002"),
@@ -652,12 +679,12 @@ fun SettingsPane(
                         Spacer(Modifier.height(20.dp))
                         Text(
                             text = S.t("set.071"),
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.titleMedium,
                             color = palette.ink
                         )
                         Spacer(Modifier.height(6.dp))
                         Text(
-                            text = S.t("set.072"),
+                            text = S.t("pc.021"),
                             style = MaterialTheme.typography.labelSmall,
                             color = palette.muted
                         )

@@ -231,8 +231,8 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"set.070" to "START OVER",
 	// Стереть всё
 	"set.071" to "Erase everything",
-	// Полный сброс: карточки, сроки, статистика, журнал ответов и сами настройки. Приложение ста
-	"set.072" to "Cards, dates, statistics, settings and the answer log all go. The log is exported to Documents/ikna first.",
+	// Полный сброс: карточки, сроки, статистика, настройки, установленные колоды и журнал ответов. Приложение ста
+	"set.072" to "Cards, dates, statistics, settings, the installed decks and the answer log all go. The log is exported to Documents/ikna first.",
 	// ТОЧНО СТЕРЕТЬ ВСЁ
 	"set.073" to "REALLY ERASE EVERYTHING",
 	// СТЕРЕТЬ ДАННЫЕ
@@ -968,6 +968,10 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "browse.021" to "Browse availability could not be checked. Try again.",
     "a11y.014" to "Dismiss notice",
     "a11y.015" to "Browse unavailable",
+    "a11y.016" to "Turn the card over",
+    "a11y.017" to "Open the source",
+    "a11y.018" to "Open the deck",
+    "a11y.019" to "Open today's cards",
     "progress.001" to "TODAY",
     "progress.002" to "DECK",
     "inspector.001" to "Element inspector",
@@ -1014,4 +1018,9 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "dev.022" to "CANCEL",
     "dev.023" to "Ikna will close. Open it again to use the selected data profile.",
     "set.150" to "GEOLOGICA",
+    "set.151" to "ANGULAR", "set.152" to "ROUNDED", "set.153" to "INTERFACE LOOK",
+    // Подгруппа «Редкого» и причина отключённой загрузки в каталоге
+    "set.144" to "Diagnostics and maintenance",
+    "cat.042" to "Waiting for another download to finish.",
+    "pc.021" to "Cards, dates, statistics, settings, the installed decks and the answer log all go. Deck texts are saved to the export folder first. The answer log is not: export it before erasing.",
 )

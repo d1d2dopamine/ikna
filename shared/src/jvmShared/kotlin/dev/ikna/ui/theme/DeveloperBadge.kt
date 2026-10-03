@@ -6,6 +6,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import dev.ikna.ui.text.S
 
@@ -15,7 +16,8 @@ fun IknaDeveloperBadge(modifier: Modifier = Modifier) {
     Text(
         text = S.t("dev.001"),
         modifier = modifier
-            .border(1.dp, MaterialTheme.colorScheme.primary)
+            .clip(iknaWindowShape())
+            .border(1.dp, MaterialTheme.colorScheme.primary, iknaWindowShape())
             .padding(horizontal = 6.dp, vertical = 2.dp),
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.primary

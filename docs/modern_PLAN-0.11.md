@@ -231,15 +231,15 @@ compatibility regression hidden behind cleanup.
 This is a usability audit, not a redesign. Preserve Ikna's visual language while
 making actions and states easier to understand.
 
-- [ ] Review every disabled primary action: the user should be able to understand
+- [x] Review every disabled primary action: the user should be able to understand
   why it is disabled without knowing Ikna internals.
 - [ ] Prefer visible disabled controls with a useful explanation over unexplained
   disappearance when the feature concept remains relevant.
-- [ ] Review Settings hierarchy and group development, maintenance and destructive
+- [x] Review Settings hierarchy and group development, maintenance and destructive
   actions more clearly inside the existing Rare section.
 - [ ] Rewrite user-facing internal terminology where names such as Governor,
   policy or component leak through product UI unnecessarily.
-- [ ] Audit destructive confirmations for clear scope: normal data, developer data
+- [x] Audit destructive confirmations for clear scope: normal data, developer data
   or both.
 - [ ] Audit Android/desktop wording and interaction parity.
 - [x] Add the shared Signal Frame hover/focus treatment to core interactive
@@ -343,7 +343,7 @@ critical state that is unavailable as text/semantics.
   fully static state.
 - [ ] Check phone and desktop density separately; the motif may be shorter on
   mobile but should remain recognizably the same system.
-- [ ] Build a second interface appearance as a first-class variant. Variant 1 is
+- [x] Build a second interface appearance as a first-class variant. Variant 1 is
   the shipped angular system - every corner a right angle, the current
   `IknaShapes`. Variant 2 is a rounded look: the first time the application, a
   couple of months into its life, tries corner rounding at all. Owner decision
@@ -351,6 +351,11 @@ critical state that is unavailable as text/semantics.
   through the shape system rather than a forked copy of the UI, every hard
   right-angle assumption in shared composables needs an inventory before the
   rounded pass, and DESIGN.md gains the variant note when variant 2 lands.
+  Implemented: `IknaAppearanceVariant` in settings (ANGULAR/ROUNDED, travels
+  through backups), shape helpers consumed by every corner-owning surface,
+  chip switch in Settings -> appearance on both platforms, DESIGN.md note
+  added; owner verified visually and requested follow-up rounding (deck
+  marks, icon glyph caps, progress cells) which is also in.
 
 Acceptance: the top chrome feels alive without competing with learning content or
 making the interface less calm.

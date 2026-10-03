@@ -21,7 +21,7 @@ replace the space with a dash: `0.1.1 press` is tagged `v0.1.1-press`. What the
 words mean and what a number promises inside an epoch is written down once, in
 [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
-## 0.11.0 press (in development)
+## 0.11.0 press
 
 ### Interface correctness, developer-mode switching and the research base
 
@@ -32,6 +32,15 @@ words mean and what a number promises inside an epoch is written down once, in
 - Signal frame scrolling defects are fixed: bordered (Outer) controls answer the overlay only with pointer presence, and an outer frame that loses the pointer cuts to zero alpha instead of running its fade at a position the control has already scrolled away from. A ring can no longer trail a selected control over unrelated text; hex and text fields, palette tiles and the Browse source link carry focus in their own boundary, and the deck rows stay free of added outlines.
 - Developer Mode is now actually switchable: the hot-reload launcher stamped `DEVELOPER` into the isolated profile on every start, overwriting the in-app "return to normal mode" choice; the stamp happens on the first run only. While the developer profile is active, Settings → Rare opens the advanced block with the way back already visible.
 - Documentation: added `docs/rele.md` (a verified research base mapped to improvement opportunities — spacing ridgeline, successive relearning, pretesting, computer-based feedback, hypercorrection, overlearning dosage, morphology, implementation intentions) and `docs/ai-audits.md` (usability, corner-geometry, accessibility, duplication and deferred-debt audits; the deck-row TERMINAL suspicion is a false alarm, while `AnkiText`/`AnkiProto`/`DeckLanguage` are real per-module copies). `docs/DESIGN.md` records the signal-frame focus split, and `docs/modern_PLAN-0.11.md` closes the Track C rhythm item, the Track J lattice items and the Signal Frame tuning (owner decision), and records the two-appearance decision: variant 1 is the shipped angular system, variant 2 will try rounded corners from one component tree.
+
+### Usability: explanations, scope wording and settings grouping
+
+- Catalogue rows explain a disabled download: while another deck is downloading, the greyed-out button now says so ("Waiting for another download to finish") instead of leaving a dead control.
+- Erase-everything wording now includes the installed decks on both platforms. The desktop erase text is its own honest wording — deck texts are saved to the export folder first, the answer log is not and must be exported beforehand — instead of repeating the Android-only Documents/ikna promise.
+- Settings → Rare groups the advanced block with a "Diagnostics and maintenance" subheading between Developer mode and Erase everything, and the desktop erase heading now matches the app's title style.
+- Portuguese is registered in `locales_config.xml`, so the Android 13+ per-app language picker lists all seven interface languages.
+- Screen-reader labels for the interactions that had none: the session card's tap, the source links in a session and in Browse, the deck rows and both Today blocks now announce their action (`onClickLabel`), with the four new names translated in all seven languages.
+- Housekeeping: the palette checker's stale `IknaToggle` assertion was updated to the shipped variant-aware knob travel.
 
 ### Parts 6/8/9 corpus decision gates
 

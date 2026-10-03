@@ -77,3 +77,17 @@ the release page cannot drift apart.
 - scheduler: FSRS-6 / scheduler version 6
 - clean-install palette: Ink
 - release targets: Android arm64 + legacy32, Windows x64, Linux x86_64
+
+## 0.11.0 press
+
+- `versionName`: `0.11.0 press`
+- `versionCode`: `200110000`
+- release tag: `v0.11.0-press`
+- desktop package version: `0.11.0`
+- database schema: 10 (Catalogue v2 deck membership and grouped contexts;
+  additive, existing review rows are not rewritten)
+- scheduler: FSRS-6 / scheduler version 6
+- clean-install palette: Ink
+- release targets: Android arm64 + legacy32, Windows x64, Linux x86_64
+- catalogue: the published catalogue remains v1 under the fixed `catalog` tag;
+  Catalogue v2 publication is a separate, later step

@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -48,6 +49,7 @@ import dev.ikna.ui.theme.IknaMemoryAmbientStrip
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.LocalIknaControlColors
+import dev.ikna.ui.theme.iknaWindowShape
 import java.awt.Toolkit
 
 internal const val WINDOWS_TITLE_BAR_HEIGHT = 45
@@ -142,8 +144,8 @@ private fun WindowButton(mark: WindowMark, label: String, ink: Color, palette: I
     val colors = LocalIknaControlColors.current
     val fill = if (pressed) colors.pressed
         else if (hovered) colors.hover else Color.Transparent
-    Box(Modifier.size(44.dp).background(fill)
-        .border(1.dp, if (focused) colors.mark else Color.Transparent)
+    Box(Modifier.size(44.dp).clip(iknaWindowShape()).background(fill)
+        .border(1.dp, if (focused) colors.mark else Color.Transparent, iknaWindowShape())
         .semantics { contentDescription = label }
         .hoverable(interaction)
         .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onClick),

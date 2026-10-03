@@ -178,6 +178,16 @@ fun IknaCatalogDeckRow(
 					color = muted
 				)
 			}
+			if (blocked && !busy && !previewLoading) {
+				// The row itself is quiet, so the only reason this button is off is
+				// another deck's download; say so instead of leaving a dead button.
+				Spacer(Modifier.height(Space.xs))
+				Text(
+					text = S.t("cat.042"),
+					style = MaterialTheme.typography.labelMedium,
+					color = muted
+				)
+			}
 		} else {
 			Spacer(Modifier.height(Space.md))
 			IknaWideButton(
@@ -187,6 +197,14 @@ fun IknaCatalogDeckRow(
 				height = 52.dp,
 				onClick = onInstall
 			)
+			if (blocked && !busy && !previewLoading) {
+				Spacer(Modifier.height(Space.xs))
+				Text(
+					text = S.t("cat.042"),
+					style = MaterialTheme.typography.labelMedium,
+					color = muted
+				)
+			}
 		}
 	}
 }

@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.BasicTextField
@@ -41,8 +42,12 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.StrokeCap
+import dev.ikna.data.prefs.IknaAppearanceVariant
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
@@ -108,8 +113,15 @@ fun IknaGlyphIcon(
         Modifier.semantics { contentDescription = label }
     }
 
+    // The rounded appearance variant softens every mark: square cells gain
+    // a proportional corner radius and open strokes gain round caps. The
+    // angular system draws the same geometry with hard corners.
+    val roundMarks = LocalIknaAppearanceVariant.current == IknaAppearanceVariant.ROUNDED
+    val lineCap = if (roundMarks) StrokeCap.Round else StrokeCap.Butt
+
     Canvas(modifier = Modifier.size(size).then(described)) {
         val s = this.size.minDimension
+        val markCorner = CornerRadius(if (roundMarks) s * 0.16f else 0f)
         when (glyph) {
             // The app mark: same spark as the launcher icon.
             IknaGlyph.SPARK -> {
@@ -125,7 +137,7 @@ fun IknaGlyphIcon(
             }
             // Browse: three left-aligned lines of text. At the 18dp size used
             // beside a deck they are approximately 14 / 11 / 8dp long, with
-            // the same square geometry and optical weight as the other marks.
+            // the same geometry and optical weight as the other marks.
             IknaGlyph.BROWSE -> {
                 val h = s * 0.10f
                 val x = s * 0.11f
@@ -134,7 +146,7 @@ fun IknaGlyphIcon(
                     s * 0.45f to s * 0.61f,
                     s * 0.73f to s * 0.44f
                 ).forEach { (y, width) ->
-                    drawRect(color, Offset(x, y), Size(width, h))
+                    drawRoundRect(color, Offset(x, y), Size(width, h), markCorner)
                 }
             }
             // Progress: bars of different heights, never a rising curve.
@@ -143,22 +155,23 @@ fun IknaGlyphIcon(
                 val gap = (s - w * 3) / 2f
                 listOf(0.45f, 0.75f, 1f).forEachIndexed { i, k ->
                     val barHeight = s * k
-                    drawRect(
+                    drawRoundRect(
                         color,
                         Offset(i * (w + gap), s - barHeight),
-                        Size(w, barHeight)
+                        Size(w, barHeight),
+                        markCorner
                     )
                 }
             }
-            // Two rules with a square knob each. Kept for anywhere that means
+            // Two rules with a knob each. Kept for anywhere that means
             // "adjust" rather than "settings".
             IknaGlyph.SLIDERS -> {
                 val line = s * 0.1f
                 val knob = s * 0.3f
-                drawRect(color, Offset(0f, s * 0.22f), Size(s, line))
-                drawRect(color, Offset(s * 0.58f, s * 0.22f - knob * 0.35f), Size(knob, knob))
-                drawRect(color, Offset(0f, s * 0.68f), Size(s, line))
-                drawRect(color, Offset(s * 0.12f, s * 0.68f - knob * 0.35f), Size(knob, knob))
+                drawRoundRect(color, Offset(0f, s * 0.22f), Size(s, line), markCorner)
+                drawRoundRect(color, Offset(s * 0.58f, s * 0.22f - knob * 0.35f), Size(knob, knob), markCorner)
+                drawRoundRect(color, Offset(0f, s * 0.68f), Size(s, line), markCorner)
+                drawRoundRect(color, Offset(s * 0.12f, s * 0.68f - knob * 0.35f), Size(knob, knob), markCorner)
             }
             // Settings: a cog with square teeth, because a round one would be the
             // only circle in the app.
@@ -166,14 +179,15 @@ fun IknaGlyphIcon(
                 val tooth = s * 0.17f
                 val span = s * 0.2f
                 val mid = (s - span) / 2f
-                drawRect(color, Offset(mid, 0f), Size(span, tooth))
-                drawRect(color, Offset(mid, s - tooth), Size(span, tooth))
-                drawRect(color, Offset(0f, mid), Size(tooth, span))
-                drawRect(color, Offset(s - tooth, mid), Size(tooth, span))
-                drawRect(
+                drawRoundRect(color, Offset(mid, 0f), Size(span, tooth), markCorner)
+                drawRoundRect(color, Offset(mid, s - tooth), Size(span, tooth), markCorner)
+                drawRoundRect(color, Offset(0f, mid), Size(tooth, span), markCorner)
+                drawRoundRect(color, Offset(s - tooth, mid), Size(tooth, span), markCorner)
+                drawRoundRect(
                     color = color,
                     topLeft = Offset(s * 0.19f, s * 0.19f),
                     size = Size(s * 0.62f, s * 0.62f),
+                    cornerRadius = markCorner,
                     style = Stroke(width = s * 0.13f)
                 )
             }
@@ -181,8 +195,8 @@ fun IknaGlyphIcon(
             IknaGlyph.PLUS -> {
                 val bar = s * 0.14f
                 val mid = (s - bar) / 2f
-                drawRect(color, Offset(mid, 0f), Size(bar, s))
-                drawRect(color, Offset(0f, mid), Size(s, bar))
+                drawRoundRect(color, Offset(mid, 0f), Size(bar, s), markCorner)
+                drawRoundRect(color, Offset(0f, mid), Size(s, bar), markCorner)
             }
             // Speech. Angular on purpose — a rounded speaker would be the only
             // curve in the app.
@@ -197,8 +211,8 @@ fun IknaGlyphIcon(
                     close()
                 }
                 drawPath(cone, color)
-                drawRect(color, Offset(s * 0.60f, s * 0.34f), Size(s * 0.09f, s * 0.32f))
-                drawRect(color, Offset(s * 0.78f, s * 0.22f), Size(s * 0.09f, s * 0.56f))
+                drawRoundRect(color, Offset(s * 0.60f, s * 0.34f), Size(s * 0.09f, s * 0.32f), markCorner)
+                drawRoundRect(color, Offset(s * 0.78f, s * 0.22f), Size(s * 0.09f, s * 0.56f), markCorner)
             }
             // Everything done to one deck rarely. Three marks in a column is
             // the one shape a phone reader takes as "more about this row"
@@ -207,33 +221,35 @@ fun IknaGlyphIcon(
             IknaGlyph.DOTS -> {
                 val d = s * 0.16f
                 val x = (s - d) / 2f
-                drawRect(color, Offset(x, s * 0.10f), Size(d, d))
-                drawRect(color, Offset(x, (s - d) / 2f), Size(d, d))
-                drawRect(color, Offset(x, s * 0.90f - d), Size(d, d))
+                drawRoundRect(color, Offset(x, s * 0.10f), Size(d, d), markCorner)
+                drawRoundRect(color, Offset(x, (s - d) / 2f), Size(d, d), markCorner)
+                drawRoundRect(color, Offset(x, s * 0.90f - d), Size(d, d), markCorner)
             }
-            // Search: an angular lens, kept in the same right-angle vocabulary
+            // Search: a lens kept in the same right-angle vocabulary
             // as the other marks rather than importing one rounded icon.
             IknaGlyph.SEARCH -> {
-                drawRect(
+                drawRoundRect(
                     color = color,
                     topLeft = Offset(s * 0.08f, s * 0.08f),
                     size = Size(s * 0.58f, s * 0.58f),
-                    style = Stroke(width = s * 0.11f)
+                    cornerRadius = markCorner,
+                    style = Stroke(width = s * 0.11f, cap = lineCap)
                 )
                 drawLine(
                     color,
                     Offset(s * 0.62f, s * 0.62f),
                     Offset(s * 0.96f, s * 0.96f),
-                    strokeWidth = s * 0.13f
+                    strokeWidth = s * 0.13f,
+                    cap = lineCap
                 )
             }
             // Back out of a screen.
             IknaGlyph.BACK -> {
                 val w = s * 0.12f
                 val y = s * 0.5f
-                drawLine(color, Offset(s, y), Offset(s * 0.06f, y), strokeWidth = w)
-                drawLine(color, Offset(s * 0.06f, y), Offset(s * 0.46f, s * 0.12f), strokeWidth = w)
-                drawLine(color, Offset(s * 0.06f, y), Offset(s * 0.46f, s * 0.88f), strokeWidth = w)
+                drawLine(color, Offset(s, y), Offset(s * 0.06f, y), strokeWidth = w, cap = lineCap)
+                drawLine(color, Offset(s * 0.06f, y), Offset(s * 0.46f, s * 0.12f), strokeWidth = w, cap = lineCap)
+                drawLine(color, Offset(s * 0.06f, y), Offset(s * 0.46f, s * 0.88f), strokeWidth = w, cap = lineCap)
             }
         }
     }
@@ -346,12 +362,14 @@ fun IknaWideButton(
             .iknaInspect("IknaWideButton[$label]")
             .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier)
             .height(height)
+            .clip(iknaControlShape())
             .background(fillColor.copy(alpha = fillColor.alpha * alpha))
-            .border(if (enabled && focused) 2.dp else 1.dp, boundary.copy(alpha = alpha))
+            .border(if (enabled && focused) 2.dp else 1.dp, boundary.copy(alpha = alpha), iknaControlShape())
             .hoverable(interaction, enabled = enabled)
             .iknaSignalFrame(
                 interaction,
                 enabled = enabled,
+                cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp),
                 placement = SignalFramePlacement.Outer
             )
             .clickable(interactionSource = interaction, indication = null,
@@ -421,7 +439,7 @@ fun IknaTextButton(
 /**
  * A switch made of two rectangles.
  *
- * The filled block travels only the 24 dp between its two unambiguous end states.
+ * The filled block travels the track minus the knob between its two unambiguous end states.
  * It never bounces and snaps immediately when the app's Animations switch is off.
  */
 @Composable
@@ -445,8 +463,14 @@ fun IknaToggle(
     val pressed by interaction.collectIsPressedAsState()
     val alpha = if (enabled) 1f else 0.35f
     val motionEnabled = LocalIknaMotionEnabled.current
+    // The rounded variant keeps the square knob but one size smaller than the
+    // content area, so it floats with visible gaps on every side of the pill.
+    // The angular knob keeps its 24dp square and its own gaps.
+    val roundedKnob = LocalIknaAppearanceVariant.current == IknaAppearanceVariant.ROUNDED
+    val knobSize = if (roundedKnob) 22.dp else 24.dp
+    val knobShape = iknaKnobShape()
     val knobOffset by animateDpAsState(
-        targetValue = if (checked) 24.dp else 0.dp,
+        targetValue = if (checked) 48.dp - knobSize else 0.dp,
         animationSpec = if (motionEnabled) tween(
             durationMillis = Motion.controlChangeDurationMillis,
             easing = LinearOutSlowInEasing
@@ -481,8 +505,8 @@ fun IknaToggle(
             .iknaInspect("IknaToggle[${label ?: if (checked) "on" else "off"}]")
             .width(56.dp)
             .height(32.dp)
-            .background(trackColor.copy(alpha = alpha))
-            .border(if (enabled && focused) 2.dp else 1.dp, boundary.copy(alpha = alpha))
+            .background(trackColor.copy(alpha = alpha), iknaToggleTrackShape())
+            .border(if (enabled && focused) 2.dp else 1.dp, boundary.copy(alpha = alpha), iknaToggleTrackShape())
             // Position and a solid/outlined thumb identify the state without
             // relying on hue. The platform still announces a real switch.
             .semantics { if (label != null) contentDescription = label }
@@ -490,7 +514,7 @@ fun IknaToggle(
             .iknaSignalFrame(
                 interaction,
                 enabled = enabled,
-                cornerRadius = 7.dp,
+                cornerRadius = iknaFrameRadius(rounded = 16.dp, angular = 7.dp),
                 placement = SignalFramePlacement.Outer
             )
             .toggleable(
@@ -507,9 +531,10 @@ fun IknaToggle(
         Box(
             modifier = Modifier
                 .offset(x = knobOffset)
-                .size(width = 24.dp, height = 24.dp)
+                .size(width = knobSize, height = knobSize)
+                .clip(knobShape)
                 .background(knobColor.copy(alpha = alpha))
-                .border(1.dp, (if (checked) colors.mark else colors.outline).copy(alpha = alpha))
+                .border(1.dp, (if (checked) colors.mark else colors.outline).copy(alpha = alpha), knobShape)
         )
     }
 }
@@ -553,13 +578,14 @@ fun IknaChip(
     Box(
         modifier = modifier
             .height(40.dp)
+            .clip(iknaControlShape())
             .background(fillColor)
-            .border(if (selected || focused) 2.dp else 1.dp, borderColor)
+            .border(if (selected || focused) 2.dp else 1.dp, borderColor, iknaControlShape())
             .semantics { this.selected = selected }
             .hoverable(interaction)
             .iknaSignalFrame(
                 interaction,
-                cornerRadius = 7.dp,
+                cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 7.dp),
                 placement = SignalFramePlacement.Outer
             )
             .clickable(interactionSource = interaction, indication = null,
@@ -598,11 +624,15 @@ fun IknaHexField(
     Box(
         modifier = modifier
             .height(40.dp)
-            .border(if (focused) 2.dp else 1.dp, if (focused) LocalIknaControlColors.current.mark else line)
+            .border(
+                if (focused) 2.dp else 1.dp,
+                if (focused) LocalIknaControlColors.current.mark else line,
+                iknaControlShape()
+            )
             .hoverable(interaction)
             .iknaSignalFrame(
                 interaction,
-                cornerRadius = 7.dp,
+                cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 7.dp),
                 placement = SignalFramePlacement.Outer
             )
             .padding(horizontal = 12.dp),
@@ -637,11 +667,15 @@ fun IknaTextField(
     Box(
         modifier = modifier
             .height(48.dp)
-            .border(if (focused) 2.dp else 1.dp, if (focused) LocalIknaControlColors.current.mark else MaterialTheme.colorScheme.outline)
+            .border(
+                if (focused) 2.dp else 1.dp,
+                if (focused) LocalIknaControlColors.current.mark else MaterialTheme.colorScheme.outline,
+                iknaControlShape()
+            )
             .hoverable(interaction)
             .iknaSignalFrame(
                 interaction,
-                cornerRadius = 7.dp,
+                cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 7.dp),
                 placement = SignalFramePlacement.Outer
             )
             .padding(horizontal = 12.dp),
@@ -677,8 +711,9 @@ fun IknaSwatch(
     Box(
         modifier = modifier
             .size(size)
+            .clip(iknaWindowShape())
             .background(color)
-            .border(1.dp, MaterialTheme.colorScheme.outline)
+            .border(1.dp, MaterialTheme.colorScheme.outline, iknaWindowShape())
     )
 }
 
@@ -703,9 +738,10 @@ fun IknaDialog(
     Dialog(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
+                .clip(iknaCardShape())
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.background)
-                .border(1.dp, LocalIknaControlColors.current.outline)
+                .border(1.dp, LocalIknaControlColors.current.outline, iknaCardShape())
                 .padding(horizontal = 20.dp, vertical = 24.dp)
         ) {
             Text(text = title, style = MaterialTheme.typography.headlineSmall)
@@ -821,6 +857,10 @@ fun IknaProgress(
     val trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.45f)
     val count = segments.coerceIn(1, 64)
     val fill = segmentFill(shownFraction, count)
+    // The rounded variant draws every cell as a pill; the angular system keeps
+    // the hard-edged cells. Radius scales with the cell height, so a 3dp strip
+    // and a 14dp deck bar round by the same rule.
+    val progressVariant = LocalIknaAppearanceVariant.current
     Canvas(
         modifier = modifier
             .fillMaxWidth()
@@ -828,20 +868,25 @@ fun IknaProgress(
     ) {
         val gap = minOf(2.dp.toPx(), size.width / (count * 3f))
         val cell = ((size.width - gap * (count - 1)) / count).coerceAtLeast(0f)
+        val corner = when (progressVariant) {
+            IknaAppearanceVariant.ANGULAR -> CornerRadius(0f, 0f)
+            IknaAppearanceVariant.ROUNDED -> CornerRadius(size.height / 2f)
+        }
         repeat(count) { index ->
             val left = index * (cell + gap)
             if (track) {
-                drawRect(trackColor, Offset(left, 0f), Size(cell, size.height))
+                drawRoundRect(trackColor, Offset(left, 0f), Size(cell, size.height), corner)
             }
             when {
                 index < fill.complete ->
-                    drawRect(color, Offset(left, 0f), Size(cell, size.height))
+                    drawRoundRect(color, Offset(left, 0f), Size(cell, size.height), corner)
 
                 index == fill.complete && fill.partial > 0f ->
-                    drawRect(
+                    drawRoundRect(
                         color,
                         Offset(left, 0f),
-                        Size(cell * fill.partial, size.height)
+                        Size(cell * fill.partial, size.height),
+                        corner
                     )
             }
         }
@@ -889,7 +934,7 @@ fun IknaPanel(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .border(2.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f))
+            .border(2.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f), iknaCardShape())
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         content = content

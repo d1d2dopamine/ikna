@@ -231,8 +231,8 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"set.070" to "ZACZNIJ OD NOWA",
 	// Стереть всё
 	"set.071" to "Wymaż wszystko",
-	// Полный сброс: карточки, сроки, статистика, журнал ответов и сами настройки. Приложение ста
-	"set.072" to "Fiszki, daty, statystyki, ustawienia i dziennik odpowiedzi znikają. Dziennik jest najpierw zapisany w Documents/ikna.",
+	// Полный сброс: карточки, сроки, статистика, настройки, установленные колоды и журнал ответов. Приложение ста
+	"set.072" to "Fiszki, daty, statystyki, ustawienia, zainstalowane talie i dziennik odpowiedzi znikają. Dziennik jest najpierw zapisany w Documents/ikna.",
 	// ТОЧНО СТЕРЕТЬ ВСЁ
 	"set.073" to "NA PEWNO WYMAŻ WSZYSTKO",
 	// СТЕРЕТЬ ДАННЫЕ
@@ -968,6 +968,10 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "browse.021" to "Nie udało się sprawdzić dostępności przeglądania. Spróbuj ponownie.",
     "a11y.014" to "Zamknij powiadomienie",
     "a11y.015" to "Przeglądanie niedostępne",
+    "a11y.016" to "Odwróć fiszkę",
+    "a11y.017" to "Otwórz źródło",
+    "a11y.018" to "Otwórz talię",
+    "a11y.019" to "Otwórz dzisiejsze fiszki",
     "progress.001" to "DZISIAJ",
     "progress.002" to "TALIA",
     "inspector.001" to "Inspektor elementów",
@@ -1014,4 +1018,9 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "dev.022" to "ANULUJ",
     "dev.023" to "Ikna zostanie zamknięta. Otwórz ją ponownie, aby użyć wybranego profilu danych.",
     "set.150" to "GEOLOGICA",
+    "set.151" to "KĄTOWY", "set.152" to "ZAOKRĄGLONY", "set.153" to "WYGLĄD INTERFEJSU",
+    // Подгруппа «Редкого» и причина отключённой загрузки в каталоге
+    "set.144" to "Diagnostyka i konserwacja",
+    "cat.042" to "Najpierw skończy się inne pobieranie.",
+    "pc.021" to "Fiszki, daty, statystyki, ustawienia, zainstalowane talie i dziennik odpowiedzi znikają. Teksty talii są najpierw zapisane w folderze export. Dziennik odpowiedzi — nie: wyeksportuj go wcześniej.",
 )

@@ -87,7 +87,9 @@ fun SessionPane(
     palette: IknaPalette,
     deckId: String?,
     onChanged: () -> Unit,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    /** False in the wide window, where the session pane is the app's home and back has nowhere to go. */
+    showBack: Boolean = true
 ) {
     val scope = rememberCoroutineScope()
     var plan by remember { mutableStateOf<SessionPlan?>(null) }
@@ -391,7 +393,12 @@ fun SessionPane(
             onUndo = undo, onDismiss = { undoVisible = false },
             onOpenSource = { id -> tatoebaSentenceUrl(id)?.let(::openInBrowser) })
         IknaBottomBar {
-            IknaIconButton(IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
+            // The session pane is the app's default state in a wide window, so
+            // back has nowhere to take the learner; the button only appears
+            // where it can actually do something (narrow layout, list hidden).
+            if (showBack) {
+                IknaIconButton(IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
+            }
             Spacer(Modifier.weight(1f))
             if (current != null && revealed && !saving) {
                 IknaTextButton(S.t("sess.044"), onClick = {

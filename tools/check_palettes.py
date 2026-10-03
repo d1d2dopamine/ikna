@@ -188,7 +188,7 @@ class PaletteContracts(unittest.TestCase):
             self.assertNotIn('else ink', block)
             self.assertNotIn('Color.White', block)
             self.assertNotIn('if (filled) paper', block)
-        self.assertIn('targetValue = if (checked) 24.dp else 0.dp', flat)
+        self.assertIn('targetValue = if (checked) 48.dp - knobSize else 0.dp', flat)
         self.assertIn('role = Role.Switch', flat)
         self.assertIn('.semantics { this.selected = selected }', flat)
         self.assertIn('else snap()', flat)

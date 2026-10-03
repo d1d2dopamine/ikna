@@ -70,6 +70,7 @@ import dev.ikna.ui.update.openInBrowser
 import dev.ikna.ui.update.rememberUpdateDownload
 import dev.ikna.data.prefs.FontStore
 import dev.ikna.data.prefs.FontMode
+import dev.ikna.data.prefs.IknaAppearanceVariant
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.LANGUAGE_SYSTEM
 import dev.ikna.data.prefs.ThemeMode
@@ -461,6 +462,33 @@ fun SettingsScreen(
                                     }
                                 }
                             }
+                        }
+                        Spacer(Modifier.height(18.dp))
+                        Text(
+                            text = S.t("set.153"),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            IknaChip(
+                                label = S.t("set.151"),
+                                selected = settings.appearanceVariant == IknaAppearanceVariant.ANGULAR,
+                                onClick = {
+                                    scope.launch {
+                                        container.settings.setAppearanceVariant(IknaAppearanceVariant.ANGULAR)
+                                    }
+                                }
+                            )
+                            IknaChip(
+                                label = S.t("set.152"),
+                                selected = settings.appearanceVariant == IknaAppearanceVariant.ROUNDED,
+                                onClick = {
+                                    scope.launch {
+                                        container.settings.setAppearanceVariant(IknaAppearanceVariant.ROUNDED)
+                                    }
+                                }
+                            )
                         }
                         if (settings.theme == ThemeMode.CUSTOM) {
                             Spacer(Modifier.height(16.dp))
@@ -1147,6 +1175,12 @@ fun SettingsScreen(
                             }
 
                             Spacer(Modifier.height(18.dp))
+                            Text(
+                                text = S.t("set.144"),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(Modifier.height(8.dp))
                             IknaSettingsToggleRow(
                                 title = S.t("pseudo.001"),
                                 subtitle = S.t("pseudo.002"),

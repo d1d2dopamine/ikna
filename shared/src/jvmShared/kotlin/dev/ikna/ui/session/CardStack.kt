@@ -438,7 +438,10 @@ fun ChunkCard(
     Box(
         modifier = modifier
             .background(MaterialTheme.colorScheme.background)
-            .clickable(enabled = tapEnabled, onClick = onTap)
+            .clickable(
+                enabled = tapEnabled,
+                onClickLabel = S.t("a11y.016"),
+                onClick = onTap)
     ) {
         // Drawn rather than recomposed: the wash follows the finger frame by
         // frame, and rebuilding the card's text on every one of those frames to
@@ -525,7 +528,7 @@ fun ChunkCard(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline,
-                        modifier = Modifier.clickable(onClick = onSource)
+                        modifier = Modifier.clickable(onClickLabel = S.t("a11y.017"), onClick = onSource)
                     )
                 }
             } else if (showTapHint) {

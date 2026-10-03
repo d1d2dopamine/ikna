@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -39,11 +40,14 @@ import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.IknaToggle
+import dev.ikna.ui.theme.LocalIknaControlColors
 import dev.ikna.ui.theme.Space
 import dev.ikna.ui.theme.SignalFramePlacement
 import dev.ikna.ui.theme.deckTintColor
+import dev.ikna.ui.theme.iknaFrameRadius
 import dev.ikna.ui.theme.iknaInspect
 import dev.ikna.ui.theme.iknaSignalFrame
+import dev.ikna.ui.theme.iknaTileShape
 import dev.ikna.ui.theme.iknaNumberStyle
 
 private val DECK_ROW_HEIGHT = 52.dp
@@ -80,7 +84,8 @@ fun IknaTodayBlock(total: Int, onClick: () -> Unit) {
             .fillMaxWidth()
             .hoverable(interaction)
             .iknaSignalFrame(interaction)
-            .clickable(interactionSource = interaction, indication = null, onClick = onClick)
+            .clickable(interactionSource = interaction, indication = null,
+                onClickLabel = S.t("a11y.019"), onClick = onClick)
             .padding(vertical = Space.sm)
             .iknaInspect("IknaTodayBlock")
     ) {
@@ -146,7 +151,11 @@ fun IknaDeckRow(
             .fillMaxWidth()
             .height(DECK_ROW_HEIGHT)
             .hoverable(interaction)
-            .iknaSignalFrame(interaction, placement = SignalFramePlacement.Outer)
+            .iknaSignalFrame(
+                interaction,
+                cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp),
+                placement = SignalFramePlacement.Outer
+            )
             .clipToBounds()
             .clickable(interactionSource = interaction, indication = null, onClick = onOpen)
             .iknaInspect("IknaDeckRow[${deck.title}]"),
@@ -302,8 +311,9 @@ fun IknaDeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
         modifier = Modifier
             .size(DECK_MARK_SIZE)
             .iknaInspect("IknaDeckMark[${deck.title}]")
+            .clip(iknaTileShape())
             .background(fill)
-            .border(Space.hair, edge),
+            .border(Space.hair, edge, iknaTileShape()),
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {

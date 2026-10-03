@@ -6,6 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.*
@@ -52,7 +53,8 @@ Row(
     Box(
         modifier = Modifier
             .size(52.dp)
-            .border(Space.hair, MaterialTheme.colorScheme.outline),
+            .clip(iknaTileShape())
+            .border(Space.hair, MaterialTheme.colorScheme.outline, iknaTileShape()),
         contentAlignment = Alignment.Center
     ) {
         BasicTextField(
@@ -93,11 +95,13 @@ Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
         Box(
             modifier = Modifier
                 .size(30.dp)
+                .clip(iknaWindowShape())
                 .background(colour)
                 .border(
                     if (picked) 2.dp else Space.hair,
                     if (picked) MaterialTheme.colorScheme.onBackground
-                    else MaterialTheme.colorScheme.outline
+                    else MaterialTheme.colorScheme.outline,
+                    iknaWindowShape()
                 )
                 .clickable {
                     onChange(look.label, if (picked) NO_TINT else index)

@@ -363,7 +363,7 @@ private fun TodayBlock(total: Int, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(onClickLabel = S.t("a11y.019"), onClick = onClick)
             .padding(vertical = Space.sm)
     ) {
         Text(

@@ -563,7 +563,7 @@ class DesignContracts(unittest.TestCase):
             'private val DECK_MARK_SIZE = 52.dp',
             'private val DECK_INFO_HEIGHT = 34.dp',
             'private val DECK_PROGRESS_HEIGHT = 14.dp',
-            '.iknaSignalFrame(interaction, placement = SignalFramePlacement.Outer)\n            .clipToBounds()',
+            '.iknaSignalFrame(\n                interaction,\n                cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp),\n                placement = SignalFramePlacement.Outer\n            )\n            .clipToBounds()',
             '.size(DECK_MARK_SIZE)',
             'modifier = Modifier.weight(1f).fillMaxHeight()',
             'modifier = Modifier.height(DECK_INFO_HEIGHT)',
@@ -675,16 +675,32 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('outerEntry.boundsInRoot = Rect(', frame)
         self.assertIn('onDrawWithContent { drawContent() }', frame)
         self.assertEqual(controls.count('placement = SignalFramePlacement.Outer'), 5)
-        self.assertIn('.iknaSignalFrame(interaction, placement = SignalFramePlacement.Outer)', decks)
+        self.assertIn('cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp)', decks)
         self.assertIn('.iknaSignalFrame(interaction)', decks)
         self.assertIn('placement = SignalFramePlacement.Outer', browse)
-        self.assertIn('.iknaSignalFrame(tileInteraction, placement = SignalFramePlacement.Outer)', palettes)
+        self.assertIn('cornerRadius = iknaFrameRadius(rounded = 12.dp, angular = 8.dp)', palettes)
         self.assertIn('.hoverable(tileInteraction)', palettes)
         self.assertIn('selected: Boolean = false', controls)
         self.assertIn('selected = searchSelected', desktop_shell)
         self.assertIn('selected = settingsSelected', desktop_shell)
         self.assertIn('selected = statsSelected', desktop_shell)
         self.assertIn('selected = addSelected', desktop_shell)
+
+    def test_rounded_variant_is_a_first_class_variant(self):
+        theme = read(SHARED, "ui/theme/Theme.kt")
+        prefs = read(SHARED, "data/prefs/SettingsStore.kt")
+        controls = read(SHARED, "ui/theme/Flat.kt")
+        desktop_settings = read(DESKTOP, "SettingsPane.kt")
+        android_settings = read(ROOT, "app/src/main/java/dev/ikna/ui/settings/SettingsScreen.kt")
+        self.assertIn("enum class IknaAppearanceVariant { ANGULAR, ROUNDED }", prefs)
+        self.assertIn("shapesFor(appearanceVariant)", theme)
+        self.assertIn("LocalIknaAppearanceVariant provides appearanceVariant", theme)
+        self.assertIn("iknaControlShape()", controls)
+        self.assertIn("iknaFrameRadius(rounded = 10.dp, angular = 7.dp)", controls)
+        self.assertIn("setAppearanceVariant(IknaAppearanceVariant.ROUNDED)", desktop_settings)
+        self.assertIn("setAppearanceVariant(IknaAppearanceVariant.ROUNDED)", android_settings)
+        self.assertIn('"set.153" to', read(SHARED, "ui/text/StringsRu.kt"))
+        self.assertIn('"set.151" to', read(SHARED, "ui/text/StringsEn.kt"))
 
     def test_developer_mode_always_bypasses_product_restrictions(self):
         mode = read(SHARED, 'data/dev/DeveloperMode.kt')

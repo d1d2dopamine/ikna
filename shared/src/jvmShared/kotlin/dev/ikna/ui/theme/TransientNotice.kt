@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
@@ -40,8 +41,9 @@ fun IknaTransientNotice(
             modifier = Modifier
                 .widthIn(max = 560.dp)
                 .fillMaxWidth()
+                .clip(iknaControlShape())
                 .background(MaterialTheme.colorScheme.background)
-                .border(1.dp, LocalIknaControlColors.current.outline)
+                .border(1.dp, LocalIknaControlColors.current.outline, iknaControlShape())
                 .clickable(
                     onClickLabel = dev.ikna.ui.text.S.t("a11y.014"),
                     role = Role.Button,

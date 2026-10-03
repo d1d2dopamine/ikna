@@ -40,6 +40,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.ikna.data.prefs.IknaAppearanceVariant
 import kotlin.math.roundToInt
 
 /**
@@ -246,7 +247,7 @@ fun Modifier.iknaSignalFrame(
     interactionSource: MutableInteractionSource,
     enabled: Boolean = true,
     selected: Boolean = false,
-    cornerRadius: Dp = 8.dp,
+    cornerRadius: Dp? = null,
     placement: SignalFramePlacement = SignalFramePlacement.Inner
 ): Modifier {
     val hovered by interactionSource.collectIsHoveredAsState()
@@ -257,6 +258,12 @@ fun Modifier.iknaSignalFrame(
     val coordinator = LocalSignalFrameCoordinator.current
     val frameId = remember { Any() }
     val outerEntry = remember(frameId) { SignalFrameOverlayEntry() }
+    // Frames that do not name a radius follow the appearance variant: 8dp in
+    // the angular system, 10dp once corners round everywhere else.
+    val effectiveRadius = cornerRadius ?: when (LocalIknaAppearanceVariant.current) {
+        IknaAppearanceVariant.ANGULAR -> 8.dp
+        IknaAppearanceVariant.ROUNDED -> 10.dp
+    }
 
     val hoverOwner by remember(coordinator, frameId) {
         derivedStateOf { coordinator.activeHoverOwner === frameId }
@@ -318,7 +325,7 @@ fun Modifier.iknaSignalFrame(
             outerEntry.pausedPhaseState = pausedPhaseState
             outerEntry.moving = moving
             outerEntry.pressed = pressed
-            outerEntry.cornerRadius = cornerRadius
+            outerEntry.cornerRadius = effectiveRadius
         }
     }
 
@@ -352,7 +359,7 @@ fun Modifier.iknaSignalFrame(
                 val edgeOffset = stroke / 2f + 1.dp.toPx()
                 val width = size.width - edgeOffset * 2f
                 val height = size.height - edgeOffset * 2f
-                val radius = minOf(cornerRadius.toPx(), width / 2f, height / 2f)
+                val radius = minOf(effectiveRadius.toPx(), width / 2f, height / 2f)
                 val intervalsDp = signalFrameIntervalsDp(
                     widthDp = if (density == 0f) 0f else width / density,
                     heightDp = if (density == 0f) 0f else height / density

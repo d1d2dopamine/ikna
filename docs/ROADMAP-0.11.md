@@ -73,7 +73,7 @@ Part 4 is not extended again for ordinary cleanup.
 
 ### Part 5 - existing-source supply census
 
-Status: tooling implemented; the reviewed 200,000-row run covers all 55 physical WikiMatrix pairs, with 19 ending at the score threshold and 36 still bounded by `max-rows`. The continuation workflow now shards global rank construction by learning language and pair measurement by physical WikiMatrix pair, with an equivalence test against the original monolithic census; the next run defaults to 500,000 rows. Part 5 remains open until the Knowledge lower bounds are resolved.
+Status: complete; live part status is owned by [`PLAN-0.11.md`](PLAN-0.11.md). The uncapped evidence run finished with every physical WikiMatrix pair ending at the configured score threshold and no pair left acquisition-capped.
 
 The manual `catalogue v2 supply census` workflow enumerates every direct WikiMatrix pair, records unavailable files, and reports bounded source scans explicitly as lower bounds rather than calling them thin. `tools/catalog/supply_census.py` measures all unique sieve-eligible exact targets before `max_deck` separately from the targets chosen by the current capped first pass.
 
@@ -105,7 +105,7 @@ The policy source is [`CORPORA-0.11.md`](CORPORA-0.11.md).
 
 ### Part 7 - final Everyday candidate pool
 
-Status: Part 6 resolved the source composition: 0.11 Everyday is Tatoeba-only and MASSIVE remains experimental. Preview-pool tooling is implemented, but the final Tatoeba-only rebuild/report belongs to Part 7 after the open Part 5 evidence checkpoint. Exact cross-source duplicates still retain both provenance origins in experimental previews.
+Status: Part 6 resolved the source composition: 0.11 Everyday is Tatoeba-only and MASSIVE remains experimental. Preview-pool tooling is implemented; live part status is owned by [`PLAN-0.11.md`](PLAN-0.11.md). Exact cross-source duplicates still retain both provenance origins in experimental previews.
 
 Purpose: build the human-source Everyday material from the admitted sources.
 

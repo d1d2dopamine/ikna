@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -27,7 +28,11 @@ import androidx.compose.ui.unit.dp
 import dev.ikna.domain.session.SessionCard
 import dev.ikna.ui.theme.Space
 import dev.ikna.ui.theme.SignalFramePlacement
+import dev.ikna.ui.theme.iknaCardShape
+import dev.ikna.ui.theme.iknaControlShape
+import dev.ikna.ui.theme.iknaFrameRadius
 import dev.ikna.ui.theme.iknaSignalFrame
+import dev.ikna.ui.text.S
 
 /**
  * One item in the passive Browse feed.
@@ -51,8 +56,9 @@ fun BrowseFeedCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .clip(iknaCardShape())
                 .background(MaterialTheme.colorScheme.background)
-                .border(Space.hair, MaterialTheme.colorScheme.outline)
+                .border(Space.hair, MaterialTheme.colorScheme.outline, iknaCardShape())
                 .padding(horizontal = Space.lg, vertical = Space.lg)
         ) {
             Text(
@@ -78,8 +84,9 @@ fun BrowseFeedCard(
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .fillMaxWidth()
+                .clip(iknaCardShape())
                 .background(MaterialTheme.colorScheme.background)
-                .border(Space.hair, MaterialTheme.colorScheme.outline)
+                .border(Space.hair, MaterialTheme.colorScheme.outline, iknaCardShape())
                 .padding(horizontal = Space.lg, vertical = Space.lg)
         )
 
@@ -93,17 +100,19 @@ fun BrowseFeedCard(
                 modifier = Modifier
                     .border(
                         Space.hair,
-                        if (sourceFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                        if (sourceFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                        iknaControlShape()
                     )
                     .hoverable(sourceInteraction)
                     .iknaSignalFrame(
                         sourceInteraction,
-                        cornerRadius = 6.dp,
+                        cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 6.dp),
                         placement = SignalFramePlacement.Outer
                     )
                     .clickable(
                         interactionSource = sourceInteraction,
                         indication = null,
+                        onClickLabel = S.t("a11y.017"),
                         onClick = onSource
                     )
                     .padding(horizontal = Space.md, vertical = Space.sm)
