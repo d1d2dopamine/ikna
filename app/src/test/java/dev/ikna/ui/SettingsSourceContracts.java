@@ -151,11 +151,17 @@ public final class SettingsSourceContracts {
         }
     }
 
-    public void autoLoadTargetIsPublishedOnlyAfterMeasurementIsKnown() {
+    public void autoLoadModeShowsNoMeasuredNorm() {
         String android = source(ANDROID + "ui/settings/SettingsScreen.kt");
-        has(android, "mutableStateOf<Int?>(null)", "The auto target must start as unknown, not as a guessed number");
-        has(android, "val measured = container.learningRepository.normIsMeasured()", "Ask whether the history is sufficient");
-        has(android, "measuredNorm = target.takeIf { measured && it > 0 }", "Publish only a known positive measured target");
+        String desktop = source(DESKTOP + "SettingsPane.kt");
+        // A number under the AUTO chip reads as a daily norm, and the adaptive
+        // load is the one thing this screen must not turn into a quota
+        // (docs/ai-audits.md 7.2). Only the manual stepper, chosen by the user,
+        // may show a figure.
+        lacks(android, "S.t(\"set.017\")", "Android must not publish a measured auto target as a number");
+        lacks(desktop, "S.t(\"set.017\")", "Desktop must not publish a measured auto target as a number");
+        has(android, "if (!settings.autoLoad) {", "Only the manual mode shows the Android stepper");
+        has(desktop, "if (!settings.autoLoad) {", "Only the manual mode shows the desktop stepper");
         lacks(android, "var normMeasured", "Do not publish measurement and value as competing mutable state");
     }
 
@@ -195,8 +201,8 @@ public final class SettingsSourceContracts {
         System.out.println("PASS: lazy speech initialization");
         contracts.fastSettingsFlingDoesNotStartACompetingJumpAnimation();
         System.out.println("PASS: fling suppression and settled recentring");
-        contracts.autoLoadTargetIsPublishedOnlyAfterMeasurementIsKnown();
-        System.out.println("PASS: measured auto-load target publication");
+        contracts.autoLoadModeShowsNoMeasuredNorm();
+        System.out.println("PASS: auto-load mode publishes no measured norm");
         contracts.microMotionIsShortLocalAndObeysTheExistingSwitch();
         System.out.println("PASS: short, local, optional motion in shared controls");
     }
