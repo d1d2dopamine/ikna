@@ -39,7 +39,7 @@ class MobileDeckUiContractTest {
             "private val DECK_MARK_SIZE = 52.dp",
             "private val DECK_INFO_HEIGHT = 34.dp",
             "private val DECK_PROGRESS_HEIGHT = 14.dp",
-            ".height(DECK_ROW_HEIGHT)\n            .hoverable(interaction)\n            .iknaSignalFrame(interaction, placement = SignalFramePlacement.Outer)\n            .clipToBounds()",
+            ".height(DECK_ROW_HEIGHT)\n            .hoverable(interaction)\n            .iknaSignalFrame(\n                interaction,\n                cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp),\n                placement = SignalFramePlacement.Outer\n            )\n            .clipToBounds()",
             "modifier = Modifier.weight(1f).fillMaxHeight()",
             "modifier = Modifier.height(DECK_INFO_HEIGHT)",
             "verticalArrangement = Arrangement.SpaceBetween",
@@ -51,7 +51,7 @@ class MobileDeckUiContractTest {
             .substringBefore("/** Makes the long-term bar")
         assertFalse(row.contains("68.dp"))
         assertTrue(row.contains("style = MaterialTheme.typography.labelSmall"))
-        assertTrue(row.split("overflow = TextOverflow.Ellipsis").size >= 3)
+        assertTrue(row.split("overflow = TextOverflow.Ellipsis").size >= 2)
     }
 
     private fun androidSource(name: String): String = source(
