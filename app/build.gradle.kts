@@ -144,15 +144,15 @@ android {
             }
         }
 
-        // The six languages the interface is actually translated into, in
+        // The seven languages the interface is actually translated into, in
         // ui/text/Strings*.kt and res/xml/locales_config.xml. Everything else
         // that AndroidX and Compose bring translations for -- around seventy
         // locales of framework strings -- cannot ever be shown by this app,
-        // because the language picker offers these six and nothing else.
+        // because the language picker offers these seven and nothing else.
         //
         // Keep this list in step with locales_config.xml. A language present
         // there and missing here would fall back to English silently.
-        resourceConfigurations += listOf("en", "ru", "pl", "es", "fr", "de")
+        resourceConfigurations += listOf("en", "ru", "pl", "es", "fr", "de", "pt")
     }
 
     signingConfigs {

@@ -165,7 +165,7 @@ class AndroidCiChecks(unittest.TestCase):
 
     def test_no_version_bump_or_min_sdk_workaround_and_updated_actions(self):
         build = (ROOT / "app/build.gradle.kts").read_text()
-        for token in ('val appVersionName = "0.10.0 press"', "val appVersionCode = 200100000", "minSdk = 29"):
+        for token in ('val appVersionName = "0.11.0 press"', "val appVersionCode = 200110000", "minSdk = 29"):
             self.assertIn(token, build)
         grading = (ROOT / ".github/workflows/grading.yml").read_text()
         self.assertIn('gradle-version: "8.10.2"', grading)

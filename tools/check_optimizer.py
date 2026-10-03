@@ -68,7 +68,7 @@ class OptimizerChecks(unittest.TestCase):
   for t in ('boundDerivedMemoryV1','(sample.inputRating ?: sample.rating) == Rating.AGAIN','if (until != null && sample.ts >= until) break','const val MIN_SCORED_ANSWERS = 500','const val MAX_ANSWERS = 20_000'):self.assertIn(t,text)
   self.assertIn('boundDerivedMemoryV1',(S/'domain/fsrs/Scheduler.kt').read_text())
  def test_version_and_ci_test_targets(self):
-  text=(ROOT/'app/build.gradle.kts').read_text();self.assertIn('"0.10.0 press"',text);self.assertIn('200100000',text)
+  text=(ROOT/'app/build.gradle.kts').read_text();self.assertIn('"0.11.0 press"',text);self.assertIn('200110000',text)
   # Kotlin plugin versions are deliberately centralized in the root project so
   # Gradle loads one plugin classloader for :app, :shared and :desktop.  The old
   # assertion required each subproject to repeat the version and therefore
