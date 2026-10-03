@@ -59,7 +59,7 @@ composes only the visible controls instead of measuring the complete settings
 document. Scroll-derived section tracking lives in a small recomposition scope,
 and the pinned strip never starts horizontal centring during a vertical fling.
 The jump strip navigates by item index; its own label-centering motion
-remains separate. Daily-target text reserves a line, while speech-engine warm-up
+remains separate. Speech-engine warm-up
 waits until the speech section is actually visible.
 
 Home data and its LazyColumn state belong to the navigation graph rather than one

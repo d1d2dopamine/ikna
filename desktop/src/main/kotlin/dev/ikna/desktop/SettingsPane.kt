@@ -116,12 +116,6 @@ fun SettingsPane(
     var diagText by remember { mutableStateOf("") }
 
     val listState = rememberLazyListState()
-    var measuredNorm by remember { mutableStateOf<Int?>(null) }
-    LaunchedEffect(settings.autoLoad) {
-        measuredNorm = runCatching {
-            if (container.learningRepository.normIsMeasured()) container.learningRepository.currentDailyTarget() else null
-        }.getOrNull()
-    }
     val sections = listOf("load" to "set.091", "look" to "set.092", "language" to "set.093",
         "speech" to "set.094", "font" to "set.095", "keys" to "keys.001", "reminder" to "set.096",
         "update" to "set.140", "data" to "set.097", "advanced" to "set.098")
@@ -150,11 +144,7 @@ fun SettingsPane(
                             onClick = { save { container.settings.setAutoLoad(false) } }
                         )
                     }
-                    if (settings.autoLoad) {
-                        Spacer(Modifier.height(12.dp))
-                        Text(measuredNorm?.let { S.t("set.017") + it } ?: " ",
-                            style = MaterialTheme.typography.labelMedium, color = palette.muted)
-                    } else {
+                    if (!settings.autoLoad) {
                         Spacer(Modifier.height(14.dp))
                         IknaSettingsStepper(settings.manualLoad, enabled = true) { value ->
                             save { container.settings.setManualLoad(value) }

@@ -290,10 +290,12 @@ private fun DesktopShell(
 
         if (wide) {
             Row(Modifier.fillMaxSize()) {
-                Box(Modifier.width(listWidth).fillMaxHeight()) {
+                // The panes separate by surface tone, not by a line: the deck
+                // column wears the panel tone, the content keeps the window
+                // background (docs/ai-audits.md 7.4, variant 1).
+                Box(Modifier.width(listWidth).fillMaxHeight().background(MaterialTheme.colorScheme.surface)) {
                     DecksColumn(container, settings, palette, ui, decks, remaining, remainingTotal, browseAvailability, deckListState)
                 }
-                VerticalRule(palette)
                 Box(Modifier.weight(1f).fillMaxHeight()) {
                     PaneContent(container, settings, palette, ui, decks, wide = true, onRestartRequested = onRestartRequested)
                 }
@@ -304,11 +306,6 @@ private fun DesktopShell(
             PaneContent(container, settings, palette, ui, decks, wide = false, onRestartRequested = onRestartRequested)
         }
     }
-}
-
-@Composable
-private fun VerticalRule(palette: IknaPalette) {
-    Box(Modifier.width(1.dp).fillMaxHeight().background(palette.line))
 }
 
 /**
