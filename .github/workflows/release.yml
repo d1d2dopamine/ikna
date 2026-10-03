@@ -6,8 +6,8 @@ name: release
 #   git push origin v0.3.0
 #
 # Everything below happens without anyone opening a browser: tests run, a signed
-# APK is built, it is renamed after the tag, and it is attached to the GitHub
-# release together with generated notes. Nothing is uploaded by hand, so the file
+# APK is built, it is attached to the GitHub release under its stable file name
+# together with generated notes. Nothing is uploaded by hand, so the file
 # on the release page is always the one built from that exact commit.
 on:
   push:
@@ -93,10 +93,10 @@ jobs:
       - name: Build release APK
         run: gradle --no-daemon --stacktrace assembleRelease
 
-      - name: Name the file after the tag
+      - name: Name the file
         run: |
           mkdir -p out
-          cp app/build/outputs/apk/release/*.apk "out/ikna-${GITHUB_REF_NAME}.apk"
+          cp app/build/outputs/apk/release/*.apk "out/ikna-android-arm64.apk"
 
       # Phones older than about 2017 are 32-bit and cannot install the file
       # above. Same code, one architecture down, published beside it under a
@@ -105,9 +105,9 @@ jobs:
       - name: Build release APK for 32-bit phones
         run: gradle --no-daemon --stacktrace assembleRelease -Pikna.abi=legacy32
 
-      - name: Name the 32-bit file after the tag
+      - name: Name the 32-bit file
         run: |
-          cp app/build/outputs/apk/release/*.apk "out/ikna-${GITHUB_REF_NAME}-legacy32.apk"
+          cp app/build/outputs/apk/release/*.apk "out/ikna-android-legacy32.apk"
 
       - name: Signer
         run: |
@@ -158,9 +158,10 @@ jobs:
       - name: Build the Windows application
         run: gradle --no-daemon --stacktrace :desktop:createReleaseDistributable
 
-      # Named after the tag, like the APKs are, so the release page says which
-      # version each file is without anyone having to open it.
-      - name: Name the file after the tag
+      # The file name is fixed rather than derived from the tag, so the README
+      # download links resolve to every release without being rewritten. The
+      # version itself lives in the tag, the release page and the app's About.
+      - name: Name the file
         shell: pwsh
         run: |
           $app = "desktop/build/compose/binaries/main-release/app/Ikna"
@@ -169,7 +170,7 @@ jobs:
             throw "the distributable is not where it was expected"
           }
           New-Item -ItemType Directory -Force -Path out | Out-Null
-          Compress-Archive -Path $app -DestinationPath "out/ikna-$env:GITHUB_REF_NAME-windows-x64.zip" -Force
+          Compress-Archive -Path $app -DestinationPath "out/ikna-windows-x64-portable.zip" -Force
 
       - name: NSIS 3
         shell: pwsh
@@ -182,7 +183,7 @@ jobs:
 
       - name: Build NSIS installer
         shell: pwsh
-        run: ./tools/nsis/build-installer.ps1 -Output "out/ikna-$env:GITHUB_REF_NAME-windows-x64-setup.exe"
+        run: ./tools/nsis/build-installer.ps1 -Output "out/ikna-windows-x64-setup.exe"
 
       - name: Silent installer and removal smoke test
         shell: pwsh
@@ -236,12 +237,12 @@ jobs:
       - name: Build the Linux application
         run: gradle --no-daemon --stacktrace :desktop:createReleaseDistributable
 
-      # Named after the tag, like every other file on the page, so a download
-      # in somebody's folder still says which version it is.
+      # A fixed file name, like every other file on the page, so the download
+      # links never rot; the version a download carries is the one in About.
       - name: AppImage
         run: |
           bash tools/appimage/build-appimage.sh \
-            "out/ikna-${GITHUB_REF_NAME}-linux-x86_64.AppImage"
+            "out/ikna-linux-x86_64.AppImage"
 
       # The same start-once check the build workflow runs, on the exact file
       # about to be published. A release nobody can open is worse than a late
@@ -251,7 +252,7 @@ jobs:
           set -e
           export IKNA_SELFTEST_HOME="$GITHUB_WORKSPACE/selftest-home"
           export APPIMAGE_EXTRACT_AND_RUN=1
-          image="out/ikna-${GITHUB_REF_NAME}-linux-x86_64.AppImage"
+          image="out/ikna-linux-x86_64.AppImage"
           code=0
           if command -v xvfb-run >/dev/null 2>&1; then
             timeout 300 xvfb-run -a "./$image" --selftest || code=$?

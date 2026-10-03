@@ -23,7 +23,7 @@ default Ink palette as the application by `tools/make-installer-art.py`.
 ## Silent use
 
 ```powershell
-ikna-v0.10.0-press-windows-x64-setup.exe /S
+ikna-windows-x64-setup.exe /S
 ```
 
 NSIS also accepts `/D=C:\path\to\ikna` as the final argument. Silent installation
