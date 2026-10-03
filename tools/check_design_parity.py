@@ -511,7 +511,7 @@ class DesignContracts(unittest.TestCase):
                 'speechEngineWaitsUntilItsSectionIsVisible'],
             'theme/MotionPolishTest.kt': [
                 'fastSettingsFlingDoesNotStartACompetingJumpAnimation',
-                'autoLoadTargetIsPublishedOnlyAfterMeasurementIsKnown',
+                'autoLoadModeShowsNoMeasuredNorm',
                 'microMotionIsShortLocalAndObeysTheExistingSwitch'],
         }
         for name, methods in cases.items():

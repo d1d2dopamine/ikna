@@ -16,8 +16,8 @@ class MotionPolishTest {
     }
 
     @Test
-    fun auto_load_target_is_published_only_after_measurement_is_known() {
-        contracts.autoLoadTargetIsPublishedOnlyAfterMeasurementIsKnown()
+    fun auto_load_mode_shows_no_measured_norm() {
+        contracts.autoLoadModeShowsNoMeasuredNorm()
     }
 
     @Test
