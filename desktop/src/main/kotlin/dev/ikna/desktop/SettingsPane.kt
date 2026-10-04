@@ -125,7 +125,7 @@ fun SettingsPane(
         // the rule follow it so the landmarks never sit somewhere else than the
         // sections they name.
         Box(Modifier.fillMaxWidth().widthIn(max = 1040.dp).align(Alignment.CenterHorizontally)) {
-            IknaSettingsJumpRow(sections, listState, settings.animations, settled = true) { id ->
+            IknaSettingsJumpRow(sections, listState, settings.animations, settled = true, edgePadding = 40.dp) { id ->
                 val index = sections.indexOfFirst { it.first == id }
                 if (index >= 0) scope.launch {
                     if (settings.animations) listState.animateScrollToItem(index) else listState.scrollToItem(index)

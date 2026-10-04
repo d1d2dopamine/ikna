@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -243,6 +244,13 @@ fun SessionPane(
         reason = plan?.reason ?: dev.ikna.domain.governor.GovernorReason.OK,
         nextDueAt = plan?.nextDueAt, noMoreExtra = noMoreExtra)
     val hotkeys = remember(settings.hotkeys) { HotkeyBindings.decode(settings.hotkeys) }
+    // Keyboard discoverability: the hint names the bindings the user actually
+    // has, not the defaults (docs/ai-audits.md 7, Track G).
+val keysHint = if (current == null) null else S.t("pc.025")
+    .replace("{reveal}", hotkeys[HotkeyAction.REVEAL]?.encoded.orEmpty())
+    .replace("{miss}", hotkeys[HotkeyAction.MISS]?.encoded.orEmpty())
+    .replace("{know}", hotkeys[HotkeyAction.KNOW]?.encoded.orEmpty())
+    .replace("{undo}", hotkeys[HotkeyAction.UNDO]?.encoded.orEmpty())
 
     LaunchedEffect(current?.card?.key, reportCard, loading) {
         if (!loading && reportCard == null) runCatching { focus.requestFocus() }
@@ -285,8 +293,20 @@ fun SessionPane(
             // to edge, exactly as it is the whole screen on the phone.
             .padding(vertical = 0.dp)
     ) {
-        IknaSessionTopBar(presentation)
-        IknaTodayProgress(state = presentation)
+        // Chrome, hint and card share one reading measure (740 minus paddings
+        // == the card's 680), so the session composes around its phrase.
+        Column(Modifier.fillMaxWidth().widthIn(max = 680.dp).align(Alignment.CenterHorizontally)) {
+            IknaSessionTopBar(presentation)
+            IknaTodayProgress(state = presentation)
+            if (keysHint != null) {
+                Text(
+                    text = keysHint,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = palette.muted,
+                    modifier = Modifier.align(Alignment.End).padding(horizontal = 16.dp)
+                )
+            }
+        }
 
         BoxWithConstraints(
             modifier = Modifier.weight(1f).fillMaxWidth(),

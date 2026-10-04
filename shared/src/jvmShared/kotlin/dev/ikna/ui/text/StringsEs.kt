@@ -320,7 +320,7 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "sess.016" to "completar",
     "sess.017" to "decirlo en voz alta",
     "sess.018" to "El plan del día está cerrado. Los fragmentos nuevos llegarán solos mañana.",
-    "sess.019" to "Primer día: empezamos con muy poco.",
+    "sess.019" to "Los primeros días, muy poco. Es un calentamiento, no una cuota: el plan crece solo cuando hay historia.",
     "sess.020" to "Todo está repasado; las siguientes aún no vencen.",
     "sess.021" to "Ya hay muchos repasos por delante; las palabras nuevas esperarán.",
     "sess.022" to "Hoy solo los repasos más útiles; lo nuevo volverá cuando haya espacio.",
@@ -480,7 +480,7 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "cat.020" to "La descarga falló: se cortó la conexión o el archivo llegó incompleto. No se instaló nada; puedes reintentarlo.",
     "cat.021" to "El archivo llegó, pero no se pudo crear ni una tarjeta. No se añadió ningún mazo.",
     "cat.022" to "Hecho. Tarjetas en el mazo: ",
-    "cat.023" to "CONSTRUYENDO EL MAZO…",
+    "cat.023" to "CONSTRUYENDO EL MAZO… los mazos grandes tardan un minuto.",
     "cat.024" to "MB",
     "cat.025" to "CC BY-SA: un mazo derivado de este y compartido conserva la misma licencia. Estudiarlo no obliga a nada.",
     "cat.026" to "Lista creada: ",
@@ -713,4 +713,5 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "set.144" to "Diagnóstico y mantenimiento",
     "cat.042" to "Primero termina otra descarga.",
     "pc.021" to "Se borran tarjetas, fechas, estadísticas, ajustes, los mazos instalados y el registro de respuestas. Los textos de los mazos se guardan antes en la carpeta export. El registro de respuestas no: expórtalo antes.",
+"pc.025" to "{reveal} revela · {miss} / {know} responde · {undo} deshace",
 )

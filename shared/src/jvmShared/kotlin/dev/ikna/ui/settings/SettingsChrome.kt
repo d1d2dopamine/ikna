@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.*
@@ -15,6 +16,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -29,6 +31,7 @@ fun IknaSettingsJumpRow(
     listState: LazyListState,
     animations: Boolean,
     settled: Boolean,
+    edgePadding: Dp = 20.dp,
     onJump: (String) -> Unit
 ) {
     val activeId by remember(listState) {
@@ -45,6 +48,7 @@ fun IknaSettingsJumpRow(
         animations = animations,
         settled = settled,
         verticalScrolling = verticalScrolling,
+        edgePadding = edgePadding,
         onJump = onJump
     )
 }
@@ -56,6 +60,7 @@ fun IknaJumpRow(
     animations: Boolean,
     settled: Boolean,
     verticalScrolling: Boolean,
+    edgePadding: Dp = 20.dp,
     onJump: (String) -> Unit
 ) {
     val row = rememberScrollState()
@@ -90,14 +95,19 @@ fun IknaJumpRow(
         }
     }
 
+    // Half-viewpoint spacers let the first and last labels reach the centre
+    // too; without them the edge labels are clamped to the row edges and
+    // always read as drifted to one side.
+    val halfRow = with(LocalDensity.current) { (rowWidth / 2).toDp() }
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .onGloballyPositioned { rowWidth = it.size.width }
             .horizontalScroll(row)
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = edgePadding),
         horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
+        if (rowWidth > 0) Spacer(Modifier.width(halfRow))
         sections.forEach { jump ->
             val here = jump.first == activeId
             Column(
@@ -133,6 +143,7 @@ fun IknaJumpRow(
                 }
             }
         }
+        if (rowWidth > 0) Spacer(Modifier.width(halfRow))
     }
 }
 

@@ -1,5 +1,6 @@
 package dev.ikna.ui.stats
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -110,11 +111,18 @@ private fun Block(
     content: @Composable () -> Unit
 ) {
     var open by remember { mutableStateOf(false) }
+    val blockInteraction = remember { MutableInteractionSource() }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClickLabel = S.t("a11y.007")) { open = !open }
+            .hoverable(blockInteraction)
+            .iknaSignalFrame(blockInteraction)
+            .clickable(
+                interactionSource = blockInteraction,
+                indication = null,
+                onClickLabel = S.t("a11y.007")
+            ) { open = !open }
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

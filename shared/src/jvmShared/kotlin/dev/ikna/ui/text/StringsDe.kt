@@ -125,7 +125,7 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "sess.006" to "Heute keine Karten", "sess.007" to "Nichts mehr zu wiederholen; der Rest ist noch nicht fällig", "sess.008" to "ERNEUT PRÜFEN",
     "sess.009" to "ETWAS MEHR +5", "sess.010" to "nur Wiederholungen, keine neuen Chunks", "sess.011" to "diese Antwort kann nicht mehr rückgängig gemacht werden",
     "sess.012" to "Antwort gespeichert", "sess.013" to "RÜCKGÄNGIG", "sess.014" to "OK", "sess.015" to "erkennen", "sess.016" to "ergänzen", "sess.017" to "laut sagen",
-    "sess.018" to "Der Tagesplan ist geschlossen. Neue Chunks kommen morgen von selbst.", "sess.019" to "Erster Tag: Wir nehmen sehr wenig.",
+    "sess.018" to "Der Tagesplan ist geschlossen. Neue Chunks kommen morgen von selbst.", "sess.019" to "Die ersten Tage sehr wenig. Das ist Anlauf, kein Soll: Der Plan wächst mit der History.",
     "sess.020" to "Alles wiederholt; die nächsten sind noch nicht fällig.", "sess.021" to "Es stehen bereits viele Wiederholungen an; neue Wörter warten.",
     "sess.022" to "Heute nur die wichtigsten Wiederholungen; Neues kommt zurück, sobald Platz ist.", "sess.023" to "Willkommen zurück. Wir beginnen mit einem kurzen, vertrauten Schritt.",
     "sess.024" to "Eine ruhige Woche: Neues kann warten, die Termine haben sich bereits angepasst.", "sess.025" to "Zu spät für neue Chunks; wir sehen sie morgens. Wiederholungen bleiben.",
@@ -181,7 +181,7 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "cat.012" to "Dieses Paar ist gut abgedeckt: viele Sätze und große Decks.", "cat.013" to "Dieses Paar ist dünn: Der Korpus enthält wenige Sätze. Das ist eine Grenze der Quelle, nicht der App.",
     "cat.014" to "Für dieses Paar gibt es noch nichts. Das README zeigt die Abdeckung aller Paare.", "cat.015" to "Karten", "cat.016" to "Lizenz: ", "cat.017" to "Quelle: ",
     "cat.018" to "HERUNTERLADEN", "cat.019" to "DOWNLOAD", "cat.020" to "Download fehlgeschlagen: Verbindung abgebrochen oder Datei unvollständig. Nichts wurde installiert.",
-    "cat.021" to "Die Datei kam an, aber keine Karte konnte erstellt werden. Kein Deck wurde hinzugefügt.", "cat.022" to "Fertig. Karten im Deck: ", "cat.023" to "DECK WIRD ERSTELLT…",
+    "cat.021" to "Die Datei kam an, aber keine Karte konnte erstellt werden. Kein Deck wurde hinzugefügt.", "cat.022" to "Fertig. Karten im Deck: ", "cat.023" to "DECK WIRD ERSTELLT… große Decks brauchen eine Minute.",
     "cat.024" to "MB", "cat.025" to "CC BY-SA: Ein abgeleitetes und weitergegebenes Deck behält dieselbe Lizenz. Das Lernen selbst verpflichtet zu nichts.", "cat.026" to "Liste erstellt: ",
     "cat.027" to "Anfänger", "cat.028" to "Mittelstufe", "cat.029" to "Fortgeschritten", "cat.030" to "Keine Treffer für diese Filter.",
     "cat.031" to "Ein fertiges Deck", "cat.032" to "Wenn ein Modell zu umständlich ist: Deck aus dem Katalog, von Menschen geschriebene Sätze, offene Lizenz und genannter Urheber.",
@@ -382,4 +382,5 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "set.144" to "Diagnose und Wartung",
     "cat.042" to "Zuerst wird ein anderer Download fertig.",
     "pc.021" to "Karten, Daten, Statistik, Einstellungen, installierte Decks und das Antwortprotokoll gehen. Die Deck-Texte werden vorher im Ordner export gesichert. Das Antwortprotokoll nicht: vorher exportieren.",
+"pc.025" to "{reveal} aufdecken · {miss} / {know} antworten · {undo} rückgängig",
 )

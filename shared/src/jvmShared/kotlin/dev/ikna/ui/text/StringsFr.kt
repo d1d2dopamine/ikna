@@ -142,7 +142,7 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "sess.009" to "UN PEU PLUS +5", "sess.010" to "révisions seulement, aucun nouveau fragment", "sess.011" to "cette réponse ne peut plus être annulée",
     "sess.012" to "réponse enregistrée", "sess.013" to "ANNULER", "sess.014" to "OK", "sess.015" to "reconnaître",
     "sess.016" to "compléter", "sess.017" to "le dire à voix haute", "sess.018" to "Le plan du jour est fermé. De nouveaux fragments arriveront demain.",
-    "sess.019" to "Premier jour : très peu de contenu.", "sess.020" to "Tout est révisé ; les suivantes ne sont pas encore dues.",
+    "sess.019" to "Les premiers jours, très peu. C'est un échauffement, pas un quota : le plan grandit avec l'historique.", "sess.020" to "Tout est révisé ; les suivantes ne sont pas encore dues.",
     "sess.021" to "Beaucoup de révisions arrivent déjà ; les nouveaux mots attendront.", "sess.022" to "Aujourd’hui, seulement les révisions les plus utiles ; le nouveau reviendra quand il y aura de la place.",
     "sess.023" to "Bon retour. Commençons par une étape courte et familière.", "sess.024" to "Une semaine calme : le nouveau peut attendre, les dates se sont déjà adaptées.",
     "sess.025" to "Trop tard pour de nouveaux fragments ; nous les verrons demain matin. Les révisions restent.", "sess.026" to "Rien de nouveau avant que l’ancien se stabilise.",
@@ -201,7 +201,7 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "cat.012" to "Cette paire est bien couverte : beaucoup de phrases et de grands paquets.", "cat.013" to "Cette paire est peu fournie : le corpus contient peu de phrases. C’est une limite de la source, pas de l’app.",
     "cat.014" to "Rien pour cette paire pour l’instant. Le README indique la couverture de chaque paire.", "cat.015" to "cartes", "cat.016" to "Licence : ", "cat.017" to "Source : ",
     "cat.018" to "TÉLÉCHARGER", "cat.019" to "TÉLÉCHARGEMENT", "cat.020" to "Échec du téléchargement : connexion coupée ou fichier incomplet. Rien n’a été installé.",
-    "cat.021" to "Le fichier est arrivé, mais aucune carte n’a pu être créée. Aucun paquet ajouté.", "cat.022" to "Terminé. Cartes dans le paquet : ", "cat.023" to "CONSTRUCTION DU PAQUET…",
+    "cat.021" to "Le fichier est arrivé, mais aucune carte n’a pu être créée. Aucun paquet ajouté.", "cat.022" to "Terminé. Cartes dans le paquet : ", "cat.023" to "ASSEMBLAGE DU PAQUET… les grands paquets prennent une minute.",
     "cat.024" to "Mo", "cat.025" to "CC BY-SA : un paquet dérivé et partagé conserve la même licence. L’étudier ne vous impose rien.", "cat.026" to "Liste créée : ",
     "cat.027" to "débutant", "cat.028" to "intermédiaire", "cat.029" to "avancé", "cat.030" to "Aucun résultat pour ces filtres.",
     "cat.031" to "Un paquet prêt", "cat.032" to "Si parler à un modèle ne vaut pas l’effort : paquet du catalogue, phrases humaines, licence ouverte et auteur indiqué.",
@@ -402,4 +402,5 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "set.144" to "Diagnostic et entretien",
     "cat.042" to "Un autre téléchargement se termine d'abord.",
     "pc.021" to "Cartes, dates, statistiques, réglages, paquets installés et journal des réponses disparaissent. Les textes des paquets sont d'abord enregistrés dans le dossier export. Le journal des réponses, non : exportez-le avant.",
+"pc.025" to "{reveal} révèle · {miss} / {know} répond · {undo} annule",
 )

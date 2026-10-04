@@ -321,7 +321,7 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "sess.016" to "completar",
     "sess.017" to "dizer em voz alta",
     "sess.018" to "O plano do dia foi encerrado. Novos blocos virão sozinhos amanhã.",
-    "sess.019" to "Primeiro dia — vamos pegar bem pouco.",
+    "sess.019" to "Os primeiros dias, bem pouco. É aquecimento, não cota: o plano cresce conforme a história se constrói.",
     "sess.020" to "Tudo foi revisado; os próximos ainda não venceram.",
     "sess.021" to "Já há muitas revisões pela frente — as palavras novas podem esperar.",
     "sess.022" to "Hoje, somente as revisões mais úteis; o material novo volta quando houver espaço.",
@@ -481,7 +481,7 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "cat.020" to "O download falhou — a conexão caiu ou o arquivo chegou incompleto. Nada foi instalado; é possível tentar novamente.",
     "cat.021" to "O arquivo chegou, mas não foi possível criar nenhum cartão a partir dele. Nenhum baralho foi adicionado.",
     "cat.022" to "Concluído. Cartões no baralho: ",
-    "cat.023" to "MONTANDO O BARALHO…",
+    "cat.023" to "MONTANDO O BARALHO… baralhos grandes levam um minuto.",
     "cat.024" to "MB",
     "cat.025" to "CC BY-SA: um baralho criado a partir deste e repassado mantém a mesma licença. Estudá-lo não impõe obrigação alguma.",
     "cat.026" to "Lista criada: ",
@@ -713,4 +713,5 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "set.144" to "Diagnóstico e manutenção",
     "cat.042" to "Primeiro o outro download termina.",
     "pc.021" to "Cartões, datas, estatísticas, configurações, os baralhos instalados e o registro de respostas serão apagados. Os textos dos baralhos são salvos antes na pasta export. O registro de respostas, não: exporte-o antes.",
+"pc.025" to "{reveal} revela · {miss} / {know} responde · {undo} desfaz",
 )

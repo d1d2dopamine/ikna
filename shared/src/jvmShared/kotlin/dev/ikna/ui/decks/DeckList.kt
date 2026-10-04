@@ -151,12 +151,12 @@ fun IknaDeckRow(
             .fillMaxWidth()
             .height(DECK_ROW_HEIGHT)
             .hoverable(interaction)
+            .clipToBounds()
             .iknaSignalFrame(
                 interaction,
                 cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp),
                 placement = SignalFramePlacement.Outer
             )
-            .clipToBounds()
             .clickable(interactionSource = interaction, indication = null, onClick = onOpen)
             .iknaInspect("IknaDeckRow[${deck.title}]"),
         verticalAlignment = Alignment.Top

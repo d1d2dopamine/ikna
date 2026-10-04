@@ -541,7 +541,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// План дня закрыт. Новые чанки придут сами завтра.
 	"sess.018" to "The day's plan is closed. New chunks will come by themselves tomorrow.",
 	// Первый день — берём совсем немного.
-	"sess.019" to "First day — we take very little.",
+	"sess.019" to "First days take very little. That is a warm-up, not a quota: the plan grows as history builds.",
 	// Всё повторено, срок следующих ещё не наступил.
 	"sess.020" to "Everything is reviewed, the next ones are not due yet.",
 	// Повторений впереди и так много — новые слова подождут.
@@ -789,7 +789,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"cat.020" to "The download failed — the connection dropped, or the file arrived short. Nothing was installed; it can be retried.",
 	"cat.021" to "The file arrived, but not a single card could be made of it. No deck was added.",
 	"cat.022" to "Done. Cards in the deck: ",
-	"cat.023" to "BUILDING THE DECK…",
+	"cat.023" to "BUILDING THE DECK… large decks take a minute.",
 	"cat.024" to "MB",
 	"cat.025" to "CC BY-SA: a deck built out of this one and handed on carries the same licence. Studying it obliges nobody to anything.",
 	"cat.026" to "List built: ",
@@ -1023,4 +1023,5 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "set.144" to "Diagnostics and maintenance",
     "cat.042" to "Waiting for another download to finish.",
     "pc.021" to "Cards, dates, statistics, settings, the installed decks and the answer log all go. Deck texts are saved to the export folder first. The answer log is not: export it before erasing.",
+"pc.025" to "{reveal} reveals · {miss} / {know} answer · {undo} undo",
 )

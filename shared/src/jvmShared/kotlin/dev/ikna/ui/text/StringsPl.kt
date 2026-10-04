@@ -541,7 +541,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// План дня закрыт. Новые чанки придут сами завтра.
 	"sess.018" to "Plan dnia zamknięty. Nowe chunki przyjdą same jutro.",
 	// Первый день — берём совсем немного.
-	"sess.019" to "Pierwszy dzień — bierzemy całkiem mało.",
+	"sess.019" to "Pierwsze dni — bardzo mało. To rozgrzewka, nie limit: plan urośnie razem z historią.",
 	// Всё повторено, срок следующих ещё не наступил.
 	"sess.020" to "Wszystko powtórzone, termin następnych jeszcze nie nadszedł.",
 	// Повторений впереди и так много — новые слова подождут.
@@ -789,7 +789,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"cat.020" to "Pobieranie się nie udało — połączenie zerwane albo plik przyszedł niecały. Nic nie zostało zainstalowane, można powtórzyć.",
 	"cat.021" to "Plik dotarł, ale nie udało się złożyć ani jednej karty. Talia nie została dodana.",
 	"cat.022" to "Gotowe. Kart w talii: ",
-	"cat.023" to "SKŁADAM TALIĘ…",
+	"cat.023" to "SKŁADAM TALIĘ… duża talia chwilę potrwa.",
 	"cat.024" to "MB",
 	"cat.025" to "CC BY-SA: talia zbudowana z tej i przekazana dalej idzie na tej samej licencji. Na naukę to nie ma żadnego wpływu.",
 	"cat.026" to "Lista złożona: ",
@@ -1023,4 +1023,5 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "set.144" to "Diagnostyka i konserwacja",
     "cat.042" to "Najpierw skończy się inne pobieranie.",
     "pc.021" to "Fiszki, daty, statystyki, ustawienia, zainstalowane talie i dziennik odpowiedzi znikają. Teksty talii są najpierw zapisane w folderze export. Dziennik odpowiedzi — nie: wyeksportuj go wcześniej.",
+"pc.025" to "{reveal} — ujawnij · {miss} / {know} — odpowiedź · {undo} — cofnij",
 )
