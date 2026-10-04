@@ -480,7 +480,7 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "cat.020" to "La descarga falló: se cortó la conexión o el archivo llegó incompleto. No se instaló nada; puedes reintentarlo.",
     "cat.021" to "El archivo llegó, pero no se pudo crear ni una tarjeta. No se añadió ningún mazo.",
     "cat.022" to "Hecho. Tarjetas en el mazo: ",
-    "cat.023" to "CONSTRUYENDO EL MAZO… los mazos grandes tardan un minuto.",
+    "cat.023" to "CONSTRUYENDO EL MAZO… los mazos grandes tardan un rato.",
     "cat.024" to "MB",
     "cat.025" to "CC BY-SA: un mazo derivado de este y compartido conserva la misma licencia. Estudiarlo no obliga a nada.",
     "cat.026" to "Lista creada: ",

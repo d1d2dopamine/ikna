@@ -789,7 +789,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"cat.020" to "Pobieranie się nie udało — połączenie zerwane albo plik przyszedł niecały. Nic nie zostało zainstalowane, można powtórzyć.",
 	"cat.021" to "Plik dotarł, ale nie udało się złożyć ani jednej karty. Talia nie została dodana.",
 	"cat.022" to "Gotowe. Kart w talii: ",
-	"cat.023" to "SKŁADAM TALIĘ… duża talia chwilę potrwa.",
+	"cat.023" to "SKŁADAM TALIĘ… duże talie składają się powoli.",
 	"cat.024" to "MB",
 	"cat.025" to "CC BY-SA: talia zbudowana z tej i przekazana dalej idzie na tej samej licencji. Na naukę to nie ma żadnego wpływu.",
 	"cat.026" to "Lista złożona: ",

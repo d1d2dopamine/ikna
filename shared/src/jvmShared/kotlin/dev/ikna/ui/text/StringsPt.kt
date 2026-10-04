@@ -481,7 +481,7 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "cat.020" to "O download falhou — a conexão caiu ou o arquivo chegou incompleto. Nada foi instalado; é possível tentar novamente.",
     "cat.021" to "O arquivo chegou, mas não foi possível criar nenhum cartão a partir dele. Nenhum baralho foi adicionado.",
     "cat.022" to "Concluído. Cartões no baralho: ",
-    "cat.023" to "MONTANDO O BARALHO… baralhos grandes levam um minuto.",
+    "cat.023" to "MONTANDO O BARALHO… baralhos grandes levam um tempo.",
     "cat.024" to "MB",
     "cat.025" to "CC BY-SA: um baralho criado a partir deste e repassado mantém a mesma licença. Estudá-lo não impõe obrigação alguma.",
     "cat.026" to "Lista criada: ",

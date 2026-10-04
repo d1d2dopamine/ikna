@@ -789,7 +789,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"cat.020" to "The download failed — the connection dropped, or the file arrived short. Nothing was installed; it can be retried.",
 	"cat.021" to "The file arrived, but not a single card could be made of it. No deck was added.",
 	"cat.022" to "Done. Cards in the deck: ",
-	"cat.023" to "BUILDING THE DECK… large decks take a minute.",
+	"cat.023" to "BUILDING THE DECK… large decks take a while.",
 	"cat.024" to "MB",
 	"cat.025" to "CC BY-SA: a deck built out of this one and handed on carries the same licence. Studying it obliges nobody to anything.",
 	"cat.026" to "List built: ",

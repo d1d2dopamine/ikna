@@ -293,19 +293,20 @@ val keysHint = if (current == null) null else S.t("pc.025")
             // to edge, exactly as it is the whole screen on the phone.
             .padding(vertical = 0.dp)
     ) {
-        // Chrome, hint and card share one reading measure (740 minus paddings
-        // == the card's 680), so the session composes around its phrase.
+        // Chrome, hint and card share one reading measure, so the session
+        // composes around its phrase; the keyboard hint sits in the counter's
+        // own row instead of drifting at a far edge.
         Column(Modifier.fillMaxWidth().widthIn(max = 680.dp).align(Alignment.CenterHorizontally)) {
             IknaSessionTopBar(presentation)
-            IknaTodayProgress(state = presentation)
-            if (keysHint != null) {
-                Text(
-                    text = keysHint,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = palette.muted,
-                    modifier = Modifier.align(Alignment.End).padding(horizontal = 16.dp)
-                )
-            }
+            IknaTodayProgress(state = presentation, trailing = {
+                if (keysHint != null) {
+                    Text(
+                        text = keysHint,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = palette.muted
+                    )
+                }
+            })
         }
 
         BoxWithConstraints(

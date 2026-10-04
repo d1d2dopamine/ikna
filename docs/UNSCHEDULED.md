@@ -54,11 +54,16 @@ If real users are confused by the small initial batch, consider a minimal
 explanation that it is an adaptive starting point rather than a daily quota.
 Avoid multi-page onboarding unless evidence shows it is needed.
 
+Implemented: the first-run session message states it directly.
+
 ## 📦 Catalogue-download states
 
 The client could distinguish download, verification, decompression and import
 failures more explicitly when installing Catalogue assets. This is useful only if
 current error messages prove insufficient in real use.
+
+Partially implemented: the import phase wording sets the expectation for large
+decks. Hash verification of downloaded assets remains open.
 
 ## 🧩 Widget compatibility matrix
 

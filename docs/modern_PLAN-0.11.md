@@ -245,10 +245,13 @@ making actions and states easier to understand.
 - [x] Add the shared Signal Frame hover/focus treatment to core interactive
   primitives, deck/today entry points and Browse source links so pointer targets
   identify themselves without permanent extra chrome.
-- [ ] Audit the remaining direct `clickable` surfaces that bypass shared controls
+- [x] Audit the remaining direct `clickable` surfaces that bypass shared controls
   and decide which ones should adopt Signal Frame rather than applying it blindly.
-- [ ] Audit keyboard and pointer discoverability on desktop beyond the first
-  Signal Frame pass.
+  Done: statistics disclosures carry the frame; the session card stays
+  deliberately silent; the transient notice keeps its own border and role.
+- [x] Audit keyboard and pointer discoverability on desktop beyond the first
+  Signal Frame pass. Done: the session shows the user's actual review bindings
+  beside the counter, and statistics disclosures answer to keyboard focus.
 - [ ] Audit semantic/accessibility labels for important controls.
 - [ ] Test smallest Android layouts and large system font scales.
 - [ ] Audit shared-target UX so deck membership is never presented as a second

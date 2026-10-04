@@ -181,7 +181,7 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "cat.012" to "Dieses Paar ist gut abgedeckt: viele Sätze und große Decks.", "cat.013" to "Dieses Paar ist dünn: Der Korpus enthält wenige Sätze. Das ist eine Grenze der Quelle, nicht der App.",
     "cat.014" to "Für dieses Paar gibt es noch nichts. Das README zeigt die Abdeckung aller Paare.", "cat.015" to "Karten", "cat.016" to "Lizenz: ", "cat.017" to "Quelle: ",
     "cat.018" to "HERUNTERLADEN", "cat.019" to "DOWNLOAD", "cat.020" to "Download fehlgeschlagen: Verbindung abgebrochen oder Datei unvollständig. Nichts wurde installiert.",
-    "cat.021" to "Die Datei kam an, aber keine Karte konnte erstellt werden. Kein Deck wurde hinzugefügt.", "cat.022" to "Fertig. Karten im Deck: ", "cat.023" to "DECK WIRD ERSTELLT… große Decks brauchen eine Minute.",
+    "cat.021" to "Die Datei kam an, aber keine Karte konnte erstellt werden. Kein Deck wurde hinzugefügt.", "cat.022" to "Fertig. Karten im Deck: ", "cat.023" to "DECK WIRD ERSTELLT… große Decks brauchen eine Weile.",
     "cat.024" to "MB", "cat.025" to "CC BY-SA: Ein abgeleitetes und weitergegebenes Deck behält dieselbe Lizenz. Das Lernen selbst verpflichtet zu nichts.", "cat.026" to "Liste erstellt: ",
     "cat.027" to "Anfänger", "cat.028" to "Mittelstufe", "cat.029" to "Fortgeschritten", "cat.030" to "Keine Treffer für diese Filter.",
     "cat.031" to "Ein fertiges Deck", "cat.032" to "Wenn ein Modell zu umständlich ist: Deck aus dem Katalog, von Menschen geschriebene Sätze, offene Lizenz und genannter Urheber.",

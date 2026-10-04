@@ -201,7 +201,7 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "cat.012" to "Cette paire est bien couverte : beaucoup de phrases et de grands paquets.", "cat.013" to "Cette paire est peu fournie : le corpus contient peu de phrases. C’est une limite de la source, pas de l’app.",
     "cat.014" to "Rien pour cette paire pour l’instant. Le README indique la couverture de chaque paire.", "cat.015" to "cartes", "cat.016" to "Licence : ", "cat.017" to "Source : ",
     "cat.018" to "TÉLÉCHARGER", "cat.019" to "TÉLÉCHARGEMENT", "cat.020" to "Échec du téléchargement : connexion coupée ou fichier incomplet. Rien n’a été installé.",
-    "cat.021" to "Le fichier est arrivé, mais aucune carte n’a pu être créée. Aucun paquet ajouté.", "cat.022" to "Terminé. Cartes dans le paquet : ", "cat.023" to "ASSEMBLAGE DU PAQUET… les grands paquets prennent une minute.",
+    "cat.021" to "Le fichier est arrivé, mais aucune carte n’a pu être créée. Aucun paquet ajouté.", "cat.022" to "Terminé. Cartes dans le paquet : ", "cat.023" to "ASSEMBLAGE DU PAQUET… les grands paquets prennent du temps.",
     "cat.024" to "Mo", "cat.025" to "CC BY-SA : un paquet dérivé et partagé conserve la même licence. L’étudier ne vous impose rien.", "cat.026" to "Liste créée : ",
     "cat.027" to "débutant", "cat.028" to "intermédiaire", "cat.029" to "avancé", "cat.030" to "Aucun résultat pour ces filtres.",
     "cat.031" to "Un paquet prêt", "cat.032" to "Si parler à un modèle ne vaut pas l’effort : paquet du catalogue, phrases humaines, licence ouverte et auteur indiqué.",

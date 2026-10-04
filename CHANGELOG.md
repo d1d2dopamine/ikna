@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### The grey lighting and a centred desktop
+
+- **"Светлая" is gone: the second lighting is grey.** Every palette ships as dark and grey — the grey room carries a whisper of the palette's hue, the accent is a desaturated pass of its own colour, and white appears no more often than in the dark lighting. A stored light choice resolves to grey, and "as the system" maps a light phone to grey.
+- **Panes separate by surface tone.** The desktop deck column wears the panel tone; the 1dp divider line is gone.
+- **A centred reading measure on desktop.** Session, statistics, search, add-deck, catalogue and backup compose around a centred column instead of hugging the deck list; the session's chrome, hint and card share one measure.
+- **The session header is grouped.** The counter, its row and the keyboard hint (built from the user's actual bindings) sit together, and the duplicated word "today" is gone. The settings jump strip aligns with the sections again after a drift regression, and its edge labels sit where the content sits.
+- **Statistics disclosures carry the Signal Frame**, and the deck-import phase states honestly that large decks build slowly instead of promising a duration.
 ### 0.11.0 runtime correctness checkpoint
 
 - Reworked Statistics around evidence rather than obligations: the invented daily norm and duplicate Today counters are gone; History now reports unique targets with review history, total answers and active days in the last 30 days. Low-sample retention and time-of-day analysis use the app's lattice waiting state, troublesome targets are labelled as requiring attention, and the 14-day chart is explicitly a scheduler forecast rather than a quota.

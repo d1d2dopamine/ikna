@@ -62,10 +62,16 @@ fun IknaSessionTopBar(state: SessionUiState) {
 
 /** Names the short-term bar and states its finite daily scope. */
 @Composable
-fun IknaTodayProgress(state: SessionUiState) {
+fun IknaTodayProgress(
+    state: SessionUiState,
+    modifier: Modifier = Modifier,
+    trailing: (@Composable RowScope.() -> Unit)? = null
+) {
     val total = state.sessionTotal.coerceAtLeast(0)
     val done = state.sessionDone.coerceIn(0, total)
-    Column(modifier = Modifier.fillMaxWidth()) {
+    // The word "today" lives on the deck screen that opened this session; here
+    // the counter alone is the fact, and whatever trails it sits beside it.
+    Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -73,16 +79,12 @@ fun IknaTodayProgress(state: SessionUiState) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = S.t("progress.001"),
-                style = MaterialTheme.typography.labelSmall,
+                text = "$done / $total",
+                style = iknaNumberStyle(MaterialTheme.typography.labelSmall),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.weight(1f))
-            Text(
-                text = "$done / $total",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            trailing?.invoke(this)
         }
         IknaProgress(fraction = state.progress)
     }

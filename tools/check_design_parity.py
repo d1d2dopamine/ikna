@@ -459,10 +459,13 @@ class DesignContracts(unittest.TestCase):
                          'settings.setOnboardingDone(true)']:
             self.assertIn(required, container)
 
-    def test_progress_names_today_and_deck_and_preserves_subpercent(self):
+    def test_progress_counts_session_and_deck_and_preserves_subpercent(self):
         session = read(SHARED, 'ui/session/SessionChrome.kt')
-        for required in ['fun IknaTodayProgress(', 'S.t("progress.001")',
-                         'text = "$done / $total"']:
+        # The word "today" is gone from the session header by owner decision;
+        # the counter stands alone and the trailing slot carries whatever joins
+        # it (the desktop keyboard hint).
+        for required in ['fun IknaTodayProgress(', 'text = "$done / $total"',
+                         'trailing: (@Composable RowScope.() -> Unit)? = null']:
             self.assertIn(required, session)
         for base, name in [(ANDROID, 'ui/session/SessionScreen.kt'), (DESKTOP, 'SessionPane.kt')]:
             self.assertIn('IknaTodayProgress(', read(base, name))
