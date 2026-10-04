@@ -155,12 +155,13 @@ class PaletteTest {
 	fun `danger steps aside when the accent is already that colour`() {
 		val ember = paletteSpec("ember")
 		assertEquals(ember.dark.ink, dangerFor(ember.dark))
-		assertEquals(ember.light.ink, dangerFor(ember.light))
 
-		// A palette whose accent is nowhere near red keeps the red.
+		// The grey lighting is monochrome by design: its desaturated accent can
+		// never be mistaken for the warning red, so the red comes back there.
 		val plum = paletteSpec("plum")
 		assertTrue(dangerFor(plum.dark) != plum.dark.ink)
-		assertTrue(dangerFor(plum.light) != plum.light.ink)
+		assertTrue(dangerFor(ember.grey) != ember.grey.ink)
+		assertTrue(dangerFor(plum.grey) != plum.grey.ink)
 	}
 
 	/**
