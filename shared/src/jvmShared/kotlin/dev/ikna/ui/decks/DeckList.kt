@@ -61,14 +61,15 @@ private val DECK_PROGRESS_HEIGHT = 14.dp
  * These are the phone's own three pieces -- the figure for the day, the row for
  * a deck, and the square that marks it -- moved here so the window cannot grow
  * its own version of them. Everything about them is a decision that was already
- * made on the phone: the number is set at display size with no frame around it,
+ * made on the phone: the today line reads as one sentence with the arrow at
+ * its end,
  * the row has no outline and is separated by space, the square is filled when the
  * deck owes work and hollow when it does not, and the percentage sits beside
  * today's figure rather than under the bar so that every row is the same height.
  */
 
 /**
- * Everything due today, as a number and nothing else.
+ * Everything due today, said in one line.
  *
  * On a finished day it drops to the muted colour and the arrow goes away -- but
  * it still opens, because "nothing is waiting" is an answer and the session
@@ -79,7 +80,7 @@ private val DECK_PROGRESS_HEIGHT = 14.dp
 fun IknaTodayBlock(total: Int, onClick: () -> Unit) {
     val enabled = total > 0
     val interaction = remember { MutableInteractionSource() }
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .hoverable(interaction)
@@ -87,42 +88,41 @@ fun IknaTodayBlock(total: Int, onClick: () -> Unit) {
             .clickable(interactionSource = interaction, indication = null,
                 onClickLabel = S.t("a11y.019"), onClick = onClick)
             .padding(vertical = Space.sm)
-            .iknaInspect("IknaTodayBlock")
+            .iknaInspect("IknaTodayBlock"),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        // One sentence in one size and weight; the digits keep their mono face.
         Text(
             text = S.t("deck.007"),
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Spacer(Modifier.height(Space.sm))
+        Spacer(Modifier.width(Space.md))
         if (enabled) {
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text(
-                    text = total.toString(),
-                    style = iknaNumberStyle(MaterialTheme.typography.displayLarge, strong = true),
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.alignByBaseline()
-                )
-                Spacer(Modifier.width(Space.md))
-                Text(
-                    text = iknaCardWord(total),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.alignByBaseline()
-                )
-                Spacer(Modifier.weight(1f))
-                Text(
-                    text = "\u2192",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.alignByBaseline()
-                )
-            }
+            Text(
+                text = total.toString(),
+                style = iknaNumberStyle(MaterialTheme.typography.titleMedium),
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(Modifier.width(Space.xs))
+            Text(
+                text = iknaCardWord(total),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
         } else {
             Text(
                 text = S.t("deck.008"),
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Spacer(Modifier.weight(1f))
+        if (enabled) {
+            Text(
+                text = "\u2192",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }

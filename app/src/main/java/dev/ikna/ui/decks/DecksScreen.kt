@@ -347,9 +347,9 @@ fun DecksScreen(
  *
  * This was a bordered box with a heading inside it — a control, competing for
  * attention with every other bordered box below. It is not a control. It is the
- * answer to the only question the screen is asked, so it is set at display size
- * in the accent colour and given room, and the frame is gone. The eye lands on
- * the number before it has read a single word, which is the whole job.
+ * answer to the only question the screen is asked, said in one line -- today,
+ * the count and the arrow -- with the arrow kept in the accent colour. The eye
+ * lands on it before it has read a single word, which is the whole job.
  *
  * On a finished day it drops to the muted colour and the arrow goes away — but it
  * still opens. A dead control is not restraint, it is a screen that stopped
@@ -359,50 +359,49 @@ fun DecksScreen(
  */
 @Composable
 private fun TodayBlock(total: Int, onClick: () -> Unit) {
-    val enabled = total > 0
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClickLabel = S.t("a11y.019"), onClick = onClick)
-            .padding(vertical = Space.sm)
-    ) {
-        Text(
-            text = S.t("deck.007"),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.height(Space.sm))
-        if (enabled) {
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text(
-                    text = total.toString(),
-                    style = iknaNumberStyle(MaterialTheme.typography.displayLarge, strong = true),
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.alignByBaseline()
-                )
-                Spacer(Modifier.width(Space.md))
-                Text(
-                    text = cardWord(total),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.alignByBaseline()
-                )
-                Spacer(Modifier.weight(1f))
-                Text(
-                    text = "\u2192",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.alignByBaseline()
-                )
-            }
-        } else {
-            Text(
-                text = S.t("deck.008"),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
+	val enabled = total > 0
+	Row(
+		modifier = Modifier
+			.fillMaxWidth()
+			.clickable(onClickLabel = S.t("a11y.019"), onClick = onClick)
+			.padding(vertical = Space.sm),
+		verticalAlignment = Alignment.CenterVertically
+	) {
+		// One sentence in one size and weight; the digits keep their mono face.
+		Text(
+			text = S.t("deck.007"),
+			style = MaterialTheme.typography.titleMedium,
+			color = MaterialTheme.colorScheme.onSurfaceVariant
+		)
+		Spacer(Modifier.width(Space.md))
+		if (enabled) {
+			Text(
+				text = total.toString(),
+				style = iknaNumberStyle(MaterialTheme.typography.titleMedium),
+				color = MaterialTheme.colorScheme.primary
+			)
+			Spacer(Modifier.width(Space.xs))
+			Text(
+				text = cardWord(total),
+				style = MaterialTheme.typography.titleMedium,
+				color = MaterialTheme.colorScheme.onBackground
+			)
+		} else {
+			Text(
+				text = S.t("deck.008"),
+				style = MaterialTheme.typography.titleMedium,
+				color = MaterialTheme.colorScheme.onSurfaceVariant
+			)
+		}
+		Spacer(Modifier.weight(1f))
+		if (enabled) {
+			Text(
+				text = "\u2192",
+				style = MaterialTheme.typography.titleMedium,
+				color = MaterialTheme.colorScheme.primary
+			)
+		}
+	}
 }
 
 /** Android and Desktop deliberately render [IknaDeckRow] from the shared module. */
