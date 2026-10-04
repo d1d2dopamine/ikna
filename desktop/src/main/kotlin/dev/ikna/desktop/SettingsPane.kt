@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -120,14 +121,22 @@ fun SettingsPane(
         "speech" to "set.094", "font" to "set.095", "keys" to "keys.001", "reminder" to "set.096",
         "update" to "set.140", "data" to "set.097", "advanced" to "set.098")
     DesktopPaneFrame(S.t("set.012"), onBack, MaterialTheme.typography.headlineSmall) {
-        IknaSettingsJumpRow(sections, listState, settings.animations, settled = true) { id ->
-            val index = sections.indexOfFirst { it.first == id }
-            if (index >= 0) scope.launch {
-                if (settings.animations) listState.animateScrollToItem(index) else listState.scrollToItem(index)
+        // The measured settings column centres in the pane; the jump strip and
+        // the rule follow it so the landmarks never sit somewhere else than the
+        // sections they name.
+        Box(Modifier.fillMaxWidth().widthIn(max = 1040.dp).align(Alignment.CenterHorizontally)) {
+            IknaSettingsJumpRow(sections, listState, settings.animations, settled = true) { id ->
+                val index = sections.indexOfFirst { it.first == id }
+                if (index >= 0) scope.launch {
+                    if (settings.animations) listState.animateScrollToItem(index) else listState.scrollToItem(index)
+                }
             }
         }
-        dev.ikna.ui.theme.IknaRule()
-        LazyColumn(state = listState, modifier = Modifier.fillMaxSize(),
+        Box(Modifier.fillMaxWidth().widthIn(max = 1040.dp).align(Alignment.CenterHorizontally)) {
+            dev.ikna.ui.theme.IknaRule()
+        }
+        LazyColumn(state = listState,
+            modifier = Modifier.fillMaxSize().widthIn(max = 1040.dp).align(Alignment.CenterHorizontally),
             contentPadding = PaddingValues(start = 40.dp, end = 40.dp, bottom = 32.dp)) {
             item(key = "load", contentType = "settings-section") {
                 IknaSettingsSection(S.t("set.013"), null) {
@@ -831,7 +840,7 @@ private fun ColorRow(
 
 private fun themeLabel(mode: ThemeMode): String = when (mode) {
     ThemeMode.DARK -> S.t("set.101")
-    ThemeMode.LIGHT -> S.t("set.102")
+    ThemeMode.GREY -> S.t("set.102")
     ThemeMode.SYSTEM -> S.t("set.099")
     ThemeMode.CUSTOM -> S.t("set.103")
 }

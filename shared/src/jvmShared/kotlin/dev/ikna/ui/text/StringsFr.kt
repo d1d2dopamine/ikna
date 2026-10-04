@@ -71,7 +71,7 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "set.090" to "un élément se lit mal sur son fond ; la couleur est tout de même appliquée",
     "set.091" to "CHARGE", "set.092" to "APPARENCE", "set.093" to "LANGUE", "set.094" to "VOIX",
     "set.095" to "POLICE", "set.096" to "RAPPEL", "set.097" to "DONNÉES", "set.098" to "RARE",
-    "set.099" to "SYSTÈME", "set.100" to "РУССКИЙ", "set.101" to "SOMBRE", "set.102" to "CLAIR",
+    "set.099" to "SYSTÈME", "set.100" to "РУССКИЙ", "set.101" to "SOMBRE", "set.102" to "GRISE",
     "set.103" to "PERSONNEL", "set.110" to "police",
     "set.114" to "PALETTE", "set.116" to "BRAISE", "set.117" to "BIBLIOTHÈQUE", "set.118" to "ENCRE",
     "set.119" to "PRUNE", "set.120" to "ZÉRO", "set.121" to "NEUTRE", "set.125" to "ROSE",

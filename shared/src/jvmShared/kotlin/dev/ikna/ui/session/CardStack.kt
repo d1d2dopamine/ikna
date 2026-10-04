@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -460,7 +462,12 @@ fun ChunkCard(
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxHeight()
+                // The reading measure: the phrase composes as a centred column,
+                // while the silent field and the throwing gesture keep the whole
+                // pane. On the phone the pane is the measure, so nothing moves.
+                .widthIn(max = 680.dp)
+                .align(Alignment.Center)
                 .padding(horizontal = Space.lg)
                 .padding(top = Space.lg, bottom = RAIL_HEIGHT)
         ) {

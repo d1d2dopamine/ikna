@@ -142,7 +142,7 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "set.099" to "SISTEMA",
     "set.100" to "РУССКИЙ",
     "set.101" to "OSCURO",
-    "set.102" to "CLARO",
+    "set.102" to "GRIS",
     "set.103" to "PROPIO",
     "set.110" to "fuente",
     "set.114" to "PALETA",

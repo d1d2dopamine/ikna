@@ -5,6 +5,7 @@ import dev.ikna.data.prefs.DEFAULT_PALETTE_ID
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.ThemeMode
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -37,17 +38,21 @@ class PaletteTest {
 	@Test
 	fun `ultraviolet is actually a purple palette`() {
 		val ultraviolet = paletteSpec("ultraviolet")
-		listOf(ultraviolet.dark.accent, ultraviolet.light.accent).forEach { accent ->
+		listOf(ultraviolet.dark.accent, ultraviolet.grey.accent).forEach { accent ->
 			val (hue, saturation) = hueAndSaturation(accent)
 			assertTrue("ultraviolet hue drifted to $hue", hue in 250f..290f)
-			assertTrue("ultraviolet became grey", saturation > 0.35f)
+			if (accent == ultraviolet.dark.accent) {
+				// The grey lighting is monochrome by owner decision; only the
+				// dark accent has to stay a saturated purple.
+				assertTrue("ultraviolet became grey", saturation > 0.35f)
+			}
 		}
 	}
 
 	@Test
 	fun `every palette is readable in both lightings`() {
 		IknaPalettes.forEach { spec ->
-			listOf("dark" to spec.dark, "light" to spec.light).forEach { (lighting, p) ->
+			listOf("dark" to spec.dark, "grey" to spec.grey).forEach { (lighting, p) ->
 				val where = spec.id + " " + lighting + " "
 				assertReadable(where + "ink", p.ink, p.background)
 				assertReadable(where + "muted", p.muted, p.background)
@@ -58,22 +63,22 @@ class PaletteTest {
 	}
 
 	/**
-	 * The rule that makes light and dark one app rather than two: the light version
-	 * is grey paper, the dark version is not. The grey stays above the system-bar
-	 * threshold while a ceiling explicitly prevents the old near-white field.
+	 * The rule that makes grey and dark one app rather than two: both are dark
+	 * rooms, the grey one a step lighter, drained of saturation and free of
+	 * white surfaces. The bounds keep the system-bar choice unambiguous.
 	 */
 	@Test
 	fun `each lighting is the lighting it claims to be`() {
 		IknaPalettes.forEach { spec ->
-			assertTrue(spec.id + " light version reads as dark", spec.light.light)
-			assertTrue(spec.id + " dark version reads as light", !spec.dark.light)
+			assertFalse(spec.id + " grey version reads as light", spec.grey.light)
+			assertTrue(spec.id + " dark version reads as dark", !spec.dark.light)
 			assertTrue(
-				spec.id + " light background must be grey, not near white or dark",
-				relativeLuminance(spec.light.background) in 0.55..0.70
+				spec.id + " grey background must sit between near black and light",
+				relativeLuminance(spec.grey.background) in 0.012..0.05
 			)
 			assertTrue(
-				spec.id + " dark background is not dark",
-				relativeLuminance(spec.dark.background) < 0.05
+				spec.id + " dark background is near black",
+				relativeLuminance(spec.dark.background) < 0.013
 			)
 		}
 	}
@@ -107,7 +112,7 @@ class PaletteTest {
 		assertEquals(DEFAULT_PALETTE_ID, paletteSpec("a palette from 2029").id)
 		assertEquals(DEFAULT_PALETTE_ID, paletteSpec("").id)
 		assertEquals(DefaultPaletteSpec.dark, DarkPalette)
-		assertEquals(DefaultPaletteSpec.light, LightPalette)
+		assertEquals(DefaultPaletteSpec.grey, GreyPalette)
 	}
 
 	/**
@@ -121,9 +126,9 @@ class PaletteTest {
 		val plum = paletteSpec("plum")
 
 		assertEquals(plum.dark, paletteFor(settings.copy(theme = ThemeMode.DARK), systemDark = false))
-		assertEquals(plum.light, paletteFor(settings.copy(theme = ThemeMode.LIGHT), systemDark = true))
+		assertEquals(plum.grey, paletteFor(settings.copy(theme = ThemeMode.GREY), systemDark = true))
 		assertEquals(plum.dark, paletteFor(settings.copy(theme = ThemeMode.SYSTEM), systemDark = true))
-		assertEquals(plum.light, paletteFor(settings.copy(theme = ThemeMode.SYSTEM), systemDark = false))
+		assertEquals(plum.grey, paletteFor(settings.copy(theme = ThemeMode.SYSTEM), systemDark = false))
 	}
 
 	/** A custom scheme still wins over the palette, whatever is stored next to it. */

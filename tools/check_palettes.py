@@ -50,7 +50,7 @@ def palettes():
         values = re.findall(r'(background|ink|muted|accent) = Color\(0xFF([0-9A-F]{6})\)', piece)
         if len(values) != 8:
             raise AssertionError(f'{identity}: expected eight literal base colours, got {len(values)}')
-        for lighting, start in [('dark', 0), ('light', 4)]:
+        for lighting, start in [('dark', 0), ('grey', 4)]:
             result[(identity, lighting)] = {key: rgb(value) for key, value in values[start:start + 4]}
     if len(result) != 24:
         raise AssertionError(f'Expected 24 palette/light combinations, got {len(result)}')
@@ -110,22 +110,30 @@ def control_colors(p):
 
 
 class PaletteContracts(unittest.TestCase):
-    def test_light_lighting_is_grey_in_all_twelve_palettes(self):
+    def test_grey_lighting_is_grey_and_a_step_lighter(self):
         for (identity, mode), p in palettes().items():
             with self.subTest(palette=identity, mode=mode):
                 value = luminance(p['background'])
-                if mode == 'light':
-                    self.assertTrue(.55 <= value <= .70)
-                    self.assertLess(max(p['background']) - min(p['background']), .09)
+                if mode == 'grey':
+                    # The grey lighting is a dark grey room: clearly lighter than
+                    # the near-black dark lighting, clearly not a light theme,
+                    # and grey enough that the hue is only a whisper.
+                    self.assertTrue(.012 <= value <= .05)
+                    self.assertLess(max(p['background']) - min(p['background']), .05)
+                    self.assertGreater(value, luminance(palettes()[(identity, 'dark')]['background']))
                 else:
-                    self.assertLess(value, .05)
+                    self.assertLess(value, .013)
 
     def test_authored_text_and_light_panels_remain_readable(self):
         for (identity, mode), p in palettes().items():
+            # The panel check is a true-light-theme guarantee: a panel mixed
+            # toward dark ink on paper. The grey lighting is a dark room, and
+            # its muted-on-panel pair is governed by the dark rules.
+            light_like = luminance(p['background']) > .45
             for key in ['ink', 'muted', 'accent']:
                 with self.subTest(palette=identity, mode=mode, role=key):
                     self.assertGreaterEqual(contrast(p[key], p['background']), 4.5)
-                    if mode == 'light':
+                    if light_like:
                         self.assertGreaterEqual(contrast(p[key], blend(p['background'], p['ink'], .07)), 4.5)
 
     def test_danger_is_readable_and_warm_accents_keep_ink(self):
@@ -134,11 +142,17 @@ class PaletteContracts(unittest.TestCase):
             h, sat, _ = colorsys.rgb_to_hsv(*p['accent'])
             distance = abs(h * 360 - 8)
             warm = sat >= .35 and min(distance, 360 - distance) < 26
-            danger = p['ink'] if warm else rgb('962A17' if key[1] == 'light' else 'FF7A66')
+            danger = p['ink'] if warm else rgb('962A17' if luminance(p['background']) > .45 else 'FF7A66')
             self.assertGreaterEqual(contrast(danger, p['background']), 4.5, key)
-        for mode in ['dark', 'light']:
+        for mode in ['dark', 'grey']:
             h, s, _ = colorsys.rgb_to_hsv(*palettes()[('ultraviolet', mode)]['accent'])
-            self.assertTrue(250 <= h * 360 <= 290 and s > .35)
+            # The saturated purple is the dark lighting's identity; the grey
+            # lighting is monochrome by owner decision and only has to keep
+            # the same hue.
+            if mode == 'grey':
+                self.assertTrue(250 <= h * 360 <= 290)
+            else:
+                self.assertTrue(250 <= h * 360 <= 290 and s > .35)
 
     def test_every_enabled_label_survives_all_control_states(self):
         for key, p in palettes().items():
@@ -155,11 +169,14 @@ class PaletteContracts(unittest.TestCase):
                 self.assertLessEqual(contrast(surface, p['background']), 1.8, (identity, mode, name))
                 for mark in ['outline', 'mark']:
                     self.assertGreaterEqual(contrast(c[mark], surface), 3.0)
-                if mode == 'dark':
+                if mode == 'grey':
+                    # The grey lighting sits a step above near-black, so its
+                    # surfaces and marks are mid greys: still no white signal.
+                    self.assertLessEqual(luminance(surface), .08)
+                    self.assertLessEqual(luminance(c['mark']), .30)
+                else:
                     self.assertLess(luminance(surface), .06)
                     self.assertLess(luminance(c['mark']), .25)
-                else:
-                    self.assertLessEqual(luminance(surface), .70)
             self.assertNotEqual(c['fill'], p['ink'])
 
     def test_valid_custom_pairs_keep_their_original_label_and_readability(self):
@@ -200,7 +217,7 @@ class PaletteContracts(unittest.TestCase):
         self.assertIn('val controls = remember(palette) { controlColors(palette) }', theme)
         self.assertIn('LocalIknaControlColors provides controls', theme)
         self.assertEqual(theme.count('primaryContainer = controls.fill'), 2)
-        self.assertIn('ThemeMode.LIGHT -> spec.light', theme)
+        self.assertIn('ThemeMode.GREY -> spec.grey', theme)
         self.assertIn('ThemeMode.CUSTOM -> customPaletteOf(settings)', theme)
         bar = (ROOT / 'desktop/src/main/kotlin/dev/ikna/desktop/WindowTitleBar.kt').read_text(encoding='utf-8')
         self.assertIn('LocalIknaControlColors.current', bar)

@@ -177,8 +177,9 @@ Colour is two choices, not one. **Which palette:**
 | Лагуна | *lagoon* | deep teal and clean mint |
 | Кобальт | *cobalt* | blue-black with a restrained yellow signal |
 
-**And how it is lit:** dark, light, as the phone is set, or four colours picked by
-hand (background, ink, muted, accent).
+**And how it is lit:** dark, grey, as the phone is set, or four colours picked by
+hand (background, ink, muted, accent). There is no light theme: the second
+lighting is grey.
 
 The default is only half a decision. Three surfaces are read as one thing — the
 launcher icon, the system splash and the first frame of the app — and only the
@@ -191,8 +192,9 @@ now, stated as literal hexes on both sides, because a test that read the same
 resource the app reads would pass while both were wrong together.
 
 A palette is not a theme: the same one exists in both lightings and keeps its hue in
-both, so the light version is tinted paper rather than white with the colour drained
-out. The twelve are chosen from tiles painted in themselves rather than from a list of
+both, so the grey version is the same room poured in concrete — greys carrying a
+whisper of the palette's hue, a desaturated accent, and whites as rare as they are in
+the dark lighting. The twelve are chosen from tiles painted in themselves rather than from a list of
 names. Every pair of colours in every palette — including the warning red, which
 each lighting defines for itself and which steps aside entirely when the palette's
 accent is already a warm red — is held to 4.5:1 by a unit test, and the hand-picked

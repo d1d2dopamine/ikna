@@ -14,7 +14,7 @@ class ControlColorsTest {
     private fun eachPalette(block: (String, IknaPalette) -> Unit) {
         IknaPalettes.forEach { spec ->
             block(spec.id + " dark", spec.dark)
-            block(spec.id + " light", spec.light)
+            block(spec.id + " grey", spec.grey)
         }
     }
 
@@ -60,26 +60,16 @@ class ControlColorsTest {
     }
 
     @Test
-    fun lightLightingIsGreyAcrossEveryPalette() {
+    fun greyLightingIsGreyAcrossEveryPalette() {
         IknaPalettes.forEach { spec ->
-            val p = spec.light
-            assertTrue(spec.id, relativeLuminance(p.background) in 0.55..0.70)
-            assertTrue(spec.id + " status icons", p.light)
+            val p = spec.grey
+            assertTrue(spec.id, relativeLuminance(p.background) in 0.012..0.05)
+            assertTrue(spec.id + " status icons", !p.light)
             val spread = maxOf(p.background.red, p.background.green, p.background.blue) -
                 minOf(p.background.red, p.background.green, p.background.blue)
-            assertTrue(spec.id + " saturated paper", spread < 0.09f)
+            assertTrue(spec.id + " hue whisper only", spread < 0.05f)
             surfaces(p, controlColors(p)).forEach { surface ->
-                assertTrue(spec.id + " white control", relativeLuminance(surface) <= 0.70)
-            }
-        }
-    }
-
-    @Test
-    fun lightPanelLabelsKeepTheirReadabilityAfterDimmingThePaper() {
-        IknaPalettes.forEach { spec ->
-            val p = spec.light
-            listOf(p.ink, p.muted, p.accent).forEach { color ->
-                assertTrue(spec.id, contrastRatio(color, p.panel) >= MIN_READABLE_CONTRAST)
+                assertTrue(spec.id + " grey control", relativeLuminance(surface) <= 0.08)
             }
         }
     }
@@ -123,14 +113,14 @@ class ControlColorsTest {
     }
 
     @Test
-    fun lightAndSystemModesSelectTheNewGreyWithoutChangingIdentity() {
+    fun greyAndSystemModesSelectTheGreyLightingWithoutChangingIdentity() {
         IknaPalettes.forEach { spec ->
-            val settings = IknaSettings(paletteId = spec.id, theme = ThemeMode.LIGHT)
-            assertEquals(spec.light, paletteFor(settings, systemDark = true))
-            assertEquals(spec.light, paletteFor(settings.copy(theme = ThemeMode.SYSTEM), systemDark = false))
+            val settings = IknaSettings(paletteId = spec.id, theme = ThemeMode.GREY)
+            assertEquals(spec.grey, paletteFor(settings, systemDark = true))
+            assertEquals(spec.grey, paletteFor(settings.copy(theme = ThemeMode.SYSTEM), systemDark = false))
             assertEquals(spec.dark, paletteFor(settings.copy(theme = ThemeMode.DARK), systemDark = false))
         }
-        val zero = paletteSpec("zero").light.background
+        val zero = paletteSpec("zero").grey.background
         assertEquals(zero.red, zero.green, 0f)
         assertEquals(zero.red, zero.blue, 0f)
         assertTrue(zero != Color.White)

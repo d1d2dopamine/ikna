@@ -40,7 +40,9 @@ fun DesktopScrollablePane(title: String, onBack: () -> Unit,
     DesktopPaneFrame(title, onBack, titleStyle) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 40.dp)) {
             Spacer(Modifier.height(Space.md))
-            Column(Modifier.widthIn(max = readingWidth).fillMaxWidth(), content = content)
+            // The reading measure centres in the pane instead of hugging the
+            // deck list: on a wide window the empty side is intentional space.
+            Column(Modifier.widthIn(max = readingWidth).fillMaxWidth().align(Alignment.CenterHorizontally), content = content)
             Spacer(Modifier.height(Space.xxl))
         }
     }

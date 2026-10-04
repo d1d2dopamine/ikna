@@ -9,8 +9,8 @@ import org.junit.Test
 /**
  * The colours, checked as numbers.
  *
- * Every palette the app ships is asserted to be readable here, so "the light
- * theme is not actually light" is a failing test rather than a complaint. The
+ * Every palette the app ships is asserted to be readable here, so "the grey
+ * theme is not actually readable" is a failing test rather than a complaint. The
  * ratios are WCAG 2.1; 4.5:1 is the line for body text.
  */
 class ContrastTest {
@@ -44,30 +44,30 @@ class ContrastTest {
     }
 
     @Test
-    fun `the light palette is readable`() {
-        assertReadable("light ink", LightPalette.ink, LightPalette.background)
-        assertReadable("light muted", LightPalette.muted, LightPalette.background)
-        assertReadable("light accent", LightPalette.accent, LightPalette.background)
+    fun `the grey palette is readable`() {
+        assertReadable("grey ink", GreyPalette.ink, GreyPalette.background)
+        assertReadable("grey muted", GreyPalette.muted, GreyPalette.background)
+        assertReadable("grey accent", GreyPalette.accent, GreyPalette.background)
     }
 
     /**
-     * The light theme has to be light and the dark one dark. This is what the
-     * status bar icons are chosen from, so getting it wrong means an invisible
-     * clock rather than an ugly one.
+     * The grey lighting has to read as dark, and the dark one darker still. This
+     * is what the status bar icons are chosen from, so getting it wrong means an
+     * invisible clock rather than an ugly one.
      */
     @Test
     fun `each palette knows which one it is`() {
-        assertTrue("light palette reported as dark", LightPalette.light)
+        assertTrue("grey palette reported as light", !GreyPalette.light)
         assertTrue("dark palette reported as light", !DarkPalette.light)
         assertTrue(isLight(white))
         assertTrue(!isLight(black))
     }
 
-    /** Light lighting is grey, still unambiguously light for system-bar icons. */
+    /** Grey lighting is grey, and unambiguously dark for system-bar icons. */
     @Test
-    fun `the light background is grey rather than white`() {
-        assertTrue(relativeLuminance(LightPalette.background) in 0.55..0.70)
-        assertTrue(relativeLuminance(DarkPalette.background) < 0.05)
+    fun `the grey background is grey and dark`() {
+        assertTrue(relativeLuminance(GreyPalette.background) in 0.012..0.05)
+        assertTrue(relativeLuminance(DarkPalette.background) < 0.013)
     }
 
     @Test
@@ -92,7 +92,7 @@ class ContrastTest {
     @Test
     fun `a colour survives the trip through the text field`() {
         assertEquals("1B1813", hexOf(parseHexColor("1b1813")!!))
-        assertEquals("932D19", hexOf(LightPalette.accent))
+        assertEquals("97A2B4", hexOf(GreyPalette.accent))
         assertEquals("0B1120", hexOf(DarkPalette.background))
     }
 

@@ -32,7 +32,17 @@ import kotlinx.coroutines.flow.map
  * default instead of throwing, which turns that upgrade into a theme switch
  * rather than a crash loop.
  */
-enum class ThemeMode { DARK, LIGHT, SYSTEM, CUSTOM }
+enum class ThemeMode { DARK, GREY, SYSTEM, CUSTOM }
+
+/**
+ * Stored lighting names. "LIGHT" is what releases up to 0.11.0 wrote under the
+ * old light theme; it now resolves to the grey lighting so an existing choice
+ * survives the rename instead of silently falling back to dark.
+ */
+private fun themeModeFromStored(name: String): ThemeMode? = when (name) {
+    "LIGHT" -> ThemeMode.GREY
+    else -> runCatching { ThemeMode.valueOf(name) }.getOrNull()
+}
 
 /** Main interface typeface. Service labels and numeric readouts keep Ikna's mono face. */
 enum class FontMode { GEOLOGICA, CUSTOM }
@@ -353,7 +363,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         IknaSettings(
             // Unknown names — "SYSTEM" from an older install — fall back to the
             // default rather than throwing on the first frame after an update.
-            theme = p[Keys.theme]?.let { name -> runCatching { ThemeMode.valueOf(name) }.getOrNull() }
+            theme = p[Keys.theme]?.let(::themeModeFromStored)
                 ?: defaults.theme,
             // An id no build knows is resolved by the theme, not here: this layer
             // stores what it was given and the palette lookup falls back.

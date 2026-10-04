@@ -36,38 +36,38 @@
 <text x="301" y="233" fill="#E5EAF4" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
 <text x="420" y="227" fill="#78859C" font-family="Arial, sans-serif" font-size="12">quiet text 4.64:1</text>
 <text x="420" y="244" fill="#78859C" font-family="Arial, sans-serif" font-size="12">background luminance 0.006</text>
-<rect x="705" y="76" width="685" height="184" fill="#D0D3D9"/>
-<text x="723" y="103" fill="#0E1526" font-family="Arial, sans-serif" font-size="19">INK / LIGHT</text>
-<text x="723" y="125" fill="#485162" font-family="Arial, sans-serif" font-size="12">background #D0D3D9 / accent #932D19</text>
-<text x="723" y="148" fill="#0E1526" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
-<rect x="723" y="165" width="122" height="37" fill="#A15244"/>
-<rect x="724" y="166" width="120" height="35" fill="#CCC9CD"/>
-<text x="733" y="188" fill="#0E1526" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
-<rect x="859" y="165" width="122" height="37" fill="#626978"/>
-<rect x="860" y="166" width="120" height="35" fill="#D0D3D9"/>
-<text x="869" y="188" fill="#0E1526" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
-<rect x="1003" y="165" width="122" height="37" fill="#A15244"/>
-<rect x="1005" y="167" width="118" height="33" fill="#CCC9CD"/>
-<text x="1013" y="188" fill="#0E1526" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
-<rect x="1143" y="167" width="56" height="32" fill="#626978"/>
-<rect x="1144" y="168" width="54" height="30" fill="#C9CCD3"/>
-<rect x="1147" y="171" width="24" height="24" fill="#626978"/>
-<rect x="1148" y="172" width="22" height="22" fill="#C9CCD3"/>
-<text x="1205" y="188" fill="#485162" font-family="Arial, sans-serif" font-size="11">OFF</text>
-<rect x="1235" y="167" width="56" height="32" fill="#A15244"/>
-<rect x="1236" y="168" width="54" height="30" fill="#CCC9CD"/>
-<rect x="1263" y="171" width="24" height="24" fill="#A15244"/>
-<rect x="1264" y="172" width="22" height="22" fill="#A15244"/>
-<text x="1297" y="188" fill="#485162" font-family="Arial, sans-serif" font-size="11">ON</text>
-<text x="723" y="227" fill="#4B505E" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
-<rect x="865" y="213" width="106" height="29" fill="#626978"/>
-<rect x="866" y="214" width="104" height="27" fill="#CBC6CA"/>
-<text x="877" y="233" fill="#0E1526" font-family="Arial, sans-serif" font-size="11">HOVER</text>
-<rect x="984" y="213" width="106" height="29" fill="#A15244"/>
-<rect x="985" y="214" width="104" height="27" fill="#CAC2C6"/>
-<text x="996" y="233" fill="#0E1526" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
-<text x="1115" y="227" fill="#485162" font-family="Arial, sans-serif" font-size="12">quiet text 4.62:1</text>
-<text x="1115" y="244" fill="#485162" font-family="Arial, sans-serif" font-size="12">background luminance 0.650</text>
+<rect x="705" y="76" width="685" height="184" fill="#262931"/>
+<text x="723" y="103" fill="#C9CED6" font-family="Arial, sans-serif" font-size="19">INK / GREY</text>
+<text x="723" y="125" fill="#9098A4" font-family="Arial, sans-serif" font-size="12">background #262931 / accent #97A2B4</text>
+<text x="723" y="148" fill="#C9CED6" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
+<rect x="723" y="165" width="122" height="37" fill="#838D9D"/>
+<rect x="724" y="166" width="120" height="35" fill="#343841"/>
+<text x="733" y="188" fill="#C9CED6" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
+<rect x="859" y="165" width="122" height="37" fill="#858D98"/>
+<rect x="860" y="166" width="120" height="35" fill="#262931"/>
+<text x="869" y="188" fill="#C9CED6" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
+<rect x="1003" y="165" width="122" height="37" fill="#838D9D"/>
+<rect x="1005" y="167" width="118" height="33" fill="#343841"/>
+<text x="1013" y="188" fill="#C9CED6" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
+<rect x="1143" y="167" width="56" height="32" fill="#858D98"/>
+<rect x="1144" y="168" width="54" height="30" fill="#2C2F37"/>
+<rect x="1147" y="171" width="24" height="24" fill="#858D98"/>
+<rect x="1148" y="172" width="22" height="22" fill="#2C2F37"/>
+<text x="1205" y="188" fill="#9098A4" font-family="Arial, sans-serif" font-size="11">OFF</text>
+<rect x="1235" y="167" width="56" height="32" fill="#838D9D"/>
+<rect x="1236" y="168" width="54" height="30" fill="#343841"/>
+<rect x="1263" y="171" width="24" height="24" fill="#838D9D"/>
+<rect x="1264" y="172" width="22" height="22" fill="#838D9D"/>
+<text x="1297" y="188" fill="#9098A4" font-family="Arial, sans-serif" font-size="11">ON</text>
+<text x="723" y="227" fill="#A7ACB4" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
+<rect x="865" y="213" width="106" height="29" fill="#858D98"/>
+<rect x="866" y="214" width="104" height="27" fill="#373B45"/>
+<text x="877" y="233" fill="#C9CED6" font-family="Arial, sans-serif" font-size="11">HOVER</text>
+<rect x="984" y="213" width="106" height="29" fill="#838D9D"/>
+<rect x="985" y="214" width="104" height="27" fill="#3A3F49"/>
+<text x="996" y="233" fill="#C9CED6" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
+<text x="1115" y="227" fill="#9098A4" font-family="Arial, sans-serif" font-size="12">quiet text 4.63:1</text>
+<text x="1115" y="244" fill="#9098A4" font-family="Arial, sans-serif" font-size="12">background luminance 0.022</text>
 <rect x="10" y="270" width="685" height="184" fill="#0F1712"/>
 <text x="28" y="297" fill="#E8EEE4" font-family="Arial, sans-serif" font-size="19">LIBRARY / DARK</text>
 <text x="28" y="319" fill="#7D9083" font-family="Arial, sans-serif" font-size="12">background #0F1712 / accent #E3B45E</text>
@@ -100,38 +100,38 @@
 <text x="301" y="427" fill="#E8EEE4" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
 <text x="420" y="421" fill="#7D9083" font-family="Arial, sans-serif" font-size="12">quiet text 4.60:1</text>
 <text x="420" y="438" fill="#7D9083" font-family="Arial, sans-serif" font-size="12">background luminance 0.008</text>
-<rect x="705" y="270" width="685" height="184" fill="#D1D4CD"/>
-<text x="723" y="297" fill="#14201A" font-family="Arial, sans-serif" font-size="19">LIBRARY / LIGHT</text>
-<text x="723" y="319" fill="#49534C" font-family="Arial, sans-serif" font-size="12">background #D1D4CD / accent #644E0F</text>
-<text x="723" y="342" fill="#14201A" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
-<rect x="723" y="359" width="122" height="37" fill="#7A6835"/>
-<rect x="724" y="360" width="120" height="35" fill="#CACCC2"/>
-<text x="733" y="382" fill="#14201A" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
-<rect x="859" y="359" width="122" height="37" fill="#646C65"/>
-<rect x="860" y="360" width="120" height="35" fill="#D1D4CD"/>
-<text x="869" y="382" fill="#14201A" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
-<rect x="1003" y="359" width="122" height="37" fill="#7A6835"/>
-<rect x="1005" y="361" width="118" height="33" fill="#CACCC2"/>
-<text x="1013" y="382" fill="#14201A" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
-<rect x="1143" y="361" width="56" height="32" fill="#646C65"/>
-<rect x="1144" y="362" width="54" height="30" fill="#CACEC7"/>
-<rect x="1147" y="365" width="24" height="24" fill="#646C65"/>
-<rect x="1148" y="366" width="22" height="22" fill="#CACEC7"/>
-<text x="1205" y="382" fill="#49534C" font-family="Arial, sans-serif" font-size="11">OFF</text>
-<rect x="1235" y="361" width="56" height="32" fill="#7A6835"/>
-<rect x="1236" y="362" width="54" height="30" fill="#CACCC2"/>
-<rect x="1263" y="365" width="24" height="24" fill="#7A6835"/>
-<rect x="1264" y="366" width="22" height="22" fill="#7A6835"/>
-<text x="1297" y="382" fill="#49534C" font-family="Arial, sans-serif" font-size="11">ON</text>
-<text x="723" y="421" fill="#4A544D" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
-<rect x="865" y="407" width="106" height="29" fill="#646C65"/>
-<rect x="866" y="408" width="104" height="27" fill="#C8C9BE"/>
-<text x="877" y="427" fill="#14201A" font-family="Arial, sans-serif" font-size="11">HOVER</text>
-<rect x="984" y="407" width="106" height="29" fill="#7A6835"/>
-<rect x="985" y="408" width="104" height="27" fill="#C6C7BA"/>
-<text x="996" y="427" fill="#14201A" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
-<text x="1115" y="421" fill="#49534C" font-family="Arial, sans-serif" font-size="12">quiet text 4.61:1</text>
-<text x="1115" y="438" fill="#49534C" font-family="Arial, sans-serif" font-size="12">background luminance 0.651</text>
+<rect x="705" y="270" width="685" height="184" fill="#252A26"/>
+<text x="723" y="297" fill="#C8D0CA" font-family="Arial, sans-serif" font-size="19">LIBRARY / GREY</text>
+<text x="723" y="319" fill="#8B968E" font-family="Arial, sans-serif" font-size="12">background #252A26 / accent #93A298</text>
+<text x="723" y="342" fill="#C8D0CA" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
+<rect x="723" y="359" width="122" height="37" fill="#828F86"/>
+<rect x="724" y="360" width="120" height="35" fill="#323834"/>
+<text x="733" y="382" fill="#C8D0CA" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
+<rect x="859" y="359" width="122" height="37" fill="#848F87"/>
+<rect x="860" y="360" width="120" height="35" fill="#252A26"/>
+<text x="869" y="382" fill="#C8D0CA" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
+<rect x="1003" y="359" width="122" height="37" fill="#828F86"/>
+<rect x="1005" y="361" width="118" height="33" fill="#323834"/>
+<text x="1013" y="382" fill="#C8D0CA" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
+<rect x="1143" y="361" width="56" height="32" fill="#848F87"/>
+<rect x="1144" y="362" width="54" height="30" fill="#2B302C"/>
+<rect x="1147" y="365" width="24" height="24" fill="#848F87"/>
+<rect x="1148" y="366" width="22" height="22" fill="#2B302C"/>
+<text x="1205" y="382" fill="#8B968E" font-family="Arial, sans-serif" font-size="11">OFF</text>
+<rect x="1235" y="361" width="56" height="32" fill="#828F86"/>
+<rect x="1236" y="362" width="54" height="30" fill="#323834"/>
+<rect x="1263" y="365" width="24" height="24" fill="#828F86"/>
+<rect x="1264" y="366" width="22" height="22" fill="#828F86"/>
+<text x="1297" y="382" fill="#8B968E" font-family="Arial, sans-serif" font-size="11">ON</text>
+<text x="723" y="421" fill="#A5ADA7" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
+<rect x="865" y="407" width="106" height="29" fill="#848F87"/>
+<rect x="866" y="408" width="104" height="27" fill="#363C37"/>
+<text x="877" y="427" fill="#C8D0CA" font-family="Arial, sans-serif" font-size="11">HOVER</text>
+<rect x="984" y="407" width="106" height="29" fill="#828F86"/>
+<rect x="985" y="408" width="104" height="27" fill="#39403B"/>
+<text x="996" y="427" fill="#C8D0CA" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
+<text x="1115" y="421" fill="#8B968E" font-family="Arial, sans-serif" font-size="12">quiet text 4.64:1</text>
+<text x="1115" y="438" fill="#8B968E" font-family="Arial, sans-serif" font-size="12">background luminance 0.022</text>
 <rect x="10" y="464" width="685" height="184" fill="#17100C"/>
 <text x="28" y="491" fill="#F2E6D9" font-family="Arial, sans-serif" font-size="19">EMBER / DARK</text>
 <text x="28" y="513" fill="#9C8574" font-family="Arial, sans-serif" font-size="12">background #17100C / accent #F2683C</text>
@@ -164,38 +164,38 @@
 <text x="301" y="621" fill="#F2E6D9" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
 <text x="420" y="615" fill="#9C8574" font-family="Arial, sans-serif" font-size="12">quiet text 4.60:1</text>
 <text x="420" y="632" fill="#9C8574" font-family="Arial, sans-serif" font-size="12">background luminance 0.006</text>
-<rect x="705" y="464" width="685" height="184" fill="#D6D0C9"/>
-<text x="723" y="491" fill="#241610" font-family="Arial, sans-serif" font-size="19">EMBER / LIGHT</text>
-<text x="723" y="513" fill="#5E4C41" font-family="Arial, sans-serif" font-size="12">background #D6D0C9 / accent #8E3016</text>
-<text x="723" y="536" fill="#241610" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
-<rect x="723" y="553" width="122" height="37" fill="#9E533E"/>
-<rect x="724" y="554" width="120" height="35" fill="#D2C6BE"/>
-<text x="733" y="576" fill="#241610" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
-<rect x="859" y="553" width="122" height="37" fill="#75655B"/>
-<rect x="860" y="554" width="120" height="35" fill="#D6D0C9"/>
-<text x="869" y="576" fill="#241610" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
-<rect x="1003" y="553" width="122" height="37" fill="#9E533E"/>
-<rect x="1005" y="555" width="118" height="33" fill="#D2C6BE"/>
-<text x="1013" y="576" fill="#241610" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
-<rect x="1143" y="555" width="56" height="32" fill="#75655B"/>
-<rect x="1144" y="556" width="54" height="30" fill="#D0C9C3"/>
-<rect x="1147" y="559" width="24" height="24" fill="#75655B"/>
-<rect x="1148" y="560" width="22" height="22" fill="#D0C9C3"/>
-<text x="1205" y="576" fill="#5E4C41" font-family="Arial, sans-serif" font-size="11">OFF</text>
-<rect x="1235" y="555" width="56" height="32" fill="#9E533E"/>
-<rect x="1236" y="556" width="54" height="30" fill="#D2C6BE"/>
-<rect x="1263" y="559" width="24" height="24" fill="#9E533E"/>
-<rect x="1264" y="560" width="22" height="22" fill="#9E533E"/>
-<text x="1297" y="576" fill="#5E4C41" font-family="Arial, sans-serif" font-size="11">ON</text>
-<text x="723" y="615" fill="#594D47" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
-<rect x="865" y="601" width="106" height="29" fill="#75655B"/>
-<rect x="866" y="602" width="104" height="27" fill="#D0C3BB"/>
-<text x="877" y="621" fill="#241610" font-family="Arial, sans-serif" font-size="11">HOVER</text>
-<rect x="984" y="601" width="106" height="29" fill="#9E533E"/>
-<rect x="985" y="602" width="104" height="27" fill="#CFC0B7"/>
-<text x="996" y="621" fill="#241610" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
-<text x="1115" y="615" fill="#5E4C41" font-family="Arial, sans-serif" font-size="12">quiet text 4.61:1</text>
-<text x="1115" y="632" fill="#5E4C41" font-family="Arial, sans-serif" font-size="12">background luminance 0.636</text>
+<rect x="705" y="464" width="685" height="184" fill="#2A2622"/>
+<text x="723" y="491" fill="#D4CDC5" font-family="Arial, sans-serif" font-size="19">EMBER / GREY</text>
+<text x="723" y="513" fill="#9C9288" font-family="Arial, sans-serif" font-size="12">background #2A2622 / accent #ABA297</text>
+<text x="723" y="536" fill="#D4CDC5" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
+<rect x="723" y="553" width="122" height="37" fill="#90897F"/>
+<rect x="724" y="554" width="120" height="35" fill="#393530"/>
+<text x="733" y="576" fill="#D4CDC5" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
+<rect x="859" y="553" width="122" height="37" fill="#92897F"/>
+<rect x="860" y="554" width="120" height="35" fill="#2A2622"/>
+<text x="869" y="576" fill="#D4CDC5" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
+<rect x="1003" y="553" width="122" height="37" fill="#90897F"/>
+<rect x="1005" y="555" width="118" height="33" fill="#393530"/>
+<text x="1013" y="576" fill="#D4CDC5" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
+<rect x="1143" y="555" width="56" height="32" fill="#92897F"/>
+<rect x="1144" y="556" width="54" height="30" fill="#302C28"/>
+<rect x="1147" y="559" width="24" height="24" fill="#92897F"/>
+<rect x="1148" y="560" width="22" height="22" fill="#302C28"/>
+<text x="1205" y="576" fill="#9C9288" font-family="Arial, sans-serif" font-size="11">OFF</text>
+<rect x="1235" y="555" width="56" height="32" fill="#90897F"/>
+<rect x="1236" y="556" width="54" height="30" fill="#393530"/>
+<rect x="1263" y="559" width="24" height="24" fill="#90897F"/>
+<rect x="1264" y="560" width="22" height="22" fill="#90897F"/>
+<text x="1297" y="576" fill="#9C9288" font-family="Arial, sans-serif" font-size="11">ON</text>
+<text x="723" y="615" fill="#AEA8A0" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
+<rect x="865" y="601" width="106" height="29" fill="#92897F"/>
+<rect x="866" y="602" width="104" height="27" fill="#3D3934"/>
+<text x="877" y="621" fill="#D4CDC5" font-family="Arial, sans-serif" font-size="11">HOVER</text>
+<rect x="984" y="601" width="106" height="29" fill="#90897F"/>
+<rect x="985" y="602" width="104" height="27" fill="#413C37"/>
+<text x="996" y="621" fill="#D4CDC5" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
+<text x="1115" y="615" fill="#9C9288" font-family="Arial, sans-serif" font-size="12">quiet text 4.62:1</text>
+<text x="1115" y="632" fill="#9C9288" font-family="Arial, sans-serif" font-size="12">background luminance 0.020</text>
 <rect x="10" y="658" width="685" height="184" fill="#150F1C"/>
 <text x="28" y="685" fill="#EDE6F1" font-family="Arial, sans-serif" font-size="19">PLUM / DARK</text>
 <text x="28" y="707" fill="#897D94" font-family="Arial, sans-serif" font-size="12">background #150F1C / accent #45D6A6</text>
@@ -228,38 +228,38 @@
 <text x="301" y="815" fill="#EDE6F1" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
 <text x="420" y="809" fill="#897D94" font-family="Arial, sans-serif" font-size="12">quiet text 4.61:1</text>
 <text x="420" y="826" fill="#897D94" font-family="Arial, sans-serif" font-size="12">background luminance 0.006</text>
-<rect x="705" y="658" width="685" height="184" fill="#D3CFD7"/>
-<text x="723" y="685" fill="#1D1324" font-family="Arial, sans-serif" font-size="19">PLUM / LIGHT</text>
-<text x="723" y="707" fill="#554B5E" font-family="Arial, sans-serif" font-size="12">background #D3CFD7 / accent #085A41</text>
-<text x="723" y="730" fill="#1D1324" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
-<rect x="723" y="747" width="122" height="37" fill="#337360"/>
-<rect x="724" y="748" width="120" height="35" fill="#C7C8CE"/>
-<text x="733" y="770" fill="#1D1324" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
-<rect x="859" y="747" width="122" height="37" fill="#6D6475"/>
-<rect x="860" y="748" width="120" height="35" fill="#D3CFD7"/>
-<text x="869" y="770" fill="#1D1324" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
-<rect x="1003" y="747" width="122" height="37" fill="#337360"/>
-<rect x="1005" y="749" width="118" height="33" fill="#C7C8CE"/>
-<text x="1013" y="770" fill="#1D1324" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
-<rect x="1143" y="749" width="56" height="32" fill="#6D6475"/>
-<rect x="1144" y="750" width="54" height="30" fill="#CDC8D1"/>
-<rect x="1147" y="753" width="24" height="24" fill="#6D6475"/>
-<rect x="1148" y="754" width="22" height="22" fill="#CDC8D1"/>
-<text x="1205" y="770" fill="#554B5E" font-family="Arial, sans-serif" font-size="11">OFF</text>
-<rect x="1235" y="749" width="56" height="32" fill="#337360"/>
-<rect x="1236" y="750" width="54" height="30" fill="#C7C8CE"/>
-<rect x="1263" y="753" width="24" height="24" fill="#337360"/>
-<rect x="1264" y="754" width="22" height="22" fill="#337360"/>
-<text x="1297" y="770" fill="#554B5E" font-family="Arial, sans-serif" font-size="11">ON</text>
-<text x="723" y="809" fill="#554B5E" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
-<rect x="865" y="795" width="106" height="29" fill="#6D6475"/>
-<rect x="866" y="796" width="104" height="27" fill="#C3C6CB"/>
-<text x="877" y="815" fill="#1D1324" font-family="Arial, sans-serif" font-size="11">HOVER</text>
-<rect x="984" y="795" width="106" height="29" fill="#337360"/>
-<rect x="985" y="796" width="104" height="27" fill="#BFC3C8"/>
-<text x="996" y="815" fill="#1D1324" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
-<text x="1115" y="809" fill="#554B5E" font-family="Arial, sans-serif" font-size="12">quiet text 4.64:1</text>
-<text x="1115" y="826" fill="#554B5E" font-family="Arial, sans-serif" font-size="12">background luminance 0.634</text>
+<rect x="705" y="658" width="685" height="184" fill="#28232D"/>
+<text x="723" y="685" fill="#CDC7D3" font-family="Arial, sans-serif" font-size="19">PLUM / GREY</text>
+<text x="723" y="707" fill="#928B9B" font-family="Arial, sans-serif" font-size="12">background #28232D / accent #A29AB2</text>
+<text x="723" y="730" fill="#CDC7D3" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
+<rect x="723" y="747" width="122" height="37" fill="#8B8499"/>
+<rect x="724" y="748" width="120" height="35" fill="#37313D"/>
+<text x="733" y="770" fill="#CDC7D3" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
+<rect x="859" y="747" width="122" height="37" fill="#8B8594"/>
+<rect x="860" y="748" width="120" height="35" fill="#28232D"/>
+<text x="869" y="770" fill="#CDC7D3" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
+<rect x="1003" y="747" width="122" height="37" fill="#8B8499"/>
+<rect x="1005" y="749" width="118" height="33" fill="#37313D"/>
+<text x="1013" y="770" fill="#CDC7D3" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
+<rect x="1143" y="749" width="56" height="32" fill="#8B8594"/>
+<rect x="1144" y="750" width="54" height="30" fill="#2E2933"/>
+<rect x="1147" y="753" width="24" height="24" fill="#8B8594"/>
+<rect x="1148" y="754" width="22" height="22" fill="#2E2933"/>
+<text x="1205" y="770" fill="#928B9B" font-family="Arial, sans-serif" font-size="11">OFF</text>
+<rect x="1235" y="749" width="56" height="32" fill="#8B8499"/>
+<rect x="1236" y="750" width="54" height="30" fill="#37313D"/>
+<rect x="1263" y="753" width="24" height="24" fill="#8B8499"/>
+<rect x="1264" y="754" width="22" height="22" fill="#8B8499"/>
+<text x="1297" y="770" fill="#928B9B" font-family="Arial, sans-serif" font-size="11">ON</text>
+<text x="723" y="809" fill="#A9A3AF" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
+<rect x="865" y="795" width="106" height="29" fill="#8B8594"/>
+<rect x="866" y="796" width="104" height="27" fill="#3A3541"/>
+<text x="877" y="815" fill="#CDC7D3" font-family="Arial, sans-serif" font-size="11">HOVER</text>
+<rect x="984" y="795" width="106" height="29" fill="#8B8499"/>
+<rect x="985" y="796" width="104" height="27" fill="#3E3845"/>
+<text x="996" y="815" fill="#CDC7D3" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
+<text x="1115" y="809" fill="#928B9B" font-family="Arial, sans-serif" font-size="12">quiet text 4.60:1</text>
+<text x="1115" y="826" fill="#928B9B" font-family="Arial, sans-serif" font-size="12">background luminance 0.018</text>
 <rect x="10" y="852" width="685" height="184" fill="#1A0E15"/>
 <text x="28" y="879" fill="#F6E7EE" font-family="Arial, sans-serif" font-size="19">ROSE / DARK</text>
 <text x="28" y="901" fill="#A2808F" font-family="Arial, sans-serif" font-size="12">background #1A0E15 / accent #FF7FB8</text>
@@ -292,38 +292,38 @@
 <text x="301" y="1009" fill="#F6E7EE" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
 <text x="420" y="1003" fill="#A2808F" font-family="Arial, sans-serif" font-size="12">quiet text 4.61:1</text>
 <text x="420" y="1020" fill="#A2808F" font-family="Arial, sans-serif" font-size="12">background luminance 0.006</text>
-<rect x="705" y="852" width="685" height="184" fill="#D7CED2"/>
-<text x="723" y="879" fill="#26121C" font-family="Arial, sans-serif" font-size="19">ROSE / LIGHT</text>
-<text x="723" y="901" fill="#654653" font-family="Arial, sans-serif" font-size="12">background #D7CED2 / accent #931A50</text>
-<text x="723" y="924" fill="#26121C" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
-<rect x="723" y="941" width="122" height="37" fill="#A44670"/>
-<rect x="724" y="942" width="120" height="35" fill="#D3C3CA"/>
-<text x="733" y="964" fill="#26121C" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
-<rect x="859" y="941" width="122" height="37" fill="#7A5F6B"/>
-<rect x="860" y="942" width="120" height="35" fill="#D7CED2"/>
-<text x="869" y="964" fill="#26121C" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
-<rect x="1003" y="941" width="122" height="37" fill="#A44670"/>
-<rect x="1005" y="943" width="118" height="33" fill="#D3C3CA"/>
-<text x="1013" y="964" fill="#26121C" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
-<rect x="1143" y="943" width="56" height="32" fill="#7A5F6B"/>
-<rect x="1144" y="944" width="54" height="30" fill="#D1C7CC"/>
-<rect x="1147" y="947" width="24" height="24" fill="#7A5F6B"/>
-<rect x="1148" y="948" width="22" height="22" fill="#D1C7CC"/>
-<text x="1205" y="964" fill="#654653" font-family="Arial, sans-serif" font-size="11">OFF</text>
-<rect x="1235" y="943" width="56" height="32" fill="#A44670"/>
-<rect x="1236" y="944" width="54" height="30" fill="#D3C3CA"/>
-<rect x="1263" y="947" width="24" height="24" fill="#A44670"/>
-<rect x="1264" y="948" width="22" height="22" fill="#A44670"/>
-<text x="1297" y="964" fill="#654653" font-family="Arial, sans-serif" font-size="11">ON</text>
-<text x="723" y="1003" fill="#5A4A52" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
-<rect x="865" y="989" width="106" height="29" fill="#7A5F6B"/>
-<rect x="866" y="990" width="104" height="27" fill="#D2C0C8"/>
-<text x="877" y="1009" fill="#26121C" font-family="Arial, sans-serif" font-size="11">HOVER</text>
-<rect x="984" y="989" width="106" height="29" fill="#A44670"/>
-<rect x="985" y="990" width="104" height="27" fill="#D0BCC5"/>
-<text x="996" y="1009" fill="#26121C" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
-<text x="1115" y="1003" fill="#654653" font-family="Arial, sans-serif" font-size="12">quiet text 4.61:1</text>
-<text x="1115" y="1020" fill="#654653" font-family="Arial, sans-serif" font-size="12">background luminance 0.632</text>
+<rect x="705" y="852" width="685" height="184" fill="#2A2326"/>
+<text x="723" y="879" fill="#D2CACD" font-family="Arial, sans-serif" font-size="19">ROSE / GREY</text>
+<text x="723" y="901" fill="#9B8E93" font-family="Arial, sans-serif" font-size="12">background #2A2326 / accent #AA9DA3</text>
+<text x="723" y="924" fill="#D2CACD" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
+<rect x="723" y="941" width="122" height="37" fill="#91858A"/>
+<rect x="724" y="942" width="120" height="35" fill="#393235"/>
+<text x="733" y="964" fill="#D2CACD" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
+<rect x="859" y="941" width="122" height="37" fill="#918589"/>
+<rect x="860" y="942" width="120" height="35" fill="#2A2326"/>
+<text x="869" y="964" fill="#D2CACD" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
+<rect x="1003" y="941" width="122" height="37" fill="#91858A"/>
+<rect x="1005" y="943" width="118" height="33" fill="#393235"/>
+<text x="1013" y="964" fill="#D2CACD" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
+<rect x="1143" y="943" width="56" height="32" fill="#918589"/>
+<rect x="1144" y="944" width="54" height="30" fill="#30292C"/>
+<rect x="1147" y="947" width="24" height="24" fill="#918589"/>
+<rect x="1148" y="948" width="22" height="22" fill="#30292C"/>
+<text x="1205" y="964" fill="#9B8E93" font-family="Arial, sans-serif" font-size="11">OFF</text>
+<rect x="1235" y="943" width="56" height="32" fill="#91858A"/>
+<rect x="1236" y="944" width="54" height="30" fill="#393235"/>
+<rect x="1263" y="947" width="24" height="24" fill="#91858A"/>
+<rect x="1264" y="948" width="22" height="22" fill="#91858A"/>
+<text x="1297" y="964" fill="#9B8E93" font-family="Arial, sans-serif" font-size="11">ON</text>
+<text x="723" y="1003" fill="#ACA5A8" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
+<rect x="865" y="989" width="106" height="29" fill="#918589"/>
+<rect x="866" y="990" width="104" height="27" fill="#3D3539"/>
+<text x="877" y="1009" fill="#D2CACD" font-family="Arial, sans-serif" font-size="11">HOVER</text>
+<rect x="984" y="989" width="106" height="29" fill="#91858A"/>
+<rect x="985" y="990" width="104" height="27" fill="#41393D"/>
+<text x="996" y="1009" fill="#D2CACD" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
+<text x="1115" y="1003" fill="#9B8E93" font-family="Arial, sans-serif" font-size="12">quiet text 4.63:1</text>
+<text x="1115" y="1020" fill="#9B8E93" font-family="Arial, sans-serif" font-size="12">background luminance 0.018</text>
 <rect x="10" y="1046" width="685" height="184" fill="#08131A"/>
 <text x="28" y="1073" fill="#E2EEF3" font-family="Arial, sans-serif" font-size="19">FROST / DARK</text>
 <text x="28" y="1095" fill="#7C929C" font-family="Arial, sans-serif" font-size="12">background #08131A / accent #5FD2E8</text>
@@ -356,38 +356,38 @@
 <text x="301" y="1203" fill="#E2EEF3" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
 <text x="420" y="1197" fill="#7C929C" font-family="Arial, sans-serif" font-size="12">quiet text 4.60:1</text>
 <text x="420" y="1214" fill="#7C929C" font-family="Arial, sans-serif" font-size="12">background luminance 0.006</text>
-<rect x="705" y="1046" width="685" height="184" fill="#CDD4D7"/>
-<text x="723" y="1073" fill="#0C1B22" font-family="Arial, sans-serif" font-size="19">FROST / LIGHT</text>
-<text x="723" y="1095" fill="#41535B" font-family="Arial, sans-serif" font-size="12">background #CDD4D7 / accent #095364</text>
-<text x="723" y="1118" fill="#0C1B22" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
-<rect x="723" y="1135" width="122" height="37" fill="#37717F"/>
-<rect x="724" y="1136" width="120" height="35" fill="#C1CCD0"/>
-<text x="733" y="1158" fill="#0C1B22" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
-<rect x="859" y="1135" width="122" height="37" fill="#5C6B73"/>
-<rect x="860" y="1136" width="120" height="35" fill="#CDD4D7"/>
-<text x="869" y="1158" fill="#0C1B22" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
-<rect x="1003" y="1135" width="122" height="37" fill="#37717F"/>
-<rect x="1005" y="1137" width="118" height="33" fill="#C1CCD0"/>
-<text x="1013" y="1158" fill="#0C1B22" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
-<rect x="1143" y="1137" width="56" height="32" fill="#5C6B73"/>
-<rect x="1144" y="1138" width="54" height="30" fill="#C6CED1"/>
-<rect x="1147" y="1141" width="24" height="24" fill="#5C6B73"/>
-<rect x="1148" y="1142" width="22" height="22" fill="#C6CED1"/>
-<text x="1205" y="1158" fill="#41535B" font-family="Arial, sans-serif" font-size="11">OFF</text>
-<rect x="1235" y="1137" width="56" height="32" fill="#37717F"/>
-<rect x="1236" y="1138" width="54" height="30" fill="#C1CCD0"/>
-<rect x="1263" y="1141" width="24" height="24" fill="#37717F"/>
-<rect x="1264" y="1142" width="22" height="22" fill="#37717F"/>
-<text x="1297" y="1158" fill="#41535B" font-family="Arial, sans-serif" font-size="11">ON</text>
-<text x="723" y="1197" fill="#42535B" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
-<rect x="865" y="1183" width="106" height="29" fill="#5C6B73"/>
-<rect x="866" y="1184" width="104" height="27" fill="#BDCACE"/>
-<text x="877" y="1203" fill="#0C1B22" font-family="Arial, sans-serif" font-size="11">HOVER</text>
-<rect x="984" y="1183" width="106" height="29" fill="#37717F"/>
-<rect x="985" y="1184" width="104" height="27" fill="#B9C7CC"/>
-<text x="996" y="1203" fill="#0C1B22" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
-<text x="1115" y="1197" fill="#41535B" font-family="Arial, sans-serif" font-size="12">quiet text 4.62:1</text>
-<text x="1115" y="1214" fill="#41535B" font-family="Arial, sans-serif" font-size="12">background luminance 0.650</text>
+<rect x="705" y="1046" width="685" height="184" fill="#232A2E"/>
+<text x="723" y="1073" fill="#C8D1D5" font-family="Arial, sans-serif" font-size="19">FROST / GREY</text>
+<text x="723" y="1095" fill="#8D9AA0" font-family="Arial, sans-serif" font-size="12">background #232A2E / accent #9AA9B0</text>
+<text x="723" y="1118" fill="#C8D1D5" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
+<rect x="723" y="1135" width="122" height="37" fill="#829096"/>
+<rect x="724" y="1136" width="120" height="35" fill="#31393E"/>
+<text x="733" y="1158" fill="#C8D1D5" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
+<rect x="859" y="1135" width="122" height="37" fill="#839095"/>
+<rect x="860" y="1136" width="120" height="35" fill="#232A2E"/>
+<text x="869" y="1158" fill="#C8D1D5" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
+<rect x="1003" y="1135" width="122" height="37" fill="#829096"/>
+<rect x="1005" y="1137" width="118" height="33" fill="#31393E"/>
+<text x="1013" y="1158" fill="#C8D1D5" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
+<rect x="1143" y="1137" width="56" height="32" fill="#839095"/>
+<rect x="1144" y="1138" width="54" height="30" fill="#293034"/>
+<rect x="1147" y="1141" width="24" height="24" fill="#839095"/>
+<rect x="1148" y="1142" width="22" height="22" fill="#293034"/>
+<text x="1205" y="1158" fill="#8D9AA0" font-family="Arial, sans-serif" font-size="11">OFF</text>
+<rect x="1235" y="1137" width="56" height="32" fill="#829096"/>
+<rect x="1236" y="1138" width="54" height="30" fill="#31393E"/>
+<rect x="1263" y="1141" width="24" height="24" fill="#829096"/>
+<rect x="1264" y="1142" width="22" height="22" fill="#829096"/>
+<text x="1297" y="1158" fill="#8D9AA0" font-family="Arial, sans-serif" font-size="11">ON</text>
+<text x="723" y="1197" fill="#A5AEB2" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
+<rect x="865" y="1183" width="106" height="29" fill="#839095"/>
+<rect x="866" y="1184" width="104" height="27" fill="#353D42"/>
+<text x="877" y="1203" fill="#C8D1D5" font-family="Arial, sans-serif" font-size="11">HOVER</text>
+<rect x="984" y="1183" width="106" height="29" fill="#829096"/>
+<rect x="985" y="1184" width="104" height="27" fill="#384145"/>
+<text x="996" y="1203" fill="#C8D1D5" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
+<text x="1115" y="1197" fill="#8D9AA0" font-family="Arial, sans-serif" font-size="12">quiet text 4.62:1</text>
+<text x="1115" y="1214" fill="#8D9AA0" font-family="Arial, sans-serif" font-size="12">background luminance 0.022</text>
 <rect x="10" y="1240" width="685" height="184" fill="#040A06"/>
 <text x="28" y="1267" fill="#B8F5CB" font-family="Arial, sans-serif" font-size="19">PHOSPHOR / DARK</text>
 <text x="28" y="1289" fill="#6DA981" font-family="Arial, sans-serif" font-size="12">background #040A06 / accent #4AF08C</text>
@@ -420,38 +420,38 @@
 <text x="301" y="1397" fill="#B8F5CB" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
 <text x="420" y="1391" fill="#6DA981" font-family="Arial, sans-serif" font-size="12">quiet text 4.65:1</text>
 <text x="420" y="1408" fill="#6DA981" font-family="Arial, sans-serif" font-size="12">background luminance 0.003</text>
-<rect x="705" y="1240" width="685" height="184" fill="#CFD6D0"/>
-<text x="723" y="1267" fill="#0A1E11" font-family="Arial, sans-serif" font-size="19">PHOSPHOR / LIGHT</text>
-<text x="723" y="1289" fill="#405646" font-family="Arial, sans-serif" font-size="12">background #CFD6D0 / accent #0D5B2D</text>
-<text x="723" y="1312" fill="#0A1E11" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
-<rect x="723" y="1329" width="122" height="37" fill="#387651"/>
-<rect x="724" y="1330" width="120" height="35" fill="#C3CFC6"/>
-<text x="733" y="1352" fill="#0A1E11" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
-<rect x="859" y="1329" width="122" height="37" fill="#5C6F61"/>
-<rect x="860" y="1330" width="120" height="35" fill="#CFD6D0"/>
-<text x="869" y="1352" fill="#0A1E11" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
-<rect x="1003" y="1329" width="122" height="37" fill="#387651"/>
-<rect x="1005" y="1331" width="118" height="33" fill="#C3CFC6"/>
-<text x="1013" y="1352" fill="#0A1E11" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
-<rect x="1143" y="1331" width="56" height="32" fill="#5C6F61"/>
-<rect x="1144" y="1332" width="54" height="30" fill="#C8D0C9"/>
-<rect x="1147" y="1335" width="24" height="24" fill="#5C6F61"/>
-<rect x="1148" y="1336" width="22" height="22" fill="#C8D0C9"/>
-<text x="1205" y="1352" fill="#405646" font-family="Arial, sans-serif" font-size="11">OFF</text>
-<rect x="1235" y="1331" width="56" height="32" fill="#387651"/>
-<rect x="1236" y="1332" width="54" height="30" fill="#C3CFC6"/>
-<rect x="1263" y="1335" width="24" height="24" fill="#387651"/>
-<rect x="1264" y="1336" width="22" height="22" fill="#387651"/>
-<text x="1297" y="1352" fill="#405646" font-family="Arial, sans-serif" font-size="11">ON</text>
-<text x="723" y="1391" fill="#415747" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
-<rect x="865" y="1377" width="106" height="29" fill="#5C6F61"/>
-<rect x="866" y="1378" width="104" height="27" fill="#BFCCC3"/>
-<text x="877" y="1397" fill="#0A1E11" font-family="Arial, sans-serif" font-size="11">HOVER</text>
-<rect x="984" y="1377" width="106" height="29" fill="#387651"/>
-<rect x="985" y="1378" width="104" height="27" fill="#BCCAC0"/>
-<text x="996" y="1397" fill="#0A1E11" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
-<text x="1115" y="1391" fill="#405646" font-family="Arial, sans-serif" font-size="12">quiet text 4.61:1</text>
-<text x="1115" y="1408" fill="#405646" font-family="Arial, sans-serif" font-size="12">background luminance 0.659</text>
+<rect x="705" y="1240" width="685" height="184" fill="#222925"/>
+<text x="723" y="1267" fill="#C9D1CB" font-family="Arial, sans-serif" font-size="19">PHOSPHOR / GREY</text>
+<text x="723" y="1289" fill="#8B958E" font-family="Arial, sans-serif" font-size="12">background #222925 / accent #9FAAA2</text>
+<text x="723" y="1312" fill="#C9D1CB" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
+<rect x="723" y="1329" width="122" height="37" fill="#848F87"/>
+<rect x="724" y="1330" width="120" height="35" fill="#313834"/>
+<text x="733" y="1352" fill="#C9D1CB" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
+<rect x="859" y="1329" width="122" height="37" fill="#858E88"/>
+<rect x="860" y="1330" width="120" height="35" fill="#222925"/>
+<text x="869" y="1352" fill="#C9D1CB" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
+<rect x="1003" y="1329" width="122" height="37" fill="#848F87"/>
+<rect x="1005" y="1331" width="118" height="33" fill="#313834"/>
+<text x="1013" y="1352" fill="#C9D1CB" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
+<rect x="1143" y="1331" width="56" height="32" fill="#858E88"/>
+<rect x="1144" y="1332" width="54" height="30" fill="#282F2B"/>
+<rect x="1147" y="1335" width="24" height="24" fill="#858E88"/>
+<rect x="1148" y="1336" width="22" height="22" fill="#282F2B"/>
+<text x="1205" y="1352" fill="#8B958E" font-family="Arial, sans-serif" font-size="11">OFF</text>
+<rect x="1235" y="1331" width="56" height="32" fill="#848F87"/>
+<rect x="1236" y="1332" width="54" height="30" fill="#313834"/>
+<rect x="1263" y="1335" width="24" height="24" fill="#848F87"/>
+<rect x="1264" y="1336" width="22" height="22" fill="#848F87"/>
+<text x="1297" y="1352" fill="#8B958E" font-family="Arial, sans-serif" font-size="11">ON</text>
+<text x="723" y="1391" fill="#A5ADA7" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
+<rect x="865" y="1377" width="106" height="29" fill="#858E88"/>
+<rect x="866" y="1378" width="104" height="27" fill="#353C38"/>
+<text x="877" y="1397" fill="#C9D1CB" font-family="Arial, sans-serif" font-size="11">HOVER</text>
+<rect x="984" y="1377" width="106" height="29" fill="#848F87"/>
+<rect x="985" y="1378" width="104" height="27" fill="#39403C"/>
+<text x="996" y="1397" fill="#C9D1CB" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
+<text x="1115" y="1391" fill="#8B958E" font-family="Arial, sans-serif" font-size="12">quiet text 4.63:1</text>
+<text x="1115" y="1408" fill="#8B958E" font-family="Arial, sans-serif" font-size="12">background luminance 0.021</text>
 <rect x="10" y="1434" width="685" height="184" fill="#000000"/>
 <text x="28" y="1461" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="19">ZERO / DARK</text>
 <text x="28" y="1483" fill="#8F8F8F" font-family="Arial, sans-serif" font-size="12">background #000000 / accent #FFFFFF</text>
@@ -484,38 +484,38 @@
 <text x="301" y="1591" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
 <text x="420" y="1585" fill="#8F8F8F" font-family="Arial, sans-serif" font-size="12">quiet text 4.65:1</text>
 <text x="420" y="1602" fill="#8F8F8F" font-family="Arial, sans-serif" font-size="12">background luminance 0.000</text>
-<rect x="705" y="1434" width="685" height="184" fill="#D2D2D2"/>
-<text x="723" y="1461" fill="#242424" font-family="Arial, sans-serif" font-size="19">ZERO / LIGHT</text>
-<text x="723" y="1483" fill="#505050" font-family="Arial, sans-serif" font-size="12">background #D2D2D2 / accent #343434</text>
-<text x="723" y="1506" fill="#242424" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
-<rect x="723" y="1523" width="122" height="37" fill="#676767"/>
-<rect x="724" y="1524" width="120" height="35" fill="#C9C9C9"/>
-<text x="733" y="1546" fill="#242424" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
-<rect x="859" y="1523" width="122" height="37" fill="#676767"/>
-<rect x="860" y="1524" width="120" height="35" fill="#D2D2D2"/>
-<text x="869" y="1546" fill="#242424" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
-<rect x="1003" y="1523" width="122" height="37" fill="#676767"/>
-<rect x="1005" y="1525" width="118" height="33" fill="#C9C9C9"/>
-<text x="1013" y="1546" fill="#242424" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
-<rect x="1143" y="1525" width="56" height="32" fill="#676767"/>
-<rect x="1144" y="1526" width="54" height="30" fill="#CCCCCC"/>
-<rect x="1147" y="1529" width="24" height="24" fill="#676767"/>
-<rect x="1148" y="1530" width="22" height="22" fill="#CCCCCC"/>
-<text x="1205" y="1546" fill="#505050" font-family="Arial, sans-serif" font-size="11">OFF</text>
-<rect x="1235" y="1525" width="56" height="32" fill="#676767"/>
-<rect x="1236" y="1526" width="54" height="30" fill="#C9C9C9"/>
-<rect x="1263" y="1529" width="24" height="24" fill="#676767"/>
-<rect x="1264" y="1530" width="22" height="22" fill="#676767"/>
-<text x="1297" y="1546" fill="#505050" font-family="Arial, sans-serif" font-size="11">ON</text>
-<text x="723" y="1585" fill="#4E4E4E" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
-<rect x="865" y="1571" width="106" height="29" fill="#676767"/>
-<rect x="866" y="1572" width="104" height="27" fill="#C5C5C5"/>
-<text x="877" y="1591" fill="#242424" font-family="Arial, sans-serif" font-size="11">HOVER</text>
-<rect x="984" y="1571" width="106" height="29" fill="#676767"/>
-<rect x="985" y="1572" width="104" height="27" fill="#C2C2C2"/>
-<text x="996" y="1591" fill="#242424" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
-<text x="1115" y="1585" fill="#505050" font-family="Arial, sans-serif" font-size="12">quiet text 4.67:1</text>
-<text x="1115" y="1602" fill="#505050" font-family="Arial, sans-serif" font-size="12">background luminance 0.644</text>
+<rect x="705" y="1434" width="685" height="184" fill="#2A2A2A"/>
+<text x="723" y="1461" fill="#D2D2D2" font-family="Arial, sans-serif" font-size="19">ZERO / GREY</text>
+<text x="723" y="1483" fill="#969696" font-family="Arial, sans-serif" font-size="12">background #2A2A2A / accent #ABABAB</text>
+<text x="723" y="1506" fill="#D2D2D2" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
+<rect x="723" y="1523" width="122" height="37" fill="#8F8F8F"/>
+<rect x="724" y="1524" width="120" height="35" fill="#393939"/>
+<text x="733" y="1546" fill="#D2D2D2" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
+<rect x="859" y="1523" width="122" height="37" fill="#8F8F8F"/>
+<rect x="860" y="1524" width="120" height="35" fill="#2A2A2A"/>
+<text x="869" y="1546" fill="#D2D2D2" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
+<rect x="1003" y="1523" width="122" height="37" fill="#8F8F8F"/>
+<rect x="1005" y="1525" width="118" height="33" fill="#393939"/>
+<text x="1013" y="1546" fill="#D2D2D2" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
+<rect x="1143" y="1525" width="56" height="32" fill="#8F8F8F"/>
+<rect x="1144" y="1526" width="54" height="30" fill="#303030"/>
+<rect x="1147" y="1529" width="24" height="24" fill="#8F8F8F"/>
+<rect x="1148" y="1530" width="22" height="22" fill="#303030"/>
+<text x="1205" y="1546" fill="#969696" font-family="Arial, sans-serif" font-size="11">OFF</text>
+<rect x="1235" y="1525" width="56" height="32" fill="#8F8F8F"/>
+<rect x="1236" y="1526" width="54" height="30" fill="#393939"/>
+<rect x="1263" y="1529" width="24" height="24" fill="#8F8F8F"/>
+<rect x="1264" y="1530" width="22" height="22" fill="#8F8F8F"/>
+<text x="1297" y="1546" fill="#969696" font-family="Arial, sans-serif" font-size="11">ON</text>
+<text x="723" y="1585" fill="#AEAEAE" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
+<rect x="865" y="1571" width="106" height="29" fill="#8F8F8F"/>
+<rect x="866" y="1572" width="104" height="27" fill="#3D3D3D"/>
+<text x="877" y="1591" fill="#D2D2D2" font-family="Arial, sans-serif" font-size="11">HOVER</text>
+<rect x="984" y="1571" width="106" height="29" fill="#8F8F8F"/>
+<rect x="985" y="1572" width="104" height="27" fill="#414141"/>
+<text x="996" y="1591" fill="#D2D2D2" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
+<text x="1115" y="1585" fill="#969696" font-family="Arial, sans-serif" font-size="12">quiet text 4.60:1</text>
+<text x="1115" y="1602" fill="#969696" font-family="Arial, sans-serif" font-size="12">background luminance 0.023</text>
 <rect x="10" y="1628" width="685" height="184" fill="#121110"/>
 <text x="28" y="1655" fill="#EDE9E1" font-family="Arial, sans-serif" font-size="19">NEUTRAL / DARK</text>
 <text x="28" y="1677" fill="#8F887A" font-family="Arial, sans-serif" font-size="12">background #121110 / accent #97A4D8</text>
@@ -548,38 +548,38 @@
 <text x="301" y="1785" fill="#EDE9E1" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
 <text x="420" y="1779" fill="#8F887A" font-family="Arial, sans-serif" font-size="12">quiet text 4.64:1</text>
 <text x="420" y="1796" fill="#8F887A" font-family="Arial, sans-serif" font-size="12">background luminance 0.006</text>
-<rect x="705" y="1628" width="685" height="184" fill="#D4D2CE"/>
-<text x="723" y="1655" fill="#2C2A27" font-family="Arial, sans-serif" font-size="19">NEUTRAL / LIGHT</text>
-<text x="723" y="1677" fill="#53514B" font-family="Arial, sans-serif" font-size="12">background #D4D2CE / accent #2E3D89</text>
-<text x="723" y="1700" fill="#2C2A27" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
-<rect x="723" y="1717" width="122" height="37" fill="#5B659C"/>
-<rect x="724" y="1718" width="120" height="35" fill="#CAC9CA"/>
-<text x="733" y="1740" fill="#2C2A27" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
-<rect x="859" y="1717" width="122" height="37" fill="#6A6863"/>
-<rect x="860" y="1718" width="120" height="35" fill="#D4D2CE"/>
-<text x="869" y="1740" fill="#2C2A27" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
-<rect x="1003" y="1717" width="122" height="37" fill="#5B659C"/>
-<rect x="1005" y="1719" width="118" height="33" fill="#CAC9CA"/>
-<text x="1013" y="1740" fill="#2C2A27" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
-<rect x="1143" y="1719" width="56" height="32" fill="#6A6863"/>
-<rect x="1144" y="1720" width="54" height="30" fill="#CECCC8"/>
-<rect x="1147" y="1723" width="24" height="24" fill="#6A6863"/>
-<rect x="1148" y="1724" width="22" height="22" fill="#CECCC8"/>
-<text x="1205" y="1740" fill="#53514B" font-family="Arial, sans-serif" font-size="11">OFF</text>
-<rect x="1235" y="1719" width="56" height="32" fill="#5B659C"/>
-<rect x="1236" y="1720" width="54" height="30" fill="#CAC9CA"/>
-<rect x="1263" y="1723" width="24" height="24" fill="#5B659C"/>
-<rect x="1264" y="1724" width="22" height="22" fill="#5B659C"/>
-<text x="1297" y="1740" fill="#53514B" font-family="Arial, sans-serif" font-size="11">ON</text>
-<text x="723" y="1779" fill="#514F4C" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
-<rect x="865" y="1765" width="106" height="29" fill="#6A6863"/>
-<rect x="866" y="1766" width="104" height="27" fill="#C7C6C8"/>
-<text x="877" y="1785" fill="#2C2A27" font-family="Arial, sans-serif" font-size="11">HOVER</text>
-<rect x="984" y="1765" width="106" height="29" fill="#5B659C"/>
-<rect x="985" y="1766" width="104" height="27" fill="#C3C3C7"/>
-<text x="996" y="1785" fill="#2C2A27" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
-<text x="1115" y="1779" fill="#53514B" font-family="Arial, sans-serif" font-size="12">quiet text 4.65:1</text>
-<text x="1115" y="1796" fill="#53514B" font-family="Arial, sans-serif" font-size="12">background luminance 0.645</text>
+<rect x="705" y="1628" width="685" height="184" fill="#292826"/>
+<text x="723" y="1655" fill="#D3CFC8" font-family="Arial, sans-serif" font-size="19">NEUTRAL / GREY</text>
+<text x="723" y="1677" fill="#99948B" font-family="Arial, sans-serif" font-size="12">background #292826 / accent #ADA79D</text>
+<text x="723" y="1700" fill="#D3CFC8" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
+<rect x="723" y="1717" width="122" height="37" fill="#918D84"/>
+<rect x="724" y="1718" width="120" height="35" fill="#393734"/>
+<text x="733" y="1740" fill="#D3CFC8" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
+<rect x="859" y="1717" width="122" height="37" fill="#918D84"/>
+<rect x="860" y="1718" width="120" height="35" fill="#292826"/>
+<text x="869" y="1740" fill="#D3CFC8" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
+<rect x="1003" y="1717" width="122" height="37" fill="#918D84"/>
+<rect x="1005" y="1719" width="118" height="33" fill="#393734"/>
+<text x="1013" y="1740" fill="#D3CFC8" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
+<rect x="1143" y="1719" width="56" height="32" fill="#918D84"/>
+<rect x="1144" y="1720" width="54" height="30" fill="#2F2E2C"/>
+<rect x="1147" y="1723" width="24" height="24" fill="#918D84"/>
+<rect x="1148" y="1724" width="22" height="22" fill="#2F2E2C"/>
+<text x="1205" y="1740" fill="#99948B" font-family="Arial, sans-serif" font-size="11">OFF</text>
+<rect x="1235" y="1719" width="56" height="32" fill="#918D84"/>
+<rect x="1236" y="1720" width="54" height="30" fill="#393734"/>
+<rect x="1263" y="1723" width="24" height="24" fill="#918D84"/>
+<rect x="1264" y="1724" width="22" height="22" fill="#918D84"/>
+<text x="1297" y="1740" fill="#99948B" font-family="Arial, sans-serif" font-size="11">ON</text>
+<text x="723" y="1779" fill="#AFABA6" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
+<rect x="865" y="1765" width="106" height="29" fill="#918D84"/>
+<rect x="866" y="1766" width="104" height="27" fill="#3D3B38"/>
+<text x="877" y="1785" fill="#D3CFC8" font-family="Arial, sans-serif" font-size="11">HOVER</text>
+<rect x="984" y="1765" width="106" height="29" fill="#918D84"/>
+<rect x="985" y="1766" width="104" height="27" fill="#413F3B"/>
+<text x="996" y="1785" fill="#D3CFC8" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
+<text x="1115" y="1779" fill="#99948B" font-family="Arial, sans-serif" font-size="12">quiet text 4.60:1</text>
+<text x="1115" y="1796" fill="#99948B" font-family="Arial, sans-serif" font-size="12">background luminance 0.021</text>
 <rect x="10" y="1822" width="685" height="184" fill="#110C24"/>
 <text x="28" y="1849" fill="#F0E9FF" font-family="Arial, sans-serif" font-size="19">ULTRAVIOLET / DARK</text>
 <text x="28" y="1871" fill="#9787B5" font-family="Arial, sans-serif" font-size="12">background #110C24 / accent #C29BFF</text>
@@ -612,38 +612,38 @@
 <text x="301" y="1979" fill="#F0E9FF" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
 <text x="420" y="1973" fill="#9787B5" font-family="Arial, sans-serif" font-size="12">quiet text 4.60:1</text>
 <text x="420" y="1990" fill="#9787B5" font-family="Arial, sans-serif" font-size="12">background luminance 0.005</text>
-<rect x="705" y="1822" width="685" height="184" fill="#D1CDD9"/>
-<text x="723" y="1849" fill="#1C1230" font-family="Arial, sans-serif" font-size="19">ULTRAVIOLET / LIGHT</text>
-<text x="723" y="1871" fill="#564867" font-family="Arial, sans-serif" font-size="12">background #D1CDD9 / accent #5D2BA8</text>
-<text x="723" y="1894" fill="#1C1230" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
-<rect x="723" y="1911" width="122" height="37" fill="#7952B4"/>
-<rect x="724" y="1912" width="120" height="35" fill="#CAC3D6"/>
-<text x="733" y="1934" fill="#1C1230" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
-<rect x="859" y="1911" width="122" height="37" fill="#6E617D"/>
-<rect x="860" y="1912" width="120" height="35" fill="#D1CDD9"/>
-<text x="869" y="1934" fill="#1C1230" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
-<rect x="1003" y="1911" width="122" height="37" fill="#7952B4"/>
-<rect x="1005" y="1913" width="118" height="33" fill="#CAC3D6"/>
-<text x="1013" y="1934" fill="#1C1230" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
-<rect x="1143" y="1913" width="56" height="32" fill="#6E617D"/>
-<rect x="1144" y="1914" width="54" height="30" fill="#CBC6D3"/>
-<rect x="1147" y="1917" width="24" height="24" fill="#6E617D"/>
-<rect x="1148" y="1918" width="22" height="22" fill="#CBC6D3"/>
-<text x="1205" y="1934" fill="#564867" font-family="Arial, sans-serif" font-size="11">OFF</text>
-<rect x="1235" y="1913" width="56" height="32" fill="#7952B4"/>
-<rect x="1236" y="1914" width="54" height="30" fill="#CAC3D6"/>
-<rect x="1263" y="1917" width="24" height="24" fill="#7952B4"/>
-<rect x="1264" y="1918" width="22" height="22" fill="#7952B4"/>
-<text x="1297" y="1934" fill="#564867" font-family="Arial, sans-serif" font-size="11">ON</text>
-<text x="723" y="1973" fill="#564867" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
-<rect x="865" y="1959" width="106" height="29" fill="#6E617D"/>
-<rect x="866" y="1960" width="104" height="27" fill="#C8C0D5"/>
-<text x="877" y="1979" fill="#1C1230" font-family="Arial, sans-serif" font-size="11">HOVER</text>
-<rect x="984" y="1959" width="106" height="29" fill="#7952B4"/>
-<rect x="985" y="1960" width="104" height="27" fill="#C5BDD4"/>
-<text x="996" y="1979" fill="#1C1230" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
-<text x="1115" y="1973" fill="#564867" font-family="Arial, sans-serif" font-size="12">quiet text 4.61:1</text>
-<text x="1115" y="1990" fill="#564867" font-family="Arial, sans-serif" font-size="12">background luminance 0.622</text>
+<rect x="705" y="1822" width="685" height="184" fill="#26222D"/>
+<text x="723" y="1849" fill="#CCC7D5" font-family="Arial, sans-serif" font-size="19">ULTRAVIOLET / GREY</text>
+<text x="723" y="1871" fill="#948DA2" font-family="Arial, sans-serif" font-size="12">background #26222D / accent #A49DB4</text>
+<text x="723" y="1894" fill="#CCC7D5" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
+<rect x="723" y="1911" width="122" height="37" fill="#8A8498"/>
+<rect x="724" y="1912" width="120" height="35" fill="#35313D"/>
+<text x="733" y="1934" fill="#CCC7D5" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
+<rect x="859" y="1911" width="122" height="37" fill="#8A8498"/>
+<rect x="860" y="1912" width="120" height="35" fill="#26222D"/>
+<text x="869" y="1934" fill="#CCC7D5" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
+<rect x="1003" y="1911" width="122" height="37" fill="#8A8498"/>
+<rect x="1005" y="1913" width="118" height="33" fill="#35313D"/>
+<text x="1013" y="1934" fill="#CCC7D5" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
+<rect x="1143" y="1913" width="56" height="32" fill="#8A8498"/>
+<rect x="1144" y="1914" width="54" height="30" fill="#2C2833"/>
+<rect x="1147" y="1917" width="24" height="24" fill="#8A8498"/>
+<rect x="1148" y="1918" width="22" height="22" fill="#2C2833"/>
+<text x="1205" y="1934" fill="#948DA2" font-family="Arial, sans-serif" font-size="11">OFF</text>
+<rect x="1235" y="1913" width="56" height="32" fill="#8A8498"/>
+<rect x="1236" y="1914" width="54" height="30" fill="#35313D"/>
+<rect x="1263" y="1917" width="24" height="24" fill="#8A8498"/>
+<rect x="1264" y="1918" width="22" height="22" fill="#8A8498"/>
+<text x="1297" y="1934" fill="#948DA2" font-family="Arial, sans-serif" font-size="11">ON</text>
+<text x="723" y="1973" fill="#A8A3B0" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
+<rect x="865" y="1959" width="106" height="29" fill="#8A8498"/>
+<rect x="866" y="1960" width="104" height="27" fill="#393441"/>
+<text x="877" y="1979" fill="#CCC7D5" font-family="Arial, sans-serif" font-size="11">HOVER</text>
+<rect x="984" y="1959" width="106" height="29" fill="#8A8498"/>
+<rect x="985" y="1960" width="104" height="27" fill="#3D3845"/>
+<text x="996" y="1979" fill="#CCC7D5" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
+<text x="1115" y="1973" fill="#948DA2" font-family="Arial, sans-serif" font-size="12">quiet text 4.61:1</text>
+<text x="1115" y="1990" fill="#948DA2" font-family="Arial, sans-serif" font-size="12">background luminance 0.017</text>
 <rect x="10" y="2016" width="685" height="184" fill="#071918"/>
 <text x="28" y="2043" fill="#E2F5F1" font-family="Arial, sans-serif" font-size="19">LAGOON / DARK</text>
 <text x="28" y="2065" fill="#7F9F99" font-family="Arial, sans-serif" font-size="12">background #071918 / accent #69E0C0</text>
@@ -676,38 +676,38 @@
 <text x="301" y="2173" fill="#E2F5F1" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
 <text x="420" y="2167" fill="#7F9F99" font-family="Arial, sans-serif" font-size="12">quiet text 4.61:1</text>
 <text x="420" y="2184" fill="#7F9F99" font-family="Arial, sans-serif" font-size="12">background luminance 0.008</text>
-<rect x="705" y="2016" width="685" height="184" fill="#CCD6D3"/>
-<text x="723" y="2043" fill="#10231F" font-family="Arial, sans-serif" font-size="19">LAGOON / LIGHT</text>
-<text x="723" y="2065" fill="#405651" font-family="Arial, sans-serif" font-size="12">background #CCD6D3 / accent #075C4C</text>
-<text x="723" y="2088" fill="#10231F" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
-<rect x="723" y="2105" width="122" height="37" fill="#307568"/>
-<rect x="724" y="2106" width="120" height="35" fill="#C0CFCB"/>
-<text x="733" y="2128" fill="#10231F" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
-<rect x="859" y="2105" width="122" height="37" fill="#5B6E6A"/>
-<rect x="860" y="2106" width="120" height="35" fill="#CCD6D3"/>
-<text x="869" y="2128" fill="#10231F" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
-<rect x="1003" y="2105" width="122" height="37" fill="#307568"/>
-<rect x="1005" y="2107" width="118" height="33" fill="#C0CFCB"/>
-<text x="1013" y="2128" fill="#10231F" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
-<rect x="1143" y="2107" width="56" height="32" fill="#5B6E6A"/>
-<rect x="1144" y="2108" width="54" height="30" fill="#C5D0CD"/>
-<rect x="1147" y="2111" width="24" height="24" fill="#5B6E6A"/>
-<rect x="1148" y="2112" width="22" height="22" fill="#C5D0CD"/>
-<text x="1205" y="2128" fill="#405651" font-family="Arial, sans-serif" font-size="11">OFF</text>
-<rect x="1235" y="2107" width="56" height="32" fill="#307568"/>
-<rect x="1236" y="2108" width="54" height="30" fill="#C0CFCB"/>
-<rect x="1263" y="2111" width="24" height="24" fill="#307568"/>
-<rect x="1264" y="2112" width="22" height="22" fill="#307568"/>
-<text x="1297" y="2128" fill="#405651" font-family="Arial, sans-serif" font-size="11">ON</text>
-<text x="723" y="2167" fill="#405651" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
-<rect x="865" y="2153" width="106" height="29" fill="#5B6E6A"/>
-<rect x="866" y="2154" width="104" height="27" fill="#BCCCC8"/>
-<text x="877" y="2173" fill="#10231F" font-family="Arial, sans-serif" font-size="11">HOVER</text>
-<rect x="984" y="2153" width="106" height="29" fill="#307568"/>
-<rect x="985" y="2154" width="104" height="27" fill="#B8CAC6"/>
-<text x="996" y="2173" fill="#10231F" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
-<text x="1115" y="2167" fill="#405651" font-family="Arial, sans-serif" font-size="12">quiet text 4.61:1</text>
-<text x="1115" y="2184" fill="#405651" font-family="Arial, sans-serif" font-size="12">background luminance 0.656</text>
+<rect x="705" y="2016" width="685" height="184" fill="#232B29"/>
+<text x="723" y="2043" fill="#C8D0CE" font-family="Arial, sans-serif" font-size="19">LAGOON / GREY</text>
+<text x="723" y="2065" fill="#8A9492" font-family="Arial, sans-serif" font-size="12">background #232B29 / accent #97A7A4</text>
+<text x="723" y="2088" fill="#C8D0CE" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
+<rect x="723" y="2105" width="122" height="37" fill="#81908D"/>
+<rect x="724" y="2106" width="120" height="35" fill="#313A38"/>
+<text x="733" y="2128" fill="#C8D0CE" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
+<rect x="859" y="2105" width="122" height="37" fill="#858F8D"/>
+<rect x="860" y="2106" width="120" height="35" fill="#232B29"/>
+<text x="869" y="2128" fill="#C8D0CE" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
+<rect x="1003" y="2105" width="122" height="37" fill="#81908D"/>
+<rect x="1005" y="2107" width="118" height="33" fill="#313A38"/>
+<text x="1013" y="2128" fill="#C8D0CE" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
+<rect x="1143" y="2107" width="56" height="32" fill="#858F8D"/>
+<rect x="1144" y="2108" width="54" height="30" fill="#29312F"/>
+<rect x="1147" y="2111" width="24" height="24" fill="#858F8D"/>
+<rect x="1148" y="2112" width="22" height="22" fill="#29312F"/>
+<text x="1205" y="2128" fill="#8A9492" font-family="Arial, sans-serif" font-size="11">OFF</text>
+<rect x="1235" y="2107" width="56" height="32" fill="#81908D"/>
+<rect x="1236" y="2108" width="54" height="30" fill="#313A38"/>
+<rect x="1263" y="2111" width="24" height="24" fill="#81908D"/>
+<rect x="1264" y="2112" width="22" height="22" fill="#81908D"/>
+<text x="1297" y="2128" fill="#8A9492" font-family="Arial, sans-serif" font-size="11">ON</text>
+<text x="723" y="2167" fill="#A6AEAC" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
+<rect x="865" y="2153" width="106" height="29" fill="#858F8D"/>
+<rect x="866" y="2154" width="104" height="27" fill="#343E3B"/>
+<text x="877" y="2173" fill="#C8D0CE" font-family="Arial, sans-serif" font-size="11">HOVER</text>
+<rect x="984" y="2153" width="106" height="29" fill="#81908D"/>
+<rect x="985" y="2154" width="104" height="27" fill="#38413F"/>
+<text x="996" y="2173" fill="#C8D0CE" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
+<text x="1115" y="2167" fill="#8A9492" font-family="Arial, sans-serif" font-size="12">quiet text 4.64:1</text>
+<text x="1115" y="2184" fill="#8A9492" font-family="Arial, sans-serif" font-size="12">background luminance 0.022</text>
 <rect x="10" y="2210" width="685" height="184" fill="#0A132B"/>
 <text x="28" y="2237" fill="#EAF0FF" font-family="Arial, sans-serif" font-size="19">COBALT / DARK</text>
 <text x="28" y="2259" fill="#8491B5" font-family="Arial, sans-serif" font-size="12">background #0A132B / accent #FFD45A</text>
@@ -740,36 +740,36 @@
 <text x="301" y="2367" fill="#EAF0FF" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
 <text x="420" y="2361" fill="#8491B5" font-family="Arial, sans-serif" font-size="12">quiet text 4.62:1</text>
 <text x="420" y="2378" fill="#8491B5" font-family="Arial, sans-serif" font-size="12">background luminance 0.007</text>
-<rect x="705" y="2210" width="685" height="184" fill="#CDD2DD"/>
-<text x="723" y="2237" fill="#121A34" font-family="Arial, sans-serif" font-size="19">COBALT / LIGHT</text>
-<text x="723" y="2259" fill="#475067" font-family="Arial, sans-serif" font-size="12">background #CDD2DD / accent #5F4B00</text>
-<text x="723" y="2282" fill="#121A34" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
-<rect x="723" y="2299" width="122" height="37" fill="#776830"/>
-<rect x="724" y="2300" width="120" height="35" fill="#C6CAD0"/>
-<text x="733" y="2322" fill="#121A34" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
-<rect x="859" y="2299" width="122" height="37" fill="#61697E"/>
-<rect x="860" y="2300" width="120" height="35" fill="#CDD2DD"/>
-<text x="869" y="2322" fill="#121A34" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
-<rect x="1003" y="2299" width="122" height="37" fill="#776830"/>
-<rect x="1005" y="2301" width="118" height="33" fill="#C6CAD0"/>
-<text x="1013" y="2322" fill="#121A34" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
-<rect x="1143" y="2301" width="56" height="32" fill="#61697E"/>
-<rect x="1144" y="2302" width="54" height="30" fill="#C6CCD7"/>
-<rect x="1147" y="2305" width="24" height="24" fill="#61697E"/>
-<rect x="1148" y="2306" width="22" height="22" fill="#C6CCD7"/>
-<text x="1205" y="2322" fill="#475067" font-family="Arial, sans-serif" font-size="11">OFF</text>
-<rect x="1235" y="2301" width="56" height="32" fill="#776830"/>
-<rect x="1236" y="2302" width="54" height="30" fill="#C6CAD0"/>
-<rect x="1263" y="2305" width="24" height="24" fill="#776830"/>
-<rect x="1264" y="2306" width="22" height="22" fill="#776830"/>
-<text x="1297" y="2322" fill="#475067" font-family="Arial, sans-serif" font-size="11">ON</text>
-<text x="723" y="2361" fill="#485067" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
-<rect x="865" y="2347" width="106" height="29" fill="#61697E"/>
-<rect x="866" y="2348" width="104" height="27" fill="#C4C7CB"/>
-<text x="877" y="2367" fill="#121A34" font-family="Arial, sans-serif" font-size="11">HOVER</text>
-<rect x="984" y="2347" width="106" height="29" fill="#776830"/>
-<rect x="985" y="2348" width="104" height="27" fill="#C2C5C7"/>
-<text x="996" y="2367" fill="#121A34" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
-<text x="1115" y="2361" fill="#475067" font-family="Arial, sans-serif" font-size="12">quiet text 4.62:1</text>
-<text x="1115" y="2378" fill="#475067" font-family="Arial, sans-serif" font-size="12">background luminance 0.643</text>
+<rect x="705" y="2210" width="685" height="184" fill="#242730"/>
+<text x="723" y="2237" fill="#CACFD8" font-family="Arial, sans-serif" font-size="19">COBALT / GREY</text>
+<text x="723" y="2259" fill="#8E96A4" font-family="Arial, sans-serif" font-size="12">background #242730 / accent #9BA3B2</text>
+<text x="723" y="2282" fill="#CACFD8" font-family="Arial, sans-serif" font-size="15">Readable text. Calm surfaces, not inverted white rectangles.</text>
+<rect x="723" y="2299" width="122" height="37" fill="#838B98"/>
+<rect x="724" y="2300" width="120" height="35" fill="#323640"/>
+<text x="733" y="2322" fill="#CACFD8" font-family="Arial, sans-serif" font-size="12">PRIMARY</text>
+<rect x="859" y="2299" width="122" height="37" fill="#838B98"/>
+<rect x="860" y="2300" width="120" height="35" fill="#242730"/>
+<text x="869" y="2322" fill="#CACFD8" font-family="Arial, sans-serif" font-size="12">SECONDARY</text>
+<rect x="1003" y="2299" width="122" height="37" fill="#838B98"/>
+<rect x="1005" y="2301" width="118" height="33" fill="#323640"/>
+<text x="1013" y="2322" fill="#CACFD8" font-family="Arial, sans-serif" font-size="12">SELECTED</text>
+<rect x="1143" y="2301" width="56" height="32" fill="#838B98"/>
+<rect x="1144" y="2302" width="54" height="30" fill="#2A2D36"/>
+<rect x="1147" y="2305" width="24" height="24" fill="#838B98"/>
+<rect x="1148" y="2306" width="22" height="22" fill="#2A2D36"/>
+<text x="1205" y="2322" fill="#8E96A4" font-family="Arial, sans-serif" font-size="11">OFF</text>
+<rect x="1235" y="2301" width="56" height="32" fill="#838B98"/>
+<rect x="1236" y="2302" width="54" height="30" fill="#323640"/>
+<rect x="1263" y="2305" width="24" height="24" fill="#838B98"/>
+<rect x="1264" y="2306" width="22" height="22" fill="#838B98"/>
+<text x="1297" y="2322" fill="#8E96A4" font-family="Arial, sans-serif" font-size="11">ON</text>
+<text x="723" y="2361" fill="#A4A9B2" font-family="Arial, sans-serif" font-size="14">Quiet action</text>
+<rect x="865" y="2347" width="106" height="29" fill="#838B98"/>
+<rect x="866" y="2348" width="104" height="27" fill="#363A44"/>
+<text x="877" y="2367" fill="#CACFD8" font-family="Arial, sans-serif" font-size="11">HOVER</text>
+<rect x="984" y="2347" width="106" height="29" fill="#838B98"/>
+<rect x="985" y="2348" width="104" height="27" fill="#393D47"/>
+<text x="996" y="2367" fill="#CACFD8" font-family="Arial, sans-serif" font-size="11">PRESSED</text>
+<text x="1115" y="2361" fill="#8E96A4" font-family="Arial, sans-serif" font-size="12">quiet text 4.60:1</text>
+<text x="1115" y="2378" fill="#8E96A4" font-family="Arial, sans-serif" font-size="12">background luminance 0.020</text>
 </svg>

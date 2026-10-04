@@ -1589,7 +1589,7 @@ private val REMINDER_TIMES = listOf(9 to 0, 13 to 0, 20 to 0, 22 to 0)
 
 private fun themeLabel(mode: ThemeMode): String = when (mode) {
     ThemeMode.DARK -> S.t("set.101")
-    ThemeMode.LIGHT -> S.t("set.102")
+    ThemeMode.GREY -> S.t("set.102")
     // Reuses the language section's "как в системе": it is the same promise about
     // the same phone setting, and two different wordings for it would read as two
     // different behaviours.

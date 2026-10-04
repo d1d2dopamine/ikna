@@ -142,7 +142,7 @@ val STRINGS_RU: Map<String, String> = mapOf(
 	"set.099" to "КАК В СИСТЕМЕ",
 	"set.100" to "РУССКИЙ",
 	"set.101" to "ТЁМНАЯ",
-	"set.102" to "СВЕТЛАЯ",
+	"set.102" to "СЕРАЯ",
 	"set.103" to "СВОЯ",
 	"set.110" to "шрифт",
 	"set.114" to "ПАЛИТРА",

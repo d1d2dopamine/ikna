@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.ikna.ui.text.S
@@ -42,7 +43,7 @@ fun SearchPane(container: DesktopContainer, palette: IknaPalette, decks: List<De
         }
     }
     DesktopPaneFrame(S.t("search.001"), onBack) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 40.dp)) {
+        Column(Modifier.fillMaxWidth().widthIn(max = 840.dp).align(Alignment.CenterHorizontally).padding(horizontal = 40.dp)) {
             Spacer(Modifier.height(Space.md))
             Text(S.t("search.002"), style = MaterialTheme.typography.bodyMedium, color = palette.muted)
             Spacer(Modifier.height(Space.md))
@@ -65,7 +66,7 @@ fun SearchPane(container: DesktopContainer, palette: IknaPalette, decks: List<De
                 enabled = !busy && localSearchTerms(query) != null)
             Spacer(Modifier.height(Space.lg)); IknaRule(); Spacer(Modifier.height(Space.md))
         }
-        LazyColumn(Modifier.weight(1f).fillMaxWidth(), contentPadding = PaddingValues(horizontal = 40.dp, vertical = 12.dp)) {
+        LazyColumn(Modifier.weight(1f).fillMaxWidth().widthIn(max = 840.dp).align(Alignment.CenterHorizontally), contentPadding = PaddingValues(horizontal = 40.dp, vertical = 12.dp)) {
             if (busy || failed || !searched || rows.isEmpty()) item {
                 Text(S.t(when { failed -> "search.009"; busy -> "search.005"; !searched -> "search.006"; else -> "search.007" }),
                     style = MaterialTheme.typography.bodyMedium, color = palette.muted)

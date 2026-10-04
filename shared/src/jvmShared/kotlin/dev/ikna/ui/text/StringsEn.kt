@@ -292,7 +292,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// ТЁМНАЯ
 	"set.101" to "DARK",
 	// СВЕТЛАЯ
-	"set.102" to "LIGHT",
+	"set.102" to "GREY",
 	// СВОЯ
 	"set.103" to "OWN",
 	// шрифт

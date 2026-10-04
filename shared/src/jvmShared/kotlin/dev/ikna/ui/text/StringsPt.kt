@@ -143,7 +143,7 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "set.099" to "SISTEMA",
     "set.100" to "РУССКИЙ",
     "set.101" to "ESCURO",
-    "set.102" to "CLARO",
+    "set.102" to "CINZA",
     "set.103" to "PRÓPRIO",
     "set.110" to "fonte",
     "set.114" to "PALETA",

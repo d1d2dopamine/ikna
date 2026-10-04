@@ -68,7 +68,7 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "set.090" to "etwas ist auf seinem Hintergrund schlecht lesbar; die Farbe wird trotzdem angewendet",
     "set.091" to "LAST", "set.092" to "AUSSEHEN", "set.093" to "SPRACHE", "set.094" to "SPRACHAUSGABE",
     "set.095" to "SCHRIFT", "set.096" to "ERINNERUNG", "set.097" to "DATEN", "set.098" to "SELTEN",
-    "set.099" to "SYSTEM", "set.100" to "РУССКИЙ", "set.101" to "DUNKEL", "set.102" to "HELL", "set.103" to "EIGEN", "set.110" to "Schrift", "set.114" to "PALETTE",
+    "set.099" to "SYSTEM", "set.100" to "РУССКИЙ", "set.101" to "DUNKEL", "set.102" to "GRAU", "set.103" to "EIGEN", "set.110" to "Schrift", "set.114" to "PALETTE",
     "set.116" to "GLUT", "set.117" to "BIBLIOTHEK", "set.118" to "TINTE", "set.119" to "PFLAUME", "set.120" to "NULL",
     "set.121" to "NEUTRAL", "set.125" to "ROSE", "set.126" to "REIF", "set.127" to "PHOSPHOR", "set.141" to "ULTRAVIOLETT", "set.142" to "LAGUNE", "set.143" to "KOBALT", "set.122" to "BELEUCHTUNG",
     "set.128" to "ALLE SPRACHEN", "set.130" to "Telefonstimme", "set.131" to "Liest Sprachen, die keines deiner Modelle abdeckt",
