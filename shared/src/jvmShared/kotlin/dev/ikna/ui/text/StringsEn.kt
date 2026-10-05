@@ -42,9 +42,9 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// НОРМА ДНЯ
 	"stats.004" to "HISTORY",
 	// Карточек в день. Посчитано по твоим последним дням, пересчитывается само.
-	"stats.005" to "TARGETS WITH HISTORY",
+	"stats.005" to "PHRASES IN STUDY",
 	// Ориентир на первые дни, а не измерение. Свою цифру посчитаю, когда наберётся хотя бы три д
-	"stats.006" to "ANSWERS",
+	"stats.006" to "ANSWERS · 30 DAYS",
 	// СЛОВ В ПАМЯТИ
 	"stats.007" to "ACTIVE DAYS · 30",
 	// ОТВЕЧЕНО СЕГОДНЯ
@@ -70,7 +70,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// Расписание метит примерно в 90%. Выше 95% — повторов больше, чем нужно: память выдержала б
 	"stats.018" to "The schedule aims at about 90%. Above 95% means the intervals may be shorter than necessary. The scheduler will adapt from later answers; there is no need to chase the percentage.",
 	// Расписание метит примерно в 90%, и сейчас всё в этом коридоре. Трогать ничего не надо.
-	"stats.019" to "The schedule aims at about 90%; the current observations are inside that corridor. This is a measurement, not a target.",
+	"stats.019" to "The schedule aims at about 90%; the current observations are inside that corridor — the intervals are well chosen. This is a measurement, not a target.",
 	// МИНУТ СЕГОДНЯ
 	"stats.020" to "MINUTES TODAY",
 	// ЗА НЕДЕЛЮ
@@ -90,11 +90,12 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// Пока рано выделять час: нужно хотя бы 12 повторений внутри одного часа. Бледные столбики —
 	"stats.028" to "Too early to name an hour: at least 12 reviews are needed in each of three different hours. Until then this block waits for evidence instead of inventing a “best time”.",
 	// НЕ ДЕРЖИТСЯ
-	"stats.029" to "REQUIRES ATTENTION",
+	"stats.029" to "WORTH STRENGTHENING",
 	// Пока таких нет: ничего не забывалось по четыре раза и больше.
 	"stats.030" to "None so far. Targets forgotten four times or more will appear here.",
 	// Справа — сколько раз фраза забывалась. Это про фразу, а не про тебя: обычно она слишком дл
 	"stats.031" to "On the right: how many times the target was forgotten. This is a signal about the target or its context, not a score for you.",
+"stats.033" to "TOMORROW",
 	// СЕГОДНЯ
 	"stats.032" to "+1",
 	// Не удалось открыть файл

@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.Dp
 
 @Composable
 fun DesktopPaneFrame(title: String, onBack: () -> Unit,
-    titleStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    titleStyle: TextStyle = MaterialTheme.typography.headlineSmall,
     content: @Composable ColumnScope.() -> Unit) {
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).clipToBounds()) {
         Column(Modifier.fillMaxSize().padding(bottom = BarHeight)) {
@@ -35,7 +35,7 @@ fun DesktopPaneFrame(title: String, onBack: () -> Unit,
 
 @Composable
 fun DesktopScrollablePane(title: String, onBack: () -> Unit,
-    titleStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    titleStyle: TextStyle = MaterialTheme.typography.headlineSmall,
     readingWidth: Dp = 760.dp, content: @Composable ColumnScope.() -> Unit) {
     DesktopPaneFrame(title, onBack, titleStyle) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 40.dp)) {

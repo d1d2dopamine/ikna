@@ -9,6 +9,9 @@
 - **A centred reading measure on desktop.** Session, statistics, search, add-deck, catalogue and backup compose around a centred column instead of hugging the deck list; the session's chrome, hint and card share one measure.
 - **The session header is grouped.** The counter, its row and the keyboard hint (built from the user's actual bindings) sit together, and the duplicated word "today" is gone. The settings jump strip aligns with the sections again after a drift regression, and its edge labels sit where the content sits.
 - **The today block reads as one line.** "Today · 5 cards · →" is set in one size and weight -- the oversized figure is gone, and the digits keep their mono face.
+- **Statistics speaks in deltas and capabilities.** "Targets with history" becomes "phrases in study", the answers counter shows the 30-day delta, the retention corridor names the schedule as well chosen, "requires attention" becomes "worth strengthening", and the 14-day forecast folds behind a tap leaving tomorrow's count in the open. Research map: docs/rele.md У11-У13 (pending owner review).
+- **Every desktop pane title reads in one style** (headlineSmall) -- the mixed display/title sizes are gone, pinned by a source-contract test.
+- **The Browse top bar joins the feed measure** (640dp) instead of stretching edge to edge.
 - **Statistics disclosures carry the Signal Frame**, and the deck-import phase states honestly that large decks build slowly instead of promising a duration.
 ### 0.11.0 runtime correctness checkpoint
 

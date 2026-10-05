@@ -102,14 +102,16 @@ fun BrowsePane(
     }
 
     Column(Modifier.fillMaxSize()) {
-        IknaBrowseTopBar(plan?.deckTitle.orEmpty())
-        developerBlockers?.let { note ->
-            Text(
-                text = note,
-                style = MaterialTheme.typography.labelSmall,
-                color = palette.accent,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = Space.xs)
-            )
+        Column(Modifier.fillMaxWidth().widthIn(max = 640.dp).align(Alignment.CenterHorizontally)) {
+            IknaBrowseTopBar(plan?.deckTitle.orEmpty())
+            developerBlockers?.let { note ->
+                Text(
+                    text = note,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = palette.accent,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = Space.xs)
+                )
+            }
         }
 
         Box(

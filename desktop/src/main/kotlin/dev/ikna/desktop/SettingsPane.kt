@@ -120,7 +120,7 @@ fun SettingsPane(
     val sections = listOf("load" to "set.091", "look" to "set.092", "language" to "set.093",
         "speech" to "set.094", "font" to "set.095", "keys" to "keys.001", "reminder" to "set.096",
         "update" to "set.140", "data" to "set.097", "advanced" to "set.098")
-    DesktopPaneFrame(S.t("set.012"), onBack, MaterialTheme.typography.headlineSmall) {
+    DesktopPaneFrame(S.t("set.012"), onBack) {
         // The measured settings column centres in the pane; the jump strip and
         // the rule follow it so the landmarks never sit somewhere else than the
         // sections they name.

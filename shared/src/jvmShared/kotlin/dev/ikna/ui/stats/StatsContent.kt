@@ -37,17 +37,17 @@ fun IknaStatsContent(days: List<Boolean>, forecast: List<Int>, digest: StatsDige
             ) {
                 HistoryMetric(
                     label = S.t("stats.005"),
-                    value = digest.targetsWithHistory,
+                    value = digest.targetsWithHistory.toString(),
                     modifier = Modifier.weight(1f)
                 )
                 HistoryMetric(
                     label = S.t("stats.006"),
-                    value = digest.totalAnswers,
+                    value = "+" + digest.answers30,
                     modifier = Modifier.weight(1f)
                 )
                 HistoryMetric(
                     label = S.t("stats.007"),
-                    value = days.count { it },
+                    value = days.count { it }.toString(),
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -67,14 +67,12 @@ fun IknaStatsContent(days: List<Boolean>, forecast: List<Int>, digest: StatsDige
 
         StatsDivider()
 
-        Block(label = S.t("stats.010"), note = S.t("stats.011")) {
-            ForecastBars(values = forecast)
-        }
+        ForecastBlock(forecast)
     }
 }
 
 @Composable
-private fun HistoryMetric(label: String, value: Int, modifier: Modifier = Modifier) {
+private fun HistoryMetric(label: String, value: String, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         // Three metrics share one row on phone and desktop. Reserve the same
         // label height so a translated two-line label does not push only one
@@ -363,6 +361,62 @@ private fun HourBars(hours: List<HourSlice>) {
             Label("12")
             Label("18")
             Label("23")
+        }
+    }
+}
+
+/**
+ * The forecast folds behind a tap: the one number a learner plans with is
+ * tomorrow's, and a 14-day wall of bars reads as an obligation queue. The
+ * owner decision follows the delay-aversion research in docs/rele.md (У12).
+ */
+@Composable
+private fun ForecastBlock(forecast: List<Int>) {
+    var open by remember { mutableStateOf(false) }
+    val blockInteraction = remember { MutableInteractionSource() }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .hoverable(blockInteraction)
+            .iknaSignalFrame(blockInteraction)
+            .clickable(
+                interactionSource = blockInteraction,
+                indication = null,
+                onClickLabel = S.t("a11y.007")
+            ) { open = !open }
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Label(S.t("stats.010"))
+            Spacer(Modifier.weight(1f))
+            Text(
+                text = if (open) "\u2212" else "?",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Spacer(Modifier.height(12.dp))
+        if (open) {
+            ForecastBars(values = forecast)
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = S.t("stats.011"),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = S.t("stats.033"),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = (forecast.getOrNull(0) ?: 0).toString(),
+                    style = iknaNumberStyle(MaterialTheme.typography.displayMedium, strong = true),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
         }
     }
 }

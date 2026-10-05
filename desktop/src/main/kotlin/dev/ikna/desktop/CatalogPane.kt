@@ -99,7 +99,7 @@ fun CatalogPane(
         .filter { subject == null || it.subject == subject }
         .filter { level == null || it.level == level }
 
-    DesktopScrollablePane(S.t("cat.001"), onBack, titleStyle = MaterialTheme.typography.headlineSmall) {
+    DesktopScrollablePane(S.t("cat.001"), onBack) {
 
 Spacer(Modifier.height(Space.lg))
 Spacer(Modifier.height(Space.xs))

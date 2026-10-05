@@ -20,6 +20,8 @@ data class StatsDigest(
     val targetsWithHistory: Int = 0,
     /** All non-retracted answers in the append-only review log. */
     val totalAnswers: Int = 0,
+    /** Real reviews inside the 30-day window: the delta the header shows. */
+    val answers30: Int = 0,
     /** Share of reviews recalled, 0..1, or null until there are enough of them. */
     val retention: Double? = null,
     /** How many reviews that share was computed from. */

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Offline source contracts; not a Kotlin compiler or a screenshot test."""
+import os
 from pathlib import Path
 import json
 import re
@@ -94,7 +95,7 @@ class DesignContracts(unittest.TestCase):
                 self.assertNotIn(forbidden, platform)
         source = read(SHARED, 'ui/stats/StatsContent.kt')
         for required in ['ActivityMap(', 'HourBars(', 'ForecastBars(', 'Leeches(', 'HistoryMetric(',
-                         'targetsWithHistory', 'totalAnswers', 'stats.030', 'IknaLatticePlaceholder()', 'displayLarge']:
+                         'targetsWithHistory', 'answers30', 'stats.030', 'IknaLatticePlaceholder()', 'displayLarge']:
             self.assertIn(required, source)
         self.assertNotIn('Minutes(digest)', source)
 
@@ -477,6 +478,20 @@ class DesignContracts(unittest.TestCase):
         for base, name in [(ANDROID, 'ui/decks/DeckScreen.kt'),
                            (DESKTOP, 'DeckPane.kt')]:
             self.assertIn('IknaDeckProgress(', read(base, name))
+
+    def test_desktop_pane_titles_share_one_style(self):
+        # Every desktop pane title reads in the same style: the wrappers own
+        # the default and no pane overrides it, so a drifted size or weight is
+        # a failing test rather than a surprise.
+        chrome = read(DESKTOP, 'PaneChrome.kt')
+        assert chrome.count('titleStyle: TextStyle = MaterialTheme.typography.headlineSmall') == 2
+        for dp, _, fns in os.walk(ROOT / 'desktop' / 'src' / 'main' / 'kotlin'):
+            for fn in fns:
+                if not fn.endswith('.kt'):
+                    continue
+                text = (Path(dp) / fn).read_text(encoding='utf-8')
+                assert 'titleStyle = MaterialTheme.typography.' not in text, \
+                    os.path.relpath(Path(dp) / fn, ROOT)
 
     def test_compose_typography_references_have_imports(self):
         # Imported Android UI bodies can keep FontWeight.Medium while losing

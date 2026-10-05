@@ -1620,6 +1620,7 @@ class LearningRepository(
         return StatsDigest(
             targetsWithHistory = reviewDao.distinctTargetCount(),
             totalAnswers = reviewDao.total(),
+            answers30 = reviews.size,
             retention = retention,
             retentionSample = reviews.size,
             hours = hours,

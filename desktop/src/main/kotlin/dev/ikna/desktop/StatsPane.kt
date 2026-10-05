@@ -45,7 +45,7 @@ fun StatsPane(
         loading = false
     }
 
-    DesktopScrollablePane(S.t("stats.001"), onBack, titleStyle = MaterialTheme.typography.displaySmall) {
+    DesktopScrollablePane(S.t("stats.001"), onBack) {
         if (loading && digest == null) IknaLatticePlaceholder()
         else dev.ikna.ui.stats.IknaStatsContent(days, forecast, digest ?: StatsDigest())
     }

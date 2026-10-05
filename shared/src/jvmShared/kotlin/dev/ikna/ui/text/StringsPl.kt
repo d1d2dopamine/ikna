@@ -42,9 +42,9 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// НОРМА ДНЯ
 	"stats.004" to "HISTORIA",
 	// Карточек в день. Посчитано по твоим последним дням, пересчитывается само.
-	"stats.005" to "CELE Z HISTORIĄ",
+	"stats.005" to "FRAZY W NAUCE",
 	// Ориентир на первые дни, а не измерение. Свою цифру посчитаю, когда наберётся хотя бы три д
-	"stats.006" to "ODPOWIEDZI",
+	"stats.006" to "ODPOWIEDZI · 30 DNI",
 	// СЛОВ В ПАМЯТИ
 	"stats.007" to "AKTYWNE DNI · 30",
 	// ОТВЕЧЕНО СЕГОДНЯ
@@ -70,7 +70,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// Расписание метит примерно в 90%. Выше 95% — повторов больше, чем нужно: память выдержала б
 	"stats.018" to "Harmonogram celuje w około 90%. Powyżej 95% odstępy mogą być krótsze niż potrzeba. Planista dostosuje je po kolejnych odpowiedziach; nie trzeba gonić za procentem.",
 	// Расписание метит примерно в 90%, и сейчас всё в этом коридоре. Трогать ничего не надо.
-	"stats.019" to "Harmonogram celuje w około 90%; obecne obserwacje mieszczą się w tym przedziale. To pomiar, nie cel.",
+	"stats.019" to "Harmonogram celuje w około 90%, a obecne obserwacje mieszczą się w tym korytarzu — interwały dobrano dobrze. To pomiar, nie cel.",
 	// МИНУТ СЕГОДНЯ
 	"stats.020" to "MINUT DZIŚ",
 	// ЗА НЕДЕЛЮ
@@ -90,11 +90,12 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// Пока рано выделять час: нужно хотя бы 12 повторений внутри одного часа. Бледные столбики —
 	"stats.028" to "Za wcześnie, by wskazać godzinę: potrzeba co najmniej 12 powtórek w każdej z trzech różnych godzin. Do tego czasu blok czeka na dane zamiast wymyślać „najlepszą porę”.",
 	// НЕ ДЕРЖИТСЯ
-	"stats.029" to "WYMAGA UWAGI",
+	"stats.029" to "DO WZMOCNIENIA",
 	// Пока таких нет: ничего не забывалось по четыре раза и больше.
 	"stats.030" to "Na razie takich celów nie ma. Pojawią się tu te zapomniane cztery razy lub więcej.",
 	// Справа — сколько раз фраза забывалась. Это про фразу, а не про тебя: обычно она слишком дл
 	"stats.031" to "Po prawej: ile razy cel został zapomniany. To sygnał o celu lub jego kontekście, nie ocena ciebie.",
+"stats.033" to "JUTRO",
 	// СЕГОДНЯ
 	"stats.032" to "+1",
 	// Не удалось открыть файл
