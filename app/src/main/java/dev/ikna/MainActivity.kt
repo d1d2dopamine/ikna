@@ -52,8 +52,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settings by container.settings.flow.collectAsState(initial = IknaSettings())
             val schedulerMigration by container.schedulerMigration.collectAsState()
-            // The phone's own light/dark switch is read here and nowhere else,
-            // and it decides one thing only: the lighting. Which palette the app
+            // The phone's own light/dark switch resolves the active lighting
+            // here (Settings uses the same signal for previews). Which palette the app
             // wears is the user's choice and does not change at sunset.
             val palette = paletteFor(settings, systemDark = isSystemInDarkTheme())
 

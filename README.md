@@ -114,6 +114,9 @@ The full build, test and release recipes live in [`CONTRIBUTING.md`](CONTRIBUTIN
 
 Start here: [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`DESIGN.md`](docs/DESIGN.md) · [`LEARNING-ENGINE.md`](docs/LEARNING-ENGINE.md) · [`CONTRIBUTING.md`](CONTRIBUTING.md) · [`VERSIONS.md`](docs/VERSIONS.md)
 
+Active development: [`0.12.0 press plan`](docs/PLAN-0.12.md).
+AI contributors: [`AGENTS.md`](AGENTS.md) and the repository skills linked there.
+
 Everything else lives in [`docs/`](docs/).
 
 ## ⚖️ License
@@ -237,6 +240,9 @@ ikna учит язык **кусками**: полезная фраза, есте
 ## 📚 Документация
 
 Начать отсюда: [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`DESIGN.md`](docs/DESIGN.md) · [`LEARNING-ENGINE.md`](docs/LEARNING-ENGINE.md) · [`CONTRIBUTING.md`](CONTRIBUTING.md) · [`VERSIONS.md`](docs/VERSIONS.md)
+
+Текущий цикл разработки: [`план 0.12.0 press`](docs/PLAN-0.12.md).
+Для AI-контрибьюторов: [`AGENTS.md`](AGENTS.md) и указанные там скиллы проекта.
 
 Остальное лежит в [`docs/`](docs/). Документация в `docs/` ведётся на английском.
 

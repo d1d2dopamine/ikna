@@ -50,7 +50,7 @@ import dev.ikna.ui.theme.IknaSwatch
 import dev.ikna.ui.theme.MIN_READABLE_CONTRAST
 import dev.ikna.ui.theme.contrastRatio
 import dev.ikna.ui.theme.hexOf
-import dev.ikna.ui.theme.isLight
+import dev.ikna.ui.theme.palettePreviewUsesGrey
 import dev.ikna.ui.theme.parseHexColor
 import dev.ikna.ui.theme.ratioText
 import kotlinx.coroutines.Dispatchers
@@ -176,11 +176,8 @@ fun SettingsPane(
                     // which is the one thing a grid of colours exists to avoid.
                     IknaPaletteTiles(
                         selectedId = settings.paletteId,
-                        // Drawn in the lighting the window is in right now, read off the
-                        // background rather than asked of the system: with a custom scheme
-                        // the two can disagree, and what matters is what the eye is
-                        // currently adapted to.
-                        light = isLight(palette.background),
+                        // Match the desktop shell's SYSTEM fallback to dark.
+                        grey = palettePreviewUsesGrey(settings, systemDark = true),
                         columns = 4,
                         onPick = { id -> save { container.settings.setPalette(id) } }
                     )

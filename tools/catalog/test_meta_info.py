@@ -37,7 +37,7 @@ def card(card_id, text, context, source, lemma=None):
 def write_deck(root, name, records):
     path = root / name
     opener = gzip.open if name.endswith(".gz") else open
-    with opener(path, "wt", encoding="utf-8") as handle:
+    with opener(path, "wt", encoding="utf-8", newline="\n") as handle:
         for record in records:
             handle.write(json.dumps(record, ensure_ascii=False) + "\n")
 
@@ -183,6 +183,32 @@ class MetaInfoTests(unittest.TestCase):
             meta_info.verify_build(data, build)
             self.assertTrue(data["input"]["buildVerified"])
             self.assertEqual(data["inventory"]["decksAtTargetCap"], 1)
+
+    def test_raw_utf8_bytes_and_build_agree_for_plain_and_gzip_line_endings(self):
+        # Write bytes independently of the platform's text writer. Non-ASCII
+        # text also ensures this measures bytes, not characters or line counts.
+        row = card("a", "care", "I care about this.", 1)
+        row["translation"] = "забота — café\n— Tatoeba #1"
+        for ending in (b"\n", b"\r\n", b"\r"):
+            for compressed in (False, True):
+                with self.subTest(ending=ending, gzip=compressed), tempfile.TemporaryDirectory() as temp:
+                    root = Path(temp)
+                    raw = (json.dumps(row, ensure_ascii=False).encode("utf-8") + ending) * 2
+                    name = "en-ru-everyday-beginner.jsonl" + (".gz" if compressed else "")
+                    payload = gzip.compress(raw, mtime=0) if compressed else raw
+                    (root / name).write_bytes(payload)
+                    data, _ = meta_info.analyse(root)
+                    self.assertEqual(2, data["catalogue"]["targetDeckMemberships"])
+                    self.assertEqual(len(raw), data["catalogue"]["observedUncompressedBytes"])
+                    self.assertEqual(len(payload), data["catalogue"]["deckAssetBytes"])
+                    build = root / "BUILD.json"
+                    build.write_text(json.dumps({"output": {
+                        "targetDeckMemberships": 2, "contexts": 2,
+                        "uniqueSourceContexts": 1, "uniqueTargets": 1, "decks": 1,
+                        "compressedDeckBytes": len(payload), "uncompressedDeckBytes": len(raw),
+                    }}), encoding="utf-8")
+                    meta_info.verify_build(data, build)
+                    self.assertTrue(data["input"]["buildVerified"])
 
     def test_v2_target_identity_mismatch_is_audited(self):
         with tempfile.TemporaryDirectory() as temp:

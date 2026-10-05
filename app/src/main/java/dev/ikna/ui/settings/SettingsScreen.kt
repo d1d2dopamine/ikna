@@ -22,6 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -52,7 +53,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
@@ -83,12 +83,11 @@ import dev.ikna.ui.theme.IknaHexField
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaSwatch
-import dev.ikna.ui.theme.IknaPalettes
 import dev.ikna.ui.theme.LocalIknaControlColors
 import dev.ikna.ui.theme.MIN_READABLE_CONTRAST
 import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.theme.contrastRatio
-import dev.ikna.ui.theme.isLight
+import dev.ikna.ui.theme.palettePreviewUsesGrey
 import dev.ikna.ui.theme.hexOf
 import dev.ikna.ui.theme.parseHexColor
 import dev.ikna.ui.theme.ratioText
@@ -406,13 +405,9 @@ fun SettingsScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(12.dp))
-                        PaletteTiles(
+                        IknaPaletteTiles(
                             selectedId = settings.paletteId,
-                            // The tiles are drawn in the lighting the app is in right
-                            // now, read off the background rather than asked of the
-                            // system: with a custom scheme the two can disagree, and
-                            // what matters is what the eye is currently adapted to.
-                            light = isLight(MaterialTheme.colorScheme.background),
+                            grey = palettePreviewUsesGrey(settings, systemDark = isSystemInDarkTheme()),
                             onPick = { id -> scope.launch { container.settings.setPalette(id) } }
                         )
                         Spacer(Modifier.height(20.dp))
@@ -1421,100 +1416,6 @@ private fun ColorRow(label: String, color: Color, onColor: (Int) -> Unit) {
         )
     }
 }
-
-/**
- * The palettes, shown as themselves.
- *
- * A list of names is not a choice of colours — nobody knows what "Слива" is until
- * they have already switched to it and switched back. Each tile is painted in the
- * palette it offers: its own background, the wordmark in its ink, and a bar of
- * accent next to a bar of muted, which is every colour the palette has.
- *
- * Selection is a heavier border rather than a tint or a tick, for the same reason
- * everything else here is: a tick would have to be drawn in some colour, and on a
- * tile whose whole point is its own colours there is no colour left to use.
- */
-@Composable
-private fun PaletteTiles(
-    selectedId: String,
-    light: Boolean,
-    onPick: (String) -> Unit
-) {
-    val ink = MaterialTheme.colorScheme.onBackground
-    val line = MaterialTheme.colorScheme.outline
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
-
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        IknaPalettes.chunked(3).forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                row.forEach { spec ->
-                    val p = spec.palette(light)
-                    val selected = spec.id == selectedId
-                    // The tap zone used to be this whole column: a third of
-                    // the row wide, tile plus gap plus name, including all the
-                    // empty space to the right of a name as short as "НОЛЬ". A
-                    // tap aimed at nothing repainted the entire app, which is
-                    // the one change here nobody asks for by accident. Only the
-                    // tile and its own name answer now.
-                    Column(modifier = Modifier.weight(1f)) {
-                        Column(
-                            modifier = Modifier
-                                .clickable(
-                                    role = Role.RadioButton,
-                                    onClickLabel = S.t(spec.nameKey),
-                                    onClick = { onPick(spec.id) }
-                                )
-                                .fillMaxWidth()
-                                .height(64.dp)
-                                .background(p.background)
-                                .border(if (selected) 2.dp else 1.dp,
-                                    if (selected) LocalIknaControlColors.current.mark else line)
-                                .padding(8.dp)
-                        ) {
-                            Text(
-                                text = WORDMARK,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = p.ink,
-                                maxLines = 1
-                            )
-                            Spacer(Modifier.weight(1f))
-                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Box(
-                                    modifier = Modifier
-                                        .weight(2f)
-                                        .height(8.dp)
-                                        .background(p.accent)
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(8.dp)
-                                        .background(p.muted)
-                                )
-                            }
-                        }
-                        Spacer(Modifier.height(6.dp))
-                        Text(
-                            text = S.t(spec.nameKey),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (selected) ink else muted,
-                            maxLines = 1,
-                            // The name is part of the target, the space beside it
-                            // is not. A Text is exactly as wide as its text.
-                            modifier = Modifier.clickable { onPick(spec.id) }
-                        )
-                    }
-                }
-                // A last row of two must not stretch its tiles to the width of
-                // three, or the grid stops being a grid.
-                repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
-            }
-        }
-    }
-}
-
-/** The one word in the app that is never translated. */
-private const val WORDMARK = "ikna"
 
 private const val SETTINGS_SECTION_CONTENT_TYPE = "settings-section"
 

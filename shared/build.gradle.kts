@@ -46,6 +46,14 @@ kotlin {
             dependsOn(jvmShared)
         }
 
+        val commonTest by getting
+        val jvmSharedTest by creating {
+            dependsOn(commonTest)
+            dependencies { implementation(kotlin("test")) }
+        }
+        val androidUnitTest by getting { dependsOn(jvmSharedTest) }
+        val desktopTest by getting { dependsOn(jvmSharedTest) }
+
         // api, not implementation: :app compiles against Compose, Room and the
         // coroutines types that appear in this module's public signatures, and
         // it no longer declares any of them itself. One version of Compose in

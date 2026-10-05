@@ -7,8 +7,10 @@ telemetry, no runtime LLM dependency, deterministic learning history, and a
 catalogue whose study material can be traced back to its public source.
 
 This file is the practical entry point for working on the repository. The design
-rationale lives in [`docs/`](docs/), while the current 0.11 work checkpoint lives
-in [`docs/PLAN-0.11.md`](docs/PLAN-0.11.md).
+rationale lives in [`docs/`](docs/), while the active work checkpoint lives
+in [`docs/PLAN-0.12.md`](docs/PLAN-0.12.md).
+
+<!-- ikna-active-plan: docs/PLAN-0.12.md -->
 
 ## 🧭 Start here
 
@@ -27,13 +29,19 @@ Before changing code, read the document closest to the area you are touching:
 - desktop packaging: [`docs/DESKTOP.md`](docs/DESKTOP.md)
 - release/version rules: [`docs/VERSIONS.md`](docs/VERSIONS.md)
 
-For 0.11 specifically, use [`docs/PLAN-0.11.md`](docs/PLAN-0.11.md) as the
-core release checklist. `ROADMAP-0.11.md` describes the sequence and intent;
-`PLAN-0.11.md` records what is actually done, what is waiting on evidence, and
-what blocks release. Parallel stabilization, cleanup, Developer Sandbox, UX and
-AI-contributor work lives in
-[`docs/modern_PLAN-0.11.md`](docs/modern_PLAN-0.11.md) so it does not get lost or
-turn into ad-hoc numbered release parts.
+Use [`docs/PLAN-0.12.md`](docs/PLAN-0.12.md) as the active cycle checkpoint.
+It allocates approximately half the planned effort to Catalogue v2 and half to
+the overall application plan. The 0.11 working plan, roadmap, modernization plan
+and decision records remain historical evidence and inputs to scope review.
+The 0.11 application has shipped; Catalogue v2 publication remains a separate
+decision governed by its evidence gates.
+
+AI contributors should start with [`AGENTS.md`](AGENTS.md) and the repository's
+[`ikna-development`](skills/ikna-development/SKILL.md) skill when their tool
+supports it. The separate
+[`ikna-owner-workflow`](skills/ikna-owner-workflow/SKILL.md) skill contains the
+owner's personal delivery preferences; apply it only when explicitly selected.
+Both are source-controlled project resources, not automatic service installs.
 
 ## 🗂️ Repository map
 
@@ -71,6 +79,7 @@ Common commands:
 gradle --no-daemon assembleDebug
 gradle --no-daemon testReleaseUnitTest
 gradle --no-daemon :desktop:test
+gradle --no-daemon :shared:desktopTest :shared:testDebugUnitTest
 gradle --no-daemon :desktop:createReleaseDistributable
 ```
 
@@ -83,6 +92,23 @@ gradle --no-daemon assembleRelease -Pikna.unsigned=true
 The Android CI can also build an x86_64 test APK with
 `-Pikna.abi=emulator`; published Android builds remain arm64 and legacy 32-bit
 ARM as described in the build files.
+
+### Builds on memory-constrained machines
+
+A prior local run exhausted the owner's laptop memory (dated evidence in
+[`docs/test-cli.md`](docs/test-cli.md)). Run one Gradle session at a time,
+including Hot Reload: stop that session before starting another build. Check
+available memory first and bound workers/heaps instead of launching overlapping
+compilers. A conservative focused run is:
+
+```bash
+gradle --no-daemon --max-workers=1 -Dorg.gradle.jvmargs=-Xmx768m -Dkotlin.daemon.jvm.options=-Xmx512m :shared:desktopTest
+```
+
+These local limits do not replace the normal CI configuration. If they cause a
+heap failure, record that resource limit and adjust it to the machine's available
+memory; do not weaken tests. Stop only processes started for this task, using
+their known process IDs. Do not kill unrelated JVMs to make room.
 
 ### Fast desktop UI loop
 

@@ -463,7 +463,7 @@ fun IknaToggle(
     val pressed by interaction.collectIsPressedAsState()
     val alpha = if (enabled) 1f else 0.35f
     val motionEnabled = LocalIknaMotionEnabled.current
-    // The rounded variant keeps the square knob but one size smaller than the
+    // The rounded variant uses a rounded knob one size smaller than the
     // content area, so it floats with visible gaps on every side of the pill.
     // The angular knob keeps its 24dp square and its own gaps.
     val roundedKnob = LocalIknaAppearanceVariant.current == IknaAppearanceVariant.ROUNDED
@@ -539,7 +539,7 @@ fun IknaToggle(
     }
 }
 
-/** Square chip. Selection has a quiet fill and a heavier boundary, never inverted ink. */
+/** Selection has a quiet fill and a heavier variant-shaped boundary, never inverted ink. */
 @Composable
 fun IknaChip(
     label: String,

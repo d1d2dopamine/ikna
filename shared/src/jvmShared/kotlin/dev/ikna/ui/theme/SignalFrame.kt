@@ -35,10 +35,21 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.PointerEvent
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerType
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.node.GlobalPositionAwareModifierNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.PointerInputModifierNode
+import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import dev.ikna.data.prefs.IknaAppearanceVariant
 import kotlin.math.roundToInt
@@ -57,11 +68,9 @@ import kotlin.math.roundToInt
 internal class SignalFrameCoordinator {
     val phase = Animatable(0f)
 
-    private val areas = mutableMapOf<Any, Float>()
-    private val hovered = mutableMapOf<Any, Long>()
+    private val hover = SignalFrameHoverState()
     private val moving = mutableSetOf<Any>()
     private val outerFrames = mutableStateMapOf<Any, SignalFrameOverlayEntry>()
-    private var hoverSequence = 0L
 
     var activeHoverOwner by mutableStateOf<Any?>(null)
         private set
@@ -70,20 +79,27 @@ internal class SignalFrameCoordinator {
         private set
 
     fun setArea(id: Any, area: Float) {
-        if (area <= 0f) return
-        areas[id] = area
-        if (hovered.containsKey(id)) chooseHoverOwner()
+        hover.setArea(id, area)
+        chooseHoverOwner()
     }
 
-    fun setHovered(id: Any, value: Boolean) {
-        if (value) {
-            if (!hovered.containsKey(id)) {
-                hoverSequence += 1
-                hovered[id] = hoverSequence
-            }
-        } else {
-            hovered.remove(id)
-        }
+    fun setHoverBounds(id: Any, bounds: Rect) {
+        hover.setBounds(id, SignalFrameHoverBounds(bounds.left, bounds.top, bounds.right, bounds.bottom))
+        chooseHoverOwner()
+    }
+
+    fun movePointer(id: Any, positionInRoot: Offset) {
+        hover.move(id, positionInRoot.x, positionInRoot.y)
+        chooseHoverOwner()
+    }
+
+    fun exitPointer(id: Any) {
+        hover.exit(id)
+        chooseHoverOwner()
+    }
+
+    fun detachPointer(id: Any) {
+        hover.detach(id)
         chooseHoverOwner()
     }
 
@@ -98,16 +114,96 @@ internal class SignalFrameCoordinator {
 
     fun outerEntries(): Collection<SignalFrameOverlayEntry> = outerFrames.values
 
+    fun unregisterOuter(id: Any) {
+        outerFrames.remove(id)
+    }
+
     fun unregister(id: Any) {
-        areas.remove(id)
-        hovered.remove(id)
+        hover.remove(id)
         outerFrames.remove(id)
         if (moving.remove(id)) movingCount = moving.size
-        if (activeHoverOwner === id) chooseHoverOwner()
+        chooseHoverOwner()
     }
 
     private fun chooseHoverOwner() {
-        activeHoverOwner = chooseSignalFrameHoverOwner(hovered, areas)
+        activeHoverOwner = hover.owner
+    }
+}
+
+/** Input lifetime belongs to the attached modifier, not a recomposition effect. */
+private data class SignalFramePointerElement(
+    val coordinator: SignalFrameCoordinator,
+    val frameId: Any,
+    val enabled: Boolean
+) : ModifierNodeElement<SignalFramePointerNode>() {
+    override fun create() = SignalFramePointerNode(coordinator, frameId, enabled)
+
+    override fun update(node: SignalFramePointerNode) {
+        node.update(coordinator, frameId, enabled)
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "signalFramePointer"
+        properties["enabled"] = enabled
+    }
+}
+
+private class SignalFramePointerNode(
+    private var coordinator: SignalFrameCoordinator,
+    private var frameId: Any,
+    private var enabled: Boolean
+) : Modifier.Node(), PointerInputModifierNode, GlobalPositionAwareModifierNode {
+    private var coordinates: LayoutCoordinates? = null
+
+    fun update(coordinator: SignalFrameCoordinator, frameId: Any, enabled: Boolean) {
+        if (this.coordinator !== coordinator || this.frameId !== frameId || !enabled) {
+            this.coordinator.detachPointer(this.frameId)
+        }
+        this.coordinator = coordinator
+        this.frameId = frameId
+        this.enabled = enabled
+        coordinates?.takeIf { isAttached && it.isAttached }?.let { updateBounds(it) }
+    }
+
+    override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
+        this.coordinates = coordinates
+        updateBounds(coordinates)
+    }
+
+    private fun updateBounds(coordinates: LayoutCoordinates) {
+        // boundsInRoot respects viewport clipping; the overlay separately keeps
+        // full drawing bounds so its outside stroke is not cut off by ancestors.
+        coordinator.setHoverBounds(frameId, coordinates.boundsInRoot())
+    }
+
+    override fun onPointerEvent(event: PointerEvent, pass: PointerEventPass, bounds: IntSize) {
+        if (pass != PointerEventPass.Main) return
+        if (!enabled || event.type == PointerEventType.Exit) {
+            coordinator.exitPointer(frameId)
+            return
+        }
+        val pointer = event.changes.firstOrNull {
+            it.type == PointerType.Mouse || (it.type == PointerType.Stylus && !it.pressed)
+        } ?: return
+        val position = pointer.position
+        val layout = coordinates?.takeIf { it.isAttached } ?: return
+        if (position.x >= 0f && position.x < bounds.width &&
+            position.y >= 0f && position.y < bounds.height) {
+            // Move also repairs hover if Enter was cancelled/lost during a
+            // modifier update. Do not consume input or emit duplicate interactions.
+            coordinator.movePointer(frameId, layout.localToRoot(position))
+        } else {
+            coordinator.exitPointer(frameId)
+        }
+    }
+
+    override fun onCancelPointerInput() {
+        coordinator.exitPointer(frameId)
+    }
+
+    override fun onDetach() {
+        coordinator.detachPointer(frameId)
+        coordinates = null
     }
 }
 
@@ -225,7 +321,7 @@ internal fun BoxScope.SignalFrameOverlay(coordinator: SignalFrameCoordinator) {
 /**
  * Pointer/focus affordance shared by interactive Ikna controls.
  *
- * The control itself keeps Ikna's flat square geometry. Borderless hit targets
+ * The control itself keeps Ikna's selected appearance geometry. Borderless hit targets
  * keep the one-pixel signal just inside their bounds; controls that already
  * own a visible boundary place the same signal just outside it. Hover and
  * selected navigation may travel around the perimeter; keyboard focus remains
@@ -250,6 +346,8 @@ fun Modifier.iknaSignalFrame(
     cornerRadius: Dp? = null,
     placement: SignalFramePlacement = SignalFramePlacement.Inner
 ): Modifier {
+    // Interaction hover only controls the nested-parent fade cut. Ownership
+    // comes from the attached pointer node and actual root-space hit bounds.
     val hovered by interactionSource.collectIsHoveredAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val pressed by interactionSource.collectIsPressedAsState()
@@ -283,14 +381,18 @@ fun Modifier.iknaSignalFrame(
     }
 
     SideEffect {
-        coordinator.setHovered(frameId, enabled && hovered)
         coordinator.setMoving(frameId, moving)
+    }
+    DisposableEffect(coordinator, frameId) {
+        onDispose { coordinator.unregister(frameId) }
     }
     DisposableEffect(coordinator, frameId, placement) {
         if (placement == SignalFramePlacement.Outer) {
             coordinator.registerOuter(frameId, outerEntry)
         }
-        onDispose { coordinator.unregister(frameId) }
+        // Changing drawing placement must not erase the still-attached input
+        // node's bounds/owner. Full cleanup belongs to the frame lifetime above.
+        onDispose { coordinator.unregisterOuter(frameId) }
     }
 
     val pausedPhaseState = remember { mutableFloatStateOf(0f) }
@@ -330,6 +432,7 @@ fun Modifier.iknaSignalFrame(
     }
 
     return this
+        .then(SignalFramePointerElement(coordinator, frameId, enabled))
         .onSizeChanged { size ->
             coordinator.setArea(frameId, size.width.toFloat() * size.height.toFloat())
         }

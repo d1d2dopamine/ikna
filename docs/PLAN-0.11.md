@@ -1,5 +1,10 @@
 # 0.11.0 press working plan
 
+> Historical 0.11 checkpoint retained as evidence. The application has shipped.
+> Current cycle status and inherited Catalogue gates are owned by
+> [PLAN-0.12.md](PLAN-0.12.md); pending Catalogue work below does not make the
+> 0.11 application unreleased.
+
 This is the operational checkpoint for the 0.11 cycle. It answers four questions:
 what is already implemented, what the current full-catalogue evidence actually
 shows, which corpus decisions are fixed for this release, and what still blocks

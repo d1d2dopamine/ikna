@@ -548,7 +548,9 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('new String(Files.readAllBytes(', helper)
         for incompatible in ['Files.readString(', '.results()', 'android.lines()']:
             self.assertNotIn(incompatible, helper)
-        self.assertIn('jvm-build.log --continue :desktop:test :app:testReleaseUnitTest :app:assembleDebug', ci)
+        self.assertIn('jvm-build.log --continue :shared:desktopTest :shared:testDebugUnitTest :desktop:test :app:testReleaseUnitTest :app:assembleDebug', ci)
+        self.assertIn('shared/build/reports/tests/', ci)
+        self.assertIn('python3 tools/catalog/test_meta_info.py', ci)
 
     def test_ci_keeps_real_build_and_migration_gates(self):
         source = read(ROOT, '.github/workflows/grading.yml')
@@ -644,6 +646,12 @@ class DesignContracts(unittest.TestCase):
 
         for required in [
             'class SignalFrameCoordinator',
+            'PointerInputModifierNode',
+            'GlobalPositionAwareModifierNode',
+            'override fun onCancelPointerInput()',
+            'override fun onDetach()',
+            'coordinates.boundsInRoot()',
+            'coordinator.movePointer(frameId, layout.localToRoot(position))',
             'activeHoverOwner',
             'movingCount',
             'rememberSignalFrameCoordinator(',
@@ -669,10 +677,13 @@ class DesignContracts(unittest.TestCase):
             self.assertIn(required, frame)
         self.assertNotIn('LaunchedEffect(moving)', frame)
         self.assertNotIn('rememberInfiniteTransition', frame)
+        self.assertNotIn('coordinator.setHovered(frameId, enabled && hovered)', frame)
         self.assertIn('LocalSignalFrameCoordinator provides signalFrameCoordinator', theme)
         self.assertIn('SignalFrameOverlay(signalFrameCoordinator)', theme)
         self.assertLess(theme.index('content()'), theme.index('SignalFrameOverlay(signalFrameCoordinator)'))
         self.assertIn('signalFrameIntervalsDp(', geometry)
+        self.assertIn('class SignalFrameHoverState', geometry)
+        self.assertIn('bounds[it]?.contains(pointerX, pointerY) == true', geometry)
         self.assertIn('shortest <= 34f || longest <= 64f', geometry)
         self.assertIn('signalFrameCycleDurationMillis = 2800', metrics)
         self.assertIn('signalFrameFadeInDurationMillis = 80', metrics)
@@ -703,6 +714,23 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('selected = settingsSelected', desktop_shell)
         self.assertIn('selected = statsSelected', desktop_shell)
         self.assertIn('selected = addSelected', desktop_shell)
+
+    def test_palette_grid_shares_lighting_and_accessible_selection_on_both_platforms(self):
+        android = read(ANDROID, 'ui/settings/SettingsScreen.kt')
+        desktop = read(DESKTOP, 'SettingsPane.kt')
+        palettes = read(SHARED, 'ui/settings/PaletteTiles.kt')
+        for host in (android, desktop):
+            self.assertIn('IknaPaletteTiles(', host)
+            self.assertIn('grey = palettePreviewUsesGrey(settings, systemDark =', host)
+            self.assertNotIn('light = isLight(', host)
+        self.assertNotIn('private fun PaletteTiles(', android)
+        self.assertIn('modifier.selectableGroup()', palettes)
+        # The tile and its text remain the two explicit targets; empty space
+        # beside a short name must not become an accidental palette action.
+        self.assertEqual(2, palettes.count('.semantics { this.selected = selected }'))
+        self.assertEqual(2, palettes.count('role = Role.RadioButton'))
+        self.assertIn('.iknaSignalFrame(captionInteraction)', palettes)
+        self.assertIn('interactionSource = captionInteraction', palettes)
 
     def test_rounded_variant_is_a_first_class_variant(self):
         theme = read(SHARED, "ui/theme/Theme.kt")

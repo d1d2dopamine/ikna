@@ -9,10 +9,12 @@ Pure src/test and desktop-only sources are intentionally outside this check.
 from pathlib import Path
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 SAFE_NAME = re.compile(r"[A-Za-z_$][A-Za-z0-9_$]*\Z")
@@ -147,6 +149,9 @@ class AndroidCiChecks(unittest.TestCase):
         self.assertNotIn("if-no-files-found: ignore", source)
 
     def test_logging_wrapper_preserves_gradle_exit_status_and_arguments(self):
+        bash = shutil.which("bash")
+        if bash is None:
+            self.skipTest("Bash is unavailable; shell-wrapper verification requires Bash (CI runs it on Linux).")
         # Fake executable verifies shell plumbing, NOT a real Gradle build.
         wrapper = ROOT / "tools/ci/run-gradle.sh"
         with tempfile.TemporaryDirectory() as folder:
@@ -157,11 +162,21 @@ class AndroidCiChecks(unittest.TestCase):
             for code in (0, 37):
                 log = directory / "logs with spaces" / f"build-{code}.log"
                 env = dict(os.environ, PATH=str(directory) + os.pathsep + os.environ.get("PATH", ""), FAKE_GRADLE_EXIT=str(code))
-                result = subprocess.run(["bash", str(wrapper), str(log), ":app:assembleDebugAndroidTest", "-Pikna.abi=emulator"], env=env, capture_output=True, text=True, timeout=10)
+                result = subprocess.run([bash, str(wrapper), str(log), ":app:assembleDebugAndroidTest", "-Pikna.abi=emulator"], env=env, capture_output=True, text=True, timeout=10)
                 self.assertEqual(code, result.returncode, result.stdout + result.stderr)
                 saved = log.read_text()
                 for token in ("diagnostic-output", "diagnostic-error", "--stacktrace", ":app:assembleDebugAndroidTest", "-Pikna.abi=emulator"):
                     self.assertIn(token, saved)
+
+    def test_logging_wrapper_reports_skip_when_bash_is_absent(self):
+        result = unittest.TestResult()
+        case = AndroidCiChecks("test_logging_wrapper_preserves_gradle_exit_status_and_arguments")
+        with patch("shutil.which", return_value=None), patch("subprocess.run") as run:
+            case.run(result)
+        self.assertTrue(result.wasSuccessful())
+        self.assertEqual(1, len(result.skipped))
+        self.assertIn("Bash is unavailable", result.skipped[0][1])
+        run.assert_not_called()
 
     def test_no_version_bump_or_min_sdk_workaround_and_updated_actions(self):
         build = (ROOT / "app/build.gradle.kts").read_text()

@@ -445,6 +445,17 @@ fun paletteFor(settings: IknaSettings, systemDark: Boolean = true): IknaPalette 
     }
 }
 
+/** Grey lighting is a mode, not a light-background luminance classification. */
+fun palettePreviewUsesGrey(settings: IknaSettings, systemDark: Boolean = true): Boolean =
+    when (settings.theme) {
+        ThemeMode.DARK -> false
+        ThemeMode.GREY -> true
+        ThemeMode.SYSTEM -> !systemDark
+        // A custom scheme has no authored lighting; retain its brightness-based
+        // preview choice without misclassifying the authored grey palettes.
+        ThemeMode.CUSTOM -> isLight(customPaletteOf(settings).background)
+    }
+
 /**
  * Every Material slot the app actually reads, filled from four colours.
  *
@@ -661,7 +672,7 @@ fun iknaFrameRadius(rounded: Dp, angular: Dp): Dp = when (LocalIknaAppearanceVar
 
 /**
  * The selected main face changes prose/content roles only. Labels and data stay
- * in Plex Mono so switching to the system or a custom font does not destroy the
+ * in Plex Mono so switching to a custom font does not destroy the
  * numeric rhythm that belongs to Ikna itself.
  */
 private fun typographyOf(content: FontFamily?): Typography {

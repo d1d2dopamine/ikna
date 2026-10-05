@@ -1,0 +1,8 @@
+interface:
+  display_name: "Ikna Development"
+  short_description: "Repository contracts and checks for ikna contributors"
+  default_prompt: "Use $ikna-development to implement a scoped ikna change against the active repository plan."
+  icon_small: "./assets/icon.svg"
+  icon_large: "./assets/icon.svg"
+policy:
+  allow_implicit_invocation: true

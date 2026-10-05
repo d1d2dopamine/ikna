@@ -30,7 +30,7 @@ stutter. Build it and see it; it takes one `gradlew assembleDebug`.
 | Answering | one axis: left *not known*, right *known*. Nothing else is an answer |
 | Audio | the phone's own engine by default; a neural engine inside, for a model you add |
 | Colour | twelve palettes, each in two lightings. Every pair passes 4.5:1, enforced by a test |
-| Interface languages | Russian, English, Polish, Spanish, French, German |
+| Interface languages | Russian, English, Polish, Spanish, French, German, Brazilian Portuguese; registry: `UI_LANGUAGES` in `shared/src/jvmShared/kotlin/dev/ikna/ui/text/UiLanguages.kt` |
 | Network | static release, catalogue and optional voice files only. Nothing is uploaded, ever |
 | Motion | Material Shared Axis X: 14 dp over 280 ms; local feedback only, with Signal Frame as the one deliberate repeating interaction/location motion |
 
@@ -81,6 +81,12 @@ thickens its own boundary instead, because the overlay that lets outer frames
 escape scroll clipping must not carry a focus ring over unrelated text. Pressing
 freezes its current phase, and disabling animations makes it fully static.
 
+Hover arbitration belongs to attached pointer modifiers. It checks the current
+root-space pointer against clipped input bounds, clears on cancellation/detach,
+and recovers on pointer movement. Palette repainting does not recreate the
+shared clock; a stale interaction notification cannot suppress an unrelated
+control outside its bounds.
+
 The dash rhythm scales with the target. Small toggles and icon buttons use shorter
 marks and gaps than a whole deck row, so the affordance stays legible without
 thickening the one-pixel stroke. The shared clock sleeps whenever no hover or
@@ -91,8 +97,9 @@ edge treatment everywhere. Borderless hit targets such as icon/text actions and
 the Today block keep the frame just inside their bounds, where it defines the
 interactive area. Controls with their own visible boundary place the same frame
 2 dp outside that boundary so the moving signal never competes with the control's
-static border. Deck rows use the outside placement too because their 52 dp mark
-already reaches the row edge. OUTER frames are painted by the theme-level overlay
+static border. Deck rows in the current source use the outside placement too
+because their 52 dp mark reaches the row edge. OUTER frames are painted by the
+theme-level overlay
 from each control's full root-space bounds, rather than inside the control's own
 DrawScope: scroll viewports, animated pane clips and tight rows must never cut off
 one side of the signal. INNER frames remain local. Motion, stroke, dash rhythm and
@@ -144,21 +151,22 @@ session and early enough that nobody works through it by accident.
 
 ## Appearance
 
-Flat right angles, hand-drawn marks, no Material components anywhere — not a style
-preference but a requirement, since a Material button ignores the theme's shape
-scheme and rounds itself back at every opportunity. The Signal Frame is the one
-intentional geometry exception: the control remains square, while its transient
-hover/focus outline has a small radius and rounded segment ends so it reads as a
-signal moving around the object rather than as another permanent container.
+Flat surfaces and hand-drawn marks use Ikna's own controls in both appearance
+variants. The angular variant keeps right angles; the rounded variant takes
+radii from the shared shape system. Material controls must not introduce their
+own geometry. The transient Signal Frame has rounded segment ends and follows
+its host radius so it reads as a signal around the object.
 
 Since the rounded-variant work there are two appearance variants served by the
 same component tree: **angular** (variant 1, every corner a right angle) and
 **rounded** (variant 2, chosen in Settings → appearance). In the rounded variant
 every corner-owning surface — chips, buttons, fields, the toggle pill, cards,
 panels, tiles, notices, window hover fills, deck marks — takes a corner radius
-from the shape system; the pixel signatures (memory lattice, progress cells,
-deck seals, wordmark) stay square in both variants, and the session card keeps
-its borderless silent field. The Signal Frame's radius follows its host control.
+from the shape system. Progress cells become pills and glyph strokes/marks round
+in variant 2; a deck seal's outer surface rounds while its internal pixel cells
+stay square. The memory lattice and wordmark keep their square signatures, and
+the session card keeps its borderless silent field. The Signal Frame's radius
+follows its host control.
 
 Colour is two choices, not one. **Which palette:**
 
@@ -180,6 +188,15 @@ Colour is two choices, not one. **Which palette:**
 **And how it is lit:** dark, grey, as the phone is set, or four colours picked by
 hand (background, ink, muted, accent). There is no light theme: the second
 lighting is grey.
+
+Palette preview tiles use the selected lighting mode, including the system
+fallback; both authored lightings have dark-background luminance. Brightness
+classification is reserved for contrast/system bars and the custom-scheme
+preview fallback. Android and desktop use the same palette grid, with selected
+semantics on both the tile and its caption. Only those explicit targets respond
+to a click; empty space beside a short caption stays inactive. The bordered tile
+has an outer frame and the borderless caption its own inner frame, with separate
+interaction sources so pressing one cannot light both targets.
 
 The default is only half a decision. Three surfaces are read as one thing — the
 launcher icon, the system splash and the first frame of the app — and only the
@@ -206,7 +223,8 @@ copy is not hairline-thin and large titles do not become heavy blocks. **IBM Ple
 is the service/data face for labels, counters, percentages, times and focal statistics;
 its fixed-width figures keep changing values from visually jumping.
 
-The main face can still be switched to the platform font or to any picked `.ttf`/`.otf`.
+The main face can be Geologica or a picked `.ttf`/`.otf`. The retired platform-font
+mode migrates to Geologica when old settings or backups are read.
 A picked file changes prose/content roles while Ikna's service and numeric face remains
 Plex Mono, keeping the information hierarchy stable. User files are validated before
 use so a broken font cannot leave the app unreadable.

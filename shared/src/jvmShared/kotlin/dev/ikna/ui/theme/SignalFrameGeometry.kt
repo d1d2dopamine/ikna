@@ -37,3 +37,66 @@ internal fun chooseSignalFrameHoverOwner(
     }
     return best
 }
+
+/** Clipped input bounds, separate from the unmodified outer drawing bounds. */
+internal data class SignalFrameHoverBounds(
+    val left: Float,
+    val top: Float,
+    val right: Float,
+    val bottom: Float
+) {
+    fun contains(x: Float, y: Float): Boolean =
+        x >= left && x < right && y >= top && y < bottom
+}
+
+/**
+ * Hover arbitration follows the current pointer, not just historical Enter/Exit
+ * notifications. A stale small target must never suppress an unrelated button.
+ * No palette or animation state lives here, so a repaint cannot reset input.
+ */
+internal class SignalFrameHoverState {
+    private val areas = mutableMapOf<Any, Float>()
+    private val bounds = mutableMapOf<Any, SignalFrameHoverBounds>()
+    private val hovered = mutableMapOf<Any, Long>()
+    private var sequence = 0L
+    private var pointerX = Float.NaN
+    private var pointerY = Float.NaN
+
+    val owner: Any?
+        get() = chooseSignalFrameHoverOwner(
+            hovered.filterKeys { bounds[it]?.contains(pointerX, pointerY) == true },
+            areas
+        )
+
+    fun setArea(id: Any, area: Float) {
+        if (area > 0f) areas[id] = area
+    }
+
+    fun setBounds(id: Any, value: SignalFrameHoverBounds) {
+        bounds[id] = value
+    }
+
+    fun move(id: Any, x: Float, y: Float) {
+        pointerX = x
+        pointerY = y
+        if (!hovered.containsKey(id)) hovered[id] = ++sequence
+    }
+
+    fun exit(id: Any) {
+        hovered.remove(id)
+        if (hovered.isEmpty()) {
+            pointerX = Float.NaN
+            pointerY = Float.NaN
+        }
+    }
+
+    fun detach(id: Any) {
+        exit(id)
+        bounds.remove(id)
+    }
+
+    fun remove(id: Any) {
+        detach(id)
+        areas.remove(id)
+    }
+}

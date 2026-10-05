@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ikna.ui.text.S
@@ -55,7 +58,7 @@ private const val WORDMARK = "ikna"
 @Composable
 fun IknaPaletteTiles(
     selectedId: String,
-    light: Boolean,
+    grey: Boolean,
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier,
     columns: Int = 3,
@@ -67,13 +70,14 @@ fun IknaPaletteTiles(
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val perRow = if (columns < 1) 1 else columns
 
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(gap)) {
+    Column(modifier = modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(gap)) {
         IknaPalettes.chunked(perRow).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
                 row.forEach { spec ->
-                    val p = spec.palette(light)
+                    val p = spec.palette(grey = grey)
                     val selected = spec.id == selectedId
                     val tileInteraction = remember(spec.id) { MutableInteractionSource() }
+                    val captionInteraction = remember(spec.id) { MutableInteractionSource() }
                     val tileFocused by tileInteraction.collectIsFocusedAsState()
                     // The tap zone is the tile and its own name, never the empty
                     // space beside a name as short as "NULL": a click aimed at
@@ -83,6 +87,7 @@ fun IknaPaletteTiles(
                             modifier = Modifier
                                 .clip(iknaTileShape())
                                 .hoverable(tileInteraction)
+                                .semantics { this.selected = selected }
                                 .iknaSignalFrame(
                                     tileInteraction,
                                     cornerRadius = iknaFrameRadius(rounded = 12.dp, angular = 8.dp),
@@ -134,9 +139,11 @@ fun IknaPaletteTiles(
                             color = if (selected) ink else muted,
                             maxLines = 1,
                             modifier = Modifier
-                                .hoverable(tileInteraction)
+                                .hoverable(captionInteraction)
+                                .iknaSignalFrame(captionInteraction)
+                                .semantics { this.selected = selected }
                                 .clickable(
-                                    interactionSource = tileInteraction,
+                                    interactionSource = captionInteraction,
                                     indication = null,
                                     role = Role.RadioButton,
                                     onClickLabel = S.t(spec.nameKey),

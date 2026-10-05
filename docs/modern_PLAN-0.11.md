@@ -1,5 +1,11 @@
 # 0.11 modernization plan
 
+> Historical inventory, with later repository-guidance/cancellation corrections
+> explicitly noted below. Current source-reviewed status and open acceptance
+> checks live in [modern_PLAN-0.12.md](modern_PLAN-0.12.md), under
+> [PLAN-0.12.md](PLAN-0.12.md). A completed implementation checkbox here is not
+> final-tree platform test evidence.
+
 This is the operational plan for the work that sits between the numbered 0.11
 release parts: stabilization, application cleanup, Developer Sandbox hardening,
 Browse/read-mode usability, desktop correctness, documentation ownership, AI
@@ -200,6 +206,8 @@ Specific work:
   resource lookup, desktop resource load or packaging script references them.
 - [ ] Search for duplicate platform implementations that can safely use existing
   shared code, without forcing unrelated architecture changes.
+  0.12 round 01 removes the Android palette-grid duplicate; the broader inventory
+  remains open.
 - [ ] Keep Room migrations/schemas, restore/export compatibility, Catalogue parity
   fixtures, decision records and reproduction evidence out of automated deletion.
 
@@ -254,8 +262,8 @@ making actions and states easier to understand.
   beside the counter, and statistics disclosures answer to keyboard focus.
 - [ ] Audit semantic/accessibility labels for important controls.
 - [ ] Test smallest Android layouts and large system font scales.
-- [ ] Audit shared-target UX so deck membership is never presented as a second
-  independent learner memory.
+- Cancelled by the owner on 2026-10-05: shared-target presentation audit, as
+  recorded in [UNSCHEDULED.md](UNSCHEDULED.md). Data identity invariants remain.
 
 Acceptance: the interface explains itself more often without adding onboarding
 walls, gamification or a new visual system.
@@ -274,7 +282,8 @@ Core rule:
   and deciding where facts belong.
 - [ ] Define four document classes: long-lived contract, operational/status,
   decision/evidence and generated/derived report.
-- [ ] Make `PLAN-0.11.md` the owner of core 0.11 live status and blockers.
+- [x] Establish a single active-cycle owner; since 0.12 this is `PLAN-0.12.md`,
+  with the shipped 0.11 checkpoint retained as evidence.
 - [x] Add this modernization plan as the owner of parallel stabilization/cleanup/UI
   work.
 - [ ] Keep `ROADMAP-0.11.md` focused on rationale and ordering rather than copying
@@ -298,21 +307,24 @@ docs.
 Repository guidance should help contributors using coding agents without encoding
 one person's chat-delivery preferences into the project itself.
 
-- [ ] Add a root `AGENTS.md` as a short universal entry point for AI coding tools.
-- [ ] Make it point to the live `CONTRIBUTING.md`, architecture, owning plan and
+- [x] Add a root `AGENTS.md` as a short universal entry point for AI coding tools.
+- [x] Make it point to the live `CONTRIBUTING.md`, architecture, owning plan and
   checks instead of duplicating current release facts.
-- [ ] Record the dangerous invariants prominently: append-only reviews, explicit
+- [x] Record the dangerous invariants prominently: append-only reviews, explicit
   Room migrations, no destructive fallback, global target identity, contexts are
   observations rather than cards, and Catalogue provenance gates fail closed.
-- [ ] Add a repository-safe `skills/ikna-development/` only if it remains useful
+- [x] Add a repository-safe `skills/ikna-development/` only if it remains useful
   beyond `AGENTS.md` and can be kept synchronized with repository docs.
-- [ ] Keep personal workflow rules (for example a preferred artifact delivery
-  format) out of the repository version of the skill.
-- [ ] Document that agents without Skill support should follow `AGENTS.md` and the
+- [x] Keep personal workflow rules out of the common contributor skill; the
+  separately activated `skills/ikna-owner-workflow/` owns personal ZIP delivery.
+- [x] Document that agents without Skill support should follow `AGENTS.md` and the
   same repository-owned checks.
 
 Acceptance: an unfamiliar AI coding tool can discover the correct project
 contracts before editing without needing hidden chat history.
+
+Track I implementation completed during 0.12 preparation (2026-10-05), not
+inferred from the earlier audit. Both skills are stored in the repository.
 
 ## Track J - visual character, after usability
 
@@ -445,5 +457,5 @@ Before calling this modernization plan complete:
 - [ ] Reduced-motion behaviour covers any added ambient animation.
 - [ ] The full project archive/package preserves the repository source manifest,
   including intentionally tracked binary/signing assets.
-- [ ] `PLAN-0.11.md` still owns the real release blockers and numbered 0.11 parts;
-  this file has not become a competing release plan.
+- [x] The active `PLAN-0.12.md` owns current blockers; historical numbered 0.11
+  evidence is preserved without creating a competing release plan here.

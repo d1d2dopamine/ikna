@@ -108,9 +108,11 @@ def deck_from_filename(path: Path) -> dict[str, str]:
 
 
 def open_deck(path: Path):
+    # Preserve source line endings: the census measures actual UTF-8 bytes,
+    # including CRLF, rather than the text reader's normalized LF view.
     if path.name.endswith(".gz"):
-        return gzip.open(path, "rt", encoding="utf-8")
-    return path.open(encoding="utf-8")
+        return gzip.open(path, "rt", encoding="utf-8", newline="")
+    return path.open(encoding="utf-8", newline="")
 
 
 def load_index(root: Path) -> tuple[dict[str, dict[str, Any]], dict[str, Any] | None]:

@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+### 0.12 small-defect round 01
+
+- Signal Frame hover arbitration now follows attached pointer-node lifetime and
+  clipped hit bounds. A stale small hovered target cannot suppress an unrelated
+  button; pointer movement restores hover after cancellation. Real Windows
+  lighting-switch confirmation remains open in `docs/ROUND-0.12-01.md`.
+- Palette previews follow DARK/GREY/SYSTEM lighting instead of classifying grey
+  as a light background. Android uses the existing shared grid, including
+  appearance/focus treatment; tile and caption expose selected radio semantics.
+- The Android CI shell self-test reports a reasoned skip when Bash is absent.
+  Other checks continue to run.
+- Catalogue census byte accounting preserves LF/CRLF/CR for plain and gzip
+  UTF-8 input and verifies exact totals against BUILD metadata.
+- Active 0.12 plans separate implemented work, historical evidence and open
+  platform checks; design facts and local memory guidance are synchronized.
+
 ### The grey lighting and a centred desktop
 
 - **"Светлая" is gone: the second lighting is grey.** Every palette ships as dark and grey — the grey room carries a whisper of the palette's hue, the accent is a desaturated pass of its own colour, and white appears no more often than in the dark lighting. A stored light choice resolves to grey, and "as the system" maps a light phone to grey.

@@ -1,5 +1,9 @@
 # 0.11.0 press roadmap
 
+> Historical sequence/rationale. The 0.11 application has shipped; current work
+> and carried-forward Catalogue decisions are tracked in
+> [PLAN-0.12.md](PLAN-0.12.md).
+
 Theme: **evidence first**.
 
 Operational checkpoint: [`PLAN-0.11.md`](PLAN-0.11.md). Corpus/source scope:

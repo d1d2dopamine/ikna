@@ -37,6 +37,7 @@ jobs:
           python3 tools/catalog/test_ingestion.py
           python3 tools/catalog/test_morphology.py
           python3 tools/catalog/test_build_catalogue_v2.py
+          python3 tools/catalog/test_meta_info.py
       - name: Verify text, fixtures and additive migrations
         run: |
           python3 tools/check_text.py
@@ -74,7 +75,7 @@ jobs:
           bash tools/voice/fetch-voice.sh
           bash tools/catalog/fetch-bundled-pack.sh
       - name: Compile both targets and run JVM regression suites
-        run: bash tools/ci/run-gradle.sh ci-logs/jvm-build.log --continue :desktop:test :app:testReleaseUnitTest :app:assembleDebug
+        run: bash tools/ci/run-gradle.sh ci-logs/jvm-build.log --continue :shared:desktopTest :shared:testDebugUnitTest :desktop:test :app:testReleaseUnitTest :app:assembleDebug
       - name: Paired replay of synthetic scenarios using production Kotlin
         shell: bash
         run: |
@@ -100,6 +101,7 @@ jobs:
           path: |
             build/grading/
             desktop/build/reports/tests/test/
+            shared/build/reports/tests/
             app/build/reports/tests/testReleaseUnitTest/
             app/schemas/
             ci-logs/
