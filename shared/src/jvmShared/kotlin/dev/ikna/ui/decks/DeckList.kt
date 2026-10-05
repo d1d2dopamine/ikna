@@ -275,7 +275,8 @@ fun IknaDeckProgress(
  * Two letters in a square, and the square is the whole signal.
  *
  * Filled means this deck wants something today. Hollow means it is done or
- * resting. Faint means it is switched off.
+ * resting: the letters and the faint seal carry the shape without a border --
+ * the owner removed the frame from the marks entirely.
  */
 @Composable
 fun IknaDeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
@@ -288,11 +289,6 @@ fun IknaDeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
         owes -> background
         deck.isActive -> MaterialTheme.colorScheme.onBackground
         else -> muted.copy(alpha = 0.6f)
-    }
-    val edge = when {
-        owes -> accent
-        deck.isActive -> MaterialTheme.colorScheme.outline
-        else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
     }
     val patternCells = remember(deck.id, deck.installedAt) { deckSealCells(deck.id, deck.installedAt) }
     val highlightCells = remember(deck.id, deck.installedAt) { deckSealHighlights(deck.id, deck.installedAt) }
@@ -312,8 +308,7 @@ fun IknaDeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
             .size(DECK_MARK_SIZE)
             .iknaInspect("IknaDeckMark[${deck.title}]")
             .clip(iknaTileShape())
-            .background(fill)
-            .border(Space.hair, edge, iknaTileShape()),
+            .background(fill),
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {

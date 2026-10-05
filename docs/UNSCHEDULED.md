@@ -39,15 +39,6 @@ has moved into Governor, Scheduler or automatic grading policy. Remove or rewrit
 only controls that are demonstrably stale; do not delete user choice merely to
 make the settings screen smaller.
 
-## 🔗 Shared-target UX audit
-
-Catalogue v2 lets one learning target belong to multiple decks while retaining
-one learner memory. A later UI audit could check that deck deletion, progress
-labels and per-deck counters never imply that those memberships are independent
-memories.
-
-This is a presentation audit, not permission to change target identity.
-
 ## 🌱 First-run explanation
 
 If real users are confused by the small initial batch, consider a minimal
@@ -70,6 +61,9 @@ decks. Hash verification of downloaded assets remains open.
 Continue testing the Android widget on the smallest declared size, large system
 font scales and several launcher implementations. Treat launcher-specific layout
 work as maintenance, not as a redesign project.
+
+Dropped by owner decision (2026-10-05): the shared-target presentation audit
+was taken out of this list without being run.
 
 ## 🚫 What this file is not
 
