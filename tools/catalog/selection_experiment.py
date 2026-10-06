@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import gzip
 import hashlib
+import io
 import json
 import os
 import sqlite3
@@ -33,7 +34,40 @@ from selection_policy import choose_contexts, select_target_ids
 
 
 def _open(path: str):
-    return gzip.open(path, "rt", encoding="utf-8", errors="replace") if path.endswith(".gz") else open(path, encoding="utf-8", errors="replace")
+    return gzip.open(path, "rt", encoding="utf-8") if path.endswith(".gz") else open(path, encoding="utf-8")
+
+
+def validate_args(args: argparse.Namespace) -> tuple[list[str], list[str]]:
+    langs = sorted({x.strip().lower() for x in args.learn.split(",") if x.strip()})
+    meanings = sorted({x.strip().lower() for x in args.meanings.split(",") if x.strip()})
+    if not langs or set(langs) - set(core.LEARNABLE) or not meanings or set(meanings) - set(core.MEANINGS):
+        raise ValueError("language scope must be non-empty and supported")
+    if not any(lang != meaning for lang in langs for meaning in meanings):
+        raise ValueError("scope contains no directed language pairs")
+    if min(args.max_deck, args.min_deck, args.thin_deck, args.contexts_per_target, args.evidence_context_limit) < 1:
+        raise ValueError("selection limits must be positive")
+    if args.min_deck > args.max_deck:
+        raise ValueError("--min-deck cannot exceed --max-deck")
+    if args.preview_limit_per_deck < 0 or args.function_top < 0:
+        raise ValueError("preview-limit-per-deck and function-top must be non-negative")
+    if not 0 < args.near_duplicate_threshold <= 1:
+        raise ValueError("near duplicate threshold must be in (0,1]")
+    inputs = [Path(path).resolve() for path in args.candidates]
+    protected = set(inputs)
+    if args.morphology_db:
+        protected.add(Path(args.morphology_db).resolve())
+    outputs = [Path(getattr(args, name)).resolve() for name in ("staging", "json", "markdown", "preview")]
+    if len(set(inputs)) != len(inputs):
+        raise ValueError("duplicate input path")
+    if len(set(outputs)) != len(outputs) or set(outputs) & protected:
+        raise ValueError("output paths must be distinct and must not overwrite inputs/morphology")
+    # Existing hard links can alias even when their resolved names differ.
+    paths = inputs + ([Path(args.morphology_db).resolve()] if args.morphology_db else []) + outputs
+    for output in outputs:
+        if output.exists() and any(other.exists() and output.samefile(other)
+                                   for other in paths if other != output):
+            raise ValueError("output path aliases another input/output file")
+    return langs, meanings
 
 
 def _context_key(collection: str, lang: str, context: str) -> str:
@@ -81,7 +115,11 @@ def _flush_stage(db: sqlite3.Connection, candidates: list[tuple], contexts: list
 
 
 def stage(paths: Iterable[str], db_path: str, batch_size: int = 50000) -> dict[str, int]:
+    paths = list(paths)
     path = Path(db_path)
+    if any(path.resolve() == Path(source).resolve() or
+           (path.exists() and Path(source).exists() and path.samefile(source)) for source in paths):
+        raise ValueError("staging must not overwrite candidate input")
     if path.exists():
         path.unlink()
     db = sqlite3.connect(path)
@@ -242,8 +280,7 @@ def pair_evidence(db: sqlite3.Connection, collection: str, lang: str, meaning_la
 
 
 def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,Any]]]:
-    langs=sorted({x.strip().lower() for x in args.learn.split(",") if x.strip()})
-    meanings=sorted({x.strip().lower() for x in args.meanings.split(",") if x.strip()})
+    langs, meanings = validate_args(args)
     try: prepare(langs)
     except IcuUnavailable as exc: raise ValueError(str(exc)) from exc
     stage_stats=stage(args.candidates,args.staging)
@@ -323,6 +360,7 @@ def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,
                 "morphology":"confident lemma is diversity evidence only; exact targetId never changes",
                 "smallDeck":"omit below minDeck; never pad with weak material",
                 "previewLimitPerDeck":args.preview_limit_per_deck,
+                "functionTop":args.function_top,
             },
             "morphologyUsed":bool(args.morphology_db),"stage":stage_stats,"summary":dict(summary),
             "previewRows":len(preview),"decks":decks,
@@ -334,10 +372,13 @@ def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,
 
 
 def write_preview(path: str, rows: list[dict[str,Any]]) -> None:
-    opener=gzip.open if path.endswith(".gz") else open
-    kwargs={"encoding":"utf-8","newline":""}
-    if path.endswith(".gz"): kwargs["compresslevel"]=6
-    with opener(path,"wt",**kwargs) as handle:
+    if path.endswith(".gz"):
+        # Preserve the same bytes across output names and run timestamps.
+        with open(path, "wb") as raw, gzip.GzipFile(fileobj=raw, filename="", mode="wb", compresslevel=6, mtime=0) as zipped:
+            with io.TextIOWrapper(zipped, encoding="utf-8", newline="") as handle:
+                for row in rows: handle.write(json.dumps(row,ensure_ascii=False,sort_keys=True)+"\n")
+        return
+    with open(path, "w", encoding="utf-8", newline="") as handle:
         for row in rows: handle.write(json.dumps(row,ensure_ascii=False,sort_keys=True)+"\n")
 
 
@@ -376,10 +417,6 @@ def parser() -> argparse.ArgumentParser:
 
 def main(argv=None)->int:
     args=parser().parse_args(argv)
-    if min(args.max_deck,args.min_deck,args.thin_deck,args.contexts_per_target,args.evidence_context_limit)<1: raise SystemExit("selection limits must be positive")
-    if args.min_deck>args.max_deck: raise SystemExit("--min-deck cannot exceed --max-deck")
-    if args.preview_limit_per_deck < 0: raise SystemExit("--preview-limit-per-deck must be non-negative")
-    if not 0 < args.near_duplicate_threshold <= 1: raise SystemExit("near duplicate threshold must be in (0,1]")
     report,preview=build_report(args)
     Path(args.json).write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     Path(args.markdown).write_text(markdown(report),encoding="utf-8")

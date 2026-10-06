@@ -24,6 +24,8 @@ def main() -> int:
     props = text("gradle.properties")
     main_kt = text("desktop/src/main/kotlin/dev/ikna/desktop/Main.kt")
     launcher = text("tools/dev-hot-reload.ps1")
+    process = text("tools/hot-reload-process.ps1")
+    bridge = text("gradlew.bat")
     cmd = text("dev-hot-reload.cmd")
     docs = text("docs/HOT-RELOAD.md")
     plan = text("docs/modern_PLAN-0.11.md")
@@ -45,7 +47,7 @@ def main() -> int:
         "desktop must support an explicit isolated dev home",
     )
     require(
-        ':desktop:hotRun --auto' in launcher,
+        ':desktop:hotRun --auto' in process,
         "launcher must use desktop hotRun in auto mode",
     )
     require(
@@ -57,8 +59,23 @@ def main() -> int:
         "default hot session must select isolated Developer Mode",
     )
     require(
-        "Tee-Object -FilePath" in launcher,
-        "launcher must persist Gradle/compiler output",
+        "Tee-Object -FilePath $Log -Append" in process
+        and "2>&1" in process and "/d /s /c $command" in process,
+        "launcher must merge native stderr before PowerShell and append compiler output",
+    )
+    require(
+        '$env:IKNA_HOT_RELOAD_GRADLE_EXE = $GradleExe' in launcher
+        and '"gradlew.bat"' in launcher
+        and '. (Join-Path $PSScriptRoot "hot-reload-process.ps1")' in launcher
+        and 'Invoke-IknaHotGradle -GradleExe $GradleExe -Log $log' in launcher
+        and 'call "%IKNA_HOT_RELOAD_GRADLE_EXE%" %* --daemon --watch-fs' in bridge,
+        "recompiler must have a root Gradle bridge with daemon/file watching enabled",
+    )
+    require(
+        "--daemon --watch-fs" in process
+        and "-Pcompose.reload.logStdout=true" in process
+        and "-Pcompose.reload.logLevel=Debug" in process,
+        "auto-run must enable file watching and expose recompiler/reload diagnostics",
     )
     require(
         "Waiting for the new ZIP contents" in launcher,
@@ -88,6 +105,8 @@ def main() -> int:
     print("  data: isolated Developer Mode by default")
     print("  source replacement/logging: wired")
     print("  terminal persistence: PowerShell -NoExit")
+    print("  Windows recompiler bridge: wired; runtime execution not checked here")
+    print("  This source check does not prove a running watcher or successful UI reload.")
     return 0
 
 

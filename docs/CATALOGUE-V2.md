@@ -127,6 +127,12 @@ WikiMatrix availability is measured separately from target supply. A missing dir
 
 ## Parts 8-10 content experiments
 
+Part 7 now has a separate [admitted Everyday pool](EVERYDAY-POOL.md) path.
+It retains a reproducible Tatoeba-only full candidate pool, scoped coverage and
+input/pipeline hashes without publishing. Reuse pinned complete candidate inputs
+before considering fresh acquisition. The historical MASSIVE comparison preview
+is not the final admitted-source input or its frequency space.
+
 Part 8 removes the English-hub assumption from Knowledge evidence. The manual
 `catalogue v2 knowledge experiment` workflow probes every direct WikiMatrix pair
 among the requested languages, keeps the upstream alignment score, applies the
@@ -146,6 +152,12 @@ run retained 20,881 fully attributed en-es rows. The all-document pass is split 
 stable SHA-256 document shards, resumes from per-shard caches, and is merged by
 `globalvoices_manifest_merge.py`; Part 11 requires that merge to report a complete
 scan, while unresolved documents remain excluded from the publishable subset.
+The 0.12 checkpoint confirms that the old full run failed its final completeness
+gate after successful merge/attribution/normalization. Retained artifacts/caches
+are no longer listed; precise failure counts remain unavailable. The
+[full-provenance runbook](PART-9-FULL-PROVENANCE.md) owns reusable input retention,
+hash-bound shards, offline merge review and exact recovery lists. Local regression
+fixtures do not establish full World coverage or admit it to the content freeze.
 
 Part 10 is deliberately non-publishing until the full evidence run is reviewed.
 `selection_experiment.py` stages candidates on disk, builds frequency ranks from
@@ -161,6 +173,14 @@ suppressed with an inspectable token-overlap rule. The 8,000 value is a safety
 budget, not a fill target. Decks below `minDeck` are omitted with an explicit
 reason, genuinely small decks above that threshold are reported as `publish-thin`,
 and no source material is weakened or fabricated merely to reach a count.
+
+The admitted Everyday path is now separate from mixed-source experiments:
+`everyday_selection.py` binds selection to the full Part 7 pool/report hashes,
+revalidates every origin and uses the exact reported language/sieve scope.
+Zero-supply pair/levels remain explicit. The admitted-pool workflow retains the
+full input before optionally running this review; reports and bounded selected
+samples never imply a content freeze. Commands and the single next run are in
+[EVERYDAY-POOL.md](EVERYDAY-POOL.md). No World/Knowledge evidence is rerun here.
 
 ## Ingestion boundary
 
@@ -541,4 +561,3 @@ release. A reviewed v2 publication also uploads `BUILD.json` and `BUILD.md` befo
 `index.json`, so a later read-only release census can cross-check the exact build.
 Part 4.5 is the final planned Part 4 checkpoint; absent a real blocker, work moves
 to Part 5 rather than adding more pre-policy catalogue machinery.
-

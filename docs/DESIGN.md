@@ -59,7 +59,13 @@ composes only the visible controls instead of measuring the complete settings
 document. Scroll-derived section tracking lives in a small recomposition scope,
 and the pinned strip never starts horizontal centring during a vertical fling.
 The jump strip navigates by item index; its own label-centering motion
-remains separate. Speech-engine warm-up
+remains separate. It recentres after the active label is remeasured (including
+language/font changes), using the measured horizontal scroll extent, and waits
+until vertical scrolling settles. Desktop Settings caps the jump strip, rule
+and section list at the same 1040dp measure; Browse caps its header and cards at
+640dp, and Search caps its input and result columns at 840dp. Apply these width
+limits before fill modifiers so the cap is effective
+on wide windows. Speech-engine warm-up
 waits until the speech section is actually visible.
 
 Home data and its LazyColumn state belong to the navigation graph rather than one

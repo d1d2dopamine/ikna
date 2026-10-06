@@ -32,7 +32,9 @@ fun SearchPane(container: DesktopContainer, palette: IknaPalette, decks: List<De
     var failed by remember { mutableStateOf(false) }
     var token by remember { mutableStateOf(0) }
     fun search() {
-        if (localSearchTerms(query) == null) return
+        // The busy guard lives here, not only on the button: Enter/NumPadEnter
+        // reaches search() directly and must honour the same disabled contract.
+        if (busy || localSearchTerms(query) == null) return
         val request = ++token
         val requestedQuery = query
         busy = true; searched = true; failed = false
@@ -43,7 +45,7 @@ fun SearchPane(container: DesktopContainer, palette: IknaPalette, decks: List<De
         }
     }
     DesktopPaneFrame(S.t("search.001"), onBack) {
-        Column(Modifier.fillMaxWidth().widthIn(max = 840.dp).align(Alignment.CenterHorizontally).padding(horizontal = 40.dp)) {
+        Column(Modifier.widthIn(max = 840.dp).fillMaxWidth().align(Alignment.CenterHorizontally).padding(horizontal = 40.dp)) {
             Spacer(Modifier.height(Space.md))
             Text(S.t("search.002"), style = MaterialTheme.typography.bodyMedium, color = palette.muted)
             Spacer(Modifier.height(Space.md))
@@ -66,7 +68,7 @@ fun SearchPane(container: DesktopContainer, palette: IknaPalette, decks: List<De
                 enabled = !busy && localSearchTerms(query) != null)
             Spacer(Modifier.height(Space.lg)); IknaRule(); Spacer(Modifier.height(Space.md))
         }
-        LazyColumn(Modifier.weight(1f).fillMaxWidth().widthIn(max = 840.dp).align(Alignment.CenterHorizontally), contentPadding = PaddingValues(horizontal = 40.dp, vertical = 12.dp)) {
+        LazyColumn(Modifier.weight(1f).widthIn(max = 840.dp).fillMaxWidth().align(Alignment.CenterHorizontally), contentPadding = PaddingValues(horizontal = 40.dp, vertical = 12.dp)) {
             if (busy || failed || !searched || rows.isEmpty()) item {
                 Text(S.t(when { failed -> "search.009"; busy -> "search.005"; !searched -> "search.006"; else -> "search.007" }),
                     style = MaterialTheme.typography.bodyMedium, color = palette.muted)

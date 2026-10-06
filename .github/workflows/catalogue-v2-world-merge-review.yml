@@ -1,0 +1,107 @@
+name: catalogue v2 world merge review
+
+# Offline review of saved provenance inputs. No OPUS/article fetch or publication.
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Existing full provenance run with retained full input/shard artifact"
+        required: true
+      alignment_sha256:
+        description: "Exact SHA-256 of saved globalvoices-alignment-map.jsonl.gz"
+        required: true
+      expected_shards:
+        description: "Shard count used by the saved run"
+        default: "32"
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: world-merge-review-${{ inputs.source_run_id }}
+  cancel-in-progress: false
+
+jobs:
+  review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+      ALIGNMENT_SHA256: ${{ inputs.alignment_sha256 }}
+      EXPECTED_SHARDS: ${{ inputs.expected_shards }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate explicit reuse pins
+        run: |
+          python3 - <<'PY'
+          import os,re
+          if not re.fullmatch(r'[1-9][0-9]*',os.environ['SOURCE_RUN_ID']):
+              raise SystemExit('source_run_id must be an explicit positive integer')
+          if not re.fullmatch(r'[a-fA-F0-9]{64}',os.environ['ALIGNMENT_SHA256']):
+              raise SystemExit('alignment_sha256 must be an explicit SHA-256')
+          if not re.fullmatch(r'[1-9][0-9]*',os.environ['EXPECTED_SHARDS']) or not 1 <= int(os.environ['EXPECTED_SHARDS']) <= 256:
+              raise SystemExit('expected_shards must be in 1..256')
+          PY
+      - name: Offline merge contracts
+        run: python3 tools/catalog/test_globalvoices_manifest_merge.py
+      - name: Download exact retained full evidence
+        uses: actions/download-artifact@v5
+        with:
+          name: catalogue-v2-world-full-provenance
+          run-id: ${{ inputs.source_run_id }}
+          github-token: ${{ github.token }}
+          path: reports
+      - name: Verify saved alignment bytes
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          source=Path('reports/globalvoices-alignment-map.jsonl.gz')
+          if not source.is_file():
+              raise SystemExit('Saved artifact has no alignment map. Supply retained full inputs; no fresh acquisition is attempted.')
+          with source.open('rb') as handle:
+              actual=hashlib.file_digest(handle,'sha256').hexdigest()
+          if actual != os.environ['ALIGNMENT_SHA256'].lower():
+              raise SystemExit('Saved alignment map SHA-256 mismatch')
+          Path('review').mkdir(exist_ok=True)
+          Path('review/WORLD-MERGE-REUSE.json').write_text(json.dumps({
+              'sourceRunId':int(os.environ['SOURCE_RUN_ID']),
+              'sourceArtifact':'catalogue-v2-world-full-provenance',
+              'alignmentMapSha256':actual,'expectedShards':int(os.environ['EXPECTED_SHARDS']),
+              'networkAcquisition':False,'publish':False
+          },indent=2)+'\n',encoding='utf-8')
+          PY
+      - name: Recompute manifest and complete recovery plan
+        run: |
+          python3 tools/catalog/globalvoices_manifest_merge.py \
+            --alignment-map reports/globalvoices-alignment-map.jsonl.gz \
+            --manifest-glob 'reports/shards/article-manifest-shard-*.jsonl' \
+            --report-glob 'reports/shards/WORLD-ARTICLE-MANIFEST-SHARD-*.json' \
+            --expected-shards "$EXPECTED_SHARDS" \
+            --out review/article-manifest.jsonl \
+            --json review/WORLD-ARTICLE-MANIFEST-FULL.json \
+            --markdown review/WORLD-ARTICLE-MANIFEST-FULL.md
+          cat review/WORLD-ARTICLE-MANIFEST-FULL.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep non-publishing review evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: catalogue-v2-world-merge-review
+          path: review/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Preserve full scan gate
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('review/WORLD-ARTICLE-MANIFEST-FULL.json').read_text(encoding='utf-8'))
+          if not report['completeScan']:
+              raise SystemExit('Scan still incomplete; review saved recovery.retryShardIndexes. No articles were fetched.')
+          print('Saved inputs establish a complete scan. Content freeze/publication acceptance remains separate.')
+          PY

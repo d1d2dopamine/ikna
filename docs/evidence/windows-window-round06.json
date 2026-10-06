@@ -1,0 +1,149 @@
+{
+  "recordVersion": 1,
+  "ownerLocalDate": "2026-10-06",
+  "status": "source corrections implemented; Windows visual acceptance pending",
+  "sourceBaseline": {
+    "file": "ikna-0.12-press-round-05-catalogue.zip",
+    "files": 560,
+    "bytes": 6412103,
+    "sha256": "d3d5bb3b723d03ff0d88f8528faf72893c7398bf280536b369c0bfcd76a60ac6"
+  },
+  "glmSource": {
+    "file": "ikna-0.12-press-glm-round-05.zip",
+    "files": 557,
+    "bytes": 6402485,
+    "sha256": "9312ddb746ee598973e4cf36c9768eb9fc26548b2fde64c6c3c1cf5f39102591",
+    "commonBase": "ikna-0.12-press-round-04-hot-reload.zip",
+    "changedExisting": [
+      "docs/DESKTOP.md"
+    ],
+    "added": [
+      "docs/ROUND-0.12-05-GLM.md"
+    ],
+    "applicationCodeChanged": false
+  },
+  "glmEvidence": {
+    "file": "ikna-0.12-press-glm-round-05-evidence.zip",
+    "bytes": 4721,
+    "sha256": "e5a3b31a4baea1cb5eb7d237190ca3adc53fc9d00446b68e7836dcfe14b18853",
+    "files": [
+      {
+        "file": "probe-1-transition-log-0349.txt",
+        "bytes": 51104,
+        "sha256": "7b8730a8a9e925bbb3f2b9332272befb085ac2cb6f50446884e034c310710863"
+      },
+      {
+        "file": "probe-2-transition-log-0356.txt",
+        "bytes": 2691,
+        "sha256": "b165b8fed42cbb47e3d290e2faf1512326c0ef8998251039431be4753342dabb"
+      }
+    ],
+    "containsRenderedFrames": false,
+    "containsBuildLogs": false
+  },
+  "probe2Observations": {
+    "java": "17.0.20.1",
+    "os": "Windows 11",
+    "scale": 1.25,
+    "floatingBounds": [
+      48,
+      48,
+      1180,
+      800
+    ],
+    "maximizedBounds": [
+      0,
+      0,
+      1536,
+      864
+    ],
+    "movedToResizedMs": {
+      "maximize": 137,
+      "restoreDown": 153,
+      "exitFullscreen": 135
+    },
+    "stationaryPointer": true,
+    "scope": "single monitor; callback snapshots, not native operation or rendered frame trace"
+  },
+  "rejectedInferences": [
+    "Callbacks prove an atomic native bounds transaction.",
+    "A stationary pointer in probe 2 proves probe 1 drift was human dragging.",
+    "Stepped content is unavoidable on Windows or impossible to fix in the app.",
+    "Desired placement effect acknowledges native restore."
+  ],
+  "pinnedStack": {
+    "compose": "1.8.2",
+    "skiko": "0.9.4.2",
+    "jdkTarget": 17
+  },
+  "primarySources": [
+    {
+      "url": "https://raw.githubusercontent.com/JetBrains/compose-multiplatform-core/v1.8.2/gradle/libs.versions.toml",
+      "bytes": 25373,
+      "sha256": "4385959cd31a0ab3a990298bb360d5a52e0909a592e8a4f27c04dc6f257ab174"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/JetBrains/compose-multiplatform-core/v1.8.2/compose/ui/ui/src/desktopMain/kotlin/androidx/compose/ui/window/Window.desktop.kt",
+      "bytes": 31454,
+      "sha256": "4fedbf791aa759c57ad162c44f264e1e2bdb677e34c534e9f54acbcc0032c370"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/JetBrains/compose-multiplatform-core/v1.8.2/compose/ui/ui/src/desktopMain/kotlin/androidx/compose/ui/window/UndecoratedWindowResizer.desktop.kt",
+      "bytes": 7158,
+      "sha256": "13c437881b99900b4784eacdff632c4dff2fb739e91ec58f20b384836f3a67fc"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/JetBrains/compose-multiplatform-core/v1.8.2/compose/ui/ui/src/desktopMain/kotlin/androidx/compose/ui/awt/ComposeWindowPanel.desktop.kt",
+      "bytes": 7093,
+      "sha256": "a939b403d29bf99ce79fcaf1d607dea1078bf401c2f989412cbda0daba0821fc"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/JetBrains/compose-multiplatform-core/v1.8.2/compose/ui/ui/src/desktopMain/kotlin/androidx/compose/ui/ComposeFeatureFlags.desktop.kt",
+      "bytes": 3105,
+      "sha256": "1ef754e5564e96a80b54e3fddd72db67b15bcabd1015ff920bef3dbb2894267c"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/JetBrains/skiko/v0.9.4.2/skiko/src/awtMain/kotlin/org/jetbrains/skiko/SkiaLayer.awt.kt",
+      "bytes": 23320,
+      "sha256": "e51d7ba50dbac1a7268eb813fff9394e9a9318683afbfe07d27822d5fe0c3f7d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/JetBrains/skiko/v0.9.4.2/skiko/src/awtMain/kotlin/org/jetbrains/skiko/redrawer/Direct3DRedrawer.kt",
+      "bytes": 4836,
+      "sha256": "38d3e2023ccca03dfc3a373a4de3cef0445dbdb35e7ea1f9bcabdb6bd6a69b6f"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/JetBrains/skiko/v0.9.4.2/skiko/src/jvmMain/kotlin/org/jetbrains/skiko/SkikoProperties.kt",
+      "bytes": 7014,
+      "sha256": "14f304d20183af64cc4ed6489175934203979f0eea4805156598aa1e9127c1d9"
+    },
+    {
+      "url": "https://api.github.com/repos/JetBrains/skiko/pulls/1243/files",
+      "bytes": 64922,
+      "sha256": "de782e87a38d5ec5ed3c555c4142da476cebe3ceed02c172107c6cba2c396eed"
+    },
+    {
+      "url": "https://api.github.com/repos/JetBrains/compose-multiplatform-core/pulls/3299/files",
+      "bytes": 21536,
+      "sha256": "a11defadaf767d6c2f39731f550c27066b492fe33d75be22d00302b063a71b08"
+    }
+  ],
+  "upstreamNewerFix": {
+    "skikoPR": "https://github.com/JetBrains/skiko/pull/1243",
+    "mergedAt": "2026-08-06T10:32:22Z",
+    "mergeCommit": "b52e0cb0c84c91c0ccee6e67b408d4ca6545f952",
+    "composePR": "https://github.com/JetBrains/compose-multiplatform-core/pull/3299",
+    "appliedHere": false,
+    "reason": "Not present in pinned APIs/native library; a property alone cannot backport native hooks."
+  },
+  "checks": {
+    "javaBoundsGroups": 6,
+    "javaTitleBarGroups": 6,
+    "sourceDesignContracts": 38,
+    "paletteContracts": 8,
+    "localizationLanguages": 7,
+    "localizationKeysEach": 714,
+    "gradleCompilationExecuted": false,
+    "windowsVisualExecutedByCodex": false
+  }
+}

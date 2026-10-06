@@ -17,12 +17,12 @@ from pathlib import Path
 from typing import Any
 
 from globalvoices_attribution import valid_globalvoices_url
-from globalvoices_manifest import alignment_inventory, normalize_document
+from globalvoices_manifest import alignment_inventory, normalize_document, sha256_file, shard_index_for_document
 
 
 def _load_manifest(path: str) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
-    with open(path, encoding="utf-8", errors="replace") as handle:
+    with open(path, encoding="utf-8") as handle:
         for physical, line in enumerate(handle, start=1):
             line = line.strip()
             if not line:
@@ -49,14 +49,19 @@ def merge(
     *,
     expected_shards: int,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    if type(expected_shards) is not int or not 1 <= expected_shards <= 256:
+        raise ValueError("expected_shards must be in 1..256")
     counts, pair_counts = alignment_inventory(alignment_map)
     all_documents = set(counts)
+    alignment_sha256 = sha256_file(alignment_map)
 
     rows_by_doc: dict[str, dict[str, Any]] = {}
     duplicate_identical = 0
     for path in sorted(manifest_paths):
         for row in _load_manifest(path):
             document = row["document"]
+            if document not in all_documents:
+                raise ValueError(f"{path}: verified document outside alignment inventory: {document}")
             previous = rows_by_doc.get(document)
             if previous is None:
                 rows_by_doc[document] = row
@@ -73,20 +78,32 @@ def merge(
     cache_hits = 0
     network_attempts = 0
     retryable_documents: set[str] = set()
+    legacy_reports = 0
 
     for path in sorted(report_paths):
         report = json.loads(Path(path).read_text(encoding="utf-8"))
+        if report.get("reportVersion") not in (2, 3) or report.get("part") != 9 or report.get("publicationSafe") is not True:
+            raise ValueError(f"{path}: unsupported or unsafe World shard report")
         reports.append(report)
         shard = report.get("shard") or {}
         index = shard.get("index")
         count = shard.get("count")
-        if not isinstance(index, int) or not isinstance(count, int):
+        if type(index) is not int or type(count) is not int:
             raise ValueError(f"{path}: missing shard metadata")
         if count != expected_shards:
             raise ValueError(f"{path}: shard count {count} != expected {expected_shards}")
+        if not 0 <= index < count:
+            raise ValueError(f"{path}: shard index outside 0..{count - 1}")
         if index in shard_indexes:
             raise ValueError(f"duplicate shard report for index {index}")
         shard_indexes.add(index)
+        input_hash = report.get("alignmentMapSha256")
+        if input_hash is None:
+            if report.get("reportVersion", 0) >= 3:
+                raise ValueError(f"{path}: missing alignment map hash")
+            legacy_reports += 1
+        elif input_hash != alignment_sha256:
+            raise ValueError(f"{path}: alignment map hash differs from merge input")
 
         summary = report.get("summary") or {}
         cache_hits += int(summary.get("cacheHits") or 0)
@@ -95,8 +112,16 @@ def merge(
             reasons[str(reason)] += int(value)
         for item in report.get("unresolved") or []:
             document = normalize_document(str(item.get("document") or ""))
-            if not document:
-                continue
+            if not document or document not in all_documents:
+                raise ValueError(f"{path}: unresolved document outside alignment inventory: {document}")
+            if shard_index_for_document(document, expected_shards) != index:
+                raise ValueError(f"{path}: unresolved document belongs to another shard: {document}")
+            if document in unresolved_by_doc or document in rows_by_doc:
+                raise ValueError(f"{path}: duplicate/conflicting document outcome: {document}")
+            if not isinstance(item.get("reason"), str) or not item["reason"].strip():
+                raise ValueError(f"{path}: unresolved document requires a reason")
+            if item.get("affectedRows") != counts[document]:
+                raise ValueError(f"{path}: unresolved affectedRows differs from alignment inventory")
             unresolved_by_doc[document] = dict(item)
             attempted_documents.add(document)
             if str(item.get("reason") or "").startswith("fetch-error:"):
@@ -112,6 +137,10 @@ def merge(
     )
     total_alignment_rows = sum(pair_counts.values())
     complete_scan = not missing_shards and not unattempted_documents and not retryable_documents
+    retry_shards = sorted(set(missing_shards) | {
+        shard_index_for_document(doc, expected_shards)
+        for doc in unattempted_documents | retryable_documents
+    })
 
     rows = [rows_by_doc[key] for key in sorted(rows_by_doc)]
     unresolved = sorted(
@@ -119,7 +148,7 @@ def merge(
         key=lambda row: (-int(row.get("affectedRows") or 0), str(row.get("document") or "")),
     )
     report = {
-        "reportVersion": 1,
+        "reportVersion": 2,
         "part": 9,
         "status": "pass" if complete_scan else "retry-required",
         "publicationSafe": True,
@@ -145,6 +174,19 @@ def merge(
         "reasons": dict(sorted(reasons.items())),
         "highestImpactUnresolved": unresolved[:500],
         "sampleUnattemptedDocuments": sorted(unattempted_documents)[:200],
+        "inputEvidence": {
+            "alignmentMapSha256": alignment_sha256,
+            "legacyShardReportsWithoutInputHash": legacy_reports,
+            "manifests": [{"file": Path(p).name, "sha256": sha256_file(p)} for p in sorted(manifest_paths)],
+            "reports": [{"file": Path(p).name, "sha256": sha256_file(p)} for p in sorted(report_paths)],
+        },
+        "recovery": {
+            "action": "none" if complete_scan else "retry-listed-shards",
+            "retryShardIndexes": retry_shards,
+            "retryableDocuments": sorted(retryable_documents),
+            "unattemptedDocuments": sorted(unattempted_documents),
+            "missingShardIndexes": missing_shards,
+        },
     }
     return rows, report
 
@@ -168,6 +210,9 @@ def markdown(report: dict[str, Any]) -> str:
         f"- unattempted documents: **{s['unattemptedDocuments']:,}**",
         f"- aligned rows with both documents verified: **{s['verifiedAlignmentRows']:,} ({s['verifiedAlignmentRate']:.1%})**",
         f"- cache hits / network attempts: **{s['cacheHits']:,} / {s['networkAttempts']:,}**",
+        f"- shards requiring further verification: **{report['recovery']['retryShardIndexes']}**",
+        f"- alignment map SHA-256: `{report['inputEvidence']['alignmentMapSha256']}`",
+        f"- legacy shard reports without input hash: **{report['inputEvidence']['legacyShardReportsWithoutInputHash']}**",
         "",
         "Only verified rows enter the publication manifest. Unresolved, missing-shard, and transient-network cases remain rejected evidence; a full Catalogue freeze should use this result only when `completeScan` is true.",
     ]
@@ -201,6 +246,10 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("no manifest shard files matched")
     if not reports:
         raise SystemExit("no shard report files matched")
+    outputs = [Path(p).resolve() for p in (args.out, args.json, args.markdown)]
+    inputs = {Path(p).resolve() for p in [args.alignment_map, *manifests, *reports]}
+    if len(set(outputs)) != len(outputs) or set(outputs) & inputs:
+        raise SystemExit("merge outputs must be distinct and must not overwrite evidence inputs")
     rows, report = merge(args.alignment_map, manifests, reports, expected_shards=args.expected_shards)
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     with open(args.out, "w", encoding="utf-8", newline="") as handle:

@@ -19,12 +19,14 @@ $LogsDir = Join-Path $LocalBase "logs"
 $DevHome = Join-Path $LocalBase "profile"
 $GradleHome = Join-Path $ToolsDir "gradle-$GradleVersion"
 $GradleExe = Join-Path $GradleHome "bin\gradle.bat"
+. (Join-Path $PSScriptRoot "hot-reload-process.ps1")
 
 $RequiredPaths = @(
     "settings.gradle.kts",
     "build.gradle.kts",
     "desktop\build.gradle.kts",
     "shared\build.gradle.kts",
+    "gradlew.bat",
     "desktop\src\main\kotlin\dev\ikna\desktop\Main.kt"
 )
 
@@ -166,6 +168,8 @@ Ensure-Directories
 Wait-RepositoryReady
 Ensure-JavaBootstrap
 Ensure-Gradle
+# Inherited by the app/devtools and their continuous recompiler process.
+$env:IKNA_HOT_RELOAD_GRADLE_EXE = $GradleExe
 Prepare-DevelopmentProfile
 
 Write-Host ""
@@ -179,15 +183,23 @@ while ($true) {
     Wait-RepositoryReady
     $log = New-LogPath
     Set-Content -Path (Join-Path $LogsDir "latest.log.path") -Value $log -Encoding utf8
+    @(
+        "Ikna Hot Reload session: $(Get-Date -Format o)",
+        "Repository: $RepoRoot",
+        "Gradle: $GradleExe (8.10.2)",
+        "Recompiler bridge: $(Join-Path $RepoRoot 'gradlew.bat')",
+        "Profile: $(if ($UseRealData) { 'normal desktop data' } else { $DevHome })",
+        "Compose Hot Reload: 1.1.1; auto mode; daemon/file watching enabled",
+        "Starting :desktop:hotRun --auto; waiting for compiler/watcher output.",
+        "An open app window alone does not prove reload. Look for a subsequent build and changed UI."
+    ) | Tee-Object -FilePath $log
 
     Push-Location $RepoRoot
     try {
         Write-Host "Starting :desktop:hotRun --auto ..." -ForegroundColor Cyan
         Write-Host "Log: $log" -ForegroundColor DarkGray
 
-        & $GradleExe --no-daemon --console=plain :desktop:hotRun --auto 2>&1 |
-            Tee-Object -FilePath $log
-        $exitCode = $LASTEXITCODE
+        $exitCode = Invoke-IknaHotGradle -GradleExe $GradleExe -Log $log
     }
     finally {
         Pop-Location
@@ -195,6 +207,7 @@ while ($true) {
 
     Write-Host ""
     Write-Host "Hot Reload process stopped (exit $exitCode)." -ForegroundColor Yellow
+    Add-Content -Path $log -Value "Hot Reload process stopped (exit $exitCode)."
     Write-Host "The log is still available at: $log" -ForegroundColor Yellow
 
     if (-not (Test-RepositoryReady)) {

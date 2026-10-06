@@ -57,7 +57,7 @@ _DOC = re.compile(
 
 
 def _open_text(path: str):
-    return gzip.open(path, "rt", encoding="utf-8", errors="replace") if path.endswith(".gz") else open(path, encoding="utf-8", errors="replace")
+    return gzip.open(path, "rt", encoding="utf-8") if path.endswith(".gz") else open(path, encoding="utf-8")
 
 
 def normalize_document(value: str) -> str:
@@ -374,6 +374,14 @@ def document_counts(alignment_map: str) -> Counter[str]:
     return alignment_inventory(alignment_map)[0]
 
 
+def sha256_file(path: str) -> str:
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def build_manifest(
     alignment_map: str,
     *,
@@ -486,7 +494,8 @@ def build_manifest(
     )
     shard_complete = len(selected) == len(rows) + len(unresolved)
     report = {
-        "reportVersion": 2,
+        "reportVersion": 3,
+        "alignmentMapSha256": sha256_file(alignment_map),
         "part": 9,
         "status": "pass" if shard_complete and retryable_unresolved == 0 else "retry-required",
         "publicationSafe": True,

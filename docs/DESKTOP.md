@@ -41,8 +41,10 @@ the disappointment:
 
 ## What the app is actually made of
 
-Measured, not estimated, over `app/src/main/java/dev/ikna` -- 103 Kotlin files,
-29,141 lines:
+Measured, not estimated, over `app/src/main/java/dev/ikna` at port time -- 103
+Kotlin files, 29,141 lines. The `:shared` split has since moved the portable
+majority into `shared/src/jvmShared`, so these numbers are the historical
+port-time evidence, not current totals:
 
 | | files |
 | --- | --- |
@@ -57,7 +59,7 @@ session builder, the phonetics respelling -- and it includes every string.
 Two facts make this much cheaper than it looks:
 
 - **The interface text is Kotlin, not resources.** All seven translations live in
-  `ui/text/Strings*.kt` as 568 keys per table. There is no `values-ru/strings.xml`
+  `ui/text/Strings*.kt`, 714 keys per table. There is no `values-ru/strings.xml`
   to reimplement, and `S.t("dp.014")` works unchanged on a desktop.
 - **The branded wordmark uses two tint masks.** `R.drawable.ikna_wordmark` and
   `R.drawable.ikna_wordmark_accent` are layered in `ui/theme/Wordmark.kt`; the
@@ -161,8 +163,8 @@ export and import. No voice, no widget, no reminders.
 Keyboard shortcuts (Space to reveal, A/D to answer with automatic grading,
 Z to undo). A pointer reveal returns focus to the session, so the same A/D
 answer works after either input method. Window size and position are remembered,
-along with tray notifications and Anki import through a native file
-dialog, update check that opens the release page.
+along with Anki import through a native file dialog and an update check that
+opens the release page.
 
 **Stage 4 -- voice, if the artefact exists. Not shipped.**
 
@@ -179,13 +181,37 @@ Window motion is intentionally kept off the coroutine/effect hot path. Native
 resize and move events update `WindowState.size` and `WindowState.position` many
 times while the pointer is moving, so those values must not be keys of a
 `LaunchedEffect`. Floating bounds are captured only before transitions that can
-destroy them and on close. Restore changes placement first and reapplies saved
-floating bounds only after the native window reports `Floating`; this avoids
-asking Compose Desktop to write floating bounds while the native frame is still
-maximized/fullscreen. The underlying AWT frame stays resizable for its lifetime;
-for the custom undecorated Windows frame only the Compose edge-resizer thickness
-is switched to zero outside `Floating`, avoiding a native frame-style rebuild
-during maximize/fullscreen transitions.
+destroy them and on close. Restore changes placement first. A single native
+`componentResized` listener, removed with the window, checks both requested and
+native placement and rejects minimized windows before applying saved floating
+bounds. A state-placement effect alone is not native acknowledgement. Matching
+bounds require no write; a correction uses one `setBounds`, and its event cannot
+trigger another restore. A newer non-floating request cancels the old restore.
+Compose observes native geometry instead of receiving separate size/position
+writes. The underlying AWT frame stays resizable for its lifetime.
+
+On Windows, `WindowResizeOverlay.kt` supplies the existing eight invisible edge
+zones and cursors only while Floating. Both desired and native placement must
+allow resizing. Every pointer step derives bounds from the initial screen-space
+pointer/window rectangle, clamps both dimensions to the minimum and preserves
+the opposite edges; negative monitor origins remain valid. It applies position
+and size together with one `setBounds`. The Compose 1.8.2 resizer's separate
+`setLocation`/`setSize` path is disabled with zero thickness throughout.
+
+Before creating the Windows window, `WindowsFramePacing` enables the pinned
+Skiko 0.9.4.2 immediate Direct3D VSync property unless explicitly overridden:
+`skiko.rendering.windows.waitForFrameVsyncOnRedrawImmediately=true`. That path
+already redraws immediately on bounds changes but defaults to unsynchronized
+presentation. The renderer choice and normal animation VSync remain unchanged;
+other platforms keep their defaults. This is a frame-pacing correction, **not**
+the newer native synchronous-live-resize implementation. First-frame/native
+setup requires a fresh process; Hot Reload alone cannot rerun `main()`.
+
+GLM's two AWT logs show final callback bounds, not displayed frames. They cannot
+establish atomic transitions or prove the problem is unavoidable on Windows.
+The owner reproduced it; complete artifact-free motion remains pending a fresh
+Windows visual check. Primary sources, reviewed evidence, resource trade-offs
+and the short acceptance matrix are in [ROUND-0.12-06.md](ROUND-0.12-06.md).
 
 ## Build
 
@@ -205,12 +231,14 @@ The shell scripts the build already depends on -- `tools/voice/fetch-voice.sh`
 and `tools/catalog/fetch-bundled-pack.sh` -- run on the Windows runner under
 `shell: bash`, which is Git Bash and is present by default.
 
-`release.yml` attaches `ikna-<tag>-windows-x64.zip` and the required
-`ikna-<tag>-windows-x64-setup.exe` beside the APKs and Linux AppImage.
+`release.yml` attaches the portable zip and installer under their fixed names
+`ikna-windows-x64-portable.zip` and `ikna-windows-x64-setup.exe`, beside the
+APKs and Linux AppImage. Release file names are fixed rather than derived from
+the tag, so the README download links resolve to every release.
 
 One wrinkle worth writing down before it surprises somebody: `jpackage` and
 the Windows executable version field insist on a numeric version. The app can
-show `0.10.0 press`, while `desktop/build.gradle.kts` uses `0.10.0` and the epoch
+show `0.11.0 press`, while `desktop/build.gradle.kts` uses `0.11.0` and the epoch
 word stays in the release tag. `build-installer.ps1` reads that value rather
 than duplicating it.
 
@@ -266,13 +294,13 @@ was already building `:desktop` on every push -- it just threw the folder away.
 
 ### What you download
 
-One file: `ikna-<version>-linux-x86_64.AppImage`, somewhere around 100 MB, the
+One file: `ikna-linux-x86_64.AppImage`, somewhere around 100 MB, the
 same shrunk jars and cut-down Java runtime that are inside the Windows zip.
 Nothing to install, no Java needed, and uninstalling is deleting the file.
 
 ```
-chmod +x ikna-v0.10.0-press-linux-x86_64.AppImage
-./ikna-v0.10.0-press-linux-x86_64.AppImage
+chmod +x ikna-linux-x86_64.AppImage
+./ikna-linux-x86_64.AppImage
 ```
 
 On Fedora that needs FUSE 2, which Fedora has not shipped by default since 40:
@@ -340,9 +368,11 @@ or `sdk.dir` in `local.properties` is for.
 `windows` and needing nothing from either. It fetches the pinned starter deck,
 runs the same `createReleaseDistributable` the Windows job runs, packs the
 AppImage, uploads it as `ikna-linux-appimage`, and then starts the packaged
-file once with `--selftest` -- through the AppImage, not beside it, so what is
-tested is the file that gets published. `release.yml` has the matching job,
-attaching `ikna-<tag>-linux-x86_64.AppImage` to the same release as the APKs
+file with `--selftest` -- through the AppImage, not beside it, so what is
+tested is the file that gets published. A second pass uses `ru_RU.UTF-8`; it
+reports a skip if that locale cannot be generated on the runner. `release.yml`
+has the matching packaging and default-locale self-test job,
+attaching `ikna-linux-x86_64.AppImage` to the same release as the APKs
 and the Windows files.
 
 Two details in those jobs are worth the sentence they cost. The runner has no
@@ -472,11 +502,11 @@ AppImage locale workarounds are untouched.
 
 The drag surface is a `WindowDraggableArea`; the three buttons are outside it.
 Double-click toggles maximize/restore without consuming drag events. Minimize,
-maximize/restore and close have keyboard-focus indication and names in all six
+maximize/restore and close have keyboard-focus indication and names in all seven
 interface languages. Closing follows the existing geometry-save/exit path.
-F11 hides the bar in full screen. Compose handles edge/corner resizing for a
-floating undecorated window; outside Floating their resizer thickness becomes
-zero while the native frame remains resizable, so maximize/fullscreen does not
+F11 hides the bar in full screen. The app's invisible edge/corner overlay handles
+floating resize with one native bounds write per step; it disappears outside
+Floating. The native frame remains resizable, so maximize/fullscreen does not
 flip the AWT frame style. The title strip occupies 45 dp including its rule; each
 button is 44 dp.
 
@@ -485,3 +515,25 @@ Windows 11 Snap Layout flyout on hovering the maximize button is not implemented
 no claim is made that OS snapping gestures behave identically to a native frame.
 Window motion, DPI transitions and packaged Windows interaction still require
 real Windows testing; source checks and headless gesture tests are not a GUI test.
+
+### First resized picture (0.12 round 07)
+
+The owner's three fresh-process logs confirm immediate VSync and Direct3D were
+active, but round-06 artifacts persisted. Do not attribute that result to an
+unapplied Hot Reload change. The pinned Compose 1.8.2 / Skiko 0.9.4.2 immediate
+resize path can record new pixel dimensions before `doLayout` updates its child
+Canvas and scene constraints. A public render-delegate wrapper now performs that
+existing layout before the same resized Direct3D picture draws. It also handles
+scale/native-state invalidation; stable frames and fallback renderers retain
+their ordinary path. Listeners/delegate are restored on disposal.
+
+Developer Mode records bounded geometry/picture diagnostics in
+`logs/window-surface.log` under the profile home (512 records, one previous file,
+asynchronous disk writes). The startup marker is
+`window surface-sync=before-picture-v1`. These are recording measurements,
+not GPU/DWM presentation evidence. Restart the app process once to install the
+hook; the owner must still check actual transitions. Implementation, source
+hashes, test limitations and the short acceptance procedure are in
+[ROUND-0.12-07.md](ROUND-0.12-07.md). Owner follow-up, 2026-10-06: the reported
+artifact is fixed in the owner's check. This closes that acceptance as
+owner-reported; mixed-DPI/multi-monitor and packaged-release checks remain open.

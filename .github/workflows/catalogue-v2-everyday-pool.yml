@@ -1,0 +1,218 @@
+name: catalogue v2 everyday admitted pool
+
+# Part 7 and optional Part 10 review. Reuse pinned normalized inputs by default;
+# fresh acquisition is explicit. No admission experiments or publication.
+on:
+  workflow_dispatch:
+    inputs:
+      input_mode:
+        description: "Reuse a saved complete candidate file, or explicitly acquire a new Tatoeba export"
+        type: choice
+        options: [artifact, fresh-tatoeba]
+        default: artifact
+      input_run_id:
+        description: "Artifact mode: exact run containing the full Tatoeba candidate file"
+      input_artifact:
+        description: "Artifact mode: exact artifact name"
+        default: catalogue-v2-everyday-admitted-pool
+      candidate_name:
+        description: "Artifact mode: candidate basename (not a report or selection preview)"
+        default: everyday-candidates.jsonl.gz
+      source_version:
+        description: "Artifact mode: exact sourceVersion from the source report"
+      candidate_sha256:
+        description: "Artifact mode: exact SHA-256 of the candidate file"
+      learn:
+        description: "Learning languages, comma separated"
+        default: "en,ru,pl,es,fr,de,it,pt,zh,ja,ko"
+      meanings:
+        description: "Meaning languages, comma separated"
+        default: "en,ru,pl,es,fr,de,it,pt,zh,ja,ko"
+      run_selection:
+        description: "Review selection over this exact admitted pool; retain pool first so a failed review can reuse it"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  pool:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      INPUT_MODE: ${{ inputs.input_mode }}
+      INPUT_RUN_ID: ${{ inputs.input_run_id }}
+      INPUT_ARTIFACT: ${{ inputs.input_artifact }}
+      CANDIDATE_NAME: ${{ inputs.candidate_name }}
+      SOURCE_VERSION: ${{ inputs.source_version }}
+      EXPECTED_SHA256: ${{ inputs.candidate_sha256 }}
+      LEARN: ${{ inputs.learn }}
+      MEANINGS: ${{ inputs.meanings }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate explicit input choice before any corpus download
+        run: |
+          python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, 'tools/catalog')
+          import catalogue_core as core
+          from everyday_pool import codes, MOVING_VERSIONS
+          learn = codes(os.environ['LEARN'], core.LEARNABLE)
+          meanings = codes(os.environ['MEANINGS'], core.MEANINGS)
+          assert any(lang != meaning for lang in learn for meaning in meanings), 'Scope contains no directed pairs'
+          mode = os.environ['INPUT_MODE']
+          if mode == 'artifact':
+              assert re.fullmatch(r'[1-9][0-9]*', os.environ['INPUT_RUN_ID']), 'An exact input_run_id is required'
+              assert os.environ['INPUT_ARTIFACT'].strip(), 'An exact input_artifact is required'
+              assert re.fullmatch(r'[A-Za-z0-9_.-]+\.jsonl(?:\.gz)?', os.environ['CANDIDATE_NAME']), 'Use a candidate basename'
+              assert re.fullmatch(r'[0-9a-fA-F]{64}', os.environ['EXPECTED_SHA256']), 'An exact candidate_sha256 is required'
+              version = os.environ['SOURCE_VERSION'].strip()
+              assert version and version.casefold() not in MOVING_VERSIONS, 'A pinned source_version is required'
+          else:
+              assert mode == 'fresh-tatoeba', 'Unknown input mode'
+          Path('reports').mkdir()
+          Path('pool').mkdir()
+          PY
+      - name: ICU and existing contracts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libicu-dev
+          python3 tools/catalog/test_ingestion.py
+          python3 tools/catalog/test_everyday_rebuild.py
+          python3 tools/catalog/test_everyday_pool.py
+          python3 tools/catalog/test_selection_policy.py
+          python3 tools/catalog/test_everyday_selection.py
+
+      # An expired/missing artifact fails here. There is deliberately no fresh
+      # download fallback, and no implicit latest-run lookup.
+      - name: Reuse exact candidate artifact
+        if: inputs.input_mode == 'artifact'
+        uses: actions/download-artifact@v5
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.input_run_id }}
+          name: ${{ inputs.input_artifact }}
+          path: reuse
+      - name: Locate and record the reused input
+        if: inputs.input_mode == 'artifact'
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          matches = list(Path('reuse').rglob(os.environ['CANDIDATE_NAME']))
+          assert len(matches) == 1, 'Expected one complete normalized candidate file; reports/previews cannot reconstruct it'
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write('CANDIDATE_INPUT=' + str(matches[0]) + '\n')
+          Path('reports/INPUT-REFERENCE.json').write_text(json.dumps({
+              'mode': 'artifact', 'runId': os.environ['INPUT_RUN_ID'],
+              'artifact': os.environ['INPUT_ARTIFACT'], 'filename': os.environ['CANDIDATE_NAME'],
+              'sourceVersion': os.environ['SOURCE_VERSION'], 'expectedSha256': os.environ['EXPECTED_SHA256'],
+          }, indent=2) + '\n', encoding='utf-8')
+          PY
+
+      - name: Explicit fresh Tatoeba acquisition with contributor metadata
+        if: inputs.input_mode == 'fresh-tatoeba'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p corpus candidates
+          base=https://downloads.tatoeba.org/exports
+          for export in sentences_detailed links; do
+            bash tools/ci/fetch-url.sh "$base/$export.tar.bz2" "corpus/$export.tar.bz2" "corpus/$export.headers"
+            tar -tjf "corpus/$export.tar.bz2" >/dev/null
+            tar -xjf "corpus/$export.tar.bz2" -C corpus
+          done
+          test -s corpus/sentences_detailed.csv
+          test -s corpus/links.csv
+          python3 - <<'PY'
+          import hashlib, json, os
+          from email.utils import parsedate_to_datetime
+          from pathlib import Path
+          exports = []
+          for name in ('sentences_detailed', 'links'):
+              headers = Path(f'corpus/{name}.headers').read_text()
+              modified = [line.split(':', 1)[1].strip() for line in headers.splitlines() if line.lower().startswith('last-modified:')]
+              assert modified, 'Tatoeba export did not provide Last-Modified'
+              with Path(f'corpus/{name}.tar.bz2').open('rb') as handle:
+                  digest = hashlib.file_digest(handle, 'sha256').hexdigest()
+              exports.append({'url': f'https://downloads.tatoeba.org/exports/{name}.tar.bz2',
+                              'sha256': digest, 'lastModified': modified[-1]})
+          identity = hashlib.sha256(''.join(row['sha256'] for row in exports).encode()).hexdigest()
+          version = parsedate_to_datetime(exports[0]['lastModified']).date().isoformat() + '-' + identity[:16]
+          Path('reports/INPUT-REFERENCE.json').write_text(json.dumps({
+              'mode': 'fresh-tatoeba', 'sourceVersion': version, 'exports': exports,
+          }, indent=2) + '\n', encoding='utf-8')
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write('SOURCE_VERSION=' + version + '\n')
+          PY
+      - name: Normalize fresh direct pairs
+        if: inputs.input_mode == 'fresh-tatoeba'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/catalog/ingest_sources.py tatoeba-matrix \
+            --dump-dir corpus --learn "$LEARN" --meanings "$MEANINGS" \
+            --source-version "$SOURCE_VERSION" --out candidates/tatoeba.jsonl.gz
+          rm -rf corpus
+          echo 'CANDIDATE_INPUT=candidates/tatoeba.jsonl.gz' >> "$GITHUB_ENV"
+          echo "EXPECTED_SHA256=$(sha256sum candidates/tatoeba.jsonl.gz | cut -d' ' -f1)" >> "$GITHUB_ENV"
+
+      - name: Build full admitted pool and coverage evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/catalog/everyday_pool.py \
+            --candidates "$CANDIDATE_INPUT" --source-version "$SOURCE_VERSION" \
+            --expect-sha256 "$EXPECTED_SHA256" --learn "$LEARN" --meanings "$MEANINGS" \
+            --pool pool/everyday-candidates.jsonl.gz --staging reports/everyday-pool.sqlite3 \
+            --json reports/EVERYDAY-POOL.json --markdown reports/EVERYDAY-POOL.md \
+            --samples reports/EVERYDAY-SAMPLES.md
+          cat reports/EVERYDAY-POOL.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Retain the full pool for later selection without corpus reacquisition
+        uses: actions/upload-artifact@v6
+        with:
+          name: catalogue-v2-everyday-admitted-pool
+          path: |
+            pool/everyday-candidates.jsonl.gz
+            reports/EVERYDAY-POOL.json
+            reports/EVERYDAY-POOL.md
+            reports/EVERYDAY-SAMPLES.md
+            reports/INPUT-REFERENCE.json
+          if-no-files-found: error
+          retention-days: 90
+
+      # The complete input is already retained, even if selection fails. Retry
+      # with artifact mode and this run's version/hash rather than fetching again.
+      - name: Part 10 review over the exact admitted pool
+        if: inputs.run_selection
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/catalog/everyday_selection.py \
+            --pool pool/everyday-candidates.jsonl.gz --pool-report reports/EVERYDAY-POOL.json \
+            --staging reports/everyday-selection.sqlite3 \
+            --json reports/EVERYDAY-SELECTION.json --markdown reports/EVERYDAY-SELECTION.md \
+            --preview review/everyday-selection-preview.jsonl.gz \
+            --samples reports/EVERYDAY-SELECTED-SAMPLES.md
+          cat reports/EVERYDAY-SELECTION.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Retain non-publishing selected-material review
+        if: inputs.run_selection
+        uses: actions/upload-artifact@v6
+        with:
+          name: catalogue-v2-everyday-selection-review
+          path: |
+            reports/EVERYDAY-SELECTION.json
+            reports/EVERYDAY-SELECTION.md
+            reports/EVERYDAY-SELECTED-SAMPLES.md
+            review/everyday-selection-preview.jsonl.gz
+            reports/EVERYDAY-POOL.json
+            reports/INPUT-REFERENCE.json
+          if-no-files-found: error
+          retention-days: 90

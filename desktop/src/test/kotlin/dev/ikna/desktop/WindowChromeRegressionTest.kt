@@ -29,11 +29,13 @@ class WindowChromeRegressionTest {
     }
 
     @Test
-    fun `restore bounds are deferred until placement is floating`() {
+    fun `restore bounds come from native resize acknowledgement`() {
         val source = source("Main.kt")
         assertTrue(source.contains("geometryMemory.requestRestore()"))
-        assertTrue(source.contains("geometryMemory.restoreAfterPlacement(windowState)"))
-        assertTrue(!source.contains("geometryMemory.restore(windowState)"))
+        assertTrue(source.contains("geometryMemory.restoreAfterNativeResize(window, windowState)"))
+        assertTrue(source.contains("override fun componentResized(event: ComponentEvent)"))
+        assertTrue(source.contains("window.removeComponentListener(listener)"))
+        assertTrue(!source.contains("restoreAfterPlacement"))
     }
 
     @Test
@@ -48,10 +50,19 @@ class WindowChromeRegressionTest {
     fun `native resizable style stays stable across placement changes`() {
         val source = source("Main.kt")
         assertTrue(source.contains("WindowDecoration.Undecorated("))
-        assertTrue(source.contains("WindowDecorationDefaults.ResizerThickness"))
+        assertTrue(source.contains("IknaWindowResizeOverlay(windowState)"))
         assertTrue(source.contains("0.dp"))
         assertTrue(source.contains("resizable = true"))
         assertTrue(!source.contains("resizable = !customTitleBar || windowState.placement"))
+    }
+
+    @Test
+    fun `resize overlay writes one bounds update and checks native placement`() {
+        val source = source("WindowResizeOverlay.kt")
+        assertTrue(source.contains("window.placement == WindowPlacement.Floating && !window.isMinimized"))
+        assertTrue(source.contains("WindowBoundsEdits.applyIfChanged(window, WindowBoundsEdits.resize("))
+        assertTrue(!source.contains("window.setLocation"))
+        assertTrue(!source.contains("window.setSize"))
     }
 
     private fun source(name: String): String {

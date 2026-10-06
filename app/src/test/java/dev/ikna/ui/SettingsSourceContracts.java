@@ -127,7 +127,9 @@ public final class SettingsSourceContracts {
         has(chrome, "fun IknaSettingsJumpRow(", "The shared jump-strip wrapper must exist");
         has(chrome, "derivedStateOf { listState.isScrollInProgress }", "Observe scrolling in a small recomposition scope");
         has(chrome, "verticalScrolling = verticalScrolling", "Forward the fling state to the shared row");
-        has(chrome, "LaunchedEffect(activeId, rowWidth, animations, settled, verticalScrolling)", "Recentre only when the relevant state changes");
+        has(chrome, "val activeSpot = spots[activeId]", "Observe the measured active label before launching the effect");
+        has(chrome, "val maxScroll = row.maxValue", "Observe the measured horizontal scroll extent");
+        has(chrome, "LaunchedEffect(activeId, rowWidth, activeSpot, maxScroll, animations, settled, verticalScrolling)", "Recentre after label remeasurement as well as list settling");
         String guard = "if (!settled || verticalScrolling || rowWidth == 0) return@LaunchedEffect";
         has(chrome, guard, "A vertical fling must prevent a competing horizontal animation");
         has(chrome, "row.animateScrollTo(", "Keep animated recentring when the list settles");

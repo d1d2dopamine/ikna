@@ -102,7 +102,7 @@ fun BrowsePane(
     }
 
     Column(Modifier.fillMaxSize()) {
-        Column(Modifier.fillMaxWidth().widthIn(max = 640.dp).align(Alignment.CenterHorizontally)) {
+        Column(Modifier.widthIn(max = 640.dp).fillMaxWidth().align(Alignment.CenterHorizontally)) {
             IknaBrowseTopBar(plan?.deckTitle.orEmpty())
             developerBlockers?.let { note ->
                 Text(
@@ -157,8 +157,8 @@ fun BrowsePane(
                                     { tatoebaSentenceUrl(id)?.let(::openInBrowser); Unit }
                                 },
                                 modifier = Modifier
-                                    .fillMaxWidth()
                                     .widthIn(max = 640.dp)
+                                    .fillMaxWidth()
                             )
                         }
                     }

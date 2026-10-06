@@ -1,0 +1,300 @@
+{
+  "evidenceVersion": 1,
+  "reviewedDate": "2026-10-06",
+  "timezone": "Asia/Yekaterinburg",
+  "retrieval": "read-only anonymous GitHub REST/raw requests; no run dispatched",
+  "run": {
+    "id": 35009216395,
+    "head_sha": "e73adaf1e5e321f0d0b08b5d4ef052b840de7ea9",
+    "created_at": "2026-09-15T18:43:14Z",
+    "updated_at": "2026-09-15T20:49:57Z",
+    "status": "completed",
+    "conclusion": "failure",
+    "html_url": "https://github.com/d1d2dopamine/ikna/actions/runs/35009216395"
+  },
+  "jobs": [
+    {
+      "id": 104516654508,
+      "name": "prepare",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087411,
+      "name": "manifest-shard (0)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087422,
+      "name": "manifest-shard (2)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087453,
+      "name": "manifest-shard (5)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087466,
+      "name": "manifest-shard (9)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087474,
+      "name": "manifest-shard (11)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087485,
+      "name": "manifest-shard (4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087508,
+      "name": "manifest-shard (25)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087510,
+      "name": "manifest-shard (15)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087511,
+      "name": "manifest-shard (17)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087520,
+      "name": "manifest-shard (8)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087529,
+      "name": "manifest-shard (6)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087530,
+      "name": "manifest-shard (3)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087548,
+      "name": "manifest-shard (13)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087553,
+      "name": "manifest-shard (18)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087555,
+      "name": "manifest-shard (12)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087583,
+      "name": "manifest-shard (24)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087585,
+      "name": "manifest-shard (21)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087597,
+      "name": "manifest-shard (1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087598,
+      "name": "manifest-shard (10)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087599,
+      "name": "manifest-shard (19)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087607,
+      "name": "manifest-shard (23)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087610,
+      "name": "manifest-shard (22)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087656,
+      "name": "manifest-shard (16)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087658,
+      "name": "manifest-shard (7)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087678,
+      "name": "manifest-shard (20)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517087686,
+      "name": "manifest-shard (14)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517089099,
+      "name": "manifest-shard (26)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517089152,
+      "name": "manifest-shard (27)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517089314,
+      "name": "manifest-shard (29)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517089357,
+      "name": "manifest-shard (28)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517089397,
+      "name": "manifest-shard (30)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104517089417,
+      "name": "manifest-shard (31)",
+      "conclusion": "success"
+    },
+    {
+      "id": 104559011495,
+      "name": "merge",
+      "conclusion": "failure"
+    }
+  ],
+  "mergeSteps": [
+    {
+      "name": "Set up job",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@v5",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/setup-python@v5",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/download-artifact@v5",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/download-artifact@v5",
+      "conclusion": "success"
+    },
+    {
+      "name": "Merge deterministic verified manifest",
+      "conclusion": "success"
+    },
+    {
+      "name": "Resolve article attribution without guessing",
+      "conclusion": "success"
+    },
+    {
+      "name": "Normalize fully attributed World rows",
+      "conclusion": "success"
+    },
+    {
+      "name": "Keep full Part 9 evidence",
+      "conclusion": "success"
+    },
+    {
+      "name": "Require complete provenance scan",
+      "conclusion": "failure"
+    },
+    {
+      "name": "Post Run actions/setup-python@v5",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Post Run actions/checkout@v5",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "conclusion": "success"
+    }
+  ],
+  "observedFailureStep": "Require complete provenance scan",
+  "artifactMetadata": {
+    "totalCount": 0,
+    "artifacts": [],
+    "historicalInputAndShardRetentionDays": 7,
+    "historicalFinalRetentionDays": 14,
+    "removalCause": "not exposed by this response; retention periods have elapsed"
+  },
+  "cacheMetadata": {
+    "totalReported": 188,
+    "rowsRetrieved": 188,
+    "globalVoicesKeysMatchingGvPrefix": []
+  },
+  "logs": {
+    "url": "https://api.github.com/repos/d1d2dopamine/ikna/actions/jobs/104559011495/logs",
+    "httpStatus": 403
+  },
+  "unknown": {
+    "missingShards": null,
+    "unattemptedDocuments": null,
+    "retryableUnresolvedDocuments": null,
+    "alignmentMapSha256": null,
+    "workflowDispatchInputs": null
+  },
+  "decision": "Keep Part 9 open. Do not weaken completeScan, infer missing counts or dispatch a full rerun. Recover saved local inputs/logs if available; retain future full evidence and support offline merge review.",
+  "retrievedSources": [
+    {
+      "url": "https://api.github.com/repos/d1d2dopamine/ikna/actions/runs/35009216395",
+      "sha256": "a4f05e0a005eb9bf1dd8c9a9ada0faaa7d6ba61cba12e3d5d60a844b9d95c70c"
+    },
+    {
+      "url": "https://api.github.com/repos/d1d2dopamine/ikna/actions/runs/35009216395/jobs?per_page=100",
+      "sha256": "9dc09872b9a699caf20de82b91097e0552f65d808a5ad64a49dc6fe275313ee2"
+    },
+    {
+      "url": "https://api.github.com/repos/d1d2dopamine/ikna/actions/runs/35009216395/artifacts?per_page=100",
+      "sha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c"
+    },
+    {
+      "url": "https://api.github.com/repos/d1d2dopamine/ikna/check-runs/104559011495",
+      "sha256": "546ce7587b390a9c3061865bb54940db555b2a84a37b1f610da80e02f2247368"
+    },
+    {
+      "url": "https://api.github.com/repos/d1d2dopamine/ikna/check-runs/104559011495/annotations",
+      "sha256": "15cf6ddbdef061c5036d2cc65fff63099207c7da9a2555f6fed5ec2b10f37eee"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/d1d2dopamine/ikna/e73adaf1e5e321f0d0b08b5d4ef052b840de7ea9/.github/workflows/catalogue-v2-world-full-provenance.yml",
+      "sha256": "c71b0f371a260c402379e2cb9e45f9dfdac8d0a2f5cae16d211ee4870e2028ac"
+    },
+    {
+      "url": "https://api.github.com/repos/d1d2dopamine/ikna/actions/caches?per_page=100",
+      "sha256": "b1159a1e6875dd4ab413d1667bb1dc434749b4820ff65dff374f0a23eaeaba45"
+    },
+    {
+      "url": "https://api.github.com/repos/d1d2dopamine/ikna/actions/caches?per_page=100&page=2",
+      "sha256": "53872893d7522f999ccd7fb041f27e040538e1d62bae8e8b0904e5b88d83aa1c"
+    }
+  ]
+}

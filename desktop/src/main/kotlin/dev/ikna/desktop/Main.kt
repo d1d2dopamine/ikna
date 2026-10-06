@@ -1,14 +1,20 @@
 package dev.ikna.desktop
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -21,6 +27,9 @@ import kotlinx.coroutines.runBlocking
 import java.awt.Desktop
 import java.awt.Dimension
 import java.awt.Component
+import java.awt.Point
+import java.awt.event.ComponentAdapter
+import java.awt.event.ComponentEvent
 import java.awt.datatransfer.DataFlavor
 import java.awt.dnd.DnDConstants
 import java.awt.dnd.DropTarget
@@ -37,6 +46,7 @@ import java.util.Locale
 import java.util.Properties
 import javax.swing.JOptionPane
 import kotlin.system.exitProcess
+import kotlin.math.roundToInt
 
 /**
  * Where the database, the settings, the log and an installed font live.
@@ -203,19 +213,28 @@ private class WindowGeometryMemory(initial: Geometry) {
         private set
     var floatingPosition: WindowPosition = initial.position
         private set
-    private var restorePending = false
+    private val restore = WindowBoundsEdits.Restore()
 
     fun capture(state: WindowState) {
         // A placement transition rewrites WindowState.size/position. Never let
         // those transient maximized/fullscreen bounds replace the last real
         // floating bounds while Restore is still settling.
-        if (restorePending) return
+        if (restore.isPending) return
         floatingSize = state.size
         floatingPosition = state.position
     }
 
     fun requestRestore() {
-        restorePending = true
+        restore.request(
+            Dimension(floatingSize.width.value.roundToInt(), floatingSize.height.value.roundToInt()),
+            if (floatingPosition.isSpecified) {
+                Point(floatingPosition.x.value.roundToInt(), floatingPosition.y.value.roundToInt())
+            } else null
+        )
+    }
+
+    fun cancelRestore() {
+        restore.cancel()
     }
 
     /** Drop a saved monitor position after the monitor layout made it unusable. */
@@ -223,17 +242,17 @@ private class WindowGeometryMemory(initial: Geometry) {
         floatingPosition = WindowPosition.PlatformDefault
     }
 
-    fun restoreAfterPlacement(state: WindowState) {
-        if (!restorePending) return
-        // Compose Desktop applies state in size -> position -> placement order.
-        // Restoring bounds in the same state change as placement therefore
-        // resizes the native window while it is still maximized/fullscreen.
-        // This method runs from a placement effect, after the native placement
-        // update has been committed, so at most one cheap corrective bounds
-        // update is needed and normally the native restore already matches.
-        if (state.size != floatingSize) state.size = floatingSize
-        if (state.position != floatingPosition) state.position = floatingPosition
-        restorePending = false
+    @OptIn(ExperimentalComposeUiApi::class)
+    fun restoreAfterNativeResize(window: ComposeWindow, state: WindowState) {
+        val bounds = restore.afterNativeResize(
+            window.bounds,
+            state.placement == WindowPlacement.Floating,
+            window.placement == WindowPlacement.Floating,
+            window.isMinimized
+        ) ?: return
+        // One native write. Compose's listeners observe it; do not also write
+        // state.size and state.position, which would create another update path.
+        WindowBoundsEdits.applyIfChanged(window, bounds)
     }
 }
 
@@ -379,6 +398,7 @@ fun main(args: Array<String>) {
 
     val home = iknaHome()
     installCrashHandlers(home)
+    WindowsFramePacing.configure(System.getProperty("os.name"), System.getProperties())
 
     // The window is drawn before any setting has been read, and the two dialogs
     // below can happen before that too, so the language starts as the computer's
@@ -449,6 +469,8 @@ fun main(args: Array<String>) {
         )
         val geometryMemory = remember { WindowGeometryMemory(geometry) }
         val placementMemory = remember { WindowPlacementMemory(geometry.placement.asDesktopPlacement()) }
+        // Plain measurements: observing root layout must not recompose the UI.
+        val frameLayout = remember { WindowFrameLayout() }
 
         // WindowState.size/position change for every native resize/move event. Do
         // not key an effect on them: doing so cancels and relaunches a coroutine
@@ -458,9 +480,6 @@ fun main(args: Array<String>) {
         LaunchedEffect(windowState.placement) {
             val placement = windowState.placement.asDesktopPlacement()
             placementMemory.observe(placement)
-            if (placement == DesktopWindowPlacement.FLOATING) {
-                geometryMemory.restoreAfterPlacement(windowState)
-            }
         }
 
         val toggleMaximize: () -> Unit = {
@@ -468,10 +487,8 @@ fun main(args: Array<String>) {
             if (current == DesktopWindowPlacement.FLOATING) geometryMemory.capture(windowState)
             val target = placementMemory.toggleMaximize(current)
             if (target == DesktopWindowPlacement.FLOATING) geometryMemory.requestRestore()
-            // Placement changes alone in this frame. If Restore needs a bounds
-            // correction it happens after the native placement update above,
-            // not before it inside Compose Desktop's size -> position -> placement
-            // update order.
+            else geometryMemory.cancelRestore()
+            // Only a native resize acknowledgement may restore floating bounds.
             windowState.placement = target.asComposePlacement()
         }
         val toggleFullscreen: () -> Unit = {
@@ -479,6 +496,7 @@ fun main(args: Array<String>) {
             if (current == DesktopWindowPlacement.FLOATING) geometryMemory.capture(windowState)
             val target = placementMemory.toggleFullscreen(current)
             if (target == DesktopWindowPlacement.FLOATING) geometryMemory.requestRestore()
+            else geometryMemory.cancelRestore()
             windowState.placement = target.asComposePlacement()
         }
         val closeWindow: () -> Unit = {
@@ -496,18 +514,10 @@ fun main(args: Array<String>) {
         Window(
             onCloseRequest = closeWindow,
             decoration = if (customTitleBar) {
-                // Keep JFrame resizable=true for the lifetime of the window.
-                // Toggling Frame.setResizable together with maximize/fullscreen
-                // changes the native Windows frame style and adds another costly
-                // window transition. Zero-width Compose resizers disable edge
-                // resizing outside Floating without rebuilding the native frame.
-                WindowDecoration.Undecorated(
-                    resizerThickness = if (windowState.placement == WindowPlacement.Floating) {
-                        WindowDecorationDefaults.ResizerThickness
-                    } else {
-                        0.dp
-                    }
-                )
+                // Use the identical edge zones below with a single setBounds
+                // per step. The pinned Compose resizer calls setLocation then
+                // setSize, exposing intermediate bounds on left/top drags.
+                WindowDecoration.Undecorated(resizerThickness = 0.dp)
             } else {
                 WindowDecoration.SystemDefault
             },
@@ -521,6 +531,25 @@ fun main(args: Array<String>) {
             state = windowState,
             onKeyEvent = { event -> handleWindowKey(event, ui, toggleFullscreen) }
         ) {
+            DisposableEffect(window) {
+                val surfaceSynchronization = if (customTitleBar) {
+                    installWindowSurfaceSynchronization(
+                        window, frameLayout, if (container.isDeveloperMode) home else null
+                    )
+                } else null
+                val listener = object : ComponentAdapter() {
+                    override fun componentResized(event: ComponentEvent) {
+                        geometryMemory.restoreAfterNativeResize(window, windowState)
+                    }
+                }
+                window.addComponentListener(listener)
+                logLine("window immediate-vsync=" + System.getProperty(WindowsFramePacing.IMMEDIATE_VSYNC) +
+                    " renderApi=" + window.renderApi)
+                onDispose {
+                    window.removeComponentListener(listener)
+                    surfaceSynchronization?.close()
+                }
+            }
             // Compose has no minimum size of its own: the window state only says
             // how big the window opens, and after that the frame can be dragged
             // down to a strip in which the deck column, the rule and the pane
@@ -541,21 +570,27 @@ fun main(args: Array<String>) {
                 }
                 installDropTarget(window, ui)
             }
-            IknaDesktopApp(
-                container = container,
-                ui = ui,
-                onRestartRequested = { exitApplication() },
-                titleBar = { palette, showWordmark ->
-                if (customTitleBar && windowState.placement != WindowPlacement.Fullscreen) {
-                    IknaWindowTitleBar(
-                        windowState,
-                        palette,
-                        closeWindow,
-                        toggleMaximize,
-                        showWordmark
-                    )
-                }
-            })
+            Box(Modifier.fillMaxSize().onSizeChanged { size ->
+                frameLayout.observeComposeSize(size.width, size.height)
+            }) {
+                IknaDesktopApp(
+                    container = container,
+                    ui = ui,
+                    onRestartRequested = { exitApplication() },
+                    titleBar = { palette, showWordmark ->
+                        if (customTitleBar && windowState.placement != WindowPlacement.Fullscreen) {
+                            IknaWindowTitleBar(
+                                windowState,
+                                palette,
+                                closeWindow,
+                                toggleMaximize,
+                                showWordmark
+                            )
+                        }
+                    }
+                )
+                if (customTitleBar) IknaWindowResizeOverlay(windowState)
+            }
         }
     }
 }

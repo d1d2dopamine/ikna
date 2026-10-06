@@ -1,0 +1,174 @@
+{
+  "recordVersion": 1,
+  "ownerLocalDate": "2026-10-06",
+  "status": "owner reports window artifact fixed; extended platform matrix pending",
+  "sourceBaseline": {
+    "file": "ikna-0.12-press-round-06-merged.zip",
+    "files": 568,
+    "bytes": 6430687,
+    "sha256": "8c94e1f867f62263fc8d76713ea2766c37bb27686860eadef33772561325a47b",
+    "sourceBytesMatchedBeforeEditing": true
+  },
+  "ownerEvidence": {
+    "kind": "user-supplied startup log and visual report",
+    "timezone": "not encoded in supplied log; timestamps retained as owner-local values",
+    "java": "21.0.10",
+    "os": "Windows 11",
+    "profile": "dev-hot-reload/profile",
+    "windowMarkers": [
+      {
+        "time": "2026-10-06 04:53:40",
+        "immediateVsync": true,
+        "renderApi": "DIRECT3D"
+      },
+      {
+        "time": "2026-10-06 05:12:00",
+        "immediateVsync": true,
+        "renderApi": "DIRECT3D"
+      },
+      {
+        "time": "2026-10-06 05:47:43",
+        "immediateVsync": true,
+        "renderApi": "DIRECT3D"
+      }
+    ],
+    "round06VisualAcceptance": "failed; artifacts reported unchanged",
+    "startupCodeApplied": true,
+    "containsPresentedFrames": false,
+    "limitation": "Startup markers prove the effective setting and render API, not the exact frames or remaining root cause."
+  },
+  "pinnedStack": {
+    "compose": "1.8.2",
+    "skiko": "0.9.4.2",
+    "jdkTarget": 17,
+    "dependenciesChanged": false
+  },
+  "primarySources": [
+    {
+      "url": "https://raw.githubusercontent.com/JetBrains/compose-multiplatform-core/v1.8.2/gradle/libs.versions.toml",
+      "bytes": 25373,
+      "sha256": "4385959cd31a0ab3a990298bb360d5a52e0909a592e8a4f27c04dc6f257ab174"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/JetBrains/compose-multiplatform-core/v1.8.2/compose/ui/ui/src/desktopMain/kotlin/androidx/compose/ui/awt/ComposeWindowPanel.desktop.kt",
+      "bytes": 7093,
+      "sha256": "a939b403d29bf99ce79fcaf1d607dea1078bf401c2f989412cbda0daba0821fc"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/JetBrains/compose-multiplatform-core/v1.8.2/compose/ui/ui/src/desktopMain/kotlin/androidx/compose/ui/scene/ComposeContainer.desktop.kt",
+      "bytes": 19739,
+      "sha256": "e4cb9e80667ceac11507016a27cfd0c10985bf844096d219bfe098aa5d2438e2"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/JetBrains/compose-multiplatform-core/v1.8.2/compose/ui/ui/src/desktopMain/kotlin/androidx/compose/ui/scene/skia/WindowSkiaLayerComponent.desktop.kt",
+      "bytes": 4553,
+      "sha256": "0adda06f7c0be08c5f444ce4eb26148d393683e20e4ee2186225f0a4c39536c4"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/JetBrains/compose-multiplatform-core/v1.8.2/compose/ui/ui/src/desktopMain/kotlin/androidx/compose/ui/scene/ComposeSceneMediator.desktop.kt",
+      "bytes": 37192,
+      "sha256": "3138915e1e1c63da596de9acab1373ebf4d97c9437e710a71e283875c7c52733"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/JetBrains/compose-multiplatform-core/v1.8.2/compose/ui/ui/src/skikoMain/kotlin/androidx/compose/ui/scene/CanvasLayersComposeScene.skiko.kt",
+      "bytes": 23619,
+      "sha256": "5df3917d0281bb009a709cfdde84e903fa3e9b97cf8985ad22da0a9093fc4514"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/JetBrains/skiko/v0.9.4.2/skiko/src/awtMain/kotlin/org/jetbrains/skiko/SkiaLayer.awt.kt",
+      "bytes": 23320,
+      "sha256": "e51d7ba50dbac1a7268eb813fff9394e9a9318683afbfe07d27822d5fe0c3f7d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/JetBrains/skiko/v0.9.4.2/skiko/src/commonMain/kotlin/org/jetbrains/skiko/SkikoRenderDelegate.kt",
+      "bytes": 676,
+      "sha256": "2dfe5a8ccb30f1ffda5b9ca3cfaeb074667a22b4ff515a7b8f227cd46e312cb5"
+    }
+  ],
+  "sourceFinding": {
+    "ordering": "ComposeContainer changes SkiaLayer size; showing Direct3D SkiaLayer immediately records a new-size picture before ordinary doLayout synchronizes native child bounds and Compose scene constraints.",
+    "sourceSupported": true,
+    "explainsOwnerDisplayedArtifact": "hypothesis pending Windows evidence"
+  },
+  "implementation": {
+    "hook": "public SkiaLayer.renderDelegate on Windows custom frame",
+    "preparation": "existing SkiaLayer doLayout before original onRender for Direct3D size/scale/native-revision changes",
+    "steadyFramesForceLayout": false,
+    "fallbackRenderersChanged": false,
+    "originalDelegateCallsAfterSuccessfulPreparation": 1,
+    "nativeGeometryWritesAdded": 0,
+    "reflectionUsed": false,
+    "disposal": "remove resize/state listeners; restore delegate only when still owned; close trace without UI wait",
+    "newerNativeLiveResizeBackported": false
+  },
+  "diagnostic": {
+    "developerModeOnly": true,
+    "file": "logs/window-surface.log",
+    "previousFile": "logs/window-surface.log.previous",
+    "maxDataRecords": 512,
+    "maxDataLineCharacters": 1024,
+    "extraRecords": [
+      "header",
+      "explicit limit marker"
+    ],
+    "diskIo": "single daemon writer, not AWT/render thread",
+    "samples": "native resize/state; changed picture and two subsequent pictures",
+    "fields": "logical window/layer/child bounds; picture pixel dimensions; content scale; last measured root pixels before/after draw; preparation/completion and callback duration",
+    "containsLearnerContent": false,
+    "containsGpuPresentOrDwmFrames": false,
+    "rootMeasurement": "latest onSizeChanged values, not a pixel readback",
+    "abruptExitMayDropQueuedTail": true
+  },
+  "checks": {
+    "javaCompiler": "installed JDK 17 javac module; no installation",
+    "javaPictureLayoutTraceGroups": 7,
+    "sourceDesignContracts": 38,
+    "paletteContracts": 8,
+    "localizationLanguages": 7,
+    "localizationKeysEach": 714,
+    "gradleCompilationExecuted": false,
+    "kotlinCompilationExecuted": false,
+    "junitViaGradleExecuted": false,
+    "windowsVisualExecutedByCodex": false,
+    "scope": "Headless fixtures model ordering and tracing; static checks do not validate Compose compilation or GPU presentation.",
+    "textFiles": 509,
+    "localizationTablesInTextCheck": 7,
+    "gitDiffCheckPassed": true,
+    "round06ManifestReviewPassed": true,
+    "existingFilesChanged": 7,
+    "unexplainedDeletions": 0
+  },
+  "acceptance": {
+    "status": "owner-reported accepted on 2026-10-06; extended platform matrix open",
+    "freshProcessRequiredToInstallHook": true,
+    "expectedMarker": "window surface-sync=before-picture-v1",
+    "shortCases": [
+      "maximize/restore",
+      "left/top resize",
+      "F11",
+      "minimize/restore"
+    ],
+    "ifArtifactsPersist": "Preserve window-surface.log and a short recording of one transition before another restart.",
+    "fullCorpusWorkflowRequired": false,
+    "ownerFollowup": {
+      "date": "2026-10-06",
+      "timezone": "Asia/Yekaterinburg",
+      "statement": "пофикшено",
+      "exhaustiveMatrixSupplied": false,
+      "windowSourceChangedInRound08": false
+    }
+  },
+  "preserved": {
+    "catalogueSourcesWorkflowsScripts": true,
+    "roomSchemas": true,
+    "buildAndDependencyVersions": true,
+    "bothRepositorySkills": true,
+    "signingAndBinaryAssets": true,
+    "sourceDeletions": 0
+  },
+  "deliveryManifest": {
+    "baselineFiles": 568,
+    "addedFiles": 7,
+    "totalFiles": 575
+  }
+}

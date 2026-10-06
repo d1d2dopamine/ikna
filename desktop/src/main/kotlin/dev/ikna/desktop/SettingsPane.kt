@@ -124,7 +124,7 @@ fun SettingsPane(
         // The measured settings column centres in the pane; the jump strip and
         // the rule follow it so the landmarks never sit somewhere else than the
         // sections they name.
-        Box(Modifier.fillMaxWidth().widthIn(max = 1040.dp).align(Alignment.CenterHorizontally)) {
+        Box(Modifier.widthIn(max = 1040.dp).fillMaxWidth().align(Alignment.CenterHorizontally)) {
             IknaSettingsJumpRow(sections, listState, settings.animations, settled = true, edgePadding = 40.dp) { id ->
                 val index = sections.indexOfFirst { it.first == id }
                 if (index >= 0) scope.launch {
@@ -132,11 +132,11 @@ fun SettingsPane(
                 }
             }
         }
-        Box(Modifier.fillMaxWidth().widthIn(max = 1040.dp).align(Alignment.CenterHorizontally)) {
+        Box(Modifier.widthIn(max = 1040.dp).fillMaxWidth().align(Alignment.CenterHorizontally)) {
             dev.ikna.ui.theme.IknaRule()
         }
         LazyColumn(state = listState,
-            modifier = Modifier.fillMaxSize().widthIn(max = 1040.dp).align(Alignment.CenterHorizontally),
+            modifier = Modifier.widthIn(max = 1040.dp).fillMaxSize().align(Alignment.CenterHorizontally),
             contentPadding = PaddingValues(start = 40.dp, end = 40.dp, bottom = 32.dp)) {
             item(key = "load", contentType = "settings-section") {
                 IknaSettingsSection(S.t("set.013"), null) {

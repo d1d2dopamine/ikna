@@ -69,18 +69,23 @@ fun IknaJumpRow(
     // position, so this stores the span rather than the left edge.
     val spots = remember { mutableStateMapOf<String, IntRange>() }
     var rowWidth by remember { mutableStateOf(0) }
+    // The viewport can stay the same while a language/font change moves the
+    // active label. Observe its measured span outside the effect so the final
+    // layout, including the first measured label, triggers recentring.
+    val activeSpot = spots[activeId]
+    val maxScroll = row.maxValue
 
     // The turn. Not a jump to the edge: the label of the section being read ends
     // up in the middle, which is the only position that reads as "you are here"
     // rather than "here is a list".
-    LaunchedEffect(activeId, rowWidth, animations, settled, verticalScrolling) {
+    LaunchedEffect(activeId, rowWidth, activeSpot, maxScroll, animations, settled, verticalScrolling) {
         // Do not run a second scroll animation while the main list is moving.
         // When it settles, verticalScrolling becomes false and this effect
         // recentres the final active label once.
         if (!settled || verticalScrolling || rowWidth == 0) return@LaunchedEffect
-        val spot = spots[activeId] ?: return@LaunchedEffect
+        val spot = activeSpot ?: return@LaunchedEffect
         val middle = spot.first + (spot.last - spot.first) / 2
-        val target = (middle - rowWidth / 2).coerceIn(0, row.maxValue)
+        val target = (middle - rowWidth / 2).coerceIn(0, maxScroll)
         if (animations) {
             row.animateScrollTo(
                 target,

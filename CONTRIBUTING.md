@@ -65,6 +65,8 @@ A change that is useful on both Android and desktop normally belongs in
 The project uses JDK 17 and Gradle 8.10.2 in CI. No Gradle wrapper jar is
 committed, so either install the pinned Gradle version locally or let GitHub
 Actions provide it.
+The root Windows `gradlew.bat` serves only the Hot Reload supervisor's external
+distribution; it is not a substitute for these ordinary build commands.
 
 Before the first Android build, fetch the speech runtime and pinned starter deck:
 
@@ -118,6 +120,11 @@ of producing a release package for every visual check. Double-click
 `:desktop:hotRun --auto`, keeps test data in an isolated Developer Sandbox by
 default, and records the build output outside the repository folder. A commit is
 not required for a reload.
+The root bridge also lets Hot Reload's child compiler use that distribution;
+daemon/file watching and child diagnostic output are enabled explicitly. Use the
+runbook's visible-edit probe to establish an actual reload. The Python source
+checker does not establish runtime success; native regression fixtures are
+`python3 tools/test_hot_reload.py` (Windows-only, no build/download).
 
 ## ✅ Checks before a pull request
 
@@ -326,7 +333,7 @@ launcher's process, so the app publishes already-localised strings into
 
 ## 🎛️ UI changes
 
-The 0.11 cycle is not a visual redesign. Prefer small fixes that preserve the
+The active cycle is not a visual redesign. Prefer small fixes that preserve the
 existing interaction model.
 
 A few project conventions are intentional:
@@ -370,6 +377,19 @@ Catalogue publication is separate from application release publication. The
 catalogue keeps the fixed `catalog` tag.
 
 ## 📝 Documentation style
+
+Use the [documentation map](docs/DOCUMENTATION.md) to find each contract's owner
+and distinguish active plans from historical evidence.
+
+Document every change minimally in the same batch: what changed and why, the
+checks actually run, and remaining acceptance limits. A short entry in the owning
+document/changelog or current round record is enough; do not create a separate
+report for every small edit. Synchronize the active plan when status changes.
+During Catalogue work, record evidence as it is acquired: exact input versions
+and hashes, workflow/run/artifact links, commands/parameters, counts and rejection
+or stop reasons, reusable data location, decisions and open gates. Distinguish
+existing evidence, newly executed runs and fixture checks; preserve provenance
+and avoid another full run merely to recover an already known result.
 
 Prefer concrete behaviour before architecture. Say what the user or build system
 will observe, then explain the mechanism.

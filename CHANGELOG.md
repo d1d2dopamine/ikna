@@ -2,6 +2,102 @@
 
 ## Unreleased
 
+### 0.12 Catalogue round 08 — admitted Everyday selection review
+
+- Bind non-publishing selection to the full Tatoeba-only pool and Part 7 report:
+  hashes/counts, exact scope and every origin are checked. Report zero-source
+  pairs/levels and retain bounded selected-material samples with provenance.
+- Reject selection input/output aliases, including hard links; fail on damaged
+  UTF-8; write identical gzip preview bytes across filenames/timestamps.
+- Retain the full pool before optional selection in the existing admitted-pool
+  workflow, enabling reuse after a selection failure. No admission/census rerun
+  or publication is implied. Full corpus and human content review remain open.
+- Record the owner's successful round-07 window check; preserve window source.
+  Evidence and exact next-run instructions: [ROUND-0.12-08.md](docs/ROUND-0.12-08.md).
+
+### 0.12 desktop window round 07 — first resized picture
+
+- Prepare the existing child Canvas and Compose scene layout before a changed
+  Direct3D picture draws, including scale/native-state changes; stable frames
+  do not force layout. Preserve the renderer, title bar and prior bounds fixes.
+- Add a bounded DEV-only geometry/picture trace with asynchronous disk writes.
+  The owner confirmed the previous startup changes ran but artifacts persisted;
+  this correction still needs real Windows acceptance. Seven Java headless
+  groups pass; Kotlin/Gradle compilation is not available locally.
+- Record source/input hashes and synchronize the open desktop status in
+  [ROUND-0.12-07.md](docs/ROUND-0.12-07.md). Catalogue work remains unchanged.
+
+### 0.12 desktop window round 06 — reviewed GLM/Catalogue integration
+
+- Windows edge/corner drags now apply position and size in one native bounds
+  write, preserving opposite edges and minimum size. Native frame style stays
+  stable; the existing title bar, edge zones and cursors are retained.
+- Restore waits for a native resize with matching requested/native Floating
+  placement, ignores minimized peers and cancels stale requests. Corrections
+  are atomic and skip matching bounds.
+- Enable the pinned Skiko immediate Direct3D VSync path on Windows, preserving
+  explicit overrides and renderer selection. Artifact-free motion still needs
+  a fresh-process Windows visual check; this is not the newer live-resize fix.
+- Review GLM's documentation-only output against the common round-04 base,
+  remove unsupported Windows/atomic-frame conclusions and retain the reviewed
+  observations. All round-05 Catalogue changes are included.
+
+### 0.12 Catalogue evidence round 05
+
+- Existing World run review pinpoints the failing final completeness gate after
+  successful merge/attribution/normalization. The checkpoint preserves actual
+  API evidence and keeps missing full-scan counters explicit.
+- Full provenance artifacts retain native inputs, all shards and stable caches
+  for 90 days. New shard reports pin alignment bytes; merged evidence contains
+  input hashes and uncapped recovery lists with affected shard indexes.
+- Offline merge review reuses a pinned retained artifact without fetching OPUS
+  or article pages. Invalid/mixed evidence and output aliases fail closed; the
+  full-scan gate remains strict. World freeze/publication is still open.
+- At Catalogue-lane delivery application source remained the round-04 baseline.
+  GLM review and the subsequent window implementation are recorded in round 06.
+
+### 0.12 Hot Reload round 04
+
+- Fixed the missing Windows recompiler entry point: Hot Reload 1.1.1 calls
+  `gradlew.bat`, which now bridges to the supervisor's existing pinned Gradle.
+  Continuous builds explicitly enable the daemon/file watcher.
+- Expose child compiler/reload diagnostics in session logs and merge native
+  stderr before Windows PowerShell's stop policy. Added Windows native-launch
+  fixtures; actual Windows reload/visual acceptance remains open.
+- Record minimal per-change documentation and Catalogue evidence requirements
+  in CONTRIBUTING. No application UI, toolchain pins or Catalogue data changed.
+
+### 0.12 visual/UX round 03 — reviewed Codex/GLM integration
+
+- Desktop Browse header/cards now apply the existing 640dp width limit before
+  filling available space; Settings jump strip, rule and list apply the same
+  effective 1040dp cap instead of stretching beyond their reading measure.
+- The shared Settings jump strip recalculates centring after measured label
+  positions or horizontal scroll bounds change, including language/font changes.
+  It still waits for vertical scrolling to settle and respects reduced motion.
+- Search now rejects repeated Enter/NumPadEnter while a request is busy, matching
+  its button; editing the query still invalidates older results. Its input/result
+  columns also respect the existing 840dp cap on wide panes.
+- Reviewed the GLM busy-guard and remaining Hot Reload path repair, removed an
+  accidental source BOM and corrected audit evidence attribution. Plans retain
+  pending integrated compilation/Hot Reload/platform acceptance.
+
+### 0.12 admitted Everyday pool round 02
+
+- A separate Tatoeba-only Part 7 tool validates all source/version pins, preserves
+  merged provenance and retains a deterministic complete scoped candidate pool,
+  coverage/rejection evidence, review samples and input/pipeline hashes.
+- The manual admitted-pool workflow defaults to exact artifact reuse. Missing
+  saved inputs fail explicitly; fresh detailed Tatoeba acquisition is a separate
+  choice. The full pool is retained for later selection without another corpus
+  download. No Catalogue assets are published.
+- Existing workflow evidence and partial Android validation are recorded in
+  `docs/ROUND-0.12-02.md`; completed source-admission experiments are not rerun.
+- Reviewed GLM documentation repairs align desktop release names, translation
+  counts and Hot Reload paths with source. The documentation map separates
+  current owners from historical evidence; Linux locale checks and audit
+  limitations are stated explicitly.
+
 ### 0.12 small-defect round 01
 
 - Signal Frame hover arbitration now follows attached pointer-node lifetime and

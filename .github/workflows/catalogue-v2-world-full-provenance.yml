@@ -48,6 +48,7 @@ jobs:
       - name: Contracts
         run: |
           python3 tools/catalog/test_globalvoices_attribution.py
+          python3 tools/catalog/test_globalvoices_manifest_merge.py
           python3 tools/catalog/test_ingestion.py
 
       - name: Validate shard plan
@@ -136,13 +137,16 @@ jobs:
             --markdown reports/WORLD-NATIVE-XCES.md \
             --samples reports/WORLD-NATIVE-SAMPLES.md
           cat reports/WORLD-NATIVE-XCES.md >> "$GITHUB_STEP_SUMMARY"
+          sha256sum reports/globalvoices-alignment-map.jsonl.gz \
+            reports/world-native.learn.txt.gz reports/world-native.meaning.txt.gz \
+            > reports/WORLD-PROVENANCE-INPUT-SHA256.txt
 
       - name: Upload manifest input
         uses: actions/upload-artifact@v6
         with:
           name: world-provenance-manifest-input
           path: reports/globalvoices-alignment-map.jsonl.gz
-          retention-days: 7
+          retention-days: 90
           overwrite: true
 
       - name: Upload native evidence
@@ -152,13 +156,14 @@ jobs:
           path: |
             reports/opus-urls.tsv
             reports/opus-native-sha256.txt
+            reports/WORLD-PROVENANCE-INPUT-SHA256.txt
             reports/WORLD-NATIVE-XCES.json
             reports/WORLD-NATIVE-XCES.md
             reports/WORLD-NATIVE-SAMPLES.md
             reports/globalvoices-alignment-map.jsonl.gz
             reports/world-native.learn.txt.gz
             reports/world-native.meaning.txt.gz
-          retention-days: 7
+          retention-days: 90
           overwrite: true
 
   manifest-shard:
@@ -206,6 +211,18 @@ jobs:
             --cache ".cache/globalvoices/${{ needs.prepare.outputs.pair_key }}/shard-${{ matrix.shard }}.jsonl"
           cat "reports/shards/WORLD-ARTICLE-MANIFEST-SHARD-${sid}.md" >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Retain resumable cache with shard evidence
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf -v sid '%03d' "${{ matrix.shard }}"
+          cache=".cache/globalvoices/${{ needs.prepare.outputs.pair_key }}/shard-${{ matrix.shard }}.jsonl"
+          if [[ -f "$cache" ]]; then
+            mkdir -p reports/shards
+            cp "$cache" "reports/shards/PROVENANCE-CACHE-SHARD-${sid}.jsonl"
+          fi
+
       - name: Upload shard evidence
         if: always()
         uses: actions/upload-artifact@v6
@@ -213,7 +230,7 @@ jobs:
           name: world-provenance-shard-${{ matrix.shard }}
           path: reports/shards/
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 90
           overwrite: true
 
   merge:
@@ -288,6 +305,11 @@ jobs:
           path: |
             reports/opus-urls.tsv
             reports/opus-native-sha256.txt
+            reports/WORLD-PROVENANCE-INPUT-SHA256.txt
+            reports/globalvoices-alignment-map.jsonl.gz
+            reports/world-native.learn.txt.gz
+            reports/world-native.meaning.txt.gz
+            reports/shards/
             reports/WORLD-NATIVE-XCES.json
             reports/WORLD-NATIVE-XCES.md
             reports/WORLD-NATIVE-SAMPLES.md
@@ -299,7 +321,7 @@ jobs:
             reports/globalvoices-attribution-original-lines.jsonl.gz
             reports/world-candidates.jsonl.gz
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 90
           overwrite: true
 
       - name: Require complete provenance scan
@@ -315,7 +337,8 @@ jobs:
                   f"missingShards={s.get('missingShards',0)}, "
                   f"unattemptedDocuments={s.get('unattemptedDocuments',0)}, "
                   f"retryableUnresolvedDocuments={s.get('retryableUnresolvedDocuments',0)}. "
-                  'Rerun the workflow; verified/stable outcomes will be restored from cache.'
+                  f"Retry shard indexes={report.get('recovery',{}).get('retryShardIndexes',[])}. "
+                  'Preserve this evidence and inspect the recovery plan before another acquisition.'
               )
           print('Full World provenance scan complete and publication-safe.')
           PY

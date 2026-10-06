@@ -1,0 +1,167 @@
+{
+  "recordVersion": 1,
+  "reviewDate": "2026-10-06",
+  "timezone": "Asia/Yekaterinburg",
+  "sourceBaseline": {
+    "file": "ikna-0.12-press-round-07-window.zip",
+    "files": 575,
+    "bytes": 6445998,
+    "sha256": "4ee9fecca3cbbb9e9e63921e417c7f8e8344608b6184f9eb0a7535140bb3c885",
+    "allSourceBytesMatchedBeforeEditing": true
+  },
+  "ownerWindowAcceptance": {
+    "statement": "пофикшено",
+    "date": "2026-10-06",
+    "status": "owner-reported accepted",
+    "extendedPlatformMatrix": "open",
+    "windowSourceChanged": false
+  },
+  "publicGitHubCheckpoint": {
+    "readOnly": true,
+    "workflowDispatched": false,
+    "observations": [
+      {
+        "url": "https://api.github.com/repos/d1d2dopamine/ikna/actions/workflows?per_page=100",
+        "httpStatus": 200,
+        "responseBytes": 6228,
+        "responseSha256": "167e7ab67f407c4ba0aa1911cf2cccb27a642fc46e6c87e2b3c707e9a4de63ab",
+        "admittedPoolWorkflowListed": false
+      },
+      {
+        "url": "https://api.github.com/repos/d1d2dopamine/ikna/actions/artifacts?per_page=100&name=catalogue-v2-everyday-admitted-pool",
+        "httpStatus": 200,
+        "responseBytes": 32,
+        "responseSha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c",
+        "totalArtifacts": 0,
+        "listedArtifacts": 0
+      },
+      {
+        "url": "https://api.github.com/repos/d1d2dopamine/ikna/actions/runs/35009216395/artifacts?per_page=100",
+        "httpStatus": 200,
+        "responseBytes": 32,
+        "responseSha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c",
+        "totalArtifacts": 0,
+        "listedArtifacts": 0
+      },
+      {
+        "url": "https://api.github.com/repos/d1d2dopamine/ikna/actions/runs/34896470535/artifacts?per_page=100",
+        "httpStatus": 200,
+        "responseBytes": 32,
+        "responseSha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c",
+        "totalArtifacts": 0,
+        "listedArtifacts": 0
+      }
+    ],
+    "admittedWorkflowRunQuery": {
+      "url": "https://api.github.com/repos/d1d2dopamine/ikna/actions/workflows/catalogue-v2-everyday-pool.yml/runs?per_page=20",
+      "httpStatus": 404
+    },
+    "limits": [
+      "No retained final admitted-pool artifact is listed at this checkpoint.",
+      "Old Everyday/World run artifacts are absent; cause of removal is not exposed.",
+      "These public API observations do not inventory separately saved owner-local inputs.",
+      "No production corpus/report was recovered; fixture candidates are not full inputs."
+    ]
+  },
+  "confirmedBaselineDefects": [
+    {
+      "issue": "selection staging can overwrite candidate input when paths alias",
+      "reproduction": "Executed round-07 selection code on a disposable input; source bytes became a staging SQLite file before failure.",
+      "correction": "Validate distinct/protected paths before staging; reject resolved and existing hard-link aliases; stage also guards direct callers."
+    },
+    {
+      "issue": "selection silently replaces invalid UTF-8",
+      "reproduction": "Executed baseline reader on invalid UTF-8 and observed U+FFFD.",
+      "correction": "Strict UTF-8 on both plain and gzip input."
+    },
+    {
+      "issue": "identical selection preview has different gzip bytes across names",
+      "reproduction": "Baseline one.gz and two.gz differ although decompressed JSONL agrees.",
+      "correction": "Empty gzip filename and mtime=0; deterministic UTF-8/JSON output."
+    }
+  ],
+  "implemented": {
+    "admittedSelection": "tools/catalog/everyday_selection.py",
+    "poolReportBinding": "raw/logical hashes, byte/row counts, Part 7 status, registry pin, exact scope/version and every origin",
+    "allDirectedPairsAndLevelsReported": true,
+    "previewTargetsPerPublishableDeck": 10,
+    "previewIsFullSelectedAssets": false,
+    "poolUploadedBeforeSelection": true,
+    "selectionFailureCanReuseSavedPool": true,
+    "publicationSafe": false,
+    "materialReviewCompleted": false,
+    "contentFrozen": false
+  },
+  "checks": {
+    "newAdmittedSelectionUnittestCases": 15,
+    "existingPoolUnittestCases": 11,
+    "selectionPolicyContractsPassed": true,
+    "everydayRebuildContractsPassed": true,
+    "ingestionContractsPassed": true,
+    "workflowYamlFilesParsed": 2,
+    "bashBlocksSyntaxChecked": 18,
+    "pythonHeredocsParsed": 3,
+    "invalidWorkflowPreflightCasesRejected": 8,
+    "actualOfflineWorkflowBlocksExecuted": [
+      "input validation",
+      "artifact input lookup/reference",
+      "full admitted pool build",
+      "admitted Part 10 selection"
+    ],
+    "offlineFixtureUsesProductionSelectionDefaults": true,
+    "offlineFixturePadded": false,
+    "remoteArtifactTransferTested": false,
+    "productionCorpusAcquiredOrScanned": false,
+    "kotlinOrGradleBuildExecuted": false,
+    "segmentationUnittestCases": 16,
+    "textFiles": 516,
+    "localizationLanguages": 7,
+    "localizationKeysEach": 714,
+    "documentRelativeLinksPassed": true,
+    "gitDiffCheckPassed": true,
+    "sourceBaselineDiffReviewed": true,
+    "existingFilesChanged": 12
+  },
+  "nextRun": {
+    "workflowFile": ".github/workflows/catalogue-v2-everyday-pool.yml",
+    "displayName": "catalogue v2 everyday admitted pool",
+    "prerequisite": "Commit this complete source ZIP to the default branch; check for an already saved complete candidate input.",
+    "inputModeIfNoSavedFullInput": "fresh-tatoeba",
+    "inputModeIfSavedActionsCandidateAvailable": "artifact with exact run/name/basename/version/SHA-256 pins",
+    "runSelection": true,
+    "learn": "en,ru,pl,es,fr,de,it,pt,zh,ja,ko",
+    "meanings": "en,ru,pl,es,fr,de,it,pt,zh,ja,ko",
+    "requestedRuns": 1,
+    "knownAdmissionOrCensusRerun": false,
+    "worldRunRequested": false,
+    "artifactNames": [
+      "catalogue-v2-everyday-admitted-pool",
+      "catalogue-v2-everyday-selection-review"
+    ]
+  },
+  "openGates": [
+    "Full admitted input acquisition/recovery evidence",
+    "Actual selected-material review and final selection policy",
+    "Content census/freeze",
+    "World all-document attribution/completeness report",
+    "Final lossless storage/client/publication validation"
+  ],
+  "preserved": {
+    "applicationSource": true,
+    "roomSchemas": true,
+    "signingAssets": true,
+    "dependencyVersions": true,
+    "bothRepositorySkills": true,
+    "admissionDecisions": {
+      "tatoeba": "admitted",
+      "massive": "not admitted",
+      "allDirectWikiMatrixExpansion": "not admitted"
+    },
+    "sourceDeletions": 0
+  },
+  "deliveryManifest": {
+    "baselineFiles": 575,
+    "addedFiles": 4,
+    "totalFiles": 579
+  }
+}

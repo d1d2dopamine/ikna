@@ -45,9 +45,9 @@ to rerun until a source can publish. Preserve dependency order below:
 
 | Candidate work | Existing owner/reference | Implemented / open |
 | --- | --- | --- |
-| Final Everyday pool | Historical Part 7 | Preview tooling exists; final admitted Tatoeba-only pool and coverage evidence open |
-| World provenance coverage | Historical Part 9, full-provenance runbook | Native identity and bounded attribution proven; sharded full-scan tooling exists; complete all-document evidence open |
-| Deterministic selection | Historical Part 10 | Disk-backed non-publishing experiment exists; real selected-material review and final production policy open |
+| Final Everyday pool | Historical Part 7, [EVERYDAY-POOL.md](EVERYDAY-POOL.md) | Tatoeba-only pool/reuse and round-08 hash-bound selection review implemented; public checkpoint offers no retained final pool; full pinned input and material review remain open |
+| World provenance coverage | Historical Part 9, full-provenance runbook | Native identity and bounded attribution proven; reusable/hash-bound shards and offline merge review implemented; old run failed final completeness gate; exact counters and all-document evidence open |
+| Deterministic selection | Historical Part 10 | Disk-backed experiment and admitted Everyday review wired; zero-supply inventory, strict inputs and deterministic previews covered by fixtures; real selected-material review/final policy open |
 | Final content census/freeze | Historical Part 11 | Census/readiness tooling exists; final reviewed samples, provenance, coverage and pinned inputs open |
 | Final storage/publication format | Historical Part 12 | Earlier lossless experiments exist; final frozen-content measurement and client acceptance open |
 | Target relations and context evidence | Historical Parts 13–14 | Existing exact identity is retained; richer relations and replayable context history open |
@@ -107,6 +107,150 @@ This batch is deliberately weighted toward the application stabilization lane,
 with the census-byte repair in Catalogue tooling. Rebalance subsequent scoped
 batches toward the Catalogue pool/provenance/selection evidence above; no exact
 percentage is claimed from file counts or an unmeasured effort estimate.
+
+## Round 02 — admitted-source pool and existing evidence
+
+Owner instruction, 2026-10-06: use the existing GitHub workflow results rather
+than requesting another long run for a known result. See
+[ROUND-0.12-02.md](ROUND-0.12-02.md) for inspected runs and verification limits.
+Part 5 and the rejected Parts 6/8 admission decisions remain complete; none was
+rerun. The observed full World run passed its 32 shards but failed merge, so
+Part 9 stays open pending examination of the existing merge report/logs.
+
+Part 7 has a separate admitted Tatoeba-only pool path. It validates source/version
+pins, retains every deduplicated candidate origin, measures all scoped pairs and
+saves full reusable inputs with hashes. No full-corpus run or publication is
+claimed from the local fixtures. The new manual workflow defaults to exact artifact
+reuse, fails on missing input and acquires a fresh export only when explicitly
+selected. Existing aggregate reports/short selection previews cannot recreate
+discarded raw candidates; recover actual saved candidates before new acquisition.
+
+Application work in this batch rechecks the round 01 contracts and existing build
+result. The remote Android migration job passed; the JVM job could not acquire a
+hosted runner. Final JVM/platform/UI acceptance stays open. No unrelated UI rewrite
+was added to meet a percentage. Catalogue implementation is weighted higher here
+to rebalance round 01. The parallel GLM documentation lane was reviewed against
+the common round 01 ZIP and integrated with targeted evidence corrections;
+see [ROUND-0.12-02-GLM.md](ROUND-0.12-02-GLM.md) and the round 02 integration record.
+
+## Round 03 — visual stability and UX
+
+Owner instruction, 2026-10-06: work on small visual/UX defects while remote CI
+is unavailable, using desktop Hot Reload for subsequent runtime review.
+Codex's scoped source changes cap Browse header/cards at 640dp and Settings
+jump strip/rule/list at 1040dp, and recalculate jump-strip centring after label
+remeasurement. Available Python contracts pass; compilation and actual layout
+acceptance remain open. See [ROUND-0.12-03.md](ROUND-0.12-03.md).
+
+The round-01 Signal Frame/palette repair is retained without speculative changes;
+its Windows lighting-switch acceptance is still open. GLM works independently
+from the exact merged round-02 ZIP on Search/Backup, the remaining Hot Reload
+path typo and PC evidence. Its round-03 source output is reviewed and integrated:
+Search has a common busy guard and effective existing 840dp caps, the path typo
+is fixed, and an accidental source BOM was removed. Backup remains unchanged.
+GLM reports a focused desktop compile, but the referenced logs were not attached;
+no interactive visual checks ran and automatic reload was not observed. This
+does not close integrated compilation, Hot Reload or the original lighting bug.
+This batch is temporarily weighted toward the application lane; return to the
+Catalogue evidence dependency order after the integrated runtime checkpoint.
+
+## Round 04 — unblock the desktop verification loop
+
+Owner instruction, 2026-10-06: address missed Hot Reload updates, then let the
+owner check the integrated application before resuming Catalogue v2. Pinned
+Hot Reload 1.1.1 source confirms that its Windows child compiler invokes the
+absent `gradlew.bat`; the initial external Gradle launch could still open the app.
+The bridge now reuses that exact distribution with daemon/file watching, and
+child/reload diagnostics are exposed in the session log. Native stderr handling
+is isolated from PowerShell's terminating-error policy. See
+[ROUND-0.12-04.md](ROUND-0.12-04.md) and [HOT-RELOAD.md](HOT-RELOAD.md).
+
+Source fixes and available checks are distinct from Windows runtime acceptance.
+Restart the old session once, prove visible edit/reload and error recovery, then
+review the integrated round-03 visual changes. This narrow application-tooling
+blocker does not start new Catalogue work or rerun known workflows. Next Catalogue
+work examines the existing World merge failure after 32 successful shards and
+recovers reusable admitted-source pool inputs. Record input hashes, run/artifact
+references, stage counts, failure/stop reasons and decisions during that work;
+CONTRIBUTING now owns the minimal documentation rule for every change.
+
+## Round 05 — Catalogue evidence recovery and parallel desktop work
+
+Owner checkpoint, 2026-10-06: round 04 was checked and continuation to Catalogue
+v2 authorized. This is owner-reported acceptance; no native test counts or complete
+platform matrix were supplied. The owner separately reports artifacts during
+minimize/maximize/resize/fullscreen transitions. GLM's parallel round uses the
+exact 556-file round-04 base on window behaviour, narrow Browse and keyboard/focus
+return. Catalogue-lane delivery kept application source unchanged. GLM's result
+has now arrived and was reviewed against the common base: it changes no app code.
+Reviewed observations and corrected conclusions are integrated in round 06.
+
+Read-only API evidence identifies the old World failure as the **final scan
+gate**, not the merge algorithm: merge, attribution and normalization passed.
+No retained artifacts or `gv-` cache metadata are listed; anonymous log retrieval
+is blocked. Exact failure counters stay unknown. [ROUND-0.12-05.md](ROUND-0.12-05.md)
+records observations, implemented recovery/retention and local fixture checks.
+
+Tooling now retains complete native/shard/cache inputs, binds new shard reports
+to the alignment hash, supports offline artifact reuse for merge review, and
+reports all affected shards/documents. Full-scan/licence/provenance gates remain
+strict. This Catalogue-heavy evidence batch performs no corpus acquisition,
+workflow dispatch, publication or application build. Next: recover any locally
+saved original World report/input/log before selecting outstanding fetch work,
+then review the full admitted Everyday input/material evidence.
+
+## Round 06 — window corrections and GLM integration
+
+The owner reproduced the window artifacts after trying GLM's unchanged source.
+GLM's bounds snapshots do not close visual acceptance or prove a Windows
+limitation. [ROUND-0.12-06.md](ROUND-0.12-06.md) records pinned upstream research,
+reviewed evidence and the implementation: one bounds write per Windows edge
+drag, restore only after native resize acknowledgement, and VSync for the pinned
+immediate Direct3D presentation path. The title bar and application design stay
+the same. All round-05 Catalogue changes are retained; no corpus run is needed.
+
+Headless Java policy/operation checks and source checks are local evidence.
+Kotlin/Gradle compilation, fresh-process Windows rendering/performance, mixed-DPI
+and focus/Browse interactive checks remain open. Do not mark the window defect
+visually closed or promote it to an unavoidable OS limitation. Startup changes
+require a new app process, not only Hot Reload of an existing window.
+
+## Round 07 — prepare layout before the resized picture
+
+Owner follow-up: round-06 artifacts persist despite three fresh-process logs
+confirming immediate VSync and Direct3D. That attempt did not pass visual
+acceptance; unapplied source is not supported as its explanation.
+[ROUND-0.12-07.md](ROUND-0.12-07.md) records the pinned immediate-render/layout
+ordering, the public delegate fix and bounded DEV diagnostics. The child Canvas
+and scene constraints are now prepared before a changed Direct3D picture draws,
+without relayout of stable frames. Catalogue round-05/06 source is unchanged.
+
+Seven Java headless regression groups pass. Kotlin/Gradle compilation and actual
+Windows presentation remain open. Perform one fresh-window short check, using
+the new startup marker and trace if the artifact persists. Do not close the
+defect from fixture results or request another corpus workflow for this task.
+
+## Round 08 — admitted Everyday selection and owner acceptance
+
+Owner reports the round-07 window defect fixed on 2026-10-06. Close that reported
+artifact's acceptance; broader mixed-DPI/multi-monitor and packaged checks remain
+open. No window source is changed in this Catalogue round.
+
+Public API metadata lists no retained final admitted Everyday artifact and no
+artifacts for the old Everyday/World runs. These observations do not cover
+separately saved local inputs. Do not rerun known admission/census results.
+The next missing dependency is the full Tatoeba-only input and its material review.
+
+Round 08 adds a hash-bound Part 7 → Part 10 review, complete pair/level inventory
+and bounded selected samples, and corrects confirmed input overwrite, UTF-8 repair
+and gzip reproducibility defects. The existing admitted-pool workflow saves its
+full input before optional selection. Local regressions and executed offline
+workflow blocks pass; full corpus/material evidence is still absent. Next commit
+this ZIP and run the one admitted-pool workflow using saved full inputs if
+available, otherwise its explicit `fresh-tatoeba` mode. Keep all language defaults
+and `run_selection=true`. [EVERYDAY-POOL.md](EVERYDAY-POOL.md) owns exact instructions;
+[ROUND-0.12-08.md](ROUND-0.12-08.md) records evidence and remaining gates. World
+stays open without another scan; recover saved reports/logs before choosing work.
 
 ## Release blockers
 
