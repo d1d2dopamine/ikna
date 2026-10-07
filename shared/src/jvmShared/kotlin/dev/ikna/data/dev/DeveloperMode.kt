@@ -21,9 +21,9 @@ data class DeveloperAccess(
     companion object {
         val NONE = DeveloperAccess()
 
-        /** Developer profile always bypasses product gates; REAL never does. */
-        fun forProfile(profile: IknaDataProfile): DeveloperAccess =
-            DeveloperAccess(active = profile == IknaDataProfile.DEVELOPER)
+        /** DEV may test ordinary product gates; REAL never receives an override. */
+        fun forProfile(profile: IknaDataProfile, applyProductLimits: Boolean = false): DeveloperAccess =
+            DeveloperAccess(active = profile == IknaDataProfile.DEVELOPER && !applyProductLimits)
     }
 }
 

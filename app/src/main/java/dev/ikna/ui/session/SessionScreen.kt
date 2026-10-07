@@ -170,14 +170,7 @@ fun SessionScreen(
                             lang = card.chunk.lang,
                             mode = settings.phoneticsFor(card.chunk.packId)
                         ),
-                        // On a subject deck the third field IS the meaning of the term, so
-                        // showing it beside a definition with the term blanked out
-                        // would simply print the answer.
-                        hint = if (card.ask == Ask.GAP && card.chunk.lang != NO_LANG) {
-                            card.meaning
-                        } else {
-                            null
-                        },
+                        hint = null,
                         sourceLabel = card.sourceId?.let { S.t("src.001") + "Tatoeba #" + it },
                         onSource = card.sourceId?.let { id ->
                             { openTatoeba(context, id) }
@@ -320,17 +313,10 @@ private fun copyReport(context: Context, report: String): Boolean = runCatching 
 }.isSuccess
 
 /**
- * What the question is asking for.
- *
- * A subject deck says it differently at the same two levels: a neuroscience card
- * shows a term and then its definition with the term missing, and calling that
- * "recognition" and "a gap in a sentence" describes a phrasebook instead. The
- * third level never appears there at all -- see [dev.ikna.domain.session.LevelPromotion].
+ * The existing classic label differs for a subject deck and a language deck.
  */
 private fun askLabel(ask: Ask, subject: Boolean): String = when (ask) {
     Ask.RECOGNISE -> if (subject) S.t("sess.046") else S.t("sess.015")
-    Ask.GAP -> if (subject) S.t("sess.047") else S.t("sess.016")
-    Ask.PRODUCE -> S.t("sess.017")
 }
 
 /**

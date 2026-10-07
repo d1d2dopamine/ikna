@@ -131,6 +131,8 @@ data class IknaSettings(
     val elementInspector: Boolean = false,
     /** Last deterministic sandbox preset selected in Developer Mode. */
     val developerScenario: String = "empty",
+    /** DEV-only inspection switch; omitted from exported learner settings. */
+    val developerApplyProductLimits: Boolean = false,
     /**
      * When true the daily norm is measured from behaviour and [manualLoad] is
      * ignored.
@@ -319,6 +321,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val pseudoLocale = booleanPreferencesKey("pseudoLocale")
         val elementInspector = booleanPreferencesKey("elementInspector")
         val developerScenario = stringPreferencesKey("developerScenario")
+        val developerApplyProductLimits = booleanPreferencesKey("developerApplyProductLimits")
         val autoLoad = booleanPreferencesKey("autoLoad")
         val reminderEnabled = booleanPreferencesKey("reminderEnabled")
         val reminderHour = intPreferencesKey("reminderHour")
@@ -377,6 +380,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             pseudoLocale = p[Keys.pseudoLocale] ?: defaults.pseudoLocale,
             elementInspector = p[Keys.elementInspector] ?: defaults.elementInspector,
             developerScenario = p[Keys.developerScenario] ?: defaults.developerScenario,
+            developerApplyProductLimits = p[Keys.developerApplyProductLimits] ?: defaults.developerApplyProductLimits,
             autoLoad = p[Keys.autoLoad] ?: defaults.autoLoad,
             reminderEnabled = p[Keys.reminderEnabled] ?: defaults.reminderEnabled,
             reminderHour = p[Keys.reminderHour] ?: defaults.reminderHour,
@@ -452,6 +456,8 @@ class SettingsStore(private val store: DataStore<Preferences>) {
     suspend fun setLanguage(code: String) = put { it[Keys.language] = code }
     suspend fun setPseudoLocale(on: Boolean) = put { it[Keys.pseudoLocale] = on }
     suspend fun setElementInspector(on: Boolean) = put { it[Keys.elementInspector] = on }
+    suspend fun setDeveloperApplyProductLimits(on: Boolean) = put { it[Keys.developerApplyProductLimits] = on }
+
     suspend fun setDeveloperScenario(id: String) = put { it[Keys.developerScenario] = id }
 
     suspend fun setAutoLoad(on: Boolean) = put { it[Keys.autoLoad] = on }

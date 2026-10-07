@@ -7,7 +7,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * The rules that decide what a chunk can be asked.
+ * Import classification and target spans; presentation has one classic mode.
  *
  * Every case here is a card that arrived from somewhere else. The app own packs
  * are all one shape, so these rules only ever matter for imported decks -- which
@@ -34,7 +34,7 @@ class ChunkShapeTest {
     )
 
     @Test
-    fun `a phrase inside a sentence with a meaning has all three steps`() {
+    fun `a phrase inside a sentence retains content classification`() {
         val c = chunk(
             text = "einen Hund",
             context = "Ich habe einen Hund.",
@@ -43,27 +43,22 @@ class ChunkShapeTest {
             end = 19
         )
         assertEquals(ChunkShape.PHRASE_IN_SENTENCE, Shapes.of(c))
-        assertEquals(listOf(Ask.RECOGNISE, Ask.GAP, Ask.PRODUCE), Shapes.ladder(Shapes.of(c)))
     }
 
     @Test
     fun `a bare word is never asked as a gap`() {
         val c = chunk(text = "Hund", translation = "dog")
         assertEquals(ChunkShape.WORD, Shapes.of(c))
-        assertFalse(Ask.GAP in Shapes.ladder(ChunkShape.WORD))
-        assertEquals(Ask.RECOGNISE, Shapes.askAt(ChunkShape.WORD, 0))
-        assertEquals(Ask.PRODUCE, Shapes.askAt(ChunkShape.WORD, 1))
     }
 
     @Test
     fun `a whole sentence is shown, never produced from its translation`() {
         val c = chunk(text = "Ich habe einen Hund.", translation = "I have a dog.")
         assertEquals(ChunkShape.SENTENCE, Shapes.of(c))
-        assertEquals(listOf(Ask.RECOGNISE), Shapes.ladder(ChunkShape.SENTENCE))
     }
 
     @Test
-    fun `a marked span with nothing written down is a gap and nothing else`() {
+    fun `a marked span without meaning keeps shape metadata and uses classic presentation`() {
         val c = chunk(
             text = "Hund",
             context = "Ich habe einen Hund.",
@@ -72,14 +67,12 @@ class ChunkShapeTest {
             end = 19
         )
         assertEquals(ChunkShape.GAP_ONLY, Shapes.of(c))
-        assertEquals(listOf(Ask.GAP), Shapes.ladder(ChunkShape.GAP_ONLY))
     }
 
     @Test
     fun `a chunk with nothing to ask is shown rather than dropped`() {
         val c = chunk(text = "Hund", translation = "")
         assertEquals(ChunkShape.SENTENCE, Shapes.of(c))
-        assertEquals(Ask.RECOGNISE, Shapes.askAt(Shapes.of(c), 0))
     }
 
     @Test
@@ -119,18 +112,4 @@ class ChunkShapeTest {
         assertTrue(Shapes.isSentence("私は犬を飼っています。"))
     }
 
-    @Test
-    fun `the highest step matches the ladder`() {
-        assertEquals(2, Shapes.maxLevel(ChunkShape.PHRASE_IN_SENTENCE))
-        assertEquals(1, Shapes.maxLevel(ChunkShape.WORD))
-        assertEquals(0, Shapes.maxLevel(ChunkShape.SENTENCE))
-        assertEquals(0, Shapes.maxLevel(ChunkShape.GAP_ONLY))
-    }
-
-    @Test
-    fun `a step the chunk no longer has is clamped, not refused`() {
-        assertEquals(Ask.GAP, Shapes.askAt(ChunkShape.GAP_ONLY, 2))
-        assertEquals(Ask.RECOGNISE, Shapes.askAt(ChunkShape.SENTENCE, 7))
-        assertEquals(Ask.RECOGNISE, Shapes.askAt(ChunkShape.WORD, -3))
-    }
 }

@@ -581,6 +581,15 @@ private fun PaneContent(
                 settings = settings,
                 palette = palette,
                 onOpenBackup = { ui.show(Pane.BACKUP) },
+                onOpenDeveloper = { target, deck ->
+                    if (container.isDeveloperMode) when (target) {
+                        dev.ikna.data.dev.DeveloperDestination.SESSION -> ui.study(deck)
+                        dev.ikna.data.dev.DeveloperDestination.BROWSE -> deck?.let(ui::browse)
+                        dev.ikna.data.dev.DeveloperDestination.STATS -> ui.show(Pane.STATS)
+                        dev.ikna.data.dev.DeveloperDestination.CATALOG -> ui.show(Pane.CATALOG)
+                        dev.ikna.data.dev.DeveloperDestination.SEARCH -> ui.show(Pane.SEARCH)
+                    }
+                },
                 onWiped = { ui.resetForFirstRun() },
                 onRestartRequested = onRestartRequested,
                 onBack = back

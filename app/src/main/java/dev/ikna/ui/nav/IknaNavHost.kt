@@ -295,6 +295,15 @@ fun IknaNavHost(
                     container = container,
                     settings = settings,
                     onOpenDebug = { forward(Routes.DEBUG) },
+                    onOpenDeveloper = { target, deck ->
+                        if (container.isDeveloperMode) when (target) {
+                            dev.ikna.data.dev.DeveloperDestination.SESSION -> forward(Routes.session(deck))
+                            dev.ikna.data.dev.DeveloperDestination.BROWSE -> deck?.let { forward(Routes.browse(it)) }
+                            dev.ikna.data.dev.DeveloperDestination.STATS -> forward(Routes.STATS)
+                            dev.ikna.data.dev.DeveloperDestination.CATALOG -> forward(Routes.CATALOG)
+                            dev.ikna.data.dev.DeveloperDestination.SEARCH -> forward(Routes.SEARCH)
+                        }
+                    },
                     onOpenVoice = { forward(Routes.VOICE) },
                     onBack = { back() }
                 )

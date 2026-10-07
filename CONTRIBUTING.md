@@ -139,12 +139,20 @@ python3 tools/check_grading.py
 python3 tools/grading/check_full.py
 python3 tools/check_optimizer.py
 python3 tools/check_design_parity.py
+python3 tools/check_classic_cards.py
 python3 tools/check_palettes.py
 python3 tools/check_nsis.py
 python3 tools/make_palette_preview.py --check
 python3 tools/check_android_ci.py --self-test
 python3 tools/check_android_ci.py
 ```
+
+`check_classic_cards.py` executes the current ChunkDao/CardDao SQL against the
+committed Room schema with mixed classic/retired rows. It is an offline SQL
+regression check, not compilation. Classic presentation/plan unit tests live in
+`app/src/test/java/dev/ikna/domain/session/`; DEV policy tests in
+`app/src/test/java/dev/ikna/data/dev/`; actual Room/repository regressions in
+`desktop/src/test/kotlin/dev/ikna/desktop/DeveloperSandboxIntegrationTest.kt`.
 
 Catalogue changes additionally need:
 

@@ -15,8 +15,8 @@ batches; this first owner-selected batch concentrates on small defects.
 
 | Area / inherited track | Implemented in the baseline | Open acceptance or implementation |
 | --- | --- | --- |
-| Stabilization (A) | One Android/shared/desktop source baseline; signing assets preserved; DEV data/settings separated; product gates bypassed with production verdicts retained | Final cross-platform builds; full DEV entry-path regressions and real smoke pass |
-| Developer Sandbox (B) | Six deterministic basic scenarios; persistent DEV marker; isolated reseed/profile settings and developer diagnostics | Real switch/reseed isolation check; backlog, low-accuracy/activity, overheating, forgetting, optimizer-ready and time-of-day scenarios; full gate diagnostics |
+| Stabilization (A) | One Android/shared/desktop source baseline; signing assets preserved; DEV data/settings separated; DEV product gates optionally bypassed with production verdicts retained | Final cross-platform builds; full DEV entry-path regressions and real smoke pass |
+| Developer Sandbox (B) | Existing six deterministic scenarios and isolated settings retained; round-11 real feature launchers, read-only diagnostics/copy and ordinary-restrictions switch | Kotlin/Room/Compose tests and real switch/entry/runtime acceptance; additional synthetic scenarios are outside this owner-selected round |
 | Browse (C) | Vertical feed, complete context/meaning/source blocks, target highlighting, optional transcription, viewport exposure accounting, shared 640dp measure and typography | Long/CJK contexts, transcription wrapping, large fonts, narrow Android layouts; desktop keyboard/wheel/touch and source-link behaviour |
 | Desktop (D) | Floating geometry retained; fullscreen restore; non-draggable maximized chrome; off-screen recovery; atomic bounds/native restore/VSync; round-07 first-picture layout/DEV trace; owner reports the artifact fixed | Real mixed-DPI multi-monitor/disconnect and packaged tests; broader transition/input/tray/close matrix beyond the brief owner acceptance |
 | Cleanup (E–F) | Initial private-helper cleanup; this round removes the live Android palette-grid duplicate in favour of the existing shared grid | Repeatable caller/manifest/resource/dependency inventory; deprecated API review and packaging validation before further removals |
@@ -154,3 +154,11 @@ see [ROUND-0.12-10.md](ROUND-0.12-10.md).
 No release/tag/publication approval is implied by a completed local small-fix
 round or by the 0.12 planning label. Build versions remain the last shipped
 metadata until the dedicated version step.
+
+Round 11, 2026-10-07: the owner removes the two extra exercises and retains
+classic card interaction/rating. Historical data stays readable; active queues
+and plans use level 0 only. DEV tools now launch actual features and expose a
+read-only snapshot plus ordinary-policy testing switch. Existing seeds are not
+expanded. See [ROUND-0.12-11.md](ROUND-0.12-11.md) for local evidence and the still
+open compilation/runtime checks. Catalogue work waits for the already running
+quality workflow; no extra workflow or selection rerun is required by this batch.

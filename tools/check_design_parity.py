@@ -749,7 +749,7 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('"set.153" to', read(SHARED, "ui/text/StringsRu.kt"))
         self.assertIn('"set.151" to', read(SHARED, "ui/text/StringsEn.kt"))
 
-    def test_developer_mode_always_bypasses_product_restrictions(self):
+    def test_developer_mode_uses_shared_optional_product_override(self):
         mode = read(SHARED, 'data/dev/DeveloperMode.kt')
         repo = read(SHARED, 'data/repo/LearningRepository.kt')
         prefs = read(SHARED, 'data/prefs/SettingsStore.kt')
@@ -758,9 +758,10 @@ class DesignContracts(unittest.TestCase):
         android_settings = read(ROOT, 'app/src/main/java/dev/ikna/ui/settings/SettingsScreen.kt')
         desktop_settings = read(DESKTOP, 'SettingsPane.kt')
 
-        self.assertIn('fun forProfile(profile: IknaDataProfile)', mode)
-        self.assertIn('DeveloperAccess.forProfile(dataProfile)', android_container)
-        self.assertIn('DeveloperAccess.forProfile(dataProfile)', desktop_container)
+        self.assertIn('fun forProfile(profile: IknaDataProfile, applyProductLimits: Boolean = false)', mode)
+        self.assertIn('profile == IknaDataProfile.DEVELOPER && !applyProductLimits', mode)
+        self.assertIn('DeveloperAccess.forProfile(dataProfile, settings.current().developerApplyProductLimits)', android_container)
+        self.assertIn('DeveloperAccess.forProfile(dataProfile, settings.current().developerApplyProductLimits)', desktop_container)
         self.assertIn('val forced = access.active && unique.isNotEmpty() &&', repo)
         self.assertIn('BrowsePolicy.developerOverrideAllowed(unique)', repo)
         for source in [mode, prefs, android_container, desktop_container, android_settings, desktop_settings]:
@@ -775,6 +776,27 @@ class DesignContracts(unittest.TestCase):
         pane = shell[shell.index('private fun PaneContent('):shell.index('@Composable\nprivate fun ShortcutsOverlay(')]
         self.assertIn('onRestartRequested: () -> Unit', pane)
         self.assertIn('onRestartRequested = onRestartRequested', pane)
+
+    def test_developer_tools_use_actual_routes_and_read_only_inspection(self):
+        panel = read(SHARED, 'ui/dev/DeveloperToolsPanel.kt')
+        repo = read(SHARED, 'data/repo/LearningRepository.kt')
+        android = read(ROOT, 'app/src/main/java/dev/ikna/ui/nav/IknaNavHost.kt')
+        desktop = read(DESKTOP, 'Shell.kt')
+        for source in [read(ROOT, 'app/src/main/java/dev/ikna/ui/settings/SettingsScreen.kt'),
+                       read(DESKTOP, 'SettingsPane.kt')]:
+            self.assertIn('DeveloperToolsPanel(', source)
+            self.assertIn('onOpen = onOpenDeveloper', source)
+        for destination in ['SESSION', 'BROWSE', 'STATS', 'CATALOG', 'SEARCH']:
+            for source in [panel, android, desktop]:
+                self.assertIn('DeveloperDestination.' + destination, source)
+        self.assertIn('if (container.isDeveloperMode)', android)
+        self.assertIn('if (container.isDeveloperMode)', desktop)
+        inspection = repo.split('suspend fun developerDiagnostics(', 1)[1].split('// ---- maintenance', 1)[0]
+        for forbidden in ['ensureDailyPlan(', 'upsert(', 'insert(', 'settleBrowseCreditPoints', 'countIntroduced(']:
+            self.assertNotIn(forbidden, inspection)
+        self.assertIn('tools.checkBrowse(deck)', panel)
+        self.assertIn('browseUnavailableText(availability)', panel)
+        self.assertIn('throw cancelled', panel)
 
     def test_today_count_is_unique_and_first_batch_does_not_multiply(self):
         repo = read(SHARED, 'data/repo/LearningRepository.kt')

@@ -37,6 +37,8 @@ import dev.ikna.domain.governor.LoadGovernor
 import dev.ikna.domain.governor.dailyNewRoom
 import dev.ikna.domain.governor.ruledOnceToday
 import dev.ikna.domain.session.Level
+import dev.ikna.domain.session.classicOnly
+import dev.ikna.data.dev.DeveloperDiagnostics
 import dev.ikna.domain.session.BrowsePlan
 import dev.ikna.domain.session.BrowsePolicy
 import dev.ikna.domain.session.BrowseAvailability
@@ -45,7 +47,6 @@ import dev.ikna.domain.session.SessionBuilder
 import dev.ikna.domain.session.ReviewSignals
 import dev.ikna.domain.session.SessionCard
 import dev.ikna.domain.session.SessionPlan
-import dev.ikna.domain.session.Shapes
 import dev.ikna.domain.time.DayBoundary
 import java.time.Instant
 import java.time.LocalDate
@@ -209,7 +210,11 @@ class LearningRepository(
         val existing = planDao.plan(day)
 
         // A stored plan is authoritative: today's questions are decided once.
-        if (existing != null) return existing
+        if (existing != null) {
+            val active = existing.classicOnly()
+            if (active != existing) planDao.upsert(active)
+            return active
+        }
 
         // What the user actually set, straight from storage. Without this the
         // switch only reached the plan if some screen had already collected it.
@@ -329,8 +334,7 @@ class LearningRepository(
             day = day,
             ids = ids,
             capacity = authorised.capacity,
-            // The day's authorisation, so that a promotion asking
-            // `newRoomToday` later gets the same answer a rebuild would.
+            // Retain today's authorisation across plan invalidation/rebuild.
             allowedNew = authorised.allowedNew,
             amnestyQuota = decision.amnestyQuota,
             reason = decision.reason,
@@ -391,10 +395,10 @@ class LearningRepository(
      * of the norm buys the whole day, because the goal is a queue that stays
      * small, not a quota that has to be met.
      */
-    private suspend fun expectedForCredit(): Double =
+    private suspend fun expectedForCredit(targetOverride: Int? = null): Double =
         max(
             config.dailyMinimumCards.toDouble(),
-            currentDailyTarget() * config.idleCreditRatio
+            (targetOverride ?: currentDailyTarget()) * config.idleCreditRatio
         )
 
     /**
@@ -406,7 +410,7 @@ class LearningRepository(
      * the queue turns into a pile. A brand new account reads as fully active, so
      * a first day is never punished for having no history.
      */
-    suspend fun activityRatio(now: Long = System.currentTimeMillis()): Double {
+    suspend fun activityRatio(now: Long = System.currentTimeMillis(), targetOverride: Int? = null): Double {
         val window = config.activityWindowDays
         val all = statsDao.lastDays(window * 3)
         if (all.isEmpty()) return 1.0
@@ -419,7 +423,7 @@ class LearningRepository(
         val span = if (firstEver == null) window
         else (ChronoUnit.DAYS.between(firstEver, today).toInt() + 1).coerceIn(1, window)
 
-        val expected = expectedForCredit()
+        val expected = expectedForCredit(targetOverride)
         val used = inWindow.sumOf { (it.reviewsDone / expected).coerceIn(0.0, 1.0) }
         // The norm is weekly, not daily. Dividing by the whole window made an
         // entirely ordinary week — four full days, three off — read as 0.57,
@@ -476,7 +480,7 @@ class LearningRepository(
         return (0 until days).map { d -> dayKey(now - d * DAY_MS) in active }
     }
 
-    suspend fun collectSignals(now: Long): GovernorSignals {
+    suspend fun collectSignals(now: Long, targetOverride: Int? = null): GovernorSignals {
         val dueToday = cardDao.dueCount(now)
         val backlog = cardDao.amnestyCount()
 
@@ -505,7 +509,7 @@ class LearningRepository(
             forecastAvg3d = forecastAvg,
             backlog = backlog,
             accuracyRecent = accuracy,
-            activityRatio = activityRatio(now),
+            activityRatio = activityRatio(now, targetOverride),
             daysSinceLastSession = daysSince,
             daysSinceStart = daysSinceStart(now),
             reviewsDoneToday = today?.reviewsDone ?: 0,
@@ -682,22 +686,6 @@ class LearningRepository(
         return cards
     }
 
-    /**
-     * What is left of today's new-material budget.
-     *
-     * The governor decides `allowedNew` once a day and the plan stores it, so
-     * this is that number minus everything already introduced today -- whether
-     * it arrived as a fresh chunk this morning or as a promotion five minutes
-     * ago. No plan row means no authorisation, which is zero rather than
-     * "unlimited": that direction of doubt is the one that cannot hurt anyone.
-     */
-    private suspend fun newRoomToday(now: Long): Int {
-        val day = dayKey(now)
-        val allowed = planDao.plan(day)?.allowedNew ?: return 0
-        val used = statsDao.day(day)?.newIntroduced ?: 0
-        return (allowed - used).coerceAtLeast(0)
-    }
-
     /** Returns the new-material budget a retracted promotion had spent. */
     private suspend fun uncountIntroduced(ts: Long) {
         val day = dayKey(ts)
@@ -760,16 +748,24 @@ class LearningRepository(
             storedReason
         }
 
+        val access = developerAccess?.invoke() ?: DeveloperAccess.NONE
+        val forcedCards = if (pending.isEmpty() && access.active) {
+            val extras = builder().pickExtra(emptyList(), config.dailyMinimumCards.coerceAtLeast(20), now, deckId)
+                .filterNot { it.chunkId in hiddenNow }
+            builder().materialize(extras.map { it.key })
+        } else emptyList()
+        val forced = forcedCards.isNotEmpty()
         return SessionPlan(
-            cards = pending,
+            cards = if (forced) forcedCards else pending,
             plannedTotal = plan.plannedTotal,
             answeredToday = statsDao.day(plan.day)?.reviewsDone ?: 0,
             reason = reason,
             nextDueAt = cardDao.nextDueAt(now),
             deckId = deckId,
             deckTitle = deckId?.let { id -> chunkDao.pack(id)?.title ?: id },
-            sessionTotal = scope.size,
-            sessionDone = scope.size - pending.size
+            sessionTotal = if (forced) forcedCards.size else scope.size,
+            sessionDone = if (forced) 0 else scope.size - pending.size,
+            forcedByDeveloper = forced
         )
     }
 
@@ -1108,24 +1104,6 @@ class LearningRepository(
      * filter costs nothing; a chunk taken back out of the list becomes askable
      * again with its schedule intact.
      */
-    /**
-     * How many ways a chunk of this deck can be asked.
-     *
-     * Two on a subject deck: recognise the term, then recall it inside its own
-     * definition. The third level asks for the phrase from its meaning, which is
-     * a language exercise -- see [LevelPromotion].
-     */
-    private fun maxLevelFor(chunk: ChunkEntity): Int {
-        val byShape = Shapes.maxLevel(Shapes.of(chunk))
-        val byLanguage =
-            if (chunk.lang == NO_LANG) Level.CLOZE.value else Level.PRODUCTION.value
-        // The lower of the two wins. The deck sets one limit; the chunk sets
-        // the other, because a bare word has no sentence to take a gap out of.
-        // Promoting past either produces a question that cannot be answered,
-        // and the miss is then recorded against the item.
-        return minOf(byShape, byLanguage)
-    }
-
     suspend fun markWrong(sessionCard: SessionCard, now: Long = System.currentTimeMillis()) =
         writeLock.withLock { markWrongLocked(sessionCard, now) }
 
@@ -1133,7 +1111,7 @@ class LearningRepository(
         val chunkId = sessionCard.chunk.id
         onSuppress?.invoke(chunkId)
 
-        val plan = planDao.plan(dayKey(now)) ?: return
+        val plan = planDao.plan(dayKey(now))?.classicOnly() ?: return
         // Every level of the chunk leaves the plan, not just the one on screen.
         val requiredCount = (plan.ids.size - plan.extraRequested).coerceAtLeast(0)
         val required = plan.ids.take(requiredCount)
@@ -1253,35 +1231,6 @@ class LearningRepository(
 
         components.recordAnswer(sessionCard.chunk.id, rating.value, now)
 
-        // Promote to the next presentation level once the item is solid, which
-        // gives novelty without growing the queue -- but only inside the day's
-        // new-material budget. A promoted level is a question the user has never
-        // been asked, and the governor is the only thing allowed to decide how
-        // many of those arrive in a day. See LevelPromotion.
-        builder()
-            .nextLevelFor(result.card, newRoomToday(now), maxLevelFor(sessionCard.chunk))
-            ?.let { nextLevel ->
-            if (cardDao.card(result.card.chunkId, nextLevel) == null) {
-                cardDao.upsert(
-                    result.card.copy(
-                        level = nextLevel,
-                        stability = result.card.stability * 0.4,
-                        dueAt = now + DAY_MS,
-                        reps = 0,
-                        lapses = 0,
-                        isNew = true,
-                        lastReviewAt = null,
-                        introducedAt = now
-                    )
-                )
-                // Counted like the introduction it is. Otherwise the measured
-                // norm and the safety valve both read the day as lighter than it
-                // was, and tomorrow's capacity is computed from a day that did
-                // not happen.
-                countIntroduced(now, 1)
-            }
-        }
-
         bumpDailyStat(now, rating, durationMs)
 
         // Work past the day's obligation buys new material now rather than
@@ -1315,7 +1264,7 @@ class LearningRepository(
         if (boundary.isNight(now, config.nightCutoffHour)) return
 
         val day = dayKey(now)
-        val plan = planDao.plan(day) ?: return
+        val plan = planDao.plan(day)?.classicOnly() ?: return
         val reason = runCatching { GovernorReason.valueOf(plan.reason) }.getOrNull() ?: return
         if (reason !in EARNABLE_REASONS) return
 
@@ -1477,7 +1426,7 @@ class LearningRepository(
      * up, or a replay from the log) the old minimum is the fallback.
      */
     private suspend fun planCompleted(day: String, done: Int, ts: Long): Boolean {
-        val plan = planDao.plan(day)
+        val plan = planDao.plan(day)?.classicOnly()
             ?: return done >= config.dailyMinimumCards
         val required = requiredIds(plan)
         val answered = reviewDao.answeredKeysSince(startOfDay(ts)).toSet()
@@ -1485,6 +1434,34 @@ class LearningRepository(
     }
 
     private fun startOfDay(ts: Long): Long = boundary.startOfDay(ts)
+
+    /** DEV inspection reads state without creating plans, awarding credits or recording answers. */
+    suspend fun developerDiagnostics(now: Long = System.currentTimeMillis()): DeveloperDiagnostics = writeLock.withLock {
+        val plan = planDao.plan(dayKey(now))?.classicOnly()
+        val answered = reviewDao.answeredKeysSince(startOfDay(now)).toSet()
+        val hidden = suppressedNow()
+        val pending = builder().materialize(plan?.ids.orEmpty())
+            .count { it.card.key !in answered && it.chunk.id !in hidden }
+        val stored = loadSettings?.invoke()
+        val target = when {
+            stored?.auto == true -> autoTarget()
+            stored != null -> stored.manual
+            else -> currentDailyTarget()
+        }
+        val signals = collectSignals(now, targetOverride = target)
+        val preview = LoadGovernor(baseConfig.copy(targetDailyReviews = target))
+        val decision = withNightRule(preview.decide(signals), now)
+        DeveloperDiagnostics(
+            capturedAt = now, planReason = plan?.reason,
+            governorReason = decision.reason.name + (decision.gate?.let { "/" + it.name } ?: ""),
+            allowedNew = decision.allowedNew, capacity = decision.capacity,
+            pending = pending, planSize = plan?.plannedTotal ?: 0,
+            due = signals.dueToday, backlog = signals.backlog,
+            reviewRows = reviewDao.total(), retiredCards = cardDao.retiredCount(),
+            overrideEnabled = developerAccess?.invoke()?.active == true,
+            decks = chunkDao.packs().map { dev.ikna.data.dev.DeveloperDeck(it.id, it.title ?: it.id) }
+        )
+    }
 
     // ---- maintenance ------------------------------------------------------
 

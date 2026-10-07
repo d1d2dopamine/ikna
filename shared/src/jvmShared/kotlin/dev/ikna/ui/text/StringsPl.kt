@@ -535,10 +535,6 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"sess.014" to "OK",
 	// узнать
 	"sess.015" to "rozpoznać",
-	// вставить
-	"sess.016" to "dopisać",
-	// сказать
-	"sess.017" to "powiedzieć na głos",
 	// План дня закрыт. Новые чанки придут сами завтра.
 	"sess.018" to "Plan dnia zamknięty. Nowe chunki przyjdą same jutro.",
 	// Первый день — берём совсем немного.
@@ -593,7 +589,6 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"sess.044" to "OZNACZ JAKO BŁĘDNĄ",
 	"sess.045" to "Karta wyjęta z obiegu. Błąd nie trafił do statystyk.",
 	"sess.046" to "termin",
-	"sess.047" to "z pamięci",
 	// Фразами, а не словами
 	"onb.001" to "To jest",
 	// Внутри — готовые чанки: короткие живые куски речи. Новые добавляются сами — ничего не надо
@@ -1002,8 +997,6 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "dev.005" to "WŁĄCZ TRYB DEWELOPERSKI",
     "dev.006" to "WRÓĆ DO ZWYKŁEGO TRYBU",
     "dev.007" to "Ikna uruchomi się ponownie z wybranym profilem danych.",
-    "dev.008" to "Ograniczenia produktu są pomijane",
-    "dev.009" to "Tryb deweloperski zawsze pozwala testować niezależnie od historii, dzisiejszego planu, pory, Governor, cooldownu i limitów użycia. Zwykłe powody blokady nadal są obliczane i pokazywane diagnostycznie.",
     "dev.010" to "Scenariusz syntetyczny",
     "dev.011" to "PUSTY",
     "dev.012" to "WCZESNA HISTORIA",
@@ -1025,4 +1018,27 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "cat.042" to "Najpierw skończy się inne pobieranie.",
     "pc.021" to "Fiszki, daty, statystyki, ustawienia, zainstalowane talie i dziennik odpowiedzi znikają. Teksty talii są najpierw zapisane w folderze export. Dziennik odpowiedzi — nie: wyeksportuj go wcześniej.",
 "pc.025" to "{reveal} — ujawnij · {miss} / {know} — odpowiedź · {undo} — cofnij",
+    "dev.tools.001" to "Narzędzia DEV",
+    "dev.tools.002" to "Otwierają rzeczywiste funkcje w oddzielnym profilu testowym.",
+    "dev.tools.003" to "Stosuj zwykłe ograniczenia",
+    "dev.tools.004" to "Włącz, aby sprawdzić zwykłe działanie. Wyłącz, aby uzyskać dostęp do funkcji.",
+    "dev.tools.005" to "ODŚWIEŻ DIAGNOSTYKĘ",
+    "dev.tools.006" to "KOPIUJ DIAGNOSTYKĘ",
+    "dev.tools.007" to "Skopiowano diagnostykę.",
+    "dev.tools.008" to "Brak zainstalowanych talii. Dodaj talię w DEV.",
+    "dev.tools.009" to "Działanie nie powiodło się",
+    "dev.tools.010" to "Talia do sprawdzenia",
+    "dev.tools.011" to "OTWÓRZ KARTY",
+    "dev.tools.012" to "OTWÓRZ BROWSE",
+    "dev.tools.013" to "OTWÓRZ STATYSTYKI",
+    "dev.tools.014" to "OTWÓRZ KATALOG",
+    "dev.tools.015" to "OTWÓRZ WYSZUKIWANIE",
+    "dev.tools.016" to "Governor: przyczyna · nowe / pojemność",
+    "dev.tools.017" to "Zapisany plan: przyczyna · pozostałe / wszystkie",
+    "dev.tools.018" to "Do powtórki / zaległe · odpowiedzi w historii · stare tryby",
+    "dev.tools.019" to "Trwa…",
+    "dev.tools.020" to "Browse sprawdza dostępność i może utworzyć dzisiejszy plan. Przy omijaniu ograniczeń karty korzystają z istniejących harmonogramów; odpowiedzi zapisują się tylko w DEV.",
+    "dev.tools.021" to "Omijanie ograniczeń",
+    "dev.tools.022" to "włączone",
+    "dev.tools.023" to "wyłączone",
 )

@@ -127,3 +127,4 @@ Never trust these from memory or from another document; read the owner:
 - This map itself — whenever documents are added, renamed or re-owned.
 
 - [Round 10 fix 1](ROUND-0.12-10-fix1.md): canonical occurrence failure and corrected automatic handoff.
+- [Round 11](ROUND-0.12-11.md): classic-only cards, retained history, and actual DEV tools.

@@ -133,6 +133,7 @@ fun SettingsScreen(
     settings: IknaSettings,
     onOpenDebug: () -> Unit,
     onOpenVoice: () -> Unit,
+    onOpenDeveloper: (dev.ikna.data.dev.DeveloperDestination, String?) -> Unit = { _, _ -> },
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -1083,18 +1084,14 @@ fun SettingsScreen(
                                     }
                                 }
                             } else {
-                                Text(
-                                    text = S.t("dev.008"),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Medium
-                                )
-                                Spacer(Modifier.height(4.dp))
-                                Text(
-                                    text = S.t("dev.009"),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Spacer(Modifier.height(14.dp))
+                                container.developerTools?.let { tools ->
+                                    dev.ikna.ui.dev.DeveloperToolsPanel(
+                                        tools = tools,
+                                        applyProductLimits = settings.developerApplyProductLimits,
+                                        onOpen = onOpenDeveloper
+                                    )
+                                }
+                                Spacer(Modifier.height(12.dp))
                                 Text(
                                     text = S.t("dev.010"),
                                     style = MaterialTheme.typography.labelMedium,

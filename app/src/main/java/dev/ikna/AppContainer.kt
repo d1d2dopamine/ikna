@@ -121,6 +121,10 @@ class AppContainer(
         config = config
     )
 
+    val developerTools: dev.ikna.data.dev.DeveloperTools? by lazy {
+        if (isDeveloperMode) dev.ikna.data.dev.DeveloperTools(dataProfile, learningRepository, settings) else null
+    }
+
     val developerSandbox: DeveloperSandboxSeeder? = if (isDeveloperMode) {
         DeveloperSandboxSeeder(
             db = db,
@@ -221,7 +225,9 @@ class AppContainer(
             settings.settleBrowseCredits(day, completed, exposures).availablePoints
         }
         learningRepository.clearBrowseCredits = { settings.clearBrowseCredits() }
-        learningRepository.developerAccess = { DeveloperAccess.forProfile(dataProfile) }
+        learningRepository.developerAccess = {
+            DeveloperAccess.forProfile(dataProfile, settings.current().developerApplyProductLimits)
+        }
 
         learningRepository.derivedGradingEnabled = { dev.ikna.domain.optimizer.AutomaticLearningPolicy.DERIVED_WHEN_READY }
         learningRepository.loadSettings = {

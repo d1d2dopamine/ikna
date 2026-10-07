@@ -1,6 +1,5 @@
 package dev.ikna.ui.session
 import dev.ikna.domain.session.SessionCard
-import dev.ikna.domain.session.Ask
 import dev.ikna.domain.governor.GovernorReason
 
 data class SessionUiState(
@@ -66,19 +65,9 @@ data class SessionUiState(
     val progress: Float
         get() = if (sessionTotal <= 0) 0f else sessionDone.toFloat() / sessionTotal
 
-    /** The level of the next question, so the next step is never a surprise. */
+    /** The next classic card, for preloading. */
     val nextCard: SessionCard? get() = queue.getOrNull(index + 1)
 
-    /**
-     * Whether saying it out loud right now would hand over the answer.
-     *
-     * A recognition card already shows the sentence it lives in, so hearing it
-     * adds pronunciation to something already visible. A cloze with a gap in
-     * it, or a production card showing only the translation, would be the answer
-     * itself — those wait until the card is turned.
-     */
-    val speakable: Boolean
-        get() = current?.let { card ->
-            card.ask == Ask.RECOGNISE || revealed
-        } == true
+    /** The complete classic prompt is visible from the start. */
+    val speakable: Boolean get() = current != null
 }

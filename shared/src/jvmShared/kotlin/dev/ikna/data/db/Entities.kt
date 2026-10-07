@@ -124,7 +124,7 @@ data class PackEntity(
 // Item layer (scheduled by FSRS)
 // ---------------------------------------------------------------------------
 
-// level: 0 = recognition, 1 = cloze, 2 = production
+// Active level: 0 = classic. Stored 1/2 remain for historical replay/export/undo.
 @Entity(
     tableName = "cards",
     primaryKeys = ["chunkId", "level"],

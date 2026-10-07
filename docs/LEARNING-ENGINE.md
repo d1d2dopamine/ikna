@@ -25,7 +25,7 @@ content / learner history
     Transfer Policy     is an unseen context appropriate yet?
           |
           v
-    Presentation        recognition / cloze / production
+    Presentation        classic full context -> tap for meaning
           |
           v
        learner
@@ -72,7 +72,7 @@ review. It is not a random sentence rotator.
 Its constraints include:
 
 - use only content whose provenance and licence are known;
-- do not reveal the answer on production prompts;
+- keep the full classic context visible and reveal the meaning through the existing tap action;
 - do not select a context that changes the target's intended meaning;
 - do not assume that maximal variety is always beneficial;
 - preserve a stable fallback to the original context;
@@ -89,6 +89,23 @@ context is a different observation and should be identifiable as such in history
 
 0.11 starts by representing the distinction. It does not assume a novel-context
 success deserves a different FSRS rating.
+
+## Active card presentation (0.12 owner decision)
+
+Classic recognition is the sole active presentation: full context, tap for
+translation/meaning, then the existing rating/side choice. Gesture handling,
+first-contact repetition, optional pronunciation playback, grading and FSRS
+updates for this presentation are unchanged. No voice-input exercise is added.
+Cloze and reverse/production prompts and automatic level promotion are removed.
+
+Persisted level 1/2 schedules and review rows remain readable for history,
+export/restore, scheduler replay and historical undo. They are excluded from
+active queues, due/backlog/forecast and active-card counts. An existing daily
+plan drops only retired keys, preserving its capacity/new allowance/time and
+required/extra split; no fresh daily budget is awarded by this conversion.
+Deck progress still counts unique targets with actual historical answers.
+The schema and append-only review contract are unchanged. Importing Anki cloze
+source syntax still extracts content; this is not an active cloze exercise.
 
 ## Grading
 

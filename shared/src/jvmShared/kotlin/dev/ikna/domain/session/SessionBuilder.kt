@@ -37,7 +37,8 @@ data class SessionPlan(
     /** Cards in today's plan belonging to this session's scope. */
     val sessionTotal: Int = cards.size,
     /** How many of those are already answered. Drives the progress band. */
-    val sessionDone: Int = 0
+    val sessionDone: Int = 0,
+    val forcedByDeveloper: Boolean = false
 ) {
     /**
      * Monotonic by construction: the plan is fixed for the day and answers only
@@ -72,7 +73,7 @@ class SessionBuilder(
         val capacity = decision.capacity
         if (capacity <= 0) return emptyList()
 
-        val reserved = introduced.take(capacity)
+        val reserved = introduced.filter { it.level == 0 }.take(capacity)
         val room = capacity - reserved.size
         if (room <= 0) return reserved
 
@@ -138,7 +139,7 @@ class SessionBuilder(
      */
     suspend fun materialize(keys: List<String>): List<SessionCard> {
         if (keys.isEmpty()) return emptyList()
-        val cards = cardDao.byKeys(keys).associateBy { it.key }
+        val cards = cardDao.byKeys(keys).filter { it.level == 0 }.associateBy { it.key }
         val ordered = keys.mapNotNull { cards[it] }
         if (ordered.isEmpty()) return emptyList()
 
@@ -174,17 +175,5 @@ class SessionBuilder(
 
     /** The whole daily obligation. One card. Streaks cannot break. */
     fun dailyMinimum(): Int = config.dailyMinimumCards
-
-    /**
-     * The level this card has earned, if any, given what is left of the day's
-     * new-material budget. The rule itself lives in [LevelPromotion], which
-     * explains why a budget is involved at all.
-     */
-    fun nextLevelFor(
-        card: CardEntity,
-        newRoomToday: Int,
-        maxLevel: Int = Level.PRODUCTION.value
-    ): Int? =
-        LevelPromotion.nextLevel(card.level, card.stability, newRoomToday, maxLevel)
 
 }

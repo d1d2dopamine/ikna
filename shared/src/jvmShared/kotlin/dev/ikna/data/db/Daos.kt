@@ -167,7 +167,7 @@ interface ChunkDao {
     @Query(
         "SELECT c.* FROM chunks c WHERE EXISTS (SELECT 1 FROM pack_chunks pc " +
             "JOIN packs p ON p.id = pc.packId WHERE pc.chunkId = c.id AND p.isActive = 1) " +
-            "AND c.id NOT IN (SELECT DISTINCT chunkId FROM cards) " +
+            "AND c.id NOT IN (SELECT DISTINCT chunkId FROM cards WHERE level = 0) " +
             "ORDER BY c.freqRank ASC LIMIT :limit"
     )
     suspend fun unintroducedByFrequency(limit: Int): List<ChunkEntity>
@@ -178,7 +178,7 @@ interface ChunkDao {
     // on the list is.
     @Query(
         "SELECT c.* FROM chunks c JOIN pack_chunks pc ON pc.chunkId = c.id " +
-            "WHERE pc.packId = :packId AND c.id NOT IN (SELECT DISTINCT chunkId FROM cards) " +
+            "WHERE pc.packId = :packId AND c.id NOT IN (SELECT DISTINCT chunkId FROM cards WHERE level = 0) " +
             "ORDER BY pc.freqRank ASC, c.id ASC LIMIT :limit"
     )
     suspend fun unintroducedByFrequencyFor(packId: String, limit: Int): List<ChunkEntity>
@@ -193,7 +193,7 @@ interface ChunkDao {
     @Query(
         "SELECT COUNT(*) FROM chunks c WHERE EXISTS (SELECT 1 FROM pack_chunks pc " +
             "JOIN packs p ON p.id = pc.packId WHERE pc.chunkId = c.id AND p.isActive = 1) " +
-            "AND c.id NOT IN (SELECT DISTINCT chunkId FROM cards)"
+            "AND c.id NOT IN (SELECT DISTINCT chunkId FROM cards WHERE level = 0)"
     )
     suspend fun untouchedCount(): Int
 
@@ -203,7 +203,7 @@ interface ChunkDao {
     @Query(
         "SELECT COUNT(*) FROM pack_chunks pc JOIN chunks c ON c.id = pc.chunkId " +
             "JOIN packs p ON p.id = pc.packId WHERE pc.packId = :packId AND p.isActive = 1 " +
-            "AND c.id NOT IN (SELECT DISTINCT chunkId FROM cards)"
+            "AND c.id NOT IN (SELECT DISTINCT chunkId FROM cards WHERE level = 0)"
     )
     suspend fun untouchedCountFor(packId: String): Int
 
@@ -265,12 +265,15 @@ interface CardDao {
     @Upsert suspend fun upsert(card: CardEntity)
     @Upsert suspend fun upsertAll(cards: List<CardEntity>)
 
-    /** Every scheduled question, for an algorithm migration performed in memory. */
+    @Query("SELECT COUNT(*) FROM cards WHERE level != 0")
+    suspend fun retiredCount(): Int
+
+    /** Every stored question, including retired modes, for lossless maintenance. */
     @Query("SELECT * FROM cards ORDER BY chunkId ASC, level ASC")
     suspend fun all(): List<CardEntity>
 
     /** True after the first batch has actually been scheduled. */
-    @Query("SELECT EXISTS(SELECT 1 FROM cards)")
+    @Query("SELECT EXISTS(SELECT 1 FROM cards WHERE level = 0)")
     suspend fun hasAny(): Boolean
 
     @Query("SELECT * FROM cards WHERE chunkId = :chunkId AND level = :level")
@@ -280,10 +283,10 @@ interface CardDao {
     @Query("SELECT * FROM cards WHERE (chunkId || ':' || level) IN (:keys)")
     suspend fun byKeys(keys: List<String>): List<CardEntity>
 
-    @Query("SELECT COUNT(*) FROM cards WHERE inAmnesty = 0 AND dueAt <= :until")
+    @Query("SELECT COUNT(*) FROM cards WHERE level = 0 AND inAmnesty = 0 AND dueAt <= :until")
     suspend fun dueCount(until: Long): Int
 
-    @Query("SELECT COUNT(*) FROM cards WHERE inAmnesty = 1")
+    @Query("SELECT COUNT(*) FROM cards WHERE level = 0 AND inAmnesty = 1")
     suspend fun amnestyCount(): Int
 
     /**
@@ -294,29 +297,29 @@ interface CardDao {
      * about the phrase, not a verdict on the person answering it.
      */
     @Query(
-        "SELECT * FROM cards WHERE lapses >= :minLapses " +
+        "SELECT * FROM cards WHERE level = 0 AND lapses >= :minLapses " +
             "ORDER BY lapses DESC, dueAt ASC LIMIT :limit"
     )
     suspend fun leeches(minLapses: Int, limit: Int): List<CardEntity>
 
     @Query(
-        "SELECT * FROM cards WHERE inAmnesty = 0 AND dueAt <= :until " +
+        "SELECT * FROM cards WHERE level = 0 AND inAmnesty = 0 AND dueAt <= :until " +
             "ORDER BY dueAt ASC LIMIT :limit"
     )
     suspend fun dueCards(until: Long, limit: Int): List<CardEntity>
 
-    @Query("SELECT * FROM cards WHERE inAmnesty = 1 ORDER BY dueAt ASC LIMIT :limit")
+    @Query("SELECT * FROM cards WHERE level = 0 AND inAmnesty = 1 ORDER BY dueAt ASC LIMIT :limit")
     suspend fun amnestyCards(limit: Int): List<CardEntity>
 
     // "ещё немного": more of what is already due, never anything new.
     @Query(
-        "SELECT * FROM cards WHERE inAmnesty = 0 AND dueAt <= :until " +
+        "SELECT * FROM cards WHERE level = 0 AND inAmnesty = 0 AND dueAt <= :until " +
             "AND (chunkId || ':' || level) NOT IN (:exclude) ORDER BY dueAt ASC LIMIT :limit"
     )
     suspend fun dueCardsExcluding(until: Long, exclude: List<String>, limit: Int): List<CardEntity>
 
     @Query(
-        "SELECT * FROM cards WHERE inAmnesty = 1 " +
+        "SELECT * FROM cards WHERE level = 0 AND inAmnesty = 1 " +
             "AND (chunkId || ':' || level) NOT IN (:exclude) ORDER BY dueAt ASC LIMIT :limit"
     )
     suspend fun amnestyCardsExcluding(exclude: List<String>, limit: Int): List<CardEntity>
@@ -326,7 +329,7 @@ interface CardDao {
     // little scheduling precision and nothing else, which is a fair price for a
     // button that is supposed to always do something.
     @Query(
-        "SELECT * FROM cards WHERE inAmnesty = 0 AND isNew = 0 AND dueAt > :after " +
+        "SELECT * FROM cards WHERE level = 0 AND inAmnesty = 0 AND isNew = 0 AND dueAt > :after " +
             "AND (chunkId || ':' || level) NOT IN (:exclude) ORDER BY dueAt ASC LIMIT :limit"
     )
     suspend fun upcomingCardsExcluding(
@@ -343,7 +346,7 @@ interface CardDao {
     // reported that nothing was due - in a deck that was full of it.
     @Query(
         "SELECT c.* FROM cards c JOIN pack_chunks pc ON pc.chunkId = c.chunkId " +
-            "WHERE pc.packId = :packId AND c.inAmnesty = 0 AND c.dueAt <= :until " +
+            "WHERE pc.packId = :packId AND c.level = 0 AND c.inAmnesty = 0 AND c.dueAt <= :until " +
             "AND (c.chunkId || ':' || c.level) NOT IN (:exclude) " +
             "ORDER BY c.dueAt ASC LIMIT :limit"
     )
@@ -356,7 +359,7 @@ interface CardDao {
 
     @Query(
         "SELECT c.* FROM cards c JOIN pack_chunks pc ON pc.chunkId = c.chunkId " +
-            "WHERE pc.packId = :packId AND c.inAmnesty = 1 " +
+            "WHERE pc.packId = :packId AND c.level = 0 AND c.inAmnesty = 1 " +
             "AND (c.chunkId || ':' || c.level) NOT IN (:exclude) " +
             "ORDER BY c.dueAt ASC LIMIT :limit"
     )
@@ -368,7 +371,7 @@ interface CardDao {
 
     @Query(
         "SELECT c.* FROM cards c JOIN pack_chunks pc ON pc.chunkId = c.chunkId " +
-            "WHERE pc.packId = :packId AND c.inAmnesty = 0 AND c.isNew = 0 " +
+            "WHERE pc.packId = :packId AND c.level = 0 AND c.inAmnesty = 0 AND c.isNew = 0 " +
             "AND c.dueAt > :after " +
             "AND (c.chunkId || ':' || c.level) NOT IN (:exclude) " +
             "ORDER BY c.dueAt ASC LIMIT :limit"
@@ -399,16 +402,16 @@ interface CardDao {
 
     // Forecast: how many cards fall due on each of the next days.
     @Query(
-        "SELECT COUNT(*) FROM cards WHERE inAmnesty = 0 " +
+        "SELECT COUNT(*) FROM cards WHERE level = 0 AND inAmnesty = 0 " +
             "AND dueAt > :from AND dueAt <= :to"
     )
     suspend fun dueBetween(from: Long, to: Long): Int
 
     /** For the empty state: when does the next card actually come back. */
-    @Query("SELECT MIN(dueAt) FROM cards WHERE inAmnesty = 0 AND dueAt > :after")
+    @Query("SELECT MIN(dueAt) FROM cards WHERE level = 0 AND inAmnesty = 0 AND dueAt > :after")
     suspend fun nextDueAt(after: Long): Long?
 
-    @Query("UPDATE cards SET inAmnesty = 1 WHERE inAmnesty = 0 AND dueAt < :threshold")
+    @Query("UPDATE cards SET inAmnesty = 1 WHERE level = 0 AND inAmnesty = 0 AND dueAt < :threshold")
     suspend fun moveOverdueToAmnesty(threshold: Long): Int
 
     // There is deliberately no "shift every schedule forward" query here any
@@ -426,7 +429,7 @@ interface CardDao {
     @Query("DELETE FROM cards")
     suspend fun clear()
 
-    @Query("SELECT COUNT(*) FROM cards")
+    @Query("SELECT COUNT(*) FROM cards WHERE level = 0")
     fun cardCountFlow(): Flow<Int>
 }
 

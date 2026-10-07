@@ -535,10 +535,6 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"sess.014" to "OK",
 	// узнать
 	"sess.015" to "recognise",
-	// вставить
-	"sess.016" to "complete it",
-	// сказать
-	"sess.017" to "say it out loud",
 	// План дня закрыт. Новые чанки придут сами завтра.
 	"sess.018" to "The day's plan is closed. New chunks will come by themselves tomorrow.",
 	// Первый день — берём совсем немного.
@@ -593,7 +589,6 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"sess.044" to "MARK AS WRONG",
 	"sess.045" to "Taken out of rotation. The mistake was not written into your statistics.",
 	"sess.046" to "the term",
-	"sess.047" to "from memory",
 	// Это ikna.
 	"onb.001" to "This is",
 	// Я сделал ikna, потому что современный рынок SRS-приложений в основном формируют команды маркетологов, которым не важно, сколько удаётся выучить и насколько эффективно проходит обучение. Ещё одна причина в том, что сейчас нет приложений для изучения предметов и языков, созданных для нейроотличных людей, например для людей с СДВГ. Я хочу помочь избежать проблем, которые возникают в других приложениях при попытке что-то изучить или освоить.
@@ -1002,8 +997,6 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "dev.005" to "ENABLE DEVELOPER MODE",
     "dev.006" to "RETURN TO NORMAL MODE",
     "dev.007" to "Ikna will restart with the selected data profile.",
-    "dev.008" to "Product restrictions are bypassed",
-    "dev.009" to "Developer Mode always allows testing past history, today’s plan, time, Governor, cooldown and usage limits. Production blockers are still calculated and shown for diagnosis.",
     "dev.010" to "Synthetic scenario",
     "dev.011" to "EMPTY",
     "dev.012" to "EARLY HISTORY",
@@ -1025,4 +1018,27 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "cat.042" to "Waiting for another download to finish.",
     "pc.021" to "Cards, dates, statistics, settings, the installed decks and the answer log all go. Deck texts are saved to the export folder first. The answer log is not: export it before erasing.",
 "pc.025" to "{reveal} reveals · {miss} / {know} answer · {undo} undo",
+    "dev.tools.001" to "DEV tools",
+    "dev.tools.002" to "Open real features in the isolated test profile.",
+    "dev.tools.003" to "Apply normal restrictions",
+    "dev.tools.004" to "Turn on to test normal behaviour. Turn off to access features.",
+    "dev.tools.005" to "REFRESH DIAGNOSTICS",
+    "dev.tools.006" to "COPY DIAGNOSTICS",
+    "dev.tools.007" to "Diagnostics copied.",
+    "dev.tools.008" to "No installed decks. Add a deck in DEV.",
+    "dev.tools.009" to "Action failed",
+    "dev.tools.010" to "Deck to inspect",
+    "dev.tools.011" to "OPEN CARDS",
+    "dev.tools.012" to "OPEN BROWSE",
+    "dev.tools.013" to "OPEN STATISTICS",
+    "dev.tools.014" to "OPEN CATALOGUE",
+    "dev.tools.015" to "OPEN SEARCH",
+    "dev.tools.016" to "Governor: reason · new / capacity",
+    "dev.tools.017" to "Saved plan: reason · remaining / total",
+    "dev.tools.018" to "Due / backlog · historical answers · retired modes",
+    "dev.tools.019" to "Working…",
+    "dev.tools.020" to "Browse checks normal availability and may create today’s plan. When restrictions are bypassed, cards use existing schedules; answers are recorded only in DEV.",
+    "dev.tools.021" to "Restriction bypass",
+    "dev.tools.022" to "on",
+    "dev.tools.023" to "off",
 )

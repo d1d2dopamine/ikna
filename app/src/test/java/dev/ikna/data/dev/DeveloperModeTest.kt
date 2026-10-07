@@ -25,9 +25,16 @@ class DeveloperModeTest {
     }
 
     @Test
-    fun `developer profile always enables forced product access`() {
+    fun `developer profile defaults to forced product access`() {
         assertFalse(DeveloperAccess.forProfile(IknaDataProfile.REAL).active)
         assertTrue(DeveloperAccess.forProfile(IknaDataProfile.DEVELOPER).active)
+    }
+
+    @Test
+    fun `normal limits can be tested in DEV but REAL never bypasses`() {
+        assertFalse(DeveloperAccess.forProfile(IknaDataProfile.DEVELOPER, applyProductLimits = true).active)
+        assertFalse(DeveloperAccess.forProfile(IknaDataProfile.REAL, applyProductLimits = false).active)
+        assertFalse(DeveloperAccess.forProfile(IknaDataProfile.REAL, applyProductLimits = true).active)
     }
 
     @Test

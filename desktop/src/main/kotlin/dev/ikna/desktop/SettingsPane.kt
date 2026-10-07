@@ -80,6 +80,7 @@ fun SettingsPane(
     onOpenBackup: () -> Unit = {},
     onWiped: () -> Unit = {},
     onRestartRequested: () -> Unit = {},
+    onOpenDeveloper: (dev.ikna.data.dev.DeveloperDestination, String?) -> Unit = { _, _ -> },
     onBack: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
@@ -547,17 +548,13 @@ fun SettingsPane(
                                 }
                             }
                         } else {
-                            Text(
-                                text = S.t("dev.008"),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = palette.ink
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = S.t("dev.009"),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = palette.muted
-                            )
+                            container.developerTools?.let { tools ->
+                                dev.ikna.ui.dev.DeveloperToolsPanel(
+                                    tools = tools,
+                                    applyProductLimits = settings.developerApplyProductLimits,
+                                    onOpen = onOpenDeveloper
+                                )
+                            }
                             Spacer(Modifier.height(12.dp))
                             Text(
                                 text = S.t("dev.010"),

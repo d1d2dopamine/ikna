@@ -335,3 +335,23 @@ review. Until then, do not treat this initial checkpoint as release approval.
 
 Record a blocker in the lane that owns it. Do not use a Catalogue publication
 blocker to reinterpret the shipped 0.11 application as unreleased.
+
+## Round 11 — classic cards and useful DEV tools
+
+Owner-approved application batch while the corrected Everyday quality workflow
+runs. Remove active cloze/production exercises and promotion, preserve the full
+classic context -> tap for meaning -> existing side/rating flow. Keep historical
+levels for lossless export/restore/undo; filter live queues and normalize only
+retired daily-plan keys without changing allowances or learner history.
+
+DEV gains actual feature navigation, a read-only/copyable state snapshot, and a
+profile-local switch to apply normal restrictions. Do not expand synthetic
+scenarios as a substitute for these tools. Existing seed/reset controls stay.
+Local SQL and source/text/localization checks are recorded in
+[ROUND-0.12-11.md](ROUND-0.12-11.md); Kotlin/Room/Compose compilation and runtime
+acceptance are open. No workflow is added or dispatched. Catalogue source,
+source pins, accepted Windows fixes and build versions remain unchanged.
+
+Next Catalogue step remains automatic quality-report review, followed by Part 11
+census/content snapshot of the saved selection, then Part 12 storage/client
+acceptance. No repeat manual selection or redundant corpus rerun is requested.

@@ -7,8 +7,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Three ways of asking about one chunk. The span arithmetic here is the kind of
- * thing that breaks quietly and turns a cloze into a blank sentence.
+ * Classic front/back rendering, including compatibility with historical levels.
  */
 class CardPresentationTest {
 
@@ -49,21 +48,12 @@ class CardPresentationTest {
     }
 
     @Test
-    fun `cloze hides exactly the target span`() {
-        val prompt = sessionCard(Level.CLOZE).prompt
-        assertEquals("I usually \u2022\u2022\u2022 before breakfast.", prompt)
-        assertTrue(!prompt.contains("shower"))
-    }
-
-    @Test
-    fun `each level asks and answers a different way`() {
-        assertEquals(chunk.contextSentence, sessionCard(Level.RECOGNITION).prompt)
-        assertEquals(chunk.translation, sessionCard(Level.RECOGNITION).answer)
-
-        assertEquals(chunk.text, sessionCard(Level.CLOZE).answer)
-
-        assertEquals(chunk.translation, sessionCard(Level.PRODUCTION).prompt)
-        assertEquals(chunk.contextSentence, sessionCard(Level.PRODUCTION).answer)
+    fun `all stored levels render the full classic prompt and meaning`() {
+        for (level in Level.entries) {
+            assertEquals(chunk.contextSentence, sessionCard(level).prompt)
+            assertEquals(chunk.translation, sessionCard(level).answer)
+            assertEquals(Ask.RECOGNISE, sessionCard(level).ask)
+        }
     }
 
     @Test

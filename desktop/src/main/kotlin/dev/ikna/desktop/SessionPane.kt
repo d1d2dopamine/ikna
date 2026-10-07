@@ -378,14 +378,7 @@ val keysHint = if (current == null) null else S.t("pc.025")
                                 lang = current.chunk.lang,
                                 mode = mode
                             ),
-                            // On a subject deck the third field IS the meaning of
-                            // the term, so showing it beside a definition with the
-                            // term blanked out would simply print the answer.
-                            hint = if (current.ask == Ask.GAP && !subject) {
-                                current.meaning
-                            } else {
-                                null
-                            },
+                            hint = null,
                             sourceLabel = current.sourceId?.let { S.t("src.001") + "Tatoeba #" + it },
                             onSource = current.sourceId?.let { id -> { tatoebaSentenceUrl(id)?.let(::openInBrowser); Unit } },
                             revealed = revealed,
@@ -446,6 +439,4 @@ val keysHint = if (current == null) null else S.t("pc.025")
 /** What the card is asking, in the phone's own words. */
 private fun askLabel(ask: Ask, subject: Boolean): String = when (ask) {
     Ask.RECOGNISE -> if (subject) S.t("sess.046") else S.t("sess.015")
-    Ask.GAP -> if (subject) S.t("sess.047") else S.t("sess.016")
-    Ask.PRODUCE -> S.t("sess.017")
 }

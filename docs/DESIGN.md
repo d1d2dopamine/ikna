@@ -20,7 +20,7 @@ stutter. Build it and see it; it takes one `gradlew assembleDebug`.
 | Decision | Value |
 | --- | --- |
 | Unit of learning | chunk = phrase + carrier sentence + translation + `target_span` |
-| Presentation levels | 0 recognition, 1 cloze, 2 production |
+| Card presentation | Classic only: full context, tap for meaning, existing side/rating controls; stored 1/2 are historical |
 | Scheduler | FSRS-6 (21 parameters), local optimisation later |
 | Second memory layer | component-level (lemma) state, one-directional influence |
 | New-material control | `LoadGovernor` — a forecast-aware valve |

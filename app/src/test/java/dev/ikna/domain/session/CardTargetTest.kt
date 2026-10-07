@@ -59,15 +59,11 @@ class CardTargetTest {
     }
 
     @Test
-    fun `a cloze marks nothing because the gap already shows the place`() {
-        assertNull(card(Level.CLOZE).promptTarget)
-        assertNull(card(Level.CLOZE).answerTarget)
-    }
-
-    @Test
-    fun `production marks the sentence on the back and not the prompt`() {
-        assertNull("the prompt is a translation, there is nothing to mark", card(Level.PRODUCTION).promptTarget)
-        assertEquals(10 until 23, card(Level.PRODUCTION).answerTarget)
+    fun `legacy levels cannot reactivate retired presentations`() {
+        for (level in Level.entries) {
+            assertEquals(10 until 23, card(level).promptTarget)
+            assertNull(card(level).answerTarget)
+        }
     }
 
     @Test

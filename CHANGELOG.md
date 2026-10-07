@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### 0.12 application round 11 — classic cards and DEV tools
+
+- Remove active cloze/reverse exercises and promotion. Keep classic full context,
+  tap-to-reveal and existing rating/scheduling behavior. Retain historical data;
+  exclude retired modes from live queues/plans without awarding new allowances.
+- Add shared DEV feature launchers, read-only/copyable diagnostics, and a switch
+  for ordinary product restrictions in the isolated developer profile.
+- Preserve existing seeds, window fixes, Catalogue tools and dependency/build
+  versions. Local checks and open runtime acceptance:
+  [ROUND-0.12-11.md](docs/ROUND-0.12-11.md).
+
 ### 0.12 Catalogue round 08 — admitted Everyday selection review
 
 - Bind non-publishing selection to the full Tatoeba-only pool and Part 7 report:
