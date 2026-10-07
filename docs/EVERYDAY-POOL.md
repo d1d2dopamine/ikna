@@ -167,6 +167,69 @@ corpus-wide defect rate or establish a final material freeze. The 27 curated
 findings are a preliminary, deliberately selected inspection, not a native-speaker
 certification of eleven languages. See [ROUND-0.12-09.md](ROUND-0.12-09.md).
 
+## Next single run: quality handoff
+
+Owner decision, 2026-10-07: round 10 ends routine manual-selection work. The owner
+need not assess unfamiliar languages or every card; round-09 viewer/notes are
+optional historical aids. Continue through automated checks and the later stages.
+
+After committing the round-10 ZIP, choose **Actions → catalogue v2 everyday quality
+handoff → Run workflow**. Leave the five prefilled inputs unchanged:
+
+| Input | Exact checkpoint |
+|---|---|
+| input_run_id | `37458524156` |
+| candidate_sha256 | `57b90b01d5dcb0725743998dccaf307a100e174059a853e01f5f31fc13dd6170` |
+| pool_report_sha256 | `41c7e176d516e6ad89d70954b116d18062baa48857f66ee276bdcfd32dd0438f` |
+| baseline_report_sha256 | `c8afd1559893fca2e336a784677a25428e43423886c33713917c261cd116fc7a` |
+| source_version | `2026-10-03-2d4eee105639ba24` |
+
+The workflow reuses the exact saved pool/review artifacts, verifies pins, selects
+**once** with `boundary-diversity-v2`, streams complete included memberships and
+checks that full output. It does not rerun the old selector, rebuild admission,
+fetch Tatoeba or fall back to latest/fresh when an artifact is missing/expired.
+This supplies new evidence for changed policy and the full Part 11/12 handoff.
+The Japanese analyzer/dictionary are pinned offline tools; see MORPHOLOGY. Two
+observed Spanish source cases are deferred by exact reference/version/text hash,
+including their use as meanings; originals and unrelated regional forms remain.
+
+Retained artifacts (90 days):
+
+- **catalogue-v2-everyday-selected-material**: full `selected-everyday.jsonl.gz`,
+  exact selection report and input reference. Save for census/storage. Uploaded
+  before evaluation so a failed check can reuse it without reselection.
+- **catalogue-v2-everyday-quality-report**: small reports/preview and
+  `QUALITY.json/md`. Send this result/link back; uploading the large material is
+  unnecessary just to inspect metrics. Before/after examples are source-bound text.
+
+The evaluator verifies raw/logical hashes, unique memberships/contexts, source
+provenance, exact target/candidate identities, complete token/UTF-16 boundaries
+and the Japanese guard. Counts compare every deck. Exact old target/context
+retention is measured only for the baseline preview, not claimed globally.
+Losing a previously included language pair stops automatic progression; shortages
+are never padded. `qualityGatePassed` certifies these automatic contracts, while
+semantic certification, content freeze and publication flags remain false.
+
+After success, proceed to complete selected-material census/snapshot and then
+storage/client validation. Do not add routine owner manual review or resieve the
+original pool through the legacy builder, reintroducing deferred occurrences.
+Existing selection CLI defaults remain legacy-compatible; local reuse passes
+`--quality-policy boundary-diversity-v2 --selected-output selected-everyday.jsonl.gz`
+to the admitted selection command above. Then run:
+
+```bash
+python3 tools/catalog/selection_evaluate.py \
+  --selected selected-everyday.jsonl.gz --selection-report EVERYDAY-SELECTION.json \
+  --baseline-directory extracted-old-review \
+  --baseline-report-sha256 c8afd1559893fca2e336a784677a25428e43423886c33713917c261cd116fc7a \
+  --output-dir quality-results
+```
+
+`--selected-output` is independent of the preview limit. Its admitted handoff is
+deterministic and input/registry/output aliases are rejected. A failed admitted
+selection preserves prior saved material. Evaluation output must be a new
+directory. Full quality evidence is pending this run, not supplied by local fixtures.
+
 Generic selection now rejects input/output aliases (including hard links),
 fails on damaged UTF-8, and writes deterministic gzip bytes without output-name
 or timestamp metadata. The admitted wrapper also retains a previous staging file

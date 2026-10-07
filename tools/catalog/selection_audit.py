@@ -153,7 +153,11 @@ def audit(pool, report, rows, identity):
                   "publish-thin" if n < policy["thinDeck"] else "publish")
         require(d["decision"] == wanted, "decision differs from recorded thresholds")
     pipeline = report["selectionPipelineSha256"]
-    require(set(pipeline) == set(SELECTION_FILES), "unexpected selection pipeline manifest")
+    extra = {"japanese_boundary.py", "selection_output.py", "requirements-selection-quality.txt", "sources/selection-quarantine.json"}
+    require(set(pipeline) == set(SELECTION_FILES) or
+            (set(pipeline) == set(SELECTION_FILES) | extra and
+             (report.get("qualityPolicy", {}).get("version") == 2 or "selectedMaterial" in report)),
+            "unexpected selection pipeline manifest")
     # These determine identity/boundaries; other changed pipeline files are recorded
     # for diagnosis without pretending the old selection was regenerated here.
     for name in ("catalogue_core.py", "catalogue_v2.py", "segmentation.py"):

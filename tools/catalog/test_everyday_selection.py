@@ -90,6 +90,33 @@ class EverydaySelectionTests(unittest.TestCase):
         self.assertEqual((self.root / "first.gz").read_bytes(), (self.root / "second.gz").read_bytes())
         self.assertEqual(b"\0\0\0\0", (self.root / "first.gz").read_bytes()[4:8])
 
+    def test_complete_material_stream_is_not_limited_by_preview(self):
+        extra = [Candidate("everyday", "en", "es", text, "Traducción de prueba; no material publicado.",
+                          [Origin("tatoeba", VERSION, f"tatoeba:{9100+i}", f"tatoeba:{9200+i}")]) for i, text in enumerate([
+                              "I don't know if I have time to do it.", "The cat is asleep on the rug by the fire."])]
+        write_jsonl(str(self.input), self.records + extra)
+        self.report = pool.build_report(self.pool_args); self.save_report()
+        args = self.args("complete")
+        args.review_per_deck = 1
+        args.quality_policy = "boundary-diversity-v2"
+        args.selected_output = str(self.root / "selected.jsonl.gz")
+        report, preview = admitted.build_report(args)
+        rows = [json.loads(line) for line in gzip.decompress(Path(args.selected_output).read_bytes()).splitlines()]
+        self.assertEqual(len(rows), report["selectedMaterial"]["memberships"])
+        self.assertGreater(len(rows), len(preview))
+        self.assertEqual(len(rows), sum(d["selectedTargets"] for d in report["decks"] if d["decision"].startswith("publish")))
+        self.assertEqual(pool.sha256(Path(args.selected_output)), report["selectedMaterial"]["sha256"])
+        self.assertFalse(report["selectedMaterial"]["publicationSafe"])
+        self.assertEqual(report["qualityPolicy"]["id"], "boundary-diversity-v2")
+
+    def test_failed_complete_selection_preserves_existing_handoff(self):
+        args = self.args("failed-complete")
+        output = self.root / "previous.jsonl.gz"; output.write_bytes(b'previous-successful-material')
+        args.selected_output = str(output)
+        with patch.object(selection, "build_report", side_effect=ValueError("selection interrupted")):
+            with self.assertRaises(ValueError): admitted.build_report(args)
+        self.assertEqual(output.read_bytes(), b'previous-successful-material')
+
     def test_cjk_handoff_retains_exact_contexts_and_target_identity(self):
         from catalogue_v2 import target_id
         contexts = {"zh": "我喜欢每天在安静的图书馆阅读新书。",

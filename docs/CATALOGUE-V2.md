@@ -186,6 +186,23 @@ It verifies every supplied preview row, not the full selected material; heuristi
 flags do not change selection policy, identity or publication gates.
 No World/Knowledge evidence is rerun here.
 
+Round 10 adds explicit `boundary-diversity-v2`: Japanese target boundaries must
+not cut analyzer units; alternative ordering prefers lower written-token overlap
+after source/alignment evidence. The legacy duplicate threshold, frequency levels,
+budgets, exact identities and source text remain unchanged. A saved-artifact
+workflow selects once, retains complete included memberships, checks that output
+and compares the bound baseline reports. Two observed Spanish source cases are
+quarantined by exact reference/version/text hash in both translation directions;
+original source text is retained. Exact old identity deltas are preview-only.
+
+The full selected JSONL is a non-publishing intermediate, not release packs or
+learner state. Part 11 must census the saved selection; Part 12 measures lossless
+storage/client limits against the accepted snapshot. Do not rebuild through the
+legacy pool sieve and reintroduce deferred occurrences. Exhaustive owner/manual
+language review is not a prerequisite; acceptance records automated coverage,
+bounded evidence and semantic limitations. [ROUND-0.12-10.md](ROUND-0.12-10.md)
+distinguishes local versus pending full-run evidence. World/publication gates remain.
+
 ## Ingestion boundary
 
 Part 2 adds an offline source-normalization layer before deck selection. Source

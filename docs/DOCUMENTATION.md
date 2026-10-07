@@ -22,6 +22,9 @@ change.
 
 ## Active cycle (0.12)
 
+- [ROUND-0.12-10.md](ROUND-0.12-10.md) — last bounded selection correction,
+  Japanese boundary evidence, diverse alternate ordering, one saved-pool workflow
+  and full selection handoff. Owner review of all languages/cards is not required.
 - [ROUND-0.12-09.md](ROUND-0.12-09.md) — saved real Everyday preview audit,
   preliminary material findings and offline card review. Input-bound machine
   report, manual notes and viewer: [everyday-round09](evidence/everyday-round09/).

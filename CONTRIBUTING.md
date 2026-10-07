@@ -162,6 +162,7 @@ python3 tools/catalog/test_supply_census.py
 python3 tools/catalog/test_supply_census_shards.py
 python3 tools/catalog/test_wikimatrix_stream_status.py
 python3 tools/catalog/test_selection_audit.py
+python3 tools/catalog/test_selection_quality.py
 ```
 
 For a saved Everyday preview audit, use the bounded offline command in
@@ -169,6 +170,13 @@ For a saved Everyday preview audit, use the bounded offline command in
 with `node tools/catalog/test_selection_review.cjs <path-to-CARDS.html>` when
 Node is available. This tests data/navigation logic with a DOM stub, not actual
 browser rendering, full-pool quality or application builds.
+
+Quality policy v2 has pinned offline dependencies in
+`tools/catalog/requirements-selection-quality.txt`. Its workflow requires
+`python3 tools/catalog/test_selection_quality.py --require-japanese-engine`.
+Without them the regular suite explicitly skips the real analyzer case while
+checking the independent policy/handoff/evaluation fixtures. A skipped engine
+case is not Japanese runtime evidence; keep these tools out of the app.
 
 Do not replace a failing check by weakening the check unless the documented
 contract itself changed. If the contract changed, update the documentation and

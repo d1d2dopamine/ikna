@@ -1,0 +1,421 @@
+{
+  "evidenceVersion": 1,
+  "round": "0.12-10",
+  "date": "2026-10-07",
+  "status": "local-quality-policy-verified-full-saved-pool-run-pending",
+  "publicationSafe": false,
+  "contentFrozen": false,
+  "semanticAccuracyCertified": false,
+  "fullPoolRunPerformed": false,
+  "ownerDecision": "Last bounded manual-selection round; automatic workflow, then Part 11 census/snapshot and Part 12 storage/client checks; no exhaustive owner language review.",
+  "baseline": {
+    "archive": "ikna-0.12-press-round-09-audit.zip",
+    "sha256": "ddec04ac64c5ec925b6d72d9d2a3f04b638551c968cf8e862c5f897bdabe1532",
+    "sizeBytes": 7539237,
+    "sourceFiles": 590,
+    "unchangedBeforeEditing": true,
+    "preservedAppDesktopSharedSkillsFiles": 359,
+    "changedPaths": [
+      "CONTRIBUTING.md",
+      "docs/CATALOGUE-V2.md",
+      "docs/DOCUMENTATION.md",
+      "docs/EVERYDAY-POOL.md",
+      "docs/MORPHOLOGY.md",
+      "docs/PLAN-0.12.md",
+      "docs/modern_PLAN-0.12.md",
+      "tools/catalog/everyday_selection.py",
+      "tools/catalog/selection_audit.py",
+      "tools/catalog/selection_experiment.py",
+      "tools/catalog/selection_policy.py",
+      "tools/catalog/test_everyday_selection.py"
+    ],
+    "explicitAdditions": [
+      "tools/catalog/japanese_boundary.py",
+      "tools/catalog/selection_output.py",
+      "tools/catalog/selection_evaluate.py",
+      "tools/catalog/requirements-selection-quality.txt",
+      "tools/catalog/test_selection_quality.py",
+      ".github/workflows/catalogue-v2-everyday-quality.yml",
+      "tools/catalog/sources/selection-quarantine.json",
+      "docs/ROUND-0.12-10.md",
+      "docs/evidence/everyday-round10.json"
+    ]
+  },
+  "realSavedInput": {
+    "runUrl": "https://github.com/d1d2dopamine/ikna/actions/runs/37458524156",
+    "sourceVersion": "2026-10-03-2d4eee105639ba24",
+    "poolSha256": "57b90b01d5dcb0725743998dccaf307a100e174059a853e01f5f31fc13dd6170",
+    "poolReportSha256": "41c7e176d516e6ad89d70954b116d18062baa48857f66ee276bdcfd32dd0438f",
+    "baselineReportSha256": "c8afd1559893fca2e336a784677a25428e43423886c33713917c261cd116fc7a",
+    "reviewZipSha256": "22e0f8372d09e70993db4b2aacf787b913c44379a21ec823ae1551ef7eb4fded",
+    "fullPoolLocallyAvailable": false,
+    "uniqueCandidatesFromBoundReport": 11099490
+  },
+  "boundedOldPreviewJapaneseCheck": {
+    "scope": "old rank-ordered preview only; not corpus defect rate or reselection",
+    "archiveSha256": "22e0f8372d09e70993db4b2aacf787b913c44379a21ec823ae1551ef7eb4fded",
+    "checkedJapaneseContextPresentations": 754,
+    "deferredContextPresentations": 203,
+    "reasons": {
+      "ja-morpheme-cut-deferred": 203
+    },
+    "surfaces": {
+      "行": 30,
+      "き": 20,
+      "や": 26,
+      "え": 30,
+      "せ": 10,
+      "わ": 26,
+      "ろう": 30,
+      "編": 13,
+      "見積": 10,
+      "もの": 1,
+      "建て": 1,
+      "闇": 1,
+      "尽く": 2,
+      "チン": 1,
+      "ビート": 1,
+      "みつ": 1
+    },
+    "engine": {
+      "engine": "SudachiPy",
+      "version": "0.6.10",
+      "dictionary": "SudachiDict-core",
+      "dictionaryVersion": "20250825",
+      "dictionarySha256": "d28ffc33b196e5c2ca731e8147fd1ef47d35ba79928ef9f0871962859d70ac23",
+      "splitMode": "A",
+      "licence": "Apache-2.0",
+      "purpose": "boundary validation only; no lemma/normalization/identity rewrite"
+    },
+    "examples": [
+      {
+        "targetId": "t2:ja:1a3d82d7eed51b2a",
+        "text": "行",
+        "reason": "ja-morpheme-cut-deferred",
+        "context": "私は弟を駅に行かせた。",
+        "containingUnits": [
+          "行か"
+        ],
+        "deckId": "ja-de-everyday-beginner",
+        "origins": [
+          {
+            "attribution": {
+              "meaningContributor": "xtofu80"
+            },
+            "contextRef": "tatoeba:154958",
+            "meaningRef": "tatoeba:370805",
+            "sourceFamily": "tatoeba",
+            "sourceVersion": "2026-10-03-2d4eee105639ba24"
+          }
+        ]
+      },
+      {
+        "targetId": "t2:ja:1a3d82d7eed51b2a",
+        "text": "行",
+        "reason": "ja-morpheme-cut-deferred",
+        "context": "彼は通りを歩いて行った。",
+        "containingUnits": [
+          "行っ"
+        ],
+        "deckId": "ja-de-everyday-beginner",
+        "origins": [
+          {
+            "attribution": {
+              "meaningContributor": "Pfirsichbaeumchen"
+            },
+            "contextRef": "tatoeba:102005",
+            "meaningRef": "tatoeba:576255",
+            "sourceFamily": "tatoeba",
+            "sourceVersion": "2026-10-03-2d4eee105639ba24"
+          }
+        ]
+      },
+      {
+        "targetId": "t2:ja:1a3d82d7eed51b2a",
+        "text": "行",
+        "reason": "ja-morpheme-cut-deferred",
+        "context": "父と会いに空港へ行った。",
+        "containingUnits": [
+          "行っ"
+        ],
+        "deckId": "ja-de-everyday-beginner",
+        "origins": [
+          {
+            "attribution": {
+              "contextContributor": "mookeee",
+              "meaningContributor": "Dejo"
+            },
+            "contextRef": "tatoeba:1003939",
+            "meaningRef": "tatoeba:754798",
+            "sourceFamily": "tatoeba",
+            "sourceVersion": "2026-10-03-2d4eee105639ba24"
+          }
+        ]
+      },
+      {
+        "targetId": "t2:ja:c4d275df0ec8ec57",
+        "text": "き",
+        "reason": "ja-morpheme-cut-deferred",
+        "context": "老いも若きも戦争にいった。",
+        "containingUnits": [
+          "若き"
+        ],
+        "deckId": "ja-de-everyday-beginner",
+        "origins": [
+          {
+            "attribution": {
+              "contextContributor": "arnab",
+              "meaningContributor": "7evenbananas"
+            },
+            "contextRef": "tatoeba:77329",
+            "meaningRef": "tatoeba:5385457",
+            "sourceFamily": "tatoeba",
+            "sourceVersion": "2026-10-03-2d4eee105639ba24"
+          }
+        ]
+      },
+      {
+        "targetId": "t2:ja:c4d275df0ec8ec57",
+        "text": "き",
+        "reason": "ja-morpheme-cut-deferred",
+        "context": "本棚の上に手が届きますか。",
+        "containingUnits": [
+          "届き"
+        ],
+        "deckId": "ja-de-everyday-beginner",
+        "origins": [
+          {
+            "attribution": {
+              "meaningContributor": "Pfirsichbaeumchen"
+            },
+            "contextRef": "tatoeba:81574",
+            "meaningRef": "tatoeba:2233873",
+            "sourceFamily": "tatoeba",
+            "sourceVersion": "2026-10-03-2d4eee105639ba24"
+          }
+        ]
+      },
+      {
+        "targetId": "t2:ja:001c3d7cf263e95c",
+        "text": "や",
+        "reason": "ja-morpheme-cut-deferred",
+        "context": "私は彼に本を一冊やった。",
+        "containingUnits": [
+          "やっ"
+        ],
+        "deckId": "ja-de-everyday-beginner",
+        "origins": [
+          {
+            "attribution": {
+              "contextContributor": "bunbuku",
+              "meaningContributor": "Zaghawa"
+            },
+            "contextRef": "tatoeba:154055",
+            "meaningRef": "tatoeba:2983748",
+            "sourceFamily": "tatoeba",
+            "sourceVersion": "2026-10-03-2d4eee105639ba24"
+          }
+        ]
+      },
+      {
+        "targetId": "t2:ja:001c3d7cf263e95c",
+        "text": "や",
+        "reason": "ja-morpheme-cut-deferred",
+        "context": "彼に職を見つけてやった。",
+        "containingUnits": [
+          "やっ"
+        ],
+        "deckId": "ja-de-everyday-beginner",
+        "origins": [
+          {
+            "attribution": {
+              "meaningContributor": "Pfirsichbaeumchen"
+            },
+            "contextRef": "tatoeba:118562",
+            "meaningRef": "tatoeba:10191295",
+            "sourceFamily": "tatoeba",
+            "sourceVersion": "2026-10-03-2d4eee105639ba24"
+          }
+        ]
+      },
+      {
+        "targetId": "t2:ja:c4a42e8ef2172bfe",
+        "text": "え",
+        "reason": "ja-morpheme-cut-deferred",
+        "context": "彼は私の首を捕まえた。",
+        "containingUnits": [
+          "捕まえ"
+        ],
+        "deckId": "ja-de-everyday-beginner",
+        "origins": [
+          {
+            "attribution": {
+              "meaningContributor": "Pfirsichbaeumchen"
+            },
+            "contextRef": "tatoeba:105792",
+            "meaningRef": "tatoeba:860163",
+            "sourceFamily": "tatoeba",
+            "sourceVersion": "2026-10-03-2d4eee105639ba24"
+          }
+        ]
+      }
+    ],
+    "publicationSafe": false
+  },
+  "exactSourceQuarantine": {
+    "manifestSha256": "46e4055fc76803e9756163db4e1ea21e75e2feae7e3d1ad1da3c000fe14fc945",
+    "records": [
+      {
+        "sourceFamily": "tatoeba",
+        "sourceVersion": "2026-10-03-2d4eee105639ba24",
+        "sentenceRef": "tatoeba:13812776",
+        "textSha256": "8d45dd066b3ede34a10d2d89b57d92f67b8550d7abb72f4ac0c5f6f6ef86ebfe",
+        "text": "¿Te gusta quedarte dormido escuchando el sonido de la lluvio?",
+        "reason": "observed-source-spelling-la-lluvio",
+        "attribution": {
+          "contextContributor": "Seael",
+          "meaningContributor": "marafon"
+        },
+        "sourceUrl": "https://tatoeba.org/en/sentences/show/13812776"
+      },
+      {
+        "sourceFamily": "tatoeba",
+        "sourceVersion": "2026-10-03-2d4eee105639ba24",
+        "sentenceRef": "tatoeba:13812777",
+        "textSha256": "3718dc6bb285e0b9784fb60cc11b8d734656344e2976d773a808b799082201d4",
+        "text": "¿Te gusta quedarte dormida escuchando el sonido de la lluvio?",
+        "reason": "observed-source-spelling-la-lluvio",
+        "attribution": {
+          "contextContributor": "Seael",
+          "meaningContributor": "marafon"
+        },
+        "sourceUrl": "https://tatoeba.org/en/sentences/show/13812777"
+      }
+    ],
+    "matches": "family + export version + reference + exact text SHA; context and meaning roles",
+    "originalsRetained": true,
+    "sourceTextRewritten": false,
+    "regionalFormBan": false
+  },
+  "offlineTool": {
+    "engine": "SudachiPy",
+    "version": "0.6.10",
+    "dictionary": "SudachiDict-core",
+    "dictionaryVersion": "20250825",
+    "dictionaryBinarySha256": "d28ffc33b196e5c2ca731e8147fd1ef47d35ba79928ef9f0871962859d70ac23",
+    "cp311WheelSha256": "5e1c1d8c579cc3af591a6511bffba9f88662eedf5ba32868ca8e3ba3c1051d60",
+    "cp312WheelSha256": "0f8fd0ce37961401c9bdd78c126b2119a0a1669d376feb0b2427c35894ef1428",
+    "dictionaryWheelSha256": "9ec36a79cc6e9aa70f74205c5877a44c397a578c6eb08e55a6023ee637d9d879",
+    "localCheck": "verified public wheel contents loaded temporarily; no system install",
+    "modelFilesPackaged": false,
+    "appDependencyChanged": false
+  },
+  "executedChecks": [
+    {
+      "check": "test_selection_quality.py",
+      "exitCode": 0,
+      "output": "...........\n----------------------------------------------------------------------\nRan 11 tests in 0.897s\n\nOK\n"
+    },
+    {
+      "check": "test_everyday_selection.py",
+      "exitCode": 0,
+      "output": ".................\n----------------------------------------------------------------------\nRan 17 tests in 0.281s\n\nOK\n"
+    },
+    {
+      "check": "test_selection_policy.py",
+      "exitCode": 0,
+      "output": "Catalogue Part 10 selection contracts: OK\n"
+    },
+    {
+      "check": "test_selection_audit.py",
+      "exitCode": 0,
+      "output": ".......\n----------------------------------------------------------------------\nRan 7 tests in 0.022s\n\nOK\n"
+    },
+    {
+      "check": "test_segmentation.py",
+      "exitCode": 0,
+      "output": "test_chinese_dictionary_words_not_characters (__main__.SegmentationTests.test_chinese_dictionary_words_not_characters) ... ok\ntest_direct_links_and_cc0_filter_remain (__main__.SegmentationTests.test_direct_links_and_cc0_filter_remain) ... ok\ntest_duplicates_are_not_ambiguous_targets (__main__.SegmentationTests.test_duplicates_are_not_ambiguous_targets) ... ok\ntest_existing_languages_keep_their_tokenizer (__main__.SegmentationTests.test_existing_languages_keep_their_tokenizer) ... ok\ntest_frequencies_and_tokens_share_boundaries (__main__.SegmentationTests.test_frequencies_and_tokens_share_boundaries) ... ok\ntest_japanese_dictionary_words_and_particles (__main__.SegmentationTests.test_japanese_dictionary_words_and_particles) ... ok\ntest_korean_eojeol_not_syllables (__main__.SegmentationTests.test_korean_eojeol_not_syllables) ... ok\ntest_limits_are_utf16_like_the_app (__main__.SegmentationTests.test_limits_are_utf16_like_the_app) ... ok\ntest_missing_icu_is_not_a_character_fallback (__main__.SegmentationTests.test_missing_icu_is_not_a_character_fallback) ... ok\ntest_non_cjk_does_not_load_icu (__main__.SegmentationTests.test_non_cjk_does_not_load_icu) ... ok\ntest_pipeline_builds_all_three_cjk_languages (__main__.SegmentationTests.test_pipeline_builds_all_three_cjk_languages) ... ok\ntest_single_cjk_word_but_not_latin_letter (__main__.SegmentationTests.test_single_cjk_word_but_not_latin_letter) ... ok\ntest_split_surrogates_are_rejected (__main__.SegmentationTests.test_split_surrogates_are_rejected) ... ok\ntest_target_is_not_an_earlier_substring (__main__.SegmentationTests.test_target_is_not_an_earlier_substring) ... ok\ntest_utf16_after_emoji_and_supplementary_han (__main__.SegmentationTests.test_utf16_after_emoji_and_supplementary_han) ... ok\ntest_utf16_fixtures_for_the_kotlin_reader (__main__.SegmentationTests.test_utf16_fixtures_for_the_kotlin_reader) ... ok\n\n----------------------------------------------------------------------\nRan 16 tests in 0.015s\n\nOK\n"
+    },
+    {
+      "check": "test_catalogue_v2_contract.py",
+      "exitCode": 0,
+      "output": "Catalogue v2 contract fixtures: OK\n  decks: 1\n  target rows: 1\n  exact target ids: 1\n  distinct source contexts: 2\n"
+    },
+    {
+      "check": "test_ingestion.py",
+      "exitCode": 0,
+      "output": "Catalogue v2 ingestion contracts: OK\n"
+    },
+    {
+      "check": "test_everyday_pool.py",
+      "exitCode": 0,
+      "output": "...........\n----------------------------------------------------------------------\nRan 11 tests in 0.123s\n\nOK\n"
+    },
+    {
+      "check": "test_morphology.py",
+      "exitCode": 0,
+      "output": "Catalogue v2 morphology contracts: OK\n"
+    }
+  ],
+  "cliFixture": {
+    "selectionAndEvaluationCommandsExecuted": true,
+    "qualityGatePassed": true,
+    "memberships": 1,
+    "scope": "small admitted fixture; not a new corpus result"
+  },
+  "workflowVerification": {
+    "yamlParsed": true,
+    "inlinePythonBlocksCompiled": 2,
+    "validPinnedFixtureAccepted": true,
+    "changedPoolHashRejected": true,
+    "movingRunIdRejected": true,
+    "dispatched": false
+  },
+  "sourceSha256": {
+    ".github/workflows/catalogue-v2-everyday-quality.yml": "112e6dbe991399ac3311f94ef7402418da0d7709403e6e70696deabeaf70514e",
+    "tools/catalog/everyday_selection.py": "a02f3dffe475b9fe0616e9ba211cc0df9ac7304833a4c22da972e577abb1b8c7",
+    "tools/catalog/japanese_boundary.py": "d52e2c1107da75e15aa9acf62d853b26d8454d1c500c373252bd2e710bd4428a",
+    "tools/catalog/requirements-selection-quality.txt": "7afb678ab8704856fdfa617b88ffdb1f16f74b553b11abc7ad847dc521a61609",
+    "tools/catalog/selection_audit.py": "cb53c756026843234dc6e8ac922da58876fbc3052e3ab355a5d8553030fda80b",
+    "tools/catalog/selection_evaluate.py": "6580486c3aedaa9360396078e4c7fe718c6ec6b535afac804e6272f9ec71cb01",
+    "tools/catalog/selection_experiment.py": "fe792fe72a5836da66d6676791644f57ef161b32b15274ef0ba767477cff48b2",
+    "tools/catalog/selection_output.py": "c0a065c53c4dca1c04bb09865add7fc5815b6d375d06b3727e85d7c3862961ac",
+    "tools/catalog/selection_policy.py": "ca7e230b76807c4f9b56d0558e04c20fc71003f59d8d360a59ac8ea7a5f386a0",
+    "tools/catalog/sources/selection-quarantine.json": "46e4055fc76803e9756163db4e1ea21e75e2feae7e3d1ad1da3c000fe14fc945",
+    "tools/catalog/test_everyday_selection.py": "e5f1f0167d2181d267e488effb61fa9c6edf174afa9acf57b7b09e60e00d221c",
+    "tools/catalog/test_selection_quality.py": "01974146cfb459edb365d4a5ee15ee0cdbefa06b80b59552cbd3a741b05bb683"
+  },
+  "limitations": [
+    "Old preview is rank-biased and repeated across meaning memberships; 203/754 is not a population defect rate.",
+    "No new full selection counts, coverage or runtime are known before the saved-pool workflow.",
+    "Structural, provenance and boundary checks do not certify every translation or pedagogical choice.",
+    "No app build, publication, World attribution acceptance or content freeze is claimed."
+  ],
+  "next": {
+    "workflow": "catalogue v2 everyday quality handoff",
+    "defaults": "unchanged checkpoint pins",
+    "smallReport": "catalogue-v2-everyday-quality-report",
+    "saveFullMaterial": "catalogue-v2-everyday-selected-material",
+    "afterPassing": [
+      "Part 11 Everyday census/content snapshot",
+      "Part 12 storage/client validation"
+    ]
+  },
+  "repositoryChecks": {
+    "text": {
+      "exitCode": 0,
+      "textFiles": 533,
+      "localizationTables": 7,
+      "utf8Nfc": true
+    },
+    "localization": {
+      "exitCode": 0,
+      "languages": 7,
+      "keysPerLanguage": 714
+    },
+    "gitDiffCheck": {
+      "exitCode": 0
+    },
+    "note": "Text checker rerun sequentially after temporary fixture cleanup; concurrent earlier traversal had raced fixture deletion. Product checker was not weakened."
+  }
+}

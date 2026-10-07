@@ -137,6 +137,12 @@ storage and build versions are preserved. No application build or Windows
 interactive test is claimed for this Catalogue-only round. Next Catalogue work
 uses retained run 37458524156; see [ROUND-0.12-09.md](ROUND-0.12-09.md).
 
+Round 10, 2026-10-07: final bounded selection work and a saved-pool automatic
+quality handoff are delivered. No application/build/learner source is changed.
+Owner manual review of all languages/cards is not required. The next checkpoint
+is the one quality workflow, then complete selected-material census/storage;
+see [ROUND-0.12-10.md](ROUND-0.12-10.md).
+
 1. Close this round's build and real-platform evidence, addressing any resulting
    regression before broad feature work.
 2. Resume the Catalogue lane's final admitted-source pool/provenance/selection

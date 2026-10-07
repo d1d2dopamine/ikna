@@ -1,0 +1,33 @@
+{
+  "quarantineVersion": 1,
+  "policy": "defer exact observed suspect source sentences; never rewrite or ban a language/register",
+  "publicationSafe": false,
+  "records": [
+    {
+      "sourceFamily": "tatoeba",
+      "sourceVersion": "2026-10-03-2d4eee105639ba24",
+      "sentenceRef": "tatoeba:13812776",
+      "textSha256": "8d45dd066b3ede34a10d2d89b57d92f67b8550d7abb72f4ac0c5f6f6ef86ebfe",
+      "text": "¿Te gusta quedarte dormido escuchando el sonido de la lluvio?",
+      "reason": "observed-source-spelling-la-lluvio",
+      "attribution": {
+        "contextContributor": "Seael",
+        "meaningContributor": "marafon"
+      },
+      "sourceUrl": "https://tatoeba.org/en/sentences/show/13812776"
+    },
+    {
+      "sourceFamily": "tatoeba",
+      "sourceVersion": "2026-10-03-2d4eee105639ba24",
+      "sentenceRef": "tatoeba:13812777",
+      "textSha256": "3718dc6bb285e0b9784fb60cc11b8d734656344e2976d773a808b799082201d4",
+      "text": "¿Te gusta quedarte dormida escuchando el sonido de la lluvio?",
+      "reason": "observed-source-spelling-la-lluvio",
+      "attribution": {
+        "contextContributor": "Seael",
+        "meaningContributor": "marafon"
+      },
+      "sourceUrl": "https://tatoeba.org/en/sentences/show/13812777"
+    }
+  ]
+}

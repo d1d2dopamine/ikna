@@ -30,7 +30,9 @@ from catalogue_v2 import target_id
 from ingest.model import Candidate
 from morphology.store import MorphologyResolver
 from segmentation import IcuUnavailable, prepare, utf16_length
-from selection_policy import choose_contexts, select_target_ids
+from selection_policy import choose_contexts, select_target_ids, quarantine_reason, QUARANTINE_PATH
+from japanese_boundary import JapaneseBoundaryGuard
+from selection_output import SelectionOutput
 
 
 def _open(path: str):
@@ -57,6 +59,10 @@ def validate_args(args: argparse.Namespace) -> tuple[list[str], list[str]]:
     if args.morphology_db:
         protected.add(Path(args.morphology_db).resolve())
     outputs = [Path(getattr(args, name)).resolve() for name in ("staging", "json", "markdown", "preview")]
+    if args.selected_output:
+        if not args.selected_output.endswith(".jsonl.gz"):
+            raise ValueError("selected-output must end in .jsonl.gz")
+        outputs.append(Path(args.selected_output).resolve())
     if len(set(inputs)) != len(inputs):
         raise ValueError("duplicate input path")
     if len(set(outputs)) != len(outputs) or set(outputs) & protected:
@@ -175,7 +181,8 @@ def build_ranks(db: sqlite3.Connection, collection: str, lang: str) -> dict[str,
 def build_context_analysis(
     db: sqlite3.Connection, collection: str, lang: str, ranks: dict[str,int], function_top: int,
     batch_size: int = 5000,
-) -> None:
+    japanese_guard: JapaneseBoundaryGuard | None = None,
+) -> dict:
     # A context is shared by many meaning languages (especially MASSIVE).  The
     # historical experiment tokenised and ranked that same sentence once per
     # directed pair.  Precompute target choices once per exact context instead;
@@ -189,15 +196,19 @@ def build_context_analysis(
         (collection,lang),
     ).fetchone()[0]
     if existing == expected and expected:
-        return
+        return {}
     db.execute("DELETE FROM context_analysis WHERE collection=? AND lang=?",(collection,lang))
-    batch=[]
+    batch=[]; quality_counts=Counter()
     for context_key,text in db.execute(
         "SELECT context_key,context FROM context WHERE collection=? AND lang=? ORDER BY context_key",
         (collection,lang),
     ):
         token_count=len(core.words(text,lang))
         choices=phrase_choices(text,ranks,lang,function_top)
+        if lang == "ja" and japanese_guard is not None:
+            choices, rejected, _ = japanese_guard.filter(text, choices)
+            quality_counts.update(rejected)
+            quality_counts["jaContextsChecked"] += 1
         batch.append((
             collection,lang,context_key,token_count,
             json.dumps(choices,ensure_ascii=False,separators=(",", ":")),
@@ -208,6 +219,7 @@ def build_context_analysis(
     if batch:
         db.executemany("INSERT INTO context_analysis VALUES(?,?,?,?,?)",batch)
     db.commit()
+    return dict(quality_counts)
 
 
 def _origin_families(origins_json: str) -> tuple[list[dict[str,Any]], list[str]]:
@@ -227,7 +239,8 @@ def _target_lemma(morphology: MorphologyResolver|None, lang: str, surface: str, 
 
 
 def pair_evidence(db: sqlite3.Connection, collection: str, lang: str, meaning_lang: str,
-                  morphology: MorphologyResolver|None, evidence_context_limit: int) -> tuple[list[dict[str,Any]], Counter]:
+                  morphology: MorphologyResolver|None, evidence_context_limit: int,
+                  diverse: bool = False) -> tuple[list[dict[str,Any]], Counter]:
     targets: dict[str,dict[str,Any]]={}
     stats=Counter()
     rows=db.execute(
@@ -247,6 +260,9 @@ def pair_evidence(db: sqlite3.Connection, collection: str, lang: str, meaning_la
         if not choices:
             stats["noUsableTarget"] += 1; continue
         origins,families=_origin_families(origins_json)
+        if diverse and quarantine_reason(context, meaning, origins):
+            stats["sourceQuarantinedCandidateRows"] += 1
+            continue
         for rank,surface,tid,level in choices:
             item=targets.get(tid)
             if item is None:
@@ -268,7 +284,7 @@ def pair_evidence(db: sqlite3.Connection, collection: str, lang: str, meaning_la
             # context policy key; a target can occur in thousands of sentences.
             item["contexts"].append(evidence)
             if len(item["contexts"]) > evidence_context_limit * 3:
-                chosen,_=choose_contexts(item["contexts"],evidence_context_limit,0.85)
+                chosen,_=choose_contexts(item["contexts"],evidence_context_limit,0.85, diverse=diverse, lang=lang)
                 item["contexts"]=chosen
             stats["eligibleTargetOccurrences"] += 1
     out=[]
@@ -283,21 +299,31 @@ def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,
     langs, meanings = validate_args(args)
     try: prepare(langs)
     except IcuUnavailable as exc: raise ValueError(str(exc)) from exc
-    stage_stats=stage(args.candidates,args.staging)
+    japanese_guard = JapaneseBoundaryGuard() if args.quality_policy == "boundary-diversity-v2" and "ja" in langs else None
+    try:
+        stage_stats=stage(args.candidates,args.staging)
+    except Exception:
+        if japanese_guard: japanese_guard.close()
+        raise
     db=sqlite3.connect(args.staging)
     morphology=MorphologyResolver(args.morphology_db) if args.morphology_db else None
-    decks=[]; preview=[]; summary=Counter(); rank_cache={}
+    decks=[]; preview=[]; summary=Counter(); rank_cache={}; quality_counts=Counter()
+    output = None
+    diverse = args.quality_policy == "boundary-diversity-v2"
     try:
+        if args.selected_output: output = SelectionOutput(args.selected_output)
         pairs=db.execute("SELECT DISTINCT collection,lang,meaning_lang FROM candidate ORDER BY collection,lang,meaning_lang").fetchall()
         for collection,lang,meaning_lang in pairs:
             if lang not in langs or meaning_lang not in meanings or lang==meaning_lang: continue
             key=(collection,lang)
             if key not in rank_cache:
                 rank_cache[key]=build_ranks(db,collection,lang)
-                build_context_analysis(db,collection,lang,rank_cache[key],args.function_top)
+                quality_counts.update(build_context_analysis(db,collection,lang,rank_cache[key],args.function_top,
+                                                            japanese_guard=japanese_guard))
             targets,pair_stats=pair_evidence(
-                db,collection,lang,meaning_lang,morphology,args.evidence_context_limit
+                db,collection,lang,meaning_lang,morphology,args.evidence_context_limit, diverse=diverse
             )
+            if diverse: quality_counts["sourceQuarantinedCandidateRows"] += pair_stats["sourceQuarantinedCandidateRows"]
             levels={level:[] for level in core.LEVELS}
             for target in targets: levels[target["level"]].append(target)
             for level in core.LEVELS:
@@ -316,7 +342,8 @@ def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,
                     if not unused:
                         context_collision_rejected += 1
                         continue
-                    contexts,rejected=choose_contexts(unused,args.contexts_per_target,args.near_duplicate_threshold)
+                    contexts,rejected=choose_contexts(unused,args.contexts_per_target,args.near_duplicate_threshold,
+                                                     diverse=diverse, lang=lang)
                     near_rejected += rejected
                     if not contexts:
                         context_collision_rejected += 1
@@ -336,6 +363,9 @@ def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,
                 elif count < args.thin_deck: decision="publish-thin"
                 else: decision="publish"
                 if decision.startswith("publish"):
+                    if output:
+                        for row in selected_rows:
+                            output.add({"deckId":deck_id,"collection":collection,"lang":lang,"meaningLang":meaning_lang,"level":level,**row})
                     evidence_rows = selected_rows if args.preview_limit_per_deck == 0 else selected_rows[:args.preview_limit_per_deck]
                     for row in evidence_rows:
                         preview.append({"deckId":deck_id,"collection":collection,"lang":lang,"meaningLang":meaning_lang,"level":level,**row})
@@ -365,10 +395,23 @@ def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,
             "morphologyUsed":bool(args.morphology_db),"stage":stage_stats,"summary":dict(summary),
             "previewRows":len(preview),"decks":decks,
         }
+        if diverse:
+            report["qualityPolicy"] = {"id": args.quality_policy, "version": 2,
+                                       "japaneseBoundary": japanese_guard.evidence if japanese_guard else None,
+                                       "counts": dict(sorted(quality_counts.items())),
+                                       "contexts": "prefer low written-token overlap after source/alignment evidence; legacy duplicate threshold unchanged",
+                                       "unknownCuts": "deferred from selection; original pool retained", "targetIdentityChanged": False,
+                                       "semanticAccuracyCertified": False}
+            report["qualityPolicy"]["sourceQuarantine"] = {"sha256": hashlib.sha256(QUARANTINE_PATH.read_bytes()).hexdigest(),
+                "scope": "exact source version/ref/text on either side; originals preserved; no silent spelling correction"}
+        if output:
+            report["selectedMaterial"] = output.finish()
         return report,preview
     finally:
+        if output: output.abort()
         db.close()
         if morphology: morphology.close()
+        if japanese_guard: japanese_guard.close()
 
 
 def write_preview(path: str, rows: list[dict[str,Any]]) -> None:
@@ -412,6 +455,8 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("--near-duplicate-threshold",type=float,default=.85); ap.add_argument("--function-top",type=int,default=core.FUNCTION_TOP)
     ap.add_argument("--preview-limit-per-deck",type=int,default=0,help="evidence rows kept per publishable deck; 0 keeps all")
     ap.add_argument("--morphology-db")
+    ap.add_argument("--quality-policy", choices=("legacy-v1", "boundary-diversity-v2"), default="legacy-v1")
+    ap.add_argument("--selected-output", help="complete non-publishing included memberships, streamed to .jsonl.gz")
     return ap
 
 

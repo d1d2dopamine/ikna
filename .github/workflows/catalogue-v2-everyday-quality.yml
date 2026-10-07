@@ -1,0 +1,169 @@
+name: catalogue v2 everyday quality handoff
+
+on:
+  workflow_dispatch:
+    inputs:
+      input_run_id:
+        description: "Exact saved run containing the admitted pool and baseline review; defaults are the completed owner run"
+        required: true
+        default: "37458524156"
+      candidate_sha256:
+        description: "Exact compressed candidate SHA-256 from that run's Part 7 report"
+        required: true
+        default: "57b90b01d5dcb0725743998dccaf307a100e174059a853e01f5f31fc13dd6170"
+      pool_report_sha256:
+        description: "Exact Part 7 report SHA-256 from the baseline admittedInput"
+        required: true
+        default: "41c7e176d516e6ad89d70954b116d18062baa48857f66ee276bdcfd32dd0438f"
+      baseline_report_sha256:
+        description: "Exact old selection report SHA-256; used without rerunning the old selector"
+        required: true
+        default: "c8afd1559893fca2e336a784677a25428e43423886c33713917c261cd116fc7a"
+      source_version:
+        description: "Pinned Tatoeba version from the saved pool"
+        required: true
+        default: "2026-10-03-2d4eee105639ba24"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    env:
+      INPUT_RUN_ID: ${{ inputs.input_run_id }}
+      EXPECTED_POOL: ${{ inputs.candidate_sha256 }}
+      EXPECTED_POOL_REPORT: ${{ inputs.pool_report_sha256 }}
+      EXPECTED_BASELINE: ${{ inputs.baseline_report_sha256 }}
+      SOURCE_VERSION: ${{ inputs.source_version }}
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate explicit pins before artifact reuse
+        run: |
+          python3 - <<'PY'
+          import os, re
+          assert re.fullmatch(r'[1-9][0-9]*', os.environ['INPUT_RUN_ID']), 'Exact input_run_id required'
+          for key in ('EXPECTED_POOL', 'EXPECTED_POOL_REPORT', 'EXPECTED_BASELINE'):
+              assert re.fullmatch(r'[0-9a-f]{64}', os.environ[key]), 'Exact SHA-256 required: ' + key
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, 'tools/catalog')
+          from everyday_pool import MOVING_VERSIONS
+          assert os.environ['SOURCE_VERSION'].strip() and os.environ['SOURCE_VERSION'].casefold() not in MOVING_VERSIONS
+          Path('quality-reports').mkdir()
+          PY
+      # Reuse both exact artifacts. No moving latest lookup or fresh source fallback.
+      - name: Reuse complete admitted pool
+        uses: actions/download-artifact@v5
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.input_run_id }}
+          name: catalogue-v2-everyday-admitted-pool
+          path: reuse-pool
+      - name: Reuse existing baseline report and bounded preview
+        uses: actions/download-artifact@v5
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.input_run_id }}
+          name: catalogue-v2-everyday-selection-review
+          path: reuse-baseline
+      - name: Verify checkpoint and select the exact files
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          def one(root, name):
+              matches = list(Path(root).rglob(name))
+              assert len(matches) == 1 and matches[0].is_file() and not matches[0].is_symlink(), 'Expected one exact ' + name
+              return matches[0]
+          def digest(path):
+              with path.open('rb') as handle:
+                  return hashlib.file_digest(handle, 'sha256').hexdigest()
+          candidate = one('reuse-pool', 'everyday-candidates.jsonl.gz')
+          pool_report = one('reuse-pool', 'EVERYDAY-POOL.json')
+          baseline = one('reuse-baseline', 'EVERYDAY-SELECTION.json')
+          assert digest(candidate) == os.environ['EXPECTED_POOL'], 'Saved pool hash mismatch'
+          assert digest(pool_report) == os.environ['EXPECTED_POOL_REPORT'], 'Saved pool report hash mismatch'
+          assert digest(baseline) == os.environ['EXPECTED_BASELINE'], 'Baseline report hash mismatch'
+          report = json.loads(pool_report.read_text(encoding='utf-8'))
+          assert report['sourceVersion'] == os.environ['SOURCE_VERSION'], 'Source version mismatch'
+          assert report['pool']['sha256'] == os.environ['EXPECTED_POOL'], 'Pool report/raw identity mismatch'
+          baseline_report = json.loads(baseline.read_text(encoding='utf-8'))
+          assert baseline_report['admittedInput']['poolReportSha256'] == os.environ['EXPECTED_POOL_REPORT']
+          # Paths in the small artifact are reports/ and review/; locate its root explicitly.
+          baseline_root = baseline.parent.parent
+          assert (baseline_root / 'review/everyday-selection-preview.jsonl.gz').is_file(), 'Full baseline preview missing'
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write('POOL_INPUT=' + str(candidate) + '\n')
+              env.write('POOL_REPORT=' + str(pool_report) + '\n')
+              env.write('BASELINE_ROOT=' + str(baseline_root) + '\n')
+          Path('quality-reports/INPUT-REFERENCE.json').write_text(json.dumps({
+              'mode': 'saved-artifacts-only', 'runId': os.environ['INPUT_RUN_ID'],
+              'sourceVersion': report['sourceVersion'], 'poolSha256': os.environ['EXPECTED_POOL'],
+              'poolReportSha256': os.environ['EXPECTED_POOL_REPORT'], 'baselineReportSha256': os.environ['EXPECTED_BASELINE'],
+              'policy': 'boundary-diversity-v2', 'publicationSafe': False,
+          }, indent=2) + '\n', encoding='utf-8')
+          PY
+      - name: Pinned offline language tool and scoped regressions
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libicu-dev
+          python3 -m pip install --only-binary=:all: --require-hashes -r tools/catalog/requirements-selection-quality.txt
+          python3 tools/catalog/test_selection_quality.py --require-japanese-engine
+          python3 tools/catalog/test_segmentation.py
+          python3 tools/catalog/test_ingestion.py
+          python3 tools/catalog/test_selection_policy.py
+          python3 tools/catalog/test_everyday_selection.py
+      - name: Select once over the saved pool and retain complete material
+        run: |
+          python3 tools/catalog/everyday_selection.py \
+            --pool "$POOL_INPUT" --pool-report "$POOL_REPORT" \
+            --quality-policy boundary-diversity-v2 \
+            --selected-output selected/selected-everyday.jsonl.gz \
+            --staging quality-reports/everyday-selection.sqlite3 \
+            --json quality-reports/EVERYDAY-SELECTION.json \
+            --markdown quality-reports/EVERYDAY-SELECTION.md \
+            --preview quality-reports/everyday-selection-preview.jsonl.gz \
+            --samples quality-reports/EVERYDAY-SELECTED-SAMPLES.md
+      # Save handoff before evaluation so a failed check never requires reselection.
+      - name: Retain complete selection for census and storage stages
+        uses: actions/upload-artifact@v6
+        with:
+          name: catalogue-v2-everyday-selected-material
+          path: |
+            selected/selected-everyday.jsonl.gz
+            quality-reports/EVERYDAY-SELECTION.json
+            quality-reports/INPUT-REFERENCE.json
+          if-no-files-found: error
+          retention-days: 90
+      - name: Complete material contracts and bound before-after evaluation
+        run: |
+          python3 tools/catalog/selection_evaluate.py \
+            --selected selected/selected-everyday.jsonl.gz \
+            --selection-report quality-reports/EVERYDAY-SELECTION.json \
+            --baseline-directory "$BASELINE_ROOT" \
+            --baseline-report-sha256 "$EXPECTED_BASELINE" \
+            --output-dir quality-results
+      - name: Step summary
+        if: always()
+        run: |
+          if test -f quality-results/QUALITY.md; then cat quality-results/QUALITY.md >> "$GITHUB_STEP_SUMMARY"; fi
+      - name: Retain small reports even when evaluation fails
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: catalogue-v2-everyday-quality-report
+          path: |
+            quality-reports/*.json
+            quality-reports/*.md
+            quality-reports/everyday-selection-preview.jsonl.gz
+            quality-results/*.json
+            quality-results/*.md
+          if-no-files-found: warn
+          retention-days: 90

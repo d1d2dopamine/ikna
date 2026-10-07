@@ -24,6 +24,10 @@ HERE = Path(__file__).resolve().parent
 def validate_paths(args: argparse.Namespace) -> None:
     inputs = [Path(getattr(args, key)).resolve() for key in ("pool", "pool_report", "registry")]
     outputs = [Path(getattr(args, key)).resolve() for key in ("staging", "json", "markdown", "preview", "samples")]
+    if args.selected_output:
+        if not args.selected_output.endswith(".jsonl.gz"):
+            raise ValueError("selected-output must end in .jsonl.gz")
+        outputs.append(Path(args.selected_output).resolve())
     if len(set(inputs)) != len(inputs) or len(set(outputs)) != len(outputs) or set(inputs) & set(outputs):
         raise ValueError("output paths must be distinct and must not overwrite pool/report/registry")
     for output in outputs:
@@ -137,6 +141,7 @@ def build_report(args: argparse.Namespace) -> tuple[dict, list[dict]]:
         "--function-top", str(function_top), "--max-deck", str(args.max_deck),
         "--min-deck", str(args.min_deck), "--thin-deck", str(args.thin_deck),
         "--preview-limit-per-deck", str(args.review_per_deck),
+        "--quality-policy", args.quality_policy,
     ])
     selection.validate_args(selected_args)
     staging = Path(args.staging)
@@ -144,6 +149,8 @@ def build_report(args: argparse.Namespace) -> tuple[dict, list[dict]]:
     # A failed selection must not destroy the previous successful staging file.
     with tempfile.TemporaryDirectory(prefix="everyday-selection-", dir=staging.parent) as td:
         selected_args.staging = str(Path(td) / "selection.sqlite3")
+        if args.selected_output:
+            selected_args.selected_output = str(Path(td) / "selected.jsonl.gz")
         report, preview = selection.build_report(selected_args)
         if report["stage"].get("uniqueCandidates") != identity["uniqueCandidates"] or report["stage"].get("duplicateCandidates") != 0:
             raise ValueError("pool is not the unique complete candidate set described by Part 7")
@@ -155,6 +162,9 @@ def build_report(args: argparse.Namespace) -> tuple[dict, list[dict]]:
         report["selectionPipelineSha256"] = {name: sha256(HERE / name) for name in (
             "everyday_selection.py", "everyday_pool.py", "selection_experiment.py", "selection_policy.py", "build_catalogue_v2.py",
             "catalogue_core.py", "catalogue_v2.py", "segmentation.py", "ingest/model.py", "ingest/registry.py")}
+        if args.quality_policy == "boundary-diversity-v2" or args.selected_output:
+            report["selectionPipelineSha256"].update({name: sha256(HERE / name) for name in
+                ("japanese_boundary.py", "selection_output.py", "requirements-selection-quality.txt", "sources/selection-quarantine.json")})
         report["selectionEnvironment"] = {"python": platform.python_version(), "zlib": zlib.ZLIB_RUNTIME_VERSION,
                                           "segmentation": selection.prepare(identity["learn"])}
         report["reviewScope"] = {
@@ -164,6 +174,10 @@ def build_report(args: argparse.Namespace) -> tuple[dict, list[dict]]:
                 "Rank-ordered samples are review aids, not semantic-quality or native-speaker evidence.",
                 "Policy publish/publish-thin decisions do not publish assets or admit content to the freeze."]}
         Path(selected_args.staging).replace(staging)
+        if args.selected_output:
+            destination = Path(args.selected_output)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            Path(selected_args.selected_output).replace(destination)
     return report, preview
 
 
@@ -180,8 +194,11 @@ def markdown(report: dict) -> str:
 
 
 def samples_markdown(report: dict, preview: list[dict]) -> str:
+    scope = ("Bounded rank-ordered examples, not full selected assets. Automatic evaluation and content snapshot remain pending; no routine manual-review prerequisite."
+             if report.get("qualityPolicy", {}).get("id") == "boundary-diversity-v2" else
+             "Bounded rank-ordered samples, not full selected assets. Human review and content freeze remain open.")
     lines = ["# Everyday selected-material review samples", "",
-             "Bounded rank-ordered samples, not full selected assets. Human review and content freeze remain open.",
+             scope,
              "No-source pairs and omitted levels are listed in EVERYDAY-SELECTION.json/md.", "",
              f"Pool SHA-256: `{report['admittedInput']['poolSha256']}`", ""]
     for row in preview:
@@ -203,6 +220,8 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("--max-deck", type=int, default=8000)
     ap.add_argument("--min-deck", type=int, default=40); ap.add_argument("--thin-deck", type=int, default=1000)
     ap.add_argument("--review-per-deck", type=int, default=10)
+    ap.add_argument("--quality-policy", choices=("legacy-v1", "boundary-diversity-v2"), default="legacy-v1")
+    ap.add_argument("--selected-output", help="complete included memberships for subsequent census/storage, not release packs")
     return ap
 
 

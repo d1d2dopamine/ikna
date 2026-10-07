@@ -1,0 +1,4 @@
+# Offline build tool only. Compatible V0 analyzer/dictionary; no rolling latest.
+# cp311/cp312 Linux x86_64 wheels, and the self-contained dictionary wheel.
+SudachiPy==0.6.10 --hash=sha256:5e1c1d8c579cc3af591a6511bffba9f88662eedf5ba32868ca8e3ba3c1051d60 --hash=sha256:0f8fd0ce37961401c9bdd78c126b2119a0a1669d376feb0b2427c35894ef1428
+SudachiDict-core==20250825 --hash=sha256:9ec36a79cc6e9aa70f74205c5877a44c397a578c6eb08e55a6023ee637d9d879

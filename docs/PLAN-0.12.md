@@ -47,8 +47,8 @@ to rerun until a source can publish. Preserve dependency order below:
 | --- | --- | --- |
 | Final Everyday pool | Historical Part 7, [EVERYDAY-POOL.md](EVERYDAY-POOL.md) | Run 37458524156 succeeded; full pinned pool retained by Actions and saved by owner. Small review artifact audited locally; full-pool bytes/material have not been independently audited in this round |
 | World provenance coverage | Historical Part 9, full-provenance runbook | Native identity and bounded attribution proven; reusable/hash-bound shards and offline merge review implemented; old run failed final completeness gate; exact counters and all-document evidence open |
-| Deterministic selection | Historical Part 10 | Admitted real report and all 3,280 preview memberships structurally audited; 27 preliminary material findings and offline review tool available. Complete material review, Japanese target suitability and context-diversity policy remain open |
-| Final content census/freeze | Historical Part 11 | Census/readiness tooling exists; final reviewed samples, provenance, coverage and pinned inputs open |
+| Deterministic selection | Historical Part 10 | Round-10 Japanese boundary guard, diverse alternate ordering, complete material export and saved-pool workflow implemented/tested locally. One real quality handoff run pending; no exhaustive owner/manual review prerequisite |
+| Final content census/freeze | Historical Part 11 | Next after quality handoff: census of complete selected material, exclusions, provenance and reproducible snapshot; no preview-only census or selection rerun |
 | Final storage/publication format | Historical Part 12 | Earlier lossless experiments exist; final frozen-content measurement and client acceptance open |
 | Target relations and context evidence | Historical Parts 13–14 | Existing exact identity is retained; richer relations and replayable context history open |
 | Context/Transfer policy | Historical Parts 15–16 | Conservative experiments remain open and depend on history representation |
@@ -273,12 +273,38 @@ manual findings and hash-bound reviewer export/import. No new workflow or corpus
 run is needed for this evidence. [ROUND-0.12-09.md](ROUND-0.12-09.md) and
 [EVERYDAY-POOL.md](EVERYDAY-POOL.md) own checks and reuse instructions.
 
-Next: review the flagged cards with the owner, agree narrow Japanese target and
-context-diversity acceptance criteria, then obtain a broader deterministic sample
-from the saved exact pool before changing the selector. Reuse that pool; do not
-repeat acquisition/admission or the known selection simply to view these cards.
+This original proposal for owner card review was superseded on 2026-10-07:
+language-by-language owner review is not practical, and round 10 is the last
+bounded manual-selection round. Continue through automated checks/later stages.
 World, Knowledge expansion, full material review, freeze, final format and
 publication remain separately gated.
+
+## Round 10 — final bounded selection work, automated handoff
+
+Owner decision: preserve high quality, finish this selection correction, then use
+workflows and subsequent stages. Do not require the solo owner to assess unknown
+languages, inspect every card or repeat manual-selection rounds without a new
+demonstrated blocker. Present useful examples in text; the viewer is optional.
+
+Explicit `boundary-diversity-v2` defers Japanese ICU targets whose source boundaries
+cut analyzer units, preserving complete short words/compounds and exact identities.
+Alternative selection prefers different written-token content after source/align
+evidence; the existing duplicate threshold stays unchanged. Local real-engine and
+contract fixtures pass. The old-preview impact is not a population defect rate.
+
+Next: commit the ZIP and run **catalogue v2 everyday quality handoff** once with
+prefilled inputs for run `37458524156`. It reuses the pool, does one new selection,
+saves complete included memberships before evaluation and checks the full output.
+The old selector, acquisition and admission are not rerun. Full-report count
+deltas are complete; exact old identity/context deltas cover only its retained
+preview because the old complete selection was not saved.
+
+After the gate passes, proceed to Part 11 census/content snapshot over that saved
+selection, then Part 12 storage/client acceptance. Freeze records exact identities,
+the accepted quality profile and semantic limitations; automatic checks do not
+prove every translation correct. World provenance/publication stay separately
+gated. [ROUND-0.12-10.md](ROUND-0.12-10.md) and
+[EVERYDAY-POOL.md](EVERYDAY-POOL.md) own evidence/run instructions.
 
 ## Release blockers
 

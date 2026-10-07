@@ -3,6 +3,29 @@
 Catalogue v2 enriches token metadata offline. The app does not ship a morphological
 model and does not contact a morphology service while somebody studies.
 
+## Separate Japanese boundary guard (selection quality v2)
+
+`boundary-diversity-v2` adds boundary evidence, separate from morphology rule v1.
+It defers an ICU target occurrence when its start/end cuts an analyzer unit;
+unknown/OOV cuts have their own deferral reason. Compounds can cover several
+complete units; complete short targets remain eligible under the existing sieve.
+The source pool stays intact. It does not populate lemmas/POS, stem text, change
+frequency ranks or merge/rewrite exact targets and learner identities.
+
+Pins: **SudachiPy 0.6.10**, **SudachiDict-core 20250825**, Split Mode A; dictionary
+SHA-256 `d28ffc33b196e5c2ca731e8147fd1ef47d35ba79928ef9f0871962859d70ac23`.
+`requirements-selection-quality.txt` pins Linux Python 3.11/3.12 wheel hashes.
+The [analyzer](https://github.com/WorksApplications/sudachi.rs) and
+[dictionary](https://github.com/WorksApplications/SudachiDict) document Apache-2.0
+distribution and compatibility. These are the compatible pre-0.7/V0 versions,
+not moving V1 releases. They are offline tools, not new study-sentence sources;
+no package/model is included in the app or source ZIP.
+
+Real checks defer `き` inside `起き` and `行` inside `行った`, preserving complete
+`木`, `日本語` and particle `や` uses. Agreement of boundaries does not certify
+every lexical choice, grammar construction or translation. Engine/dictionary
+identities and deferral counts are recorded for the automatic comparison.
+
 Morphology rule version 1 has one bias: **unknown is better than a false lemma**.
 The output may therefore be less complete than a general NLP tagger. That is
 intentional because later target grouping can amplify one wrong lemma into many
