@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ikna — Everyday v2: просмотр выборки</title>
+<style>
+:root{color-scheme:light dark;--bg:#f3f4f6;--panel:#fff;--fg:#202530;--muted:#596575;--line:#ccd3dd;--accent:#3856a3;--mark:#ffec9e}
+@media(prefers-color-scheme:dark){:root{--bg:#171b22;--panel:#222832;--fg:#e6e9f0;--muted:#acb5c5;--line:#505b6d;--accent:#a7bbff;--mark:#68581d}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,sans-serif}main{max-width:1000px;margin:auto;padding:24px}h1{font-size:24px;margin:0 0 8px}h2{font-size:20px}p{margin:8px 0}.muted{color:var(--muted)}.filters,.navigation,.actions{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}label{display:grid;gap:4px;font-size:14px}input,select,button,textarea{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px}button,a{cursor:pointer}button:disabled{opacity:.5;cursor:default}a{color:var(--accent)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;margin:16px 0}.target{font-size:32px;overflow-wrap:anywhere}.context{font-size:22px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}mark{background:var(--mark);color:var(--fg);border-radius:3px;padding:0 2px}.origin{font-size:13px;overflow-wrap:anywhere}.badge{border:1px solid var(--line);padding:3px 8px;display:inline-block;border-radius:4px;margin:4px 6px 4px 0}textarea{width:100%;min-height:80px}details{margin-top:16px}code{overflow-wrap:anywhere}.navigation{align-items:center}.warning{padding:12px;border-left:3px solid var(--accent)}#status{min-height:24px}.review-status{font-size:14px}#search{max-width:280px}
+</style>
+</head>
+<body><main>
+<h1>Everyday v2 — реальные карточки выборки</h1>
+<p class="warning">Это автономный просмотр исходного материала. Первые цели по рангу в каждой колоде, а не весь каталог и не случайная выборка. Уровень — частотный, не CEFR. Отметки здесь не меняют каталог или историю обучения.</p>
+<p id="identity" class="muted"></p>
+<div class="filters">
+<label>Изучаемый язык<select id="lang"></select></label>
+<label>Язык смысла<select id="meaning"></select></label>
+<label>Уровень<select id="level"></select></label>
+<label>Очередь проверки<select id="flag"></select></label>
+<label>Поиск цели или контекста<input id="search" type="search" placeholder="Например: time, き, сегодня"></label>
+</div>
+<div class="navigation"><button id="prev" type="button">← Предыдущая</button><span id="position" aria-live="polite"></span><button id="next" type="button">Следующая →</button><button id="toggle" type="button" aria-pressed="false">Показать смысл</button></div>
+<div id="cards"></div>
+<section class="card" id="review">
+<h2>Ваша оценка этой карточки</h2>
+<p class="muted">Оценка относится к цели, её контекстам и конкретной языковой паре. Файл решений содержит хеш входа и идентификаторы. Общий процент качества по нему не вычисляется.</p>
+<label>Решение<select id="decision"><option value="unreviewed">Не проверено</option><option value="acceptable">Подходит</option><option value="needs-review">Нужно разобраться</option><option value="exclude-proposed">Предлагаю исключить</option></select></label>
+<label>Комментарий<textarea id="comment" placeholder="Что именно подходит или вызывает сомнение?"></textarea></label>
+<p class="review-status" id="saved"></p>
+</section>
+<div class="actions"><button id="export" type="button">Скачать решения JSON</button><label>Восстановить решения<input id="import" type="file" accept=".json,application/json"></label></div>
+<p id="status" role="status"></p>
+<details><summary>Ограничения и происхождение</summary><div id="evidence"></div><p>Материал Tatoeba: <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener noreferrer">CC BY 2.0</a>. Ссылки и имена авторов приведены под каждым контекстом. Текст не переписан. Дополнительный просмотр не подтверждает весь пул, точность переводов или готовность публикации.</p></details>
+</main>
+<script type="application/json" id="data">__AUDIT_DATA__</script>
+<script>
+'use strict';
+const payload=JSON.parse(document.getElementById('data').textContent);
+const audit=payload.audit,rows=payload.rows,flagLabels=payload.flagLabels;
+const el=id=>document.getElementById(id);
+const names={en:'English',ru:'Русский',pl:'Polski',es:'Español',fr:'Français',de:'Deutsch',it:'Italiano',pt:'Português',ja:'日本語',ko:'한국어',zh:'中文'};
+let filtered=[],index=0,showMeaning=false,decisions={};
+const inputIdentity={archiveSha256:audit.input.archiveSha256,previewLogicalSha256:audit.input.previewLogicalSha256,sourceVersion:audit.sourceVersion};
+const storageKey='ikna-selection-review:'+inputIdentity.archiveSha256;
+const rowKey=r=>r.deckId+'|'+r.targetId;
+const validDecisions=new Set(['unreviewed','acceptable','needs-review','exclude-proposed']);
+const reviewedCount=()=>Object.values(decisions).filter(v=>v.decision!=='unreviewed').length;
+function validateImported(data){
+ if(data.reviewVersion!==1||!data.input||Object.keys(data.input).length!==Object.keys(inputIdentity).length||Object.entries(inputIdentity).some(([k,v])=>data.input[k]!==v))throw new Error('Другой входной артефакт или версия решений.');
+ const known=new Set(rows.map(rowKey)),out=Object.create(null);
+ if(!data.decisions||typeof data.decisions!=='object'||Array.isArray(data.decisions))throw new Error('Некорректный файл решений.');
+ for(const [key,value] of Object.entries(data.decisions)){
+  if(!known.has(key)||!value||!validDecisions.has(value.decision)||typeof value.comment!=='string'||value.comment.length>10000)throw new Error('Некорректная оценка или неизвестная карточка.');
+  out[key]={decision:value.decision,comment:value.comment};
+ }
+ return out;
+}
+function documentData(){return {reviewVersion:1,input:inputIdentity,decisions:decisions};}
+let storageAvailable=true;
+try{const old=localStorage.getItem(storageKey);if(old)decisions=validateImported(JSON.parse(old));}catch(error){storageAvailable=false;el('status').textContent='Локальное сохранение недоступно или сохранённые решения не прошли проверку. Скачивайте JSON перед закрытием.';}
+function options(id,values,label){
+ const all=document.createElement('option');all.value='';all.textContent='Все';el(id).append(all);
+ for(const value of values){const option=document.createElement('option');option.value=value;option.textContent=label(value);el(id).append(option);}
+}
+options('lang',[...new Set(rows.map(r=>r.lang))].sort(),v=>names[v]||v);
+options('meaning',[...new Set(rows.map(r=>r.meaningLang))].sort(),v=>names[v]||v);
+options('level',['beginner','middle','advanced'],v=>({beginner:'Начальный',middle:'Средний',advanced:'Продвинутый'})[v]);
+options('flag',['manual-notes',...Object.keys(flagLabels)],v=>v==='manual-notes'?'Заметки раунда аудита':flagLabels[v]);
+// Start with the owner's Russian meaning language, while keeping every pair available.
+el('lang').value='en';el('meaning').value='ru';el('level').value='beginner';
+el('identity').textContent=audit.sourceVersion+' · '+rows.length+' карточек · '+audit.preview.uniqueGlobalTargets+' уникальных целей · '+audit.preview.contexts+' контекстов';
+function add(parent,tag,text,className){const node=document.createElement(tag);node.textContent=text;if(className)node.className=className;parent.append(node);return node;}
+function sourceLink(parent,ref,label){
+ if(!/^tatoeba:[1-9][0-9]*$/.test(ref))return;
+ const link=document.createElement('a');link.textContent=label;link.href='https://tatoeba.org/en/sentences/show/'+ref.slice(8);link.target='_blank';link.rel='noopener noreferrer';parent.append(link);
+}
+function render(){
+ el('cards').replaceChildren();el('position').textContent=filtered.length?(index+1)+' / '+filtered.length:'Нет совпадений';
+ el('prev').disabled=index===0;el('next').disabled=index>=filtered.length-1;el('review').hidden=!filtered.length;
+ el('toggle').textContent=showMeaning?'Скрыть смысл':'Показать смысл';el('toggle').setAttribute('aria-pressed',String(showMeaning));
+ if(!filtered.length)return;
+ const r=filtered[index],header=document.createElement('article');header.className='card';
+ add(header,'h2',r.text,'target');add(header,'p',r.deckId+' · ранг '+r.freqRank+' · контекстов в evidence: '+r.evidenceContexts,'muted');
+ for(const flag of r.auditFlags)add(header,'span',flagLabels[flag],'badge');
+ if(r.manualFinding){add(header,'h3','Заметка раунда аудита');add(header,'p',r.manualFinding.note);add(header,'p','Предварительный разбор; не одобрение носителем языка и не автоматическое исключение.','muted');}
+ if(!r.auditFlags.length)add(header,'p','Автоматических сигналов нет. Содержание ещё требует оценки.','muted');
+ el('cards').append(header);
+ r.contexts.forEach((c,i)=>{
+  const card=document.createElement('section');card.className='card';add(card,'h2','Контекст '+(i+1));
+  const sentence=add(card,'p','','context'),h=c.highlight;
+  sentence.append(document.createTextNode(c.context.slice(0,h.start)));add(sentence,'mark',c.context.slice(h.start,h.end));sentence.append(document.createTextNode(c.context.slice(h.end)));
+  if(showMeaning)add(card,'p',c.meaning,'context');
+  for(const origin of c.origins){const p=add(card,'p','','origin'),a=origin.attribution||{};
+   sourceLink(p,origin.contextRef,'Tatoeba '+origin.contextRef.slice(8));p.append(document.createTextNode(' · '+(a.contextContributor||'автор не указан')+' → '));
+   sourceLink(p,origin.meaningRef,origin.meaningRef.slice(8));p.append(document.createTextNode(' · '+(a.meaningContributor||'автор не указан')+' · '+origin.sourceVersion));
+  }
+  el('cards').append(card);
+ });
+ const value=decisions[rowKey(r)];el('decision').value=value?value.decision:'unreviewed';el('comment').value=value?value.comment:'';
+ el('saved').textContent=reviewedCount()+' оценок. '+(storageAvailable?'Сохранены в этом браузере; скачайте JSON для передачи.':'Хранятся в памяти страницы; скачайте JSON перед закрытием.');
+}
+function filter(){const q=el('search').value.normalize('NFKC').toLocaleLowerCase();filtered=rows.filter(r=>(!el('lang').value||r.lang===el('lang').value)&&(!el('meaning').value||r.meaningLang===el('meaning').value)&&(!el('level').value||r.level===el('level').value)&&(!el('flag').value||(el('flag').value==='manual-notes'?r.manualFinding:r.auditFlags.includes(el('flag').value)))&&(!q||[r.text,...r.contexts.flatMap(c=>[c.context,c.meaning])].some(s=>s.normalize('NFKC').toLocaleLowerCase().includes(q))));index=0;render();}
+for(const id of ['lang','meaning','level','flag'])el(id).addEventListener('change',filter);
+el('search').addEventListener('input',filter);
+el('prev').onclick=()=>{if(index>0){index--;render();}};el('next').onclick=()=>{if(index<filtered.length-1){index++;render();}};
+el('toggle').onclick=()=>{showMeaning=!showMeaning;render();};
+function save(){
+ if(!filtered.length)return;
+ const key=rowKey(filtered[index]),decision=el('decision').value;
+ if(decision==='unreviewed'&&!el('comment').value){delete decisions[key];}else{decisions[key]={decision:decision,comment:el('comment').value.slice(0,10000)};}
+ try{localStorage.setItem(storageKey,JSON.stringify(documentData()));storageAvailable=true;}catch(error){storageAvailable=false;}
+ el('saved').textContent=reviewedCount()+' оценок. '+(storageAvailable?'Сохранено в этом браузере; скачайте JSON для передачи.':'Сохранено в памяти страницы; скачайте JSON перед закрытием.');
+}
+el('decision').onchange=save;el('comment').oninput=save;
+el('export').onclick=()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(documentData(),null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='ikna-everyday-review-'+audit.sourceVersion+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+el('import').onchange=async event=>{try{const file=event.target.files[0];if(!file)return;if(file.size>8*1024*1024)throw new Error('Файл решений слишком большой.');const imported=validateImported(JSON.parse(await file.text()));decisions=imported;try{localStorage.setItem(storageKey,JSON.stringify(documentData()));storageAvailable=true;}catch(error){storageAvailable=false;}render();el('status').textContent='Восстановлено '+Object.keys(decisions).length+' оценок из этого артефакта.';}catch(error){el('status').textContent=error.message;}finally{event.target.value='';}};
+for(const text of audit.limitations)add(el('evidence'),'p',text);
+add(el('evidence'),'p','SHA-256 ZIP: '+inputIdentity.archiveSha256,'origin');
+filter();
+</script>
+</body></html>

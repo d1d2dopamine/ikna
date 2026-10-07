@@ -161,7 +161,14 @@ python3 tools/catalog/test_storage_experiment.py
 python3 tools/catalog/test_supply_census.py
 python3 tools/catalog/test_supply_census_shards.py
 python3 tools/catalog/test_wikimatrix_stream_status.py
+python3 tools/catalog/test_selection_audit.py
 ```
+
+For a saved Everyday preview audit, use the bounded offline command in
+[EVERYDAY-POOL.md](docs/EVERYDAY-POOL.md). Its generated card viewer can be checked
+with `node tools/catalog/test_selection_review.cjs <path-to-CARDS.html>` when
+Node is available. This tests data/navigation logic with a DOM stub, not actual
+browser rendering, full-pool quality or application builds.
 
 Do not replace a failing check by weakening the check unless the documented
 contract itself changed. If the contract changed, update the documentation and
@@ -220,7 +227,7 @@ blocker; `WARN` is evidence to inspect, not an automatic reason to delete conten
 
 The user-facing collections are categories, not permanent aliases for one corpus:
 
-- `Everyday` — Tatoeba remains the baseline; MASSIVE 1.1 may supplement it only after the measured 0.11 admission gate;
+- `Everyday` — Tatoeba is admitted; MASSIVE remains experimental and excluded from production under the active 0.12 decision;
 - `Knowledge` — WikiMatrix/Wikipedia-derived material, using direct source pairs rather than hidden translation pivots;
 - `World` — Global Voices once record-level attribution is available.
 

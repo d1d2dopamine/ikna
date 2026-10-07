@@ -131,6 +131,12 @@ native log or packaged result was supplied. Preserve the accepted window source.
 Catalogue work resumes with the admitted Everyday input/selection handoff and
 material review. Details: [ROUND-0.12-08.md](ROUND-0.12-08.md).
 
+Round 09, 2026-10-07: real Everyday preview audit and an offline material viewer
+are delivered separately from the app. The accepted window fix, runtime, learner
+storage and build versions are preserved. No application build or Windows
+interactive test is claimed for this Catalogue-only round. Next Catalogue work
+uses retained run 37458524156; see [ROUND-0.12-09.md](ROUND-0.12-09.md).
+
 1. Close this round's build and real-platform evidence, addressing any resulting
    regression before broad feature work.
 2. Resume the Catalogue lane's final admitted-source pool/provenance/selection

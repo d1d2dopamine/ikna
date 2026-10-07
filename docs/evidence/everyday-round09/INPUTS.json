@@ -1,0 +1,203 @@
+{
+  "evidenceVersion": 1,
+  "observedOn": "2026-10-07",
+  "baseline": {
+    "file": "ikna-0.12-press-round-08-everyday.zip",
+    "sourceFiles": 579,
+    "sizeBytes": 6464746,
+    "sha256": "5ef3a36cc9813d060a30755ff1d1679e82b739e712c01237c597810e8b6cfc19"
+  },
+  "githubObservation": {
+    "method": "read-only public GitHub REST; selected fields",
+    "runId": 37458524156,
+    "headSha": "47a393466e50ac5490ede8bba9173472726a1b9a",
+    "createdAt": "2026-10-06T11:45:26Z",
+    "updatedAt": "2026-10-06T13:24:48Z",
+    "status": "completed",
+    "conclusion": "success",
+    "artifacts": [
+      {
+        "id": 11416257701,
+        "name": "catalogue-v2-everyday-selection-review",
+        "sizeBytes": 1793840,
+        "expired": false
+      },
+      {
+        "id": 11414433600,
+        "name": "catalogue-v2-everyday-admitted-pool",
+        "sizeBytes": 545984900,
+        "expired": false
+      }
+    ]
+  },
+  "reviewArchive": {
+    "sha256": "22e0f8372d09e70993db4b2aacf787b913c44379a21ec823ae1551ef7eb4fded",
+    "sizeBytes": 1793840,
+    "members": {
+      "reports/EVERYDAY-SELECTION.json": {
+        "sha256": "c8afd1559893fca2e336a784677a25428e43423886c33713917c261cd116fc7a",
+        "sizeBytes": 223480
+      },
+      "reports/EVERYDAY-SELECTION.md": {
+        "sha256": "6dd5fd21eb12df318e3c7fda70908ef280c5bd3fe61a4ed02ad2828c6db31f8b",
+        "sizeBytes": 20893
+      },
+      "reports/EVERYDAY-SELECTED-SAMPLES.md": {
+        "sha256": "9e0b8b5b4a43a0513efc187e19b9d9df84f80c4e01056f2f429b6918d43d0768",
+        "sizeBytes": 3524696
+      },
+      "review/everyday-selection-preview.jsonl.gz": {
+        "sha256": "7ef67bb17cc43d6329b7689974bd9c463dbfcd2c9d694a5a05aeac5fe505da7e",
+        "sizeBytes": 975453
+      },
+      "reports/EVERYDAY-POOL.json": {
+        "sha256": "41c7e176d516e6ad89d70954b116d18062baa48857f66ee276bdcfd32dd0438f",
+        "sizeBytes": 267859
+      },
+      "reports/INPUT-REFERENCE.json": {
+        "sha256": "35be8a66b6b4c64a049f279fe59979a4ec7d9ac5d49ec676e353d6eeb415f393",
+        "sizeBytes": 550
+      }
+    }
+  },
+  "admittedInputReported": {
+    "poolSha256": "57b90b01d5dcb0725743998dccaf307a100e174059a853e01f5f31fc13dd6170",
+    "poolLogicalSha256": "05ccbb5b5217dc050cc5a5e0e1cfca3223657529afa6b3890c9340999d571ab8",
+    "poolReportSha256": "41c7e176d516e6ad89d70954b116d18062baa48857f66ee276bdcfd32dd0438f",
+    "sourceVersion": "2026-10-03-2d4eee105639ba24",
+    "uniqueCandidates": 11099490,
+    "registrySha256": "98695b8beb720899b567c9a6b946eae33bd61952a82a03fe9d3fecfed9fc4066",
+    "learn": [
+      "de",
+      "en",
+      "es",
+      "fr",
+      "it",
+      "ja",
+      "ko",
+      "pl",
+      "pt",
+      "ru",
+      "zh"
+    ],
+    "meanings": [
+      "de",
+      "en",
+      "es",
+      "fr",
+      "it",
+      "ja",
+      "ko",
+      "pl",
+      "pt",
+      "ru",
+      "zh"
+    ],
+    "poolEnvironment": {
+      "python": "3.12.14",
+      "zlib": "1.3",
+      "segmentation": {
+        "engine": "ICU word break",
+        "icuVersion": "74.2",
+        "languages": [
+          "ja",
+          "ko",
+          "zh"
+        ],
+        "offsets": "UTF-16",
+        "koreanUnit": "eojeol"
+      }
+    },
+    "poolPipelineSha256": {
+      "everyday_pool.py": "b1342adb46c5a0f605761051b2d947b0f05a888b12a56578e2351cc94ecbf098",
+      "everyday_rebuild.py": "d63b638e1583b94348e2e82e98666e596c5876f95f05209c3f8cedd01d859c0e",
+      "build_catalogue_v2.py": "e8a3f9986a917174ffcb8c141eff9015964249ad471fd13d53f06fbe9cfe0086",
+      "catalogue_core.py": "984a58be4f88939b37c86e7e677e01ffe7d0f94a2c20f38a56eb6f32b7151e56",
+      "catalogue_v2.py": "92b9b761c4f4419e56eff66dd18a06327224fe8afbc7e8cd74397296b786578b",
+      "segmentation.py": "627b30e28ccb3c31a423d4d83b7968422913efd8cc7d631863d4d4075634b8da",
+      "ingest/model.py": "1d5097bbd68fbcc589f5846efb766785f0e682bfb004aff01c1e2d97b68cf9fc",
+      "ingest/registry.py": "3249cdc94cdb5fc0bb52389a3c6aee33cd4d07eeb46ce747dd23072d65dc3033"
+    }
+  },
+  "poolSummaryReported": {
+    "eligibleTargetContextMemberships": 30772462,
+    "eligibleTargetMemberships": 1953502,
+    "measured": 110,
+    "plannedDirectedPairs": 110,
+    "uniqueEligibleGlobalTargets": 648494
+  },
+  "selectionSummaryReported": {
+    "publish": 257,
+    "eligibleTargets": 1953154,
+    "selectedTargets": 934652,
+    "budgetRejected": 871279,
+    "nearDuplicateContextsRejected": 126330,
+    "contextCollisionTargetsRejected": 147223,
+    "publish-thin": 71,
+    "omit-below-minimum": 2
+  },
+  "omittedDecksReported": [
+    {
+      "deckId": "pl-ko-everyday-advanced",
+      "collection": "everyday",
+      "lang": "pl",
+      "meaningLang": "ko",
+      "level": "advanced",
+      "eligibleTargets": 47,
+      "selectedTargets": 30,
+      "decision": "omit-below-minimum",
+      "budget": 8000,
+      "budgetRejected": 0,
+      "morphologyDeferred": 0,
+      "nearDuplicateContextsRejected": 0,
+      "contextCollisionTargetsRejected": 17,
+      "pairStats": {
+        "candidateRows": 94,
+        "eligibleTargetOccurrences": 236,
+        "sentenceLengthRejected": 21,
+        "noUsableTarget": 1,
+        "eligibleExactTargets": 210
+      }
+    },
+    {
+      "deckId": "pl-ko-everyday-middle",
+      "collection": "everyday",
+      "lang": "pl",
+      "meaningLang": "ko",
+      "level": "middle",
+      "eligibleTargets": 46,
+      "selectedTargets": 32,
+      "decision": "omit-below-minimum",
+      "budget": 8000,
+      "budgetRejected": 0,
+      "morphologyDeferred": 0,
+      "nearDuplicateContextsRejected": 0,
+      "contextCollisionTargetsRejected": 14,
+      "pairStats": {
+        "candidateRows": 94,
+        "eligibleTargetOccurrences": 236,
+        "sentenceLengthRejected": 21,
+        "noUsableTarget": 1,
+        "eligibleExactTargets": 210
+      }
+    }
+  ],
+  "acquisitionReferenceReported": {
+    "mode": "fresh-tatoeba",
+    "sourceVersion": "2026-10-03-2d4eee105639ba24",
+    "exports": [
+      {
+        "url": "https://downloads.tatoeba.org/exports/sentences_detailed.tar.bz2",
+        "sha256": "0af302eebda1d7c5773c505b7b6fa5bb41690eb8bcb31cf213a07caf04a88ba3",
+        "lastModified": "Sat, 03 Oct 2026 06:14:35 GMT"
+      },
+      {
+        "url": "https://downloads.tatoeba.org/exports/links.tar.bz2",
+        "sha256": "a7cb697cf60bd55beb042391523946964dd68a3f6884625c3db7a4f4e9b3aa8b",
+        "lastModified": "Sat, 03 Oct 2026 06:15:33 GMT"
+      }
+    ]
+  },
+  "fullPoolBytesAuditedLocally": false,
+  "publicationSafe": false
+}

@@ -109,6 +109,64 @@ quality statistics. Contributor metadata remains in preview origins and samples.
 Native-speaker/reliability or translation correctness is not established by
 passing this automated gate. Human review/freeze/publication remain open.
 
+## Saved preview audit and card review — round 09
+
+The successful run [37458524156](https://github.com/d1d2dopamine/ikna/actions/runs/37458524156)
+now supplies both artifacts. The owner has saved the large pool; do not request
+fresh Tatoeba acquisition or another identical selection to inspect the preview.
+Use the **small** `catalogue-v2-everyday-selection-review.zip` below, not the
+545 MB admitted-pool artifact. `selection_audit.py` is offline and performs no
+network requests, corpus rebuilds, source rewrites or publication.
+
+```bash
+python3 tools/catalog/test_selection_audit.py
+python3 tools/catalog/selection_audit.py \
+  --review-zip catalogue-v2-everyday-selection-review.zip \
+  --expected-sha256 22e0f8372d09e70993db4b2aacf787b913c44379a21ec823ae1551ef7eb4fded \
+  --notes docs/evidence/everyday-round09/MANUAL-REVIEW.json \
+  --output-dir review-output
+node tools/catalog/test_selection_review.cjs review-output/CARDS.html
+```
+
+The output directory must be new: input files and old reviewer decisions are not
+overwritten. ICU must match the source report (74.2 for this artifact). Python's
+standard library plus the existing system ICU suffice for the auditor; Node is
+optional for the viewer logic regression, and no JS dependency installation is
+needed. For a future different artifact, use its own exact ZIP hash and omit
+these round-specific `--notes` or supply new notes bound to that artifact.
+
+Outputs are `AUDIT.json`, `AUDIT.md` and the self-contained `CARDS.html`. The
+delivered [round-09 viewer](evidence/everyday-round09/CARDS.html) already contains
+all 3,280 supplied preview memberships, so regeneration is optional. Download
+and open it in a browser to see actual target/context/meaning text. Filter by
+language pair, frequency level, review signals, manual notes or text; reveal the
+meaning and inspect original Tatoeba references/contributors. Each context uses
+its own exact surface and UTF-16 highlight, including case variation.
+
+Viewer ratings/comments are separate review data. They do not alter Catalogue
+assets or FSRS. Save **Скачать решения JSON** before handing work back or closing
+the viewer: local browser storage can be unavailable or cleared. Import replaces
+the viewer's current decisions only after checking the exact artifact/preview
+hashes, source version and known memberships; foreign/invalid decisions leave
+current work untouched. Unreviewed comment drafts are retained without inventing
+a verdict. Imported reviewer comments render as plain text.
+
+Audit checks distinguish 754 unique global targets from 3,280 memberships and
+8,157 contexts. They validate hash links, inventory and summaries, current
+admission policy, all origin families/versions/references, candidate/target IDs,
+one complete canonical token per context, UTF-16 reconstruction and the existing
+production near-duplicate contract. Reproducibility metadata records the checker,
+template, policy and segmentation environment.
+
+Single-hiragana Japanese targets and near-edit alternative contexts are **review
+signals only**. The auditor does not ban Chinese/Korean one-character targets,
+infer senses/lemmas, assess CEFR, score translation truth or approve material.
+The full pool hash is linked through the supplied reports, not independently
+recomputed without the large input. First-ten ranked previews cannot estimate a
+corpus-wide defect rate or establish a final material freeze. The 27 curated
+findings are a preliminary, deliberately selected inspection, not a native-speaker
+certification of eleven languages. See [ROUND-0.12-09.md](ROUND-0.12-09.md).
+
 Generic selection now rejects input/output aliases (including hard links),
 fails on damaged UTF-8, and writes deterministic gzip bytes without output-name
 or timestamp metadata. The admitted wrapper also retains a previous staging file

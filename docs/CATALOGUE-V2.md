@@ -180,7 +180,11 @@ revalidates every origin and uses the exact reported language/sieve scope.
 Zero-supply pair/levels remain explicit. The admitted-pool workflow retains the
 full input before optionally running this review; reports and bounded selected
 samples never imply a content freeze. Commands and the single next run are in
-[EVERYDAY-POOL.md](EVERYDAY-POOL.md). No World/Knowledge evidence is rerun here.
+[EVERYDAY-POOL.md](EVERYDAY-POOL.md). Round 09 adds an offline, hash-bound preview
+audit and a card viewer with source links and independent reviewer decisions.
+It verifies every supplied preview row, not the full selected material; heuristic
+flags do not change selection policy, identity or publication gates.
+No World/Knowledge evidence is rerun here.
 
 ## Ingestion boundary
 

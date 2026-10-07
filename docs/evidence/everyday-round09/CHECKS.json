@@ -1,0 +1,68 @@
+{
+  "verificationVersion": 1,
+  "executedOn": "2026-10-07",
+  "scope": "local saved-preview audit/tooling; no full corpus acquisition or application build",
+  "python": "3.12.14",
+  "node": "v24.19.0",
+  "checks": [
+    {
+      "command": "python3 tools/catalog/test_selection_audit.py (7 groups)",
+      "result": "passed"
+    },
+    {
+      "command": "python3 tools/catalog/test_segmentation.py (16 tests)",
+      "result": "passed"
+    },
+    {
+      "command": "python3 tools/catalog/test_catalogue_v2_contract.py",
+      "result": "passed"
+    },
+    {
+      "command": "python3 tools/catalog/test_ingestion.py",
+      "result": "passed"
+    },
+    {
+      "command": "python3 tools/catalog/test_selection_policy.py",
+      "result": "passed"
+    },
+    {
+      "command": "python3 tools/catalog/test_everyday_selection.py (15 tests)",
+      "result": "passed"
+    },
+    {
+      "command": "node tools/catalog/test_selection_review.cjs docs/evidence/everyday-round09/CARDS.html",
+      "result": "passed"
+    },
+    {
+      "command": "python3 tools/check_text.py",
+      "result": "passed"
+    },
+    {
+      "command": "python3 tools/check_localization.py",
+      "result": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    },
+    {
+      "command": "Saved ZIP audit against exact expected SHA-256; every preview row checked",
+      "result": "passed"
+    },
+    {
+      "command": "Repeated identical audit with bound manual notes; AUDIT.json, AUDIT.md, CARDS.html byte-exact",
+      "result": "passed"
+    },
+    {
+      "command": "Compared source against round-08 ZIP; only six owning docs changed, application/build/signing/skills bytes preserved",
+      "result": "passed"
+    }
+  ],
+  "limitations": [
+    "Node viewer checks use a DOM stub, not a real browser. Browser executable was unavailable; none installed.",
+    "Full pool raw/logical bytes were not independently read in this session.",
+    "27 manual memberships / 73 contexts inspected; not native-speaker certification or random population sampling.",
+    "No workflow dispatched, Android/desktop Gradle build, Windows interactive check, final material freeze or publication."
+  ],
+  "publicationSafe": false
+}

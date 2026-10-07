@@ -45,9 +45,9 @@ to rerun until a source can publish. Preserve dependency order below:
 
 | Candidate work | Existing owner/reference | Implemented / open |
 | --- | --- | --- |
-| Final Everyday pool | Historical Part 7, [EVERYDAY-POOL.md](EVERYDAY-POOL.md) | Tatoeba-only pool/reuse and round-08 hash-bound selection review implemented; public checkpoint offers no retained final pool; full pinned input and material review remain open |
+| Final Everyday pool | Historical Part 7, [EVERYDAY-POOL.md](EVERYDAY-POOL.md) | Run 37458524156 succeeded; full pinned pool retained by Actions and saved by owner. Small review artifact audited locally; full-pool bytes/material have not been independently audited in this round |
 | World provenance coverage | Historical Part 9, full-provenance runbook | Native identity and bounded attribution proven; reusable/hash-bound shards and offline merge review implemented; old run failed final completeness gate; exact counters and all-document evidence open |
-| Deterministic selection | Historical Part 10 | Disk-backed experiment and admitted Everyday review wired; zero-supply inventory, strict inputs and deterministic previews covered by fixtures; real selected-material review/final policy open |
+| Deterministic selection | Historical Part 10 | Admitted real report and all 3,280 preview memberships structurally audited; 27 preliminary material findings and offline review tool available. Complete material review, Japanese target suitability and context-diversity policy remain open |
 | Final content census/freeze | Historical Part 11 | Census/readiness tooling exists; final reviewed samples, provenance, coverage and pinned inputs open |
 | Final storage/publication format | Historical Part 12 | Earlier lossless experiments exist; final frozen-content measurement and client acceptance open |
 | Target relations and context evidence | Historical Parts 13–14 | Existing exact identity is retained; richer relations and replayable context history open |
@@ -251,6 +251,34 @@ available, otherwise its explicit `fresh-tatoeba` mode. Keep all language defaul
 and `run_selection=true`. [EVERYDAY-POOL.md](EVERYDAY-POOL.md) owns exact instructions;
 [ROUND-0.12-08.md](ROUND-0.12-08.md) records evidence and remaining gates. World
 stays open without another scan; recover saved reports/logs before choosing work.
+
+## Round 09 — saved Everyday material audit
+
+Run `37458524156` completed successfully on 2026-10-06. Its exact small review
+ZIP is available; the owner saved the full pool. Round-08's request to acquire/run
+the pool is fulfilled and is not the next action. The run reports 11,099,490 unique
+candidates, 110 directed pairs and 934,652 selected memberships across all
+decisions (including 62 in two omitted decks); counts do not prove quality.
+
+Round 09 independently checks all 3,280 preview memberships: 754 unique targets,
+8,157 contexts and 8,159 origins. Hash links, scopes, target/candidate identities,
+complete token boundaries and UTF-16 reconstruction pass using the recorded ICU
+74.2. Full pool bytes are absent from this session and are not recalculated.
+The preview is the first ten ranked targets per included deck, not a population
+sample. Five distinct single-hiragana Japanese targets and 63 distinct targets
+with similar alternatives are review signals, not automatic exclusions.
+
+An offline viewer shows the actual material, source attribution, 27 preliminary
+manual findings and hash-bound reviewer export/import. No new workflow or corpus
+run is needed for this evidence. [ROUND-0.12-09.md](ROUND-0.12-09.md) and
+[EVERYDAY-POOL.md](EVERYDAY-POOL.md) own checks and reuse instructions.
+
+Next: review the flagged cards with the owner, agree narrow Japanese target and
+context-diversity acceptance criteria, then obtain a broader deterministic sample
+from the saved exact pool before changing the selector. Reuse that pool; do not
+repeat acquisition/admission or the known selection simply to view these cards.
+World, Knowledge expansion, full material review, freeze, final format and
+publication remain separately gated.
 
 ## Release blockers
 

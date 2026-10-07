@@ -22,6 +22,9 @@ change.
 
 ## Active cycle (0.12)
 
+- [ROUND-0.12-09.md](ROUND-0.12-09.md) — saved real Everyday preview audit,
+  preliminary material findings and offline card review. Input-bound machine
+  report, manual notes and viewer: [everyday-round09](evidence/everyday-round09/).
 - [ROUND-0.12-08.md](ROUND-0.12-08.md) — admitted Everyday selection, input
   preservation/reproducible preview fixes, next single workflow and owner window
   acceptance. [everyday-round08.json](evidence/everyday-round08.json) records the

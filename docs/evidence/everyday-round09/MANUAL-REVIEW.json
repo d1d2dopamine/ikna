@@ -1,0 +1,2366 @@
+{
+  "reviewVersion": 1,
+  "archiveSha256": "22e0f8372d09e70993db4b2aacf787b913c44379a21ec823ae1551ef7eb4fded",
+  "sourceVersion": "2026-10-03-2d4eee105639ba24",
+  "reviewer": "Codex preliminary material inspection; not native-speaker certification",
+  "sampling": "Deliberately chosen examples from the rank-ordered preview, not random sampling",
+  "materialReviewCompleted": false,
+  "publicationSafe": false,
+  "cards": [
+    {
+      "deckId": "de-ru-everyday-middle",
+      "targetId": "t2:de:8d5c7cbe6d6a73cb",
+      "text": "nahe",
+      "status": "needs-review",
+      "note": "Все три контекста повторяют ситуацию не подходить близко к собаке; меняются обращение/местоимение. Автоматическая метрика находит сходство, но полезность грамматического варианта требует ручного решения.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:de-ru:1a383a7479d5d024d7dd",
+          "context": "Sag ihm, er möge dem Hund nicht zu nahe kommen.",
+          "contextId": "tatoeba:13662885",
+          "meaning": "Скажи ему, чтобы не подходил к собаке слишком близко.",
+          "meaningId": "tatoeba:13662862",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "mhr",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:13662885",
+              "meaningRef": "tatoeba:13662862",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 35,
+            "end": 39,
+            "surface": "nahe"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:de-ru:3d003285e744276ce506",
+          "context": "Sag ihr, sie möge dem Hund nicht zu nahe kommen.",
+          "contextId": "tatoeba:13662884",
+          "meaning": "Скажи ей, чтобы не подходила к собаке слишком близко.",
+          "meaningId": "tatoeba:13662865",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "mhr",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:13662884",
+              "meaningRef": "tatoeba:13662865",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 36,
+            "end": 40,
+            "surface": "nahe"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:de-ru:a3d3757aab6aa9bc35a9",
+          "context": "Sagt ihr, sie möge dem Hund nicht zu nahe kommen.",
+          "contextId": "tatoeba:13662886",
+          "meaning": "Скажите ей, чтобы не подходила к собаке слишком близко.",
+          "meaningId": "tatoeba:13662861",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "mhr",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:13662886",
+              "meaningRef": "tatoeba:13662861",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 37,
+            "end": 41,
+            "surface": "nahe"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "en-ru-everyday-beginner",
+      "targetId": "t2:en:f28debe0de94368b",
+      "text": "time",
+      "status": "needs-review",
+      "note": "Два понятных бытовых контекста. В «I had not even time to put on my hat» необычный для современного учебного Everyday порядок слов: проверить регистр и предпочтение этого контекста, не объявлять предложение ошибочным.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:09e06d81b53e8d184dca",
+          "context": "I don't know if I have time to do it.",
+          "contextId": "tatoeba:1230776",
+          "meaning": "Не знаю, будет ли у меня на это время.",
+          "meaningId": "tatoeba:3217124",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "alec",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:1230776",
+              "meaningRef": "tatoeba:3217124",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 23,
+            "end": 27,
+            "surface": "time"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:1a5707ab0874e9475a78",
+          "context": "I had not even time to put on my hat.",
+          "contextId": "tatoeba:6614741",
+          "meaning": "Я даже не успел шляпу надеть.",
+          "meaningId": "tatoeba:6616757",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "Hybrid",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:6614741",
+              "meaningRef": "tatoeba:6616757",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 15,
+            "end": 19,
+            "surface": "time"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:0e5bcb0460f02947857a",
+          "context": "It was a waste of time for all of us.",
+          "contextId": "tatoeba:2882846",
+          "meaning": "Это была пустая трата времени для всех нас.",
+          "meaningId": "tatoeba:9537793",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "CK",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:2882846",
+              "meaningRef": "tatoeba:9537793",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 18,
+            "end": 22,
+            "surface": "time"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "en-ru-everyday-beginner",
+      "targetId": "t2:en:e9013caf69b71210",
+      "text": "by",
+      "status": "needs-review",
+      "note": "Три разные конструкции: by car, by the side of, by the time. Полезные реальные предложения, но общий точный targetId сам по себе не объясняет, какой смысл или конструкцию изучает человек. Не дробить идентификатор автоматически.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:a5b30a74959b9ed86e1b",
+          "context": "As far as I know, he is coming by car.",
+          "contextId": "tatoeba:246927",
+          "meaning": "Насколько я знаю, он едет на машине.",
+          "meaningId": "tatoeba:4103849",
+          "origins": [
+            {
+              "attribution": {
+                "meaningContributor": "Ooneykcall"
+              },
+              "contextRef": "tatoeba:246927",
+              "meaningRef": "tatoeba:4103849",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 31,
+            "end": 33,
+            "surface": "by"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:76f4d79c52cac1d2fb40",
+          "context": "There is a man by the side of the pond.",
+          "contextId": "tatoeba:277302",
+          "meaning": "На берегу пруда какой-то мужчина.",
+          "meaningId": "tatoeba:12197696",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "CK",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:277302",
+              "meaningRef": "tatoeba:12197696",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 15,
+            "end": 17,
+            "surface": "by"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:63abc9763aca1a8fb3a2",
+          "context": "I want Tom gone by the time I get home.",
+          "contextId": "tatoeba:3594680",
+          "meaning": "Я хочу, чтобы к тому времени, как я вернусь домой, Тома не было.",
+          "meaningId": "tatoeba:8737986",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "CK",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:3594680",
+              "meaningRef": "tatoeba:8737986",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 16,
+            "end": 18,
+            "surface": "by"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "en-ru-everyday-beginner",
+      "targetId": "t2:en:3c36841611f0d853",
+      "text": "were",
+      "status": "needs-review",
+      "note": "Два альтернативных условия отличаются could/would. Это грамматически содержательное различие, хотя автоматическая метрика помечает их как похожие. Уровень beginner получен из частоты were и не доказывает простоту условного предложения. Не удалять альтернативу только по сходству.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:ca650ce8834fb0dc6e3d",
+          "context": "He cried as if he were a boy of six.",
+          "contextId": "tatoeba:292944",
+          "meaning": "Он плакал как шестилетний мальчик.",
+          "meaningId": "tatoeba:9957504",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "CM",
+                "meaningContributor": "Ooneykcall"
+              },
+              "contextRef": "tatoeba:292944",
+              "meaningRef": "tatoeba:9957504",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 18,
+            "end": 22,
+            "surface": "were"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:531323fcf4c438df64f2",
+          "context": "If I were a bird, I could fly to you.",
+          "contextId": "tatoeba:30798",
+          "meaning": "Если бы я был птицей, я бы мог полететь к тебе.",
+          "meaningId": "tatoeba:13908206",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "sacredceltic",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:30798",
+              "meaningRef": "tatoeba:13908206",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 5,
+            "end": 9,
+            "surface": "were"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:54db007c6202b034850e",
+          "context": "If I were a bird, I would fly to you.",
+          "contextId": "tatoeba:508780",
+          "meaning": "Будь я птицей, я бы полетел к тебе.",
+          "meaningId": "tatoeba:417303",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "kebukebu",
+                "meaningContributor": "Hellerick"
+              },
+              "contextRef": "tatoeba:508780",
+              "meaningRef": "tatoeba:417303",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 5,
+            "end": 9,
+            "surface": "were"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "en-ru-everyday-advanced",
+      "targetId": "t2:en:9fd267debe1d29b0",
+      "text": "rug",
+      "status": "illustrative",
+      "note": "Бытовая цель и понятные контексты. Два предложения о покупке ковра близки по смыслу, но третье показывает коврик у камина. Метка advanced отражает частотный ранг; она не делает слово лингвистически сложным.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:0d5918d036e35fe8cd0e",
+          "context": "I have to buy a new rug for the room.",
+          "contextId": "tatoeba:4300715",
+          "meaning": "Мне надо купить новый ковёр в комнату.",
+          "meaningId": "tatoeba:5308411",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "AlanF_US",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:4300715",
+              "meaningRef": "tatoeba:5308411",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 20,
+            "end": 23,
+            "surface": "rug"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:e9e8eba5c7ddc85fcca7",
+          "context": "We need to buy a new rug for this room.",
+          "contextId": "tatoeba:528123",
+          "meaning": "Мы должны купить новый ковёр для этой комнаты.",
+          "meaningId": "tatoeba:525679",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "fanty",
+                "meaningContributor": "Maksimo"
+              },
+              "contextRef": "tatoeba:528123",
+              "meaningRef": "tatoeba:525679",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 21,
+            "end": 24,
+            "surface": "rug"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:28e393ec38859693455a",
+          "context": "The cat is asleep on the rug by the fire.",
+          "contextId": "tatoeba:8585186",
+          "meaning": "Кот спит на коврике у камина.",
+          "meaningId": "tatoeba:13326863",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "sundown",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:8585186",
+              "meaningRef": "tatoeba:13326863",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 25,
+            "end": 28,
+            "surface": "rug"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "en-ru-everyday-advanced",
+      "targetId": "t2:en:ea1b9b26895f8ca5",
+      "text": "Denmark",
+      "status": "needs-review",
+      "note": "Имя собственное вместо обычной лексики; следующие контексты географические и политические. Нужно явно решить место имён собственных в Everyday. Фактическая актуальность утверждений здесь не проверена.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:418ddd04e63ceb4aa818",
+          "context": "I am going to Denmark on the 20th of May.",
+          "contextId": "tatoeba:3997384",
+          "meaning": "Двадцатого мая я поеду в Данию.",
+          "meaningId": "tatoeba:6923793",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "Bergthor",
+                "meaningContributor": "odexed"
+              },
+              "contextRef": "tatoeba:3997384",
+              "meaningRef": "tatoeba:6923793",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 14,
+            "end": 21,
+            "surface": "Denmark"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:8f90ce353446ba026501",
+          "context": "The Faroe Islands are part of the Kingdom of Denmark.",
+          "contextId": "tatoeba:11270461",
+          "meaning": "Фареры - часть Датского королевства.",
+          "meaningId": "tatoeba:13433992",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "sundown",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:11270461",
+              "meaningRef": "tatoeba:13433992",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 45,
+            "end": 52,
+            "surface": "Denmark"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:55cac6dca47ad07eb392",
+          "context": "Greenland, as a territory of Denmark, is part of NATO.",
+          "contextId": "tatoeba:13712761",
+          "meaning": "Гренландия, как территория Дании, состоит в НАТО.",
+          "meaningId": "tatoeba:13712867",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "Adelpa",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:13712761",
+              "meaningRef": "tatoeba:13712867",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 29,
+            "end": 36,
+            "surface": "Denmark"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "en-ru-everyday-advanced",
+      "targetId": "t2:en:e9372ce18594da6a",
+      "text": "technique",
+      "status": "needs-review",
+      "note": "Контекст про виртуальную память и многозадачные ядра технический; два других относятся к исполнительской технике. Разнообразие формально есть, пригодность такого смешения для Everyday требует решения о тематике/регистре.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:8a1075372d7bb78b2347",
+          "context": "Virtual memory is a memory management technique developed for multitasking kernels.",
+          "contextId": "tatoeba:722650",
+          "meaning": "Виртуальная память - это метод управления памятью, разработанный для многозадачных ядер.",
+          "meaningId": "tatoeba:1569720",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "qdii",
+                "meaningContributor": "Biga"
+              },
+              "contextRef": "tatoeba:722650",
+              "meaningRef": "tatoeba:1569720",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 11,
+          "highlight": {
+            "start": 38,
+            "end": 47,
+            "surface": "technique"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:b99c66710b2f04eb7c7e",
+          "context": "Her technique is superb, but she needs to play with more expression.",
+          "contextId": "tatoeba:309020",
+          "meaning": "Техника у неё великолепная, но ей нужно играть более экспрессивно.",
+          "meaningId": "tatoeba:12201702",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "CM",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:309020",
+              "meaningRef": "tatoeba:12201702",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 12,
+          "highlight": {
+            "start": 4,
+            "end": 13,
+            "surface": "technique"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:en-ru:138a9be642699a2433b1",
+          "context": "That pianist is known for his technique.",
+          "contextId": "tatoeba:68641",
+          "meaning": "Этот пианист известен своей техникой игры.",
+          "meaningId": "tatoeba:471643",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "CK",
+                "meaningContributor": "las"
+              },
+              "contextRef": "tatoeba:68641",
+              "meaningRef": "tatoeba:471643",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 7,
+          "highlight": {
+            "start": 30,
+            "end": 39,
+            "surface": "technique"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "es-ru-everyday-beginner",
+      "targetId": "t2:es:95a97b38a2b9b08c",
+      "text": "nada",
+      "status": "illustrative",
+      "note": "Разные отрицательные конструкции с nada; третий контекст содержит региональное podés. Сохранять различия языка и явно решать политику регионального регистра, не считать их автоматически ошибкой.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:es-ru:9fc2908ef4fd48ff928a",
+          "context": "No le dije nada acerca de esto a mi novia.",
+          "contextId": "tatoeba:2816373",
+          "meaning": "Я ничего не сказал об этом своей девушке.",
+          "meaningId": "tatoeba:4026779",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "marcelostockle",
+                "meaningContributor": "odexed"
+              },
+              "contextRef": "tatoeba:2816373",
+              "meaningRef": "tatoeba:4026779",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 11,
+            "end": 15,
+            "surface": "nada"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:es-ru:17a6015c4e8e4977e2a7",
+          "context": "No hay nada en este mundo que me dé miedo.",
+          "contextId": "tatoeba:3147704",
+          "meaning": "Нет в этом мире ничего, чего бы я боялся.",
+          "meaningId": "tatoeba:6070059",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "cueyayotl",
+                "meaningContributor": "odexed"
+              },
+              "contextRef": "tatoeba:3147704",
+              "meaningRef": "tatoeba:6070059",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 7,
+            "end": 11,
+            "surface": "nada"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:es-ru:01487156bb8e58d63bef",
+          "context": "No podés creer nada de lo que dice ese tipo.",
+          "contextId": "tatoeba:1338910",
+          "meaning": "Ты не должен верить ничему из того, что говорит этот тип.",
+          "meaningId": "tatoeba:2032079",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "hayastan",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:1338910",
+              "meaningRef": "tatoeba:2032079",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 15,
+            "end": 19,
+            "surface": "nada"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "es-ru-everyday-middle",
+      "targetId": "t2:es:06a06333e9130b72",
+      "text": "escuchando",
+      "status": "needs-review",
+      "note": "Два контекста отличаются dormida/dormido и содержат одинаковое подозрительное написание «la lluvio». Проверить написание исходника и разнообразие; не исправлять человеческий источник молча. Третий контекст использует региональные vos/Decime.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:es-ru:7a198dbec814749e6a38",
+          "context": "¿Te gusta quedarte dormida escuchando el sonido de la lluvio?",
+          "contextId": "tatoeba:13812777",
+          "meaning": "Ты любишь засыпать, слушая дождь?",
+          "meaningId": "tatoeba:13813047",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "Seael",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:13812777",
+              "meaningRef": "tatoeba:13813047",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 27,
+            "end": 37,
+            "surface": "escuchando"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:es-ru:fb994a20f54b4e0e3233",
+          "context": "¿Te gusta quedarte dormido escuchando el sonido de la lluvio?",
+          "contextId": "tatoeba:13812776",
+          "meaning": "Ты любишь засыпать, слушая дождь?",
+          "meaningId": "tatoeba:13813047",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "Seael",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:13812776",
+              "meaningRef": "tatoeba:13813047",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 27,
+            "end": 37,
+            "surface": "escuchando"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:es-ru:4e4d48179d168b635c69",
+          "context": "\"Necesito hablar con vos. Es urgente.\" \"Decime, te estoy escuchando.\"",
+          "contextId": "tatoeba:1265457",
+          "meaning": "\"Мне нужно с тобой поговорить. Это срочно\". - \"Говори, я слушаю\".",
+          "meaningId": "tatoeba:7300155",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "alexmarcelo",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:1265457",
+              "meaningRef": "tatoeba:7300155",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 57,
+            "end": 67,
+            "surface": "escuchando"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "fr-ru-everyday-advanced",
+      "targetId": "t2:fr:db2ca3fa34af8c9e",
+      "text": "examiner",
+      "status": "needs-review",
+      "note": "Два контекста отличаются un médecin / le médecin при одинаковом русском смысле; третий действительно другой. Различие артикля может быть учебно полезным, но не гарантирует разнообразие ситуаций.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:fr-ru:c32f684e2d00fbf97c23",
+          "context": "Je l'ai persuadé de se faire examiner par un médecin.",
+          "contextId": "tatoeba:603045",
+          "meaning": "Я убедил его показаться врачу.",
+          "meaningId": "tatoeba:3687373",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "autuno",
+                "meaningContributor": "sharptoothed"
+              },
+              "contextRef": "tatoeba:603045",
+              "meaningRef": "tatoeba:3687373",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 29,
+            "end": 37,
+            "surface": "examiner"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:fr-ru:3f438b3e175b926c1b9b",
+          "context": "Je l'ai persuadé de se faire examiner par le médecin.",
+          "contextId": "tatoeba:7697884",
+          "meaning": "Я убедил его показаться врачу.",
+          "meaningId": "tatoeba:3687373",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "Maxence",
+                "meaningContributor": "sharptoothed"
+              },
+              "contextRef": "tatoeba:7697884",
+              "meaningRef": "tatoeba:3687373",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 29,
+            "end": 37,
+            "surface": "examiner"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:fr-ru:299f3e65378e264d1197",
+          "context": "Je suis allé à l'hôpital pour faire examiner mes yeux.",
+          "contextId": "tatoeba:1372195",
+          "meaning": "Я пошёл в больницу проверить зрение.",
+          "meaningId": "tatoeba:12731386",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "sysko",
+                "meaningContributor": "marafon"
+              },
+              "contextRef": "tatoeba:1372195",
+              "meaningRef": "tatoeba:12731386",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 36,
+            "end": 44,
+            "surface": "examiner"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "it-ru-everyday-beginner",
+      "targetId": "t2:it:550c008f7c5c38c9",
+      "text": "piace",
+      "status": "needs-review",
+      "note": "Два понятных бытовых контекста, третий про pathos и написание Si: проверить регистр/орфографию исходника. Это сигнал редакторского разбора, не автоматически переписанный материал.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:it-ru:f17408e7c8b382d9917b",
+          "context": "Quale ti piace di più, il tè o il caffè?",
+          "contextId": "tatoeba:889480",
+          "meaning": "Что тебе больше нравится, чай или кофе?",
+          "meaningId": "tatoeba:3042171",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "Guybrush88",
+                "meaningContributor": "Selena777"
+              },
+              "contextRef": "tatoeba:889480",
+              "meaningRef": "tatoeba:3042171",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 9,
+            "end": 14,
+            "surface": "piace"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:it-ru:2c4eaa5d7e08ad9597c7",
+          "context": "A Tom non piace che Mary viva lì da sola.",
+          "contextId": "tatoeba:5749486",
+          "meaning": "Тому не нравится, что Мэри живёт там одна.",
+          "meaningId": "tatoeba:4841559",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "dnnywld",
+                "meaningContributor": "Wezel"
+              },
+              "contextRef": "tatoeba:5749486",
+              "meaningRef": "tatoeba:4841559",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 10,
+            "end": 15,
+            "surface": "piace"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:it-ru:27cfa41eeef40c6771f1",
+          "context": "Si, tu sai che mi piace un po' di pathos.",
+          "contextId": "tatoeba:5535644",
+          "meaning": "Да, ты знаешь, я немного люблю пафос.",
+          "meaningId": "tatoeba:3064021",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "dnnywld",
+                "meaningContributor": "al_ex_an_der"
+              },
+              "contextRef": "tatoeba:5535644",
+              "meaningRef": "tatoeba:3064021",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 18,
+            "end": 23,
+            "surface": "piace"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "ja-ru-everyday-beginner",
+      "targetId": "t2:ja:1a3d82d7eed51b2a",
+      "text": "行",
+      "status": "needs-review",
+      "note": "В контекстах 行った / 行かせた / 行かなくて ICU выделяет 行. Граница корректна по текущему контракту, но самостоятельность такого учебного фрагмента и работа с окончаниями требуют отдельного японского решения.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:21287ddaee00afa1bf11",
+          "context": "子供達は外に遊びに行った。",
+          "contextId": "tatoeba:168427",
+          "meaning": "Дети пошли играть на улицу.",
+          "meaningId": "tatoeba:2145263",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "bunbuku",
+                "meaningContributor": "sharptoothed"
+              },
+              "contextRef": "tatoeba:168427",
+              "meaningRef": "tatoeba:2145263",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 9,
+            "end": 10,
+            "surface": "行"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:71a6ba9478cb5d1a90a7",
+          "context": "両親は私にそこへ行かせた。",
+          "contextId": "tatoeba:78028",
+          "meaning": "Родители заставили меня пойти туда.",
+          "meaningId": "tatoeba:6989514",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "mookeee",
+                "meaningContributor": "fjay69"
+              },
+              "contextRef": "tatoeba:78028",
+              "meaningRef": "tatoeba:6989514",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 8,
+            "end": 9,
+            "surface": "行"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:43a6d9a41cfc590785c5",
+          "context": "急いで授業に行かなくては。",
+          "contextId": "tatoeba:182570",
+          "meaning": "Я должен спешить на занятия.",
+          "meaningId": "tatoeba:5064978",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "bunbuku",
+                "meaningContributor": "sharptoothed"
+              },
+              "contextRef": "tatoeba:182570",
+              "meaningRef": "tatoeba:5064978",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 6,
+            "end": 7,
+            "surface": "行"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "ja-ru-everyday-beginner",
+      "targetId": "t2:ja:c4d275df0ec8ec57",
+      "text": "き",
+      "status": "needs-review",
+      "note": "Один target объединяет фрагменты 聞き / 起き / 持ってきて. ICU действительно отдаёт этот токен; UTF-16 не повреждён. Такое совпадение поверхности не доказывает единую полезную учебную цель. Приоритет для проверки японского отбора.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:3f648e67e1b33f7fe3d4",
+          "context": "神よ、我が願いを聞き給え。",
+          "contextId": "tatoeba:144899",
+          "meaning": "Боже, услышь мои молитвы!",
+          "meaningId": "tatoeba:1195809",
+          "origins": [
+            {
+              "attribution": {
+                "meaningContributor": "Keiden"
+              },
+              "contextRef": "tatoeba:144899",
+              "meaningRef": "tatoeba:1195809",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 9,
+            "end": 10,
+            "surface": "き"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:d3b30a3b38e92a5ed0a1",
+          "context": "私は夜遅くまで起きていた。",
+          "contextId": "tatoeba:152555",
+          "meaning": "Я не спал допоздна.",
+          "meaningId": "tatoeba:4467852",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "bunbuku",
+                "meaningContributor": "Wezel"
+              },
+              "contextRef": "tatoeba:152555",
+              "meaningRef": "tatoeba:4467852",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 8,
+            "end": 9,
+            "surface": "き"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:3c954dd26d7a8d9a1a9d",
+          "context": "手袋持ってきて正解だったな。",
+          "contextId": "tatoeba:3193827",
+          "meaning": "Хорошо, что я взял варежки.",
+          "meaningId": "tatoeba:3664909",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "tommy_san",
+                "meaningContributor": "soniamiku"
+              },
+              "contextRef": "tatoeba:3193827",
+              "meaningRef": "tatoeba:3664909",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 5,
+            "end": 6,
+            "surface": "き"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "ja-ru-everyday-beginner",
+      "targetId": "t2:ja:001c3d7cf263e95c",
+      "text": "や",
+      "status": "needs-review",
+      "note": "Одна поверхность встречается в 費やした, やり遂げよう и 魚や肉. В последнем контексте есть самостоятельная частица; значит, запрещать весь знак や без разбора контекстов нельзя.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:216671b507a21b90f5cf",
+          "context": "彼は全財産を車に費やした。",
+          "contextId": "tatoeba:8848181",
+          "meaning": "Он потратил все свои деньги на машину.",
+          "meaningId": "tatoeba:6391554",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "small_snow",
+                "meaningContributor": "odexed"
+              },
+              "contextRef": "tatoeba:8848181",
+              "meaningRef": "tatoeba:6391554",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 9,
+            "end": 10,
+            "surface": "や"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:aaa922271e56b6a6959d",
+          "context": "万難を排してやり遂げよう。",
+          "contextId": "tatoeba:81093",
+          "meaning": "Я сделаю это любой ценой.",
+          "meaningId": "tatoeba:6484204",
+          "origins": [
+            {
+              "attribution": {
+                "meaningContributor": "fjay69"
+              },
+              "contextRef": "tatoeba:81093",
+              "meaningRef": "tatoeba:6484204",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 6,
+            "end": 7,
+            "surface": "や"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:5459bb61e3161f608003",
+          "context": "魚や肉を売っているんだよ。",
+          "contextId": "tatoeba:182093",
+          "meaning": "Они продают рыбу и мясо.",
+          "meaningId": "tatoeba:667361",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "bunbuku",
+                "meaningContributor": "shanghainese"
+              },
+              "contextRef": "tatoeba:182093",
+              "meaningRef": "tatoeba:667361",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 1,
+            "end": 2,
+            "surface": "や"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "ja-ru-everyday-beginner",
+      "targetId": "t2:ja:c4a42e8ef2172bfe",
+      "text": "え",
+      "status": "needs-review",
+      "note": "Контексты 燃えて / 間違えた / 変えた показывают одинаковый короткий сегмент внутри разных глагольных форм. Приоритетный вопрос учебной самостоятельности цели, не ошибка диапазона подсветки.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:5c93f486845f86b2474f",
+          "context": "彼の目は怒りに燃えていた。",
+          "contextId": "tatoeba:1118908",
+          "meaning": "Его глаза пылали гневом.",
+          "meaningId": "tatoeba:2717476",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "mookeee",
+                "meaningContributor": "sharptoothed"
+              },
+              "contextRef": "tatoeba:1118908",
+              "meaningRef": "tatoeba:2717476",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 8,
+            "end": 9,
+            "surface": "え"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:966735f7931d1baf8dc0",
+          "context": "私はあなたを兄と間違えた。",
+          "contextId": "tatoeba:161616",
+          "meaning": "Я принял тебя за твоего брата.",
+          "meaningId": "tatoeba:1031577",
+          "origins": [
+            {
+              "attribution": {
+                "meaningContributor": "Mira"
+              },
+              "contextRef": "tatoeba:161616",
+              "meaningRef": "tatoeba:1031577",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 10,
+            "end": 11,
+            "surface": "え"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:0cfb0a3cbed8110a769c",
+          "context": "文を変えた方がいいですか？",
+          "contextId": "tatoeba:9594137",
+          "meaning": "Мне изменить предложение?",
+          "meaningId": "tatoeba:9594138",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "small_snow",
+                "meaningContributor": "odexed"
+              },
+              "contextRef": "tatoeba:9594137",
+              "meaningRef": "tatoeba:9594138",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 3,
+            "end": 4,
+            "surface": "え"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "ja-ru-everyday-beginner",
+      "targetId": "t2:ja:ae39a83f19dfcde0",
+      "text": "せ",
+      "status": "needs-review",
+      "note": "Сегмент встречается в 修理させた / 見せましょう / 浴びせた. Нужна японская политика целей и проверка словоформ; одного словарного word-break недостаточно для учебной оценки.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:8b30336a0dcb7bcf6308",
+          "context": "私は彼に車を修理させた。",
+          "contextId": "tatoeba:154123",
+          "meaning": "Я заставил его отремонтировать мою машину.",
+          "meaningId": "tatoeba:6693298",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "bunbuku",
+                "meaningContributor": "fjay69"
+              },
+              "contextRef": "tatoeba:154123",
+              "meaningRef": "tatoeba:6693298",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 9,
+            "end": 10,
+            "surface": "せ"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:2ed007e3edc413ec44f3",
+          "context": "君に或る物を見せましょう。",
+          "contextId": "tatoeba:2172642",
+          "meaning": "Позвольте мне кое-что показать вам.",
+          "meaningId": "tatoeba:6698664",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "Blanka_Meduzo",
+                "meaningContributor": "fjay69"
+              },
+              "contextRef": "tatoeba:2172642",
+              "meaningRef": "tatoeba:6698664",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 7,
+            "end": 8,
+            "surface": "せ"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:d7bef3ee05d6a6559241",
+          "context": "彼女は私に悪口を浴びせた。",
+          "contextId": "tatoeba:89531",
+          "meaning": "Она осыпала меня бранью.",
+          "meaningId": "tatoeba:8085525",
+          "origins": [
+            {
+              "attribution": {
+                "meaningContributor": "fjay69"
+              },
+              "contextRef": "tatoeba:89531",
+              "meaningRef": "tatoeba:8085525",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 10,
+            "end": 11,
+            "surface": "せ"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "ja-ru-everyday-beginner",
+      "targetId": "t2:ja:2704b3b356938f11",
+      "text": "わ",
+      "status": "needs-review",
+      "note": "Два контекста содержат 出くわした, третий 間に合わない. Сходный знак не подтверждает общий лексический смысл. Не менять глобальную идентичность без отдельного согласованного контракта.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:6fbd0a97211863ca41f2",
+          "context": "私は駅で彼に出くわした。",
+          "contextId": "tatoeba:158267",
+          "meaning": "Я случайно встретил его на станции.",
+          "meaningId": "tatoeba:2189041",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "small_snow",
+                "meaningContributor": "sharptoothed"
+              },
+              "contextRef": "tatoeba:158267",
+              "meaningRef": "tatoeba:2189041",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 8,
+            "end": 9,
+            "surface": "わ"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:daa89b6d83670525ad3e",
+          "context": "彼は道で友人と出くわした。",
+          "contextId": "tatoeba:101633",
+          "meaning": "По дороге он столкнулся с приятелем.",
+          "meaningId": "tatoeba:4991123",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "tommy_san",
+                "meaningContributor": "sharptoothed"
+              },
+              "contextRef": "tatoeba:101633",
+              "meaningRef": "tatoeba:4991123",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 9,
+            "end": 10,
+            "surface": "わ"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ja-ru:e26e37400249ee2ddab6",
+          "context": "間に合わないかと思ったよ。",
+          "contextId": "tatoeba:1167452",
+          "meaning": "Думал, не успеешь.",
+          "meaningId": "tatoeba:5325108",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "bunbuku",
+                "meaningContributor": "yatomoya"
+              },
+              "contextRef": "tatoeba:1167452",
+              "meaningRef": "tatoeba:5325108",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 3,
+            "end": 4,
+            "surface": "わ"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "ko-ru-everyday-beginner",
+      "targetId": "t2:ko:0803efa69bbedf27",
+      "text": "때",
+      "status": "needs-review",
+      "note": "Короткая цель не является автоматически плохой. В паре 지난 방학 / прошлый отпуск стоит проверить учебные каникулы против общего отпуска; это вопрос к точности/области перевода, а не подтверждённая ошибка.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ko-ru:4abf75de45f79dbfdd21",
+          "context": "지난 방학 때 뭐 했어요?",
+          "contextId": "tatoeba:480005",
+          "meaning": "Что вы делали в прошлый отпуск?",
+          "meaningId": "tatoeba:480088",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "tamsanh",
+                "meaningContributor": "las"
+              },
+              "contextRef": "tatoeba:480005",
+              "meaningRef": "tatoeba:480088",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 5,
+          "highlight": {
+            "start": 6,
+            "end": 7,
+            "surface": "때"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ko-ru:5cdbaac3407b104554e2",
+          "context": "일어났을 때 슬펐어.",
+          "contextId": "tatoeba:5373",
+          "meaning": "Когда я проснулся, мне было грустно.",
+          "meaningId": "tatoeba:5495",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "cueyayotl",
+                "meaningContributor": "zmoo"
+              },
+              "contextRef": "tatoeba:5373",
+              "meaningRef": "tatoeba:5495",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 3,
+          "highlight": {
+            "start": 5,
+            "end": 6,
+            "surface": "때"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "ko-ru-everyday-beginner",
+      "targetId": "t2:ko:0e13ca82bd6d86be",
+      "text": "게",
+      "status": "counterexample",
+      "note": "Короткий записанный корейский элемент найден ICU в цельном контексте. Самостоятельность обучения требует языкового разбора; длина 1 сама по себе недостаточна для исключения, eojeol не является морфологическим анализом.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ko-ru:39b9177c094253e27ee3",
+          "context": "사람 많은 게 싫어요.",
+          "contextId": "tatoeba:5376",
+          "meaning": "Я не люблю толпу.",
+          "meaningId": "tatoeba:5528",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "cueyayotl",
+                "meaningContributor": "al_ex_an_der"
+              },
+              "contextRef": "tatoeba:5376",
+              "meaningRef": "tatoeba:5528",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 4,
+          "highlight": {
+            "start": 6,
+            "end": 7,
+            "surface": "게"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "pl-ru-everyday-advanced",
+      "targetId": "t2:pl:abe1993e8f244c77",
+      "text": "skromny",
+      "status": "needs-review",
+      "note": "Литературный/рифмованный контекст и адаптация имени Janek → Ваня. Это может быть художественным переводом; для прямого учебного сопоставления нужны решение о регистре и проверка точности, не автоматический диагноз неверного перевода.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:pl-ru:629137836b4a48fe6a21",
+          "context": "Był sobie chłopczyk, imieniem Janek, na pozór skromny niby baranek.",
+          "contextId": "tatoeba:7840563",
+          "meaning": "Жил-был мальчик по имени Ваня, на вид скромный, будто барашек.",
+          "meaningId": "tatoeba:7840592",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "seveleu_dubrovnik",
+                "meaningContributor": "seveleu_dubrovnik"
+              },
+              "contextRef": "tatoeba:7840563",
+              "meaningRef": "tatoeba:7840592",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 46,
+            "end": 53,
+            "surface": "skromny"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "pl-ru-everyday-advanced",
+      "targetId": "t2:pl:82f04384c4bf39d6",
+      "text": "polu",
+      "status": "illustrative",
+      "note": "Короткий понятный контекст о кукурузе в поле. Цель — точная форма polu, не автоматически объединённая лемма. Advanced отражает частоту формы, не CEFR.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:pl-ru:c4e3ca719250b8cbb605",
+          "context": "Kukurydza rośnie na polu.",
+          "contextId": "tatoeba:10890728",
+          "meaning": "Кукуруза растёт в поле.",
+          "meaningId": "tatoeba:12629404",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "sebek5000",
+                "meaningContributor": "Wezel"
+              },
+              "contextRef": "tatoeba:10890728",
+              "meaningRef": "tatoeba:12629404",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 4,
+          "highlight": {
+            "start": 20,
+            "end": 24,
+            "surface": "polu"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "pl-ru-everyday-advanced",
+      "targetId": "t2:pl:42808ed50675d6a2",
+      "text": "niezły",
+      "status": "needs-review",
+      "note": "Один контекст нейтральный («неплохая идея»), другой содержит разговорное/грубое burdel. Требуется явное решение о регистре и аудитории; не вводить скрытую цензуру или запрет на слово niezły.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:pl-ru:bd02f07eb73a7754a863",
+          "context": "Myślę, że mam całkiem niezły pomysł.",
+          "contextId": "tatoeba:3430551",
+          "meaning": "Кажется, у меня есть неплохая идея.",
+          "meaningId": "tatoeba:7744107",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "Hikaru",
+                "meaningContributor": "bredsky"
+              },
+              "contextRef": "tatoeba:3430551",
+              "meaningRef": "tatoeba:7744107",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 6,
+          "highlight": {
+            "start": 22,
+            "end": 28,
+            "surface": "niezły"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:pl-ru:e0cbcf0f16a6c7db2768",
+          "context": "Mam w pokoju niezły burdel.",
+          "contextId": "tatoeba:348630",
+          "meaning": "В моей комнате - полный бардак.",
+          "meaningId": "tatoeba:645828",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "zipangu",
+                "meaningContributor": "vlad2k"
+              },
+              "contextRef": "tatoeba:348630",
+              "meaningRef": "tatoeba:645828",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 5,
+          "highlight": {
+            "start": 13,
+            "end": 19,
+            "surface": "niezły"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "pt-ru-everyday-beginner",
+      "targetId": "t2:pt:301c9d07172971e0",
+      "text": "estão",
+      "status": "illustrative",
+      "note": "Три контекста показывают ожидание, расположение мыла/полотенца и состояние мебели. Есть разнообразие ситуаций; это иллюстративный разбор, а не независимая проверка португальского носителем.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:pt-ru:00a07c5fc502b8adfd5e",
+          "context": "Eu acho que Tom e Maria estão esperando por mim.",
+          "contextId": "tatoeba:7026097",
+          "meaning": "Думаю, Том и Мэри ждут меня.",
+          "meaningId": "tatoeba:7026098",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "ajdavidl",
+                "meaningContributor": "odexed"
+              },
+              "contextRef": "tatoeba:7026097",
+              "meaningRef": "tatoeba:7026098",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 24,
+            "end": 29,
+            "surface": "estão"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:pt-ru:dcd23010bf3dae0c5644",
+          "context": "Quero tomar banho. Onde estão o sabão e a toalha?",
+          "contextId": "tatoeba:14068155",
+          "meaning": "Я хочу принять ванну. Где мыло и полотенце?",
+          "meaningId": "tatoeba:14068157",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "carlosalberto",
+                "meaningContributor": "Wezel"
+              },
+              "contextRef": "tatoeba:14068155",
+              "meaningRef": "tatoeba:14068157",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 24,
+            "end": 29,
+            "surface": "estão"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:pt-ru:ab6c9c54edfbb49be3c2",
+          "context": "Os móveis da cozinha estão cobertos de pó e fuligem.",
+          "contextId": "tatoeba:5482823",
+          "meaning": "Кухонная мебель покрыта пылью и копотью.",
+          "meaningId": "tatoeba:13127226",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "ianna",
+                "meaningContributor": "Wezel"
+              },
+              "contextRef": "tatoeba:5482823",
+              "meaningRef": "tatoeba:13127226",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 21,
+            "end": 26,
+            "surface": "estão"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "ru-en-everyday-beginner",
+      "targetId": "t2:ru:4c158ac135fa1413",
+      "text": "никогда",
+      "status": "illustrative",
+      "note": "Понятные примеры никогда с отрицательными конструкциями; английские смыслы передают общий смысл. Иллюстративно полезный материал, без утверждения о проверке всего языкового направления.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ru-en:3abac0645c2e1649040e",
+          "context": "Я ни с кем никогда ни о чём не спорю.",
+          "contextId": "tatoeba:5462066",
+          "meaning": "I never argue with anyone about anything.",
+          "meaningId": "tatoeba:9957205",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "nina99nv",
+                "meaningContributor": "ddnktr"
+              },
+              "contextRef": "tatoeba:5462066",
+              "meaningRef": "tatoeba:9957205",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 11,
+            "end": 18,
+            "surface": "никогда"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ru-en:9fb6fef56d03eed527be",
+          "context": "Я бы никогда и ни за что тебя не предал.",
+          "contextId": "tatoeba:4517151",
+          "meaning": "I would never ever betray you.",
+          "meaningId": "tatoeba:3357817",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "odexed",
+                "meaningContributor": "CK"
+              },
+              "contextRef": "tatoeba:4517151",
+              "meaningRef": "tatoeba:3357817",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 5,
+            "end": 12,
+            "surface": "никогда"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ru-en:f5f1c9adb22c8a46dcff",
+          "context": "Я никогда не сожалел ни о чем, что я делал.",
+          "contextId": "tatoeba:2118132",
+          "meaning": "I never regretted anything I did.",
+          "meaningId": "tatoeba:1402582",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "oxioxigen",
+                "meaningContributor": "marcelostockle"
+              },
+              "contextRef": "tatoeba:2118132",
+              "meaningRef": "tatoeba:1402582",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 2,
+            "end": 9,
+            "surface": "никогда"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "ru-en-everyday-beginner",
+      "targetId": "t2:ru:23b8c2eaf0b64cc1",
+      "text": "сегодня",
+      "status": "needs-review",
+      "note": "Первые два контекста меняют только ты/вы и слегка порядок английского перевода. Это ограниченное разнообразие ситуаций, хотя различие обращения может быть полезным. Третий контекст другой. Нужен разбор политики альтернатив.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ru-en:5fc83f332baf0d4e96c4",
+          "context": "Если бы не вы, меня бы сегодня здесь не было.",
+          "contextId": "tatoeba:12957026",
+          "meaning": "Without you, I wouldn't be here today.",
+          "meaningId": "tatoeba:3329461",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "marafon",
+                "meaningContributor": "Hybrid"
+              },
+              "contextRef": "tatoeba:12957026",
+              "meaningRef": "tatoeba:3329461",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 23,
+            "end": 30,
+            "surface": "сегодня"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ru-en:42542cd7c4262f60af61",
+          "context": "Если бы не ты, меня бы сегодня здесь не было.",
+          "contextId": "tatoeba:12957025",
+          "meaning": "I wouldn't be here today without you.",
+          "meaningId": "tatoeba:3329465",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "marafon",
+                "meaningContributor": "Hybrid"
+              },
+              "contextRef": "tatoeba:12957025",
+              "meaningRef": "tatoeba:3329465",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 23,
+            "end": 30,
+            "surface": "сегодня"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:ru-en:b1ece28a6910130c6c36",
+          "context": "Вот бы мне не надо было сегодня идти в школу.",
+          "contextId": "tatoeba:11124918",
+          "meaning": "I wish I didn't have to go to school today.",
+          "meaningId": "tatoeba:11124902",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "marafon",
+                "meaningContributor": "CK"
+              },
+              "contextRef": "tatoeba:11124918",
+              "meaningRef": "tatoeba:11124902",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 24,
+            "end": 31,
+            "surface": "сегодня"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "zh-ru-everyday-beginner",
+      "targetId": "t2:zh:e952d25be589e32c",
+      "text": "用",
+      "status": "counterexample",
+      "note": "Один иероглиф работает в осмысленных конструкциях использования денег, времени и способа воспроизведения. Контрпример к общему запрету односимвольных CJK-целей; это не сертификат точности китайских переводов.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:zh-ru:1b731b1a996d77c4116f",
+          "context": "我用两千日元买了这本书。",
+          "contextId": "tatoeba:332889",
+          "meaning": "Я купил эту книгу за 2000 иен.",
+          "meaningId": "tatoeba:600548",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "fucongcong",
+                "meaningContributor": "loins"
+              },
+              "contextRef": "tatoeba:332889",
+              "meaningRef": "tatoeba:600548",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 1,
+            "end": 2,
+            "surface": "用"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:zh-ru:d690ab2e8160470876a4",
+          "context": "你用了多少时间来翻译这本书？",
+          "contextId": "tatoeba:786042",
+          "meaning": "Сколько времени тебе понадобилось, чтобы перевести эту книгу?",
+          "meaningId": "tatoeba:8057434",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "fucongcong",
+                "meaningContributor": "elisei"
+              },
+              "contextRef": "tatoeba:786042",
+              "meaningRef": "tatoeba:8057434",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 1,
+            "end": 2,
+            "surface": "用"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:zh-ru:ba1a5bfd59d22a26a801",
+          "context": "他們用慢動作把那一幕播了出來。",
+          "contextId": "tatoeba:373173",
+          "meaning": "Они показали сцену в замедленной съёмке.",
+          "meaningId": "tatoeba:682969",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "nickyeow",
+                "meaningContributor": "Tonari"
+              },
+              "contextRef": "tatoeba:373173",
+              "meaningRef": "tatoeba:682969",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 2,
+            "end": 3,
+            "surface": "用"
+          }
+        }
+      ]
+    },
+    {
+      "deckId": "zh-ru-everyday-beginner",
+      "targetId": "t2:zh:2d3033e48d57f811",
+      "text": "事",
+      "status": "needs-review",
+      "note": "Первый контекст бытовой, третий — вопрос о китайском периоде «14-й пятилетки». Проверить тематическую пригодность/актуальность такого контекста для Everyday, а не удалять полезную короткую цель целиком.",
+      "contexts": [
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:zh-ru:aa1b88b6148467a6c185",
+          "context": "这是我身上发生的最糟糕的事了！",
+          "contextId": "tatoeba:7781522",
+          "meaning": "Это худшее, что со мной когда-либо случалось!",
+          "meaningId": "tatoeba:9803337",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "jiangche",
+                "meaningContributor": "Ivanovb"
+              },
+              "contextRef": "tatoeba:7781522",
+              "meaningRef": "tatoeba:9803337",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 12,
+            "end": 13,
+            "surface": "事"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:zh-ru:082be08be909275b75b3",
+          "context": "我怀疑有什么事在他身上发生了。",
+          "contextId": "tatoeba:5091337",
+          "meaning": "Я подозреваю, что с ним что-то случилось.",
+          "meaningId": "tatoeba:9803322",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "mirrorvan",
+                "meaningContributor": "Ivanovb"
+              },
+              "contextRef": "tatoeba:5091337",
+              "meaningRef": "tatoeba:9803322",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 6,
+            "end": 7,
+            "surface": "事"
+          }
+        },
+        {
+          "alignmentScore": null,
+          "candidateId": "c1:everyday:zh-ru:f62fa7eb595ea3a47fdc",
+          "context": "“十四五”时期，中国将着重办好哪些事？",
+          "contextId": "tatoeba:9839011",
+          "meaning": "На чём сосредоточится Китай в период «14-й пятилетки»?",
+          "meaningId": "tatoeba:9839012",
+          "origins": [
+            {
+              "attribution": {
+                "contextContributor": "Ivanovb",
+                "meaningContributor": "Ivanovb"
+              },
+              "contextRef": "tatoeba:9839011",
+              "meaningRef": "tatoeba:9839012",
+              "sourceFamily": "tatoeba",
+              "sourceVersion": "2026-10-03-2d4eee105639ba24"
+            }
+          ],
+          "sourceFamilies": [
+            "tatoeba"
+          ],
+          "tokenCount": 10,
+          "highlight": {
+            "start": 17,
+            "end": 18,
+            "surface": "事"
+          }
+        }
+      ]
+    }
+  ]
+}
