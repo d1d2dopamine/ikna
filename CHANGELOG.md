@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### 0.12 application round 11 fix 1 — CI test corrections
+
+- Correct DEV Browse blocker comparison and classic undo journal/count assertions.
+  Add actual-SQL raw/valid count regression and missing-deck refusal assertion.
+- Supplied CI confirms compilation/debug APK; corrected desktop rerun remains
+  open. Application behavior, Catalogue workflows and build versions are unchanged.
+
 ### 0.12 application round 11 — classic cards and DEV tools
 
 - Remove active cloze/reverse exercises and promotion. Keep classic full context,

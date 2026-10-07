@@ -6,11 +6,13 @@ import dev.ikna.data.dev.IknaDataProfile
 import dev.ikna.data.db.DailyPlanEntity
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.session.SessionBuilder
+import dev.ikna.domain.session.BrowseUnavailableReason
 import dev.ikna.domain.governor.GovernorConfig
 import java.nio.file.Files
 import java.time.LocalDateTime
 import java.time.ZoneId
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -118,7 +120,16 @@ class DeveloperSandboxIntegrationTest {
                 .browseDeckAvailability(listOf("developer-reading"), now)["developer-reading"])
             assertTrue(forced.available)
             assertTrue(forced.forcedByDeveloper)
-            assertEquals(normal.blockers, forced.blockers)
+            // The normal pool requires familiar, future-due cards. DEV can
+            // read existing schedules instead, so NO_CANDIDATES may disappear.
+            // Product-policy blockers must still be retained exactly.
+            assertEquals(normal.blockers.filterNot { it == BrowseUnavailableReason.NO_CANDIDATES }, forced.blockers)
+            assertTrue(forced.blockers.contains(BrowseUnavailableReason.LATE_NIGHT))
+            val missing = requireNotNull(container.learningRepository
+                .browseDeckAvailability(listOf("missing-deck"), now)["missing-deck"])
+            assertFalse("DEV must not fabricate content for a missing deck", missing.available)
+            assertFalse(missing.forcedByDeveloper)
+            assertTrue(missing.blockers.contains(BrowseUnavailableReason.NO_CANDIDATES))
         } finally {
             container.db.close()
             home.deleteRecursively()
@@ -203,6 +214,7 @@ class DeveloperSandboxIntegrationTest {
             val card = SessionBuilder(dao, container.db.chunkDao(), GovernorConfig())
                 .materialize(listOf(before.key)).single()
             val history = container.db.reviewDao().total()
+            val rawRows = container.db.reviewDao().observeOptimizerChanges().first()
             container.learningRepository.answer(card, Rating.GOOD, 4200L, now)
             assertEquals(history + 1, container.db.reviewDao().total())
             assertEquals(before.reps + 1, requireNotNull(dao.card(before.chunkId, 0)).reps)
@@ -210,7 +222,10 @@ class DeveloperSandboxIntegrationTest {
             assertEquals(null, dao.card(before.chunkId, 2))
             assertTrue(container.learningRepository.undoLast(now + 1_000L) != null)
             assertEquals(before, dao.card(before.chunkId, 0))
-            assertEquals(history + 2, container.db.reviewDao().total())
+            // total() counts non-retracted answers; undo restores that count.
+            // The raw journal still appends both the answer and its retraction.
+            assertEquals(history, container.db.reviewDao().total())
+            assertEquals(rawRows + 2L, container.db.reviewDao().observeOptimizerChanges().first())
         } finally {
             container.db.close()
             home.deleteRecursively()

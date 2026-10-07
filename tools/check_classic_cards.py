@@ -9,6 +9,12 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SHARED = ROOT / "shared/src/jvmShared/kotlin/dev/ikna"
 SOURCE = (SHARED / "data/db/Daos.kt").read_text()
+REVIEW_SOURCE = SOURCE.split("@Dao\ninterface ReviewDao", 1)[1].split("@Dao\ninterface StatsDao", 1)[0]
+NOT_RETRACTED_LITERAL = re.search(r'NOT_RETRACTED\s*=\s*("(?:\\.|[^"\\])*")', SOURCE).group(1)
+REVIEW_QUERIES = {
+    name: "".join(json.loads(literal) for literal in re.findall(r'"(?:\\.|[^"\\])*"', body.replace("NOT_RETRACTED", NOT_RETRACTED_LITERAL)))
+    for body, name in re.findall(r'@Query\((.*?)\)\s*(?:suspend\s+)?fun\s+(\w+)', REVIEW_SOURCE, re.S)
+}
 # DAO method names repeat in other interfaces; use only ChunkDao/CardDao here.
 SOURCE = SOURCE.split("@Dao\ninterface ReviewDao", 1)[0]
 QUERIES = {
@@ -89,6 +95,23 @@ class ClassicDaoTests(unittest.TestCase):
         self.assertEqual(3, self.query("untouchedCountFor", packId="p").fetchone()[0])
         self.assertEqual(3, len(self.query("unintroducedByFrequency", limit=10).fetchall()))
         self.assertEqual(3, len(self.query("unintroducedByFrequencyFor", packId="p", limit=10).fetchall()))
+
+    def test_undo_restores_valid_answer_count_while_journal_grows(self):
+        # Execute the actual DAO count expressions, not a renamed copy of total().
+        insert = ("INSERT INTO reviews (id,chunkId,level,ts,rating,elapsedDays,"
+                  "stabilityBefore,stabilityAfter,difficultyBefore,difficultyAfter,"
+                  "durationMs,wasAmnesty,undoOf) VALUES (?, 'c0', 0, ?, ?, 1, 5, 6, 5, 5, 4200, 0, ?)")
+        self.db.execute(insert, (1, 1, 3, None))
+        kept = self.db.execute("SELECT * FROM reviews WHERE id=1").fetchone()
+        valid = lambda: self.db.execute(REVIEW_QUERIES["total"]).fetchone()[0]
+        raw = lambda: self.db.execute(REVIEW_QUERIES["observeOptimizerChanges"]).fetchone()[0]
+        self.assertEqual((1, 1), (valid(), raw()))
+        self.db.execute(insert, (2, 2, 3, None))
+        self.assertEqual((2, 2), (valid(), raw()))
+        self.db.execute(insert, (3, 3, 0, 2))
+        self.assertEqual((1, 3), (valid(), raw()))
+        self.assertEqual(kept, self.db.execute("SELECT * FROM reviews WHERE id=1").fetchone())
+        self.assertEqual(3, len(self.db.execute("SELECT * FROM reviews").fetchall()))
 
 
 if __name__ == "__main__":

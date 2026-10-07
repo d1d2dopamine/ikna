@@ -355,3 +355,9 @@ source pins, accepted Windows fixes and build versions remain unchanged.
 Next Catalogue step remains automatic quality-report review, followed by Part 11
 census/content snapshot of the saved selection, then Part 12 storage/client
 acceptance. No repeat manual selection or redundant corpus rerun is requested.
+
+Round-11 fix 1: owner CI log confirms compilation/debug APK and shared test tasks;
+117/119 desktop tests pass. Correct two new test assertions (Browse pool versus
+product blockers; valid review count versus raw append-only journal). Application
+behavior is unchanged. Corrected desktop rerun and runtime acceptance remain open;
+see the round-11 fix record. Catalogue evidence work is unaffected.

@@ -162,3 +162,9 @@ read-only snapshot plus ordinary-policy testing switch. Existing seeds are not
 expanded. See [ROUND-0.12-11.md](ROUND-0.12-11.md) for local evidence and the still
 open compilation/runtime checks. Catalogue work waits for the already running
 quality workflow; no extra workflow or selection rerun is required by this batch.
+
+Round-11 fix 1, 2026-10-08 (Asia/Yekaterinburg): supplied CI log confirms app/shared/
+desktop compilation and debug APK generation, but two newly added desktop tests
+failed among 119. Their incompatible Browse-pool and raw/valid-history assertions
+are corrected; no production behavior changes. New-commit desktop execution and
+real DEV/classic runtime acceptance remain open.

@@ -89,3 +89,34 @@ state; reloading only a currently open card is insufficient acceptance evidence.
 No additional long workflow is needed for this application round. Review the
 already running Catalogue quality report when it finishes, then continue saved
 selected-material census/content freeze and storage/client acceptance.
+
+## Fix 1 — owner-supplied CI failure, 2026-10-08 (Asia/Yekaterinburg)
+
+The supplied console log shows KSP/Kotlin compilation for shared Android/desktop
+and app/desktop targets, test compilation, successful shared test tasks and
+`:app:assembleDebug`. Desktop ran 119 tests, with two failures in the newly added
+DEV toggle and classic answer/undo regressions; the overall build failed in
+3m 9s. This is not a compiler failure. The pasted console names the coroutine
+method entry lines, not the exact failing assertions; no JUnit XML was supplied.
+
+Source review identifies two incorrect assertions in these tests:
+
+- Normal Browse eligibility may add `NO_CANDIDATES`; forced DEV Browse can read
+  existing schedules instead. Compare the retained product blockers, excluding
+  that normal-pool availability result. Also assert a missing deck stays
+  unavailable under DEV; do not bypass missing content.
+- `ReviewDao.total()` counts non-retracted answers, not raw rows. After undo it
+  returns the original valid count. Separately use the existing raw-row flow to
+  assert that the answer and additive undo increased journal length by two.
+
+The production Scheduler, Governor, repositories, UI, settings and schema are
+unchanged by fix 1. An offline regression executes both actual DAO count queries
+on schema 10 and verifies valid counts `1 -> 2 -> 1` against raw rows `1 -> 2 -> 3`.
+The architecture's obsolete three-active-exercise description is corrected.
+
+Five SQL tests and 39 design/source contracts pass locally, plus text and
+localization checks. Corrected desktop Kotlin tests still require execution on
+the new commit; no local Gradle build is available. CI success is not claimed.
+Use the corrected complete ZIP for a new commit and the ordinary JVM check;
+re-running the old failed commit would test the old assertions. No Catalogue
+workflow or corpus selection rerun is needed.

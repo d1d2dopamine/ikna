@@ -31,8 +31,9 @@ making scientific claims are in [`SCIENCE.md`](SCIENCE.md).
 
 ## Two memory layers
 
-**Item layer** — `cards`, scheduled by FSRS-6. One chunk produces up to three cards, one per
-presentation level (recognition, cloze, production).
+**Item layer** — `cards`, scheduled by FSRS-6. Each target has one active classic
+schedule (level 0). Historical level 1/2 rows remain for lossless history/replay;
+they do not create active exercises. See [LEARNING-ENGINE.md](LEARNING-ENGINE.md).
 
 **Component layer** — `components`, keyed by `(lemma, pos)`. Every answer updates the
 components of the answered chunk with weights: the token inside `target_span` gets 1.0, other

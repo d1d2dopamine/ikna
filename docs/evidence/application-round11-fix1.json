@@ -1,0 +1,93 @@
+{
+  "round": 11,
+  "fix": 1,
+  "recorded_date": "2026-10-08",
+  "recorded_timezone": "Asia/Yekaterinburg",
+  "input_source": {
+    "filename": "ikna-0.12-press-round-11.zip",
+    "files": 606,
+    "sha256": "7de92229dac5d1b0580f7b8f752ac78d22e76dfa6c54c42b37de8a7497d1eded"
+  },
+  "owner_ci_log": {
+    "filename": "Вставленный текст.txt",
+    "sha256": "dbeef1a0d5b62bd70fb00751d236598291a038048a67acd19f80540b63a2905c",
+    "bytes": 36083,
+    "observed": [
+      "KSP and Kotlin compilation completed for shared Android/desktop and app/desktop",
+      "shared desktop and Android unit test tasks completed",
+      "app debug APK assembly completed",
+      "119 desktop tests completed; 2 failed",
+      "overall build failed in 3m 9s"
+    ],
+    "missing": [
+      "run/commit identity",
+      "JUnit XML with exact assertion messages and coroutine stack"
+    ]
+  },
+  "corrections": [
+    "Compare retained Browse product blockers after excluding the normal-pool NO_CANDIDATES result; also assert missing-deck refusal under DEV",
+    "After classic undo total() returns the original non-retracted-answer count; raw journal grows by two rows",
+    "Execute actual valid/raw ReviewDao count SQL against schema 10",
+    "Correct stale architecture description of three active exercises"
+  ],
+  "changed_baseline_paths": [
+    "CHANGELOG.md",
+    "desktop/src/test/kotlin/dev/ikna/desktop/DeveloperSandboxIntegrationTest.kt",
+    "docs/ARCHITECTURE.md",
+    "docs/PLAN-0.12.md",
+    "docs/ROUND-0.12-11.md",
+    "docs/modern_PLAN-0.12.md",
+    "tools/check_classic_cards.py"
+  ],
+  "production_kotlin_workflows_schema_build_signing_bytes": "identical to complete round-11 archive",
+  "local_checks": [
+    {
+      "command": "python tools/check_classic_cards.py",
+      "exit_code": 0,
+      "output": "test_amnesty_does_not_rewrite_archived_schedules (__main__.ClassicDaoTests.test_amnesty_does_not_rewrite_archived_schedules) ... ok\ntest_archive_reads_still_preserve_all_levels (__main__.ClassicDaoTests.test_archive_reads_still_preserve_all_levels) ... ok\ntest_due_backlog_forecast_and_next_due_ignore_retired_modes (__main__.ClassicDaoTests.test_due_backlog_forecast_and_next_due_ignore_retired_modes) ... ok\ntest_queue_and_leeches_only_return_classic_rows (__main__.ClassicDaoTests.test_queue_and_leeches_only_return_classic_rows) ... ok\ntest_undo_restores_valid_answer_count_while_journal_grows (__main__.ClassicDaoTests.test_undo_restores_valid_answer_count_while_journal_grows) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.006s\n\nOK\n"
+    },
+    {
+      "command": "python tools/check_design_parity.py",
+      "exit_code": 0,
+      "output": "test_all_locales_have_overwrite_confirmation (__main__.DesignContracts.test_all_locales_have_overwrite_confirmation) ... ok\ntest_automatic_policy_starts_in_both_containers (__main__.DesignContracts.test_automatic_policy_starts_in_both_containers) ... ok\ntest_automatic_worker_has_quiet_period_and_backoff (__main__.DesignContracts.test_automatic_worker_has_quiet_period_and_backoff) ... ok\ntest_browse_control_stays_visible_and_explains_why (__main__.DesignContracts.test_browse_control_stays_visible_and_explains_why) ... ok\ntest_browse_credit_is_cumulative_global_and_honest (__main__.DesignContracts.test_browse_credit_is_cumulative_global_and_honest) ... ok\ntest_browse_is_vertical_feed_not_a_swipe_session (__main__.DesignContracts.test_browse_is_vertical_feed_not_a_swipe_session) ... ok\ntest_button_appearance_has_one_implementation (__main__.DesignContracts.test_button_appearance_has_one_implementation) ... ok\ntest_ci_keeps_real_build_and_migration_gates (__main__.DesignContracts.test_ci_keeps_real_build_and_migration_gates) ... ok\ntest_compose_typography_references_have_imports (__main__.DesignContracts.test_compose_typography_references_have_imports) ... ok\ntest_deck_header_paint_and_desktop_inspector (__main__.DesignContracts.test_deck_header_paint_and_desktop_inspector) ... ok\ntest_deck_marks_and_phonetics_are_real (__main__.DesignContracts.test_deck_marks_and_phonetics_are_real) ... ok\ntest_desktop_developer_restart_callback_reaches_settings_pane (__main__.DesignContracts.test_desktop_developer_restart_callback_reaches_settings_pane) ... ok\ntest_desktop_first_launch_uses_the_mobile_onboarding_contract (__main__.DesignContracts.test_desktop_first_launch_uses_the_mobile_onboarding_contract) ... ok\ntest_desktop_geometry_is_not_a_phone_window (__main__.DesignContracts.test_desktop_geometry_is_not_a_phone_window) ... ok\ntest_desktop_hotkeys_are_captured_not_typed (__main__.DesignContracts.test_desktop_hotkeys_are_captured_not_typed) ... ok\ntest_desktop_pane_titles_share_one_style (__main__.DesignContracts.test_desktop_pane_titles_share_one_style) ... ok\ntest_desktop_wipe_clears_the_whole_database_and_returns_to_first_run (__main__.DesignContracts.test_desktop_wipe_clears_the_whole_database_and_returns_to_first_run) ... ok\ntest_developer_mode_uses_shared_optional_product_override (__main__.DesignContracts.test_developer_mode_uses_shared_optional_product_override) ... ok\ntest_developer_tools_use_actual_routes_and_read_only_inspection (__main__.DesignContracts.test_developer_tools_use_actual_routes_and_read_only_inspection) ... ok\ntest_generation_and_fingerprint_guards_remain (__main__.DesignContracts.test_generation_and_fingerprint_guards_remain) ... ok\ntest_interface_language_registry_drives_both_targets (__main__.DesignContracts.test_interface_language_registry_drives_both_targets) ... ok\ntest_junit_settings_contracts_use_the_same_executable_preflight (__main__.DesignContracts.test_junit_settings_contracts_use_the_same_executable_preflight) ... ok\ntest_mobile_add_deck_is_clean_and_deck_rows_keep_proportions (__main__.DesignContracts.test_mobile_add_deck_is_clean_and_deck_rows_keep_proportions) ... ok\ntest_model_controls_are_not_exposed (__main__.DesignContracts.test_model_controls_are_not_exposed) ... ok\ntest_model_path_and_paste_cost_are_bounded (__main__.DesignContracts.test_model_path_and_paste_cost_are_bounded) ... ok\ntest_palette_grid_shares_lighting_and_accessible_selection_on_both_platforms (__main__.DesignContracts.test_palette_grid_shares_lighting_and_accessible_selection_on_both_platforms) ... ok\ntest_progress_counts_session_and_deck_and_preserves_subpercent (__main__.DesignContracts.test_progress_counts_session_and_deck_and_preserves_subpercent) ... ok\ntest_rounded_variant_is_a_first_class_variant (__main__.DesignContracts.test_rounded_variant_is_a_first_class_variant) ... ok\ntest_same_stats_renderer_and_empty_states (__main__.DesignContracts.test_same_stats_renderer_and_empty_states) ... ok\ntest_session_uses_shared_quiet_chrome (__main__.DesignContracts.test_session_uses_shared_quiet_chrome) ... ok\ntest_settings_navigation_and_section_order (__main__.DesignContracts.test_settings_navigation_and_section_order) ... ok\ntest_shared_ui_has_no_android_or_desktop_host_dependency (__main__.DesignContracts.test_shared_ui_has_no_android_or_desktop_host_dependency) ... ok\ntest_signal_frame_uses_shared_clock_and_nested_ownership (__main__.DesignContracts.test_signal_frame_uses_shared_clock_and_nested_ownership) ... ok\ntest_source_aware_search_and_catalog_are_shared (__main__.DesignContracts.test_source_aware_search_and_catalog_are_shared) ... ok\ntest_stats_history_uses_global_targets_and_best_hour_waits_for_evidence (__main__.DesignContracts.test_stats_history_uses_global_targets_and_best_hour_waits_for_evidence) ... ok\ntest_today_count_is_unique_and_first_batch_does_not_multiply (__main__.DesignContracts.test_today_count_is_unique_and_first_batch_does_not_multiply) ... ok\ntest_window_controls_are_named_in_all_locales (__main__.DesignContracts.test_window_controls_are_named_in_all_locales) ... ok\ntest_windows_title_bar_is_themed_and_other_frames_stay_native (__main__.DesignContracts.test_windows_title_bar_is_themed_and_other_frames_stay_native) ... ok\ntest_wipe_queries_execute_and_empty_every_current_table (__main__.DesignContracts.test_wipe_queries_execute_and_empty_every_current_table) ... ok\n\n----------------------------------------------------------------------\nRan 39 tests in 0.152s\n\nOK\n"
+    },
+    {
+      "command": "python tools/check_text.py",
+      "exit_code": 0,
+      "output": "Repository text is valid UTF-8/NFC; 540 text files and 7 localization tables passed.\n"
+    },
+    {
+      "command": "python tools/check_localization.py",
+      "exit_code": 0,
+      "output": "Language registry OK: 7 languages, 732 keys each; English fallback, tokens, labels and selectors agree.\n"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "output": ""
+    }
+  ],
+  "corrected_kotlin_tests_executed_locally": false,
+  "open": [
+    "New-commit desktop test execution",
+    "Actual DEV/classic runtime acceptance"
+  ],
+  "current_source_sha256": {
+    "CHANGELOG.md": "56f1375db85d5f49d53aefbec1e5b412d65f2daf8b994e9bb49e8c4eec4d3fb5",
+    "desktop/src/test/kotlin/dev/ikna/desktop/DeveloperSandboxIntegrationTest.kt": "b60ce8bb12a28f029b68f0ac0390aebcce933d1ea0501b03dadd5c2f4483c8bc",
+    "docs/ARCHITECTURE.md": "0685a38f95ad2afeeb3f1ff055b31b1f63f18a6fb3a3ecbaa5c93125215a0655",
+    "docs/PLAN-0.12.md": "a8ad0e4686e3b8a3cf44763ecb899a1f7b2321dfd3bd983424a98575d176c7b1",
+    "docs/ROUND-0.12-11.md": "a4c702e3c39326e82d3042b6cb1d16170dcf600a4cac3ab2be371f9e04863e11",
+    "docs/modern_PLAN-0.12.md": "5697ec1116cabe27b72e33d050cc34fb5bf3976db9c699f99589127a2a1a7595",
+    "tools/check_classic_cards.py": "d61c6c7c917c37e162f5838cdca86a12ea2e6d86b23513dd069031bd577d6248"
+  },
+  "delivery": {
+    "filename": "ikna-0.12-press-round-11-fix1.zip",
+    "expected_files": 607,
+    "added": [
+      "docs/evidence/application-round11-fix1.json"
+    ],
+    "deleted": []
+  },
+  "catalogue": "unchanged; no workflow dispatched or selection rerun required"
+}
