@@ -17,7 +17,7 @@ from build_catalogue_v2 import phrase_choices
 import everyday_selection as admitted
 from japanese_boundary import filter_boundaries, JapaneseBoundaryGuard
 from segmentation import word_spans
-from selection_policy import choose_contexts, quarantine_reason, quarantine_rules
+from selection_policy import choose_contexts, quarantine_reason, quarantine_rules, filter_unique_choices
 from selection_output import SelectionOutput
 import selection_evaluate as evaluation
 from test_selection_audit import fixture
@@ -46,6 +46,37 @@ class QualityTests(unittest.TestCase):
         choices = phrase_choices(text, {w.lower(): 100 for w in core.words(text, "ja")}, "ja", 0)
         for units in ([(0, 999, False)], [(0, 8, False), (7, 9, False)], []):
             with self.assertRaises(ValueError): filter_boundaries(text, choices, units)
+
+    def test_canonical_collisions_defer_only_ambiguous_targets(self):
+        for text, lang, aliases in [
+            ("今日はＡとAを見た。", "ja", {"Ａ", "A"}),
+            ("今日はßとSSを見た。", "ja", {"ß", "SS"}),
+            ("今日はカとｶを見た。", "ja", {"カ", "ｶ"}),
+            ("Heute lese ich Straße und STRASSE auf dem Schild.", "de", {"Straße", "STRASSE"}),
+        ]:
+            choices = phrase_choices(text, {w.lower(): 100 for w in core.words(text, lang)}, lang, 0)
+            self.assertTrue(aliases.issubset({c[1] for c in choices}))
+            kept, rejected, notes = filter_unique_choices(text, choices, lang)
+            self.assertEqual({c[1] for c in kept}, {c[1] for c in choices} - aliases)
+            self.assertTrue(kept)
+            self.assertEqual(rejected["canonical-target-ambiguous-deferred"], 2)
+            self.assertTrue(all(n["canonicalOccurrences"] == 2 for n in notes))
+            self.assertTrue(all(c[2] == target_id(lang, c[1]) and c[0] == 100 for c in kept))
+            if lang == "ja":
+                # Exercise the formerly crashing guard directly too; every ICU
+                # token is a whole synthetic analyzer unit in this boundary fixture.
+                units = [(s.start, s.end, False) for s in word_spans(text, lang)]
+                guarded, rejected, _ = filter_boundaries(text, choices, units)
+                self.assertEqual(guarded, kept)
+                self.assertEqual(rejected["canonical-target-ambiguous-deferred"], 2)
+
+    def test_non_token_choice_still_fails_closed(self):
+        text = "私は日本語を学びます。"
+        bogus = [(100, "日本", target_id("ja", "日本"), "beginner")]
+        with self.assertRaisesRegex(ValueError, "complete source token"):
+            filter_unique_choices(text, bogus, "ja")
+        with self.assertRaisesRegex(ValueError, "complete source token"):
+            filter_boundaries(text, bogus, [(0, len(text), False)])
 
     def test_diversity_reorders_without_erasing_grammar_variation(self):
         def c(ref, text, n):
@@ -174,6 +205,15 @@ class QualityTests(unittest.TestCase):
                 kept, rejected, _ = guard.filter(text, choices)
                 self.assertEqual(bool(kept), accepted); self.assertEqual(bool(rejected), not accepted)
                 if kept: self.assertEqual(kept[0][2], target_id("ja", surface))
+            for text, aliases in [("今日はＡとAを見た。", {"Ａ", "A"}),
+                                  ("今日はßとSSを見た。", {"ß", "SS"}),
+                                  ("今日はカとｶを見た。", {"カ", "ｶ"}),
+                                  ("😀私はＫとKを書きます。", {"Ｋ", "K"})]:
+                choices = phrase_choices(text, {w.lower(): 100 for w in core.words(text, "ja")}, "ja", 0)
+                kept, rejected, _ = guard.filter(text, choices)
+                self.assertTrue(kept)
+                self.assertFalse(aliases & {c[1] for c in kept})
+                self.assertEqual(rejected["canonical-target-ambiguous-deferred"], 2)
         finally: guard.close()
         # Actual analyzer also flows through admitted selection and full-output
         # evaluation; test provenance is not published corpus evidence.
@@ -184,6 +224,10 @@ class QualityTests(unittest.TestCase):
             texts = [("私は夜遅くまで起きていた。", "Я не спал допоздна."),
                      ("魚や肉を売っているんだよ。", "Они продают рыбу и мясо."),
                      ("私は日本語を学びます。", "Я изучаю японский язык.")]
+            texts += [("今日はＡとAを見た。", "Тестовый контекст с вариантами ширины букв."),
+                      ("今日はßとSSを見た。", "Тестовый контекст с вариантами регистра."),
+                      ("今日はカとｶを見た。", "Тестовый контекст с вариантами катаканы."),
+                      ("😀私はＫとKを書きます。", "Тестовый контекст с дополнительным символом.")]
             records = [Candidate("everyday", "ja", "ru", a, b,
                 [Origin("tatoeba", VERSION, f"tatoeba:{9400+i}", f"tatoeba:{9500+i}")]) for i, (a, b) in enumerate(texts)]
             write_jsonl(str(case.input), records)
@@ -193,7 +237,8 @@ class QualityTests(unittest.TestCase):
             args = case.args("ja-after"); args.quality_policy = "boundary-diversity-v2"
             args.selected_output = str(case.root / "ja-selected.jsonl.gz")
             current, _ = admitted.build_report(args)
-            self.assertEqual(current["qualityPolicy"]["counts"]["jaContextsChecked"], 3)
+            self.assertEqual(current["qualityPolicy"]["counts"]["jaContextsChecked"], len(texts))
+            self.assertEqual(current["qualityPolicy"]["counts"]["canonical-target-ambiguous-deferred"], 8)
             self.assertGreater(current["qualityPolicy"]["counts"]["ja-morpheme-cut-deferred"], 0)
             result = evaluation.evaluate(Path(args.selected_output), current, baseline, old_rows)
             self.assertTrue(result["qualityGatePassed"])

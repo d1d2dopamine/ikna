@@ -12,6 +12,12 @@ complete units; complete short targets remain eligible under the existing sieve.
 The source pool stays intact. It does not populate lemmas/POS, stem text, change
 frequency ranks or merge/rewrite exact targets and learner identities.
 
+Round-10 fix 1 defers canonical occurrence ambiguity (NFKC/casefold), including
+width variants, before checking Japanese units. This complete-token uniqueness
+rule applies to all quality-v2 learning languages. Other targets in the context
+remain eligible. Missing source tokens and malformed analyzer ranges still fail.
+See [ROUND-0.12-10-fix1.md](ROUND-0.12-10-fix1.md).
+
 Pins: **SudachiPy 0.6.10**, **SudachiDict-core 20250825**, Split Mode A; dictionary
 SHA-256 `d28ffc33b196e5c2ca731e8147fd1ef47d35ba79928ef9f0871962859d70ac23`.
 `requirements-selection-quality.txt` pins Linux Python 3.11/3.12 wheel hashes.

@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 from bisect import bisect_right
-from collections import Counter
 import hashlib
 from importlib import metadata
 from pathlib import Path
 
 from catalogue_v2 import canonical_target
 from segmentation import word_spans
+from selection_policy import filter_unique_choices
 
 ENGINE_VERSION = "0.6.10"
 DICTIONARY_VERSION = "20250825"
@@ -33,8 +33,9 @@ def filter_boundaries(text, choices, units):
     by_form = {}
     for span in spans:
         by_form.setdefault(canonical_target(span.surface), []).append(span)
-    kept, rejected, examples = [], Counter(), []
-    for choice in choices:
+    unique, rejected, examples = filter_unique_choices(text, choices, "ja")
+    kept = []
+    for choice in unique:
         matches = by_form.get(canonical_target(choice[1]), [])
         if len(matches) != 1:
             raise ValueError("Japanese choice is not one complete ICU token")

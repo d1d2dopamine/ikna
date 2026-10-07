@@ -1,0 +1,191 @@
+{
+  "evidenceVersion": 1,
+  "round": "0.12-10-fix1",
+  "dateOwnerTimezone": "2026-10-08",
+  "timezone": "Asia/Yekaterinburg",
+  "status": "local-fix-verified-corrected-full-run-pending",
+  "publicationSafe": false,
+  "contentFrozen": false,
+  "semanticAccuracyCertified": false,
+  "baseline": {
+    "archive": "ikna-0.12-press-round-10-quality.zip",
+    "files": 599,
+    "sizeBytes": 7570859,
+    "sha256": "c17a02a2e552cf6d9056f9ddefe84057c105dfc0accc58592b37a7ae8bdee5b7",
+    "allSourceBytesMatchedBeforeEditing": true,
+    "changedPaths": [
+      "docs/CATALOGUE-V2.md",
+      "docs/DOCUMENTATION.md",
+      "docs/EVERYDAY-POOL.md",
+      "docs/MORPHOLOGY.md",
+      "docs/PLAN-0.12.md",
+      "tools/catalog/japanese_boundary.py",
+      "tools/catalog/selection_experiment.py",
+      "tools/catalog/selection_policy.py",
+      "tools/catalog/test_selection_quality.py"
+    ],
+    "explicitAdditions": [
+      "docs/ROUND-0.12-10-fix1.md",
+      "docs/evidence/everyday-round10-fix1.json"
+    ],
+    "preservedAppSharedDesktopSkillsSigningFiles": 360
+  },
+  "failedRun": {
+    "url": "https://github.com/d1d2dopamine/ikna/actions/runs/37647495700",
+    "runId": 37647495700,
+    "headSha": "bee52bb5e9c92d438a41c50b5697bdd018679d49",
+    "conclusion": "failure",
+    "jobId": 112881990073,
+    "selectionStep": {
+      "name": "Select once over the saved pool and retain complete material",
+      "status": "completed",
+      "conclusion": "failure",
+      "number": 9,
+      "started_at": "2026-10-07T15:53:03Z",
+      "completed_at": "2026-10-07T17:56:21Z"
+    },
+    "completeOutputUpload": "skipped",
+    "evaluation": "skipped",
+    "artifacts": [
+      {
+        "name": "catalogue-v2-everyday-quality-report",
+        "sizeBytes": 476,
+        "digest": "sha256:799cc3a92949ed05bdc352b346e3e668ff30ea0e62f9f1bb670c5b0ccfc0af9b"
+      }
+    ],
+    "tracebackSource": "Owner supplied exact traceback in this conversation; public job logs required authentication.",
+    "exception": "ValueError: Japanese choice is not one complete ICU token",
+    "tracebackPath": [
+      "everyday_selection.build_report",
+      "selection_experiment.build_report",
+      "build_context_analysis",
+      "JapaneseBoundaryGuard.filter",
+      "filter_boundaries"
+    ],
+    "actualFailedSentenceKnown": false,
+    "completedSelectionAvailable": false
+  },
+  "reproductions": {
+    "beforePatchRealPinnedEngine": [
+      "今日はＡとAを見た。",
+      "今日はßとSSを見た。",
+      "今日はカとｶを見た。",
+      "私はＫとKを書きます。"
+    ],
+    "allRaisedOriginalExceptionBeforePatch": true,
+    "scope": "Constructed regressions, not claimed corpus source observations",
+    "rootCause": "Legacy lower()-uniqueness differs from global NFKC/casefold identity; canonical aliases made the guard see multiple complete token occurrences."
+  },
+  "correction": {
+    "policy": "boundary-diversity-v2",
+    "rule": "Count complete canonical source tokens; defer choices with multiple occurrences, retain other eligible choices.",
+    "counter": "canonical-target-ambiguous-deferred",
+    "counterUnit": "rejected choice entries, not unique source sentences",
+    "allLearningLanguages": true,
+    "legacySelectionChanged": false,
+    "targetIdentityChanged": false,
+    "frequencyRanksChanged": false,
+    "originalPoolRetained": true,
+    "strictMissingTokenAndAnalyzerChecksRetained": true,
+    "japaneseAnalysisBeforeOtherPairSelection": true,
+    "progressLogs": true,
+    "resumableCheckpointAdded": false
+  },
+  "executedChecks": [
+    {
+      "check": "test_selection_quality.py",
+      "exitCode": 0,
+      "output": ".........Selection: staging admitted candidates\nSelection: staging complete (7 unique candidates)\nSelection: context analysis everyday/ja\nSelection: pair everyday/ja->ru\nSelection: complete\nSelection: staging admitted candidates\nSelection: staging complete (7 unique candidates)\nSelection: early Japanese analysis everyday/ja\nSelection: Japanese analysis complete; deferrals={'ja-morpheme-cut-deferred': 6, 'jaContextsChecked': 7, 'canonical-target-ambiguous-deferred': 8}\nSelection: pair everyday/ja->ru\nSelection: complete\n....\n----------------------------------------------------------------------\nRan 13 tests in 0.540s\n\nOK\n"
+    },
+    {
+      "check": "test_everyday_selection.py",
+      "exitCode": 0,
+      "output": ".Selection: staging admitted candidates\nSelection: staging complete (2 unique candidates)\nSelection: context analysis everyday/en\nSelection: pair everyday/en->es\nSelection: complete\n.Selection: staging admitted candidates\nSelection: staging complete (1 unique candidates)\nSelection: context analysis everyday/zh\nSelection: pair everyday/zh->en\nSelection: complete\nSelection: staging admitted candidates\nSelection: staging complete (1 unique candidates)\nSelection: context analysis everyday/ja\nSelection: pair everyday/ja->en\nSelection: complete\nSelection: staging admitted candidates\nSelection: staging complete (1 unique candidates)\nSelection: context analysis everyday/ko\nSelection: pair everyday/ko->en\nSelection: complete\n..Selection: staging admitted candidates\nSelection: staging complete (4 unique candidates)\nSelection: context analysis everyday/en\nSelection: pair everyday/en->es\nSelection: complete\n...Selection: staging admitted candidates\nSelection: staging complete (2 unique candidates)\nSelection: context analysis everyday/en\nSelection: pair everyday/en->es\nSelection: complete\n...Selection: staging admitted candidates\nSelection: staging complete (2 unique candidates)\nSelection: context analysis everyday/en\nSelection: pair everyday/en->es\nSelection: complete\n.....Selection: staging admitted candidates\nSelection: staging complete (2 unique candidates)\nSelection: context analysis everyday/en\nSelection: pair everyday/en->es\nSelection: complete\nSelection: staging admitted candidates\nSelection: staging complete (2 unique candidates)\nSelection: context analysis everyday/en\nSelection: pair everyday/en->es\nSelection: complete\n..\n----------------------------------------------------------------------\nRan 17 tests in 0.289s\n\nOK\n"
+    },
+    {
+      "check": "test_selection_policy.py",
+      "exitCode": 0,
+      "output": "Catalogue Part 10 selection contracts: OK\nSelection: staging admitted candidates\nSelection: staging complete (3 unique candidates)\nSelection: context analysis everyday/en\nSelection: pair everyday/en->es\nSelection: complete\nSelection: staging admitted candidates\nSelection: staging complete (3 unique candidates)\nSelection: context analysis everyday/en\nSelection: pair everyday/en->es\nSelection: complete\n"
+    },
+    {
+      "check": "test_selection_audit.py",
+      "exitCode": 0,
+      "output": ".......\n----------------------------------------------------------------------\nRan 7 tests in 0.021s\n\nOK\n"
+    },
+    {
+      "check": "test_segmentation.py",
+      "exitCode": 0,
+      "output": "test_chinese_dictionary_words_not_characters (__main__.SegmentationTests.test_chinese_dictionary_words_not_characters) ... ok\ntest_direct_links_and_cc0_filter_remain (__main__.SegmentationTests.test_direct_links_and_cc0_filter_remain) ... ok\ntest_duplicates_are_not_ambiguous_targets (__main__.SegmentationTests.test_duplicates_are_not_ambiguous_targets) ... ok\ntest_existing_languages_keep_their_tokenizer (__main__.SegmentationTests.test_existing_languages_keep_their_tokenizer) ... ok\ntest_frequencies_and_tokens_share_boundaries (__main__.SegmentationTests.test_frequencies_and_tokens_share_boundaries) ... ok\ntest_japanese_dictionary_words_and_particles (__main__.SegmentationTests.test_japanese_dictionary_words_and_particles) ... ok\ntest_korean_eojeol_not_syllables (__main__.SegmentationTests.test_korean_eojeol_not_syllables) ... ok\ntest_limits_are_utf16_like_the_app (__main__.SegmentationTests.test_limits_are_utf16_like_the_app) ... ok\ntest_missing_icu_is_not_a_character_fallback (__main__.SegmentationTests.test_missing_icu_is_not_a_character_fallback) ... ok\ntest_non_cjk_does_not_load_icu (__main__.SegmentationTests.test_non_cjk_does_not_load_icu) ... ok\ntest_pipeline_builds_all_three_cjk_languages (__main__.SegmentationTests.test_pipeline_builds_all_three_cjk_languages) ... ok\ntest_single_cjk_word_but_not_latin_letter (__main__.SegmentationTests.test_single_cjk_word_but_not_latin_letter) ... ok\ntest_split_surrogates_are_rejected (__main__.SegmentationTests.test_split_surrogates_are_rejected) ... ok\ntest_target_is_not_an_earlier_substring (__main__.SegmentationTests.test_target_is_not_an_earlier_substring) ... ok\ntest_utf16_after_emoji_and_supplementary_han (__main__.SegmentationTests.test_utf16_after_emoji_and_supplementary_han) ... ok\ntest_utf16_fixtures_for_the_kotlin_reader (__main__.SegmentationTests.test_utf16_fixtures_for_the_kotlin_reader) ... ok\n\n----------------------------------------------------------------------\nRan 16 tests in 0.026s\n\nOK\n"
+    },
+    {
+      "check": "test_catalogue_v2_contract.py",
+      "exitCode": 0,
+      "output": "Catalogue v2 contract fixtures: OK\n  decks: 1\n  target rows: 1\n  exact target ids: 1\n  distinct source contexts: 2\n"
+    },
+    {
+      "check": "test_build_catalogue_v2.py",
+      "exitCode": 0,
+      "output": "Catalogue v2 builder contracts: OK\n"
+    },
+    {
+      "check": "test_v1_v2_parity.py",
+      "exitCode": 0,
+      "output": "Catalogue v1/v2 primitive parity: OK\n"
+    },
+    {
+      "check": "test_ingestion.py",
+      "exitCode": 0,
+      "output": "Catalogue v2 ingestion contracts: OK\n"
+    }
+  ],
+  "cliFixture": {
+    "selectionAndCompleteEvaluationExecuted": true,
+    "qualityGatePassed": true,
+    "memberships": 1,
+    "fullCorpusEvidence": false
+  },
+  "realEngineAdmittedJapaneseFixture": {
+    "contexts": 7,
+    "ambiguousChoiceEntriesDeferred": 8,
+    "completeMaterialGatePassed": true,
+    "engine": "SudachiPy 0.6.10",
+    "dictionary": "SudachiDict-core 20250825",
+    "dictionaryBinarySha256": "d28ffc33b196e5c2ca731e8147fd1ef47d35ba79928ef9f0871962859d70ac23"
+  },
+  "sourceSha256": {
+    "tools/catalog/japanese_boundary.py": "8b4b7eabe6a2c5e06e595ed6583c4af45b0969c69dd424137d5aea0dabaa8c45",
+    "tools/catalog/selection_experiment.py": "4206ed4a8db3579e614ce73b8290cb69dc2fb50f761d87895073473c7915054f",
+    "tools/catalog/selection_policy.py": "6100810b5bd7eca23b063f90dd0c1e81cb3a7f55ba3aeab76f02be84720fb3ae",
+    "tools/catalog/test_selection_quality.py": "f802b055897cabf8e9de0812f763a2c98b1a25c680e1e9abc4dcffb26bd4b532"
+  },
+  "next": {
+    "action": "Commit complete ZIP; new workflow_dispatch on updated branch, not rerun of old commit",
+    "workflow": "catalogue v2 everyday quality handoff",
+    "inputPins": "Unchanged saved-pool checkpoint defaults from run 37458524156",
+    "newSourceAcquisition": false,
+    "fullRunPerformedHere": false,
+    "reasonOneFullRunRequired": "Failed run did not persist a completed selection.",
+    "afterSuccess": [
+      "Part 11 selected-material census/content snapshot",
+      "Part 12 storage/client acceptance"
+    ],
+    "newRoutineManualRound": false
+  },
+  "repositoryChecks": [
+    {
+      "command": "python3 tools/check_text.py",
+      "exitCode": 0,
+      "output": "Repository text is valid UTF-8/NFC; 535 text files and 7 localization tables passed.\n"
+    },
+    {
+      "command": "python3 tools/check_localization.py",
+      "exitCode": 0,
+      "output": "Language registry OK: 7 languages, 714 keys each; English fallback, tokens, labels and selectors agree.\n"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "output": ""
+    }
+  ]
+}

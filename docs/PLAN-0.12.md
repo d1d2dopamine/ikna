@@ -47,7 +47,7 @@ to rerun until a source can publish. Preserve dependency order below:
 | --- | --- | --- |
 | Final Everyday pool | Historical Part 7, [EVERYDAY-POOL.md](EVERYDAY-POOL.md) | Run 37458524156 succeeded; full pinned pool retained by Actions and saved by owner. Small review artifact audited locally; full-pool bytes/material have not been independently audited in this round |
 | World provenance coverage | Historical Part 9, full-provenance runbook | Native identity and bounded attribution proven; reusable/hash-bound shards and offline merge review implemented; old run failed final completeness gate; exact counters and all-document evidence open |
-| Deterministic selection | Historical Part 10 | Round-10 Japanese boundary guard, diverse alternate ordering, complete material export and saved-pool workflow implemented/tested locally. One real quality handoff run pending; no exhaustive owner/manual review prerequisite |
+| Deterministic selection | Historical Part 10 | Round-10 Japanese boundary guard, diverse alternate ordering, complete material export and saved-pool workflow implemented/tested locally. Run 37647495700 failed on canonical occurrence ambiguity; fix-1 regressions pass locally, corrected full run pending; no exhaustive owner/manual review prerequisite |
 | Final content census/freeze | Historical Part 11 | Next after quality handoff: census of complete selected material, exclusions, provenance and reproducible snapshot; no preview-only census or selection rerun |
 | Final storage/publication format | Historical Part 12 | Earlier lossless experiments exist; final frozen-content measurement and client acceptance open |
 | Target relations and context evidence | Historical Parts 13–14 | Existing exact identity is retained; richer relations and replayable context history open |
@@ -305,6 +305,17 @@ the accepted quality profile and semantic limitations; automatic checks do not
 prove every translation correct. World provenance/publication stay separately
 gated. [ROUND-0.12-10.md](ROUND-0.12-10.md) and
 [EVERYDAY-POOL.md](EVERYDAY-POOL.md) own evidence/run instructions.
+
+### Round 10 fix 1 — failed-run recovery
+
+Run `37647495700` failed during Japanese analysis: legacy lower()-uniqueness
+conflicted with global NFKC/casefold identity. No complete selection was saved.
+Fix 1 defers ambiguous choices in quality v2, keeps unrelated targets and strict
+boundary/source gates, validates Japanese analysis first after staging, and emits
+progress/context diagnostics. Real-engine and full-output fixture checks pass.
+Commit the fix and start a new quality-handoff dispatch on the updated branch;
+keep the saved-pool pins. Full-run evidence remains pending; Part 11/12 follow.
+[ROUND-0.12-10-fix1.md](ROUND-0.12-10-fix1.md) owns details. No new manual round.
 
 ## Release blockers
 

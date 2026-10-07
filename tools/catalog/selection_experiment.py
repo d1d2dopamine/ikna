@@ -30,7 +30,7 @@ from catalogue_v2 import target_id
 from ingest.model import Candidate
 from morphology.store import MorphologyResolver
 from segmentation import IcuUnavailable, prepare, utf16_length
-from selection_policy import choose_contexts, select_target_ids, quarantine_reason, QUARANTINE_PATH
+from selection_policy import choose_contexts, select_target_ids, quarantine_reason, QUARANTINE_PATH, filter_unique_choices
 from japanese_boundary import JapaneseBoundaryGuard
 from selection_output import SelectionOutput
 
@@ -144,6 +144,8 @@ def stage(paths: Iterable[str], db_path: str, batch_size: int = 50000) -> dict[s
                     except Exception as exc:
                         raise ValueError(f"{source}:{number}: {exc}") from exc
                     stats["inputCandidates"] += 1
+                    if stats["inputCandidates"] % 250000 == 0:
+                        print(f"Selection: staged {stats['inputCandidates']} candidate rows", file=sys.stderr, flush=True)
                     origins=[origin.to_dict() for origin in record.origins]
                     scores=[origin.alignment_score for origin in record.origins if origin.alignment_score is not None]
                     ckey=_context_key(record.collection,record.lang,record.context)
@@ -182,6 +184,7 @@ def build_context_analysis(
     db: sqlite3.Connection, collection: str, lang: str, ranks: dict[str,int], function_top: int,
     batch_size: int = 5000,
     japanese_guard: JapaneseBoundaryGuard | None = None,
+    canonical_unique: bool = False,
 ) -> dict:
     # A context is shared by many meaning languages (especially MASSIVE).  The
     # historical experiment tokenised and ranked that same sentence once per
@@ -198,17 +201,26 @@ def build_context_analysis(
     if existing == expected and expected:
         return {}
     db.execute("DELETE FROM context_analysis WHERE collection=? AND lang=?",(collection,lang))
-    batch=[]; quality_counts=Counter()
+    batch=[]; quality_counts=Counter(); checked = 0
     for context_key,text in db.execute(
         "SELECT context_key,context FROM context WHERE collection=? AND lang=? ORDER BY context_key",
         (collection,lang),
     ):
         token_count=len(core.words(text,lang))
         choices=phrase_choices(text,ranks,lang,function_top)
-        if lang == "ja" and japanese_guard is not None:
-            choices, rejected, _ = japanese_guard.filter(text, choices)
-            quality_counts.update(rejected)
-            quality_counts["jaContextsChecked"] += 1
+        try:
+            if canonical_unique:
+                choices, rejected, _ = filter_unique_choices(text, choices, lang)
+                quality_counts.update(rejected)
+            if lang == "ja" and japanese_guard is not None:
+                choices, rejected, _ = japanese_guard.filter(text, choices)
+                quality_counts.update(rejected)
+                quality_counts["jaContextsChecked"] += 1
+        except ValueError as exc:
+            raise ValueError(f"Context analysis failed: collection={collection} lang={lang} key={context_key} text={text[:512]!r}: {exc}") from exc
+        checked += 1
+        if checked % 25000 == 0:
+            print(f"Selection: analyzed {collection}/{lang} {checked}/{expected} contexts", file=sys.stderr, flush=True)
         batch.append((
             collection,lang,context_key,token_count,
             json.dumps(choices,ensure_ascii=False,separators=(",", ":")),
@@ -301,7 +313,9 @@ def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,
     except IcuUnavailable as exc: raise ValueError(str(exc)) from exc
     japanese_guard = JapaneseBoundaryGuard() if args.quality_policy == "boundary-diversity-v2" and "ja" in langs else None
     try:
+        print("Selection: staging admitted candidates", file=sys.stderr, flush=True)
         stage_stats=stage(args.candidates,args.staging)
+        print(f"Selection: staging complete ({stage_stats['uniqueCandidates']} unique candidates)", file=sys.stderr, flush=True)
     except Exception:
         if japanese_guard: japanese_guard.close()
         raise
@@ -313,13 +327,25 @@ def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,
     try:
         if args.selected_output: output = SelectionOutput(args.selected_output)
         pairs=db.execute("SELECT DISTINCT collection,lang,meaning_lang FROM candidate ORDER BY collection,lang,meaning_lang").fetchall()
+        # Validate the new Japanese analyzer path before spending time selecting
+        # other languages. Pair ordering and frequency/identity semantics stay fixed.
+        if japanese_guard:
+            for collection, lang in sorted({(c, l) for c, l, m in pairs if l == "ja" and m in meanings and m != l}):
+                key = (collection, lang)
+                print(f"Selection: early Japanese analysis {collection}/{lang}", file=sys.stderr, flush=True)
+                rank_cache[key] = build_ranks(db, collection, lang)
+                quality_counts.update(build_context_analysis(db, collection, lang, rank_cache[key], args.function_top,
+                                                            japanese_guard=japanese_guard, canonical_unique=True))
+                print(f"Selection: Japanese analysis complete; deferrals={dict(quality_counts)}", file=sys.stderr, flush=True)
         for collection,lang,meaning_lang in pairs:
             if lang not in langs or meaning_lang not in meanings or lang==meaning_lang: continue
             key=(collection,lang)
             if key not in rank_cache:
+                print(f"Selection: context analysis {collection}/{lang}", file=sys.stderr, flush=True)
                 rank_cache[key]=build_ranks(db,collection,lang)
                 quality_counts.update(build_context_analysis(db,collection,lang,rank_cache[key],args.function_top,
-                                                            japanese_guard=japanese_guard))
+                                                            japanese_guard=japanese_guard, canonical_unique=diverse))
+            print(f"Selection: pair {collection}/{lang}->{meaning_lang}", file=sys.stderr, flush=True)
             targets,pair_stats=pair_evidence(
                 db,collection,lang,meaning_lang,morphology,args.evidence_context_limit, diverse=diverse
             )
@@ -401,11 +427,13 @@ def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,
                                        "counts": dict(sorted(quality_counts.items())),
                                        "contexts": "prefer low written-token overlap after source/alignment evidence; legacy duplicate threshold unchanged",
                                        "unknownCuts": "deferred from selection; original pool retained", "targetIdentityChanged": False,
+                                       "canonicalOccurrence": "one complete source token per NFKC/casefold target identity; ambiguous occurrences deferred",
                                        "semanticAccuracyCertified": False}
             report["qualityPolicy"]["sourceQuarantine"] = {"sha256": hashlib.sha256(QUARANTINE_PATH.read_bytes()).hexdigest(),
                 "scope": "exact source version/ref/text on either side; originals preserved; no silent spelling correction"}
         if output:
             report["selectedMaterial"] = output.finish()
+        print("Selection: complete", file=sys.stderr, flush=True)
         return report,preview
     finally:
         if output: output.abort()

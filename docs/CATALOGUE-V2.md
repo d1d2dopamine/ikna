@@ -195,6 +195,11 @@ and compares the bound baseline reports. Two observed Spanish source cases are
 quarantined by exact reference/version/text hash in both translation directions;
 original source text is retained. Exact old identity deltas are preview-only.
 
+Round-10 fix 1 adds canonical complete-token occurrence counting to quality v2:
+ambiguous NFKC/casefold aliases are deferred without rewriting identities or
+blocking other targets. [ROUND-0.12-10-fix1.md](ROUND-0.12-10-fix1.md) records the
+failed real run, reproduction, regression checks and new-dispatch recovery.
+
 The full selected JSONL is a non-publishing intermediate, not release packs or
 learner state. Part 11 must census the saved selection; Part 12 measures lossless
 storage/client limits against the accepted snapshot. Do not rebuild through the

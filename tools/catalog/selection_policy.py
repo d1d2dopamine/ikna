@@ -11,8 +11,27 @@ from collections import Counter
 from functools import lru_cache
 from typing import Any, Iterable
 from segmentation import word_spans
+from catalogue_v2 import canonical_target
 
 QUARANTINE_PATH = Path(__file__).resolve().parent / "sources/selection-quarantine.json"
+
+
+def filter_unique_choices(text, choices, lang):
+    """One source span per global canonical identity; do not choose an arbitrary occurrence."""
+    occurrences = Counter(canonical_target(s.surface) for s in word_spans(text, lang))
+    kept, rejected, examples = [], Counter(), []
+    for choice in choices:
+        count = occurrences[canonical_target(choice[1])]
+        if count == 0:
+            raise ValueError("Selected choice is not one complete source token")
+        if count > 1:
+            reason = "canonical-target-ambiguous-deferred"
+            rejected[reason] += 1
+            examples.append({"targetId": choice[2], "text": choice[1], "reason": reason,
+                             "context": text, "canonicalOccurrences": count})
+        else:
+            kept.append(choice)
+    return kept, rejected, examples
 
 
 @lru_cache(maxsize=1)

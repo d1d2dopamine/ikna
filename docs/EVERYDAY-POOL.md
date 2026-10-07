@@ -173,7 +173,8 @@ Owner decision, 2026-10-07: round 10 ends routine manual-selection work. The own
 need not assess unfamiliar languages or every card; round-09 viewer/notes are
 optional historical aids. Continue through automated checks and the later stages.
 
-After committing the round-10 ZIP, choose **Actions → catalogue v2 everyday quality
+After committing the round-10 fix-1 ZIP, start a new dispatch (not Re-run jobs
+on the old commit): choose **Actions → catalogue v2 everyday quality
 handoff → Run workflow**. Leave the five prefilled inputs unchanged:
 
 | Input | Exact checkpoint |

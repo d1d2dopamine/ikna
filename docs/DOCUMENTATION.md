@@ -125,3 +125,5 @@ Never trust these from memory or from another document; read the owner:
 - DESKTOP.md counts labelled "at port time" — historical by intent; do not
   refresh them as if they were current.
 - This map itself — whenever documents are added, renamed or re-owned.
+
+- [Round 10 fix 1](ROUND-0.12-10-fix1.md): canonical occurrence failure and corrected automatic handoff.
