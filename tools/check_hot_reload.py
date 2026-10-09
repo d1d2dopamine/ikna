@@ -82,6 +82,16 @@ def main() -> int:
         "launcher must tolerate temporary source-tree replacement",
     )
     require(
+        '$env:IKNA_PROFILE_RESTART_FILE = Join-Path $LogsDir' in launcher
+        and 'Receive-IknaProfileRestart -Path $env:IKNA_PROFILE_RESTART_FILE' in launcher
+        and launcher.index('Receive-IknaProfileRestart -Path') < launcher.index('Press Enter to restart'),
+        "confirmed profile switches must restart after process exit without requiring Enter",
+    )
+    require(
+        'Remove-Item $Path -Force' in process and 'return $value -eq "RESTART"' in process,
+        "profile restart requests must be validated and consumed once",
+    )
+    require(
         "tools\\dev-hot-reload.ps1" in cmd,
         "root cmd launcher must delegate to the PowerShell supervisor",
     )

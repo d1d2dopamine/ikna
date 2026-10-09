@@ -1,7 +1,6 @@
 package dev.ikna.ui.settings
 
 import dev.ikna.data.prefs.suppressedOf
-import dev.ikna.data.dev.DeveloperScenario
 import dev.ikna.data.dev.IknaDataProfile
 import dev.ikna.ui.text.S
 import dev.ikna.ui.text.UI_LANGUAGES
@@ -56,7 +55,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
-import dev.ikna.MainActivity
 import dev.ikna.audio.SpeakerStatus
 import dev.ikna.data.export.SettingsBackup
 import dev.ikna.data.update.UpdateCheck
@@ -99,7 +97,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
-import kotlin.system.exitProcess
 
 /**
  * Settings: one screen, with a row of jumps pinned above it.
@@ -147,15 +144,9 @@ fun SettingsScreen(
     // what you want.
     var wipeArmed by remember { mutableStateOf(false) }
 
-    // The rare and the irreversible live behind one expander. Closed by default,
-    // so nothing here can be hit while scrolling past it.
-    // An active developer profile must surface its way back without hunting:
-    // the advanced block starts open while Developer Mode is on.
-    var advancedOpen by remember { mutableStateOf(container.isDeveloperMode) }
-    var developerArmed by remember { mutableStateOf(false) }
-    var selectedDeveloperScenario by remember(settings.developerScenario) {
-        mutableStateOf(DeveloperScenario.fromId(settings.developerScenario))
-    }
+    // Rare stays closed; DEV exit is visible outside the fold.
+    var advancedOpen by remember { mutableStateOf(false) }
+    var developerRestarting by remember { mutableStateOf(false) }
 
     // The update section keeps its own answer rather than reading a stored one:
     // a check made here is a question asked on purpose, and its result belongs to
@@ -179,11 +170,13 @@ fun SettingsScreen(
     var diagnostics by remember { mutableStateOf<String?>(null) }
 
     fun restartWithProfile(profile: IknaDataProfile) {
+        check(!developerRestarting)
         container.requestDataProfile(profile)
-        val restart = Intent(context, MainActivity::class.java)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        context.startActivity(restart)
-        exitProcess(0)
+        try { dev.ikna.ProfileRestartActivity.restart(context); developerRestarting = true }
+        catch (failure: Exception) {
+            container.requestDataProfile(container.dataProfile)
+            throw failure
+        }
     }
 
     // Navigation keeps both destinations composed until Shared Axis X finishes.
@@ -739,7 +732,7 @@ fun SettingsScreen(
                                         settings.reminderMinute
                                     )
                                 }
-                                if (enabled && Build.VERSION.SDK_INT >= 33) {
+                                if (enabled && !container.isDeveloperMode && Build.VERSION.SDK_INT >= 33) {
                                     notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
                                 }
                             }
@@ -1033,115 +1026,46 @@ fun SettingsScreen(
 
                 item(key = ID_ADVANCED, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
                     IknaSettingsSection(S.t("set.063"), null) {
+                        if (container.isDeveloperMode) {
+                            dev.ikna.ui.dev.DeveloperProfileControls(
+                                profile = container.dataProfile, enabled = !developerRestarting,
+                                onSwitch = ::restartWithProfile
+                            )
+                            Spacer(Modifier.height(12.dp))
+                        }
                         IknaTextButton(
                             label = if (advancedOpen) S.t("set.065") else S.t("set.066"),
-                            onClick = { advancedOpen = !advancedOpen },
+                            onClick = { if (!developerRestarting) advancedOpen = !advancedOpen },
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
                         if (advancedOpen) {
                             Spacer(Modifier.height(16.dp))
-                            Text(
-                                text = S.t("dev.002"),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = S.t("dev.003"),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(Modifier.height(10.dp))
-
                             if (!container.isDeveloperMode) {
-                                if (!developerArmed) {
-                                    IknaWideButton(
-                                        label = S.t("dev.005"),
-                                        height = 52.dp,
-                                        onClick = { developerArmed = true }
-                                    )
-                                } else {
-                                    Text(
-                                        text = S.t("dev.004"),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.error
-                                    )
-                                    Spacer(Modifier.height(10.dp))
-                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        IknaWideButton(
-                                            label = S.t("dev.021"),
-                                            modifier = Modifier.weight(1f),
-                                            height = 52.dp,
-                                            onClick = { restartWithProfile(IknaDataProfile.DEVELOPER) }
-                                        )
-                                        IknaWideButton(
-                                            label = S.t("dev.022"),
-                                            modifier = Modifier.weight(1f),
-                                            height = 52.dp,
-                                            onClick = { developerArmed = false }
-                                        )
-                                    }
-                                }
+                                dev.ikna.ui.dev.DeveloperProfileControls(
+                                    profile = container.dataProfile, enabled = !developerRestarting,
+                                    onSwitch = ::restartWithProfile
+                                )
                             } else {
                                 container.developerTools?.let { tools ->
                                     dev.ikna.ui.dev.DeveloperToolsPanel(
-                                        tools = tools,
+                                        tools = tools, enabled = !developerRestarting,
                                         applyProductLimits = settings.developerApplyProductLimits,
                                         onOpen = onOpenDeveloper
                                     )
                                 }
                                 Spacer(Modifier.height(12.dp))
-                                Text(
-                                    text = S.t("dev.010"),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Spacer(Modifier.height(8.dp))
-                                DeveloperScenario.entries.chunked(2).forEach { row ->
-                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        row.forEach { scenario ->
-                                            IknaChip(
-                                                label = S.t(scenarioLabelKey(scenario)),
-                                                selected = selectedDeveloperScenario == scenario,
-                                                modifier = Modifier.weight(1f),
-                                                onClick = { selectedDeveloperScenario = scenario }
-                                            )
+                                dev.ikna.ui.dev.DeveloperScenarioControls(
+                                    scenarioId = settings.developerScenario, enabled = !developerRestarting,
+                                    onReseed = { scenario ->
+                                        check(!developerRestarting)
+                                        container.requestDeveloperScenario(scenario)
+                                        try { restartWithProfile(IknaDataProfile.DEVELOPER) }
+                                        catch (failure: Exception) {
+                                            container.cancelDeveloperScenarioRequest()
+                                            throw failure
                                         }
                                     }
-                                    Spacer(Modifier.height(6.dp))
-                                }
-                                Text(
-                                    text = S.t("dev.018"),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Spacer(Modifier.height(10.dp))
-                                IknaWideButton(
-                                    label = S.t("dev.017"),
-                                    height = 52.dp,
-                                    enabled = !busy,
-                                    onClick = {
-                                        val sandbox = container.developerSandbox ?: return@IknaWideButton
-                                        busy = true
-                                        scope.launch {
-                                            val result = withContext(Dispatchers.IO) {
-                                                runCatching { sandbox.seed(selectedDeveloperScenario) }
-                                            }
-                                            busy = false
-                                            if (result.isSuccess) {
-                                                restartWithProfile(IknaDataProfile.DEVELOPER)
-                                            } else {
-                                                message = S.t("diag.008")
-                                            }
-                                        }
-                                    }
-                                )
-                                Spacer(Modifier.height(8.dp))
-                                IknaTextButton(
-                                    label = S.t("dev.006"),
-                                    onClick = { restartWithProfile(IknaDataProfile.REAL) },
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
 
@@ -1235,13 +1159,7 @@ fun SettingsScreen(
                                             // and session state all outlive the tables
                                             // otherwise, and a half-empty app in memory
                                             // looks exactly like a bug.
-                                            val restart = Intent(context, MainActivity::class.java)
-                                                .addFlags(
-                                                    Intent.FLAG_ACTIVITY_NEW_TASK or
-                                                        Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                                )
-                                            context.startActivity(restart)
-                                            exitProcess(0)
+                                            dev.ikna.ProfileRestartActivity.restart(context)
                                         }
                                     }
                                 }
@@ -1424,14 +1342,6 @@ private const val ID_FONT = "font"
 private const val ID_REMINDER = "reminder"
 private const val ID_DATA = "data"
 private const val ID_UPDATE = "update"
-private fun scenarioLabelKey(scenario: DeveloperScenario): String = when (scenario) {
-    DeveloperScenario.EMPTY -> "dev.011"
-    DeveloperScenario.EARLY_HISTORY -> "dev.012"
-    DeveloperScenario.MATURE_HISTORY -> "dev.013"
-    DeveloperScenario.BROWSE_READY -> "dev.014"
-    DeveloperScenario.RICH_STATISTICS -> "dev.015"
-    DeveloperScenario.RETURN_AFTER_BREAK -> "dev.016"
-}
 
 private const val ID_ADVANCED = "advanced"
 

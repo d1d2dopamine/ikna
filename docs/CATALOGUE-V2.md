@@ -169,8 +169,9 @@ so several inflected surfaces of one lemma do not crowd out other useful targets
 The exact `targetId` is never merged or rewritten.
 
 Alternate contexts are selected separately and near-duplicate sentences are
-suppressed with an inspectable token-overlap rule. The 8,000 value is a safety
-budget, not a fill target. Decks below `minDeck` are omitted with an explicit
+suppressed with an inspectable token-overlap rule. The owner-approved 12,000 value is the maximum safety
+budget, not a fill target. Smaller explicit budgets remain available for bounded
+experiments and replay of the historical 8,000-target snapshot. Decks below `minDeck` are omitted with an explicit
 reason, genuinely small decks above that threshold are reported as `publish-thin`,
 and no source material is weakened or fabricated merely to reach a count.
 
@@ -207,6 +208,15 @@ legacy pool sieve and reintroduce deferred occurrences. Exhaustive owner/manual
 language review is not a prerequisite; acceptance records automated coverage,
 bounded evidence and semantic limitations. [ROUND-0.12-10.md](ROUND-0.12-10.md)
 distinguishes local versus pending full-run evidence. World/publication gates remain.
+
+Round 15 completes the full local census of the saved Everyday selected file and
+reproduces the successful workflow quality report byte for byte. Its narrowly
+scoped [snapshot decision](evidence/everyday-round15/SNAPSHOT.json) accepts these
+exact rows for non-publishing Part 12 storage/client measurements, while keeping
+the historical quality report unchanged. [ROUND-0.12-15.md](ROUND-0.12-15.md)
+records all-deck counts, source/profile limitations and a bounded allocation
+witness. This does not accept installable packs, semantic accuracy, World/Knowledge
+or public release. Reuse the retained selected material without selecting again.
 
 ## Ingestion boundary
 
@@ -522,6 +532,16 @@ language pair for the same reason.
 
 ## Part 4.3 storage experiment
 
+Current selected-snapshot Part 12 work is recorded in
+[ROUND-0.12-16.md](ROUND-0.12-16.md). The new
+`tools/catalog/selected_storage_experiment.py` consumes the exact accepted
+Everyday intermediate, preserves all evidence and verifies reconstruction from
+serialized files. Its output is not the built PackChunk contract below; token,
+span, credit and provenance handoff requirements must be resolved before final
+pack/client acceptance. Reuse the saved selection without invoking the legacy
+builder's sieve or optional-context trimming. The command and scope are in
+[EVERYDAY-POOL.md](EVERYDAY-POOL.md#selected-snapshot-storage-measurement).
+
 The measured 8,000-target scale build made the physical-storage question
 separate from the content model: self-contained deck assets total 3,108.4 MiB as
 raw JSONL and 387.1 MiB as deterministic gzip. Gzip is therefore already doing
@@ -587,3 +607,18 @@ release. A reviewed v2 publication also uploads `BUILD.json` and `BUILD.md` befo
 `index.json`, so a later read-only release census can cross-check the exact build.
 Part 4.5 is the final planned Part 4 checkpoint; absent a real blocker, work moves
 to Part 5 rather than adding more pre-policy catalogue machinery.
+
+## 0.12 selection-engine planning checkpoint
+
+[SELECTION-ENGINE-PLAN-0.12.md](SELECTION-ENGINE-PLAN-0.12.md) records the proposed
+performance/reuse audit and bounded offline-classifier comparison. It is not an
+implemented policy change. Mandatory licence/provenance, structural and identity
+checks remain; translation correspondence, collection suitability and target
+usefulness are separate evaluation questions. A model score cannot certify all
+three or authorize publication. Current accepted selections remain the control.
+
+The active plan places this diagnosis/evaluation before expansion of expensive
+corpus experiments. No classifier, cache format or new workflow is selected here.
+Reproducibility and useful incremental quality must be demonstrated before a new
+selection policy is adopted. Existing sources, learner identity and assembly
+gates remain governed by their current contracts.

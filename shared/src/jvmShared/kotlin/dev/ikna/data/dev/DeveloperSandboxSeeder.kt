@@ -66,7 +66,7 @@ class DeveloperSandboxSeeder(
         settings.setAutoExport(false)
         settings.setDeveloperScenario(scenario.id)
 
-        val ids = installSyntheticContent(now)
+        val ids = if (scenario == DeveloperScenario.EMPTY) emptyList() else installSyntheticContent(now)
         when (scenario) {
             DeveloperScenario.EMPTY -> Unit
             DeveloperScenario.EARLY_HISTORY -> generateHistory(ids, days = 4, perDay = 12, now = now)

@@ -19,6 +19,8 @@ class IknaApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // The handoff process must not open Room, DataStore or background work.
+        if (Application.getProcessName() == packageName + ":profileRestart") return
         // Before anything can ask the theme for the chosen font.
         FontStore.baseDir = filesDir
         val profile = DataProfileStore(File(filesDir, DATA_PROFILE_FILE)).current()

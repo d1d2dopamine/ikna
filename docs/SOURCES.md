@@ -340,3 +340,14 @@ natural contexts are nested on that row instead of becoming extra cards. The rep
 therefore separate unique exact targets, target-deck memberships, retained natural
 contexts and unique source contexts. Scale is measured after the sieve, not inferred
 from the size of the downloaded corpora or inflated by context variants.
+
+## 0.12 replenishment research checkpoint
+
+The current [candidate review](CORPUS-CANDIDATES-0.12.md) and
+[large-source shortlist](LARGE-CORPUS-CANDIDATES-0.12.md) record proposed sources,
+exact metadata scope, primary terms and unresolved rights/quality gates. They do
+not extend the admitted source registry or the public catalogue. A licence for
+corpus packaging, software, a model or a portal's editorial pages is not evidence
+that the corresponding original/translated study texts can be redistributed.
+Source-publication rights and provenance must pass before production admission;
+the available download and its row count cannot substitute for those checks.

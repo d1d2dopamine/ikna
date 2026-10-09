@@ -1,6 +1,9 @@
 package dev.ikna.data.dev
 
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import java.nio.file.AtomicMoveNotSupportedException
 
 /** Which durable learner-data root the process opens at startup. */
 enum class IknaDataProfile {
@@ -48,15 +51,36 @@ class DataProfileStore(private val file: File) {
     }.getOrDefault(IknaDataProfile.REAL)
 
     fun set(profile: IknaDataProfile) {
-        file.parentFile?.mkdirs()
-        val temp = File(file.parentFile, file.name + ".tmp")
-        temp.writeText(profile.name)
-        if (!temp.renameTo(file)) {
-            file.writeText(profile.name)
-            temp.delete()
-        }
+        writeBootstrap(file, profile.name)
     }
 }
+
+/** A confirmed scenario is applied at startup, before the interactive UI opens. */
+class PendingDeveloperScenarioStore(private val file: File) {
+    fun current(): DeveloperScenario? {
+        if (!file.exists()) return null
+        val id = file.readText().trim()
+        return DeveloperScenario.entries.firstOrNull { it.id == id }
+            ?: error("Invalid pending developer scenario")
+    }
+    fun set(scenario: DeveloperScenario) = writeBootstrap(file, scenario.id)
+    fun clear() { Files.deleteIfExists(file.toPath()) }
+}
+
+private fun writeBootstrap(file: File, value: String) {
+    file.absoluteFile.parentFile.mkdirs()
+    val temp = Files.createTempFile(file.absoluteFile.parentFile.toPath(), file.name, ".tmp")
+    try {
+        Files.write(temp, value.toByteArray(Charsets.UTF_8))
+        try {
+            Files.move(temp, file.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+        } catch (_: AtomicMoveNotSupportedException) {
+            Files.move(temp, file.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        }
+    } finally { Files.deleteIfExists(temp) }
+}
+
+const val DEVELOPER_SCENARIO_REQUEST_FILE = "ikna-developer-scenario-request"
 
 const val REAL_DATABASE_FILE = "ikna.db"
 const val DEVELOPER_DATABASE_FILE = "ikna-developer.db"

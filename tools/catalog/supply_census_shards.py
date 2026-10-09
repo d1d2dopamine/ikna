@@ -514,7 +514,7 @@ def parser() -> argparse.ArgumentParser:
     pair.add_argument("--meanings", default=",".join(core.MEANINGS))
     pair.add_argument("--staging", required=True)
     pair.add_argument("--out", required=True)
-    pair.add_argument("--max-deck", type=int, default=8000)
+    pair.add_argument("--max-deck", type=core.v2_deck_budget, default=core.V2_MAX_DECK_TARGETS)
     pair.add_argument("--min-deck", type=int, default=40)
     pair.add_argument("--function-top", type=int, default=core.FUNCTION_TOP)
 
@@ -524,7 +524,7 @@ def parser() -> argparse.ArgumentParser:
     everyday.add_argument("--meanings", default=",".join(core.MEANINGS))
     everyday.add_argument("--staging", required=True)
     everyday.add_argument("--out", required=True)
-    everyday.add_argument("--max-deck", type=int, default=8000)
+    everyday.add_argument("--max-deck", type=core.v2_deck_budget, default=core.V2_MAX_DECK_TARGETS)
     everyday.add_argument("--min-deck", type=int, default=40)
     everyday.add_argument("--function-top", type=int, default=core.FUNCTION_TOP)
 
@@ -533,7 +533,7 @@ def parser() -> argparse.ArgumentParser:
     assemble.add_argument("--knowledge-shards", nargs="+", required=True)
     assemble.add_argument("--learn", default=",".join(core.LEARNABLE))
     assemble.add_argument("--meanings", default=",".join(core.MEANINGS))
-    assemble.add_argument("--max-deck", type=int, default=8000)
+    assemble.add_argument("--max-deck", type=core.v2_deck_budget, default=core.V2_MAX_DECK_TARGETS)
     assemble.add_argument("--min-deck", type=int, default=40)
     assemble.add_argument("--function-top", type=int, default=core.FUNCTION_TOP)
     assemble.add_argument("--json", required=True)

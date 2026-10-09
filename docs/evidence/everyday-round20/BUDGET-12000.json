@@ -1,0 +1,2670 @@
+{
+  "additionalMembershipsRange": [
+    0,
+    161978
+  ],
+  "assumption": "same inputs, ranks, evidence and allocation order; remaining candidates may collide",
+  "baselineBudget": 8000,
+  "baselineIncludedMemberships": 928162,
+  "below1000UnaffectedByBudget": 73,
+  "decks": [
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "de-en-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 64137
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1432,
+      "deckId": "de-en-everyday-beginner",
+      "futureTargetsUpperBound": 1432,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3470,
+      "deckId": "de-en-everyday-middle",
+      "futureTargetsUpperBound": 3470,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "de-es-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 16392
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1435,
+      "deckId": "de-es-everyday-beginner",
+      "futureTargetsUpperBound": 1435,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3450,
+      "deckId": "de-es-everyday-middle",
+      "futureTargetsUpperBound": 3450,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "de-fr-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 26848
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1434,
+      "deckId": "de-fr-everyday-beginner",
+      "futureTargetsUpperBound": 1434,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3471,
+      "deckId": "de-fr-everyday-middle",
+      "futureTargetsUpperBound": 3471,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 6888,
+      "deckId": "de-it-everyday-advanced",
+      "futureTargetsUpperBound": 6888,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1431,
+      "deckId": "de-it-everyday-beginner",
+      "futureTargetsUpperBound": 1431,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2976,
+      "deckId": "de-it-everyday-middle",
+      "futureTargetsUpperBound": 2976,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "de-ja-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 8282
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1433,
+      "deckId": "de-ja-everyday-beginner",
+      "futureTargetsUpperBound": 1433,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3367,
+      "deckId": "de-ja-everyday-middle",
+      "futureTargetsUpperBound": 3367,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 798,
+      "deckId": "de-ko-everyday-advanced",
+      "futureTargetsUpperBound": 798,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 920,
+      "deckId": "de-ko-everyday-beginner",
+      "futureTargetsUpperBound": 920,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 764,
+      "deckId": "de-ko-everyday-middle",
+      "futureTargetsUpperBound": 764,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 4465,
+      "deckId": "de-pl-everyday-advanced",
+      "futureTargetsUpperBound": 4465,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1420,
+      "deckId": "de-pl-everyday-beginner",
+      "futureTargetsUpperBound": 1420,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2657,
+      "deckId": "de-pl-everyday-middle",
+      "futureTargetsUpperBound": 2657,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 6467,
+      "deckId": "de-pt-everyday-advanced",
+      "futureTargetsUpperBound": 6467,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1427,
+      "deckId": "de-pt-everyday-beginner",
+      "futureTargetsUpperBound": 1427,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2918,
+      "deckId": "de-pt-everyday-middle",
+      "futureTargetsUpperBound": 2918,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "de-ru-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 21532
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1435,
+      "deckId": "de-ru-everyday-beginner",
+      "futureTargetsUpperBound": 1435,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3468,
+      "deckId": "de-ru-everyday-middle",
+      "futureTargetsUpperBound": 3468,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 2512,
+      "baselineTargets": 8000,
+      "deckId": "de-zh-everyday-advanced",
+      "futureTargetsUpperBound": 10512,
+      "included": true,
+      "unallocatedBudgetCandidates": 2512
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1431,
+      "deckId": "de-zh-everyday-beginner",
+      "futureTargetsUpperBound": 1431,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3202,
+      "deckId": "de-zh-everyday-middle",
+      "futureTargetsUpperBound": 3202,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "en-de-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 25227
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1437,
+      "deckId": "en-de-everyday-beginner",
+      "futureTargetsUpperBound": 1437,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3491,
+      "deckId": "en-de-everyday-middle",
+      "futureTargetsUpperBound": 3491,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "en-es-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 16118
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1437,
+      "deckId": "en-es-everyday-beginner",
+      "futureTargetsUpperBound": 1437,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3489,
+      "deckId": "en-es-everyday-middle",
+      "futureTargetsUpperBound": 3489,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "en-fr-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 21880
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1437,
+      "deckId": "en-fr-everyday-beginner",
+      "futureTargetsUpperBound": 1437,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3491,
+      "deckId": "en-fr-everyday-middle",
+      "futureTargetsUpperBound": 3491,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "en-it-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 13599
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1437,
+      "deckId": "en-it-everyday-beginner",
+      "futureTargetsUpperBound": 1437,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3491,
+      "deckId": "en-it-everyday-middle",
+      "futureTargetsUpperBound": 3491,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "en-ja-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 14650
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1437,
+      "deckId": "en-ja-everyday-beginner",
+      "futureTargetsUpperBound": 1437,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3479,
+      "deckId": "en-ja-everyday-middle",
+      "futureTargetsUpperBound": 3479,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1405,
+      "deckId": "en-ko-everyday-advanced",
+      "futureTargetsUpperBound": 1405,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1357,
+      "deckId": "en-ko-everyday-beginner",
+      "futureTargetsUpperBound": 1357,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1639,
+      "deckId": "en-ko-everyday-middle",
+      "futureTargetsUpperBound": 1639,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 305,
+      "baselineTargets": 8000,
+      "deckId": "en-pl-everyday-advanced",
+      "futureTargetsUpperBound": 8305,
+      "included": true,
+      "unallocatedBudgetCandidates": 305
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1437,
+      "deckId": "en-pl-everyday-beginner",
+      "futureTargetsUpperBound": 1437,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3411,
+      "deckId": "en-pl-everyday-middle",
+      "futureTargetsUpperBound": 3411,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "en-pt-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 19365
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1437,
+      "deckId": "en-pt-everyday-beginner",
+      "futureTargetsUpperBound": 1437,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3489,
+      "deckId": "en-pt-everyday-middle",
+      "futureTargetsUpperBound": 3489,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "en-ru-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 20807
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1437,
+      "deckId": "en-ru-everyday-beginner",
+      "futureTargetsUpperBound": 1437,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3491,
+      "deckId": "en-ru-everyday-middle",
+      "futureTargetsUpperBound": 3491,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 1435,
+      "baselineTargets": 8000,
+      "deckId": "en-zh-everyday-advanced",
+      "futureTargetsUpperBound": 9435,
+      "included": true,
+      "unallocatedBudgetCandidates": 1435
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1437,
+      "deckId": "en-zh-everyday-beginner",
+      "futureTargetsUpperBound": 1437,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3434,
+      "deckId": "en-zh-everyday-middle",
+      "futureTargetsUpperBound": 3434,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "es-de-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 14226
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1438,
+      "deckId": "es-de-everyday-beginner",
+      "futureTargetsUpperBound": 1438,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3485,
+      "deckId": "es-de-everyday-middle",
+      "futureTargetsUpperBound": 3485,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "es-en-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 35965
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1438,
+      "deckId": "es-en-everyday-beginner",
+      "futureTargetsUpperBound": 1438,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3494,
+      "deckId": "es-en-everyday-middle",
+      "futureTargetsUpperBound": 3494,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "es-fr-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 7022
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1438,
+      "deckId": "es-fr-everyday-beginner",
+      "futureTargetsUpperBound": 1438,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3445,
+      "deckId": "es-fr-everyday-middle",
+      "futureTargetsUpperBound": 3445,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 5141,
+      "deckId": "es-it-everyday-advanced",
+      "futureTargetsUpperBound": 5141,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1429,
+      "deckId": "es-it-everyday-beginner",
+      "futureTargetsUpperBound": 1429,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2748,
+      "deckId": "es-it-everyday-middle",
+      "futureTargetsUpperBound": 2748,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 1696,
+      "baselineTargets": 8000,
+      "deckId": "es-ja-everyday-advanced",
+      "futureTargetsUpperBound": 9696,
+      "included": true,
+      "unallocatedBudgetCandidates": 1696
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1437,
+      "deckId": "es-ja-everyday-beginner",
+      "futureTargetsUpperBound": 1437,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3295,
+      "deckId": "es-ja-everyday-middle",
+      "futureTargetsUpperBound": 3295,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 347,
+      "deckId": "es-ko-everyday-advanced",
+      "futureTargetsUpperBound": 347,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 458,
+      "deckId": "es-ko-everyday-beginner",
+      "futureTargetsUpperBound": 458,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 356,
+      "deckId": "es-ko-everyday-middle",
+      "futureTargetsUpperBound": 356,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2737,
+      "deckId": "es-pl-everyday-advanced",
+      "futureTargetsUpperBound": 2737,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1386,
+      "deckId": "es-pl-everyday-beginner",
+      "futureTargetsUpperBound": 1386,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2106,
+      "deckId": "es-pl-everyday-middle",
+      "futureTargetsUpperBound": 2106,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "es-pt-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 12124
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1437,
+      "deckId": "es-pt-everyday-beginner",
+      "futureTargetsUpperBound": 1437,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3478,
+      "deckId": "es-pt-everyday-middle",
+      "futureTargetsUpperBound": 3478,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "es-ru-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 14019
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1438,
+      "deckId": "es-ru-everyday-beginner",
+      "futureTargetsUpperBound": 1438,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3485,
+      "deckId": "es-ru-everyday-middle",
+      "futureTargetsUpperBound": 3485,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2374,
+      "deckId": "es-zh-everyday-advanced",
+      "futureTargetsUpperBound": 2374,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1360,
+      "deckId": "es-zh-everyday-beginner",
+      "futureTargetsUpperBound": 1360,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1882,
+      "deckId": "es-zh-everyday-middle",
+      "futureTargetsUpperBound": 1882,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "fr-de-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 24562
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1438,
+      "deckId": "fr-de-everyday-beginner",
+      "futureTargetsUpperBound": 1438,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3494,
+      "deckId": "fr-de-everyday-middle",
+      "futureTargetsUpperBound": 3494,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "fr-en-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 44488
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1438,
+      "deckId": "fr-en-everyday-beginner",
+      "futureTargetsUpperBound": 1438,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3494,
+      "deckId": "fr-en-everyday-middle",
+      "futureTargetsUpperBound": 3494,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "fr-es-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 7447
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1437,
+      "deckId": "fr-es-everyday-beginner",
+      "futureTargetsUpperBound": 1437,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3431,
+      "deckId": "fr-es-everyday-middle",
+      "futureTargetsUpperBound": 3431,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "fr-it-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 5654
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1438,
+      "deckId": "fr-it-everyday-beginner",
+      "futureTargetsUpperBound": 1438,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3328,
+      "deckId": "fr-it-everyday-middle",
+      "futureTargetsUpperBound": 3328,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 3927,
+      "baselineTargets": 8000,
+      "deckId": "fr-ja-everyday-advanced",
+      "futureTargetsUpperBound": 11927,
+      "included": true,
+      "unallocatedBudgetCandidates": 3927
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1434,
+      "deckId": "fr-ja-everyday-beginner",
+      "futureTargetsUpperBound": 1434,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3299,
+      "deckId": "fr-ja-everyday-middle",
+      "futureTargetsUpperBound": 3299,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 530,
+      "deckId": "fr-ko-everyday-advanced",
+      "futureTargetsUpperBound": 530,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 697,
+      "deckId": "fr-ko-everyday-beginner",
+      "futureTargetsUpperBound": 697,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 552,
+      "deckId": "fr-ko-everyday-middle",
+      "futureTargetsUpperBound": 552,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1560,
+      "deckId": "fr-pl-everyday-advanced",
+      "futureTargetsUpperBound": 1560,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1193,
+      "deckId": "fr-pl-everyday-beginner",
+      "futureTargetsUpperBound": 1193,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1392,
+      "deckId": "fr-pl-everyday-middle",
+      "futureTargetsUpperBound": 1392,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 50,
+      "baselineTargets": 8000,
+      "deckId": "fr-pt-everyday-advanced",
+      "futureTargetsUpperBound": 8050,
+      "included": true,
+      "unallocatedBudgetCandidates": 50
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1435,
+      "deckId": "fr-pt-everyday-beginner",
+      "futureTargetsUpperBound": 1435,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3182,
+      "deckId": "fr-pt-everyday-middle",
+      "futureTargetsUpperBound": 3182,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "fr-ru-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 29199
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1436,
+      "deckId": "fr-ru-everyday-beginner",
+      "futureTargetsUpperBound": 1436,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3490,
+      "deckId": "fr-ru-everyday-middle",
+      "futureTargetsUpperBound": 3490,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 5706,
+      "deckId": "fr-zh-everyday-advanced",
+      "futureTargetsUpperBound": 5706,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1435,
+      "deckId": "fr-zh-everyday-beginner",
+      "futureTargetsUpperBound": 1435,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2885,
+      "deckId": "fr-zh-everyday-middle",
+      "futureTargetsUpperBound": 2885,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 6709,
+      "deckId": "it-de-everyday-advanced",
+      "futureTargetsUpperBound": 6709,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1434,
+      "deckId": "it-de-everyday-beginner",
+      "futureTargetsUpperBound": 1434,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3042,
+      "deckId": "it-de-everyday-middle",
+      "futureTargetsUpperBound": 3042,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "it-en-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 35159
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1439,
+      "deckId": "it-en-everyday-beginner",
+      "futureTargetsUpperBound": 1439,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3498,
+      "deckId": "it-en-everyday-middle",
+      "futureTargetsUpperBound": 3498,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 4959,
+      "deckId": "it-es-everyday-advanced",
+      "futureTargetsUpperBound": 4959,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1422,
+      "deckId": "it-es-everyday-beginner",
+      "futureTargetsUpperBound": 1422,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2644,
+      "deckId": "it-es-everyday-middle",
+      "futureTargetsUpperBound": 2644,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "it-fr-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 6343
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1438,
+      "deckId": "it-fr-everyday-beginner",
+      "futureTargetsUpperBound": 1438,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3296,
+      "deckId": "it-fr-everyday-middle",
+      "futureTargetsUpperBound": 3296,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2133,
+      "deckId": "it-ja-everyday-advanced",
+      "futureTargetsUpperBound": 2133,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1238,
+      "deckId": "it-ja-everyday-beginner",
+      "futureTargetsUpperBound": 1238,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1553,
+      "deckId": "it-ja-everyday-middle",
+      "futureTargetsUpperBound": 1553,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 53,
+      "deckId": "it-ko-everyday-advanced",
+      "futureTargetsUpperBound": 53,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 111,
+      "deckId": "it-ko-everyday-beginner",
+      "futureTargetsUpperBound": 111,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 61,
+      "deckId": "it-ko-everyday-middle",
+      "futureTargetsUpperBound": 61,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 730,
+      "deckId": "it-pl-everyday-advanced",
+      "futureTargetsUpperBound": 730,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 854,
+      "deckId": "it-pl-everyday-beginner",
+      "futureTargetsUpperBound": 854,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 815,
+      "deckId": "it-pl-everyday-middle",
+      "futureTargetsUpperBound": 815,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 4147,
+      "deckId": "it-pt-everyday-advanced",
+      "futureTargetsUpperBound": 4147,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1387,
+      "deckId": "it-pt-everyday-beginner",
+      "futureTargetsUpperBound": 1387,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2391,
+      "deckId": "it-pt-everyday-middle",
+      "futureTargetsUpperBound": 2391,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "it-ru-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 9644
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1433,
+      "deckId": "it-ru-everyday-beginner",
+      "futureTargetsUpperBound": 1433,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3351,
+      "deckId": "it-ru-everyday-middle",
+      "futureTargetsUpperBound": 3351,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1164,
+      "deckId": "it-zh-everyday-advanced",
+      "futureTargetsUpperBound": 1164,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1007,
+      "deckId": "it-zh-everyday-beginner",
+      "futureTargetsUpperBound": 1007,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1050,
+      "deckId": "it-zh-everyday-middle",
+      "futureTargetsUpperBound": 1050,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 7362,
+      "deckId": "ja-de-everyday-advanced",
+      "futureTargetsUpperBound": 7362,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1303,
+      "deckId": "ja-de-everyday-beginner",
+      "futureTargetsUpperBound": 1303,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3125,
+      "deckId": "ja-de-everyday-middle",
+      "futureTargetsUpperBound": 3125,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "ja-en-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 16689
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1344,
+      "deckId": "ja-en-everyday-beginner",
+      "futureTargetsUpperBound": 1344,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3296,
+      "deckId": "ja-en-everyday-middle",
+      "futureTargetsUpperBound": 3296,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 5400,
+      "deckId": "ja-es-everyday-advanced",
+      "futureTargetsUpperBound": 5400,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1289,
+      "deckId": "ja-es-everyday-beginner",
+      "futureTargetsUpperBound": 1289,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2963,
+      "deckId": "ja-es-everyday-middle",
+      "futureTargetsUpperBound": 2963,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 6634,
+      "deckId": "ja-fr-everyday-advanced",
+      "futureTargetsUpperBound": 6634,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1298,
+      "deckId": "ja-fr-everyday-beginner",
+      "futureTargetsUpperBound": 1298,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3105,
+      "deckId": "ja-fr-everyday-middle",
+      "futureTargetsUpperBound": 3105,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1121,
+      "deckId": "ja-it-everyday-advanced",
+      "futureTargetsUpperBound": 1121,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1136,
+      "deckId": "ja-it-everyday-beginner",
+      "futureTargetsUpperBound": 1136,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1438,
+      "deckId": "ja-it-everyday-middle",
+      "futureTargetsUpperBound": 1438,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 469,
+      "deckId": "ja-ko-everyday-advanced",
+      "futureTargetsUpperBound": 469,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 708,
+      "deckId": "ja-ko-everyday-beginner",
+      "futureTargetsUpperBound": 708,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 652,
+      "deckId": "ja-ko-everyday-middle",
+      "futureTargetsUpperBound": 652,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 5071,
+      "deckId": "ja-pl-everyday-advanced",
+      "futureTargetsUpperBound": 5071,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1286,
+      "deckId": "ja-pl-everyday-beginner",
+      "futureTargetsUpperBound": 1286,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2910,
+      "deckId": "ja-pl-everyday-middle",
+      "futureTargetsUpperBound": 2910,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1029,
+      "deckId": "ja-pt-everyday-advanced",
+      "futureTargetsUpperBound": 1029,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1061,
+      "deckId": "ja-pt-everyday-beginner",
+      "futureTargetsUpperBound": 1061,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1208,
+      "deckId": "ja-pt-everyday-middle",
+      "futureTargetsUpperBound": 1208,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 5123,
+      "deckId": "ja-ru-everyday-advanced",
+      "futureTargetsUpperBound": 5123,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1286,
+      "deckId": "ja-ru-everyday-beginner",
+      "futureTargetsUpperBound": 1286,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2838,
+      "deckId": "ja-ru-everyday-middle",
+      "futureTargetsUpperBound": 2838,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2811,
+      "deckId": "ja-zh-everyday-advanced",
+      "futureTargetsUpperBound": 2811,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1266,
+      "deckId": "ja-zh-everyday-beginner",
+      "futureTargetsUpperBound": 1266,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2345,
+      "deckId": "ja-zh-everyday-middle",
+      "futureTargetsUpperBound": 2345,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1594,
+      "deckId": "ko-de-everyday-advanced",
+      "futureTargetsUpperBound": 1594,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 883,
+      "deckId": "ko-de-everyday-beginner",
+      "futureTargetsUpperBound": 883,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1092,
+      "deckId": "ko-de-everyday-middle",
+      "futureTargetsUpperBound": 1092,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 5701,
+      "deckId": "ko-en-everyday-advanced",
+      "futureTargetsUpperBound": 5701,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1404,
+      "deckId": "ko-en-everyday-beginner",
+      "futureTargetsUpperBound": 1404,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2641,
+      "deckId": "ko-en-everyday-middle",
+      "futureTargetsUpperBound": 2641,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 588,
+      "deckId": "ko-es-everyday-advanced",
+      "futureTargetsUpperBound": 588,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 426,
+      "deckId": "ko-es-everyday-beginner",
+      "futureTargetsUpperBound": 426,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 446,
+      "deckId": "ko-es-everyday-middle",
+      "futureTargetsUpperBound": 446,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1072,
+      "deckId": "ko-fr-everyday-advanced",
+      "futureTargetsUpperBound": 1072,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 647,
+      "deckId": "ko-fr-everyday-beginner",
+      "futureTargetsUpperBound": 647,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 748,
+      "deckId": "ko-fr-everyday-middle",
+      "futureTargetsUpperBound": 748,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 108,
+      "deckId": "ko-it-everyday-advanced",
+      "futureTargetsUpperBound": 108,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 109,
+      "deckId": "ko-it-everyday-beginner",
+      "futureTargetsUpperBound": 109,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 77,
+      "deckId": "ko-it-everyday-middle",
+      "futureTargetsUpperBound": 77,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1375,
+      "deckId": "ko-ja-everyday-advanced",
+      "futureTargetsUpperBound": 1375,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 733,
+      "deckId": "ko-ja-everyday-beginner",
+      "futureTargetsUpperBound": 733,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 877,
+      "deckId": "ko-ja-everyday-middle",
+      "futureTargetsUpperBound": 877,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 45,
+      "deckId": "ko-pl-everyday-advanced",
+      "futureTargetsUpperBound": 45,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 55,
+      "deckId": "ko-pl-everyday-beginner",
+      "futureTargetsUpperBound": 55,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 42,
+      "deckId": "ko-pl-everyday-middle",
+      "futureTargetsUpperBound": 42,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 104,
+      "deckId": "ko-pt-everyday-advanced",
+      "futureTargetsUpperBound": 104,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 127,
+      "deckId": "ko-pt-everyday-beginner",
+      "futureTargetsUpperBound": 127,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 93,
+      "deckId": "ko-pt-everyday-middle",
+      "futureTargetsUpperBound": 93,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 123,
+      "deckId": "ko-ru-everyday-advanced",
+      "futureTargetsUpperBound": 123,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 140,
+      "deckId": "ko-ru-everyday-beginner",
+      "futureTargetsUpperBound": 140,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 103,
+      "deckId": "ko-ru-everyday-middle",
+      "futureTargetsUpperBound": 103,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1526,
+      "deckId": "ko-zh-everyday-advanced",
+      "futureTargetsUpperBound": 1526,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 833,
+      "deckId": "ko-zh-everyday-beginner",
+      "futureTargetsUpperBound": 833,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1030,
+      "deckId": "ko-zh-everyday-middle",
+      "futureTargetsUpperBound": 1030,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 7130,
+      "deckId": "pl-de-everyday-advanced",
+      "futureTargetsUpperBound": 7130,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1429,
+      "deckId": "pl-de-everyday-beginner",
+      "futureTargetsUpperBound": 1429,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2973,
+      "deckId": "pl-de-everyday-middle",
+      "futureTargetsUpperBound": 2973,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "pl-en-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 24526
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1437,
+      "deckId": "pl-en-everyday-beginner",
+      "futureTargetsUpperBound": 1437,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3494,
+      "deckId": "pl-en-everyday-middle",
+      "futureTargetsUpperBound": 3494,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3815,
+      "deckId": "pl-es-everyday-advanced",
+      "futureTargetsUpperBound": 3815,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1392,
+      "deckId": "pl-es-everyday-beginner",
+      "futureTargetsUpperBound": 1392,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2276,
+      "deckId": "pl-es-everyday-middle",
+      "futureTargetsUpperBound": 2276,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2327,
+      "deckId": "pl-fr-everyday-advanced",
+      "futureTargetsUpperBound": 2327,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1220,
+      "deckId": "pl-fr-everyday-beginner",
+      "futureTargetsUpperBound": 1220,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1592,
+      "deckId": "pl-fr-everyday-middle",
+      "futureTargetsUpperBound": 1592,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1103,
+      "deckId": "pl-it-everyday-advanced",
+      "futureTargetsUpperBound": 1103,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 825,
+      "deckId": "pl-it-everyday-beginner",
+      "futureTargetsUpperBound": 825,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 891,
+      "deckId": "pl-it-everyday-middle",
+      "futureTargetsUpperBound": 891,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "pl-ja-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 7748
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1429,
+      "deckId": "pl-ja-everyday-beginner",
+      "futureTargetsUpperBound": 1429,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3228,
+      "deckId": "pl-ja-everyday-middle",
+      "futureTargetsUpperBound": 3228,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 30,
+      "deckId": "pl-ko-everyday-advanced",
+      "futureTargetsUpperBound": 30,
+      "included": false,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 51,
+      "deckId": "pl-ko-everyday-beginner",
+      "futureTargetsUpperBound": 51,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 32,
+      "deckId": "pl-ko-everyday-middle",
+      "futureTargetsUpperBound": 32,
+      "included": false,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 839,
+      "deckId": "pl-pt-everyday-advanced",
+      "futureTargetsUpperBound": 839,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 625,
+      "deckId": "pl-pt-everyday-beginner",
+      "futureTargetsUpperBound": 625,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 629,
+      "deckId": "pl-pt-everyday-middle",
+      "futureTargetsUpperBound": 629,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3759,
+      "deckId": "pl-ru-everyday-advanced",
+      "futureTargetsUpperBound": 3759,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1333,
+      "deckId": "pl-ru-everyday-beginner",
+      "futureTargetsUpperBound": 1333,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2128,
+      "deckId": "pl-ru-everyday-middle",
+      "futureTargetsUpperBound": 2128,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 558,
+      "deckId": "pl-zh-everyday-advanced",
+      "futureTargetsUpperBound": 558,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 472,
+      "deckId": "pl-zh-everyday-beginner",
+      "futureTargetsUpperBound": 472,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 484,
+      "deckId": "pl-zh-everyday-middle",
+      "futureTargetsUpperBound": 484,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 6482,
+      "deckId": "pt-de-everyday-advanced",
+      "futureTargetsUpperBound": 6482,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1433,
+      "deckId": "pt-de-everyday-beginner",
+      "futureTargetsUpperBound": 1433,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2960,
+      "deckId": "pt-de-everyday-middle",
+      "futureTargetsUpperBound": 2960,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "pt-en-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 34914
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1438,
+      "deckId": "pt-en-everyday-beginner",
+      "futureTargetsUpperBound": 1438,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3493,
+      "deckId": "pt-en-everyday-middle",
+      "futureTargetsUpperBound": 3493,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "pt-es-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 11299
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1437,
+      "deckId": "pt-es-everyday-beginner",
+      "futureTargetsUpperBound": 1437,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3442,
+      "deckId": "pt-es-everyday-middle",
+      "futureTargetsUpperBound": 3442,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 7937,
+      "deckId": "pt-fr-everyday-advanced",
+      "futureTargetsUpperBound": 7937,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1435,
+      "deckId": "pt-fr-everyday-beginner",
+      "futureTargetsUpperBound": 1435,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3123,
+      "deckId": "pt-fr-everyday-middle",
+      "futureTargetsUpperBound": 3123,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 4131,
+      "deckId": "pt-it-everyday-advanced",
+      "futureTargetsUpperBound": 4131,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1403,
+      "deckId": "pt-it-everyday-beginner",
+      "futureTargetsUpperBound": 1403,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2409,
+      "deckId": "pt-it-everyday-middle",
+      "futureTargetsUpperBound": 2409,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1441,
+      "deckId": "pt-ja-everyday-advanced",
+      "futureTargetsUpperBound": 1441,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1175,
+      "deckId": "pt-ja-everyday-beginner",
+      "futureTargetsUpperBound": 1175,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1319,
+      "deckId": "pt-ja-everyday-middle",
+      "futureTargetsUpperBound": 1319,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 42,
+      "deckId": "pt-ko-everyday-advanced",
+      "futureTargetsUpperBound": 42,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 125,
+      "deckId": "pt-ko-everyday-beginner",
+      "futureTargetsUpperBound": 125,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 55,
+      "deckId": "pt-ko-everyday-middle",
+      "futureTargetsUpperBound": 55,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 607,
+      "deckId": "pt-pl-everyday-advanced",
+      "futureTargetsUpperBound": 607,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 634,
+      "deckId": "pt-pl-everyday-beginner",
+      "futureTargetsUpperBound": 634,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 583,
+      "deckId": "pt-pl-everyday-middle",
+      "futureTargetsUpperBound": 583,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 7790,
+      "deckId": "pt-ru-everyday-advanced",
+      "futureTargetsUpperBound": 7790,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1437,
+      "deckId": "pt-ru-everyday-beginner",
+      "futureTargetsUpperBound": 1437,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3128,
+      "deckId": "pt-ru-everyday-middle",
+      "futureTargetsUpperBound": 3128,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 343,
+      "deckId": "pt-zh-everyday-advanced",
+      "futureTargetsUpperBound": 343,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 574,
+      "deckId": "pt-zh-everyday-beginner",
+      "futureTargetsUpperBound": 574,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 460,
+      "deckId": "pt-zh-everyday-middle",
+      "futureTargetsUpperBound": 460,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "ru-de-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 37631
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1439,
+      "deckId": "ru-de-everyday-beginner",
+      "futureTargetsUpperBound": 1439,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3495,
+      "deckId": "ru-de-everyday-middle",
+      "futureTargetsUpperBound": 3495,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "ru-en-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 84680
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1439,
+      "deckId": "ru-en-everyday-beginner",
+      "futureTargetsUpperBound": 1439,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3497,
+      "deckId": "ru-en-everyday-middle",
+      "futureTargetsUpperBound": 3497,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "ru-es-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 29087
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1439,
+      "deckId": "ru-es-everyday-beginner",
+      "futureTargetsUpperBound": 1439,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3487,
+      "deckId": "ru-es-everyday-middle",
+      "futureTargetsUpperBound": 3487,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "ru-fr-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 50289
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1439,
+      "deckId": "ru-fr-everyday-beginner",
+      "futureTargetsUpperBound": 1439,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3495,
+      "deckId": "ru-fr-everyday-middle",
+      "futureTargetsUpperBound": 3495,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "ru-it-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 20160
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1439,
+      "deckId": "ru-it-everyday-beginner",
+      "futureTargetsUpperBound": 1439,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3477,
+      "deckId": "ru-it-everyday-middle",
+      "futureTargetsUpperBound": 3477,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "ru-ja-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 7261
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1435,
+      "deckId": "ru-ja-everyday-beginner",
+      "futureTargetsUpperBound": 1435,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3175,
+      "deckId": "ru-ja-everyday-middle",
+      "futureTargetsUpperBound": 3175,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 79,
+      "deckId": "ru-ko-everyday-advanced",
+      "futureTargetsUpperBound": 79,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 124,
+      "deckId": "ru-ko-everyday-beginner",
+      "futureTargetsUpperBound": 124,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 85,
+      "deckId": "ru-ko-everyday-middle",
+      "futureTargetsUpperBound": 85,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3498,
+      "deckId": "ru-pl-everyday-advanced",
+      "futureTargetsUpperBound": 3498,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1308,
+      "deckId": "ru-pl-everyday-beginner",
+      "futureTargetsUpperBound": 1308,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1946,
+      "deckId": "ru-pl-everyday-middle",
+      "futureTargetsUpperBound": 1946,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "ru-pt-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 8791
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1437,
+      "deckId": "ru-pt-everyday-beginner",
+      "futureTargetsUpperBound": 1437,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3191,
+      "deckId": "ru-pt-everyday-middle",
+      "futureTargetsUpperBound": 3191,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 4734,
+      "deckId": "ru-zh-everyday-advanced",
+      "futureTargetsUpperBound": 4734,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1361,
+      "deckId": "ru-zh-everyday-beginner",
+      "futureTargetsUpperBound": 1361,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2328,
+      "deckId": "ru-zh-everyday-middle",
+      "futureTargetsUpperBound": 2328,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 53,
+      "baselineTargets": 8000,
+      "deckId": "zh-de-everyday-advanced",
+      "futureTargetsUpperBound": 8053,
+      "included": true,
+      "unallocatedBudgetCandidates": 53
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1439,
+      "deckId": "zh-de-everyday-beginner",
+      "futureTargetsUpperBound": 1439,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3376,
+      "deckId": "zh-de-everyday-middle",
+      "futureTargetsUpperBound": 3376,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 4000,
+      "baselineTargets": 8000,
+      "deckId": "zh-en-everyday-advanced",
+      "futureTargetsUpperBound": 12000,
+      "included": true,
+      "unallocatedBudgetCandidates": 10797
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1440,
+      "deckId": "zh-en-everyday-beginner",
+      "futureTargetsUpperBound": 1440,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3494,
+      "deckId": "zh-en-everyday-middle",
+      "futureTargetsUpperBound": 3494,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2369,
+      "deckId": "zh-es-everyday-advanced",
+      "futureTargetsUpperBound": 2369,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1348,
+      "deckId": "zh-es-everyday-beginner",
+      "futureTargetsUpperBound": 1348,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2066,
+      "deckId": "zh-es-everyday-middle",
+      "futureTargetsUpperBound": 2066,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 5319,
+      "deckId": "zh-fr-everyday-advanced",
+      "futureTargetsUpperBound": 5319,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1432,
+      "deckId": "zh-fr-everyday-beginner",
+      "futureTargetsUpperBound": 1432,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2916,
+      "deckId": "zh-fr-everyday-middle",
+      "futureTargetsUpperBound": 2916,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 937,
+      "deckId": "zh-it-everyday-advanced",
+      "futureTargetsUpperBound": 937,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 945,
+      "deckId": "zh-it-everyday-beginner",
+      "futureTargetsUpperBound": 945,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1051,
+      "deckId": "zh-it-everyday-middle",
+      "futureTargetsUpperBound": 1051,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 4618,
+      "deckId": "zh-ja-everyday-advanced",
+      "futureTargetsUpperBound": 4618,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1429,
+      "deckId": "zh-ja-everyday-beginner",
+      "futureTargetsUpperBound": 1429,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2826,
+      "deckId": "zh-ja-everyday-middle",
+      "futureTargetsUpperBound": 2826,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 916,
+      "deckId": "zh-ko-everyday-advanced",
+      "futureTargetsUpperBound": 916,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 833,
+      "deckId": "zh-ko-everyday-beginner",
+      "futureTargetsUpperBound": 833,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 918,
+      "deckId": "zh-ko-everyday-middle",
+      "futureTargetsUpperBound": 918,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 427,
+      "deckId": "zh-pl-everyday-advanced",
+      "futureTargetsUpperBound": 427,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 479,
+      "deckId": "zh-pl-everyday-beginner",
+      "futureTargetsUpperBound": 479,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 510,
+      "deckId": "zh-pl-everyday-middle",
+      "futureTargetsUpperBound": 510,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 370,
+      "deckId": "zh-pt-everyday-advanced",
+      "futureTargetsUpperBound": 370,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 557,
+      "deckId": "zh-pt-everyday-beginner",
+      "futureTargetsUpperBound": 557,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 510,
+      "deckId": "zh-pt-everyday-middle",
+      "futureTargetsUpperBound": 510,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 3208,
+      "deckId": "zh-ru-everyday-advanced",
+      "futureTargetsUpperBound": 3208,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 1385,
+      "deckId": "zh-ru-everyday-beginner",
+      "futureTargetsUpperBound": 1385,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    },
+    {
+      "additionalMembershipsUpperBound": 0,
+      "baselineTargets": 2329,
+      "deckId": "zh-ru-everyday-middle",
+      "futureTargetsUpperBound": 2329,
+      "included": true,
+      "unallocatedBudgetCandidates": 0
+    }
+  ],
+  "decksAtBaselineCap": 45,
+  "finalBytesMeasured": false,
+  "includedMembershipsRange": [
+    928162,
+    1090140
+  ],
+  "proposedBudget": 12000,
+  "publicationSafe": false,
+  "reportVersion": 1,
+  "selectionFileSha256": "8db3bf4a8706d45053e646bcfed9c066797bee5e590fabfaf2a093d8a5d78d9e",
+  "selectionReexecuted": false,
+  "sizeStress": {
+    "actualSizeForecast": false,
+    "hypotheticalDecksOver24MiB": [],
+    "method": "intermediate self-contained raw bytes per row held constant at target-count upper bound"
+  },
+  "storageFileSha256": "1ab4a34fc73dfd1b07d1d161a114d64644ac556e917d714632bc95e1feb84ab2",
+  "uniqueTargetGainMeasured": false
+}

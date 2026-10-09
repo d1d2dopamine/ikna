@@ -1,0 +1,118 @@
+{
+  "auditVersion": 1,
+  "date": "2026-10-08",
+  "evidenceKind": "source-contract-inspection-and-full-selected-field-census",
+  "snapshotId": "everyday-2026-10-03-boundary-diversity-v2-a2a5e4bb1e4079e88",
+  "snapshotSha256": "b56c874153bd89be364e04d0407ba8d768fabc91b40c1d5c22f2f67a7866ac0c",
+  "storageReportSha256": "1ab4a34fc73dfd1b07d1d161a114d64644ac556e917d714632bc95e1feb84ab2",
+  "sourceSha256": {
+    "shared/src/jvmShared/kotlin/dev/ikna/data/pack/PackModels.kt": "94af0970fa07d1b94af6371f8fc935b0f7e118c8646a5111656afb28323a6945",
+    "shared/src/jvmShared/kotlin/dev/ikna/data/pack/PackLoader.kt": "d6293cdceef6cb3a75ffab6f29b644c5446139d78dcdc88096e973f0e8d3a62b",
+    "shared/src/jvmShared/kotlin/dev/ikna/data/catalog/CatalogFetch.kt": "076c46bf5702e59c81794ba9757c2e6fc5040d1397400feef7046cf678ff30bd",
+    "shared/src/jvmShared/kotlin/dev/ikna/data/catalog/CatalogCardSource.kt": "f9b1852b942354a92c81d316b5622a3891351b317778c3edcc7c4df74718134a",
+    "shared/src/jvmShared/kotlin/dev/ikna/data/db/Entities.kt": "9bde8f9d9299314a68a298bc1e35ee2cf903bf12889f8533c8a826ea6fb834bb",
+    "app/schemas/dev.ikna.data.db.IknaDatabase/10.json": "93a6c80de06b9f3af9dfd2d3cd27e27c7222550391685ad643fe2438c5eb5fa5",
+    "tools/catalog/catalogue_core.py": "984a58be4f88939b37c86e7e677e01ffe7d0f94a2c20f38a56eb6f32b7151e56",
+    "tools/catalog/selection_experiment.py": "4206ed4a8db3579e614ce73b8290cb69dc2fb50f761d87895073473c7915054f",
+    "tools/catalog/build_catalogue_v2.py": "e8a3f9986a917174ffcb8c141eff9015964249ad471fd13d53f06fbe9cfe0086",
+    "tools/catalog/schema/catalogue-v2-card.schema.json": "fbead228a5395b6aa801f79a7709d176036d69097c6c6c4057b27bc87b06522a"
+  },
+  "runtimeImporterExecuted": false,
+  "appReaderAccepted": false,
+  "publicationSafe": false,
+  "requiredPackChunkFields": [
+    "id",
+    "text",
+    "context",
+    "translation",
+    "targetStart",
+    "targetEnd",
+    "freqRank",
+    "tokens"
+  ],
+  "missingRequiredFieldMemberships": {
+    "context": 928162,
+    "id": 928162,
+    "targetEnd": 928162,
+    "targetStart": 928162,
+    "tokens": 928162,
+    "translation": 928162
+  },
+  "limitsBytes": {
+    "MAX_INDEX_BYTES": 2097152,
+    "MAX_DECK_BYTES": 25165824,
+    "MAX_DECK_DOWNLOAD_BYTES": 25165824
+  },
+  "databaseVersion": 10,
+  "chunkContextColumns": [
+    "packId",
+    "chunkId",
+    "contextId",
+    "meaningId",
+    "sourceFamily",
+    "contextSentence",
+    "translation",
+    "targetStart",
+    "targetEnd",
+    "freqRank",
+    "ipaContext",
+    "tokensJson"
+  ],
+  "environment": {
+    "python": "3.12.14",
+    "sqlite": "3.53.1",
+    "zlib": "1.3.2"
+  },
+  "findings": [
+    {
+      "id": "selected-is-not-pack",
+      "observation": "All selected memberships lack six required legacy PackChunk fields; they are not import-ready.",
+      "next": "Materialize exact saved memberships, flatten primary only, retain all alternatives; no selection rerun."
+    },
+    {
+      "id": "function-rank-metadata",
+      "observation": "token_list classifies function words using pinned lowercased form ranks <=functionTop (60). Exported target ranks exclude this prefix.",
+      "next": "Export exact top-function-word metadata from the retained admitted pool and original rank construction. Preserve row freqRank; never rerank selected content."
+    },
+    {
+      "id": "canonical-spans",
+      "observation": "Selected validation uses a single NFKC/casefold complete-token occurrence; source case/spelling can differ from target display text.",
+      "next": "Derive UTF-16 spans using the original segmentation contract and canonical occurrence; preserve targetId and actual source strings."
+    },
+    {
+      "id": "provenance-retention",
+      "observation": "PackContext/ChunkContextEntity contain source refs and sourceFamily but no structured version/origin/contributor payload. Unknown JSON keys are ignored.",
+      "next": "Preserve complete evidence in final assets and explicitly design client persistence/export, with a safe explicit migration if needed. Do not claim that unknown extra keys survive import."
+    },
+    {
+      "id": "credit-parser",
+      "observation": "catalogMeaning recognizes the final Tatoeba sentence-ID suffix; app credits cannot be changed by inserting arbitrary visible metadata into answer text.",
+      "next": "Keep compatibility suffix and use an explicit provenance handoff for other known source metadata."
+    },
+    {
+      "id": "final-size",
+      "observation": "Intermediate rows omit final token/span/credit payloads. The current limits apply to final gzip/logical pack and index independently.",
+      "next": "Measure final materialized packs/index and runtime import before acceptance. No installed-RAM/DB estimate is inferred."
+    },
+    {
+      "id": "no-trimming",
+      "observation": "write_deck invokes the historical optional-context fitting helper; it can remove alternatives.",
+      "next": "Do not route the frozen snapshot through a trimming/reselection path. Fail on overflow or review a lossless layout explicitly."
+    }
+  ],
+  "nextInput": {
+    "rawPoolSha256": "57b90b01d5dcb0725743998dccaf307a100e174059a853e01f5f31fc13dd6170",
+    "sourceVersion": "2026-10-03-2d4eee105639ba24",
+    "scope": "Exact functionTop prefix per learning language; full ranks/pool may be retained separately",
+    "acquisitionOrSelectionRerunRequired": false
+  },
+  "unchanged": [
+    "cap8000",
+    "targetIdentity",
+    "classicCardBehavior",
+    "sourceAdmissions",
+    "RoomSchema10",
+    "buildVersions"
+  ],
+  "acceptance": "Intermediate storage measurement only. Final app/pack/global/publication gates remain open."
+}

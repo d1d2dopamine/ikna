@@ -382,6 +382,7 @@ private fun selfTest(home: File): Int = try {
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main(args: Array<String>) {
+    awaitPreviousProcess(args)
     if (args.any { it == "--selftest" }) {
         // Where the test runs is an input, because the packaged launcher is a
         // windowed program: nothing it prints reaches a console, so the build
@@ -452,11 +453,16 @@ fun main(args: Array<String>) {
     // where it never belonged.
     runBlocking {
         runCatching { container.install() }
-            .onFailure { error -> logLine("install failed: " + error) }
+            .onFailure { error ->
+                logLine("install failed: " + error)
+                // Never expose a partly reseeded sandbox as a successful scenario.
+                if (container.isDeveloperMode) throw error
+            }
     }
     // Plain object rather than remembered state: it is created once, before the
     // composition exists, because the menu bar and the window's key handler both
     // need to reach the same screen state the shell is drawing from.
+    var restartArranged = false
     val ui = DesktopUi()
     val geometry = loadGeometry(home)
     val customTitleBar = TitleBarClicks.useCustomTitleBar(System.getProperty("os.name"))
@@ -576,7 +582,13 @@ fun main(args: Array<String>) {
                 IknaDesktopApp(
                     container = container,
                     ui = ui,
-                    onRestartRequested = { exitApplication() },
+                    onRestartRequested = {
+                        if (!restartArranged) {
+                            arrangeDesktopRestart(home)
+                            restartArranged = true
+                            closeWindow()
+                        }
+                    },
                     titleBar = { palette, showWordmark ->
                         if (customTitleBar && windowState.placement != WindowPlacement.Fullscreen) {
                             IknaWindowTitleBar(

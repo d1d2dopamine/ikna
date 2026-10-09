@@ -215,7 +215,48 @@ More source rows do not imply bigger decks automatically.
 
 ## What is deliberately deferred
 
+### 0.12 coverage follow-up — 2026-10-08 owner decision
+
+The successful Everyday quality run `37674241928` makes coverage shortages
+concrete. [ROUND-0.12-12.md](ROUND-0.12-12.md) and the
+[complete report inventory](evidence/everyday-round12/COVERAGE.md) distinguish
+53 below-1,000 decks with insufficient post-sieve target supply from 20 that
+cross below that threshold during distinct-context allocation. None is reduced
+by the 8,000 cap. Polish–Korean is the most urgent low-supply pair (94 candidate
+rows); other Korean directions and some Polish/Portuguese/Chinese combinations
+also need attention. These measurements apply to the pinned provided-input
+snapshot, not every possible export. 1,000 is a thinness marker, not a quota.
+
+**To broaden these sparse Everyday directions, more eligible natural source
+evidence is needed under the current rules.** The owner requests documenting
+open-corpus replenishment now and defers choosing the corpus. First investigate
+allocation-limited cases; do not infer that all discarded targets require a new
+corpus or that greedy/bounded context allocation is optimal. Later compare a
+demonstrably fuller/newer Tatoeba input or other open candidates by net new
+eligible targets and distinct direct contexts in the weak pairs/levels, domain
+fit, licences/attribution, reproducible versions and measured alignment quality.
+
+This authorizes a future evidence task, not automatic admission or acquisition.
+MASSIVE remains excluded and WikiMatrix expansion remains unadmitted. Keep the
+current Everyday snapshot reproducible; any later admitted addition creates a
+new snapshot. No synthetic/pivoted translations, relaxed boundary checks or
+Knowledge/World relabelling to pad Everyday. Small honest decks remain permitted.
+
 0.11 does not keep searching for more corpora once the fixed sources above have
 been measured. DGT-TM, ParaCrawl-family data, subtitles and other possible sources
 may be revisited later under the same licence/provenance/quality gate, but they are
 not required to finish this release.
+
+
+### 0.12 shortlist — 2026-10-08 research follow-up
+
+The owner's subsequent recommendation request is now researched in
+[CORPUS-CANDIDATES-0.12.md](CORPUS-CANDIDATES-0.12.md). Recommended Everyday
+measurements: WMT24++ social/qualifying speech human references, then suitable
+MKQA question translations. NTREX-128 is a separate Knowledge candidate. Source
+sizes are not final card yields; no source is admitted by this recommendation.
+Retain primary data licences (including MKQA's ShareAlike terms), exact human
+multiway anchors and source/domain gates. The earlier deferred-choice decision
+is superseded only for this research shortlist; acquisition, measured yield and
+production admission remain open. MASSIVE, WikiMatrix expansion and FLORES
+reference-only decisions are unchanged.

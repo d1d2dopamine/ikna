@@ -451,7 +451,7 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("--markdown", required=True)
     ap.add_argument("--learn", default=",".join(core.LEARNABLE))
     ap.add_argument("--meanings", default=",".join(core.MEANINGS))
-    ap.add_argument("--max-deck", type=int, default=8000)
+    ap.add_argument("--max-deck", type=core.v2_deck_budget, default=core.V2_MAX_DECK_TARGETS)
     ap.add_argument("--min-deck", type=int, default=40)
     ap.add_argument("--function-top", type=int, default=core.FUNCTION_TOP)
     ap.add_argument("--wikimatrix-inventory")

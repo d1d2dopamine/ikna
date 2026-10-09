@@ -24,6 +24,7 @@ import kotlinx.coroutines.withContext
 fun DeveloperToolsPanel(
     tools: DeveloperTools,
     applyProductLimits: Boolean,
+    enabled: Boolean = true,
     onOpen: (DeveloperDestination, String?) -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -34,7 +35,7 @@ fun DeveloperToolsPanel(
     var note by remember { mutableStateOf<String?>(null) }
 
     fun runOperation(operation: suspend () -> Unit) {
-        if (busy) return
+        if (!enabled || busy) return
         busy = true
         note = null
         scope.launch {
@@ -68,16 +69,17 @@ fun DeveloperToolsPanel(
         IknaSettingsToggleRow(
             title = S.t("dev.tools.003"), subtitle = S.t("dev.tools.004"),
             checked = applyProductLimits,
+            enabled = enabled && !busy,
             onCheckedChange = { on -> runOperation {
                 withContext(Dispatchers.IO) { tools.applyProductLimits(on) }
                 refresh()
             } }
         )
-        IknaWideButton(label = S.t("dev.tools.005"), enabled = !busy, onClick = { runOperation { refresh() } })
+        IknaWideButton(label = S.t("dev.tools.005"), enabled = enabled && !busy, onClick = { runOperation { refresh() } })
         snapshot?.let { state ->
             Text(diagnosticsText(state), style = MaterialTheme.typography.bodySmall)
             Spacer(Modifier.height(8.dp))
-            IknaWideButton(label = S.t("dev.tools.006"), enabled = !busy, onClick = {
+            IknaWideButton(label = S.t("dev.tools.006"), enabled = enabled && !busy, onClick = {
                 clipboard.setText(AnnotatedString(diagnosticsText(state)))
                 note = S.t("dev.tools.007")
             })
@@ -86,15 +88,15 @@ fun DeveloperToolsPanel(
             state.decks.forEach { deck ->
                 IknaWideButton(
                     label = (if (selectedDeck == deck.id) "✓ " else "") + deck.title,
-                    filled = selectedDeck == deck.id, enabled = !busy,
+                    filled = selectedDeck == deck.id, enabled = enabled && !busy,
                     onClick = { selectedDeck = deck.id }
                 )
             }
             if (state.decks.isEmpty()) Text(S.t("dev.tools.008"), style = MaterialTheme.typography.bodySmall)
-            IknaWideButton(label = S.t("dev.tools.011"), enabled = !busy, onClick = {
+            IknaWideButton(label = S.t("dev.tools.011"), enabled = enabled && !busy && selectedDeck != null, onClick = {
                 onOpen(DeveloperDestination.SESSION, selectedDeck)
             })
-            IknaWideButton(label = S.t("dev.tools.012"), enabled = !busy && selectedDeck != null, onClick = {
+            IknaWideButton(label = S.t("dev.tools.012"), enabled = enabled && !busy && selectedDeck != null, onClick = {
                 val deck = selectedDeck ?: return@IknaWideButton
                 runOperation {
                     val availability = withContext(Dispatchers.IO) { tools.checkBrowse(deck) }
@@ -103,9 +105,9 @@ fun DeveloperToolsPanel(
                 }
             })
             Text(S.t("dev.tools.020"), style = MaterialTheme.typography.bodySmall)
-            IknaWideButton(label = S.t("dev.tools.013"), enabled = !busy, onClick = { onOpen(DeveloperDestination.STATS, null) })
-            IknaWideButton(label = S.t("dev.tools.014"), enabled = !busy, onClick = { onOpen(DeveloperDestination.CATALOG, null) })
-            IknaWideButton(label = S.t("dev.tools.015"), enabled = !busy, onClick = { onOpen(DeveloperDestination.SEARCH, null) })
+            IknaWideButton(label = S.t("dev.tools.013"), enabled = enabled && !busy, onClick = { onOpen(DeveloperDestination.STATS, null) })
+            IknaWideButton(label = S.t("dev.tools.014"), enabled = enabled && !busy, onClick = { onOpen(DeveloperDestination.CATALOG, null) })
+            IknaWideButton(label = S.t("dev.tools.015"), enabled = enabled && !busy, onClick = { onOpen(DeveloperDestination.SEARCH, null) })
         }
         if (busy) Text(S.t("dev.tools.019"), style = MaterialTheme.typography.bodySmall)
         note?.let { Text(it, style = MaterialTheme.typography.bodySmall) }

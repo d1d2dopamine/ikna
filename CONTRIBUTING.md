@@ -166,6 +166,10 @@ python3 tools/catalog/test_v1_v2_parity.py
 python3 tools/catalog/test_meta_info.py
 python3 tools/catalog/test_readiness_audit.py
 python3 tools/catalog/test_storage_experiment.py
+python3 tools/catalog/test_selected_storage_experiment.py
+python3 tools/catalog/test_pool_function_words.py
+python3 tools/catalog/test_deck_budget.py
+python3 tools/catalog/test_replenishment_review.py
 python3 tools/catalog/test_supply_census.py
 python3 tools/catalog/test_supply_census_shards.py
 python3 tools/catalog/test_wikimatrix_stream_status.py
@@ -286,10 +290,11 @@ The experimental full rebuild is the `catalogue v2 build` workflow. It is
 intentionally separate from the application build and can run in parallel.
 
 For a scale/census run, keep publication off. The current working configuration
-for 0.11 is up to 8,000 unique targets per collection/level deck, up to three
+for Catalogue v2 is up to 12,000 unique targets per collection/level deck, up to three
 natural contexts per exact target, morphology enabled and phonetics disabled for
-the first census pass. Those values are also the current workflow defaults; do
-not raise them merely to inflate catalogue counts before reviewing the census.
+the first census pass. Those values are also the current workflow defaults; the
+12,000 ceiling is not a fill quota. Historical 8,000-target reports remain
+unchanged and do not describe a new 12,000-target selection.
 
 The build may be much slower than Catalogue v1 because it stages and deduplicates
 millions of normalized candidates and keeps global target/context relations.
@@ -299,6 +304,15 @@ The outputs to inspect first are the build summary and `catalogue-meta-info`
 report. Do not publish merely because the workflow succeeded.
 
 ### Storage experiments
+
+The accepted round-15 Everyday **selected intermediate** is not a built pack
+directory. Measure it offline with `tools/catalog/selected_storage_experiment.py`
+and its exact snapshot passport; the command is in
+[EVERYDAY-POOL.md](docs/EVERYDAY-POOL.md#selected-snapshot-storage-measurement).
+That experiment preserves every field/context/origin and verifies reconstruction
+from serialized output. Its layouts are not app assets, final download sizes or
+permission to change the reader. Use the built-pack experiment below only after
+the final pack handoff exists.
 
 Do not rerun the corpora merely to test a physical file layout. The manual
 `catalogue v2 storage experiment` workflow downloads an already completed

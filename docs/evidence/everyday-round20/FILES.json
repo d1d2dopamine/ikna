@@ -1,0 +1,128 @@
+[
+  {
+    "file": "wmt24pp--en-de_DE.jsonl",
+    "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-de_DE.jsonl",
+    "sizeBytes": 844048,
+    "sha256": "5f9e403833ccb3cbab90c9247cd9617ab6744060dc72cfcc7b470ea82d19bd05"
+  },
+  {
+    "file": "wmt24pp--en-es_MX.jsonl",
+    "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-es_MX.jsonl",
+    "sizeBytes": 837846,
+    "sha256": "e88f65699e094b8bf865deb3424aa8d4ef17a6cadf687e2d5af78ab70d98c2ee"
+  },
+  {
+    "file": "wmt24pp--en-fr_FR.jsonl",
+    "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-fr_FR.jsonl",
+    "sizeBytes": 872013,
+    "sha256": "af9722b702087c0d3dfbd51bf6fd61b5bb89bce5bfc981615c68260253d1e676"
+  },
+  {
+    "file": "wmt24pp--en-it_IT.jsonl",
+    "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-it_IT.jsonl",
+    "sizeBytes": 799364,
+    "sha256": "1404d59ec6a6499ef89813984d1da21735450bb017f8666be8ad143ad4eb2a91"
+  },
+  {
+    "file": "wmt24pp--en-ja_JP.jsonl",
+    "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-ja_JP.jsonl",
+    "sizeBytes": 1332480,
+    "sha256": "58bbee69aed537d21e25f04c5eaf49c2c7aef1b1dddb918f6eac424ab93c7ec8"
+  },
+  {
+    "file": "wmt24pp--en-ko_KR.jsonl",
+    "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-ko_KR.jsonl",
+    "sizeBytes": 1223239,
+    "sha256": "4520124f3769cd711aab0c939aeb849a225dce51b761eeb419f46e555b02d7e5"
+  },
+  {
+    "file": "wmt24pp--en-pl_PL.jsonl",
+    "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-pl_PL.jsonl",
+    "sizeBytes": 934176,
+    "sha256": "ad7c214d3e6842740f3e7a1cf99ddf1762b8ab55cc42c4092404dbc14cd50add"
+  },
+  {
+    "file": "wmt24pp--en-pt_PT.jsonl",
+    "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-pt_PT.jsonl",
+    "sizeBytes": 835631,
+    "sha256": "05078aa5e4a9a9f095ccf738ec48bcd91024be455b613bdcb89cd139cdd52a19"
+  },
+  {
+    "file": "wmt24pp--en-ru_RU.jsonl",
+    "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-ru_RU.jsonl",
+    "sizeBytes": 2245729,
+    "sha256": "13b9417b25f677f80e9973737492ac3329a720cb85a351029c2b98fa7998deb6"
+  },
+  {
+    "file": "wmt24pp--en-zh_CN.jsonl",
+    "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-zh_CN.jsonl",
+    "sizeBytes": 1061605,
+    "sha256": "984ec4da714800aae2b9ee6e2601d1cadb01a770e01ed385d5283ce7a0585287"
+  },
+  {
+    "file": "wmt24pp--README.md",
+    "url": "https://huggingface.co/datasets/google/wmt24pp/raw/fd7405c06494bc66a57b25f55d217a72f96e60dc/README.md",
+    "sizeBytes": 11226,
+    "sha256": "0481632f24c7f1aab971631a5bcdd5c974777cf5fea58ae86df247b8260be7c7"
+  },
+  {
+    "file": "mkqa--README.md",
+    "url": "https://raw.githubusercontent.com/apple-aiml-research/ml-mkqa/f964fe1bac4d580cee3d4928572df1f676f8e656/README.md",
+    "sizeBytes": 8777,
+    "sha256": "4ca2808cd6cc6e543dbd7a7006467e718f3a5aac3efa354a30366aaf1430527c"
+  },
+  {
+    "file": "mkqa--LICENSE",
+    "url": "https://raw.githubusercontent.com/apple-aiml-research/ml-mkqa/f964fe1bac4d580cee3d4928572df1f676f8e656/LICENSE",
+    "sizeBytes": 10175,
+    "sha256": "b3fc37157980610b9ab6ab20bf260b9c6c82ff5dca3aaa775b50d41173bd4696"
+  },
+  {
+    "file": "mkqa--dataset--mkqa.jsonl.gz",
+    "url": "https://raw.githubusercontent.com/apple-aiml-research/ml-mkqa/f964fe1bac4d580cee3d4928572df1f676f8e656/dataset/mkqa.jsonl.gz",
+    "sizeBytes": 11903948,
+    "sha256": "f77ac6bf6306e98816c5c047880db71a3c67d2f1491b169896d63e9bb14ef3d3"
+  },
+  {
+    "file": "ntrex--README.md",
+    "url": "https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/468c6b69c7f6a75d31d4743d9daba2af566cc18d/README.md",
+    "sizeBytes": 3757,
+    "sha256": "d00240af5232e2b89d1e1fb1af23117339fabee04d0d01f72df64162cc207f35"
+  },
+  {
+    "file": "ntrex--LICENSE.md",
+    "url": "https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/468c6b69c7f6a75d31d4743d9daba2af566cc18d/LICENSE.md",
+    "sizeBytes": 20137,
+    "sha256": "5e436ff8ffbb77d8607220e9bce20c8915d860010feeb6c1ebef5a85688e9b39"
+  },
+  {
+    "file": "ntrex--DOCUMENT_IDS.tsv",
+    "url": "https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/468c6b69c7f6a75d31d4743d9daba2af566cc18d/DOCUMENT_IDS.tsv",
+    "sizeBytes": 30754,
+    "sha256": "88a8b0ff1eae47e83f60dcde01075b8c87d75ced59ca09e0af1eb539958e05d5"
+  },
+  {
+    "file": "ntrex--LANGUAGES.tsv",
+    "url": "https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/468c6b69c7f6a75d31d4743d9daba2af566cc18d/LANGUAGES.tsv",
+    "sizeBytes": 1862,
+    "sha256": "06b295e71976aa7adfef358d7c24a91b61212ca7aafb244c199619661f808158"
+  },
+  {
+    "file": "ntrex--NTREX-128--newstest2019-src.eng.txt",
+    "url": "https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/468c6b69c7f6a75d31d4743d9daba2af566cc18d/NTREX-128/newstest2019-src.eng.txt",
+    "sizeBytes": 251739,
+    "sha256": "389e8f5796c66db4f646dfad33e1ec622d74767af5ef112b42a1f2cd814df3cc"
+  },
+  {
+    "file": "ntrex--NTREX-128--newstest2019-ref.pol.txt",
+    "url": "https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/468c6b69c7f6a75d31d4743d9daba2af566cc18d/NTREX-128/newstest2019-ref.pol.txt",
+    "sizeBytes": 302480,
+    "sha256": "95fb2e4b00a41847015eebda8821d52eadb60479507e179e575e3c706e353b77"
+  },
+  {
+    "file": "ntrex--NTREX-128--newstest2019-ref.kor.txt",
+    "url": "https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/468c6b69c7f6a75d31d4743d9daba2af566cc18d/NTREX-128/newstest2019-ref.kor.txt",
+    "sizeBytes": 320777,
+    "sha256": "2b50fa9a121b595ac7d3b9e98d901e72bafe68dcd945109ceb1fbbe782193638"
+  }
+]

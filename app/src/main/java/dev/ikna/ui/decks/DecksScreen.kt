@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -43,7 +44,7 @@ import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
-import dev.ikna.ui.theme.IknaDeckHeaderPaint
+import dev.ikna.ui.theme.IknaReadingCat
 import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaMemoryField
 import dev.ikna.ui.theme.IknaTransientNotice
@@ -167,9 +168,9 @@ fun DecksScreen(
         // Every pushed route and the NavHost paint an opaque clipped surface, so the
         // field cannot survive after Home's exit or leak into Settings.
         IknaMemoryField(seed = 0x1A4B_7C2D, modifier = Modifier.fillMaxSize())
-        IknaDeckHeaderPaint(seed = 0x5D31_7A0C)
+
         Column(modifier = Modifier.fillMaxSize()) {
-        // The name of the app, and nothing else up here. The marks that used to
+        // The title and static reading cat. Navigation marks that used to
         // share this row now live in the bar at the bottom of the screen: a phone
         // is held low in one hand, and the top of the screen is the one place a
         // thumb cannot go without regripping the device.
@@ -184,8 +185,11 @@ fun DecksScreen(
                 text = S.t("deck.004"),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
+            IknaReadingCat()
         }
 
         Column(modifier = Modifier.padding(horizontal = Edge)) {

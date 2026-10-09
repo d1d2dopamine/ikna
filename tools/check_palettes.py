@@ -124,6 +124,20 @@ class PaletteContracts(unittest.TestCase):
                 else:
                     self.assertLess(value, .013)
 
+    def test_grey_accents_keep_the_palette_identity(self):
+        import colorsys
+        data = palettes()
+        for (identity, mode), p in data.items():
+            if mode != 'grey' or identity == 'zero':
+                continue
+            h, saturation, _ = colorsys.rgb_to_hsv(*p['accent'])
+            dark_h, _, _ = colorsys.rgb_to_hsv(*data[(identity, 'dark')]['accent'])
+            distance = abs(h - dark_h) * 360
+            self.assertLess(min(distance, 360 - distance), 8, identity)
+            self.assertGreater(saturation, .25, identity)
+        self.assertEqual(len({hex_of(p['accent']) for (_, mode), p in data.items()
+                              if mode == 'grey'}), 12)
+
     def test_authored_text_and_light_panels_remain_readable(self):
         for (identity, mode), p in palettes().items():
             # The panel check is a true-light-theme guarantee: a panel mixed
@@ -146,13 +160,7 @@ class PaletteContracts(unittest.TestCase):
             self.assertGreaterEqual(contrast(danger, p['background']), 4.5, key)
         for mode in ['dark', 'grey']:
             h, s, _ = colorsys.rgb_to_hsv(*palettes()[('ultraviolet', mode)]['accent'])
-            # The saturated purple is the dark lighting's identity; the grey
-            # lighting is monochrome by owner decision and only has to keep
-            # the same hue.
-            if mode == 'grey':
-                self.assertTrue(250 <= h * 360 <= 290)
-            else:
-                self.assertTrue(250 <= h * 360 <= 290 and s > .35)
+            self.assertTrue(250 <= h * 360 <= 290 and s > (.35 if mode == 'dark' else .25))
 
     def test_every_enabled_label_survives_all_control_states(self):
         for key, p in palettes().items():

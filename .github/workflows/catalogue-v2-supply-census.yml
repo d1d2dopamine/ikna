@@ -18,7 +18,7 @@ on:
         default: "en,ru,pl,es,fr,de,it,pt,zh,ja,ko"
       max_deck:
         description: "Current deck target cap to compare against"
-        default: "8000"
+        default: "12000"
       min_deck:
         description: "Current minimum publishable deck size"
         default: "40"
@@ -42,6 +42,16 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
+      - name: Validate deck budget before corpus work
+        env:
+          DECK_BUDGET: ${{ inputs.max_deck }}
+        run: |
+          python3 - <<'PYCODE'
+          import os, sys
+          sys.path.insert(0, 'tools/catalog')
+          from catalogue_core import v2_deck_budget
+          v2_deck_budget(os.environ['DECK_BUDGET'])
+          PYCODE
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -51,6 +61,8 @@ jobs:
           sudo apt-get install -y -qq libicu-dev
           python3 tools/catalog/test_ingestion.py
           python3 tools/catalog/test_build_catalogue_v2.py
+          python3 tools/catalog/test_deck_budget.py
+          python3 tools/catalog/test_replenishment_review.py
           python3 tools/catalog/test_supply_census.py
           python3 tools/catalog/test_supply_census_shards.py
           python3 tools/catalog/test_wikimatrix_stream_status.py
@@ -66,6 +78,16 @@ jobs:
       rank_languages: ${{ steps.matrix.outputs.rank_languages }}
     steps:
       - uses: actions/checkout@v5
+      - name: Validate deck budget before corpus work
+        env:
+          DECK_BUDGET: ${{ inputs.max_deck }}
+        run: |
+          python3 - <<'PYCODE'
+          import os, sys
+          sys.path.insert(0, 'tools/catalog')
+          from catalogue_core import v2_deck_budget
+          v2_deck_budget(os.environ['DECK_BUDGET'])
+          PYCODE
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -160,6 +182,16 @@ jobs:
         pair: ${{ fromJSON(needs.plan-wikimatrix.outputs.rank_pairs) }}
     steps:
       - uses: actions/checkout@v5
+      - name: Validate deck budget before corpus work
+        env:
+          DECK_BUDGET: ${{ inputs.max_deck }}
+        run: |
+          python3 - <<'PYCODE'
+          import os, sys
+          sys.path.insert(0, 'tools/catalog')
+          from catalogue_core import v2_deck_budget
+          v2_deck_budget(os.environ['DECK_BUDGET'])
+          PYCODE
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -274,6 +306,16 @@ jobs:
         lang: ${{ fromJSON(needs.plan-wikimatrix.outputs.rank_languages) }}
     steps:
       - uses: actions/checkout@v5
+      - name: Validate deck budget before corpus work
+        env:
+          DECK_BUDGET: ${{ inputs.max_deck }}
+        run: |
+          python3 - <<'PYCODE'
+          import os, sys
+          sys.path.insert(0, 'tools/catalog')
+          from catalogue_core import v2_deck_budget
+          v2_deck_budget(os.environ['DECK_BUDGET'])
+          PYCODE
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -325,6 +367,16 @@ jobs:
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v5
+      - name: Validate deck budget before corpus work
+        env:
+          DECK_BUDGET: ${{ inputs.max_deck }}
+        run: |
+          python3 - <<'PYCODE'
+          import os, sys
+          sys.path.insert(0, 'tools/catalog')
+          from catalogue_core import v2_deck_budget
+          v2_deck_budget(os.environ['DECK_BUDGET'])
+          PYCODE
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -394,6 +446,16 @@ jobs:
         pair: ${{ fromJSON(needs.plan-wikimatrix.outputs.pairs) }}
     steps:
       - uses: actions/checkout@v5
+      - name: Validate deck budget before corpus work
+        env:
+          DECK_BUDGET: ${{ inputs.max_deck }}
+        run: |
+          python3 - <<'PYCODE'
+          import os, sys
+          sys.path.insert(0, 'tools/catalog')
+          from catalogue_core import v2_deck_budget
+          v2_deck_budget(os.environ['DECK_BUDGET'])
+          PYCODE
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -532,6 +594,16 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
+      - name: Validate deck budget before corpus work
+        env:
+          DECK_BUDGET: ${{ inputs.max_deck }}
+        run: |
+          python3 - <<'PYCODE'
+          import os, sys
+          sys.path.insert(0, 'tools/catalog')
+          from catalogue_core import v2_deck_budget
+          v2_deck_budget(os.environ['DECK_BUDGET'])
+          PYCODE
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

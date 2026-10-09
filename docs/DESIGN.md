@@ -114,10 +114,17 @@ shared phase are the same in both placements.
 Empty space is divided deliberately. The card keeps a completely silent field
 because the phrase is the only object to read. Unused home space may carry a dense
 but faint grain made from hundreds of disconnected dots and very short orthogonal
-strokes. It never joins into a route or snake. The same field breathes in the
-window's top and bottom strips: a few marks dissolve while others appear on one
-deterministic slow cycle, at the deck-header ladder, fully static when animations
-are off. Empty search, catalogue and
+strokes. It never joins into a route or snake. Desktop window strips retain a few marks that dissolve while others appear on
+one deterministic slow cycle, fully static when animations are off. Android's
+bottom navigation bar stays plain. The deck header on both platforms uses a static
+reading cat in its own 48 dp slot beside the title, replacing the falling pixel
+paint. Its transparent artwork maps contours to ink, the book to accent and light
+interiors to the current background; it has no hit target or accessibility label.
+Keep the selected 1254 px artwork intact. Its small slot uses mipmap-aware Medium
+filtering on desktop and the native mipmap hint plus filtered painting on Android;
+the renderer may honour the Android hint differently by device. Do not replace
+the drawing or enlarge the slot to work around downsampling artefacts.
+It never overlaps the title or Today block. Empty search, catalogue and
 statistics states retain a compact unfinished structure instead of looking
 unloaded, and texture is never painted on the learning card.
 
@@ -216,8 +223,11 @@ resource the app reads would pass while both were wrong together.
 
 A palette is not a theme: the same one exists in both lightings and keeps its hue in
 both, so the grey version is the same room poured in concrete — greys carrying a
-whisper of the palette's hue, a desaturated accent, and whites as rare as they are in
-the dark lighting. The twelve are chosen from tiles painted in themselves rather than from a list of
+whisper of the palette's hue, a recognisable coloured accent, and whites as rare
+as they are in the dark lighting. Grey changes the lighting, not the accent's
+identity: coloured accents retain their dark counterpart's hue (within 8°) and
+at least 25% HSV saturation; Zero remains neutral. This supersedes the former
+monochrome-accent choice, which made palette changes nearly invisible in grey. The twelve are chosen from tiles painted in themselves rather than from a list of
 names. Every pair of colours in every palette — including the warning red, which
 each lighting defines for itself and which steps aside entirely when the palette's
 accent is already a warm red — is held to 4.5:1 by a unit test, and the hand-picked

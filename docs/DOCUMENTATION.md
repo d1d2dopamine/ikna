@@ -22,6 +22,40 @@ change.
 
 ## Active cycle (0.12)
 
+- [ROUND-0.12-19.md](ROUND-0.12-19.md) — restored admitted pool, complete identity
+  scan and exact builder-compatible function-rank prefix. Compact next-stage
+  input and audit: [everyday-round19](evidence/everyday-round19/).
+
+- [ROUND-0.12-18.md](ROUND-0.12-18.md) — first-cat downsampling, confirmed DEV
+  profile/process switching, startup-only reseeds, genuine empty scenario and
+  verification limits. Owns this round's runtime acceptance checklist.
+
+- [ROUND-0.12-16.md](ROUND-0.12-16.md) — selected-intermediate lossless storage
+  experiment, full serialized reconstruction, measured dependency costs and
+  source-audited reader/materialization requirements. Exact storage report and
+  reader-source pins: [everyday-round16](evidence/everyday-round16/). Final pack,
+  runtime import, installed sizes and publication acceptance remain separate.
+
+- [ROUND-0.12-15.md](ROUND-0.12-15.md) — full local Everyday audit, byte-identical
+  quality-report reproduction, all-deck census and scoped acceptance for Part 12
+  storage measurements. [everyday-round15](evidence/everyday-round15/) retains the
+  snapshot passport, complete census, bounded allocation witness and exact
+  read-only analysis recipes. This does not certify semantics or approve release.
+
+- [CORPUS-CANDIDATES-0.12.md](CORPUS-CANDIDATES-0.12.md) — dated publisher/author
+  research on replenishment: WMT24++/MKQA Everyday experiments, separate NTREX
+  Knowledge candidate, data-licence distinctions and proposed incremental checks.
+  Recommendations do not admit sources or establish net card yield.
+
+- [ROUND-0.12-12.md](ROUND-0.12-12.md) — successful Everyday quality handoff,
+  source-supply versus context-allocation shortage diagnosis, deferred corpus
+  replenishment requirements and remaining census/freeze gates. Exact reports and
+  complete report-derived deck inventory: [everyday-round12](evidence/everyday-round12/).
+- [ROUND-0.12-11.md](ROUND-0.12-11.md) — classic-only cards, retained history,
+  actual DEV tools and fix-1 CI assertion corrections; runtime acceptance remains open.
+- [ROUND-0.12-10-fix1.md](ROUND-0.12-10-fix1.md) — canonical occurrence failure
+  and correction; its pending-run status is superseded by round 12 evidence.
+
 - [ROUND-0.12-10.md](ROUND-0.12-10.md) — last bounded selection correction,
   Japanese boundary evidence, diverse alternate ordering, one saved-pool workflow
   and full selection handoff. Owner review of all languages/cards is not required.
@@ -106,6 +140,8 @@ change.
 - [ai-audits.md](ai-audits.md), [rele.md](rele.md) — dated read-only audits
   and research notes.
 
+- [ROUND-0.12-17.md](ROUND-0.12-17.md) — reading-cat header, plain phone bottom bar, grey palette identity and verification limits.
+
 ## Facts that require regular re-verification
 
 Never trust these from memory or from another document; read the owner:
@@ -126,5 +162,3 @@ Never trust these from memory or from another document; read the owner:
   refresh them as if they were current.
 - This map itself — whenever documents are added, renamed or re-owned.
 
-- [Round 10 fix 1](ROUND-0.12-10-fix1.md): canonical occurrence failure and corrected automatic handoff.
-- [Round 11](ROUND-0.12-11.md): classic-only cards, retained history, and actual DEV tools.

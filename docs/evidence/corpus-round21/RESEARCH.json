@@ -1,0 +1,140 @@
+{
+  "format": "ikna-corpus-research-metadata-v1",
+  "researched_on": "2026-10-09",
+  "production_admission": false,
+  "full_candidate_files_acquired": false,
+  "owner_decisions": {
+    "v2_maximum_targets_per_deck": 12000,
+    "wmt24pp_and_mkqa": "Future supplements across all eligible decks, conditional on quality/validity/licence/provenance; existing yield is Polish/Korean only",
+    "full_catalogue_assembly": "Deferred"
+  },
+  "interpretation": {
+    "count_field": "alignment_pairs",
+    "counts_are": "Publisher metadata records, not unique sentences, targets, cards, net useful yield or measured content truth",
+    "blank_counts": "Unknown, never zero",
+    "zero_counts": "Reported zero in this specific API record, not proof of language-wide absence",
+    "versions": "Not additive",
+    "licences": "Read content grants separately from packaging, software, models, portal editorial text and mirrors",
+    "api_hashes": "Identify saved metadata responses only; not corpus file hashes"
+  },
+  "files": [
+    {
+      "path": "opus-ko-pl.json",
+      "url": "https://opus.nlpl.eu/opusapi/?source=ko&target=pl&preprocessing=moses",
+      "retrieved_date": "2026-10-09",
+      "bytes": 12075,
+      "sha256": "0f913ca44eead18509d730acced05990ee0ee03497a756a321c80f7ecb441f6b"
+    },
+    {
+      "path": "opus-pl-pt.json",
+      "url": "https://opus.nlpl.eu/opusapi/?source=pl&target=pt&preprocessing=moses",
+      "retrieved_date": "2026-10-09",
+      "bytes": 20473,
+      "sha256": "0b8f85e35ae24181145721bdf6ff41e4cff7ea3108fda0fda5c1ec9b73297333"
+    },
+    {
+      "path": "opus-ko-en.json",
+      "url": "https://opus.nlpl.eu/opusapi/?source=en&target=ko&preprocessing=moses",
+      "retrieved_date": "2026-10-09",
+      "bytes": 14630,
+      "sha256": "0a5ead3d36758db63eb410c1eb4f252fe6ff3c567929019e73954b44f2757f87"
+    },
+    {
+      "path": "opus-multiparacrawl-ko.json",
+      "url": "https://opus.nlpl.eu/opusapi/?preprocessing=moses&corpus=MultiParaCrawl&version=v9b&source=ko",
+      "retrieved_date": "2026-10-09",
+      "bytes": 11170,
+      "sha256": "a1c76fb0b087933602f53396961a20d0d8b14b74908bfe5145bc54973b58f19d"
+    },
+    {
+      "path": "opus-eubookshop-pl-zh.json",
+      "url": "https://opus.nlpl.eu/opusapi/?preprocessing=moses&corpus=EUbookshop&version=v2&source=pl&target=zh",
+      "retrieved_date": "2026-10-09",
+      "bytes": 286,
+      "sha256": "92eca761dc9e83c03497124a49d5abfbf6bc16879ddc9cb8accf649524fe4d0a"
+    },
+    {
+      "path": "opus-dgt-it-pl.json",
+      "url": "https://opus.nlpl.eu/opusapi/?preprocessing=moses&corpus=DGT&version=v2021&source=it&target=pl",
+      "retrieved_date": "2026-10-09",
+      "bytes": 304,
+      "sha256": "76c4b22e896accc252e48e752ccbd1c500a1862ab553b52de3bcfafab2fe4c83"
+    }
+  ],
+  "reference_revisions": {
+    "korean": "a1fb53dc5216f3a2d07d973456d8921ed23c88c6",
+    "opus": "42d4fbe382245487a68e853ca53bea832a41a02a"
+  },
+  "reference_files": [
+    {
+      "url": "https://raw.githubusercontent.com/jungyeul/korean-parallel-corpora/a1fb53dc5216f3a2d07d973456d8921ed23c88c6/README.md",
+      "sha256_inspected_bytes": "f78b28209bb6087511214fc61bdceb2486b87b14569f067d30408b589cff54ce",
+      "bytes": 993,
+      "included_in_source_zip": false,
+      "scope": "Research reference, not candidate text or ingestion pin"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Helsinki-NLP/OPUS/42d4fbe382245487a68e853ca53bea832a41a02a/corpus/MultiParaCrawl/v9b/README",
+      "sha256_inspected_bytes": "f3bb9b9a1208fe1b7ee1b4db94640696c7392a77b02a2176d1ade33dbf23d3cd",
+      "bytes": 61212,
+      "included_in_source_zip": false,
+      "scope": "Research reference, not candidate text or ingestion pin"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Helsinki-NLP/OPUS/42d4fbe382245487a68e853ca53bea832a41a02a/corpus/DGT/v2021/README",
+      "sha256_inspected_bytes": "1c5f731e0cc832479e7b612f266084211b25bca61eb2449491daba424a3a48be",
+      "bytes": 21010,
+      "included_in_source_zip": false,
+      "scope": "Research reference, not candidate text or ingestion pin"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Helsinki-NLP/OPUS/42d4fbe382245487a68e853ca53bea832a41a02a/corpus/EUbookshop/v2/README",
+      "sha256_inspected_bytes": "5bb83ac2c05e85ad66827153c877ede890753c493c7dd003ef34dc7f002bfda1",
+      "bytes": 85493,
+      "included_in_source_zip": false,
+      "scope": "Research reference, not candidate text or ingestion pin"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Helsinki-NLP/OPUS/42d4fbe382245487a68e853ca53bea832a41a02a/corpus/Europarl/v8/README",
+      "sha256_inspected_bytes": "5ea272872b2b033ce6e9ca00ce5614c65d48e57c012f949eacb4dc4150875cff",
+      "bytes": 17344,
+      "included_in_source_zip": false,
+      "scope": "Research reference, not candidate text or ingestion pin"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Helsinki-NLP/OPUS/42d4fbe382245487a68e853ca53bea832a41a02a/corpus/CCMatrix/v1/README",
+      "sha256_inspected_bytes": "6e9406af5bb01fae5772c3b0180418edcd56a92235a65aa3ef03afe6f1006945",
+      "bytes": 97580,
+      "included_in_source_zip": false,
+      "scope": "Research reference, not candidate text or ingestion pin"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Helsinki-NLP/OPUS/42d4fbe382245487a68e853ca53bea832a41a02a/corpus/NLLB/v1/README",
+      "sha256_inspected_bytes": "f4b7afd6252c09e8a34283499928656d4aee56627b141b3df4c2e75b99e199be",
+      "bytes": 435692,
+      "included_in_source_zip": false,
+      "scope": "Research reference, not candidate text or ingestion pin"
+    }
+  ],
+  "review_shortlist": [
+    "DGT v2021",
+    "EUbookshop v2",
+    "Korean Parallel Corpora news-v1",
+    "Europarl v8",
+    "MultiParaCrawl v9b"
+  ],
+  "decisions_and_rights_evidence": "../../LARGE-CORPUS-CANDIDATES-0.12.md",
+  "primary_terms_checked": [
+    "https://joint-research-centre.ec.europa.eu/language-technology-resources/dgt-translation-memory_en",
+    "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32011D0833",
+    "https://op.europa.eu/en/web/about-us/legal-notices/publications-office-of-the-european-union-copyright",
+    "https://github.com/jungyeul/korean-parallel-corpora",
+    "https://aclanthology.org/Y16-2002.pdf",
+    "https://www.statmt.org/europarl/",
+    "https://www.europarl.europa.eu/legal-notice/en/home",
+    "https://paracrawl.eu/",
+    "https://data.hplt-project.org/two/",
+    "https://huggingface.co/datasets/allenai/nllb",
+    "https://opendatacommons.org/licenses/by/1-0/"
+  ]
+}

@@ -250,7 +250,7 @@ class EverydaySelectionTests(unittest.TestCase):
         self.assertFalse(Path(self.args().staging).exists())
 
     def test_numeric_and_scope_validation_before_staging(self):
-        for changes in ({"max_deck": 0}, {"min_deck": 21}, {"review_per_deck": 0}, {"review_per_deck": 101}):
+        for changes in ({"max_deck": 0}, {"max_deck": 12001}, {"min_deck": 21}, {"review_per_deck": 0}, {"review_per_deck": 101}):
             args = self.args()
             for key, value in changes.items(): setattr(args, key, value)
             with self.assertRaises(ValueError): admitted.build_report(args)

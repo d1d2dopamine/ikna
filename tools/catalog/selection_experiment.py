@@ -40,6 +40,10 @@ def _open(path: str):
 
 
 def validate_args(args: argparse.Namespace) -> tuple[list[str], list[str]]:
+    try:
+        core.v2_deck_budget(str(args.max_deck))
+    except argparse.ArgumentTypeError as exc:
+        raise ValueError(str(exc)) from exc
     langs = sorted({x.strip().lower() for x in args.learn.split(",") if x.strip()})
     meanings = sorted({x.strip().lower() for x in args.meanings.split(",") if x.strip()})
     if not langs or set(langs) - set(core.LEARNABLE) or not meanings or set(meanings) - set(core.MEANINGS):
@@ -478,7 +482,7 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("--json",required=True); ap.add_argument("--markdown",required=True); ap.add_argument("--preview",required=True)
     ap.add_argument("--staging",required=True)
     ap.add_argument("--learn",default=",".join(core.LEARNABLE)); ap.add_argument("--meanings",default=",".join(core.MEANINGS))
-    ap.add_argument("--max-deck",type=int,default=8000); ap.add_argument("--min-deck",type=int,default=40); ap.add_argument("--thin-deck",type=int,default=1000)
+    ap.add_argument("--max-deck", type=core.v2_deck_budget, default=core.V2_MAX_DECK_TARGETS); ap.add_argument("--min-deck",type=int,default=40); ap.add_argument("--thin-deck",type=int,default=1000)
     ap.add_argument("--contexts-per-target",type=int,default=3); ap.add_argument("--evidence-context-limit",type=int,default=12)
     ap.add_argument("--near-duplicate-threshold",type=float,default=.85); ap.add_argument("--function-top",type=int,default=core.FUNCTION_TOP)
     ap.add_argument("--preview-limit-per-deck",type=int,default=0,help="evidence rows kept per publishable deck; 0 keeps all")

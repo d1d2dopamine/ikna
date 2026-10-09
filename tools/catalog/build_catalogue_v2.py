@@ -929,7 +929,7 @@ def parser() -> argparse.ArgumentParser:
     root.add_argument("--registry", default=str(DEFAULT_REGISTRY))
     root.add_argument("--learn", default=",".join(core.LEARNABLE))
     root.add_argument("--meanings", default=",".join(core.MEANINGS))
-    root.add_argument("--max-deck", type=int, default=3000)
+    root.add_argument("--max-deck", type=core.v2_deck_budget, default=core.V2_MAX_DECK_TARGETS)
     root.add_argument("--min-deck", type=int, default=40)
     root.add_argument("--full-threshold", type=int, default=3000)
     root.add_argument("--function-top", type=int, default=core.FUNCTION_TOP)

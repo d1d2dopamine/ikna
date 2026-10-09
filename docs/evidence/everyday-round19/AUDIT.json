@@ -1,0 +1,58 @@
+{
+  "acquisitionReexecuted": false,
+  "admittedInputFieldsMatched": 10,
+  "admittedPoolFixturesPassed": 11,
+  "appChanged": false,
+  "auditCompleted": true,
+  "auditVersion": 1,
+  "date": "2026-10-09",
+  "directedPairs": 110,
+  "exportFixturesPassed": 7,
+  "firstAttempt": {
+    "completeLogicalIdentityScanPassed": true,
+    "failure": "new guard compared Part7 premerge pair counts with retained counts; corrected and regression tested",
+    "prefixExportCompleted": false
+  },
+  "formsPerLanguage": 60,
+  "functionPrefixReportSha256": "f2f6d6da6c650d31f13f546292de173168e6b475f44b891ed3da44b00f1b3877",
+  "historicalRunId": "37458524156",
+  "logicalPoolScanMatched": true,
+  "manifestMatched": true,
+  "manifestSha256": "56ad4e9eb9229a1763f202e256a4c3caf209ddb95dcfa09c7badfd7466c064d5",
+  "newExporterSha256": "11fd4e5158197ce7778801820416a171880125b3d3641d046a00869ea3d90c84",
+  "nextStep": "materialize exact frozen selected rows with this prefix, retain all context/provenance fields, measure final payloads, then validate real reader",
+  "originalArchiveBytes": 545984900,
+  "originalArchiveName": "catalogue-v2-everyday-admitted-pool.zip",
+  "originalArchiveSha256": "0f02c2acfbab21d1e90c3d88f1dda0db61ca789f9507b05a483ea7f2a20884e3",
+  "originalBuilderContractsPassed": true,
+  "prefixLanguages": 11,
+  "publicationSafe": false,
+  "runtimeImporterExecuted": false,
+  "selectedMaterialPreviousAudit": "ROUND-0.12-15.md",
+  "selectedMaterialReadThisRound": false,
+  "selectedSnapshotId": "everyday-2026-10-03-boundary-diversity-v2-a2a5e4bb1e4079e88",
+  "selectedSnapshotSha256": "b56c874153bd89be364e04d0407ba8d768fabc91b40c1d5c22f2f67a7866ac0c",
+  "selectionReexecuted": false,
+  "semanticAccuracyCertified": false,
+  "sourcePoolReportSha256": "41c7e176d516e6ad89d70954b116d18062baa48857f66ee276bdcfd32dd0438f",
+  "timezone": "Asia/Yekaterinburg",
+  "transferParts": [
+    {
+      "binaryBytes": 314572800,
+      "binaryMember": "part-01.bin",
+      "wrapperBytes": 314620930,
+      "wrapperName": "ikna-pool-part-01.zip",
+      "wrapperSha256": "3a0821ff6136c7c372fdb678f70350ffdd6d809ac967868572d521c9b3c55504"
+    },
+    {
+      "binaryBytes": 231412100,
+      "binaryMember": "part-02.bin",
+      "wrapperBytes": 231447540,
+      "wrapperName": "ikna-pool-part-02.zip",
+      "wrapperSha256": "0e82a5a3cc3fa5f0b32efebb432806d65a3aee53114eeda91f396732599eca75"
+    }
+  ],
+  "uniquePrimaryContexts": 5296490,
+  "validatedCandidateRows": 11099490,
+  "workflowDispatched": false
+}

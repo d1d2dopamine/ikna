@@ -27,7 +27,7 @@ fun DesktopPaneFrame(title: String, onBack: () -> Unit,
             }
             Column(Modifier.weight(1f).fillMaxWidth(), content = content)
         }
-        IknaBottomBar(Modifier.align(Alignment.BottomCenter)) {
+        IknaBottomBar(Modifier.align(Alignment.BottomCenter), textured = true) {
             IknaIconButton(IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
         }
     }

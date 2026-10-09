@@ -20,6 +20,36 @@ import org.junit.Test
 
 class DeveloperSandboxIntegrationTest {
     @Test
+    fun `empty scenario remains empty after installation and cannot alter the real profile`() = runBlocking {
+        val home = Files.createTempDirectory("ikna-empty-dev").toFile()
+        val real = DesktopContainer(home, IknaDataProfile.REAL)
+        val developer = DesktopContainer(home, IknaDataProfile.DEVELOPER)
+        try {
+            real.install()
+            val realDecks = real.deckRepository.decks()
+            val realHistory = real.db.reviewDao().total()
+            val realSettings = real.settings.current()
+            developer.requestDeveloperScenario(DeveloperScenario.EMPTY)
+            // install performs a queued seed before the UI can start repository work.
+            developer.install()
+            assertTrue(developer.deckRepository.decks().isEmpty())
+            assertEquals(0, developer.db.reviewDao().total())
+            assertTrue(developer.db.cardDao().all().isEmpty())
+            assertEquals(realDecks, real.deckRepository.decks())
+            assertEquals(realHistory, real.db.reviewDao().total())
+            assertEquals(realSettings, real.settings.current())
+            assertFalse(home.resolve(dev.ikna.data.dev.DEVELOPER_SCENARIO_REQUEST_FILE).exists())
+            developer.requestDataProfile(IknaDataProfile.REAL)
+            assertEquals(IknaDataProfile.REAL, developer.profileStore.current())
+            assertTrue(developer.isDeveloperMode) // Existing graph cannot silently change its database.
+        } finally {
+            real.db.close()
+            developer.db.close()
+            home.deleteRecursively()
+        }
+    }
+
+    @Test
     fun `developer seed uses its own real room database and creates mature history`() = runBlocking {
         val home = Files.createTempDirectory("ikna-developer-sandbox").toFile()
         val container = DesktopContainer(home, IknaDataProfile.DEVELOPER)

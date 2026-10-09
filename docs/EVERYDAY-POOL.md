@@ -101,9 +101,11 @@ python3 tools/catalog/everyday_selection.py \
 The workflow retains `catalogue-v2-everyday-selection-review` for 90 days:
 selection JSON/Markdown, selected-material samples, bounded JSONL preview,
 the bound pool report and input reference. The full pool is in the separate
-same-run `catalogue-v2-everyday-admitted-pool` artifact. Defaults remain
-8,000 maximum targets per level, 40 minimum, 1,000 thin-deck threshold and
-three contexts per target. Review rows are limited to the first ten policy-ranked
+same-run `catalogue-v2-everyday-admitted-pool` artifact. Current v2 defaults are
+12,000 maximum targets per level, 40 minimum, 1,000 thin-deck threshold and
+three contexts per target. To replay the historical selection, explicitly pass
+`--max-deck 8000`; existing evidence and source passports remain unchanged.
+Review rows are limited to the first ten policy-ranked
 targets per publishable deck; they are not full selected assets or representative
 quality statistics. Contributor metadata remains in preview origins and samples.
 Native-speaker/reliability or translation correctness is not established by
@@ -236,7 +238,90 @@ fails on damaged UTF-8, and writes deterministic gzip bytes without output-name
 or timestamp metadata. The admitted wrapper also retains a previous staging file
 if validation/selection fails. No public Catalogue asset/index is generated.
 
-## Next owner run (0.12 round 08)
+## Successful quality handoff and coverage checkpoint — 2026-10-08
+
+Run [37674241928](https://github.com/d1d2dopamine/ikna/actions/runs/37674241928)
+completed the corrected saved-pool selection and full-output automatic gate.
+It reuses pool run `37458524156` and source `2026-10-03-2d4eee105639ba24`.
+This supersedes the pending-run instructions above and the old round-08 input
+availability checkpoint below; neither is a request to acquire or select again.
+
+Retain `catalogue-v2-everyday-selected-material` from this exact new run. The
+selected gzip is 255,938,165 bytes, SHA-256
+`a2a5e4bb1e4079e88c8986443c95761795d5fe66ec14ee46a1f83e099e95df64`.
+It contains 928,162 memberships and 2,094,192 contexts in 328 included decks.
+The raw admitted pool saved earlier is not this selected-material artifact.
+
+[ROUND-0.12-12.md](ROUND-0.12-12.md) records local report checks and limitations;
+[coverage evidence](evidence/everyday-round12/COVERAGE.md) separates 53 decks with
+post-sieve supply below 1,000 from 20 that cross below 1,000 during distinct-context
+allocation. No weak deck loses targets to the safety budget. Polish with Korean
+meanings has only 94 candidate rows and two levels omitted below 40. The report
+does not establish optimal context assignment or completeness of every possible
+Tatoeba export.
+
+The next-checkpoint statement recorded in round 12 is now superseded by
+[ROUND-0.12-15.md](ROUND-0.12-15.md): the owner supplied the full selected archive,
+all rows were locally checked, the quality report was reproduced byte for byte,
+and the selected Everyday snapshot is accepted for non-publishing Part 12
+measurements. Its [passport](evidence/everyday-round15/SNAPSHOT.json) and
+[full census](evidence/everyday-round15/CENSUS.md) bind exact bytes and limitations.
+The original raw pool is a different retained input, not reread in round 15.
+
+Next is lossless storage measurement on these exact selected rows, followed by
+final pack/client acceptance. Corpus replenishment, semantic certification,
+global Catalogue freeze and public publication remain separate. Do not weaken
+quality rules or add filler to make deck counts equal. No new routine
+manual-review round or selection rerun is required.
+
+## Selected snapshot storage measurement
+
+Use the full selected member from run `37674241928`, not its preview or raw
+candidate pool. The round-15 passport fixes the exact compressed/logical bytes
+and accepts this intermediate for non-publishing Part 12 measurements:
+
+```bash
+python3 tools/catalog/selected_storage_experiment.py \
+  --selected selected-everyday.jsonl.gz \
+  --snapshot docs/evidence/everyday-round15/SNAPSHOT.json \
+  --output selected-storage-measurement
+```
+
+The output directory must be new and separate from inputs. Only the Python
+standard library is needed; no corpus acquisition, segmentation or selection
+is performed. The disposable SQLite stage preserves original within-deck order
+and bounds open baseline gzip writers to one deck. The tool writes all 328
+self-contained intermediate files, pair pools and learning-language pools, then
+rereads actual files and restores every row including unknown fields, ordered
+contexts, origin/meaning associations and names. Raw/logical input hashes,
+deck counts, serialized file identities and reconstructed deck digests are
+checked before `STORAGE.json` is emitted. Failed/partial output is not evidence;
+use a fresh directory for retry, without overwriting inputs or successful output.
+
+`--modes pair` or `--modes language` limits exploratory layouts. Pair pools share
+only within the directed language pair; language pools are diagnostic and can
+require many unwanted decks' data for one cold install. The tool keeps aligned
+`candidateId`/`origins` on each occurrence reference, never pools them by sentence
+ID alone. Core/meaning pooling uses exact full payload bytes, not text-only joins.
+
+The compact baseline uses JSON whitespace removal and gzip level 9 with `mtime=0`.
+The source artifact used level 6; different sizes are not evidence of removed
+cards. A provisional pooling screen requires at least 10% savings plus inherited
+220 MiB total / 24 MiB cold transfer thresholds. This screen is a conservative
+experiment heuristic, not a new production gate: these are Everyday-only
+intermediate bytes. Final token/credit/enrichment payloads, index size, app RAM,
+installed database size and real-platform import still require measurement.
+
+The output is not `PackChunk`: selected `contexts` includes the primary, while
+the reader's list contains alternatives after legacy primary fields. Required
+tokens, canonical-token UTF-16 spans and compatibility translations must be
+materialized without re-selection. Exact top-function-word evidence can be
+exported from the retained admitted pool without repeating selection; exported
+target ranks alone do not identify the omitted top 60 function words. Preserve
+known source version, every origin and contributor through the final handoff;
+unknown JSON keys alone do not make the current importer retain that evidence.
+
+## Historical next-owner-run instructions (0.12 round 08; superseded)
 
 The 2026-10-06 public API checkpoint lists no retained final admitted-pool
 artifact, and the old Everyday experiment lists no artifacts. Its declaration

@@ -32,7 +32,7 @@ def render():
 
     from check_palettes import rgb
     text(20, 28, 'IKNA / QUIET CONTROLS / GREY LIGHT LIGHTING', rgb('CFD2D6'), 20)
-    text(20, 55, 'Source-derived colour study. Dark left / Light right. Not an application screenshot.', rgb('B0B5BD'), 14)
+    text(20, 55, 'Source-derived colour study. Dark left / Grey right. Not an application screenshot.', rgb('B0B5BD'), 14)
     data = palettes()
     for index, ((identity, mode), p) in enumerate(data.items()):
         c = control_colors(p)

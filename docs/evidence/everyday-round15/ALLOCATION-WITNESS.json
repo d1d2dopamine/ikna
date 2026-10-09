@@ -1,0 +1,1794 @@
+{
+  "diagnosticVersion": 1,
+  "publicationSafe": false,
+  "selectionChanged": false,
+  "scope": "81 stored direct bilingual witnesses from accepted pl-ko and reversed ko-pl contexts; exported Polish ranks only",
+  "selectedMaterialSha256": "a2a5e4bb1e4079e88c8986443c95761795d5fe66ec14ee46a1f83e099e95df64",
+  "witnessFileSha256": "755ed4cc213b07d7eca2622dae149a40944c4a0f2c0a2d4efe7e59a0f11fc4a7",
+  "analysisScriptSha256": "9b5dcd4878f2433e43539ac0c638911486a81a8ef7343af740c3421a7355d038",
+  "knownRankSurfaces": 21493,
+  "ambiguousRankSurfacesExcluded": 0,
+  "counters": {
+    "witnessCandidatePairs": 81,
+    "witnessesWithKnownEligibleChoices": 72,
+    "sourceLengthRejected": 8,
+    "noKnownEligibleChoice": 1
+  },
+  "levels": {
+    "beginner": {
+      "knownEligibleTargets": 117,
+      "sourceContextRefsInGraph": 62,
+      "greedyUpToThreeContexts": {
+        "memberships": 51,
+        "reservedContextRefs": 62,
+        "targetsWithNoUnusedContext": 66,
+        "assignments": [
+          {
+            "targetId": "t2:pl:f4a898f4d520670f",
+            "text": "coś",
+            "contextRefs": [
+              "tatoeba:348977"
+            ]
+          },
+          {
+            "targetId": "t2:pl:e22acfebc53d6864",
+            "text": "dlaczego",
+            "contextRefs": [
+              "tatoeba:348991"
+            ]
+          },
+          {
+            "targetId": "t2:pl:80c8749bf6656c04",
+            "text": "żeby",
+            "contextRefs": [
+              "tatoeba:4982370"
+            ]
+          },
+          {
+            "targetId": "t2:pl:739b1a9045aaf1af",
+            "text": "nic",
+            "contextRefs": [
+              "tatoeba:350109"
+            ]
+          },
+          {
+            "targetId": "t2:pl:83f509295d69cad8",
+            "text": "wiem",
+            "contextRefs": [
+              "tatoeba:348988",
+              "tatoeba:350104",
+              "tatoeba:350101"
+            ]
+          },
+          {
+            "targetId": "t2:pl:8964fcc55a92cef0",
+            "text": "by",
+            "contextRefs": [
+              "tatoeba:350102"
+            ]
+          },
+          {
+            "targetId": "t2:pl:02f293ee69a6f229",
+            "text": "teraz",
+            "contextRefs": [
+              "tatoeba:4658347"
+            ]
+          },
+          {
+            "targetId": "t2:pl:e3072c8b17499310",
+            "text": "ja",
+            "contextRefs": [
+              "tatoeba:348981"
+            ]
+          },
+          {
+            "targetId": "t2:pl:26709041301712ea",
+            "text": "dużo",
+            "contextRefs": [
+              "tatoeba:348992"
+            ]
+          },
+          {
+            "targetId": "t2:pl:f4d58670b2fc9edf",
+            "text": "Wszyscy",
+            "contextRefs": [
+              "tatoeba:350111"
+            ]
+          },
+          {
+            "targetId": "t2:pl:8cbbcb1eb978a715",
+            "text": "Chciałbym",
+            "contextRefs": [
+              "tatoeba:348976"
+            ]
+          },
+          {
+            "targetId": "t2:pl:16abc0e37edcb9c2",
+            "text": "Muszę",
+            "contextRefs": [
+              "tatoeba:348989",
+              "tatoeba:348964"
+            ]
+          },
+          {
+            "targetId": "t2:pl:a81903ddc35776fb",
+            "text": "chce",
+            "contextRefs": [
+              "tatoeba:4658336"
+            ]
+          },
+          {
+            "targetId": "t2:pl:a19cd465394670d3",
+            "text": "chcesz",
+            "contextRefs": [
+              "tatoeba:348967",
+              "tatoeba:7299892",
+              "tatoeba:4658340"
+            ]
+          },
+          {
+            "targetId": "t2:pl:07ad9cf536abf146",
+            "text": "Byłem",
+            "contextRefs": [
+              "tatoeba:348788"
+            ]
+          },
+          {
+            "targetId": "t2:pl:81e7604bb459dbc4",
+            "text": "lat",
+            "contextRefs": [
+              "tatoeba:348787"
+            ]
+          },
+          {
+            "targetId": "t2:pl:e630ebb3f7f7708e",
+            "text": "moje",
+            "contextRefs": [
+              "tatoeba:348997"
+            ]
+          },
+          {
+            "targetId": "t2:pl:8f36fcc733386c4d",
+            "text": "prawda",
+            "contextRefs": [
+              "tatoeba:348966"
+            ]
+          },
+          {
+            "targetId": "t2:pl:16624769d000c963",
+            "text": "ty",
+            "contextRefs": [
+              "tatoeba:982071"
+            ]
+          },
+          {
+            "targetId": "t2:pl:09a5226318353f2f",
+            "text": "nikt",
+            "contextRefs": [
+              "tatoeba:2699835"
+            ]
+          },
+          {
+            "targetId": "t2:pl:338f3fd3e098849b",
+            "text": "Jesteśmy",
+            "contextRefs": [
+              "tatoeba:350110",
+              "tatoeba:348979"
+            ]
+          },
+          {
+            "targetId": "t2:pl:448d5fe272515e66",
+            "text": "powiedzieć",
+            "contextRefs": [
+              "tatoeba:350106",
+              "tatoeba:1588001"
+            ]
+          },
+          {
+            "targetId": "t2:pl:5bec566b982b5d80",
+            "text": "sam",
+            "contextRefs": [
+              "tatoeba:348968"
+            ]
+          },
+          {
+            "targetId": "t2:pl:e0bc9ef785b680ab",
+            "text": "dzień",
+            "contextRefs": [
+              "tatoeba:460705",
+              "tatoeba:778576"
+            ]
+          },
+          {
+            "targetId": "t2:pl:4313a32725617132",
+            "text": "Wygląda",
+            "contextRefs": [
+              "tatoeba:350107"
+            ]
+          },
+          {
+            "targetId": "t2:pl:d102383b6d3a01a5",
+            "text": "wie",
+            "contextRefs": [
+              "tatoeba:4658329",
+              "tatoeba:13111544",
+              "tatoeba:348675"
+            ]
+          },
+          {
+            "targetId": "t2:pl:d03c79918a588006",
+            "text": "pieniądze",
+            "contextRefs": [
+              "tatoeba:603574"
+            ]
+          },
+          {
+            "targetId": "t2:pl:3dd6e3b2eafea9af",
+            "text": "siebie",
+            "contextRefs": [
+              "tatoeba:7299973"
+            ]
+          },
+          {
+            "targetId": "t2:pl:f525ff0780b639f3",
+            "text": "Twoje",
+            "contextRefs": [
+              "tatoeba:5326241"
+            ]
+          },
+          {
+            "targetId": "t2:pl:5fdc24f57535842b",
+            "text": "Dobry",
+            "contextRefs": [
+              "tatoeba:399614"
+            ]
+          },
+          {
+            "targetId": "t2:pl:abb75ded65b9ec9a",
+            "text": "bo",
+            "contextRefs": [
+              "tatoeba:360289"
+            ]
+          },
+          {
+            "targetId": "t2:pl:3cabfc5a7f35d405",
+            "text": "Japonii",
+            "contextRefs": [
+              "tatoeba:709277"
+            ]
+          },
+          {
+            "targetId": "t2:pl:1b3b011575c8247b",
+            "text": "pewien",
+            "contextRefs": [
+              "tatoeba:348994"
+            ]
+          },
+          {
+            "targetId": "t2:pl:55f58daad62e9421",
+            "text": "mieć",
+            "contextRefs": [
+              "tatoeba:348965"
+            ]
+          },
+          {
+            "targetId": "t2:pl:d894ef7fb237e5cc",
+            "text": "pierwszy",
+            "contextRefs": [
+              "tatoeba:350103"
+            ]
+          },
+          {
+            "targetId": "t2:pl:f2ab68c3b29bc1b2",
+            "text": "zajęty",
+            "contextRefs": [
+              "tatoeba:350105"
+            ]
+          },
+          {
+            "targetId": "t2:pl:d77a78bbe1152d93",
+            "text": "Dziękuję",
+            "contextRefs": [
+              "tatoeba:4658351"
+            ]
+          },
+          {
+            "targetId": "t2:pl:b72ea1680cccd6f6",
+            "text": "świecie",
+            "contextRefs": [
+              "tatoeba:350108"
+            ]
+          },
+          {
+            "targetId": "t2:pl:703a77f907e4d6b3",
+            "text": "kocha",
+            "contextRefs": [
+              "tatoeba:927282"
+            ]
+          },
+          {
+            "targetId": "t2:pl:ae01e4dd6b9ea463",
+            "text": "zjeść",
+            "contextRefs": [
+              "tatoeba:7299884"
+            ]
+          },
+          {
+            "targetId": "t2:pl:75ec163f3e8f3d05",
+            "text": "Wyglądasz",
+            "contextRefs": [
+              "tatoeba:348971"
+            ]
+          },
+          {
+            "targetId": "t2:pl:90256881440e47c4",
+            "text": "Poniedziałek",
+            "contextRefs": [
+              "tatoeba:13658273"
+            ]
+          },
+          {
+            "targetId": "t2:pl:9b874db4aca6c289",
+            "text": "miejsca",
+            "contextRefs": [
+              "tatoeba:348995"
+            ]
+          },
+          {
+            "targetId": "t2:pl:ea242f467b0f338b",
+            "text": "głodny",
+            "contextRefs": [
+              "tatoeba:532470"
+            ]
+          },
+          {
+            "targetId": "t2:pl:146db6181dcd3ef0",
+            "text": "Uczę",
+            "contextRefs": [
+              "tatoeba:9573169"
+            ]
+          },
+          {
+            "targetId": "t2:pl:02e8e538184c2c2c",
+            "text": "niedzielę",
+            "contextRefs": [
+              "tatoeba:9190638"
+            ]
+          },
+          {
+            "targetId": "t2:pl:cff448de0c3aa2da",
+            "text": "Niebo",
+            "contextRefs": [
+              "tatoeba:348996"
+            ]
+          },
+          {
+            "targetId": "t2:pl:7e1cc6b47cd5d43f",
+            "text": "brzmi",
+            "contextRefs": [
+              "tatoeba:348974"
+            ]
+          },
+          {
+            "targetId": "t2:pl:548dbdea2190f98e",
+            "text": "dziennie",
+            "contextRefs": [
+              "tatoeba:348969"
+            ]
+          },
+          {
+            "targetId": "t2:pl:3007783db6115cbf",
+            "text": "stolicą",
+            "contextRefs": [
+              "tatoeba:448900"
+            ]
+          },
+          {
+            "targetId": "t2:pl:24fa82d7928aacf1",
+            "text": "Idziemy",
+            "contextRefs": [
+              "tatoeba:348985",
+              "tatoeba:2423597"
+            ]
+          }
+        ]
+      },
+      "greedyPrimaryOnly": {
+        "memberships": 57,
+        "reservedContextRefs": 57,
+        "targetsWithNoUnusedContext": 60,
+        "assignments": [
+          {
+            "targetId": "t2:pl:f4a898f4d520670f",
+            "text": "coś",
+            "contextRefs": [
+              "tatoeba:348977"
+            ]
+          },
+          {
+            "targetId": "t2:pl:e22acfebc53d6864",
+            "text": "dlaczego",
+            "contextRefs": [
+              "tatoeba:348991"
+            ]
+          },
+          {
+            "targetId": "t2:pl:80c8749bf6656c04",
+            "text": "żeby",
+            "contextRefs": [
+              "tatoeba:4982370"
+            ]
+          },
+          {
+            "targetId": "t2:pl:739b1a9045aaf1af",
+            "text": "nic",
+            "contextRefs": [
+              "tatoeba:350109"
+            ]
+          },
+          {
+            "targetId": "t2:pl:83f509295d69cad8",
+            "text": "wiem",
+            "contextRefs": [
+              "tatoeba:348988"
+            ]
+          },
+          {
+            "targetId": "t2:pl:8964fcc55a92cef0",
+            "text": "by",
+            "contextRefs": [
+              "tatoeba:350102"
+            ]
+          },
+          {
+            "targetId": "t2:pl:02f293ee69a6f229",
+            "text": "teraz",
+            "contextRefs": [
+              "tatoeba:4658347"
+            ]
+          },
+          {
+            "targetId": "t2:pl:e3072c8b17499310",
+            "text": "ja",
+            "contextRefs": [
+              "tatoeba:348981"
+            ]
+          },
+          {
+            "targetId": "t2:pl:26709041301712ea",
+            "text": "dużo",
+            "contextRefs": [
+              "tatoeba:348992"
+            ]
+          },
+          {
+            "targetId": "t2:pl:f4d58670b2fc9edf",
+            "text": "Wszyscy",
+            "contextRefs": [
+              "tatoeba:350111"
+            ]
+          },
+          {
+            "targetId": "t2:pl:8cbbcb1eb978a715",
+            "text": "Chciałbym",
+            "contextRefs": [
+              "tatoeba:348976"
+            ]
+          },
+          {
+            "targetId": "t2:pl:16abc0e37edcb9c2",
+            "text": "Muszę",
+            "contextRefs": [
+              "tatoeba:348989"
+            ]
+          },
+          {
+            "targetId": "t2:pl:a81903ddc35776fb",
+            "text": "chce",
+            "contextRefs": [
+              "tatoeba:4658336"
+            ]
+          },
+          {
+            "targetId": "t2:pl:a19cd465394670d3",
+            "text": "chcesz",
+            "contextRefs": [
+              "tatoeba:348967"
+            ]
+          },
+          {
+            "targetId": "t2:pl:47c42b20652ac715",
+            "text": "iść",
+            "contextRefs": [
+              "tatoeba:348964"
+            ]
+          },
+          {
+            "targetId": "t2:pl:07ad9cf536abf146",
+            "text": "Byłem",
+            "contextRefs": [
+              "tatoeba:348788"
+            ]
+          },
+          {
+            "targetId": "t2:pl:36c3a232fe160ca4",
+            "text": "miał",
+            "contextRefs": [
+              "tatoeba:350104"
+            ]
+          },
+          {
+            "targetId": "t2:pl:81e7604bb459dbc4",
+            "text": "lat",
+            "contextRefs": [
+              "tatoeba:348787"
+            ]
+          },
+          {
+            "targetId": "t2:pl:e630ebb3f7f7708e",
+            "text": "moje",
+            "contextRefs": [
+              "tatoeba:348997"
+            ]
+          },
+          {
+            "targetId": "t2:pl:8f36fcc733386c4d",
+            "text": "prawda",
+            "contextRefs": [
+              "tatoeba:348966"
+            ]
+          },
+          {
+            "targetId": "t2:pl:16624769d000c963",
+            "text": "ty",
+            "contextRefs": [
+              "tatoeba:982071"
+            ]
+          },
+          {
+            "targetId": "t2:pl:09a5226318353f2f",
+            "text": "nikt",
+            "contextRefs": [
+              "tatoeba:2699835"
+            ]
+          },
+          {
+            "targetId": "t2:pl:338f3fd3e098849b",
+            "text": "Jesteśmy",
+            "contextRefs": [
+              "tatoeba:350110"
+            ]
+          },
+          {
+            "targetId": "t2:pl:448d5fe272515e66",
+            "text": "powiedzieć",
+            "contextRefs": [
+              "tatoeba:350106"
+            ]
+          },
+          {
+            "targetId": "t2:pl:5bec566b982b5d80",
+            "text": "sam",
+            "contextRefs": [
+              "tatoeba:348968"
+            ]
+          },
+          {
+            "targetId": "t2:pl:61d98e2c35d320ed",
+            "text": "robić",
+            "contextRefs": [
+              "tatoeba:350101"
+            ]
+          },
+          {
+            "targetId": "t2:pl:e0bc9ef785b680ab",
+            "text": "dzień",
+            "contextRefs": [
+              "tatoeba:460705"
+            ]
+          },
+          {
+            "targetId": "t2:pl:4313a32725617132",
+            "text": "Wygląda",
+            "contextRefs": [
+              "tatoeba:350107"
+            ]
+          },
+          {
+            "targetId": "t2:pl:d102383b6d3a01a5",
+            "text": "wie",
+            "contextRefs": [
+              "tatoeba:4658329"
+            ]
+          },
+          {
+            "targetId": "t2:pl:d03c79918a588006",
+            "text": "pieniądze",
+            "contextRefs": [
+              "tatoeba:603574"
+            ]
+          },
+          {
+            "targetId": "t2:pl:3dd6e3b2eafea9af",
+            "text": "siebie",
+            "contextRefs": [
+              "tatoeba:7299973"
+            ]
+          },
+          {
+            "targetId": "t2:pl:f525ff0780b639f3",
+            "text": "Twoje",
+            "contextRefs": [
+              "tatoeba:5326241"
+            ]
+          },
+          {
+            "targetId": "t2:pl:89bae9adde2f5ed9",
+            "text": "Jaki",
+            "contextRefs": [
+              "tatoeba:4658340"
+            ]
+          },
+          {
+            "targetId": "t2:pl:44ef94d427091f87",
+            "text": "robi",
+            "contextRefs": [
+              "tatoeba:13111544"
+            ]
+          },
+          {
+            "targetId": "t2:pl:5fdc24f57535842b",
+            "text": "Dobry",
+            "contextRefs": [
+              "tatoeba:778576"
+            ]
+          },
+          {
+            "targetId": "t2:pl:abb75ded65b9ec9a",
+            "text": "bo",
+            "contextRefs": [
+              "tatoeba:360289"
+            ]
+          },
+          {
+            "targetId": "t2:pl:3cabfc5a7f35d405",
+            "text": "Japonii",
+            "contextRefs": [
+              "tatoeba:709277"
+            ]
+          },
+          {
+            "targetId": "t2:pl:1b3b011575c8247b",
+            "text": "pewien",
+            "contextRefs": [
+              "tatoeba:348994"
+            ]
+          },
+          {
+            "targetId": "t2:pl:55f58daad62e9421",
+            "text": "mieć",
+            "contextRefs": [
+              "tatoeba:348965"
+            ]
+          },
+          {
+            "targetId": "t2:pl:d894ef7fb237e5cc",
+            "text": "pierwszy",
+            "contextRefs": [
+              "tatoeba:350103"
+            ]
+          },
+          {
+            "targetId": "t2:pl:f2ab68c3b29bc1b2",
+            "text": "zajęty",
+            "contextRefs": [
+              "tatoeba:350105"
+            ]
+          },
+          {
+            "targetId": "t2:pl:d77a78bbe1152d93",
+            "text": "Dziękuję",
+            "contextRefs": [
+              "tatoeba:4658351"
+            ]
+          },
+          {
+            "targetId": "t2:pl:b72ea1680cccd6f6",
+            "text": "świecie",
+            "contextRefs": [
+              "tatoeba:350108"
+            ]
+          },
+          {
+            "targetId": "t2:pl:703a77f907e4d6b3",
+            "text": "kocha",
+            "contextRefs": [
+              "tatoeba:927282"
+            ]
+          },
+          {
+            "targetId": "t2:pl:ae01e4dd6b9ea463",
+            "text": "zjeść",
+            "contextRefs": [
+              "tatoeba:7299892"
+            ]
+          },
+          {
+            "targetId": "t2:pl:75ec163f3e8f3d05",
+            "text": "Wyglądasz",
+            "contextRefs": [
+              "tatoeba:348971"
+            ]
+          },
+          {
+            "targetId": "t2:pl:90256881440e47c4",
+            "text": "Poniedziałek",
+            "contextRefs": [
+              "tatoeba:13658273"
+            ]
+          },
+          {
+            "targetId": "t2:pl:9b874db4aca6c289",
+            "text": "miejsca",
+            "contextRefs": [
+              "tatoeba:348995"
+            ]
+          },
+          {
+            "targetId": "t2:pl:ea242f467b0f338b",
+            "text": "głodny",
+            "contextRefs": [
+              "tatoeba:532470"
+            ]
+          },
+          {
+            "targetId": "t2:pl:146db6181dcd3ef0",
+            "text": "Uczę",
+            "contextRefs": [
+              "tatoeba:9573169"
+            ]
+          },
+          {
+            "targetId": "t2:pl:02e8e538184c2c2c",
+            "text": "niedzielę",
+            "contextRefs": [
+              "tatoeba:9190638"
+            ]
+          },
+          {
+            "targetId": "t2:pl:cff448de0c3aa2da",
+            "text": "Niebo",
+            "contextRefs": [
+              "tatoeba:348996"
+            ]
+          },
+          {
+            "targetId": "t2:pl:7e1cc6b47cd5d43f",
+            "text": "brzmi",
+            "contextRefs": [
+              "tatoeba:348974"
+            ]
+          },
+          {
+            "targetId": "t2:pl:548dbdea2190f98e",
+            "text": "dziennie",
+            "contextRefs": [
+              "tatoeba:348969"
+            ]
+          },
+          {
+            "targetId": "t2:pl:a09c1fa69a69c994",
+            "text": "wieczór",
+            "contextRefs": [
+              "tatoeba:399614"
+            ]
+          },
+          {
+            "targetId": "t2:pl:3007783db6115cbf",
+            "text": "stolicą",
+            "contextRefs": [
+              "tatoeba:448900"
+            ]
+          },
+          {
+            "targetId": "t2:pl:24fa82d7928aacf1",
+            "text": "Idziemy",
+            "contextRefs": [
+              "tatoeba:348985"
+            ]
+          }
+        ]
+      },
+      "maximumPrimaryOnly": {
+        "memberships": 60,
+        "assignments": {
+          "tatoeba:13111544": "t2:pl:44ef94d427091f87",
+          "tatoeba:13658273": "t2:pl:90256881440e47c4",
+          "tatoeba:1588001": "t2:pl:448d5fe272515e66",
+          "tatoeba:2423597": "t2:pl:24fa82d7928aacf1",
+          "tatoeba:2699835": "t2:pl:09a5226318353f2f",
+          "tatoeba:348675": "t2:pl:d102383b6d3a01a5",
+          "tatoeba:348787": "t2:pl:81e7604bb459dbc4",
+          "tatoeba:348788": "t2:pl:07ad9cf536abf146",
+          "tatoeba:348964": "t2:pl:47c42b20652ac715",
+          "tatoeba:348965": "t2:pl:55f58daad62e9421",
+          "tatoeba:348966": "t2:pl:8f36fcc733386c4d",
+          "tatoeba:348967": "t2:pl:5bec566b982b5d80",
+          "tatoeba:348968": "t2:pl:2dc58cd861baf01a",
+          "tatoeba:348969": "t2:pl:548dbdea2190f98e",
+          "tatoeba:348971": "t2:pl:75ec163f3e8f3d05",
+          "tatoeba:348974": "t2:pl:7e1cc6b47cd5d43f",
+          "tatoeba:348976": "t2:pl:8cbbcb1eb978a715",
+          "tatoeba:348977": "t2:pl:f4a898f4d520670f",
+          "tatoeba:348979": "t2:pl:338f3fd3e098849b",
+          "tatoeba:348981": "t2:pl:e3072c8b17499310",
+          "tatoeba:348988": "t2:pl:f45ce084e708dda3",
+          "tatoeba:348989": "t2:pl:16abc0e37edcb9c2",
+          "tatoeba:348991": "t2:pl:e22acfebc53d6864",
+          "tatoeba:348992": "t2:pl:26709041301712ea",
+          "tatoeba:348994": "t2:pl:1b3b011575c8247b",
+          "tatoeba:348995": "t2:pl:9b874db4aca6c289",
+          "tatoeba:348996": "t2:pl:cff448de0c3aa2da",
+          "tatoeba:348997": "t2:pl:e630ebb3f7f7708e",
+          "tatoeba:350101": "t2:pl:61d98e2c35d320ed",
+          "tatoeba:350102": "t2:pl:8964fcc55a92cef0",
+          "tatoeba:350103": "t2:pl:d894ef7fb237e5cc",
+          "tatoeba:350104": "t2:pl:36c3a232fe160ca4",
+          "tatoeba:350105": "t2:pl:f2ab68c3b29bc1b2",
+          "tatoeba:350106": "t2:pl:83f509295d69cad8",
+          "tatoeba:350107": "t2:pl:4313a32725617132",
+          "tatoeba:350108": "t2:pl:b72ea1680cccd6f6",
+          "tatoeba:350109": "t2:pl:739b1a9045aaf1af",
+          "tatoeba:350110": "t2:pl:f2c3d0fd0199cc17",
+          "tatoeba:350111": "t2:pl:f4d58670b2fc9edf",
+          "tatoeba:360289": "t2:pl:abb75ded65b9ec9a",
+          "tatoeba:399614": "t2:pl:5fdc24f57535842b",
+          "tatoeba:448900": "t2:pl:3007783db6115cbf",
+          "tatoeba:460705": "t2:pl:0fc73bc2060aaa93",
+          "tatoeba:4658336": "t2:pl:a81903ddc35776fb",
+          "tatoeba:4658340": "t2:pl:89bae9adde2f5ed9",
+          "tatoeba:4658347": "t2:pl:02f293ee69a6f229",
+          "tatoeba:4658351": "t2:pl:d77a78bbe1152d93",
+          "tatoeba:4982370": "t2:pl:80c8749bf6656c04",
+          "tatoeba:532470": "t2:pl:ea242f467b0f338b",
+          "tatoeba:5326241": "t2:pl:f525ff0780b639f3",
+          "tatoeba:603574": "t2:pl:d03c79918a588006",
+          "tatoeba:709277": "t2:pl:3cabfc5a7f35d405",
+          "tatoeba:7299884": "t2:pl:ae01e4dd6b9ea463",
+          "tatoeba:7299892": "t2:pl:a19cd465394670d3",
+          "tatoeba:7299973": "t2:pl:3dd6e3b2eafea9af",
+          "tatoeba:778576": "t2:pl:e0bc9ef785b680ab",
+          "tatoeba:9190638": "t2:pl:02e8e538184c2c2c",
+          "tatoeba:927282": "t2:pl:703a77f907e4d6b3",
+          "tatoeba:9573169": "t2:pl:146db6181dcd3ef0",
+          "tatoeba:982071": "t2:pl:16624769d000c963"
+        }
+      }
+    },
+    "middle": {
+      "knownEligibleTargets": 46,
+      "sourceContextRefsInGraph": 32,
+      "greedyUpToThreeContexts": {
+        "memberships": 32,
+        "reservedContextRefs": 32,
+        "targetsWithNoUnusedContext": 14,
+        "assignments": [
+          {
+            "targetId": "t2:pl:faf5873af37254b4",
+            "text": "Sto",
+            "contextRefs": [
+              "tatoeba:348787"
+            ]
+          },
+          {
+            "targetId": "t2:pl:9e0870e139f6d69d",
+            "text": "Chociaż",
+            "contextRefs": [
+              "tatoeba:348981"
+            ]
+          },
+          {
+            "targetId": "t2:pl:8f6761e2788351db",
+            "text": "listu",
+            "contextRefs": [
+              "tatoeba:460705"
+            ]
+          },
+          {
+            "targetId": "t2:pl:9e861808b3cb4928",
+            "text": "pojadę",
+            "contextRefs": [
+              "tatoeba:348988"
+            ]
+          },
+          {
+            "targetId": "t2:pl:6b32283aafc7d863",
+            "text": "szczęśliwi",
+            "contextRefs": [
+              "tatoeba:348979"
+            ]
+          },
+          {
+            "targetId": "t2:pl:54469b31afc9fe0b",
+            "text": "skończy",
+            "contextRefs": [
+              "tatoeba:348978"
+            ]
+          },
+          {
+            "targetId": "t2:pl:1ca537be572096ab",
+            "text": "niedziela",
+            "contextRefs": [
+              "tatoeba:13658273"
+            ]
+          },
+          {
+            "targetId": "t2:pl:7e3172f2c575d5c0",
+            "text": "rozwiązanie",
+            "contextRefs": [
+              "tatoeba:348977"
+            ]
+          },
+          {
+            "targetId": "t2:pl:28474860c470d210",
+            "text": "Samotny",
+            "contextRefs": [
+              "tatoeba:348968"
+            ]
+          },
+          {
+            "targetId": "t2:pl:51e8b2f8d22f73cf",
+            "text": "uniwersytecie",
+            "contextRefs": [
+              "tatoeba:348984"
+            ]
+          },
+          {
+            "targetId": "t2:pl:4b65979a65e9821a",
+            "text": "móc",
+            "contextRefs": [
+              "tatoeba:348976"
+            ]
+          },
+          {
+            "targetId": "t2:pl:b1f894238fd2fb44",
+            "text": "sławny",
+            "contextRefs": [
+              "tatoeba:350111"
+            ]
+          },
+          {
+            "targetId": "t2:pl:c8809e2e19d21e53",
+            "text": "krok",
+            "contextRefs": [
+              "tatoeba:350103"
+            ]
+          },
+          {
+            "targetId": "t2:pl:cdf4b9815e08e542",
+            "text": "zniknął",
+            "contextRefs": [
+              "tatoeba:350102"
+            ]
+          },
+          {
+            "targetId": "t2:pl:e6472343f3204ac2",
+            "text": "córkę",
+            "contextRefs": [
+              "tatoeba:927282"
+            ]
+          },
+          {
+            "targetId": "t2:pl:8e1f19e1b4624155",
+            "text": "skoro",
+            "contextRefs": [
+              "tatoeba:350109"
+            ]
+          },
+          {
+            "targetId": "t2:pl:4c9e45f954ebce0a",
+            "text": "Zgadza",
+            "contextRefs": [
+              "tatoeba:348992"
+            ]
+          },
+          {
+            "targetId": "t2:pl:25ff2c694c4544f6",
+            "text": "marzenie",
+            "contextRefs": [
+              "tatoeba:350112"
+            ]
+          },
+          {
+            "targetId": "t2:pl:eb87b865eb41feb6",
+            "text": "euro",
+            "contextRefs": [
+              "tatoeba:348969"
+            ]
+          },
+          {
+            "targetId": "t2:pl:49bb8a0b8b0ccf3d",
+            "text": "rzeczą",
+            "contextRefs": [
+              "tatoeba:2699835"
+            ]
+          },
+          {
+            "targetId": "t2:pl:8930324c697448af",
+            "text": "zadziała",
+            "contextRefs": [
+              "tatoeba:348991"
+            ]
+          },
+          {
+            "targetId": "t2:pl:38e4226178fe4872",
+            "text": "spragniony",
+            "contextRefs": [
+              "tatoeba:526803"
+            ]
+          },
+          {
+            "targetId": "t2:pl:c6d90b3dd3f7e5fb",
+            "text": "obejrzeć",
+            "contextRefs": [
+              "tatoeba:4658340"
+            ]
+          },
+          {
+            "targetId": "t2:pl:919896db15cd3c7b",
+            "text": "Widzimy",
+            "contextRefs": [
+              "tatoeba:350110"
+            ]
+          },
+          {
+            "targetId": "t2:pl:88279bd6bbcdac2d",
+            "text": "chcieć",
+            "contextRefs": [
+              "tatoeba:348965"
+            ]
+          },
+          {
+            "targetId": "t2:pl:a3623031b934678f",
+            "text": "taksówką",
+            "contextRefs": [
+              "tatoeba:360289"
+            ]
+          },
+          {
+            "targetId": "t2:pl:5afcd32e77b50930",
+            "text": "górach",
+            "contextRefs": [
+              "tatoeba:348788"
+            ]
+          },
+          {
+            "targetId": "t2:pl:15cac9a7145b58e6",
+            "text": "chiński",
+            "contextRefs": [
+              "tatoeba:959620"
+            ]
+          },
+          {
+            "targetId": "t2:pl:64a969b9f452b7e9",
+            "text": "Hasło",
+            "contextRefs": [
+              "tatoeba:348974"
+            ]
+          },
+          {
+            "targetId": "t2:pl:746afdfd2018a616",
+            "text": "samodzielnie",
+            "contextRefs": [
+              "tatoeba:9573169"
+            ]
+          },
+          {
+            "targetId": "t2:pl:2f0bf825a6c9119f",
+            "text": "Szwajcarii",
+            "contextRefs": [
+              "tatoeba:448900"
+            ]
+          },
+          {
+            "targetId": "t2:pl:868ff318c79e1418",
+            "text": "Wykształcenie",
+            "contextRefs": [
+              "tatoeba:350108"
+            ]
+          }
+        ]
+      },
+      "greedyPrimaryOnly": {
+        "memberships": 32,
+        "reservedContextRefs": 32,
+        "targetsWithNoUnusedContext": 14,
+        "assignments": [
+          {
+            "targetId": "t2:pl:faf5873af37254b4",
+            "text": "Sto",
+            "contextRefs": [
+              "tatoeba:348787"
+            ]
+          },
+          {
+            "targetId": "t2:pl:9e0870e139f6d69d",
+            "text": "Chociaż",
+            "contextRefs": [
+              "tatoeba:348981"
+            ]
+          },
+          {
+            "targetId": "t2:pl:8f6761e2788351db",
+            "text": "listu",
+            "contextRefs": [
+              "tatoeba:460705"
+            ]
+          },
+          {
+            "targetId": "t2:pl:9e861808b3cb4928",
+            "text": "pojadę",
+            "contextRefs": [
+              "tatoeba:348988"
+            ]
+          },
+          {
+            "targetId": "t2:pl:6b32283aafc7d863",
+            "text": "szczęśliwi",
+            "contextRefs": [
+              "tatoeba:348979"
+            ]
+          },
+          {
+            "targetId": "t2:pl:54469b31afc9fe0b",
+            "text": "skończy",
+            "contextRefs": [
+              "tatoeba:348978"
+            ]
+          },
+          {
+            "targetId": "t2:pl:1ca537be572096ab",
+            "text": "niedziela",
+            "contextRefs": [
+              "tatoeba:13658273"
+            ]
+          },
+          {
+            "targetId": "t2:pl:7e3172f2c575d5c0",
+            "text": "rozwiązanie",
+            "contextRefs": [
+              "tatoeba:348977"
+            ]
+          },
+          {
+            "targetId": "t2:pl:28474860c470d210",
+            "text": "Samotny",
+            "contextRefs": [
+              "tatoeba:348968"
+            ]
+          },
+          {
+            "targetId": "t2:pl:51e8b2f8d22f73cf",
+            "text": "uniwersytecie",
+            "contextRefs": [
+              "tatoeba:348984"
+            ]
+          },
+          {
+            "targetId": "t2:pl:4b65979a65e9821a",
+            "text": "móc",
+            "contextRefs": [
+              "tatoeba:348976"
+            ]
+          },
+          {
+            "targetId": "t2:pl:b1f894238fd2fb44",
+            "text": "sławny",
+            "contextRefs": [
+              "tatoeba:350111"
+            ]
+          },
+          {
+            "targetId": "t2:pl:c8809e2e19d21e53",
+            "text": "krok",
+            "contextRefs": [
+              "tatoeba:350103"
+            ]
+          },
+          {
+            "targetId": "t2:pl:cdf4b9815e08e542",
+            "text": "zniknął",
+            "contextRefs": [
+              "tatoeba:350102"
+            ]
+          },
+          {
+            "targetId": "t2:pl:e6472343f3204ac2",
+            "text": "córkę",
+            "contextRefs": [
+              "tatoeba:927282"
+            ]
+          },
+          {
+            "targetId": "t2:pl:8e1f19e1b4624155",
+            "text": "skoro",
+            "contextRefs": [
+              "tatoeba:350109"
+            ]
+          },
+          {
+            "targetId": "t2:pl:4c9e45f954ebce0a",
+            "text": "Zgadza",
+            "contextRefs": [
+              "tatoeba:348992"
+            ]
+          },
+          {
+            "targetId": "t2:pl:25ff2c694c4544f6",
+            "text": "marzenie",
+            "contextRefs": [
+              "tatoeba:350112"
+            ]
+          },
+          {
+            "targetId": "t2:pl:eb87b865eb41feb6",
+            "text": "euro",
+            "contextRefs": [
+              "tatoeba:348969"
+            ]
+          },
+          {
+            "targetId": "t2:pl:49bb8a0b8b0ccf3d",
+            "text": "rzeczą",
+            "contextRefs": [
+              "tatoeba:2699835"
+            ]
+          },
+          {
+            "targetId": "t2:pl:8930324c697448af",
+            "text": "zadziała",
+            "contextRefs": [
+              "tatoeba:348991"
+            ]
+          },
+          {
+            "targetId": "t2:pl:38e4226178fe4872",
+            "text": "spragniony",
+            "contextRefs": [
+              "tatoeba:526803"
+            ]
+          },
+          {
+            "targetId": "t2:pl:c6d90b3dd3f7e5fb",
+            "text": "obejrzeć",
+            "contextRefs": [
+              "tatoeba:4658340"
+            ]
+          },
+          {
+            "targetId": "t2:pl:919896db15cd3c7b",
+            "text": "Widzimy",
+            "contextRefs": [
+              "tatoeba:350110"
+            ]
+          },
+          {
+            "targetId": "t2:pl:88279bd6bbcdac2d",
+            "text": "chcieć",
+            "contextRefs": [
+              "tatoeba:348965"
+            ]
+          },
+          {
+            "targetId": "t2:pl:a3623031b934678f",
+            "text": "taksówką",
+            "contextRefs": [
+              "tatoeba:360289"
+            ]
+          },
+          {
+            "targetId": "t2:pl:5afcd32e77b50930",
+            "text": "górach",
+            "contextRefs": [
+              "tatoeba:348788"
+            ]
+          },
+          {
+            "targetId": "t2:pl:15cac9a7145b58e6",
+            "text": "chiński",
+            "contextRefs": [
+              "tatoeba:959620"
+            ]
+          },
+          {
+            "targetId": "t2:pl:64a969b9f452b7e9",
+            "text": "Hasło",
+            "contextRefs": [
+              "tatoeba:348974"
+            ]
+          },
+          {
+            "targetId": "t2:pl:746afdfd2018a616",
+            "text": "samodzielnie",
+            "contextRefs": [
+              "tatoeba:9573169"
+            ]
+          },
+          {
+            "targetId": "t2:pl:2f0bf825a6c9119f",
+            "text": "Szwajcarii",
+            "contextRefs": [
+              "tatoeba:448900"
+            ]
+          },
+          {
+            "targetId": "t2:pl:868ff318c79e1418",
+            "text": "Wykształcenie",
+            "contextRefs": [
+              "tatoeba:350108"
+            ]
+          }
+        ]
+      },
+      "maximumPrimaryOnly": {
+        "memberships": 32,
+        "assignments": {
+          "tatoeba:13658273": "t2:pl:1ca537be572096ab",
+          "tatoeba:2699835": "t2:pl:49bb8a0b8b0ccf3d",
+          "tatoeba:348787": "t2:pl:faf5873af37254b4",
+          "tatoeba:348788": "t2:pl:5afcd32e77b50930",
+          "tatoeba:348965": "t2:pl:88279bd6bbcdac2d",
+          "tatoeba:348968": "t2:pl:28474860c470d210",
+          "tatoeba:348969": "t2:pl:eb87b865eb41feb6",
+          "tatoeba:348974": "t2:pl:64a969b9f452b7e9",
+          "tatoeba:348976": "t2:pl:4b65979a65e9821a",
+          "tatoeba:348977": "t2:pl:7e3172f2c575d5c0",
+          "tatoeba:348978": "t2:pl:54469b31afc9fe0b",
+          "tatoeba:348979": "t2:pl:6b32283aafc7d863",
+          "tatoeba:348981": "t2:pl:9e0870e139f6d69d",
+          "tatoeba:348984": "t2:pl:51e8b2f8d22f73cf",
+          "tatoeba:348988": "t2:pl:9e861808b3cb4928",
+          "tatoeba:348991": "t2:pl:8930324c697448af",
+          "tatoeba:348992": "t2:pl:4c9e45f954ebce0a",
+          "tatoeba:350102": "t2:pl:cdf4b9815e08e542",
+          "tatoeba:350103": "t2:pl:c8809e2e19d21e53",
+          "tatoeba:350108": "t2:pl:868ff318c79e1418",
+          "tatoeba:350109": "t2:pl:8e1f19e1b4624155",
+          "tatoeba:350110": "t2:pl:919896db15cd3c7b",
+          "tatoeba:350111": "t2:pl:b1f894238fd2fb44",
+          "tatoeba:350112": "t2:pl:25ff2c694c4544f6",
+          "tatoeba:360289": "t2:pl:a3623031b934678f",
+          "tatoeba:448900": "t2:pl:2f0bf825a6c9119f",
+          "tatoeba:460705": "t2:pl:8f6761e2788351db",
+          "tatoeba:4658340": "t2:pl:c6d90b3dd3f7e5fb",
+          "tatoeba:526803": "t2:pl:38e4226178fe4872",
+          "tatoeba:927282": "t2:pl:e6472343f3204ac2",
+          "tatoeba:9573169": "t2:pl:746afdfd2018a616",
+          "tatoeba:959620": "t2:pl:15cac9a7145b58e6"
+        }
+      }
+    },
+    "advanced": {
+      "knownEligibleTargets": 37,
+      "sourceContextRefsInGraph": 27,
+      "greedyUpToThreeContexts": {
+        "memberships": 26,
+        "reservedContextRefs": 27,
+        "targetsWithNoUnusedContext": 11,
+        "assignments": [
+          {
+            "targetId": "t2:pl:3bde16ea40e58e83",
+            "text": "Skończyły",
+            "contextRefs": [
+              "tatoeba:603574"
+            ]
+          },
+          {
+            "targetId": "t2:pl:0acd585efef35c70",
+            "text": "Muiriel",
+            "contextRefs": [
+              "tatoeba:348787",
+              "tatoeba:348974"
+            ]
+          },
+          {
+            "targetId": "t2:pl:38fc904b8e12b12e",
+            "text": "wiedzy",
+            "contextRefs": [
+              "tatoeba:350102"
+            ]
+          },
+          {
+            "targetId": "t2:pl:ff4505ddb136001e",
+            "text": "kwestię",
+            "contextRefs": [
+              "tatoeba:2699835"
+            ]
+          },
+          {
+            "targetId": "t2:pl:bbe006d1eb1b6fe4",
+            "text": "Zwyczajnie",
+            "contextRefs": [
+              "tatoeba:350106"
+            ]
+          },
+          {
+            "targetId": "t2:pl:e65c44c0588376a6",
+            "text": "środa",
+            "contextRefs": [
+              "tatoeba:13658273"
+            ]
+          },
+          {
+            "targetId": "t2:pl:9f127d2deba5428a",
+            "text": "rzekł",
+            "contextRefs": [
+              "tatoeba:350107"
+            ]
+          },
+          {
+            "targetId": "t2:pl:352f9c56785e8668",
+            "text": "Któż",
+            "contextRefs": [
+              "tatoeba:348675"
+            ]
+          },
+          {
+            "targetId": "t2:pl:65546ca0f9689d93",
+            "text": "koreańskiego",
+            "contextRefs": [
+              "tatoeba:9573169"
+            ]
+          },
+          {
+            "targetId": "t2:pl:d325d78693b46f18",
+            "text": "realistą",
+            "contextRefs": [
+              "tatoeba:13133326"
+            ]
+          },
+          {
+            "targetId": "t2:pl:23501611c2dd38ab",
+            "text": "durnia",
+            "contextRefs": [
+              "tatoeba:348971"
+            ]
+          },
+          {
+            "targetId": "t2:pl:034f955c57ad0c55",
+            "text": "Zdecyduj",
+            "contextRefs": [
+              "tatoeba:348985"
+            ]
+          },
+          {
+            "targetId": "t2:pl:3af9aad5851b6fe0",
+            "text": "najstarszą",
+            "contextRefs": [
+              "tatoeba:927282"
+            ]
+          },
+          {
+            "targetId": "t2:pl:6117272597f63f4d",
+            "text": "Zarabiam",
+            "contextRefs": [
+              "tatoeba:348969"
+            ]
+          },
+          {
+            "targetId": "t2:pl:4a77576c94494be8",
+            "text": "Zamenhof",
+            "contextRefs": [
+              "tatoeba:510608"
+            ]
+          },
+          {
+            "targetId": "t2:pl:2847f19e26bcfd74",
+            "text": "Zaskoczenie",
+            "contextRefs": [
+              "tatoeba:350103"
+            ]
+          },
+          {
+            "targetId": "t2:pl:b371512124dce113",
+            "text": "widoków",
+            "contextRefs": [
+              "tatoeba:600299"
+            ]
+          },
+          {
+            "targetId": "t2:pl:d76b2fc6dfb1e8c5",
+            "text": "obawia",
+            "contextRefs": [
+              "tatoeba:348968"
+            ]
+          },
+          {
+            "targetId": "t2:pl:f00ef14256c0bd03",
+            "text": "Stanisław",
+            "contextRefs": [
+              "tatoeba:4982370"
+            ]
+          },
+          {
+            "targetId": "t2:pl:f2e6d204c82f4171",
+            "text": "rozczarowaniem",
+            "contextRefs": [
+              "tatoeba:350108"
+            ]
+          },
+          {
+            "targetId": "t2:pl:070acb031cb2290e",
+            "text": "błękitne",
+            "contextRefs": [
+              "tatoeba:348996"
+            ]
+          },
+          {
+            "targetId": "t2:pl:4c54031c3ee9f1e4",
+            "text": "Jenny",
+            "contextRefs": [
+              "tatoeba:4658336"
+            ]
+          },
+          {
+            "targetId": "t2:pl:763183faa456333b",
+            "text": "wilgoci",
+            "contextRefs": [
+              "tatoeba:348992"
+            ]
+          },
+          {
+            "targetId": "t2:pl:08983a9d95678ef0",
+            "text": "Hunter",
+            "contextRefs": [
+              "tatoeba:547916"
+            ]
+          },
+          {
+            "targetId": "t2:pl:1eab0c8387746bfc",
+            "text": "Berno",
+            "contextRefs": [
+              "tatoeba:448900"
+            ]
+          },
+          {
+            "targetId": "t2:pl:32f88ed3c3af7df4",
+            "text": "saunie",
+            "contextRefs": [
+              "tatoeba:13136612"
+            ]
+          }
+        ]
+      },
+      "greedyPrimaryOnly": {
+        "memberships": 26,
+        "reservedContextRefs": 26,
+        "targetsWithNoUnusedContext": 11,
+        "assignments": [
+          {
+            "targetId": "t2:pl:3bde16ea40e58e83",
+            "text": "Skończyły",
+            "contextRefs": [
+              "tatoeba:603574"
+            ]
+          },
+          {
+            "targetId": "t2:pl:0acd585efef35c70",
+            "text": "Muiriel",
+            "contextRefs": [
+              "tatoeba:348787"
+            ]
+          },
+          {
+            "targetId": "t2:pl:38fc904b8e12b12e",
+            "text": "wiedzy",
+            "contextRefs": [
+              "tatoeba:350102"
+            ]
+          },
+          {
+            "targetId": "t2:pl:ff4505ddb136001e",
+            "text": "kwestię",
+            "contextRefs": [
+              "tatoeba:2699835"
+            ]
+          },
+          {
+            "targetId": "t2:pl:bbe006d1eb1b6fe4",
+            "text": "Zwyczajnie",
+            "contextRefs": [
+              "tatoeba:350106"
+            ]
+          },
+          {
+            "targetId": "t2:pl:e65c44c0588376a6",
+            "text": "środa",
+            "contextRefs": [
+              "tatoeba:13658273"
+            ]
+          },
+          {
+            "targetId": "t2:pl:9f127d2deba5428a",
+            "text": "rzekł",
+            "contextRefs": [
+              "tatoeba:350107"
+            ]
+          },
+          {
+            "targetId": "t2:pl:352f9c56785e8668",
+            "text": "Któż",
+            "contextRefs": [
+              "tatoeba:348675"
+            ]
+          },
+          {
+            "targetId": "t2:pl:65546ca0f9689d93",
+            "text": "koreańskiego",
+            "contextRefs": [
+              "tatoeba:9573169"
+            ]
+          },
+          {
+            "targetId": "t2:pl:d325d78693b46f18",
+            "text": "realistą",
+            "contextRefs": [
+              "tatoeba:13133326"
+            ]
+          },
+          {
+            "targetId": "t2:pl:23501611c2dd38ab",
+            "text": "durnia",
+            "contextRefs": [
+              "tatoeba:348971"
+            ]
+          },
+          {
+            "targetId": "t2:pl:034f955c57ad0c55",
+            "text": "Zdecyduj",
+            "contextRefs": [
+              "tatoeba:348985"
+            ]
+          },
+          {
+            "targetId": "t2:pl:3af9aad5851b6fe0",
+            "text": "najstarszą",
+            "contextRefs": [
+              "tatoeba:927282"
+            ]
+          },
+          {
+            "targetId": "t2:pl:6117272597f63f4d",
+            "text": "Zarabiam",
+            "contextRefs": [
+              "tatoeba:348969"
+            ]
+          },
+          {
+            "targetId": "t2:pl:4a77576c94494be8",
+            "text": "Zamenhof",
+            "contextRefs": [
+              "tatoeba:510608"
+            ]
+          },
+          {
+            "targetId": "t2:pl:2847f19e26bcfd74",
+            "text": "Zaskoczenie",
+            "contextRefs": [
+              "tatoeba:350103"
+            ]
+          },
+          {
+            "targetId": "t2:pl:b371512124dce113",
+            "text": "widoków",
+            "contextRefs": [
+              "tatoeba:600299"
+            ]
+          },
+          {
+            "targetId": "t2:pl:d76b2fc6dfb1e8c5",
+            "text": "obawia",
+            "contextRefs": [
+              "tatoeba:348968"
+            ]
+          },
+          {
+            "targetId": "t2:pl:f00ef14256c0bd03",
+            "text": "Stanisław",
+            "contextRefs": [
+              "tatoeba:4982370"
+            ]
+          },
+          {
+            "targetId": "t2:pl:f2e6d204c82f4171",
+            "text": "rozczarowaniem",
+            "contextRefs": [
+              "tatoeba:350108"
+            ]
+          },
+          {
+            "targetId": "t2:pl:070acb031cb2290e",
+            "text": "błękitne",
+            "contextRefs": [
+              "tatoeba:348996"
+            ]
+          },
+          {
+            "targetId": "t2:pl:4c54031c3ee9f1e4",
+            "text": "Jenny",
+            "contextRefs": [
+              "tatoeba:4658336"
+            ]
+          },
+          {
+            "targetId": "t2:pl:763183faa456333b",
+            "text": "wilgoci",
+            "contextRefs": [
+              "tatoeba:348992"
+            ]
+          },
+          {
+            "targetId": "t2:pl:08983a9d95678ef0",
+            "text": "Hunter",
+            "contextRefs": [
+              "tatoeba:547916"
+            ]
+          },
+          {
+            "targetId": "t2:pl:1eab0c8387746bfc",
+            "text": "Berno",
+            "contextRefs": [
+              "tatoeba:448900"
+            ]
+          },
+          {
+            "targetId": "t2:pl:32f88ed3c3af7df4",
+            "text": "saunie",
+            "contextRefs": [
+              "tatoeba:13136612"
+            ]
+          }
+        ]
+      },
+      "maximumPrimaryOnly": {
+        "memberships": 26,
+        "assignments": {
+          "tatoeba:13133326": "t2:pl:d325d78693b46f18",
+          "tatoeba:13136612": "t2:pl:32f88ed3c3af7df4",
+          "tatoeba:13658273": "t2:pl:e65c44c0588376a6",
+          "tatoeba:2699835": "t2:pl:ff4505ddb136001e",
+          "tatoeba:348675": "t2:pl:352f9c56785e8668",
+          "tatoeba:348787": "t2:pl:0acd585efef35c70",
+          "tatoeba:348968": "t2:pl:d76b2fc6dfb1e8c5",
+          "tatoeba:348969": "t2:pl:6117272597f63f4d",
+          "tatoeba:348971": "t2:pl:23501611c2dd38ab",
+          "tatoeba:348985": "t2:pl:034f955c57ad0c55",
+          "tatoeba:348992": "t2:pl:763183faa456333b",
+          "tatoeba:348996": "t2:pl:070acb031cb2290e",
+          "tatoeba:350102": "t2:pl:38fc904b8e12b12e",
+          "tatoeba:350103": "t2:pl:2847f19e26bcfd74",
+          "tatoeba:350106": "t2:pl:bbe006d1eb1b6fe4",
+          "tatoeba:350107": "t2:pl:9f127d2deba5428a",
+          "tatoeba:350108": "t2:pl:f2e6d204c82f4171",
+          "tatoeba:448900": "t2:pl:1eab0c8387746bfc",
+          "tatoeba:4658336": "t2:pl:4c54031c3ee9f1e4",
+          "tatoeba:4982370": "t2:pl:f00ef14256c0bd03",
+          "tatoeba:510608": "t2:pl:4a77576c94494be8",
+          "tatoeba:547916": "t2:pl:08983a9d95678ef0",
+          "tatoeba:600299": "t2:pl:b371512124dce113",
+          "tatoeba:603574": "t2:pl:3bde16ea40e58e83",
+          "tatoeba:927282": "t2:pl:3af9aad5851b6fe0",
+          "tatoeba:9573169": "t2:pl:65546ca0f9689d93"
+        }
+      }
+    }
+  },
+  "limitations": [
+    "Partial source witness, not reconstruction of all 94 raw candidate rows or all source occurrences/ranks.",
+    "Maximum matching assumes one primary context per target; it does not preserve the original up-to-three-context allocation policy.",
+    "Counts from a different diagnostic subset cannot be subtracted from full-report losses to promise recoverable targets.",
+    "Joining existing reverse-direction source text/ref witnesses is diagnostic reuse, not machine translation or newly admitted supply.",
+    "Raw admitted pool plus its exact rank construction are needed to attribute every full selection loss or test a proposed policy on complete evidence."
+  ],
+  "observedBeginnerTargetAndContextAssignmentsReproducedExactly": true
+}

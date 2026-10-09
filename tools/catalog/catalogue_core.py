@@ -9,6 +9,8 @@ importing the v1 builder as an implementation detail.
 """
 from __future__ import annotations
 
+import argparse
+
 from segmentation import CJK, word_spans, utf16_length, utf16_offset
 
 LEARNABLE = ["en", "ru", "pl", "es", "fr", "de", "it", "pt", "zh", "ja", "ko"]
@@ -25,6 +27,22 @@ MAX_TRANSLATION = 160
 MIN_SENTENCE = 12
 MIN_PHRASE = 2
 FUNCTION_TOP = 60
+# Owner-approved Catalogue v2 ceiling. Smaller explicit budgets remain valid
+# for fixtures and replay of the unchanged 8,000-target evidence snapshot.
+V2_MAX_DECK_TARGETS = 12_000
+
+
+def v2_deck_budget(value: str) -> int:
+    """Reject an invalid budget before acquiring or staging a large corpus."""
+    try:
+        budget = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("deck budget must be an integer") from exc
+    if not 1 <= budget <= V2_MAX_DECK_TARGETS:
+        raise argparse.ArgumentTypeError(f"deck budget must be between 1 and {V2_MAX_DECK_TARGETS}")
+    return budget
+
+
 LEVEL_BEGINNER = 1500
 LEVEL_MIDDLE = 5000
 LEVELS = ["beginner", "middle", "advanced"]

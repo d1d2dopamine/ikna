@@ -98,6 +98,29 @@ class NativeHotReloadTests(unittest.TestCase):
         self.assertIn("-Pcompose.reload.logStdout=true", contents)
         self.assertIn("-Pcompose.reload.logLevel=Debug", contents)
 
+    def test_profile_restart_request_is_consumed_once_and_ignores_invalid_requests(self) -> None:
+        powershell = shutil.which("powershell.exe") or shutil.which("pwsh")
+        if powershell is None:
+            self.skipTest("Windows PowerShell/PowerShell is unavailable")
+        helper = ROOT / "tools/hot-reload-process.ps1"
+        script = Path(self.temp.name) / "profile restart.ps1"
+        script.write_text(
+            "$ErrorActionPreference = 'Stop'\n"
+            + f". '{str(helper).replace(chr(39), chr(39) * 2)}'\n"
+            + "$request = Join-Path $PSScriptRoot 'request.txt'\n"
+            + "if (Receive-IknaProfileRestart -Path $request) { throw 'missing request accepted' }\n"
+            + "Set-Content $request 'RESTART'\n"
+            + "if (-not (Receive-IknaProfileRestart -Path $request)) { throw 'request ignored' }\n"
+            + "if (Receive-IknaProfileRestart -Path $request) { throw 'request repeated' }\n"
+            + "Set-Content $request 'invalid'\n"
+            + "if (Receive-IknaProfileRestart -Path $request) { throw 'invalid request accepted' }\n"
+            + "if (Test-Path $request) { throw 'invalid request not removed' }\n",
+            encoding="utf-8-sig",
+        )
+        result = subprocess.run([powershell, "-NoProfile", "-ExecutionPolicy", "Bypass",
+                                 "-File", str(script)], capture_output=True, timeout=20)
+        self.assertEqual(result.returncode, 0, (result.stdout, result.stderr))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

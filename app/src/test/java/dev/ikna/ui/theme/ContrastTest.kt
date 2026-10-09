@@ -92,7 +92,7 @@ class ContrastTest {
     @Test
     fun `a colour survives the trip through the text field`() {
         assertEquals("1B1813", hexOf(parseHexColor("1b1813")!!))
-        assertEquals("97A2B4", hexOf(GreyPalette.accent))
+        assertEquals("FF927C", hexOf(GreyPalette.accent))
         assertEquals("0B1120", hexOf(DarkPalette.background))
     }
 

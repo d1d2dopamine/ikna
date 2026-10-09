@@ -598,7 +598,7 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('style = MaterialTheme.typography.labelSmall', row)
         self.assertGreaterEqual(row.count('overflow = TextOverflow.Ellipsis'), 2)
 
-    def test_deck_header_paint_and_desktop_inspector(self):
+    def test_reading_cat_header_and_desktop_inspector(self):
         lattice = read(SHARED, 'ui/theme/MemoryLattice.kt')
         inspector = read(SHARED, 'ui/theme/ElementInspector.kt')
         controls = read(SHARED, 'ui/theme/Flat.kt')
@@ -608,14 +608,28 @@ class DesignContracts(unittest.TestCase):
         desktop_shell = read(DESKTOP, 'Shell.kt')
         desktop_settings = read(DESKTOP, 'SettingsPane.kt')
 
-        self.assertIn('fun IknaDeckHeaderPaint(', lattice)
-        self.assertIn('val todayLeft', lattice)
-        self.assertIn('fun protected(', lattice)
-        self.assertIn('val clusterLeft = size.width * 0.49f', lattice)
-        self.assertEqual(2, lattice.count('x < clusterLeft'))
-        self.assertIn('for (step in 0 until run)', lattice)
+        self.assertNotIn('fun IknaDeckHeaderPaint(', lattice)
         for home in (android_home, desktop_shell):
-            self.assertIn('IknaDeckHeaderPaint(seed = 0x5D31_7A0C)', home)
+            self.assertIn('IknaReadingCat()', home)
+            self.assertNotIn('IknaDeckHeaderPaint', home)
+        self.assertIn('textured: Boolean = false', controls)
+        self.assertIn('if (textured) IknaMemoryAmbientStrip(', controls)
+        self.assertIn('textured = true', read(DESKTOP, 'PaneChrome.kt'))
+        cat = read(SHARED, 'ui/theme/ReadingCat.kt')
+        self.assertIn('contentDescription = null', cat)
+        self.assertIn('remember(ink, accent, paper)', cat)
+        self.assertIn('modifier = modifier.size(48.dp)', cat)
+        import struct
+        android_asset = ROOT / 'shared/src/androidMain/res/drawable-nodpi/ikna_reading_cat.png'
+        desktop_asset = ROOT / 'shared/src/desktopMain/resources/drawable/ikna_reading_cat.png'
+        data = android_asset.read_bytes()
+        self.assertEqual(data, desktop_asset.read_bytes())
+        self.assertEqual(data[:8], b'\x89PNG\r\n\x1a\n')
+        width, height, depth, colour = struct.unpack('>IIBB', data[16:26])
+        self.assertEqual(width, height)
+        self.assertGreaterEqual(width, 256)
+        self.assertEqual((depth, colour), (8, 6), 'Cat must retain an RGBA channel')
+
 
         self.assertIn('val elementInspector: Boolean = false', prefs)
         self.assertIn('booleanPreferencesKey("elementInspector")', prefs)
@@ -769,13 +783,68 @@ class DesignContracts(unittest.TestCase):
 
     def test_desktop_developer_restart_callback_reaches_settings_pane(self):
         shell = read(DESKTOP, 'Shell.kt')
-        self.assertIn('onRestartRequested: () -> Unit = {}', shell)
+        self.assertIn('onRestartRequested: () -> Unit', shell)
+        for source in [shell, read(DESKTOP, 'SettingsPane.kt')]:
+            self.assertNotIn('onRestartRequested: () -> Unit = {}', source)
         self.assertIn('DesktopShell(container, settings, palette, ui, onRestartRequested)', shell)
         self.assertIn('wide = true, onRestartRequested = onRestartRequested', shell)
         self.assertIn('wide = false, onRestartRequested = onRestartRequested', shell)
         pane = shell[shell.index('private fun PaneContent('):shell.index('@Composable\nprivate fun ShortcutsOverlay(')]
         self.assertIn('onRestartRequested: () -> Unit', pane)
         self.assertIn('onRestartRequested = onRestartRequested', pane)
+
+    def test_developer_profile_changes_require_confirmation_and_a_new_process(self):
+        controls = read(SHARED, 'ui/dev/DeveloperProfileControls.kt')
+        self.assertEqual(controls.count('IknaDialog('), 2)
+        self.assertLess(controls.index('onConfirm ='), controls.index('try { onSwitch('))
+        self.assertIn('onDismiss = { asking = false }', controls)
+        self.assertIn('onDismiss = { asking = null }', controls)
+        for base, name in [(ANDROID, 'ui/settings/SettingsScreen.kt'), (DESKTOP, 'SettingsPane.kt')]:
+            source = read(base, name)
+            self.assertIn('var advancedOpen by remember { mutableStateOf(false) }', source)
+            self.assertNotIn('developerArmed', source)
+            self.assertNotIn('.seed(', source)
+            rare = source[source.index('IknaSettingsSection(S.t("set.063")'):]
+            self.assertLess(rare.index('DeveloperProfileControls('), rare.index('if (advancedOpen)'))
+            self.assertIn('container.requestDeveloperScenario(scenario)', rare)
+            self.assertIn('container.cancelDeveloperScenarioRequest()', rare)
+            self.assertIn('container.requestDataProfile(container.dataProfile)', source)
+        main = read(DESKTOP, 'Main.kt').split('fun main(args: Array<String>) {', 1)[1]
+        self.assertLess(main.index('awaitPreviousProcess(args)'), main.index('DesktopContainer('))
+        restart = main[main.index('onRestartRequested = {'):]
+        self.assertLess(restart.index('arrangeDesktopRestart(home)'), restart.index('closeWindow()'))
+        manifest = read(ROOT, 'app/src/main/AndroidManifest.xml')
+        self.assertRegex(manifest, r'<activity\s+android:name="\.ProfileRestartActivity"[^>]*android:exported="false"[^>]*android:process=":profileRestart"')
+        self.assertIn('Application.getProcessName() == packageName + ":profileRestart"', read(ANDROID, 'IknaApp.kt'))
+        helper = read(ANDROID, 'ProfileRestartActivity.kt')
+        self.assertLess(helper.index('Process.killProcess(pid)'), helper.index('startActivity(Intent(this, MainActivity::class.java)'))
+        self.assertIn('manager.runningAppProcesses?.any { it.pid == pid }', helper)
+        self.assertNotIn('exitProcess(', read(ANDROID, 'ui/settings/SettingsScreen.kt'))
+
+    def test_developer_reseed_is_startup_only_and_empty_stays_empty(self):
+        for base, name in [(ANDROID, 'AppContainer.kt'), (DESKTOP, 'DesktopContainer.kt')]:
+            source = read(base, name)
+            queued = source[source.index('val requested = scenarioRequests.current()'):]
+            self.assertLess(queued.index('.seed(requested)'), queued.index('scenarioRequests.clear()'))
+            self.assertLess(queued.index('scenarioRequests.clear()'), queued.index('optimizer.initialize()'))
+        seeder = read(SHARED, 'data/dev/DeveloperSandboxSeeder.kt')
+        self.assertIn('if (scenario == DeveloperScenario.EMPTY) emptyList() else installSyntheticContent(now)', seeder)
+        desktop = read(DESKTOP, 'DesktopContainer.kt')
+        self.assertIn('if (!isDeveloperMode || settings.current().developerScenario != DeveloperScenario.EMPTY.id)', desktop)
+        panel = read(SHARED, 'ui/dev/DeveloperToolsPanel.kt')
+        self.assertIn('if (!enabled || busy) return', panel)
+        self.assertIn('enabled = enabled && !busy', panel)
+
+    def test_reading_cat_keeps_the_selected_artwork_and_uses_downscale_filtering(self):
+        import hashlib
+        for path in ['shared/src/androidMain/res/drawable-nodpi/ikna_reading_cat.png',
+                     'shared/src/desktopMain/resources/drawable/ikna_reading_cat.png']:
+            self.assertEqual(hashlib.sha256((ROOT / path).read_bytes()).hexdigest(),
+                             '80ac42002e3ec5692cf417c83d07bc8f463001b0cab54e3f26cf6fcbef300131')
+        for path in ['shared/src/androidMain/kotlin/dev/ikna/ui/theme/PlatformTheme.android.kt',
+                     'shared/src/desktopMain/kotlin/dev/ikna/ui/theme/PlatformTheme.desktop.kt']:
+            self.assertIn('filterQuality = FilterQuality.Medium', read(ROOT, path))
+        self.assertIn('setHasMipMap(true)', read(ROOT, 'shared/src/androidMain/kotlin/dev/ikna/ui/theme/PlatformTheme.android.kt'))
 
     def test_developer_tools_use_actual_routes_and_read_only_inspection(self):
         panel = read(SHARED, 'ui/dev/DeveloperToolsPanel.kt')

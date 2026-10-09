@@ -26,3 +26,7 @@ expect fun iknaWordmarkPainter(): Painter
 
 @Composable
 expect fun iknaWordmarkAccentPainter(): Painter
+
+/** Shared transparent reading-cat artwork, recoloured by ReadingCat.kt. */
+@Composable
+expect fun iknaReadingCatPainter(): Painter

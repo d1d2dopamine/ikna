@@ -222,6 +222,7 @@ fun IknaSettingsToggleRow(
     title: String,
     subtitle: String?,
     checked: Boolean,
+    enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
@@ -246,6 +247,7 @@ fun IknaSettingsToggleRow(
         // announced as an anonymous "switch, on" after the text has been read.
         IknaToggle(
             checked = checked,
+            enabled = enabled,
             onCheckedChange = onCheckedChange,
             label = title
         )

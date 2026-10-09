@@ -33,7 +33,7 @@ on:
         default: "5"
       max_deck:
         description: "Part 10 safety budget per level"
-        default: "8000"
+        default: "12000"
       preview_limit_per_deck:
         description: "Small evidence preview rows kept per publishable deck"
         default: "25"
@@ -47,6 +47,16 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
+      - name: Validate deck budget before corpus work
+        env:
+          DECK_BUDGET: ${{ inputs.max_deck }}
+        run: |
+          python3 - <<'PYCODE'
+          import os, sys
+          sys.path.insert(0, 'tools/catalog')
+          from catalogue_core import v2_deck_budget
+          v2_deck_budget(os.environ['DECK_BUDGET'])
+          PYCODE
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -58,6 +68,8 @@ jobs:
           python3 tools/catalog/test_build_catalogue_v2.py
           python3 tools/catalog/test_everyday_rebuild.py
           python3 tools/catalog/test_selection_policy.py
+          python3 tools/catalog/test_deck_budget.py
+          python3 tools/catalog/test_replenishment_review.py
 
   everyday-experiment:
     needs: contracts
@@ -65,6 +77,16 @@ jobs:
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v5
+      - name: Validate deck budget before corpus work
+        env:
+          DECK_BUDGET: ${{ inputs.max_deck }}
+        run: |
+          python3 - <<'PYCODE'
+          import os, sys
+          sys.path.insert(0, 'tools/catalog')
+          from catalogue_core import v2_deck_budget
+          v2_deck_budget(os.environ['DECK_BUDGET'])
+          PYCODE
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

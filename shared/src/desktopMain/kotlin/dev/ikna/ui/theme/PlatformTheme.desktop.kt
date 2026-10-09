@@ -3,6 +3,7 @@ package dev.ikna.ui.theme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
@@ -47,10 +48,10 @@ private object NothingPainter : Painter() {
     override fun DrawScope.onDraw() = Unit
 }
 
-private fun loadWordmark(resource: String): Painter {
+private fun loadWordmark(resource: String, filterQuality: FilterQuality = FilterQuality.Low): Painter {
     val stream = WordmarkAnchor.javaClass.getResourceAsStream(resource) ?: return NothingPainter
     val image = runCatching { stream.use { ImageIO.read(it) } }.getOrNull() ?: return NothingPainter
-    return BitmapPainter(image.toComposeImageBitmap())
+    return BitmapPainter(image.toComposeImageBitmap(), filterQuality = filterQuality)
 }
 
 @Composable
@@ -61,4 +62,9 @@ actual fun iknaWordmarkPainter(): Painter = remember {
 @Composable
 actual fun iknaWordmarkAccentPainter(): Painter = remember {
     loadWordmark("/drawable/ikna_wordmark_accent.png")
+}
+
+@Composable
+actual fun iknaReadingCatPainter(): Painter = remember {
+    loadWordmark("/drawable/ikna_reading_cat.png", filterQuality = FilterQuality.Medium)
 }

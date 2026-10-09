@@ -170,6 +170,7 @@ Ensure-JavaBootstrap
 Ensure-Gradle
 # Inherited by the app/devtools and their continuous recompiler process.
 $env:IKNA_HOT_RELOAD_GRADLE_EXE = $GradleExe
+$env:IKNA_PROFILE_RESTART_FILE = Join-Path $LogsDir ("profile-restart-" + [guid]::NewGuid().ToString("N") + ".request")
 Prepare-DevelopmentProfile
 
 Write-Host ""
@@ -181,6 +182,7 @@ Write-Host ""
 
 while ($true) {
     Wait-RepositoryReady
+    Remove-Item $env:IKNA_PROFILE_RESTART_FILE -Force -ErrorAction SilentlyContinue
     $log = New-LogPath
     Set-Content -Path (Join-Path $LogsDir "latest.log.path") -Value $log -Encoding utf8
     @(
@@ -213,6 +215,11 @@ while ($true) {
     if (-not (Test-RepositoryReady)) {
         Wait-RepositoryReady
         Write-Host "Restarting automatically after repository replacement..." -ForegroundColor Cyan
+        continue
+    }
+
+    if (Receive-IknaProfileRestart -Path $env:IKNA_PROFILE_RESTART_FILE) {
+        Write-Host "Restarting automatically after a confirmed profile/scenario change..." -ForegroundColor Cyan
         continue
     }
 

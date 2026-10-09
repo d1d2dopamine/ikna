@@ -1,0 +1,825 @@
+{
+  "baselineFileSha256": "7a861d648025196bbf507495d937664b675daff419722e58dcabd451c66c75b2",
+  "baselineReproduced": true,
+  "catalogueBuilt": false,
+  "environment": {
+    "engine": "ICU word break",
+    "icuVersion": "74.2",
+    "koreanUnit": "eojeol",
+    "languages": [
+      "ko"
+    ],
+    "offsets": "UTF-16"
+  },
+  "expectedSelectionSha256": "8db3bf4a8706d45053e646bcfed9c066797bee5e590fabfaf2a093d8a5d78d9e",
+  "inputFiles": [
+    {
+      "file": "wmt24pp--en-de_DE.jsonl",
+      "sha256": "5f9e403833ccb3cbab90c9247cd9617ab6744060dc72cfcc7b470ea82d19bd05",
+      "sizeBytes": 844048,
+      "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-de_DE.jsonl"
+    },
+    {
+      "file": "wmt24pp--en-es_MX.jsonl",
+      "sha256": "e88f65699e094b8bf865deb3424aa8d4ef17a6cadf687e2d5af78ab70d98c2ee",
+      "sizeBytes": 837846,
+      "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-es_MX.jsonl"
+    },
+    {
+      "file": "wmt24pp--en-fr_FR.jsonl",
+      "sha256": "af9722b702087c0d3dfbd51bf6fd61b5bb89bce5bfc981615c68260253d1e676",
+      "sizeBytes": 872013,
+      "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-fr_FR.jsonl"
+    },
+    {
+      "file": "wmt24pp--en-it_IT.jsonl",
+      "sha256": "1404d59ec6a6499ef89813984d1da21735450bb017f8666be8ad143ad4eb2a91",
+      "sizeBytes": 799364,
+      "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-it_IT.jsonl"
+    },
+    {
+      "file": "wmt24pp--en-ja_JP.jsonl",
+      "sha256": "58bbee69aed537d21e25f04c5eaf49c2c7aef1b1dddb918f6eac424ab93c7ec8",
+      "sizeBytes": 1332480,
+      "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-ja_JP.jsonl"
+    },
+    {
+      "file": "wmt24pp--en-ko_KR.jsonl",
+      "sha256": "4520124f3769cd711aab0c939aeb849a225dce51b761eeb419f46e555b02d7e5",
+      "sizeBytes": 1223239,
+      "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-ko_KR.jsonl"
+    },
+    {
+      "file": "wmt24pp--en-pl_PL.jsonl",
+      "sha256": "ad7c214d3e6842740f3e7a1cf99ddf1762b8ab55cc42c4092404dbc14cd50add",
+      "sizeBytes": 934176,
+      "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-pl_PL.jsonl"
+    },
+    {
+      "file": "wmt24pp--en-pt_PT.jsonl",
+      "sha256": "05078aa5e4a9a9f095ccf738ec48bcd91024be455b613bdcb89cd139cdd52a19",
+      "sizeBytes": 835631,
+      "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-pt_PT.jsonl"
+    },
+    {
+      "file": "wmt24pp--en-ru_RU.jsonl",
+      "sha256": "13b9417b25f677f80e9973737492ac3329a720cb85a351029c2b98fa7998deb6",
+      "sizeBytes": 2245729,
+      "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-ru_RU.jsonl"
+    },
+    {
+      "file": "wmt24pp--en-zh_CN.jsonl",
+      "sha256": "984ec4da714800aae2b9ee6e2601d1cadb01a770e01ed385d5283ce7a0585287",
+      "sizeBytes": 1061605,
+      "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-zh_CN.jsonl"
+    },
+    {
+      "file": "wmt24pp--README.md",
+      "sha256": "0481632f24c7f1aab971631a5bcdd5c974777cf5fea58ae86df247b8260be7c7",
+      "sizeBytes": 11226,
+      "url": "https://huggingface.co/datasets/google/wmt24pp/raw/fd7405c06494bc66a57b25f55d217a72f96e60dc/README.md"
+    },
+    {
+      "file": "mkqa--README.md",
+      "sha256": "4ca2808cd6cc6e543dbd7a7006467e718f3a5aac3efa354a30366aaf1430527c",
+      "sizeBytes": 8777,
+      "url": "https://raw.githubusercontent.com/apple-aiml-research/ml-mkqa/f964fe1bac4d580cee3d4928572df1f676f8e656/README.md"
+    },
+    {
+      "file": "mkqa--LICENSE",
+      "sha256": "b3fc37157980610b9ab6ab20bf260b9c6c82ff5dca3aaa775b50d41173bd4696",
+      "sizeBytes": 10175,
+      "url": "https://raw.githubusercontent.com/apple-aiml-research/ml-mkqa/f964fe1bac4d580cee3d4928572df1f676f8e656/LICENSE"
+    },
+    {
+      "file": "mkqa--dataset--mkqa.jsonl.gz",
+      "sha256": "f77ac6bf6306e98816c5c047880db71a3c67d2f1491b169896d63e9bb14ef3d3",
+      "sizeBytes": 11903948,
+      "url": "https://raw.githubusercontent.com/apple-aiml-research/ml-mkqa/f964fe1bac4d580cee3d4928572df1f676f8e656/dataset/mkqa.jsonl.gz"
+    },
+    {
+      "file": "ntrex--README.md",
+      "sha256": "d00240af5232e2b89d1e1fb1af23117339fabee04d0d01f72df64162cc207f35",
+      "sizeBytes": 3757,
+      "url": "https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/468c6b69c7f6a75d31d4743d9daba2af566cc18d/README.md"
+    },
+    {
+      "file": "ntrex--LICENSE.md",
+      "sha256": "5e436ff8ffbb77d8607220e9bce20c8915d860010feeb6c1ebef5a85688e9b39",
+      "sizeBytes": 20137,
+      "url": "https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/468c6b69c7f6a75d31d4743d9daba2af566cc18d/LICENSE.md"
+    },
+    {
+      "file": "ntrex--DOCUMENT_IDS.tsv",
+      "sha256": "88a8b0ff1eae47e83f60dcde01075b8c87d75ced59ca09e0af1eb539958e05d5",
+      "sizeBytes": 30754,
+      "url": "https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/468c6b69c7f6a75d31d4743d9daba2af566cc18d/DOCUMENT_IDS.tsv"
+    },
+    {
+      "file": "ntrex--LANGUAGES.tsv",
+      "sha256": "06b295e71976aa7adfef358d7c24a91b61212ca7aafb244c199619661f808158",
+      "sizeBytes": 1862,
+      "url": "https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/468c6b69c7f6a75d31d4743d9daba2af566cc18d/LANGUAGES.tsv"
+    },
+    {
+      "file": "ntrex--NTREX-128--newstest2019-src.eng.txt",
+      "sha256": "389e8f5796c66db4f646dfad33e1ec622d74767af5ef112b42a1f2cd814df3cc",
+      "sizeBytes": 251739,
+      "url": "https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/468c6b69c7f6a75d31d4743d9daba2af566cc18d/NTREX-128/newstest2019-src.eng.txt"
+    },
+    {
+      "file": "ntrex--NTREX-128--newstest2019-ref.pol.txt",
+      "sha256": "95fb2e4b00a41847015eebda8821d52eadb60479507e179e575e3c706e353b77",
+      "sizeBytes": 302480,
+      "url": "https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/468c6b69c7f6a75d31d4743d9daba2af566cc18d/NTREX-128/newstest2019-ref.pol.txt"
+    },
+    {
+      "file": "ntrex--NTREX-128--newstest2019-ref.kor.txt",
+      "sha256": "2b50fa9a121b595ac7d3b9e98d901e72bafe68dcd945109ceb1fbbe782193638",
+      "sizeBytes": 320777,
+      "url": "https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/468c6b69c7f6a75d31d4743d9daba2af566cc18d/NTREX-128/newstest2019-ref.kor.txt"
+    }
+  ],
+  "measurements": {
+    "baseline": {
+      "ko->pl": {
+        "levels": {
+          "advanced": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 29,
+            "eligibleTargets": 74,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 0,
+            "retainedContexts": 45,
+            "selectedCountDelta": 0,
+            "selectedTargets": 45
+          },
+          "beginner": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 72,
+            "eligibleTargets": 127,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 0,
+            "retainedContexts": 61,
+            "selectedCountDelta": 0,
+            "selectedTargets": 55
+          },
+          "middle": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 18,
+            "eligibleTargets": 60,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 0,
+            "retainedContexts": 45,
+            "selectedCountDelta": 0,
+            "selectedTargets": 42
+          }
+        },
+        "originPreservingMerge": {
+          "inputCandidates": 188,
+          "originOccurrences": 188,
+          "stageDuplicateCandidates": 0,
+          "uniqueCandidates": 188
+        },
+        "outOfBaselineWrittenFormsBeforeSieve": 0,
+        "sieve": {
+          "candidateRows": 94,
+          "eligibleExactTargets": 261,
+          "eligibleTargetOccurrences": 279,
+          "sentenceLengthRejected": 16
+        }
+      },
+      "pl->ko": {
+        "levels": {
+          "advanced": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 17,
+            "eligibleTargets": 47,
+            "included": false,
+            "newSelectedTargetsAgainstBaseline": 0,
+            "retainedContexts": 31,
+            "selectedCountDelta": 0,
+            "selectedTargets": 30
+          },
+          "beginner": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 66,
+            "eligibleTargets": 117,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 0,
+            "retainedContexts": 62,
+            "selectedCountDelta": 0,
+            "selectedTargets": 51
+          },
+          "middle": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 14,
+            "eligibleTargets": 46,
+            "included": false,
+            "newSelectedTargetsAgainstBaseline": 0,
+            "retainedContexts": 32,
+            "selectedCountDelta": 0,
+            "selectedTargets": 32
+          }
+        },
+        "originPreservingMerge": {
+          "inputCandidates": 188,
+          "originOccurrences": 188,
+          "stageDuplicateCandidates": 0,
+          "uniqueCandidates": 188
+        },
+        "outOfBaselineWrittenFormsBeforeSieve": 0,
+        "sieve": {
+          "candidateRows": 94,
+          "eligibleExactTargets": 210,
+          "eligibleTargetOccurrences": 236,
+          "noUsableTarget": 1,
+          "sentenceLengthRejected": 21
+        }
+      }
+    },
+    "baseline+mkqa-all-queries": {
+      "ko->pl": {
+        "levels": {
+          "advanced": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": false,
+            "contextCollisionTargetsRejected": 160,
+            "eligibleTargets": 1445,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 1240,
+            "retainedContexts": 2116,
+            "selectedCountDelta": 1240,
+            "selectedTargets": 1285
+          },
+          "beginner": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 106,
+            "eligibleTargets": 746,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 585,
+            "retainedContexts": 1390,
+            "selectedCountDelta": 585,
+            "selectedTargets": 640
+          },
+          "middle": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 72,
+            "eligibleTargets": 838,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 724,
+            "retainedContexts": 1392,
+            "selectedCountDelta": 724,
+            "selectedTargets": 766
+          }
+        },
+        "originPreservingMerge": {
+          "inputCandidates": 20188,
+          "originOccurrences": 20188,
+          "stageDuplicateCandidates": 0,
+          "uniqueCandidates": 20184
+        },
+        "outOfBaselineWrittenFormsBeforeSieve": 16482,
+        "sieve": {
+          "candidateRows": 10092,
+          "eligibleExactTargets": 3029,
+          "eligibleTargetOccurrences": 24737,
+          "noUsableTarget": 594,
+          "sentenceLengthRejected": 129
+        }
+      },
+      "pl->ko": {
+        "levels": {
+          "advanced": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": false,
+            "contextCollisionTargetsRejected": 1661,
+            "eligibleTargets": 5172,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 3481,
+            "retainedContexts": 5816,
+            "selectedCountDelta": 3481,
+            "selectedTargets": 3511
+          },
+          "beginner": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 104,
+            "eligibleTargets": 958,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 803,
+            "retainedContexts": 1997,
+            "selectedCountDelta": 803,
+            "selectedTargets": 854
+          },
+          "middle": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": false,
+            "contextCollisionTargetsRejected": 134,
+            "eligibleTargets": 1327,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 1161,
+            "retainedContexts": 2382,
+            "selectedCountDelta": 1161,
+            "selectedTargets": 1193
+          }
+        },
+        "originPreservingMerge": {
+          "inputCandidates": 20188,
+          "originOccurrences": 20188,
+          "stageDuplicateCandidates": 0,
+          "uniqueCandidates": 20184
+        },
+        "outOfBaselineWrittenFormsBeforeSieve": 9130,
+        "sieve": {
+          "candidateRows": 10092,
+          "eligibleExactTargets": 7457,
+          "eligibleTargetOccurrences": 40644,
+          "noUsableTarget": 48,
+          "sentenceLengthRejected": 21
+        }
+      }
+    },
+    "baseline+wmt24pp": {
+      "ko->pl": {
+        "levels": {
+          "advanced": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 121,
+            "eligibleTargets": 347,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 181,
+            "retainedContexts": 253,
+            "selectedCountDelta": 181,
+            "selectedTargets": 226
+          },
+          "beginner": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 237,
+            "eligibleTargets": 459,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 167,
+            "retainedContexts": 335,
+            "selectedCountDelta": 167,
+            "selectedTargets": 222
+          },
+          "middle": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 93,
+            "eligibleTargets": 282,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 147,
+            "retainedContexts": 230,
+            "selectedCountDelta": 147,
+            "selectedTargets": 189
+          }
+        },
+        "originPreservingMerge": {
+          "inputCandidates": 1398,
+          "originOccurrences": 1398,
+          "stageDuplicateCandidates": 0,
+          "uniqueCandidates": 1396
+        },
+        "outOfBaselineWrittenFormsBeforeSieve": 4294,
+        "sieve": {
+          "candidateRows": 698,
+          "eligibleExactTargets": 1088,
+          "eligibleTargetOccurrences": 1702,
+          "noUsableTarget": 39,
+          "sentenceLengthRejected": 34,
+          "translationLengthRejected": 201
+        }
+      },
+      "pl->ko": {
+        "levels": {
+          "advanced": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 677,
+            "eligibleTargets": 1053,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 346,
+            "retainedContexts": 429,
+            "selectedCountDelta": 346,
+            "selectedTargets": 376
+          },
+          "beginner": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 384,
+            "eligibleTargets": 643,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 208,
+            "retainedContexts": 444,
+            "selectedCountDelta": 208,
+            "selectedTargets": 259
+          },
+          "middle": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 245,
+            "eligibleTargets": 531,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 254,
+            "retainedContexts": 347,
+            "selectedCountDelta": 254,
+            "selectedTargets": 286
+          }
+        },
+        "originPreservingMerge": {
+          "inputCandidates": 1398,
+          "originOccurrences": 1398,
+          "stageDuplicateCandidates": 0,
+          "uniqueCandidates": 1396
+        },
+        "outOfBaselineWrittenFormsBeforeSieve": 2047,
+        "sieve": {
+          "candidateRows": 698,
+          "eligibleExactTargets": 2227,
+          "eligibleTargetOccurrences": 3764,
+          "noUsableTarget": 4,
+          "sentenceLengthRejected": 156,
+          "translationLengthRejected": 3
+        }
+      }
+    },
+    "baseline+wmt24pp+mkqa-all-queries": {
+      "ko->pl": {
+        "levels": {
+          "advanced": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": false,
+            "contextCollisionTargetsRejected": 223,
+            "eligibleTargets": 1652,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 1384,
+            "retainedContexts": 2309,
+            "selectedCountDelta": 1384,
+            "selectedTargets": 1429
+          },
+          "beginner": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 149,
+            "eligibleTargets": 862,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 658,
+            "retainedContexts": 1560,
+            "selectedCountDelta": 658,
+            "selectedTargets": 713
+          },
+          "middle": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 121,
+            "eligibleTargets": 982,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 819,
+            "retainedContexts": 1548,
+            "selectedCountDelta": 819,
+            "selectedTargets": 861
+          }
+        },
+        "originPreservingMerge": {
+          "inputCandidates": 21398,
+          "originOccurrences": 21398,
+          "stageDuplicateCandidates": 0,
+          "uniqueCandidates": 21392
+        },
+        "outOfBaselineWrittenFormsBeforeSieve": 20213,
+        "sieve": {
+          "candidateRows": 10696,
+          "eligibleExactTargets": 3496,
+          "eligibleTargetOccurrences": 26160,
+          "noUsableTarget": 633,
+          "sentenceLengthRejected": 147,
+          "translationLengthRejected": 201
+        }
+      },
+      "pl->ko": {
+        "levels": {
+          "advanced": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": false,
+            "contextCollisionTargetsRejected": 2111,
+            "eligibleTargets": 5886,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 3745,
+            "retainedContexts": 6183,
+            "selectedCountDelta": 3745,
+            "selectedTargets": 3775
+          },
+          "beginner": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 185,
+            "eligibleTargets": 1115,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 879,
+            "retainedContexts": 2187,
+            "selectedCountDelta": 879,
+            "selectedTargets": 930
+          },
+          "middle": {
+            "baselineSelectedTargetsNotSelected": 0,
+            "below1000": false,
+            "contextCollisionTargetsRejected": 253,
+            "eligibleTargets": 1592,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 1307,
+            "retainedContexts": 2637,
+            "selectedCountDelta": 1307,
+            "selectedTargets": 1339
+          }
+        },
+        "originPreservingMerge": {
+          "inputCandidates": 21398,
+          "originOccurrences": 21398,
+          "stageDuplicateCandidates": 0,
+          "uniqueCandidates": 21392
+        },
+        "outOfBaselineWrittenFormsBeforeSieve": 10939,
+        "sieve": {
+          "candidateRows": 10696,
+          "eligibleExactTargets": 8593,
+          "eligibleTargetOccurrences": 44172,
+          "noUsableTarget": 51,
+          "sentenceLengthRejected": 156,
+          "translationLengthRejected": 3
+        }
+      }
+    },
+    "mkqa-all-queries-only": {
+      "ko->pl": {
+        "levels": {
+          "advanced": {
+            "baselineSelectedTargetsNotSelected": 41,
+            "below1000": false,
+            "contextCollisionTargetsRejected": 135,
+            "eligibleTargets": 1379,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 1240,
+            "retainedContexts": 2071,
+            "selectedCountDelta": 1199,
+            "selectedTargets": 1244
+          },
+          "beginner": {
+            "baselineSelectedTargetsNotSelected": 19,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 76,
+            "eligibleTargets": 695,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 583,
+            "retainedContexts": 1349,
+            "selectedCountDelta": 564,
+            "selectedTargets": 619
+          },
+          "middle": {
+            "baselineSelectedTargetsNotSelected": 34,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 63,
+            "eligibleTargets": 795,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 724,
+            "retainedContexts": 1351,
+            "selectedCountDelta": 690,
+            "selectedTargets": 732
+          }
+        },
+        "originPreservingMerge": {
+          "inputCandidates": 20000,
+          "originOccurrences": 20000,
+          "stageDuplicateCandidates": 0,
+          "uniqueCandidates": 19996
+        },
+        "outOfBaselineWrittenFormsBeforeSieve": 16482,
+        "sieve": {
+          "candidateRows": 9998,
+          "eligibleExactTargets": 2869,
+          "eligibleTargetOccurrences": 24458,
+          "noUsableTarget": 594,
+          "sentenceLengthRejected": 113
+        }
+      },
+      "pl->ko": {
+        "levels": {
+          "advanced": {
+            "baselineSelectedTargetsNotSelected": 23,
+            "below1000": false,
+            "contextCollisionTargetsRejected": 1647,
+            "eligibleTargets": 5134,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 3480,
+            "retainedContexts": 5785,
+            "selectedCountDelta": 3457,
+            "selectedTargets": 3487
+          },
+          "beginner": {
+            "baselineSelectedTargetsNotSelected": 16,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 83,
+            "eligibleTargets": 920,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 802,
+            "retainedContexts": 1959,
+            "selectedCountDelta": 786,
+            "selectedTargets": 837
+          },
+          "middle": {
+            "baselineSelectedTargetsNotSelected": 19,
+            "below1000": false,
+            "contextCollisionTargetsRejected": 124,
+            "eligibleTargets": 1298,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 1161,
+            "retainedContexts": 2355,
+            "selectedCountDelta": 1142,
+            "selectedTargets": 1174
+          }
+        },
+        "originPreservingMerge": {
+          "inputCandidates": 20000,
+          "originOccurrences": 20000,
+          "stageDuplicateCandidates": 0,
+          "uniqueCandidates": 19996
+        },
+        "outOfBaselineWrittenFormsBeforeSieve": 9130,
+        "sieve": {
+          "candidateRows": 9998,
+          "eligibleExactTargets": 7352,
+          "eligibleTargetOccurrences": 40408,
+          "noUsableTarget": 47
+        }
+      }
+    },
+    "wmt24pp-only": {
+      "ko->pl": {
+        "levels": {
+          "advanced": {
+            "baselineSelectedTargetsNotSelected": 42,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 93,
+            "eligibleTargets": 277,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 181,
+            "retainedContexts": 208,
+            "selectedCountDelta": 139,
+            "selectedTargets": 184
+          },
+          "beginner": {
+            "baselineSelectedTargetsNotSelected": 34,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 206,
+            "eligibleTargets": 384,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 157,
+            "retainedContexts": 275,
+            "selectedCountDelta": 123,
+            "selectedTargets": 178
+          },
+          "middle": {
+            "baselineSelectedTargetsNotSelected": 35,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 78,
+            "eligibleTargets": 232,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 147,
+            "retainedContexts": 185,
+            "selectedCountDelta": 112,
+            "selectedTargets": 154
+          }
+        },
+        "originPreservingMerge": {
+          "inputCandidates": 1210,
+          "originOccurrences": 1210,
+          "stageDuplicateCandidates": 0,
+          "uniqueCandidates": 1208
+        },
+        "outOfBaselineWrittenFormsBeforeSieve": 4294,
+        "sieve": {
+          "candidateRows": 604,
+          "eligibleExactTargets": 893,
+          "eligibleTargetOccurrences": 1423,
+          "noUsableTarget": 39,
+          "sentenceLengthRejected": 18,
+          "translationLengthRejected": 201
+        }
+      },
+      "pl->ko": {
+        "levels": {
+          "advanced": {
+            "baselineSelectedTargetsNotSelected": 30,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 663,
+            "eligibleTargets": 1009,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 346,
+            "retainedContexts": 398,
+            "selectedCountDelta": 316,
+            "selectedTargets": 346
+          },
+          "beginner": {
+            "baselineSelectedTargetsNotSelected": 29,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 376,
+            "eligibleTargets": 597,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 199,
+            "retainedContexts": 385,
+            "selectedCountDelta": 170,
+            "selectedTargets": 221
+          },
+          "middle": {
+            "baselineSelectedTargetsNotSelected": 29,
+            "below1000": true,
+            "contextCollisionTargetsRejected": 236,
+            "eligibleTargets": 493,
+            "included": true,
+            "newSelectedTargetsAgainstBaseline": 254,
+            "retainedContexts": 315,
+            "selectedCountDelta": 225,
+            "selectedTargets": 257
+          }
+        },
+        "originPreservingMerge": {
+          "inputCandidates": 1210,
+          "originOccurrences": 1210,
+          "stageDuplicateCandidates": 0,
+          "uniqueCandidates": 1208
+        },
+        "outOfBaselineWrittenFormsBeforeSieve": 2047,
+        "sieve": {
+          "candidateRows": 604,
+          "eligibleExactTargets": 2099,
+          "eligibleTargetOccurrences": 3528,
+          "noUsableTarget": 3,
+          "sentenceLengthRejected": 135,
+          "translationLengthRejected": 3
+        }
+      }
+    }
+  },
+  "mkqa": {
+    "queries": 10000,
+    "scope": "optimistic all-query diagnostic before Everyday/domain review; answers never used"
+  },
+  "ntrex": {
+    "alignedSegments": 1997,
+    "collection": "knowledge",
+    "documents": 123,
+    "netKnowledgeYieldMeasured": false,
+    "shapeOnly": {
+      "ko": {
+        "lengthEligiblePairs": 1272,
+        "sentenceLengthRejected": 24,
+        "translationLengthRejected": 701
+      },
+      "pl": {
+        "lengthEligiblePairs": 1920,
+        "sentenceLengthRejected": 64,
+        "translationLengthRejected": 13
+      }
+    }
+  },
+  "pipelineSha256": {
+    "build_catalogue_v2.py": "976a868d70509e77dc020cfe943ad1e1821ae0fd287f13ff6952f384b42dd530",
+    "catalogue_core.py": "38af974c1e853034b0c9343bd41b5bc82f4644d117a11596bf35d50f98c47329",
+    "ingest/model.py": "1d5097bbd68fbcc589f5846efb766785f0e682bfb004aff01c1e2d97b68cf9fc",
+    "replenishment_review.py": "826fb51b2c6249bafdce46a9dc088ae53db96764d5b2a7ef41d0d6feff636145",
+    "segmentation.py": "627b30e28ccb3c31a423d4d83b7968422913efd8cc7d631863d4d4075634b8da",
+    "selection_experiment.py": "c2dfcdd495898416441035c887d192ff7f227c193bd5ca4ccd90f2dd661e6dfe",
+    "selection_policy.py": "6100810b5bd7eca23b063f90dd0c1e81cb3a7f55ba3aeab76f02be84720fb3ae"
+  },
+  "publicationSafe": false,
+  "pythonVersion": "3.12.14",
+  "ranksFileSha256": "cdb3ac19359d7d111d6d931f59efcbe3b091a26f68d3cc1aec5b2bfdc7c9afb2",
+  "reportVersion": 1,
+  "revisions": {
+    "mkqa": "f964fe1bac4d580cee3d4928572df1f676f8e656",
+    "ntrex": "468c6b69c7f6a75d31d4743d9daba2af566cc18d",
+    "wmt24pp": "fd7405c06494bc66a57b25f55d217a72f96e60dc"
+  },
+  "scope": "pl<->ko; existing whole segments; baseline frequency space; unknown forms deferred",
+  "semanticAccuracyCertified": false,
+  "sourceAdmissionChanged": false,
+  "wmt24pp": {
+    "rejected": {
+      "bad-source": 38,
+      "outside-everyday-domains": 355
+    },
+    "retainedDomainSegments": 605,
+    "sharedAnchorsVerifiedLanguages": 11,
+    "sourceSegments": 998
+  }
+}

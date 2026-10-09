@@ -1,0 +1,21 @@
+{
+  "baselineRows": 188,
+  "baselineSelectedCountsReproduced": true,
+  "files": {
+    "PL-KO-BASELINE.jsonl.gz": "7a861d648025196bbf507495d937664b675daff419722e58dcabd451c66c75b2",
+    "PL-KO-RANKS.json.gz": "cdb3ac19359d7d111d6d931f59efcbe3b091a26f68d3cc1aec5b2bfdc7c9afb2"
+  },
+  "fullPoolLogicalBytesRead": 5320249214,
+  "fullPoolRowsRead": 11099490,
+  "normalizedContexts": {
+    "ko": 15336,
+    "pl": 123779
+  },
+  "publicationSafe": false,
+  "rankMethod": "selection_experiment.build_ranks: deduplicated normalized context key, sorted context_key order, lower-case word counts, first-seen frequency ties",
+  "rawPoolLogicalSha256": "05ccbb5b5217dc050cc5a5e0e1cfca3223657529afa6b3890c9340999d571ab8",
+  "scope": [
+    "pl",
+    "ko"
+  ]
+}

@@ -14,7 +14,7 @@ on:
         default: "en,ru,pl,es,fr,de,it,pt,zh,ja,ko"
       max_deck:
         description: "Unique learning targets per collection/level deck at most"
-        default: "8000"
+        default: "12000"
       contexts_per_target:
         description: "Natural source contexts kept per exact target and pair"
         default: "3"
@@ -55,6 +55,16 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
+      - name: Validate deck budget before corpus work
+        env:
+          DECK_BUDGET: ${{ inputs.max_deck }}
+        run: |
+          python3 - <<'PYCODE'
+          import os, sys
+          sys.path.insert(0, 'tools/catalog')
+          from catalogue_core import v2_deck_budget
+          v2_deck_budget(os.environ['DECK_BUDGET'])
+          PYCODE
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -68,6 +78,8 @@ jobs:
           python3 tools/catalog/test_ingestion.py
           python3 tools/catalog/test_morphology.py
           python3 tools/catalog/test_build_catalogue_v2.py
+          python3 tools/catalog/test_deck_budget.py
+          python3 tools/catalog/test_replenishment_review.py
           python3 tools/catalog/test_meta_info.py
           python3 tools/catalog/test_readiness_audit.py
           python3 tools/catalog/test_storage_experiment.py
@@ -83,6 +95,16 @@ jobs:
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v5
+      - name: Validate deck budget before corpus work
+        env:
+          DECK_BUDGET: ${{ inputs.max_deck }}
+        run: |
+          python3 - <<'PYCODE'
+          import os, sys
+          sys.path.insert(0, 'tools/catalog')
+          from catalogue_core import v2_deck_budget
+          v2_deck_budget(os.environ['DECK_BUDGET'])
+          PYCODE
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

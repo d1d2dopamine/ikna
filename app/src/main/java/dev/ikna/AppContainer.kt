@@ -134,6 +134,15 @@ class AppContainer(
         )
     } else null
 
+    private val scenarioRequests = dev.ikna.data.dev.PendingDeveloperScenarioStore(
+        File(appContext.filesDir, dev.ikna.data.dev.DEVELOPER_SCENARIO_REQUEST_FILE)
+    )
+    fun requestDeveloperScenario(scenario: DeveloperScenario) {
+        check(isDeveloperMode)
+        scenarioRequests.set(scenario)
+    }
+    fun cancelDeveloperScenarioRequest() = scenarioRequests.clear()
+
     fun requestDataProfile(profile: IknaDataProfile) {
         profileStore.set(profile)
     }
@@ -273,8 +282,14 @@ class AppContainer(
         _schedulerMigration.value = SchedulerMigrationState.Running
         schedulerMigrationJob = scope.launch(Dispatchers.IO) {
             _schedulerMigration.value = runCatching {
-                if (isDeveloperMode && !settings.flow.first().onboardingDone) {
-                    developerSandbox?.seed(DeveloperScenario.MATURE_HISTORY)
+                if (isDeveloperMode) {
+                    val requested = scenarioRequests.current()
+                    if (requested != null) {
+                        requireNotNull(developerSandbox).seed(requested)
+                        scenarioRequests.clear()
+                    } else if (!settings.flow.first().onboardingDone) {
+                        developerSandbox?.seed(DeveloperScenario.MATURE_HISTORY)
+                    }
                 }
                 optimizer.initialize()
                 schedulerMigrator.runIfNeeded().also {

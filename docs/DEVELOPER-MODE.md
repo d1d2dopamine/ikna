@@ -31,11 +31,21 @@ reach a state naturally.
 
 Current scenario classes cover an empty profile, early history, mature history,
 Browse-ready history, statistics-rich history and a return after a long break.
+The empty scenario contains no packs, chunks, cards or reviews. Desktop bundled
+packs are not automatically installed into that scenario. Other scenarios retain
+their existing production-shaped fixtures.
 Future scenarios should be added only when they represent a distinct product
 state that is otherwise expensive or impossible to reproduce manually.
 
 Synthetic history must never be inserted into the normal profile. Reset/reseed is
 allowed to be destructive only inside the developer database.
+
+A reseed requires a separate confirmation that also warns about resetting DEV
+settings. The UI queues the exact selected scenario in the bootstrap file
+`ikna-developer-scenario-request`, then requests a process restart. Only DEV
+startup reads it, before repository/UI work; the request is removed only after
+successful seeding. Invalid requests fail startup instead of silently choosing
+another scenario. No reseed runs against the live Settings composition.
 
 ## Restrictions and forced access
 
@@ -46,6 +56,7 @@ waiting for history maturity, a completed plan, credits or the right time of day
 The setting belongs to the isolated DEV DataStore, is omitted from learner settings
 exports, and cannot grant an override to a REAL profile. It is read by the shared
 access boundary on each operation, without a process restart or policy fork.
+Changing it does not leave Developer Mode; the UI states this explicitly.
 Reseeding DEV clears its settings and returns the switch to the default.
 
 The switch does not rebuild an existing daily plan or change Governor/Scheduler
@@ -82,6 +93,25 @@ Developer Mode lives under Settings -> Rare and requires an explicit warning bef
 it is enabled. While active, a persistent `DEV` marker remains visible so the
 current profile cannot be mistaken for normal learning.
 
+Rare is closed on every Settings visit, including DEV. Entry and exit both use a
+separate confirmation dialog; cancel writes no bootstrap state. In DEV, the
+return-to-normal button remains visible above the closed fold. Confirmed changes
+disable duplicate developer actions while the process restarts. Failure to arrange
+the restart restores the previous profile choice and exposes an error.
+
+The marker and deck list describe the profile actually opened by the process;
+they are never cosmetically hidden while DEV repositories are still active. On a
+successful return, the new process opens REAL, restores its own decks/settings,
+and omits DEV tools/marker. DEV files remain isolated for future tests.
+
+Desktop arranges a successor before closing. Packaged/JVM successors wait for the
+old PID to exit before opening Room or claiming the instance lock. Hot Reload
+uses its supervisor's one-shot restart request, consumed after the child exits;
+ordinary window closes still require Enter. Android uses an unexported handoff
+activity in `:profileRestart`; that process skips the app dependency graph,
+terminates the old main process and starts MainActivity only after it stops.
+Actual target-platform restart acceptance remains a required smoke check.
+
 The shared DEV tools panel on Android and desktop provides:
 
 - installed-deck selection and direct navigation to actual classic cards, Browse,
@@ -99,6 +129,6 @@ that day's plan and settle credits, and this distinction is stated in the panel.
 Cancelled operations propagate cancellation; failed actions show an error and can
 be retried. Copying diagnostics only writes the local clipboard.
 
-Existing deterministic reseed controls and return-to-normal profile controls remain
-below the tools. This round adds no synthetic scenarios. See
-[ROUND-0.12-11.md](ROUND-0.12-11.md) for scope and verification limits.
+Deterministic reseed controls remain below the tools. No new synthetic scenarios
+are added. See [ROUND-0.12-11.md](ROUND-0.12-11.md) for the tool audit and
+[ROUND-0.12-18.md](ROUND-0.12-18.md) for profile/reseed repairs and runtime limits.

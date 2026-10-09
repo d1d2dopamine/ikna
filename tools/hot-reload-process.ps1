@@ -13,3 +13,12 @@ function Invoke-IknaHotGradle {
         Tee-Object -FilePath $Log -Append | Out-Host
     return $LASTEXITCODE
 }
+
+# One-shot request: a normal close must still offer Enter, not a restart loop.
+function Receive-IknaProfileRestart {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    if (-not (Test-Path $Path -PathType Leaf)) { return $false }
+    $value = (Get-Content $Path -Raw).Trim()
+    Remove-Item $Path -Force
+    return $value -eq "RESTART"
+}

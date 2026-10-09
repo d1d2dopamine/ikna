@@ -1,6 +1,12 @@
 package dev.ikna.ui.theme
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
@@ -25,3 +31,14 @@ actual fun iknaWordmarkPainter(): Painter = painterResource(R.drawable.ikna_word
 
 @Composable
 actual fun iknaWordmarkAccentPainter(): Painter = painterResource(R.drawable.ikna_wordmark_accent)
+
+@Composable
+actual fun iknaReadingCatPainter(): Painter {
+    val bitmap = ImageBitmap.imageResource(R.drawable.ikna_reading_cat)
+    return remember(bitmap) {
+        // Android collapses non-None filter qualities to bilinear. Request the
+        // native renderer's downscale levels as well; the source pixels stay intact.
+        bitmap.asAndroidBitmap().setHasMipMap(true)
+        BitmapPainter(bitmap, filterQuality = FilterQuality.Medium)
+    }
+}

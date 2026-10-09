@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -53,7 +54,7 @@ import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
-import dev.ikna.ui.theme.IknaDeckHeaderPaint
+import dev.ikna.ui.theme.IknaReadingCat
 import dev.ikna.ui.theme.IknaDeveloperBadge
 import dev.ikna.ui.theme.IknaElementInspector
 import dev.ikna.ui.theme.IknaLatticePlaceholder
@@ -143,7 +144,7 @@ class DesktopUi {
 fun IknaDesktopApp(
     container: DesktopContainer,
     ui: DesktopUi,
-    onRestartRequested: () -> Unit = {},
+    onRestartRequested: () -> Unit,
     titleBar: @Composable (IknaPalette, Boolean) -> Unit = { _, _ -> }
 ) {
     // Null means the DataStore has not answered yet. Using a default settings
@@ -335,7 +336,6 @@ private fun DecksColumn(
 
     Box(Modifier.fillMaxSize().iknaInspect("DecksColumn")) {
         IknaMemoryField(seed = 0x1A4B_7C2D, modifier = Modifier.fillMaxSize())
-        IknaDeckHeaderPaint(seed = 0x5D31_7A0C)
 
         Column(Modifier.fillMaxSize()) {
             Row(
@@ -349,8 +349,12 @@ private fun DecksColumn(
                 Text(
                     text = S.t("deck.004"),
                     style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
+                IknaReadingCat()
             }
 
             Column(Modifier.padding(horizontal = Edge)) {

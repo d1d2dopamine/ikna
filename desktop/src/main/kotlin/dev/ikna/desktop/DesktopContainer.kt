@@ -130,6 +130,15 @@ class DesktopContainer(
         )
     } else null
 
+    private val scenarioRequests = dev.ikna.data.dev.PendingDeveloperScenarioStore(
+        File(home, dev.ikna.data.dev.DEVELOPER_SCENARIO_REQUEST_FILE)
+    )
+    fun requestDeveloperScenario(scenario: DeveloperScenario) {
+        check(isDeveloperMode)
+        scenarioRequests.set(scenario)
+    }
+    fun cancelDeveloperScenarioRequest() = scenarioRequests.clear()
+
     fun requestDataProfile(profile: IknaDataProfile) {
         profileStore.set(profile)
     }
@@ -172,7 +181,9 @@ class DesktopContainer(
      * introduction. Safe after a full wipe because bundled packs are upserts.
      */
     suspend fun completeOnboarding() {
-        packLoader.installBundledPacks()
+        if (!isDeveloperMode || settings.current().developerScenario != DeveloperScenario.EMPTY.id) {
+            packLoader.installBundledPacks()
+        }
         learningRepository.ensureDailyPlan()
         settings.setOnboardingDone(true)
     }
@@ -199,11 +210,19 @@ class DesktopContainer(
     /** Installs the decks shipped inside the application. Safe to call twice. */
     suspend fun install() {
         if (installed) return
-        if (isDeveloperMode && !settings.current().onboardingDone) {
-            developerSandbox?.seed(DeveloperScenario.MATURE_HISTORY)
+        if (isDeveloperMode) {
+            val requested = scenarioRequests.current()
+            if (requested != null) {
+                requireNotNull(developerSandbox).seed(requested)
+                scenarioRequests.clear()
+            } else if (!settings.current().onboardingDone) {
+                developerSandbox?.seed(DeveloperScenario.MATURE_HISTORY)
+            }
         }
         optimizer.initialize()
-        packLoader.installBundledPacks()
+        if (!isDeveloperMode || settings.current().developerScenario != DeveloperScenario.EMPTY.id) {
+            packLoader.installBundledPacks()
+        }
         installed = true
         optimizer.startAutomatic(db.reviewDao().observeOptimizerChanges())
     }

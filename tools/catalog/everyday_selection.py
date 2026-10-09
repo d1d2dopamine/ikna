@@ -22,6 +22,10 @@ HERE = Path(__file__).resolve().parent
 
 
 def validate_paths(args: argparse.Namespace) -> None:
+    try:
+        core.v2_deck_budget(str(args.max_deck))
+    except argparse.ArgumentTypeError as exc:
+        raise ValueError(str(exc)) from exc
     inputs = [Path(getattr(args, key)).resolve() for key in ("pool", "pool_report", "registry")]
     outputs = [Path(getattr(args, key)).resolve() for key in ("staging", "json", "markdown", "preview", "samples")]
     if args.selected_output:
@@ -217,7 +221,7 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("--registry", default=str(DEFAULT_REGISTRY))
     for name in ("staging", "json", "markdown", "preview", "samples"):
         ap.add_argument("--" + name, required=True)
-    ap.add_argument("--max-deck", type=int, default=8000)
+    ap.add_argument("--max-deck", type=core.v2_deck_budget, default=core.V2_MAX_DECK_TARGETS)
     ap.add_argument("--min-deck", type=int, default=40); ap.add_argument("--thin-deck", type=int, default=1000)
     ap.add_argument("--review-per-deck", type=int, default=10)
     ap.add_argument("--quality-policy", choices=("legacy-v1", "boundary-diversity-v2"), default="legacy-v1")

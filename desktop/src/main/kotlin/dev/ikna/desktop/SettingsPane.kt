@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import dev.ikna.data.dev.DeveloperScenario
 import dev.ikna.data.dev.IknaDataProfile
 import dev.ikna.data.prefs.FontStore
 import dev.ikna.data.prefs.FontMode
@@ -79,7 +78,7 @@ fun SettingsPane(
     palette: IknaPalette,
     onOpenBackup: () -> Unit = {},
     onWiped: () -> Unit = {},
-    onRestartRequested: () -> Unit = {},
+    onRestartRequested: () -> Unit,
     onOpenDeveloper: (dev.ikna.data.dev.DeveloperDestination, String?) -> Unit = { _, _ -> },
     onBack: () -> Unit = {}
 ) {
@@ -105,17 +104,23 @@ fun SettingsPane(
     var dataNote by remember { mutableStateOf<String?>(null) }
     var updateNote by remember { mutableStateOf<String?>(null) }
     var checking by remember { mutableStateOf(false) }
-    // An active developer profile must surface its way back without hunting:
-    // the advanced block starts open while Developer Mode is on.
-    var advancedOpen by remember { mutableStateOf(container.isDeveloperMode) }
-    var developerArmed by remember { mutableStateOf(false) }
-    var selectedDeveloperScenario by remember(settings.developerScenario) {
-        mutableStateOf(DeveloperScenario.fromId(settings.developerScenario))
-    }
+    // Rare stays closed; DEV exit is visible outside the fold.
+    var advancedOpen by remember { mutableStateOf(false) }
+    var developerRestarting by remember { mutableStateOf(false) }
     var resetAsking by remember { mutableStateOf(false) }
     var wipeArmed by remember { mutableStateOf(false) }
     var diagOpen by remember { mutableStateOf(false) }
     var diagText by remember { mutableStateOf("") }
+
+    fun switchDeveloperProfile(profile: IknaDataProfile) {
+        check(!developerRestarting)
+        container.requestDataProfile(profile)
+        try { onRestartRequested(); developerRestarting = true }
+        catch (failure: Exception) {
+            container.requestDataProfile(container.dataProfile)
+            throw failure
+        }
+    }
 
     val listState = rememberLazyListState()
     val sections = listOf("load" to "set.091", "look" to "set.092", "language" to "set.093",
@@ -495,114 +500,50 @@ fun SettingsPane(
             }
             item(key = "advanced", contentType = "settings-section") {
                 IknaSettingsSection(S.t("set.063"), null) {
+                    if (container.isDeveloperMode) {
+                        dev.ikna.ui.dev.DeveloperProfileControls(
+                            profile = container.dataProfile, enabled = !developerRestarting,
+                            onSwitch = ::switchDeveloperProfile
+                        )
+                        Spacer(Modifier.height(12.dp))
+                    }
                     Row(verticalAlignment = Alignment.CenterVertically) {
 
                         Spacer(Modifier.width(12.dp))
                         IknaButton(
                             label = if (advancedOpen) S.t("set.065") else S.t("set.066"),
                             palette = palette
-                        ) { advancedOpen = !advancedOpen }
+                        ) { if (!developerRestarting) advancedOpen = !advancedOpen }
                     }
 
                     if (advancedOpen) {
                         Spacer(Modifier.height(12.dp))
-                        Text(
-                            text = S.t("dev.002"),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = palette.ink
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = S.t("dev.003"),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = palette.muted
-                        )
-                        Spacer(Modifier.height(10.dp))
-
                         if (!container.isDeveloperMode) {
-                            if (!developerArmed) {
-                                IknaButton(
-                                    label = S.t("dev.005"),
-                                    palette = palette
-                                ) { developerArmed = true }
-                            } else {
-                                Text(
-                                    text = S.t("dev.004"),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = palette.ink
-                                )
-                                Spacer(Modifier.height(10.dp))
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    IknaButton(
-                                        label = S.t("dev.021"),
-                                        palette = palette,
-                                        filled = true
-                                    ) {
-                                        container.requestDataProfile(IknaDataProfile.DEVELOPER)
-                                        onRestartRequested()
-                                    }
-                                    IknaButton(
-                                        label = S.t("dev.022"),
-                                        palette = palette
-                                    ) { developerArmed = false }
-                                }
-                            }
+                            dev.ikna.ui.dev.DeveloperProfileControls(
+                                profile = container.dataProfile, enabled = !developerRestarting,
+                                onSwitch = ::switchDeveloperProfile
+                            )
                         } else {
                             container.developerTools?.let { tools ->
                                 dev.ikna.ui.dev.DeveloperToolsPanel(
-                                    tools = tools,
+                                    tools = tools, enabled = !developerRestarting,
                                     applyProductLimits = settings.developerApplyProductLimits,
                                     onOpen = onOpenDeveloper
                                 )
                             }
                             Spacer(Modifier.height(12.dp))
-                            Text(
-                                text = S.t("dev.010"),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = palette.muted
-                            )
-                            Spacer(Modifier.height(8.dp))
-                            DeveloperScenario.entries.chunked(2).forEach { row ->
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    row.forEach { scenario ->
-                                        IknaChip(
-                                            label = S.t(developerScenarioLabelKey(scenario)),
-                                            selected = selectedDeveloperScenario == scenario,
-                                            modifier = Modifier.weight(1f),
-                                            onClick = { selectedDeveloperScenario = scenario }
-                                        )
+                            dev.ikna.ui.dev.DeveloperScenarioControls(
+                                scenarioId = settings.developerScenario, enabled = !developerRestarting,
+                                onReseed = { scenario ->
+                                    check(!developerRestarting)
+                                    container.requestDeveloperScenario(scenario)
+                                    try { switchDeveloperProfile(IknaDataProfile.DEVELOPER) }
+                                    catch (failure: Exception) {
+                                        container.cancelDeveloperScenarioRequest()
+                                        throw failure
                                     }
                                 }
-                                Spacer(Modifier.height(6.dp))
-                            }
-                            Text(
-                                text = S.t("dev.018"),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = palette.muted
                             )
-                            Spacer(Modifier.height(10.dp))
-                            IknaButton(
-                                label = S.t("dev.017"),
-                                palette = palette,
-                                filled = true
-                            ) {
-                                val sandbox = container.developerSandbox ?: return@IknaButton
-                                scope.launch {
-                                    val result = withContext(Dispatchers.IO) {
-                                        runCatching { sandbox.seed(selectedDeveloperScenario) }
-                                    }
-                                    if (result.isSuccess) onRestartRequested()
-                                    else dataNote = S.t("diag.008")
-                                }
-                            }
-                            Spacer(Modifier.height(8.dp))
-                            IknaButton(
-                                label = S.t("dev.006"),
-                                palette = palette
-                            ) {
-                                container.requestDataProfile(IknaDataProfile.REAL)
-                                onRestartRequested()
-                            }
                         }
 
                         Spacer(Modifier.height(16.dp))
@@ -746,7 +687,7 @@ fun SettingsPane(
 /** A name on the left, a switch on the right, the whole row a click target. */
 @Composable
 private fun ToggleRow(title: String, checked: Boolean, palette: IknaPalette, onCheckedChange: (Boolean) -> Unit) {
-    IknaSettingsToggleRow(title, null, checked, onCheckedChange)
+    IknaSettingsToggleRow(title, null, checked, onCheckedChange = onCheckedChange)
 }
 
 /** The four colours of a custom scheme, with the contrast they produce. */
@@ -856,14 +797,7 @@ private const val APP_VERSION = "0.10.0 press"
  * the whole point is that a person can paste this into a bug report without
  * reading it first.
  */
-private fun developerScenarioLabelKey(scenario: DeveloperScenario): String = when (scenario) {
-    DeveloperScenario.EMPTY -> "dev.011"
-    DeveloperScenario.EARLY_HISTORY -> "dev.012"
-    DeveloperScenario.MATURE_HISTORY -> "dev.013"
-    DeveloperScenario.BROWSE_READY -> "dev.014"
-    DeveloperScenario.RICH_STATISTICS -> "dev.015"
-    DeveloperScenario.RETURN_AFTER_BREAK -> "dev.016"
-}
+
 
 private suspend fun diagnosticsText(container: DesktopContainer): String {
     val decks = container.deckRepository.decks()

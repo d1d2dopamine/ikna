@@ -39,6 +39,7 @@ jobs:
           python3 tools/catalog/test_build_catalogue_v2.py
           python3 tools/catalog/test_meta_info.py
           python3 tools/catalog/test_everyday_pool.py
+          python3 tools/catalog/test_pool_function_words.py
           python3 tools/catalog/test_selection_policy.py
           python3 tools/catalog/test_everyday_selection.py
           python3 tools/catalog/test_globalvoices_manifest_merge.py

@@ -139,6 +139,27 @@ argument/exit preservation and merged stderr under PowerShell's stop policy.
 It does not compile the app. On other hosts it reports explicit skips, not runtime
 acceptance. Real watcher/reload validation remains the three-step check above.
 
+## Profile and scenario changes
+
+After replacing the project with round 18, stop the old Hot Reload session and
+start `dev-hot-reload.cmd` once. The supervisor script/environment and process
+bootstrap cannot be updated by a Compose reload.
+
+A confirmed DEV entry/exit or reseed now writes a one-shot restart request. The
+supervisor waits for its child to exit, consumes the request and starts the app
+with the selected profile without requiring Enter. Cancelling a dialog writes no
+request. Closing the window normally still shows the existing Enter prompt.
+The supervisor chooses DEV only when initially preparing a missing profile file;
+it does not overwrite a confirmed REAL choice on subsequent launches.
+
+Do not judge exit by changing/hiding a badge in the old window. Check that a new
+process starts, the ordinary deck list returns and the DEV marker disappears.
+Separate DEV data remains saved for future tests. If an old supervisor lacks the
+restart protocol, the app reports that the launcher needs a restart rather than
+pretending to switch databases in place. Windows runtime acceptance is pending;
+`tools/check_hot_reload.py` verifies wiring only. The one-shot native regression
+fixture in `tools/test_hot_reload.py` requires Windows PowerShell.
+
 ## What Hot Reload is for
 
 Best candidates:

@@ -780,6 +780,7 @@ fun IknaDialog(
 @Composable
 fun IknaBottomBar(
     modifier: Modifier = Modifier,
+    textured: Boolean = false,
     content: @Composable RowScope.() -> Unit
 ) {
     Column(
@@ -789,7 +790,7 @@ fun IknaBottomBar(
     ) {
         IknaRule()
         Box(Modifier.fillMaxWidth().height(BarHeight)) {
-            IknaMemoryAmbientStrip(
+            if (textured) IknaMemoryAmbientStrip(
                 seed = 0x4D5E6F,
                 modifier = Modifier.fillMaxSize(),
                 protectedStartDp = 112f,

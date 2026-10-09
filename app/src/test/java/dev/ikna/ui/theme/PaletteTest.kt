@@ -41,11 +41,8 @@ class PaletteTest {
 		listOf(ultraviolet.dark.accent, ultraviolet.grey.accent).forEach { accent ->
 			val (hue, saturation) = hueAndSaturation(accent)
 			assertTrue("ultraviolet hue drifted to $hue", hue in 250f..290f)
-			if (accent == ultraviolet.dark.accent) {
-				// The grey lighting is monochrome by owner decision; only the
-				// dark accent has to stay a saturated purple.
-				assertTrue("ultraviolet became grey", saturation > 0.35f)
-			}
+			val minimum = if (accent == ultraviolet.dark.accent) 0.35f else 0.25f
+			assertTrue("ultraviolet became grey", saturation > minimum)
 		}
 	}
 
@@ -64,7 +61,7 @@ class PaletteTest {
 
 	/**
 	 * The rule that makes grey and dark one app rather than two: both are dark
-	 * rooms, the grey one a step lighter, drained of saturation and free of
+	 * rooms, the grey one a step lighter, with coloured accents and free of
 	 * white surfaces. The bounds keep the system-bar choice unambiguous.
 	 */
 	@Test
@@ -81,6 +78,18 @@ class PaletteTest {
 				relativeLuminance(spec.dark.background) < 0.013
 			)
 		}
+	}
+
+	@Test
+	fun `grey lighting keeps each coloured accent recognisable`() {
+		IknaPalettes.filter { it.id != "zero" }.forEach { spec ->
+			val (darkHue, _) = hueAndSaturation(spec.dark.accent)
+			val (greyHue, saturation) = hueAndSaturation(spec.grey.accent)
+			val difference = kotlin.math.abs(darkHue - greyHue)
+			assertTrue(spec.id + " hue", minOf(difference, 360f - difference) < 8f)
+			assertTrue(spec.id + " saturation", saturation > 0.25f)
+		}
+		assertEquals(12, IknaPalettes.map { it.grey.accent }.distinct().size)
 	}
 
 	/**
@@ -156,11 +165,10 @@ class PaletteTest {
 		val ember = paletteSpec("ember")
 		assertEquals(ember.dark.ink, dangerFor(ember.dark))
 
-		// The grey lighting is monochrome by design: its desaturated accent can
-		// never be mistaken for the warning red, so the red comes back there.
+		// Warm accents retain their warning guard in both lightings.
 		val plum = paletteSpec("plum")
 		assertTrue(dangerFor(plum.dark) != plum.dark.ink)
-		assertTrue(dangerFor(ember.grey) != ember.grey.ink)
+		assertEquals(ember.grey.ink, dangerFor(ember.grey))
 		assertTrue(dangerFor(plum.grey) != plum.grey.ink)
 	}
 

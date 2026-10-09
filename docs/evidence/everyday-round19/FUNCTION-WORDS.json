@@ -1,0 +1,3107 @@
+{
+  "candidateUniqueness": "inherited from exact hash-bound admitted report; not independently indexed again",
+  "census": {
+    "candidateRows": 11099490,
+    "candidatesByPair": {
+      "de->en": 584927,
+      "de->es": 100179,
+      "de->fr": 157190,
+      "de->it": 32659,
+      "de->ja": 58359,
+      "de->ko": 3312,
+      "de->pl": 21952,
+      "de->pt": 25390,
+      "de->ru": 228254,
+      "de->zh": 38987,
+      "en->de": 584927,
+      "en->es": 283558,
+      "en->fr": 440288,
+      "en->it": 720920,
+      "en->ja": 280509,
+      "en->ko": 11553,
+      "en->pl": 84126,
+      "en->pt": 302025,
+      "en->ru": 826135,
+      "en->zh": 78053,
+      "es->de": 100179,
+      "es->en": 283558,
+      "es->fr": 61612,
+      "es->it": 19882,
+      "es->ja": 39747,
+      "es->ko": 1103,
+      "es->pl": 11652,
+      "es->pt": 77704,
+      "es->ru": 134968,
+      "es->zh": 11576,
+      "fr->de": 157190,
+      "fr->en": 440288,
+      "fr->es": 61612,
+      "fr->it": 89600,
+      "fr->ja": 43793,
+      "fr->ko": 2180,
+      "fr->pl": 5307,
+      "fr->pt": 35403,
+      "fr->ru": 455372,
+      "fr->zh": 21205,
+      "it->de": 32659,
+      "it->en": 720920,
+      "it->es": 19882,
+      "it->fr": 89600,
+      "it->ja": 6430,
+      "it->ko": 214,
+      "it->pl": 2747,
+      "it->pt": 15166,
+      "it->ru": 86657,
+      "it->zh": 4742,
+      "ja->de": 58359,
+      "ja->en": 280509,
+      "ja->es": 39747,
+      "ja->fr": 43793,
+      "ja->it": 6430,
+      "ja->ko": 2262,
+      "ja->pl": 26307,
+      "ja->pt": 4919,
+      "ja->ru": 31565,
+      "ja->zh": 16210,
+      "ko->de": 3312,
+      "ko->en": 11553,
+      "ko->es": 1103,
+      "ko->fr": 2180,
+      "ko->it": 214,
+      "ko->ja": 2262,
+      "ko->pl": 94,
+      "ko->pt": 214,
+      "ko->ru": 248,
+      "ko->zh": 2842,
+      "pl->de": 21952,
+      "pl->en": 84126,
+      "pl->es": 11652,
+      "pl->fr": 5307,
+      "pl->it": 2747,
+      "pl->ja": 26307,
+      "pl->ko": 94,
+      "pl->pt": 1582,
+      "pl->ru": 9521,
+      "pl->zh": 1039,
+      "pt->de": 25390,
+      "pt->en": 302025,
+      "pt->es": 77704,
+      "pt->fr": 35403,
+      "pt->it": 15166,
+      "pt->ja": 4919,
+      "pt->ko": 214,
+      "pt->pl": 1582,
+      "pt->ru": 34140,
+      "pt->zh": 1540,
+      "ru->de": 228254,
+      "ru->en": 826135,
+      "ru->es": 134968,
+      "ru->fr": 455372,
+      "ru->it": 86657,
+      "ru->ja": 31565,
+      "ru->ko": 248,
+      "ru->pl": 9521,
+      "ru->pt": 34140,
+      "ru->zh": 11826,
+      "zh->de": 38987,
+      "zh->en": 78053,
+      "zh->es": 11576,
+      "zh->fr": 21205,
+      "zh->it": 4742,
+      "zh->ja": 16210,
+      "zh->ko": 2842,
+      "zh->pl": 1039,
+      "zh->pt": 1540,
+      "zh->ru": 11826
+    },
+    "contextsByLanguage": {
+      "de": 633689,
+      "en": 1158070,
+      "es": 358205,
+      "fr": 567923,
+      "it": 767137,
+      "ja": 238145,
+      "ko": 15336,
+      "pl": 123831,
+      "pt": 356043,
+      "ru": 996894,
+      "zh": 81217
+    },
+    "namedOriginOccurrences": {
+      "contextContributor": 10836550,
+      "meaningContributor": 10836550
+    },
+    "originOccurrencesByFamily": {
+      "tatoeba": 11115426
+    },
+    "premergeCandidatesByPairFromReport": {
+      "de->en": 585179,
+      "de->es": 100250,
+      "de->fr": 157387,
+      "de->it": 32704,
+      "de->ja": 58371,
+      "de->ko": 3312,
+      "de->pl": 21956,
+      "de->pt": 25409,
+      "de->ru": 228443,
+      "de->zh": 39017,
+      "en->de": 585179,
+      "en->es": 283583,
+      "en->fr": 440683,
+      "en->it": 720983,
+      "en->ja": 280523,
+      "en->ko": 11554,
+      "en->pl": 84155,
+      "en->pt": 302059,
+      "en->ru": 829792,
+      "en->zh": 78085,
+      "es->de": 100250,
+      "es->en": 283583,
+      "es->fr": 61666,
+      "es->it": 19882,
+      "es->ja": 39748,
+      "es->ko": 1104,
+      "es->pl": 11653,
+      "es->pt": 77710,
+      "es->ru": 134990,
+      "es->zh": 11578,
+      "fr->de": 157387,
+      "fr->en": 440683,
+      "fr->es": 61666,
+      "fr->it": 89666,
+      "fr->ja": 43817,
+      "fr->ko": 2186,
+      "fr->pl": 5309,
+      "fr->pt": 35424,
+      "fr->ru": 457943,
+      "fr->zh": 21222,
+      "it->de": 32704,
+      "it->en": 720983,
+      "it->es": 19882,
+      "it->fr": 89666,
+      "it->ja": 6430,
+      "it->ko": 214,
+      "it->pl": 2747,
+      "it->pt": 15167,
+      "it->ru": 86734,
+      "it->zh": 4743,
+      "ja->de": 58371,
+      "ja->en": 280523,
+      "ja->es": 39748,
+      "ja->fr": 43817,
+      "ja->it": 6430,
+      "ja->ko": 2262,
+      "ja->pl": 26307,
+      "ja->pt": 4920,
+      "ja->ru": 31575,
+      "ja->zh": 16213,
+      "ko->de": 3312,
+      "ko->en": 11554,
+      "ko->es": 1104,
+      "ko->fr": 2186,
+      "ko->it": 214,
+      "ko->ja": 2262,
+      "ko->pl": 94,
+      "ko->pt": 214,
+      "ko->ru": 248,
+      "ko->zh": 2844,
+      "pl->de": 21956,
+      "pl->en": 84155,
+      "pl->es": 11653,
+      "pl->fr": 5309,
+      "pl->it": 2747,
+      "pl->ja": 26307,
+      "pl->ko": 94,
+      "pl->pt": 1582,
+      "pl->ru": 9521,
+      "pl->zh": 1039,
+      "pt->de": 25409,
+      "pt->en": 302059,
+      "pt->es": 77710,
+      "pt->fr": 35424,
+      "pt->it": 15167,
+      "pt->ja": 4920,
+      "pt->ko": 214,
+      "pt->pl": 1582,
+      "pt->ru": 34148,
+      "pt->zh": 1540,
+      "ru->de": 228443,
+      "ru->en": 829792,
+      "ru->es": 134990,
+      "ru->fr": 457943,
+      "ru->it": 86734,
+      "ru->ja": 31575,
+      "ru->ko": 248,
+      "ru->pl": 9521,
+      "ru->pt": 34148,
+      "ru->zh": 11828,
+      "zh->de": 39017,
+      "zh->en": 78085,
+      "zh->es": 11578,
+      "zh->fr": 21222,
+      "zh->it": 4743,
+      "zh->ja": 16213,
+      "zh->ko": 2844,
+      "zh->pl": 1039,
+      "zh->pt": 1540,
+      "zh->ru": 11828
+    },
+    "removedDuplicateCandidatesByPair": {
+      "de->en": 252,
+      "de->es": 71,
+      "de->fr": 197,
+      "de->it": 45,
+      "de->ja": 12,
+      "de->ko": 0,
+      "de->pl": 4,
+      "de->pt": 19,
+      "de->ru": 189,
+      "de->zh": 30,
+      "en->de": 252,
+      "en->es": 25,
+      "en->fr": 395,
+      "en->it": 63,
+      "en->ja": 14,
+      "en->ko": 1,
+      "en->pl": 29,
+      "en->pt": 34,
+      "en->ru": 3657,
+      "en->zh": 32,
+      "es->de": 71,
+      "es->en": 25,
+      "es->fr": 54,
+      "es->it": 0,
+      "es->ja": 1,
+      "es->ko": 1,
+      "es->pl": 1,
+      "es->pt": 6,
+      "es->ru": 22,
+      "es->zh": 2,
+      "fr->de": 197,
+      "fr->en": 395,
+      "fr->es": 54,
+      "fr->it": 66,
+      "fr->ja": 24,
+      "fr->ko": 6,
+      "fr->pl": 2,
+      "fr->pt": 21,
+      "fr->ru": 2571,
+      "fr->zh": 17,
+      "it->de": 45,
+      "it->en": 63,
+      "it->es": 0,
+      "it->fr": 66,
+      "it->ja": 0,
+      "it->ko": 0,
+      "it->pl": 0,
+      "it->pt": 1,
+      "it->ru": 77,
+      "it->zh": 1,
+      "ja->de": 12,
+      "ja->en": 14,
+      "ja->es": 1,
+      "ja->fr": 24,
+      "ja->it": 0,
+      "ja->ko": 0,
+      "ja->pl": 0,
+      "ja->pt": 1,
+      "ja->ru": 10,
+      "ja->zh": 3,
+      "ko->de": 0,
+      "ko->en": 1,
+      "ko->es": 1,
+      "ko->fr": 6,
+      "ko->it": 0,
+      "ko->ja": 0,
+      "ko->pl": 0,
+      "ko->pt": 0,
+      "ko->ru": 0,
+      "ko->zh": 2,
+      "pl->de": 4,
+      "pl->en": 29,
+      "pl->es": 1,
+      "pl->fr": 2,
+      "pl->it": 0,
+      "pl->ja": 0,
+      "pl->ko": 0,
+      "pl->pt": 0,
+      "pl->ru": 0,
+      "pl->zh": 0,
+      "pt->de": 19,
+      "pt->en": 34,
+      "pt->es": 6,
+      "pt->fr": 21,
+      "pt->it": 1,
+      "pt->ja": 1,
+      "pt->ko": 0,
+      "pt->pl": 0,
+      "pt->ru": 8,
+      "pt->zh": 0,
+      "ru->de": 189,
+      "ru->en": 3657,
+      "ru->es": 22,
+      "ru->fr": 2571,
+      "ru->it": 77,
+      "ru->ja": 10,
+      "ru->ko": 0,
+      "ru->pl": 0,
+      "ru->pt": 8,
+      "ru->zh": 2,
+      "zh->de": 30,
+      "zh->en": 32,
+      "zh->es": 2,
+      "zh->fr": 17,
+      "zh->it": 1,
+      "zh->ja": 3,
+      "zh->ko": 2,
+      "zh->pl": 0,
+      "zh->pt": 0,
+      "zh->ru": 2
+    },
+    "uniquePrimaryContexts": 5296490
+  },
+  "corpusAcquired": false,
+  "environment": {
+    "python": "3.12.14",
+    "segmentation": {
+      "engine": "ICU word break",
+      "icuVersion": "74.2",
+      "koreanUnit": "eojeol",
+      "languages": [
+        "ja",
+        "ko",
+        "zh"
+      ],
+      "offsets": "UTF-16"
+    },
+    "sqlite": "3.53.1"
+  },
+  "exporterSha256": "11fd4e5158197ce7778801820416a171880125b3d3641d046a00869ea3d90c84",
+  "functionTop": 60,
+  "input": {
+    "archiveBytes": 545984900,
+    "archiveSha256": "0f02c2acfbab21d1e90c3d88f1dda0db61ca789f9507b05a483ea7f2a20884e3",
+    "duplicateCandidatesMerged": 15936,
+    "logicalSha256": "05ccbb5b5217dc050cc5a5e0e1cfca3223657529afa6b3890c9340999d571ab8",
+    "logicalSizeBytes": 5320249214,
+    "poolReportSha256": "41c7e176d516e6ad89d70954b116d18062baa48857f66ee276bdcfd32dd0438f",
+    "sha256": "57b90b01d5dcb0725743998dccaf307a100e174059a853e01f5f31fc13dd6170",
+    "sizeBytes": 545718435,
+    "uniqueCandidates": 11099490
+  },
+  "languages": {
+    "de": {
+      "functionForms": [
+        {
+          "form": "ich",
+          "rank": 1
+        },
+        {
+          "form": "ist",
+          "rank": 2
+        },
+        {
+          "form": "sie",
+          "rank": 3
+        },
+        {
+          "form": "tom",
+          "rank": 4
+        },
+        {
+          "form": "nicht",
+          "rank": 5
+        },
+        {
+          "form": "die",
+          "rank": 6
+        },
+        {
+          "form": "das",
+          "rank": 7
+        },
+        {
+          "form": "du",
+          "rank": 8
+        },
+        {
+          "form": "zu",
+          "rank": 9
+        },
+        {
+          "form": "der",
+          "rank": 10
+        },
+        {
+          "form": "es",
+          "rank": 11
+        },
+        {
+          "form": "er",
+          "rank": 12
+        },
+        {
+          "form": "in",
+          "rank": 13
+        },
+        {
+          "form": "ein",
+          "rank": 14
+        },
+        {
+          "form": "hat",
+          "rank": 15
+        },
+        {
+          "form": "und",
+          "rank": 16
+        },
+        {
+          "form": "wir",
+          "rank": 17
+        },
+        {
+          "form": "dass",
+          "rank": 18
+        },
+        {
+          "form": "den",
+          "rank": 19
+        },
+        {
+          "form": "ihr",
+          "rank": 20
+        },
+        {
+          "form": "habe",
+          "rank": 21
+        },
+        {
+          "form": "eine",
+          "rank": 22
+        },
+        {
+          "form": "sich",
+          "rank": 23
+        },
+        {
+          "form": "auf",
+          "rank": 24
+        },
+        {
+          "form": "mit",
+          "rank": 25
+        },
+        {
+          "form": "mir",
+          "rank": 26
+        },
+        {
+          "form": "was",
+          "rank": 27
+        },
+        {
+          "form": "wie",
+          "rank": 28
+        },
+        {
+          "form": "war",
+          "rank": 29
+        },
+        {
+          "form": "mich",
+          "rank": 30
+        },
+        {
+          "form": "maria",
+          "rank": 31
+        },
+        {
+          "form": "sind",
+          "rank": 32
+        },
+        {
+          "form": "haben",
+          "rank": 33
+        },
+        {
+          "form": "von",
+          "rank": 34
+        },
+        {
+          "form": "an",
+          "rank": 35
+        },
+        {
+          "form": "als",
+          "rank": 36
+        },
+        {
+          "form": "einen",
+          "rank": 37
+        },
+        {
+          "form": "dem",
+          "rank": 38
+        },
+        {
+          "form": "so",
+          "rank": 39
+        },
+        {
+          "form": "für",
+          "rank": 40
+        },
+        {
+          "form": "kann",
+          "rank": 41
+        },
+        {
+          "form": "im",
+          "rank": 42
+        },
+        {
+          "form": "noch",
+          "rank": 43
+        },
+        {
+          "form": "wenn",
+          "rank": 44
+        },
+        {
+          "form": "bin",
+          "rank": 45
+        },
+        {
+          "form": "hast",
+          "rank": 46
+        },
+        {
+          "form": "sein",
+          "rank": 47
+        },
+        {
+          "form": "aus",
+          "rank": 48
+        },
+        {
+          "form": "um",
+          "rank": 49
+        },
+        {
+          "form": "nach",
+          "rank": 50
+        },
+        {
+          "form": "wird",
+          "rank": 51
+        },
+        {
+          "form": "dir",
+          "rank": 52
+        },
+        {
+          "form": "dich",
+          "rank": 53
+        },
+        {
+          "form": "sehr",
+          "rank": 54
+        },
+        {
+          "form": "uns",
+          "rank": 55
+        },
+        {
+          "form": "man",
+          "rank": 56
+        },
+        {
+          "form": "hier",
+          "rank": 57
+        },
+        {
+          "form": "meine",
+          "rank": 58
+        },
+        {
+          "form": "schon",
+          "rank": 59
+        },
+        {
+          "form": "etwas",
+          "rank": 60
+        }
+      ],
+      "rankedForms": 97971
+    },
+    "en": {
+      "functionForms": [
+        {
+          "form": "the",
+          "rank": 1
+        },
+        {
+          "form": "to",
+          "rank": 2
+        },
+        {
+          "form": "i",
+          "rank": 3
+        },
+        {
+          "form": "tom",
+          "rank": 4
+        },
+        {
+          "form": "a",
+          "rank": 5
+        },
+        {
+          "form": "you",
+          "rank": 6
+        },
+        {
+          "form": "is",
+          "rank": 7
+        },
+        {
+          "form": "that",
+          "rank": 8
+        },
+        {
+          "form": "of",
+          "rank": 9
+        },
+        {
+          "form": "in",
+          "rank": 10
+        },
+        {
+          "form": "he",
+          "rank": 11
+        },
+        {
+          "form": "was",
+          "rank": 12
+        },
+        {
+          "form": "and",
+          "rank": 13
+        },
+        {
+          "form": "it",
+          "rank": 14
+        },
+        {
+          "form": "do",
+          "rank": 15
+        },
+        {
+          "form": "for",
+          "rank": 16
+        },
+        {
+          "form": "this",
+          "rank": 17
+        },
+        {
+          "form": "have",
+          "rank": 18
+        },
+        {
+          "form": "me",
+          "rank": 19
+        },
+        {
+          "form": "mary",
+          "rank": 20
+        },
+        {
+          "form": "she",
+          "rank": 21
+        },
+        {
+          "form": "my",
+          "rank": 22
+        },
+        {
+          "form": "are",
+          "rank": 23
+        },
+        {
+          "form": "be",
+          "rank": 24
+        },
+        {
+          "form": "we",
+          "rank": 25
+        },
+        {
+          "form": "don't",
+          "rank": 26
+        },
+        {
+          "form": "on",
+          "rank": 27
+        },
+        {
+          "form": "with",
+          "rank": 28
+        },
+        {
+          "form": "his",
+          "rank": 29
+        },
+        {
+          "form": "what",
+          "rank": 30
+        },
+        {
+          "form": "not",
+          "rank": 31
+        },
+        {
+          "form": "her",
+          "rank": 32
+        },
+        {
+          "form": "at",
+          "rank": 33
+        },
+        {
+          "form": "i'm",
+          "rank": 34
+        },
+        {
+          "form": "your",
+          "rank": 35
+        },
+        {
+          "form": "like",
+          "rank": 36
+        },
+        {
+          "form": "they",
+          "rank": 37
+        },
+        {
+          "form": "know",
+          "rank": 38
+        },
+        {
+          "form": "has",
+          "rank": 39
+        },
+        {
+          "form": "can",
+          "rank": 40
+        },
+        {
+          "form": "as",
+          "rank": 41
+        },
+        {
+          "form": "him",
+          "rank": 42
+        },
+        {
+          "form": "want",
+          "rank": 43
+        },
+        {
+          "form": "didn't",
+          "rank": 44
+        },
+        {
+          "form": "did",
+          "rank": 45
+        },
+        {
+          "form": "think",
+          "rank": 46
+        },
+        {
+          "form": "will",
+          "rank": 47
+        },
+        {
+          "form": "all",
+          "rank": 48
+        },
+        {
+          "form": "about",
+          "rank": 49
+        },
+        {
+          "form": "how",
+          "rank": 50
+        },
+        {
+          "form": "there",
+          "rank": 51
+        },
+        {
+          "form": "go",
+          "rank": 52
+        },
+        {
+          "form": "it's",
+          "rank": 53
+        },
+        {
+          "form": "from",
+          "rank": 54
+        },
+        {
+          "form": "an",
+          "rank": 55
+        },
+        {
+          "form": "had",
+          "rank": 56
+        },
+        {
+          "form": "said",
+          "rank": 57
+        },
+        {
+          "form": "one",
+          "rank": 58
+        },
+        {
+          "form": "if",
+          "rank": 59
+        },
+        {
+          "form": "very",
+          "rank": 60
+        }
+      ],
+      "rankedForms": 71308
+    },
+    "es": {
+      "functionForms": [
+        {
+          "form": "de",
+          "rank": 1
+        },
+        {
+          "form": "la",
+          "rank": 2
+        },
+        {
+          "form": "que",
+          "rank": 3
+        },
+        {
+          "form": "no",
+          "rank": 4
+        },
+        {
+          "form": "el",
+          "rank": 5
+        },
+        {
+          "form": "a",
+          "rank": 6
+        },
+        {
+          "form": "en",
+          "rank": 7
+        },
+        {
+          "form": "es",
+          "rank": 8
+        },
+        {
+          "form": "un",
+          "rank": 9
+        },
+        {
+          "form": "tom",
+          "rank": 10
+        },
+        {
+          "form": "se",
+          "rank": 11
+        },
+        {
+          "form": "me",
+          "rank": 12
+        },
+        {
+          "form": "una",
+          "rank": 13
+        },
+        {
+          "form": "los",
+          "rank": 14
+        },
+        {
+          "form": "por",
+          "rank": 15
+        },
+        {
+          "form": "y",
+          "rank": 16
+        },
+        {
+          "form": "lo",
+          "rank": 17
+        },
+        {
+          "form": "él",
+          "rank": 18
+        },
+        {
+          "form": "con",
+          "rank": 19
+        },
+        {
+          "form": "las",
+          "rank": 20
+        },
+        {
+          "form": "mi",
+          "rank": 21
+        },
+        {
+          "form": "su",
+          "rank": 22
+        },
+        {
+          "form": "está",
+          "rank": 23
+        },
+        {
+          "form": "qué",
+          "rank": 24
+        },
+        {
+          "form": "para",
+          "rank": 25
+        },
+        {
+          "form": "más",
+          "rank": 26
+        },
+        {
+          "form": "ella",
+          "rank": 27
+        },
+        {
+          "form": "te",
+          "rank": 28
+        },
+        {
+          "form": "le",
+          "rank": 29
+        },
+        {
+          "form": "al",
+          "rank": 30
+        },
+        {
+          "form": "del",
+          "rank": 31
+        },
+        {
+          "form": "yo",
+          "rank": 32
+        },
+        {
+          "form": "tiene",
+          "rank": 33
+        },
+        {
+          "form": "si",
+          "rank": 34
+        },
+        {
+          "form": "este",
+          "rank": 35
+        },
+        {
+          "form": "mary",
+          "rank": 36
+        },
+        {
+          "form": "esta",
+          "rank": 37
+        },
+        {
+          "form": "muy",
+          "rank": 38
+        },
+        {
+          "form": "tu",
+          "rank": 39
+        },
+        {
+          "form": "como",
+          "rank": 40
+        },
+        {
+          "form": "son",
+          "rank": 41
+        },
+        {
+          "form": "eso",
+          "rank": 42
+        },
+        {
+          "form": "estoy",
+          "rank": 43
+        },
+        {
+          "form": "hay",
+          "rank": 44
+        },
+        {
+          "form": "tengo",
+          "rank": 45
+        },
+        {
+          "form": "fue",
+          "rank": 46
+        },
+        {
+          "form": "ha",
+          "rank": 47
+        },
+        {
+          "form": "todo",
+          "rank": 48
+        },
+        {
+          "form": "pero",
+          "rank": 49
+        },
+        {
+          "form": "estaba",
+          "rank": 50
+        },
+        {
+          "form": "casa",
+          "rank": 51
+        },
+        {
+          "form": "cuando",
+          "rank": 52
+        },
+        {
+          "form": "quiero",
+          "rank": 53
+        },
+        {
+          "form": "hacer",
+          "rank": 54
+        },
+        {
+          "form": "aquí",
+          "rank": 55
+        },
+        {
+          "form": "puede",
+          "rank": 56
+        },
+        {
+          "form": "todos",
+          "rank": 57
+        },
+        {
+          "form": "ya",
+          "rank": 58
+        },
+        {
+          "form": "puedo",
+          "rank": 59
+        },
+        {
+          "form": "tiempo",
+          "rank": 60
+        }
+      ],
+      "rankedForms": 61463
+    },
+    "fr": {
+      "functionForms": [
+        {
+          "form": "de",
+          "rank": 1
+        },
+        {
+          "form": "je",
+          "rank": 2
+        },
+        {
+          "form": "la",
+          "rank": 3
+        },
+        {
+          "form": "pas",
+          "rank": 4
+        },
+        {
+          "form": "le",
+          "rank": 5
+        },
+        {
+          "form": "à",
+          "rank": 6
+        },
+        {
+          "form": "que",
+          "rank": 7
+        },
+        {
+          "form": "ne",
+          "rank": 8
+        },
+        {
+          "form": "il",
+          "rank": 9
+        },
+        {
+          "form": "est",
+          "rank": 10
+        },
+        {
+          "form": "les",
+          "rank": 11
+        },
+        {
+          "form": "a",
+          "rank": 12
+        },
+        {
+          "form": "un",
+          "rank": 13
+        },
+        {
+          "form": "vous",
+          "rank": 14
+        },
+        {
+          "form": "tom",
+          "rank": 15
+        },
+        {
+          "form": "tu",
+          "rank": 16
+        },
+        {
+          "form": "une",
+          "rank": 17
+        },
+        {
+          "form": "en",
+          "rank": 18
+        },
+        {
+          "form": "ce",
+          "rank": 19
+        },
+        {
+          "form": "nous",
+          "rank": 20
+        },
+        {
+          "form": "elle",
+          "rank": 21
+        },
+        {
+          "form": "des",
+          "rank": 22
+        },
+        {
+          "form": "pour",
+          "rank": 23
+        },
+        {
+          "form": "et",
+          "rank": 24
+        },
+        {
+          "form": "dans",
+          "rank": 25
+        },
+        {
+          "form": "j'ai",
+          "rank": 26
+        },
+        {
+          "form": "c'est",
+          "rank": 27
+        },
+        {
+          "form": "me",
+          "rank": 28
+        },
+        {
+          "form": "suis",
+          "rank": 29
+        },
+        {
+          "form": "du",
+          "rank": 30
+        },
+        {
+          "form": "plus",
+          "rank": 31
+        },
+        {
+          "form": "qui",
+          "rank": 32
+        },
+        {
+          "form": "se",
+          "rank": 33
+        },
+        {
+          "form": "au",
+          "rank": 34
+        },
+        {
+          "form": "ça",
+          "rank": 35
+        },
+        {
+          "form": "sont",
+          "rank": 36
+        },
+        {
+          "form": "faire",
+          "rank": 37
+        },
+        {
+          "form": "avec",
+          "rank": 38
+        },
+        {
+          "form": "tout",
+          "rank": 39
+        },
+        {
+          "form": "mon",
+          "rank": 40
+        },
+        {
+          "form": "fait",
+          "rank": 41
+        },
+        {
+          "form": "son",
+          "rank": 42
+        },
+        {
+          "form": "ils",
+          "rank": 43
+        },
+        {
+          "form": "si",
+          "rank": 44
+        },
+        {
+          "form": "sur",
+          "rank": 45
+        },
+        {
+          "form": "te",
+          "rank": 46
+        },
+        {
+          "form": "cette",
+          "rank": 47
+        },
+        {
+          "form": "lui",
+          "rank": 48
+        },
+        {
+          "form": "y",
+          "rank": 49
+        },
+        {
+          "form": "qu'il",
+          "rank": 50
+        },
+        {
+          "form": "était",
+          "rank": 51
+        },
+        {
+          "form": "très",
+          "rank": 52
+        },
+        {
+          "form": "ma",
+          "rank": 53
+        },
+        {
+          "form": "on",
+          "rank": 54
+        },
+        {
+          "form": "par",
+          "rank": 55
+        },
+        {
+          "form": "sa",
+          "rank": 56
+        },
+        {
+          "form": "bien",
+          "rank": 57
+        },
+        {
+          "form": "n'est",
+          "rank": 58
+        },
+        {
+          "form": "dit",
+          "rank": 59
+        },
+        {
+          "form": "ont",
+          "rank": 60
+        }
+      ],
+      "rankedForms": 73620
+    },
+    "it": {
+      "functionForms": [
+        {
+          "form": "non",
+          "rank": 1
+        },
+        {
+          "form": "è",
+          "rank": 2
+        },
+        {
+          "form": "tom",
+          "rank": 3
+        },
+        {
+          "form": "di",
+          "rank": 4
+        },
+        {
+          "form": "a",
+          "rank": 5
+        },
+        {
+          "form": "che",
+          "rank": 6
+        },
+        {
+          "form": "la",
+          "rank": 7
+        },
+        {
+          "form": "il",
+          "rank": 8
+        },
+        {
+          "form": "ha",
+          "rank": 9
+        },
+        {
+          "form": "un",
+          "rank": 10
+        },
+        {
+          "form": "sono",
+          "rank": 11
+        },
+        {
+          "form": "per",
+          "rank": 12
+        },
+        {
+          "form": "in",
+          "rank": 13
+        },
+        {
+          "form": "io",
+          "rank": 14
+        },
+        {
+          "form": "mi",
+          "rank": 15
+        },
+        {
+          "form": "una",
+          "rank": 16
+        },
+        {
+          "form": "mary",
+          "rank": 17
+        },
+        {
+          "form": "le",
+          "rank": 18
+        },
+        {
+          "form": "ho",
+          "rank": 19
+        },
+        {
+          "form": "con",
+          "rank": 20
+        },
+        {
+          "form": "i",
+          "rank": 21
+        },
+        {
+          "form": "lei",
+          "rank": 22
+        },
+        {
+          "form": "e",
+          "rank": 23
+        },
+        {
+          "form": "si",
+          "rank": 24
+        },
+        {
+          "form": "lui",
+          "rank": 25
+        },
+        {
+          "form": "questo",
+          "rank": 26
+        },
+        {
+          "form": "da",
+          "rank": 27
+        },
+        {
+          "form": "lo",
+          "rank": 28
+        },
+        {
+          "form": "era",
+          "rank": 29
+        },
+        {
+          "form": "molto",
+          "rank": 30
+        },
+        {
+          "form": "perché",
+          "rank": 31
+        },
+        {
+          "form": "detto",
+          "rank": 32
+        },
+        {
+          "form": "loro",
+          "rank": 33
+        },
+        {
+          "form": "più",
+          "rank": 34
+        },
+        {
+          "form": "suo",
+          "rank": 35
+        },
+        {
+          "form": "del",
+          "rank": 36
+        },
+        {
+          "form": "sua",
+          "rank": 37
+        },
+        {
+          "form": "vero",
+          "rank": 38
+        },
+        {
+          "form": "cosa",
+          "rank": 39
+        },
+        {
+          "form": "mio",
+          "rank": 40
+        },
+        {
+          "form": "essere",
+          "rank": 41
+        },
+        {
+          "form": "come",
+          "rank": 42
+        },
+        {
+          "form": "ci",
+          "rank": 43
+        },
+        {
+          "form": "al",
+          "rank": 44
+        },
+        {
+          "form": "sta",
+          "rank": 45
+        },
+        {
+          "form": "questa",
+          "rank": 46
+        },
+        {
+          "form": "noi",
+          "rank": 47
+        },
+        {
+          "form": "voi",
+          "rank": 48
+        },
+        {
+          "form": "mai",
+          "rank": 49
+        },
+        {
+          "form": "me",
+          "rank": 50
+        },
+        {
+          "form": "mia",
+          "rank": 51
+        },
+        {
+          "form": "gli",
+          "rank": 52
+        },
+        {
+          "form": "hai",
+          "rank": 53
+        },
+        {
+          "form": "sei",
+          "rank": 54
+        },
+        {
+          "form": "casa",
+          "rank": 55
+        },
+        {
+          "form": "tu",
+          "rank": 56
+        },
+        {
+          "form": "fare",
+          "rank": 57
+        },
+        {
+          "form": "ti",
+          "rank": 58
+        },
+        {
+          "form": "qui",
+          "rank": 59
+        },
+        {
+          "form": "ancora",
+          "rank": 60
+        }
+      ],
+      "rankedForms": 60283
+    },
+    "ja": {
+      "functionForms": [
+        {
+          "form": "は",
+          "rank": 1
+        },
+        {
+          "form": "の",
+          "rank": 2
+        },
+        {
+          "form": "に",
+          "rank": 3
+        },
+        {
+          "form": "を",
+          "rank": 4
+        },
+        {
+          "form": "が",
+          "rank": 5
+        },
+        {
+          "form": "た",
+          "rank": 6
+        },
+        {
+          "form": "て",
+          "rank": 7
+        },
+        {
+          "form": "っ",
+          "rank": 8
+        },
+        {
+          "form": "だ",
+          "rank": 9
+        },
+        {
+          "form": "彼",
+          "rank": 10
+        },
+        {
+          "form": "私",
+          "rank": 11
+        },
+        {
+          "form": "で",
+          "rank": 12
+        },
+        {
+          "form": "って",
+          "rank": 13
+        },
+        {
+          "form": "ない",
+          "rank": 14
+        },
+        {
+          "form": "した",
+          "rank": 15
+        },
+        {
+          "form": "と",
+          "rank": 16
+        },
+        {
+          "form": "か",
+          "rank": 17
+        },
+        {
+          "form": "な",
+          "rank": 18
+        },
+        {
+          "form": "し",
+          "rank": 19
+        },
+        {
+          "form": "いる",
+          "rank": 20
+        },
+        {
+          "form": "です",
+          "rank": 21
+        },
+        {
+          "form": "い",
+          "rank": 22
+        },
+        {
+          "form": "れ",
+          "rank": 23
+        },
+        {
+          "form": "ます",
+          "rank": 24
+        },
+        {
+          "form": "彼女",
+          "rank": 25
+        },
+        {
+          "form": "その",
+          "rank": 26
+        },
+        {
+          "form": "トム",
+          "rank": 27
+        },
+        {
+          "form": "よ",
+          "rank": 28
+        },
+        {
+          "form": "も",
+          "rank": 29
+        },
+        {
+          "form": "こと",
+          "rank": 30
+        },
+        {
+          "form": "ま",
+          "rank": 31
+        },
+        {
+          "form": "この",
+          "rank": 32
+        },
+        {
+          "form": "ある",
+          "rank": 33
+        },
+        {
+          "form": "する",
+          "rank": 34
+        },
+        {
+          "form": "から",
+          "rank": 35
+        },
+        {
+          "form": "てい",
+          "rank": 36
+        },
+        {
+          "form": "ん",
+          "rank": 37
+        },
+        {
+          "form": "ら",
+          "rank": 38
+        },
+        {
+          "form": "さい",
+          "rank": 39
+        },
+        {
+          "form": "さ",
+          "rank": 40
+        },
+        {
+          "form": "人",
+          "rank": 41
+        },
+        {
+          "form": "よう",
+          "rank": 42
+        },
+        {
+          "form": "なか",
+          "rank": 43
+        },
+        {
+          "form": "け",
+          "rank": 44
+        },
+        {
+          "form": "ば",
+          "rank": 45
+        },
+        {
+          "form": "たち",
+          "rank": 46
+        },
+        {
+          "form": "何",
+          "rank": 47
+        },
+        {
+          "form": "あなた",
+          "rank": 48
+        },
+        {
+          "form": "せん",
+          "rank": 49
+        },
+        {
+          "form": "では",
+          "rank": 50
+        },
+        {
+          "form": "く",
+          "rank": 51
+        },
+        {
+          "form": "ね",
+          "rank": 52
+        },
+        {
+          "form": "言",
+          "rank": 53
+        },
+        {
+          "form": "見",
+          "rank": 54
+        },
+        {
+          "form": "んで",
+          "rank": 55
+        },
+        {
+          "form": "君",
+          "rank": 56
+        },
+        {
+          "form": "いい",
+          "rank": 57
+        },
+        {
+          "form": "それ",
+          "rank": 58
+        },
+        {
+          "form": "お",
+          "rank": 59
+        },
+        {
+          "form": "なら",
+          "rank": 60
+        }
+      ],
+      "rankedForms": 32351
+    },
+    "ko": {
+      "functionForms": [
+        {
+          "form": "나는",
+          "rank": 1
+        },
+        {
+          "form": "톰은",
+          "rank": 2
+        },
+        {
+          "form": "있어",
+          "rank": 3
+        },
+        {
+          "form": "그",
+          "rank": 4
+        },
+        {
+          "form": "이",
+          "rank": 5
+        },
+        {
+          "form": "그는",
+          "rank": 6
+        },
+        {
+          "form": "수",
+          "rank": 7
+        },
+        {
+          "form": "있다",
+          "rank": 8
+        },
+        {
+          "form": "난",
+          "rank": 9
+        },
+        {
+          "form": "톰이",
+          "rank": 10
+        },
+        {
+          "form": "내",
+          "rank": 11
+        },
+        {
+          "form": "내가",
+          "rank": 12
+        },
+        {
+          "form": "그녀는",
+          "rank": 13
+        },
+        {
+          "form": "더",
+          "rank": 14
+        },
+        {
+          "form": "안",
+          "rank": 15
+        },
+        {
+          "form": "우리는",
+          "rank": 16
+        },
+        {
+          "form": "거야",
+          "rank": 17
+        },
+        {
+          "form": "한",
+          "rank": 18
+        },
+        {
+          "form": "우리",
+          "rank": 19
+        },
+        {
+          "form": "좀",
+          "rank": 20
+        },
+        {
+          "form": "있어요",
+          "rank": 21
+        },
+        {
+          "form": "것",
+          "rank": 22
+        },
+        {
+          "form": "너무",
+          "rank": 23
+        },
+        {
+          "form": "할",
+          "rank": 24
+        },
+        {
+          "form": "왜",
+          "rank": 25
+        },
+        {
+          "form": "것을",
+          "rank": 26
+        },
+        {
+          "form": "잘",
+          "rank": 27
+        },
+        {
+          "form": "네가",
+          "rank": 28
+        },
+        {
+          "form": "너",
+          "rank": 29
+        },
+        {
+          "form": "네",
+          "rank": 30
+        },
+        {
+          "form": "저는",
+          "rank": 31
+        },
+        {
+          "form": "있는",
+          "rank": 32
+        },
+        {
+          "form": "없어",
+          "rank": 33
+        },
+        {
+          "form": "정말",
+          "rank": 34
+        },
+        {
+          "form": "것이다",
+          "rank": 35
+        },
+        {
+          "form": "걸",
+          "rank": 36
+        },
+        {
+          "form": "해",
+          "rank": 37
+        },
+        {
+          "form": "없다",
+          "rank": 38
+        },
+        {
+          "form": "한다",
+          "rank": 39
+        },
+        {
+          "form": "않아",
+          "rank": 40
+        },
+        {
+          "form": "너는",
+          "rank": 41
+        },
+        {
+          "form": "어떻게",
+          "rank": 42
+        },
+        {
+          "form": "있습니다",
+          "rank": 43
+        },
+        {
+          "form": "주세요",
+          "rank": 44
+        },
+        {
+          "form": "같아",
+          "rank": 45
+        },
+        {
+          "form": "메리는",
+          "rank": 46
+        },
+        {
+          "form": "오늘",
+          "rank": 47
+        },
+        {
+          "form": "몇",
+          "rank": 48
+        },
+        {
+          "form": "사람은",
+          "rank": 49
+        },
+        {
+          "form": "알고",
+          "rank": 50
+        },
+        {
+          "form": "그들은",
+          "rank": 51
+        },
+        {
+          "form": "그의",
+          "rank": 52
+        },
+        {
+          "form": "집에",
+          "rank": 53
+        },
+        {
+          "form": "제",
+          "rank": 54
+        },
+        {
+          "form": "지금",
+          "rank": 55
+        },
+        {
+          "form": "있었다",
+          "rank": 56
+        },
+        {
+          "form": "나",
+          "rank": 57
+        },
+        {
+          "form": "좋은",
+          "rank": 58
+        },
+        {
+          "form": "하고",
+          "rank": 59
+        },
+        {
+          "form": "않는다",
+          "rank": 60
+        }
+      ],
+      "rankedForms": 19593
+    },
+    "pl": {
+      "functionForms": [
+        {
+          "form": "nie",
+          "rank": 1
+        },
+        {
+          "form": "się",
+          "rank": 2
+        },
+        {
+          "form": "jest",
+          "rank": 3
+        },
+        {
+          "form": "w",
+          "rank": 4
+        },
+        {
+          "form": "to",
+          "rank": 5
+        },
+        {
+          "form": "tom",
+          "rank": 6
+        },
+        {
+          "form": "na",
+          "rank": 7
+        },
+        {
+          "form": "że",
+          "rank": 8
+        },
+        {
+          "form": "do",
+          "rank": 9
+        },
+        {
+          "form": "z",
+          "rank": 10
+        },
+        {
+          "form": "czy",
+          "rank": 11
+        },
+        {
+          "form": "i",
+          "rank": 12
+        },
+        {
+          "form": "co",
+          "rank": 13
+        },
+        {
+          "form": "jak",
+          "rank": 14
+        },
+        {
+          "form": "o",
+          "rank": 15
+        },
+        {
+          "form": "mi",
+          "rank": 16
+        },
+        {
+          "form": "on",
+          "rank": 17
+        },
+        {
+          "form": "mnie",
+          "rank": 18
+        },
+        {
+          "form": "ma",
+          "rank": 19
+        },
+        {
+          "form": "po",
+          "rank": 20
+        },
+        {
+          "form": "za",
+          "rank": 21
+        },
+        {
+          "form": "tego",
+          "rank": 22
+        },
+        {
+          "form": "jestem",
+          "rank": 23
+        },
+        {
+          "form": "mary",
+          "rank": 24
+        },
+        {
+          "form": "są",
+          "rank": 25
+        },
+        {
+          "form": "ten",
+          "rank": 26
+        },
+        {
+          "form": "bardzo",
+          "rank": 27
+        },
+        {
+          "form": "mam",
+          "rank": 28
+        },
+        {
+          "form": "tak",
+          "rank": 29
+        },
+        {
+          "form": "był",
+          "rank": 30
+        },
+        {
+          "form": "tym",
+          "rank": 31
+        },
+        {
+          "form": "ona",
+          "rank": 32
+        },
+        {
+          "form": "od",
+          "rank": 33
+        },
+        {
+          "form": "już",
+          "rank": 34
+        },
+        {
+          "form": "jesteś",
+          "rank": 35
+        },
+        {
+          "form": "jego",
+          "rank": 36
+        },
+        {
+          "form": "ci",
+          "rank": 37
+        },
+        {
+          "form": "kiedy",
+          "rank": 38
+        },
+        {
+          "form": "go",
+          "rank": 39
+        },
+        {
+          "form": "ale",
+          "rank": 40
+        },
+        {
+          "form": "dla",
+          "rank": 41
+        },
+        {
+          "form": "mogę",
+          "rank": 42
+        },
+        {
+          "form": "jej",
+          "rank": 43
+        },
+        {
+          "form": "toma",
+          "rank": 44
+        },
+        {
+          "form": "mój",
+          "rank": 45
+        },
+        {
+          "form": "może",
+          "rank": 46
+        },
+        {
+          "form": "tylko",
+          "rank": 47
+        },
+        {
+          "form": "domu",
+          "rank": 48
+        },
+        {
+          "form": "było",
+          "rank": 49
+        },
+        {
+          "form": "być",
+          "rank": 50
+        },
+        {
+          "form": "chcę",
+          "rank": 51
+        },
+        {
+          "form": "tu",
+          "rank": 52
+        },
+        {
+          "form": "nigdy",
+          "rank": 53
+        },
+        {
+          "form": "pan",
+          "rank": 54
+        },
+        {
+          "form": "będzie",
+          "rank": 55
+        },
+        {
+          "form": "cię",
+          "rank": 56
+        },
+        {
+          "form": "proszę",
+          "rank": 57
+        },
+        {
+          "form": "zrobić",
+          "rank": 58
+        },
+        {
+          "form": "gdzie",
+          "rank": 59
+        },
+        {
+          "form": "przez",
+          "rank": 60
+        }
+      ],
+      "rankedForms": 51382
+    },
+    "pt": {
+      "functionForms": [
+        {
+          "form": "o",
+          "rank": 1
+        },
+        {
+          "form": "de",
+          "rank": 2
+        },
+        {
+          "form": "que",
+          "rank": 3
+        },
+        {
+          "form": "a",
+          "rank": 4
+        },
+        {
+          "form": "não",
+          "rank": 5
+        },
+        {
+          "form": "tom",
+          "rank": 6
+        },
+        {
+          "form": "eu",
+          "rank": 7
+        },
+        {
+          "form": "é",
+          "rank": 8
+        },
+        {
+          "form": "você",
+          "rank": 9
+        },
+        {
+          "form": "um",
+          "rank": 10
+        },
+        {
+          "form": "e",
+          "rank": 11
+        },
+        {
+          "form": "para",
+          "rank": 12
+        },
+        {
+          "form": "uma",
+          "rank": 13
+        },
+        {
+          "form": "em",
+          "rank": 14
+        },
+        {
+          "form": "ele",
+          "rank": 15
+        },
+        {
+          "form": "com",
+          "rank": 16
+        },
+        {
+          "form": "está",
+          "rank": 17
+        },
+        {
+          "form": "do",
+          "rank": 18
+        },
+        {
+          "form": "se",
+          "rank": 19
+        },
+        {
+          "form": "por",
+          "rank": 20
+        },
+        {
+          "form": "os",
+          "rank": 21
+        },
+        {
+          "form": "isso",
+          "rank": 22
+        },
+        {
+          "form": "da",
+          "rank": 23
+        },
+        {
+          "form": "no",
+          "rank": 24
+        },
+        {
+          "form": "me",
+          "rank": 25
+        },
+        {
+          "form": "mais",
+          "rank": 26
+        },
+        {
+          "form": "as",
+          "rank": 27
+        },
+        {
+          "form": "na",
+          "rank": 28
+        },
+        {
+          "form": "ela",
+          "rank": 29
+        },
+        {
+          "form": "muito",
+          "rank": 30
+        },
+        {
+          "form": "fazer",
+          "rank": 31
+        },
+        {
+          "form": "tem",
+          "rank": 32
+        },
+        {
+          "form": "como",
+          "rank": 33
+        },
+        {
+          "form": "foi",
+          "rank": 34
+        },
+        {
+          "form": "meu",
+          "rank": 35
+        },
+        {
+          "form": "mary",
+          "rank": 36
+        },
+        {
+          "form": "estava",
+          "rank": 37
+        },
+        {
+          "form": "seu",
+          "rank": 38
+        },
+        {
+          "form": "estou",
+          "rank": 39
+        },
+        {
+          "form": "sua",
+          "rank": 40
+        },
+        {
+          "form": "ao",
+          "rank": 41
+        },
+        {
+          "form": "são",
+          "rank": 42
+        },
+        {
+          "form": "à",
+          "rank": 43
+        },
+        {
+          "form": "nós",
+          "rank": 44
+        },
+        {
+          "form": "minha",
+          "rank": 45
+        },
+        {
+          "form": "eles",
+          "rank": 46
+        },
+        {
+          "form": "vocês",
+          "rank": 47
+        },
+        {
+          "form": "quando",
+          "rank": 48
+        },
+        {
+          "form": "mas",
+          "rank": 49
+        },
+        {
+          "form": "casa",
+          "rank": 50
+        },
+        {
+          "form": "ser",
+          "rank": 51
+        },
+        {
+          "form": "tenho",
+          "rank": 52
+        },
+        {
+          "form": "vai",
+          "rank": 53
+        },
+        {
+          "form": "aqui",
+          "rank": 54
+        },
+        {
+          "form": "disse",
+          "rank": 55
+        },
+        {
+          "form": "pode",
+          "rank": 56
+        },
+        {
+          "form": "há",
+          "rank": 57
+        },
+        {
+          "form": "já",
+          "rank": 58
+        },
+        {
+          "form": "quero",
+          "rank": 59
+        },
+        {
+          "form": "dos",
+          "rank": 60
+        }
+      ],
+      "rankedForms": 66794
+    },
+    "ru": {
+      "functionForms": [
+        {
+          "form": "я",
+          "rank": 1
+        },
+        {
+          "form": "не",
+          "rank": 2
+        },
+        {
+          "form": "в",
+          "rank": 3
+        },
+        {
+          "form": "том",
+          "rank": 4
+        },
+        {
+          "form": "что",
+          "rank": 5
+        },
+        {
+          "form": "ты",
+          "rank": 6
+        },
+        {
+          "form": "это",
+          "rank": 7
+        },
+        {
+          "form": "на",
+          "rank": 8
+        },
+        {
+          "form": "он",
+          "rank": 9
+        },
+        {
+          "form": "вы",
+          "rank": 10
+        },
+        {
+          "form": "мне",
+          "rank": 11
+        },
+        {
+          "form": "у",
+          "rank": 12
+        },
+        {
+          "form": "с",
+          "rank": 13
+        },
+        {
+          "form": "и",
+          "rank": 14
+        },
+        {
+          "form": "она",
+          "rank": 15
+        },
+        {
+          "form": "мы",
+          "rank": 16
+        },
+        {
+          "form": "меня",
+          "rank": 17
+        },
+        {
+          "form": "как",
+          "rank": 18
+        },
+        {
+          "form": "мэри",
+          "rank": 19
+        },
+        {
+          "form": "его",
+          "rank": 20
+        },
+        {
+          "form": "бы",
+          "rank": 21
+        },
+        {
+          "form": "тебе",
+          "rank": 22
+        },
+        {
+          "form": "тома",
+          "rank": 23
+        },
+        {
+          "form": "они",
+          "rank": 24
+        },
+        {
+          "form": "чтобы",
+          "rank": 25
+        },
+        {
+          "form": "её",
+          "rank": 26
+        },
+        {
+          "form": "был",
+          "rank": 27
+        },
+        {
+          "form": "очень",
+          "rank": 28
+        },
+        {
+          "form": "тебя",
+          "rank": 29
+        },
+        {
+          "form": "за",
+          "rank": 30
+        },
+        {
+          "form": "так",
+          "rank": 31
+        },
+        {
+          "form": "вам",
+          "rank": 32
+        },
+        {
+          "form": "есть",
+          "rank": 33
+        },
+        {
+          "form": "было",
+          "rank": 34
+        },
+        {
+          "form": "всё",
+          "rank": 35
+        },
+        {
+          "form": "тому",
+          "rank": 36
+        },
+        {
+          "form": "вас",
+          "rank": 37
+        },
+        {
+          "form": "почему",
+          "rank": 38
+        },
+        {
+          "form": "из",
+          "rank": 39
+        },
+        {
+          "form": "о",
+          "rank": 40
+        },
+        {
+          "form": "ещё",
+          "rank": 41
+        },
+        {
+          "form": "сказал",
+          "rank": 42
+        },
+        {
+          "form": "когда",
+          "rank": 43
+        },
+        {
+          "form": "ему",
+          "rank": 44
+        },
+        {
+          "form": "по",
+          "rank": 45
+        },
+        {
+          "form": "хочу",
+          "rank": 46
+        },
+        {
+          "form": "к",
+          "rank": 47
+        },
+        {
+          "form": "если",
+          "rank": 48
+        },
+        {
+          "form": "нет",
+          "rank": 49
+        },
+        {
+          "form": "уже",
+          "rank": 50
+        },
+        {
+          "form": "нам",
+          "rank": 51
+        },
+        {
+          "form": "от",
+          "rank": 52
+        },
+        {
+          "form": "знаю",
+          "rank": 53
+        },
+        {
+          "form": "надо",
+          "rank": 54
+        },
+        {
+          "form": "здесь",
+          "rank": 55
+        },
+        {
+          "form": "больше",
+          "rank": 56
+        },
+        {
+          "form": "все",
+          "rank": 57
+        },
+        {
+          "form": "могу",
+          "rank": 58
+        },
+        {
+          "form": "ей",
+          "rank": 59
+        },
+        {
+          "form": "этом",
+          "rank": 60
+        }
+      ],
+      "rankedForms": 125734
+    },
+    "zh": {
+      "functionForms": [
+        {
+          "form": "的",
+          "rank": 1
+        },
+        {
+          "form": "我",
+          "rank": 2
+        },
+        {
+          "form": "了",
+          "rank": 3
+        },
+        {
+          "form": "你",
+          "rank": 4
+        },
+        {
+          "form": "他",
+          "rank": 5
+        },
+        {
+          "form": "是",
+          "rank": 6
+        },
+        {
+          "form": "在",
+          "rank": 7
+        },
+        {
+          "form": "她",
+          "rank": 8
+        },
+        {
+          "form": "汤姆",
+          "rank": 9
+        },
+        {
+          "form": "有",
+          "rank": 10
+        },
+        {
+          "form": "我们",
+          "rank": 11
+        },
+        {
+          "form": "很",
+          "rank": 12
+        },
+        {
+          "form": "人",
+          "rank": 13
+        },
+        {
+          "form": "我的",
+          "rank": 14
+        },
+        {
+          "form": "和",
+          "rank": 15
+        },
+        {
+          "form": "吗",
+          "rank": 16
+        },
+        {
+          "form": "湯姆",
+          "rank": 17
+        },
+        {
+          "form": "这",
+          "rank": 18
+        },
+        {
+          "form": "嗎",
+          "rank": 19
+        },
+        {
+          "form": "我們",
+          "rank": 20
+        },
+        {
+          "form": "去",
+          "rank": 21
+        },
+        {
+          "form": "把",
+          "rank": 22
+        },
+        {
+          "form": "你的",
+          "rank": 23
+        },
+        {
+          "form": "他的",
+          "rank": 24
+        },
+        {
+          "form": "上",
+          "rank": 25
+        },
+        {
+          "form": "会",
+          "rank": 26
+        },
+        {
+          "form": "不",
+          "rank": 27
+        },
+        {
+          "form": "就",
+          "rank": 28
+        },
+        {
+          "form": "要",
+          "rank": 29
+        },
+        {
+          "form": "什么",
+          "rank": 30
+        },
+        {
+          "form": "一个",
+          "rank": 31
+        },
+        {
+          "form": "做",
+          "rank": 32
+        },
+        {
+          "form": "可以",
+          "rank": 33
+        },
+        {
+          "form": "都",
+          "rank": 34
+        },
+        {
+          "form": "這",
+          "rank": 35
+        },
+        {
+          "form": "说",
+          "rank": 36
+        },
+        {
+          "form": "他们",
+          "rank": 37
+        },
+        {
+          "form": "个",
+          "rank": 38
+        },
+        {
+          "form": "没有",
+          "rank": 39
+        },
+        {
+          "form": "您",
+          "rank": 40
+        },
+        {
+          "form": "吃",
+          "rank": 41
+        },
+        {
+          "form": "这个",
+          "rank": 42
+        },
+        {
+          "form": "那",
+          "rank": 43
+        },
+        {
+          "form": "一個",
+          "rank": 44
+        },
+        {
+          "form": "工作",
+          "rank": 45
+        },
+        {
+          "form": "被",
+          "rank": 46
+        },
+        {
+          "form": "能",
+          "rank": 47
+        },
+        {
+          "form": "吧",
+          "rank": 48
+        },
+        {
+          "form": "喜欢",
+          "rank": 49
+        },
+        {
+          "form": "不是",
+          "rank": 50
+        },
+        {
+          "form": "给",
+          "rank": 51
+        },
+        {
+          "form": "自己",
+          "rank": 52
+        },
+        {
+          "form": "来",
+          "rank": 53
+        },
+        {
+          "form": "好",
+          "rank": 54
+        },
+        {
+          "form": "他們",
+          "rank": 55
+        },
+        {
+          "form": "知道",
+          "rank": 56
+        },
+        {
+          "form": "对",
+          "rank": 57
+        },
+        {
+          "form": "這個",
+          "rank": 58
+        },
+        {
+          "form": "到",
+          "rank": 59
+        },
+        {
+          "form": "今天",
+          "rank": 60
+        }
+      ],
+      "rankedForms": 29249
+    }
+  },
+  "poolPipelineSha256": {
+    "build_catalogue_v2.py": "e8a3f9986a917174ffcb8c141eff9015964249ad471fd13d53f06fbe9cfe0086",
+    "catalogue_core.py": "984a58be4f88939b37c86e7e677e01ffe7d0f94a2c20f38a56eb6f32b7151e56",
+    "catalogue_v2.py": "92b9b761c4f4419e56eff66dd18a06327224fe8afbc7e8cd74397296b786578b",
+    "everyday_pool.py": "b1342adb46c5a0f605761051b2d947b0f05a888b12a56578e2351cc94ecbf098",
+    "everyday_rebuild.py": "d63b638e1583b94348e2e82e98666e596c5876f95f05209c3f8cedd01d859c0e",
+    "ingest/model.py": "1d5097bbd68fbcc589f5846efb766785f0e682bfb004aff01c1e2d97b68cf9fc",
+    "ingest/registry.py": "3249cdc94cdb5fc0bb52389a3c6aee33cd4d07eeb46ce747dd23072d65dc3033",
+    "segmentation.py": "627b30e28ccb3c31a423d4d83b7968422913efd8cc7d631863d4d4075634b8da"
+  },
+  "publicationSafe": false,
+  "rankContract": "primary-origin context key once; first-seen text/rowid; lower() tokens; Counter.most_common first-seen ties",
+  "registrySha256": "98695b8beb720899b567c9a6b946eae33bd61952a82a03fe9d3fecfed9fc4066",
+  "reportVersion": 1,
+  "selectionReexecuted": false,
+  "semanticAccuracyCertified": false,
+  "sourceVersion": "2026-10-03-2d4eee105639ba24",
+  "status": "verified-admitted-pool-function-prefix"
+}
