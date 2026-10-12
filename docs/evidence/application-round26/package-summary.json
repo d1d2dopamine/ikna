@@ -1,0 +1,12 @@
+{
+  "format": "Linux x86_64 jpackage application image (not AppImage)",
+  "files": 176,
+  "logical_bytes": 168423683,
+  "launcher_sha256": "b3d3030696eb10c223bed43a426fb8b9a9250960e982a02cfe153d05ecb947c2",
+  "desktop_jar_sha256": "88b701583f1becd983b57eb662e3280b007c048533ab03d2ebf5c39e558fa0cf",
+  "packaged_selftest": "PASS",
+  "display_available": false,
+  "xvfb_available": false,
+  "ui_smoke": "NOT RUN",
+  "source_changes": []
+}

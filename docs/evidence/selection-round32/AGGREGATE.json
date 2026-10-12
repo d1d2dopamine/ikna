@@ -1,0 +1,593 @@
+{
+  "candidateProfile": {
+    "candidateOverlapCalls": 864108,
+    "focusedCalls": [
+      {
+        "calls": 1,
+        "cumulativeSeconds": 11.472125987,
+        "function": "pair_evidence",
+        "line": 258,
+        "path": "/workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_experiment.py",
+        "primitiveCalls": 1,
+        "selfSeconds": 0.715721652
+      },
+      {
+        "calls": 169164,
+        "cumulativeSeconds": 0.8173934780000001,
+        "function": "context_quality_key",
+        "line": 90,
+        "path": "/workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py",
+        "primitiveCalls": 169164,
+        "selfSeconds": 0.320248493
+      },
+      {
+        "calls": 2286,
+        "cumulativeSeconds": 10.159929979000001,
+        "function": "choose_contexts",
+        "line": 16,
+        "path": "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/overlap_reuse.py",
+        "primitiveCalls": 2286,
+        "selfSeconds": 0.134159258
+      },
+      {
+        "calls": 36692,
+        "cumulativeSeconds": 0.978859047,
+        "function": "_written_counts",
+        "line": 106,
+        "path": "/workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py",
+        "primitiveCalls": 36692,
+        "selfSeconds": 0.027673685000000003
+      },
+      {
+        "calls": 301752,
+        "cumulativeSeconds": 1.11015031,
+        "function": "normalized_words",
+        "line": 66,
+        "path": "/workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py",
+        "primitiveCalls": 301752,
+        "selfSeconds": 0.161069831
+      },
+      {
+        "calls": 864108,
+        "cumulativeSeconds": 5.774520524000001,
+        "function": "context_overlap",
+        "line": 111,
+        "path": "/workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py",
+        "primitiveCalls": 864108,
+        "selfSeconds": 1.190574465
+      },
+      {
+        "calls": 150876,
+        "cumulativeSeconds": 1.3855515500000002,
+        "function": "near_duplicate",
+        "line": 71,
+        "path": "/workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py",
+        "primitiveCalls": 150876,
+        "selfSeconds": 0.22768353700000002
+      },
+      {
+        "calls": 32192,
+        "cumulativeSeconds": 0.189920987,
+        "function": "_origin_families",
+        "line": 242,
+        "path": "/workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_experiment.py",
+        "primitiveCalls": 32192,
+        "selfSeconds": 0.027699228000000003
+      },
+      {
+        "calls": 36692,
+        "cumulativeSeconds": 0.6656800620000001,
+        "function": "word_spans",
+        "line": 131,
+        "path": "/workspace/scratch/8105054a3211/ikna-work/tools/catalog/segmentation.py",
+        "primitiveCalls": 36692,
+        "selfSeconds": 0.058178320000000006
+      },
+      {
+        "calls": 169164,
+        "cumulativeSeconds": 0.23944861,
+        "function": "stable_hash",
+        "line": 62,
+        "path": "/workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py",
+        "primitiveCalls": 169164,
+        "selfSeconds": 0.109301463
+      }
+    ],
+    "originalRound31OverlapCalls": 5289804,
+    "overlapCallReductionFraction": 0.8366464995678479,
+    "primitiveCalls": 32644116,
+    "referenceComparison": {
+      "exactReturnedEvidenceEqual": true,
+      "interpretation": "cProfile instrumentation overhead relative to the same unprofiled candidate, not an optimization gain",
+      "path": "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/candidate-01/PROBE.json",
+      "profileOverCandidateElapsedRatio": 2.462822857425166,
+      "sha256": "2a5a0d6afb6eb2c30f7a7ddd7f28e09ecf476bbc252349e196551d1fb1542dd9",
+      "unprofiledCandidatePairElapsedSeconds": 4.658243359001062
+    },
+    "totalCalls": 32728716
+  },
+  "limits": [
+    "exact early pair prefix; no full pair, final allocation, selected deck or full-workflow speedup",
+    "fresh-process caches differ from the full producer's inherited process state",
+    "OS caches uncontrolled and warmed by mandatory preflight hashing/row checks",
+    "cProfile cumulative times overlap and include instrumentation overhead",
+    "SQLite cursor-fetch work may appear in enclosing function self time",
+    "pair timing excludes source/staging hashes, prefix checks, imports and artifact serialization",
+    "resource peak is whole-process lifetime RSS, not pair-exclusive allocation",
+    "hard address-space and CPU limits do not guarantee host or cgroup headroom",
+    "candidate changes pure written-token cache hit/recency behavior; no original policy or cache definition is patched",
+    "full staging bytes hashed before and after; no production staging-reuse or resume implementation",
+    "Three unprofiled observations per implementation; no randomized trial or confidence interval.",
+    "C2 is paired with B2 for timing here, while all candidate manifests bind B1 for identity.",
+    "Profile binds C1/B1 as actually executed; historical harness guide suggested C3/B3."
+  ],
+  "pairStats": {
+    "candidateRows": 32768,
+    "eligibleExactTargets": 11496,
+    "eligibleTargetOccurrences": 111407,
+    "noUsableTarget": 188,
+    "sentenceLengthRejected": 254,
+    "translationLengthRejected": 134
+  },
+  "pairedUnprofiledObservations": [
+    {
+      "baseline": "baseline-01",
+      "baselinePairElapsedSeconds": 13.297267137997551,
+      "candidate": "candidate-01",
+      "candidatePairElapsedSeconds": 4.658243359001062,
+      "observedBaselineOverCandidateCpuRatio": 2.851139242990135,
+      "observedBaselineOverCandidateWallRatio": 2.8545668642028796,
+      "observedWallReductionFraction": 0.6496841561007736
+    },
+    {
+      "baseline": "baseline-02",
+      "baselinePairElapsedSeconds": 13.53188763000071,
+      "candidate": "candidate-02",
+      "candidatePairElapsedSeconds": 4.620789177999541,
+      "observedBaselineOverCandidateCpuRatio": 2.9283831178141537,
+      "observedBaselineOverCandidateWallRatio": 2.9284797701718595,
+      "observedWallReductionFraction": 0.6585258979127883
+    },
+    {
+      "baseline": "baseline-03",
+      "baselinePairElapsedSeconds": 13.494454742998641,
+      "candidate": "candidate-03",
+      "candidatePairElapsedSeconds": 4.888500507000572,
+      "observedBaselineOverCandidateCpuRatio": 2.757019785023184,
+      "observedBaselineOverCandidateWallRatio": 2.760448674122857,
+      "observedWallReductionFraction": 0.6377400495164962
+    }
+  ],
+  "prefixIdentity": {
+    "candidateRows": 32768,
+    "encoding": "UTF-8 canonical JSON per row; 8-byte big-endian length prefix; exact stored JSON strings",
+    "firstCandidateId": "c1:everyday:en-de:00000ef156dd5dba4b4d",
+    "lastCandidateId": "c1:everyday:en-de:0e6081433cd1d0ce2408",
+    "orderedCandidateIdsSha256": "1015a074bfb80e5f60624feac2b50ec6f3e685610d6d598df42c3ab9be139c21",
+    "sevenValueRowsSha256": "30c05cfa2166b7427a619eb8a02039eced5e00ee444cbd85848c8d92a472e71a"
+  },
+  "publicationSafe": false,
+  "runs": [
+    {
+      "finalProcessEvidence": {
+        "processLifetimePeakRssBytes": 110325760,
+        "processSystemSeconds": 5.688235,
+        "processUserSeconds": 26.081278
+      },
+      "finishedUtc": "2026-10-12T00:31:04.077537+00:00",
+      "mode": "baseline",
+      "name": "baseline-01",
+      "outputIdentity": {
+        "sha256": "f551785d003b9a8f0793bedd687829f0a3364ebf47cab80f83d2a1f052ee12bd",
+        "sizeBytes": 31461064
+      },
+      "pair": {
+        "elapsedSeconds": 13.297267137997551,
+        "processCpuSeconds": 13.282407763999998,
+        "processLifetimePeakRssBytes": 106524672,
+        "processSystemSeconds": 3.478583,
+        "processUserSeconds": 18.81175
+      },
+      "quarantineRuleCache": {
+        "after": {
+          "currsize": 1,
+          "hits": 32191,
+          "maxsize": 1,
+          "misses": 1
+        },
+        "before": {
+          "currsize": 0,
+          "hits": 0,
+          "maxsize": 1,
+          "misses": 0
+        }
+      },
+      "resourcePreflight": {
+        "diskFreeBytes": 14204407808,
+        "hostAvailableBytes": 7505993728,
+        "scope": "preflight snapshot only; hidden cgroup limits unknown; no sampled RSS/headroom guarantee"
+      },
+      "startedUtc": "2026-10-12T00:30:27.432866+00:00",
+      "totalElapsedSeconds": 36.55470560499816,
+      "totalProcessCpuSeconds": 31.714152547999998,
+      "writtenTokenCache": {
+        "after": {
+          "currsize": 8192,
+          "hits": 10542928,
+          "maxsize": 8192,
+          "misses": 36680
+        },
+        "before": {
+          "currsize": 0,
+          "hits": 0,
+          "maxsize": 8192,
+          "misses": 0
+        }
+      }
+    },
+    {
+      "finalProcessEvidence": {
+        "processLifetimePeakRssBytes": 110387200,
+        "processSystemSeconds": 5.444088,
+        "processUserSeconds": 17.680104
+      },
+      "finishedUtc": "2026-10-12T00:31:30.580083+00:00",
+      "mode": "candidate",
+      "name": "candidate-01",
+      "outputIdentity": {
+        "sha256": "f551785d003b9a8f0793bedd687829f0a3364ebf47cab80f83d2a1f052ee12bd",
+        "sizeBytes": 31461064
+      },
+      "pair": {
+        "elapsedSeconds": 4.658243359001062,
+        "processCpuSeconds": 4.658631737,
+        "processLifetimePeakRssBytes": 106586112,
+        "processSystemSeconds": 2.901437,
+        "processUserSeconds": 10.461058
+      },
+      "quarantineRuleCache": {
+        "after": {
+          "currsize": 1,
+          "hits": 32191,
+          "maxsize": 1,
+          "misses": 1
+        },
+        "before": {
+          "currsize": 0,
+          "hits": 0,
+          "maxsize": 1,
+          "misses": 0
+        }
+      },
+      "resourcePreflight": {
+        "diskFreeBytes": 14172880896,
+        "hostAvailableBytes": 7380430848,
+        "scope": "preflight snapshot only; hidden cgroup limits unknown; no sampled RSS/headroom guarantee"
+      },
+      "startedUtc": "2026-10-12T00:31:04.078062+00:00",
+      "totalElapsedSeconds": 26.405362039000465,
+      "totalProcessCpuSeconds": 23.067959973,
+      "writtenTokenCache": {
+        "after": {
+          "currsize": 8192,
+          "hits": 1691524,
+          "maxsize": 8192,
+          "misses": 36692
+        },
+        "before": {
+          "currsize": 0,
+          "hits": 0,
+          "maxsize": 8192,
+          "misses": 0
+        }
+      }
+    },
+    {
+      "finalProcessEvidence": {
+        "processLifetimePeakRssBytes": 110428160,
+        "processSystemSeconds": 5.55007,
+        "processUserSeconds": 17.479432
+      },
+      "finishedUtc": "2026-10-12T00:31:56.665818+00:00",
+      "mode": "candidate",
+      "name": "candidate-02",
+      "outputIdentity": {
+        "sha256": "f551785d003b9a8f0793bedd687829f0a3364ebf47cab80f83d2a1f052ee12bd",
+        "sizeBytes": 31461064
+      },
+      "pair": {
+        "elapsedSeconds": 4.620789177999541,
+        "processCpuSeconds": 4.617189759,
+        "processLifetimePeakRssBytes": 106627072,
+        "processSystemSeconds": 2.773411,
+        "processUserSeconds": 10.283474
+      },
+      "quarantineRuleCache": {
+        "after": {
+          "currsize": 1,
+          "hits": 32191,
+          "maxsize": 1,
+          "misses": 1
+        },
+        "before": {
+          "currsize": 0,
+          "hits": 0,
+          "maxsize": 1,
+          "misses": 0
+        }
+      },
+      "resourcePreflight": {
+        "diskFreeBytes": 14141362176,
+        "hostAvailableBytes": 7531188224,
+        "scope": "preflight snapshot only; hidden cgroup limits unknown; no sampled RSS/headroom guarantee"
+      },
+      "startedUtc": "2026-10-12T00:31:30.580782+00:00",
+      "totalElapsedSeconds": 25.99213783599771,
+      "totalProcessCpuSeconds": 22.971718618,
+      "writtenTokenCache": {
+        "after": {
+          "currsize": 8192,
+          "hits": 1691524,
+          "maxsize": 8192,
+          "misses": 36692
+        },
+        "before": {
+          "currsize": 0,
+          "hits": 0,
+          "maxsize": 8192,
+          "misses": 0
+        }
+      }
+    },
+    {
+      "finalProcessEvidence": {
+        "processLifetimePeakRssBytes": 110272512,
+        "processSystemSeconds": 5.821193,
+        "processUserSeconds": 26.140214
+      },
+      "finishedUtc": "2026-10-12T00:32:32.009509+00:00",
+      "mode": "baseline",
+      "name": "baseline-02",
+      "outputIdentity": {
+        "sha256": "f551785d003b9a8f0793bedd687829f0a3364ebf47cab80f83d2a1f052ee12bd",
+        "sizeBytes": 31461064
+      },
+      "pair": {
+        "elapsedSeconds": 13.53188763000071,
+        "processCpuSeconds": 13.520900542000001,
+        "processLifetimePeakRssBytes": 106471424,
+        "processSystemSeconds": 3.205869,
+        "processUserSeconds": 18.965301
+      },
+      "quarantineRuleCache": {
+        "after": {
+          "currsize": 1,
+          "hits": 32191,
+          "maxsize": 1,
+          "misses": 1
+        },
+        "before": {
+          "currsize": 0,
+          "hits": 0,
+          "maxsize": 1,
+          "misses": 0
+        }
+      },
+      "resourcePreflight": {
+        "diskFreeBytes": 14109843456,
+        "hostAvailableBytes": 7441608704,
+        "scope": "preflight snapshot only; hidden cgroup limits unknown; no sampled RSS/headroom guarantee"
+      },
+      "startedUtc": "2026-10-12T00:31:56.666394+00:00",
+      "totalElapsedSeconds": 35.2515165520017,
+      "totalProcessCpuSeconds": 31.906176176000002,
+      "writtenTokenCache": {
+        "after": {
+          "currsize": 8192,
+          "hits": 10542928,
+          "maxsize": 8192,
+          "misses": 36680
+        },
+        "before": {
+          "currsize": 0,
+          "hits": 0,
+          "maxsize": 8192,
+          "misses": 0
+        }
+      }
+    },
+    {
+      "finalProcessEvidence": {
+        "processLifetimePeakRssBytes": 110211072,
+        "processSystemSeconds": 5.596699,
+        "processUserSeconds": 26.586553
+      },
+      "finishedUtc": "2026-10-12T00:33:07.473120+00:00",
+      "mode": "baseline",
+      "name": "baseline-03",
+      "outputIdentity": {
+        "sha256": "f551785d003b9a8f0793bedd687829f0a3364ebf47cab80f83d2a1f052ee12bd",
+        "sizeBytes": 31461064
+      },
+      "pair": {
+        "elapsedSeconds": 13.494454742998641,
+        "processCpuSeconds": 13.481432619,
+        "processLifetimePeakRssBytes": 106409984,
+        "processSystemSeconds": 3.000832,
+        "processUserSeconds": 19.203535
+      },
+      "quarantineRuleCache": {
+        "after": {
+          "currsize": 1,
+          "hits": 32191,
+          "maxsize": 1,
+          "misses": 1
+        },
+        "before": {
+          "currsize": 0,
+          "hits": 0,
+          "maxsize": 1,
+          "misses": 0
+        }
+      },
+      "resourcePreflight": {
+        "diskFreeBytes": 14076907520,
+        "hostAvailableBytes": 7451516928,
+        "scope": "preflight snapshot only; hidden cgroup limits unknown; no sampled RSS/headroom guarantee"
+      },
+      "startedUtc": "2026-10-12T00:32:32.010141+00:00",
+      "totalElapsedSeconds": 35.36636600999918,
+      "totalProcessCpuSeconds": 32.121397903,
+      "writtenTokenCache": {
+        "after": {
+          "currsize": 8192,
+          "hits": 10542928,
+          "maxsize": 8192,
+          "misses": 36680
+        },
+        "before": {
+          "currsize": 0,
+          "hits": 0,
+          "maxsize": 8192,
+          "misses": 0
+        }
+      }
+    },
+    {
+      "finalProcessEvidence": {
+        "processLifetimePeakRssBytes": 110395392,
+        "processSystemSeconds": 5.330445,
+        "processUserSeconds": 18.059732
+      },
+      "finishedUtc": "2026-10-12T00:33:33.089949+00:00",
+      "mode": "candidate",
+      "name": "candidate-03",
+      "outputIdentity": {
+        "sha256": "f551785d003b9a8f0793bedd687829f0a3364ebf47cab80f83d2a1f052ee12bd",
+        "sizeBytes": 31461064
+      },
+      "pair": {
+        "elapsedSeconds": 4.888500507000572,
+        "processCpuSeconds": 4.889857044999999,
+        "processLifetimePeakRssBytes": 106594304,
+        "processSystemSeconds": 2.960737,
+        "processUserSeconds": 10.566933
+      },
+      "quarantineRuleCache": {
+        "after": {
+          "currsize": 1,
+          "hits": 32191,
+          "maxsize": 1,
+          "misses": 1
+        },
+        "before": {
+          "currsize": 0,
+          "hits": 0,
+          "maxsize": 1,
+          "misses": 0
+        }
+      },
+      "resourcePreflight": {
+        "diskFreeBytes": 14044979200,
+        "hostAvailableBytes": 7418109952,
+        "scope": "preflight snapshot only; hidden cgroup limits unknown; no sampled RSS/headroom guarantee"
+      },
+      "startedUtc": "2026-10-12T00:33:07.473732+00:00",
+      "totalElapsedSeconds": 25.526478023999516,
+      "totalProcessCpuSeconds": 23.330302257000003,
+      "writtenTokenCache": {
+        "after": {
+          "currsize": 8192,
+          "hits": 1691524,
+          "maxsize": 8192,
+          "misses": 36692
+        },
+        "before": {
+          "currsize": 0,
+          "hits": 0,
+          "maxsize": 8192,
+          "misses": 0
+        }
+      }
+    },
+    {
+      "finalProcessEvidence": {
+        "processLifetimePeakRssBytes": 110796800,
+        "processSystemSeconds": 5.448368,
+        "processUserSeconds": 24.425133
+      },
+      "finishedUtc": "2026-10-12T00:34:05.560740+00:00",
+      "mode": "candidate-cprofile",
+      "name": "candidate-cprofile-01",
+      "outputIdentity": {
+        "sha256": "f551785d003b9a8f0793bedd687829f0a3364ebf47cab80f83d2a1f052ee12bd",
+        "sizeBytes": 31461064
+      },
+      "pair": {
+        "elapsedSeconds": 11.4724282199968,
+        "processCpuSeconds": 11.466553760999998,
+        "processLifetimePeakRssBytes": 106995712,
+        "processSystemSeconds": 2.844881,
+        "processUserSeconds": 17.141902
+      },
+      "quarantineRuleCache": {
+        "after": {
+          "currsize": 1,
+          "hits": 32191,
+          "maxsize": 1,
+          "misses": 1
+        },
+        "before": {
+          "currsize": 0,
+          "hits": 0,
+          "maxsize": 1,
+          "misses": 0
+        }
+      },
+      "resourcePreflight": {
+        "diskFreeBytes": 14013456384,
+        "hostAvailableBytes": 7430836224,
+        "scope": "preflight snapshot only; hidden cgroup limits unknown; no sampled RSS/headroom guarantee"
+      },
+      "startedUtc": "2026-10-12T00:33:33.090608+00:00",
+      "totalElapsedSeconds": 32.376469750997785,
+      "totalProcessCpuSeconds": 29.814410894999998,
+      "writtenTokenCache": {
+        "after": {
+          "currsize": 8192,
+          "hits": 1691524,
+          "maxsize": 8192,
+          "misses": 36692
+        },
+        "before": {
+          "currsize": 0,
+          "hits": 0,
+          "maxsize": 8192,
+          "misses": 0
+        }
+      }
+    }
+  ],
+  "scope": {
+    "diverse": true,
+    "evidenceContextLimit": 12,
+    "morphology": null,
+    "pair": [
+      "everyday",
+      "en",
+      "de"
+    ],
+    "prefixRows": 32768,
+    "producerMaxDeck": 8000
+  },
+  "status": "complete-seven-serial-probes-independently-verified",
+  "unprofiledWallSummary": {
+    "baselineMaxSeconds": 13.53188763000071,
+    "baselineMedianSeconds": 13.494454742998641,
+    "baselineMinSeconds": 13.297267137997551,
+    "candidateMaxSeconds": 4.888500507000572,
+    "candidateMedianSeconds": 4.658243359001062,
+    "candidateMinSeconds": 4.620789177999541,
+    "observedRatioOfMedians": 2.8968977580193367
+  }
+}

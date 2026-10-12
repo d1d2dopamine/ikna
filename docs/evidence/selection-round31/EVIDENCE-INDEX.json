@@ -1,0 +1,108 @@
+{
+  "status": "complete-dense-pair-prefix-diagnostic-delivery",
+  "publicationSafe": false,
+  "copiedOriginalToolingUnmodified": true,
+  "historicalPreRunDocuments": [
+    "tooling/README.md",
+    "tooling/REVIEW.md",
+    "tooling/TOOLING-MANIFEST.json"
+  ],
+  "currentExecutionStatusAuthority": "../../ROUND-0.12-31.md and baseline-01/PROBE.json plus cprofile-01/PROBE.json",
+  "files": {
+    "tooling/dense_pair_probe.py": {
+      "sourceRelativeToOriginalTooling": "dense_pair_probe.py",
+      "sha256": "3dfe1efe4bce32ff4f791a6c41b3dff7fb89ab7bc7d67083b405196cdb02e0fa",
+      "sizeBytes": 30307,
+      "byteIdenticalToOriginal": true
+    },
+    "tooling/test_dense_pair_probe.py": {
+      "sourceRelativeToOriginalTooling": "test_dense_pair_probe.py",
+      "sha256": "50d1004f86337d7ead642d3de57834fb70cea9bfc083743ce74713d5795e3dce",
+      "sizeBytes": 17918,
+      "byteIdenticalToOriginal": true
+    },
+    "tooling/README.md": {
+      "sourceRelativeToOriginalTooling": "README.md",
+      "sha256": "68d43495e8136fda9dea36e880ce384137d1f08d7a019ac3be4ad3d9c98e5e0a",
+      "sizeBytes": 8874,
+      "byteIdenticalToOriginal": true
+    },
+    "tooling/REVIEW.md": {
+      "sourceRelativeToOriginalTooling": "REVIEW.md",
+      "sha256": "06c203b2bf4b0a8b667d6a177242a68cb146abdee0ee7e56aefd8c4e219d14b0",
+      "sizeBytes": 1510,
+      "byteIdenticalToOriginal": true
+    },
+    "tooling/TOOLING-MANIFEST.json": {
+      "sourceRelativeToOriginalTooling": "TOOLING-MANIFEST.json",
+      "sha256": "795ea42b2ef955e6c73c7d089e1a21545e488beb0104c95cf5e1c2615ae1403c",
+      "sizeBytes": 801,
+      "byteIdenticalToOriginal": true
+    },
+    "tooling/TESTS.log": {
+      "sourceRelativeToOriginalTooling": "TESTS.log",
+      "sha256": "9e1800ce64cc46f5fa376a6c8ce546b3925368e657e118bb6d63e74c1516ee00",
+      "sizeBytes": 2787,
+      "byteIdenticalToOriginal": true
+    },
+    "baseline-01/PROBE.json": {
+      "sourceRelativeToOriginalTooling": "baseline-01/PROBE.json",
+      "sha256": "1a803af7d24c915d266af917c01d45efbcf8d2d2d16843244cbf3d98f04bc7ef",
+      "sizeBytes": 21501,
+      "byteIdenticalToOriginal": true
+    },
+    "cprofile-01/PROBE.json": {
+      "sourceRelativeToOriginalTooling": "cprofile-01/PROBE.json",
+      "sha256": "2906207a1a2834246c160739ee68d70a434ebe16c9d2abfd83ef302e58a4c39b",
+      "sizeBytes": 41126,
+      "byteIdenticalToOriginal": true
+    },
+    "cprofile-01/PROFILE-TOP.txt": {
+      "sourceRelativeToOriginalTooling": "cprofile-01/PROFILE-TOP.txt",
+      "sha256": "3f7fb71c449beccfb975284f940f768cff95ef9a399b23a5e21698b08c16f5c1",
+      "sizeBytes": 15320,
+      "byteIdenticalToOriginal": true
+    },
+    "cprofile-01/PAIR.pstats": {
+      "sourceRelativeToOriginalTooling": "cprofile-01/PAIR.pstats",
+      "sha256": "57220903562c5252271e84f97aca31b24e3295c0815185359f161d61ea55cbaa",
+      "sizeBytes": 18156,
+      "byteIdenticalToOriginal": true
+    },
+    "BASELINE-RUN.log": {
+      "sourceRelativeToOriginalTooling": "BASELINE-RUN.log",
+      "sha256": "bdd07b469b969d5904c3687b9f7d5a5e9323869b655cc2a151e1dbd9dccf9d21",
+      "sizeBytes": 193,
+      "byteIdenticalToOriginal": true
+    },
+    "CPROFILE-RUN.log": {
+      "sourceRelativeToOriginalTooling": "CPROFILE-RUN.log",
+      "sha256": "fd395ca1311e3917869e16fce4316c99e8cc20b3ba24297e999a72d3f0820b88",
+      "sizeBytes": 193,
+      "byteIdenticalToOriginal": true
+    },
+    "SHARED-HOST.json": {
+      "sha256": "ddcec2d7d6931b3d9f3ac4fe18c761d6797fe866ca002c406102cdc63149da7b",
+      "sizeBytes": 2363,
+      "kind": "new compact review evidence"
+    },
+    "VERIFICATION.json": {
+      "sha256": "6e0705f645f3571cfacadddcd91e0bd7909f62f8d36c8a86587775a9f8061fed",
+      "sizeBytes": 800,
+      "kind": "new compact review evidence"
+    }
+  },
+  "excludedLargePayloads": {
+    "baseline-01/EVIDENCE.json": {
+      "sha256": "f551785d003b9a8f0793bedd687829f0a3364ebf47cab80f83d2a1f052ee12bd",
+      "sizeBytes": 31461064,
+      "reason": "Large complete returned-evidence payload retained outside source delivery."
+    },
+    "cprofile-01/EVIDENCE.json": {
+      "sha256": "f551785d003b9a8f0793bedd687829f0a3364ebf47cab80f83d2a1f052ee12bd",
+      "sizeBytes": 31461064,
+      "reason": "Large complete returned-evidence payload retained outside source delivery."
+    }
+  },
+  "largeParentInputsIncluded": false
+}

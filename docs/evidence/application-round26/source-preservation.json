@@ -1,0 +1,7 @@
+{
+  "scope": "Every pre-existing app/shared/desktop file plus root build.gradle.kts/settings.gradle.kts/gradle.properties",
+  "files_checked": 363,
+  "changed_files": [],
+  "git_metadata_available": false,
+  "excluded_new_outputs": "Gradle/KSP/classes/reports/package image and ignored pinned starter-deck prerequisite"
+}

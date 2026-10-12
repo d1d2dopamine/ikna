@@ -1,0 +1,29 @@
+classifier: en-de.classifier
+classifier_type: extra_trees
+source_lang: en
+target_lang: de
+source_dictionary: dict-en.gz
+target_dictionary: dict-de.gz
+source_word_freqs: wordfreq-en.gz
+target_word_freqs: wordfreq-de.gz
+normalize_by_length: True
+treat_oovs: False
+qmax_limit: 40
+disable_features_quest: True
+good_test_histogram: [63, 73, 45, 99, 182, 375, 695, 1230, 1721, 517]
+wrong_test_histogram: [2524, 468, 366, 317, 316, 318, 309, 245, 122, 13]
+precision_histogram: [0.5001000, 0.6661719, 0.7080058, 0.7460907, 0.7810690, 0.8183950, 0.8579967, 0.9012474, 0.9431100, 0.9754717]
+recall_histogram: [1.0000000, 0.9874000, 0.9728000, 0.9638000, 0.9440000, 0.9076000, 0.8326000, 0.6936000, 0.4476000, 0.1034000]
+accuracy_histogram: [0.5001000, 0.7462492, 0.7857572, 0.8178636, 0.8396679, 0.8530706, 0.8473695, 0.8087618, 0.7102420, 0.5503101]
+length_ratio: 0.8337820
+features_version: 4
+source_lm: model.lm.en
+target_lm: model.lm.de
+lm_type: CHARACTER
+clean_mean_perp: -0.9462965736404666
+clean_stddev_perp: 0.11712376635555748
+noisy_mean_perp: -4.022206820960055
+noisy_stddev_perp: 0.10501757077830065
+disable_lang_ident: False
+porn_removal_file: porn-model.en
+porn_removal_side: sl

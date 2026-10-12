@@ -9,6 +9,7 @@ import ctypes.util
 from dataclasses import dataclass
 from functools import lru_cache
 import re
+import os
 import sys
 
 CJK = frozenset({'zh', 'ja', 'ko'})
@@ -39,7 +40,13 @@ class IcuUnavailable(RuntimeError):
 
 class _IcuWords:
     def __init__(self):
-        library = ctypes.util.find_library('icui18n')
+        # A process-local, explicit runtime pin supports historical offline replay.
+        # Never fall back to the system ICU when the requested pin is invalid.
+        override = os.environ.get('IKNA_ICU_LIBRARY')
+        self.requested_pin = (override or None, os.environ.get('IKNA_ICU_VERSION') or None)
+        if override and (not os.path.isabs(override) or not os.path.isfile(override)):
+            raise IcuUnavailable('IKNA_ICU_LIBRARY must name an existing absolute library path')
+        library = override or ctypes.util.find_library('icui18n')
         if not library:
             raise IcuUnavailable('CJK segmentation needs ICU. On Ubuntu: sudo apt-get install libicu-dev')
         try:
@@ -57,6 +64,9 @@ class _IcuWords:
             version = (ctypes.c_uint8 * 4)()
             self._function('u_getVersion', None, [ctypes.POINTER(ctypes.c_uint8)])(version)
             self.version = '.'.join(str(n) for n in list(version)[:2])
+            expected = os.environ.get('IKNA_ICU_VERSION')
+            if expected and self.version != expected:
+                raise IcuUnavailable(f'ICU version {self.version} differs from required {expected}')
         except (OSError, AttributeError, StopIteration) as error:
             raise IcuUnavailable('Could not load ICU word-break API from ' + library) from error
 
@@ -107,8 +117,11 @@ _ENGINE = None
 
 def _engine():
     global _ENGINE
+    requested = (os.environ.get('IKNA_ICU_LIBRARY') or None, os.environ.get('IKNA_ICU_VERSION') or None)
     if _ENGINE is None:
         _ENGINE = _IcuWords()
+    elif _ENGINE.requested_pin != requested:
+        raise IcuUnavailable('ICU configuration changed after initialization; start a fresh process')
     return _ENGINE
 
 @lru_cache(maxsize=8192)
@@ -117,6 +130,8 @@ def _cjk_spans(text, lang):
 
 def word_spans(text, lang=None):
     if lang in CJK:
+        # Check before the span cache so cached text cannot hide a changed pin.
+        _engine()
         return _cjk_spans(text, lang)
     return tuple(WordSpan(m.group(0), m.start(), m.end()) for m in WORD.finditer(text))
 

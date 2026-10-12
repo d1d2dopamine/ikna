@@ -1,0 +1,23 @@
+{
+  "experimentVersion": 1,
+  "status": "complete-bounded-cache-experiment",
+  "publicationSafe": false,
+  "productionCacheEnabled": false,
+  "mode": "baseline",
+  "profileFile": "PROFILE.json",
+  "cacheEvents": [],
+  "outputIdentities": [
+    {
+      "reportSha256": "bb83e6121d4cbb046a33cf68227b2b6fa2060258d95022dbfa0cfd0d06fbb84d",
+      "previewSha256": "50b5b745c0dccb6090304f8754ae96ded77b5dbe2ae74dc5b0e9826f361ef890",
+      "selectedSha256": "2efae253c630285c7b7de5f9de5e076117c39981775cea181e6a7ef51bdc16f6",
+      "selectedLogicalSha256": "7ab05cd6a7a03221cf818176c9671b99f33646fe7f98a173fa716bbb1c7d3d2e"
+    }
+  ],
+  "elapsedSeconds": [
+    20.293433810998977
+  ],
+  "mandatoryChecks": "unchanged complete supplied-input validation, staging and ranks; downstream evidence/allocation/output recomputed",
+  "timingScope": "selection call includes cache key/integrity/import/write costs; profile provenance/final diagnostics separately outside call",
+  "limits": "bounded same-input experiment; no full-corpus speedup, new quality claim or production cache admission"
+}

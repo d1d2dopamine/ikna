@@ -175,6 +175,9 @@ python3 tools/catalog/test_supply_census_shards.py
 python3 tools/catalog/test_wikimatrix_stream_status.py
 python3 tools/catalog/test_selection_audit.py
 python3 tools/catalog/test_selection_quality.py
+python3 tools/catalog/test_selection_profile.py
+python3 tools/catalog/test_selection_metrics.py
+python3 tools/catalog/test_selection_diagnostic_pool.py
 ```
 
 For a saved Everyday preview audit, use the bounded offline command in

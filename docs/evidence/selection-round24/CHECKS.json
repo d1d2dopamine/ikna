@@ -1,0 +1,33 @@
+{
+  "dateUtc": "2026-10-11",
+  "dateAsiaYekaterinburg": "2026-10-12",
+  "sourceArchiveSha256": "0f02c2acfbab21d1e90c3d88f1dda0db61ca789f9507b05a483ea7f2a20884e3",
+  "zipCrcMembers": 5,
+  "fullInputValidated": 11099490,
+  "samplerRepeated": true,
+  "repeatedSampleSourcePoolReportBytesEqual": true,
+  "uninstrumentedOutputEqualsProfiled": true,
+  "tests": {
+    "test_selection_diagnostic_pool": 8,
+    "test_selection_profile": 10,
+    "test_everyday_selection": 17,
+    "test_selection_quality": 13,
+    "test_selection_audit": 7,
+    "selectionPolicyContracts": "passed",
+    "deckBudgetContracts": "passed",
+    "check_text": "passed",
+    "check_localization": "passed"
+  },
+  "japaneseEngineRequiredSuite": "13 passed; no skips",
+  "fullProductionSelectionRun": false,
+  "publicationSafe": false,
+  "appChanged": false,
+  "historicalIcuReproduced": false,
+  "knownLimits": [
+    "ICU76.1 vs historical74.2",
+    "sample ranks rebuilt",
+    "not a defect-labelled control set",
+    "stage memory and isolated allocation unmeasured",
+    "cache conditions uncontrolled"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "status": "complete-normal-source-postintegration-smoke",
+  "scope": "105988-row saved-input diagnostic; not a second full control or cap12000 full-corpus acceptance",
+  "baselineProfileSha256": "0e9452883820f77caaa25056c07575972be87a355b30208bc80fa51e511723f9",
+  "currentProfileSha256": "49c6289277d4097b747954a92555acda92fa5861f55c6280e9e11667287b241e",
+  "sameExactInput": true,
+  "defaultMaxDeck": 12000,
+  "stageCountsEqual": true,
+  "summaryEqual": true,
+  "previewIdentityEqual": true,
+  "fullSelectedCrcRead": true,
+  "selectedSha256": "2efae253c630285c7b7de5f9de5e076117c39981775cea181e6a7ef51bdc16f6",
+  "selectedLogicalSha256": "7ab05cd6a7a03221cf818176c9671b99f33646fe7f98a173fa716bbb1c7d3d2e",
+  "selectedLogicalSizeBytes": 128746924,
+  "serializedMemberships": 121673,
+  "elapsedSeconds": 21.281193268994684,
+  "guardSampledPeakRssBytes": 313241600,
+  "initialAttempt": {
+    "status": "parser-rejected-before-selection",
+    "reason": "Invocation omitted required --input-scope",
+    "exitCode": 2,
+    "sourceChangedToRetry": false,
+    "failureEvidenceRetained": true
+  },
+  "normalPolicySha256": "72783a30ada3995c9cc4e32f96a4fc5ff53940756ceb5895c9530ecd9af92edc"
+}

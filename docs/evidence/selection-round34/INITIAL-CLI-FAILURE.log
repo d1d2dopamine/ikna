@@ -1,0 +1,11 @@
+usage: selection_profile_guard.py [-h] --pool POOL --pool-report POOL_REPORT
+                                  [--registry REGISTRY] --output-dir
+                                  OUTPUT_DIR --input-scope
+                                  {fixture,bounded-saved-input,full-saved-input}
+                                  [--measurement-mode {cprofile,stages}]
+                                  [--runs RUNS]
+                                  [--max-input-bytes MAX_INPUT_BYTES]
+                                  [--quality-policy {legacy-v1,boundary-diversity-v2}]
+                                  [--max-deck MAX_DECK] [--min-deck MIN_DECK]
+                                  [--thin-deck THIN_DECK]
+selection_profile_guard.py: error: the following arguments are required: --input-scope

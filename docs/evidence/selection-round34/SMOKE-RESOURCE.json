@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "status": "child-exited-zero",
+  "publicationSafe": false,
+  "resumable": false,
+  "childPid": 6,
+  "exitCode": 0,
+  "sampleCount": 22,
+  "sampledPeakRssBytes": 313241600,
+  "minimumAvailableBytes": 7304364032,
+  "minimumDiskFreeBytes": 3963936768,
+  "limits": {
+    "max_rss_bytes": 805306368,
+    "address_space_bytes": 2147483648,
+    "min_available_bytes": 2147483648,
+    "min_disk_free_bytes": 3221225472,
+    "poll_seconds": 1.0
+  },
+  "profileArgs": [
+    "--pool",
+    "/workspace/scratch/8105054a3211/ikna-work/docs/evidence/selection-round25/diagnostic-pool-1024.jsonl.gz",
+    "--pool-report",
+    "/workspace/scratch/8105054a3211/ikna-work/docs/evidence/selection-round25/EVERYDAY-POOL-1024.json",
+    "--output-dir",
+    "/workspace/scratch/8105054a3211/ikna-results/round34-integration/normal-smoke-02",
+    "--input-scope",
+    "bounded-saved-input",
+    "--measurement-mode",
+    "stages",
+    "--runs",
+    "1"
+  ],
+  "limitations": [
+    "sampled thresholds can overshoot between polls",
+    "RLIMIT_AS limits virtual address space, not RSS or total host use",
+    "unavailable cgroup visibility leaves hidden memory limits unknown",
+    "partial SQLite/output is not resumable; successful child exit is diagnostic only",
+    "supervisor SIGKILL leaves last monitoring snapshot incomplete; kernel parent-death signal terminates child, adoptive parent must reap it"
+  ],
+  "temporaryDirectory": "/workspace/scratch/8105054a3211/ikna-results/round34-integration/smoke-guard-02/tmp",
+  "temporaryDirectoryContract": "child TMPDIR/TMP/TEMP and SQLITE_TMPDIR pinned to monitored filesystem",
+  "preflight": {
+    "rssBytes": 11218944,
+    "virtualBytes": 38998016,
+    "hostAvailableBytes": 7499362304,
+    "availableBytes": 7499362304,
+    "cgroupVisibility": "unavailable",
+    "cgroupHeadroomBytes": null,
+    "diskFreeBytes": 4103184384,
+    "monotonicSeconds": 36263.166065583
+  },
+  "latestSample": {
+    "rssBytes": 313241600,
+    "virtualBytes": 512430080,
+    "hostAvailableBytes": 7340052480,
+    "availableBytes": 7340052480,
+    "cgroupVisibility": "unavailable",
+    "cgroupHeadroomBytes": null,
+    "diskFreeBytes": 3963936768,
+    "monotonicSeconds": 36284.18313613
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "source_sha256": "3952dc904997dda31c03421243862cb8a093f9a712fd90dc97b9709b4bb387b3",
+  "bytes": 2341948,
+  "annotation_rows": 8435,
+  "pair_groups": 7406,
+  "source_segments": 529,
+  "documents": [
+    "talk.1",
+    "talk.3",
+    "talk.4",
+    "talk.5",
+    "talk.6"
+  ],
+  "systems": [
+    "Facebook-AI",
+    "HuaweiTSC",
+    "Nemo",
+    "Online-W",
+    "UEdin",
+    "VolcTrans-AT",
+    "VolcTrans-GLAT",
+    "eTranslation",
+    "metricsystem1",
+    "metricsystem2",
+    "metricsystem3",
+    "metricsystem4",
+    "metricsystem5",
+    "ref"
+  ],
+  "severities": {
+    "Minor": 2164,
+    "Major": 1867,
+    "No-error": 4404
+  },
+  "categories": {
+    "Terminology/Inappropriate for context": 454,
+    "Fluency/Register": 41,
+    "Accuracy/Mistranslation": 1158,
+    "Style/Awkward": 1491,
+    "No-error": 4404,
+    "Fluency/Inconsistency": 107,
+    "Fluency/Grammar": 270,
+    "Fluency/Punctuation": 244,
+    "Fluency/Spelling": 124,
+    "Other": 38,
+    "Accuracy/Untranslated text": 31,
+    "Accuracy/Addition": 16,
+    "Terminology/Inconsistent use of terminology": 41,
+    "Accuracy/Omission": 14,
+    "Fluency/Display": 2
+  },
+  "preliminary_group_labels": {
+    "other_or_ambiguous": 2134,
+    "all_explicit_no_error": 4404,
+    "major_accuracy_or_nontranslation": 868
+  },
+  "rater_count_per_group": {
+    "1": 7406
+  }
+}

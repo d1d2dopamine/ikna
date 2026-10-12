@@ -1,0 +1,318 @@
+{
+  "schema_version": 1,
+  "audit_scope": "One official classic Bicleaner en-de v1.6 archive; streaming inventory and inert metadata inspection only. No model or corpus payloads are included in this evidence directory.",
+  "observed_at_utc": "2026-10-11T23:04:03.968274+00:00",
+  "publisher_asset": {
+    "id": 88211159,
+    "name": "en-de.tar.gz",
+    "url": "https://api.github.com/repos/bitextor/bicleaner-data/releases/assets/88211159",
+    "content_type": "application/gzip",
+    "state": "uploaded",
+    "size": 523179851,
+    "digest": null,
+    "created_at": "2022-12-14T18:21:51Z",
+    "updated_at": "2022-12-14T18:26:18Z",
+    "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-de.tar.gz"
+  },
+  "publisher_asset_observation": {
+    "observed_at_utc": "2026-10-11T23:03:09.027805+00:00",
+    "url": "https://api.github.com/repos/bitextor/bicleaner-data/releases/assets/88211159",
+    "status": 200,
+    "bytes": 1383,
+    "sha256": "5985fe0ecef4d88ed72ee74cce3aaa6878fdf4eacc64877664ed4a7dd05087a1",
+    "headers": {
+      "Date": "Sun, 11 Oct 2026 23:03:08 GMT",
+      "Last-Modified": "Wed, 14 Dec 2022 18:26:18 GMT",
+      "Content-Type": "application/json; charset=utf-8",
+      "ETag": "W/\"7bbf71309e609b917961b55aaeecc66028c78ca19eb06a045c5d783681e54eb4\"",
+      "Content-Length": "1383"
+    }
+  },
+  "download": {
+    "started_at_utc": "2026-10-11T23:03:09.028017+00:00",
+    "finished_at_utc": "2026-10-11T23:03:34.589724+00:00",
+    "official_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-de.tar.gz",
+    "official_asset_api": "https://api.github.com/repos/bitextor/bicleaner-data/releases/assets/88211159",
+    "asset_id": 88211159,
+    "release": "v1.6",
+    "bytes": 523179851,
+    "sha256": "c932449563ef0108757382d7d2de2dae2bdd97f78cf9dcee3fcf734a80c5b98d",
+    "publisher_digest": null,
+    "download_seconds": 25.562,
+    "resource_limits": {
+      "compressed_bytes": 600000000,
+      "process_address_space_bytes": 268435456,
+      "nice": 10
+    },
+    "max_rss_kib": 18128,
+    "response": {
+      "status": 200,
+      "final_url_origin_and_path": "https://release-assets.githubusercontent.com/github-production-release-asset/236975479/9ca9ddf9-b8d3-4981-aa07-47a07114ea27",
+      "signed_redirect_query_omitted": true,
+      "headers": {
+        "Content-Length": "523179851",
+        "Last-Modified": "Wed, 14 Dec 2022 18:26:28 GMT",
+        "ETag": "\"0x8DADE00B78E6683\"",
+        "Date": "Sun, 11 Oct 2026 23:03:17 GMT",
+        "Content-Disposition": "attachment; filename=en-de.tar.gz",
+        "Content-Type": "application/octet-stream"
+      }
+    }
+  },
+  "inspection": {
+    "started_at_utc": "2026-10-11T23:04:01.819387+00:00",
+    "finished_at_utc": "2026-10-11T23:04:03.968274+00:00",
+    "archive_bytes": 523179851,
+    "archive_sha256": "c932449563ef0108757382d7d2de2dae2bdd97f78cf9dcee3fcf734a80c5b98d",
+    "archive_sha256_reverified": true,
+    "member_count": 15,
+    "regular_file_count": 14,
+    "declared_regular_file_bytes": 646939311,
+    "decompressed_gzip_bytes": 646952960,
+    "metadata_file_count": 1,
+    "metadata_bytes": 1182,
+    "symlink_or_hardlink_count": 0,
+    "path_or_structure_issues": [],
+    "gzip_checksum_verified": true,
+    "limits": {
+      "decompressed_bytes": 4294967296,
+      "metadata_per_file_bytes": 2097152,
+      "all_metadata_bytes": 8388608,
+      "member_count": 10000,
+      "address_space_bytes": 268435456,
+      "cpu_seconds_soft": 300,
+      "nice": 15
+    },
+    "elapsed_seconds": 2.149,
+    "max_rss_kib": 12812,
+    "safety_statement": "No extraction of resource payloads, model loading, deserialization, execution, dependency installation or network access in inspection. Archive pathnames never used as destination paths; links never followed. Per-resource payload hashes intentionally not computed."
+  },
+  "members": [
+    {
+      "index": 0,
+      "name": "en-de",
+      "type": "5",
+      "kind": "directory",
+      "size": 0,
+      "mode_octal": "0o775",
+      "mtime": 1651854724,
+      "linkname": "",
+      "pax_headers": {},
+      "path_issues": [],
+      "payload_read": false
+    },
+    {
+      "index": 1,
+      "name": "en-de/model.lm.de",
+      "type": "0",
+      "kind": "regular",
+      "size": 62336166,
+      "mode_octal": "0o664",
+      "mtime": 1670933692,
+      "linkname": "",
+      "pax_headers": {},
+      "path_issues": [],
+      "payload_read": false
+    },
+    {
+      "index": 2,
+      "name": "en-de/model.lm.en",
+      "type": "0",
+      "kind": "regular",
+      "size": 58232663,
+      "mode_octal": "0o664",
+      "mtime": 1670933692,
+      "linkname": "",
+      "pax_headers": {},
+      "path_issues": [],
+      "payload_read": false
+    },
+    {
+      "index": 3,
+      "name": "en-de/porn-model.en",
+      "type": "0",
+      "kind": "regular",
+      "size": 1213624,
+      "mode_octal": "0o664",
+      "mtime": 1670933629,
+      "linkname": "",
+      "pax_headers": {},
+      "path_issues": [],
+      "payload_read": false
+    },
+    {
+      "index": 4,
+      "name": "en-de/en-de.yaml",
+      "type": "0",
+      "kind": "regular",
+      "size": 1182,
+      "mode_octal": "0o664",
+      "mtime": 1670946645,
+      "linkname": "",
+      "pax_headers": {},
+      "path_issues": [],
+      "payload_read": true,
+      "metadata_candidate": "yaml",
+      "metadata_sha256": "7e8e201e4ddcb362cd0c377396f3574571895694d51716ecd26ee9f400e65730"
+    },
+    {
+      "index": 5,
+      "name": "en-de/train.en-de",
+      "type": "0",
+      "kind": "regular",
+      "size": 30758021,
+      "mode_octal": "0o664",
+      "mtime": 1651854649,
+      "linkname": "",
+      "pax_headers": {},
+      "path_issues": [],
+      "payload_read": false
+    },
+    {
+      "index": 6,
+      "name": "en-de/porn-removal.en.ftz",
+      "type": "0",
+      "kind": "regular",
+      "size": 1213624,
+      "mode_octal": "0o664",
+      "mtime": 1651854649,
+      "linkname": "",
+      "pax_headers": {},
+      "path_issues": [],
+      "payload_read": false
+    },
+    {
+      "index": 7,
+      "name": "en-de/dict-de.gz",
+      "type": "0",
+      "kind": "regular",
+      "size": 46150807,
+      "mode_octal": "0o664",
+      "mtime": 1651854649,
+      "linkname": "",
+      "pax_headers": {},
+      "path_issues": [],
+      "payload_read": false
+    },
+    {
+      "index": 8,
+      "name": "en-de/wordfreq-en.gz",
+      "type": "0",
+      "kind": "regular",
+      "size": 1566172,
+      "mode_octal": "0o664",
+      "mtime": 1651854649,
+      "linkname": "",
+      "pax_headers": {},
+      "path_issues": [],
+      "payload_read": false
+    },
+    {
+      "index": 9,
+      "name": "en-de/lm.de",
+      "type": "0",
+      "kind": "regular",
+      "size": 62357443,
+      "mode_octal": "0o664",
+      "mtime": 1651854649,
+      "linkname": "",
+      "pax_headers": {},
+      "path_issues": [],
+      "payload_read": false
+    },
+    {
+      "index": 10,
+      "name": "en-de/wordfreq-de.gz",
+      "type": "0",
+      "kind": "regular",
+      "size": 3666068,
+      "mode_octal": "0o664",
+      "mtime": 1651854649,
+      "linkname": "",
+      "pax_headers": {},
+      "path_issues": [],
+      "payload_read": false
+    },
+    {
+      "index": 11,
+      "name": "en-de/en-de.classifier",
+      "type": "0",
+      "kind": "regular",
+      "size": 274819224,
+      "mode_octal": "0o664",
+      "mtime": 1670933946,
+      "linkname": "",
+      "pax_headers": {},
+      "path_issues": [],
+      "payload_read": false
+    },
+    {
+      "index": 12,
+      "name": "en-de/lm.en",
+      "type": "0",
+      "kind": "regular",
+      "size": 58247369,
+      "mode_octal": "0o664",
+      "mtime": 1651854649,
+      "linkname": "",
+      "pax_headers": {},
+      "path_issues": [],
+      "payload_read": false
+    },
+    {
+      "index": 13,
+      "name": "en-de/porn-removal.txt.en",
+      "type": "0",
+      "kind": "regular",
+      "size": 18925337,
+      "mode_octal": "0o664",
+      "mtime": 1651854649,
+      "linkname": "",
+      "pax_headers": {},
+      "path_issues": [],
+      "payload_read": false
+    },
+    {
+      "index": 14,
+      "name": "en-de/dict-en.gz",
+      "type": "0",
+      "kind": "regular",
+      "size": 27451611,
+      "mode_octal": "0o664",
+      "mtime": 1651854649,
+      "linkname": "",
+      "pax_headers": {},
+      "path_issues": [],
+      "payload_read": false
+    }
+  ],
+  "inert_metadata": {
+    "archive_name": "en-de/en-de.yaml",
+    "evidence_file": "en-de.metadata.yaml",
+    "bytes": 1182,
+    "sha256": "7e8e201e4ddcb362cd0c377396f3574571895694d51716ecd26ee9f400e65730",
+    "handling": "Copied byte-for-byte as inert UTF-8 text; no object-constructing YAML parser or model loader used."
+  },
+  "concurrency_note": {
+    "context": "Download and metadata inspection ran alongside the full saved-input ikna profile; the full profile retained priority.",
+    "measurement": "Reported elapsed time and process-lifetime ru_maxrss belong to the separate audit processes only. Download and inspection were sequential, low-priority tasks, not two concurrent heavy jobs.",
+    "interpretation": "No isolated audit benchmark or zero-slowdown claim for the full profile; classifier startup and inference resources remain unmeasured."
+  },
+  "audit_procedure": {
+    "archive_hash": "SHA-256 over the received compressed bytes, independently reread and verified before inspection.",
+    "inventory": "Sequential gzip/tar streaming, bounded bytes/member count, safe member-path and link inspection; no extraction to archive-controlled paths.",
+    "metadata": "Only safe regular YAML/notice/manifest candidates up to 2 MiB each and 8 MiB total; observed exactly one 1,182-byte YAML.",
+    "payloads": "Model, dictionary, frequency, language-model and text-suggestive payloads were not interpreted or extracted. Per-resource payload hashes are not claimed.",
+    "gzip_integrity": "Decompression consumed to end-of-stream, including integrity verification.",
+    "original_audit_script_sha256": {
+      "audit_archive.py": "91c622e11dcd1fd2adf29612cf67266344f4d1c78bf8767a03125684a02a2b80",
+      "inspect_metadata.py": "b19b6894484df8c4190480d6d90aaffd3dd24095747a2fc018ac33120873fe87"
+    }
+  },
+  "limitations": [
+    "Local SHA-256 pins observed bytes; publisher digest is null and no independent publisher-signed checksum is claimed.",
+    "No standalone notice/license/source inventory is present; embedded notices in unread payloads remain unexamined.",
+    "Nested dictionary/frequency gzip payload sizes are not expanded plaintext or runtime RAM.",
+    "No installation, execution, scoring, publication, resource redistribution or source admission was performed."
+  ]
+}

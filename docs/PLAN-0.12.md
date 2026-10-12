@@ -661,3 +661,157 @@ snapshot and distinguishes output-preserving optimization from a changed selecti
 policy. Report quality gains, good-example losses, coverage, runtime/memory and
 repeatability before deciding on integration. Final assembly/publication and
 existing global content, licence, byte/reader and release gates remain deferred.
+
+## Round 23 — bounded diagnostic tooling; real profile still open
+
+2026-10-11. [ROUND-0.12-23.md](ROUND-0.12-23.md) adds an offline cProfile driver for
+the unchanged admitted-selection path, with repeat-output identity checks and
+fail-closed input/output handling. The retained two-row fixture evidence verifies
+the instrumentation only. Overlapping call times and process-lifetime RSS do not
+close isolated stage timing/peak-memory requirements. No optimization or classifier
+integration is justified by these fixtures.
+
+The exact saved admitted pool remains required for representative bounded real-input
+profiling; its existing Actions artifact is unexpired but download requires GitHub
+authentication. No new upstream acquisition, full selection, app/UI/policy change,
+assembly or publication occurs. Continue the selection-engine plan's first step
+when input is available; later reuse/classifier decisions remain open.
+
+## Round 24 — full saved-input verification and bounded real profile
+
+2026-10-12, Asia/Yekaterinburg. [ROUND-0.12-24.md](ROUND-0.12-24.md) restores the
+exact round-19 archive and completes unchanged validation of all 11,099,490
+retained candidates. A deterministic per-pair sample retains 14,012 real rows
+across all 110 directions; repeated extraction preserves identical source/pool
+bytes and repeated selection preserves complete output identities. Compact
+non-publishing diagnostic input and evidence are retained for reuse.
+
+The profiler now has real-input timing evidence, not only fixtures. Context
+analysis is its largest measured individual boundary; no production speedup is
+inferred. Stage-local memory, isolated allocation and controlled cold/reuse
+conditions remain open. Current ICU 76.1 differs from historical 74.2, so this is
+not frozen-snapshot replay or acceptance. Japanese pinned-engine checks now pass.
+No cache, classifier, selection rule, app/UI, final assembly or publication change.
+
+## Round 25 — pinned ICU and measured selection stages
+
+2026-10-12, Asia/Yekaterinburg. [ROUND-0.12-25.md](ROUND-0.12-25.md) adds optional
+stage observers with sampled process RSS, isolates the allocation loop and output,
+and pins an isolated official ICU 74.2 runtime without changing system libraries.
+Changed pins after initialization fail closed, including cached CJK spans.
+
+Two diagnostic sizes (14,012 / 105,988 saved-source rows), each measured twice in
+two fresh processes, produce stable complete output. The larger input also matches
+the untouched round-22 selector exactly, apart from expected pipeline fingerprints.
+Context analysis is the largest isolated boundary; proceed to a bounded experimental
+analysis-cache comparison preserving quality counters and all downstream decisions.
+No cache is enabled in production by this checkpoint. OS-cold/full-corpus timing,
+classifier labels/model decision, final assembly and publication remain open.
+
+## Round 26 — application JVM, packaged Linux and DEV startup verified
+
+2026-10-12, Asia/Yekaterinburg. [ROUND-0.12-26-APPLICATION.md](ROUND-0.12-26-APPLICATION.md)
+records 14 shared and 123 desktop JVM tests passing without skips, successful
+Kotlin/Compose/Room compilation and release Linux app-image packaging. The actual
+packaged launcher passes selftest and an 11-process REAL/DEV startup harness,
+covering all six scenarios, Empty reopening, failed-request retention/recovery
+and byte-identical REAL data during DEV use. Application source, visuals, schemas,
+signing identity and versions remain unchanged.
+
+These results close the current desktop compilation/JVM and headless packaged
+startup evidence gaps. They do not establish GUI/native restart handoff, Windows,
+multi-monitor or Android runtime acceptance. Android JVM/APK tasks concretely
+stop at missing SDK; isolated SDK setup requires owner acceptance of its linked
+license agreement. Queue that decision without blocking independent catalogue
+work. No SDK agreement was accepted or marker fabricated.
+
+## Round 27 — bounded analysis reuse
+
+[Round 27](ROUND-0.12-27.md) adds a fail-closed, standalone context-analysis cache
+experiment. Nine same-input runs preserve complete output identity; observed fresh
+warm-cache median is 17.535 s versus 20.416 s baseline, with slower cold population.
+This remains a bounded sample result and an offline prototype, not production
+cache activation or full-input acceptance. A reviewed malformed-DEFLATE exception
+normalization fix and final-code equivalence refresh are recorded separately.
+
+## Round 28 — classifier feasibility decision
+
+[Round 28](ROUND-0.12-28.md) records classic offline-classifier coverage/rights/runtime
+limits and an independently labelled, document-disjoint ID-only MQM evaluation
+manifest. Retain existing rules; no model was acquired/run or accuracy measured.
+The scored comparison is deferred, with concrete pack/runtime/benchmark gates in
+[the feasibility report](CLASSIFIER-FEASIBILITY-0.12.md). Mandatory source checks and
+three distinct content questions are now documented explicitly.
+
+## Round 29 — resource-guarded full-input readiness
+
+[Round 29](ROUND-0.12-29.md) prepares explicit full-saved-input status, durable
+completed-stage evidence and an owned-process memory/disk guard. Signal cleanup
+and SQLite-temp filesystem review findings are fixed; 126 relevant tests pass.
+The intended full replay uses historical cap8000, preserving current default12000.
+Historical/local Python and zlib differences are corrected explicitly; full replay
+has not completed in this readiness checkpoint.
+
+## Round 30 — full saved-input control verified
+
+[Round 30](ROUND-0.12-30.md) completes all 11,099,490 candidates and 110 directions
+under historical cap 8000. Independent whole-output checks reproduce both logical
+and compressed historical selection hashes, all counts and deck decisions. The
+full stage profile identifies pair evidence as the dominant cost; bounded
+analysis-cache savings must not be extrapolated to the complete workflow.
+No cache is enabled. A bounded exact pair-function profile is the next diagnostic.
+The current cap-12000 scenario, OS-cold measurement, semantic classifier scoring,
+final assembly and publication remain outside this completed control.
+
+The one-pack [read-only archive audit](CLASSIFIER-ARCHIVE-AUDIT-0.12.md) is complete;
+pack contents do not resolve underlying source provenance or empirical quality.
+Model execution and classifier adoption remain deferred.
+
+## Round 31 — exact dense-prefix cost localized
+
+[Round 31](ROUND-0.12-31.md) measures the unchanged pair-evidence function on an
+exact 32,768-candidate en→de prefix from finalized full staging. Fresh baseline
+and cProfile return byte-identical complete evidence. Repeated overlap maxima
+and Counter intersections dominate evidence pruning in this diagnostic.
+Profiler overhead is not an engine gain; one prefix does not represent all pairs.
+The next scoped prototype may reuse exact call-local overlap maxima while
+preserving all ranking, source, boundary, duplicate and output decisions.
+Production integration still requires differential and real-output evidence.
+
+## Round 32 — bounded exact overlap reuse verified
+
+[Round 32](ROUND-0.12-32.md) verifies the call-local maximum-reuse prototype with
+3,177 differential invocations, real multilingual/Japanese regressions and seven
+exact-output real-prefix runs. Three fresh original/candidate runs observe median
+13.494 s versus 4.658 s on that prefix. LRU recency changes are disclosed and
+included in measurement. Normal production source remains unchanged.
+An isolated full historical candidate replay is the next acceptance gate and
+started separately as Round 33; prefix gains do not establish full-workflow gains.
+
+## Round 33 — full exact candidate accepted
+
+[Round 33](ROUND-0.12-33.md) completes the isolated overlap-reuse replay over all
+11,099,490 candidates and 110 directions under historical cap 8000. Independent
+whole-output CRC/hash verification proves byte-identical selected material,
+counts, decks and quality counters; only the reviewed policy fingerprint differs.
+Observed elapsed time is 4288.253 s versus 8335.166 s control (48.55% lower), with
+shared-host/cache and one-run uncertainty explicitly retained. No guard stopped.
+This closes the full-output/resource gate for the exact call-local optimization.
+Normal source is unchanged in this checkpoint; integration and durable
+independent-reference regression tests are the next separate stage.
+
+## Round 34 — exact overlap optimization integrated
+
+[Round 34](ROUND-0.12-34.md) integrates only the fully replayed call-local maximum
+reuse function and three test-only files. 143 relevant tests pass; explicit
+Japanese-engine rerun and a 105,988-row normal-CLI smoke preserve all expected
+material identities. No UI, policy semantics, default cap or persistent cache
+changes. Original and isolated full candidate evidence plus rollback checkpoint
+are retained. The observed full-control elapsed reduction is 48.55%, with
+one-run/shared-host/cache limitations.
+
+Performance profiling and this justified exact reuse change are complete within
+the reported scope. Empirical classifier scoring/adoption stays deferred on
+provenance/rights, labels/runtime and coverage grounds; retain current rules.
+Android SDK agreement/setup and real-platform GUI acceptance remain separate
+application gates. No final Catalogue assembly, source expansion or publication.

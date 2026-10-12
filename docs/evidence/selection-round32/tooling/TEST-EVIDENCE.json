@@ -1,0 +1,203 @@
+{
+  "callReductionCases": [
+    {
+      "candidateObjects": 37,
+      "candidateOverlapCalls": 378,
+      "limit": 12,
+      "originalOverlapCalls": 2314,
+      "rejected": 0,
+      "selected": 12,
+      "threshold": 0.85,
+      "writtenCountCache": {
+        "candidate": {
+          "endSize": 7874,
+          "hitsDelta": 756,
+          "maxsize": 8192,
+          "missesDelta": 0
+        },
+        "original": {
+          "endSize": 7874,
+          "hitsDelta": 4591,
+          "maxsize": 8192,
+          "missesDelta": 37
+        }
+      }
+    },
+    {
+      "candidateObjects": 37,
+      "candidateOverlapCalls": 378,
+      "limit": 12,
+      "originalOverlapCalls": 2314,
+      "rejected": 0,
+      "selected": 12,
+      "threshold": 1.1,
+      "writtenCountCache": {
+        "candidate": {
+          "endSize": 7874,
+          "hitsDelta": 756,
+          "maxsize": 8192,
+          "missesDelta": 0
+        },
+        "original": {
+          "endSize": 7874,
+          "hitsDelta": 4628,
+          "maxsize": 8192,
+          "missesDelta": 0
+        }
+      }
+    }
+  ],
+  "candidateSha256": "36efac2461e102d1c0ae66282c5ea46facff6c1dcdd6b8bb376828e6e0525e1e",
+  "comparisonInvocations": 3177,
+  "errors": 0,
+  "failures": 0,
+  "naturalCachePopulation": {
+    "candidate": {
+      "initialCache": {
+        "currsize": 0,
+        "hits": 0,
+        "maxsize": 8192,
+        "misses": 0
+      },
+      "outputSha256": "4c71217cd3dec4471407d8357240225ba8e76eb2cd5b98977ce8a0aadb08e61d",
+      "phases": [
+        {
+          "cache": {
+            "currsize": 37,
+            "hits": 719,
+            "maxsize": 8192,
+            "misses": 37
+          },
+          "phase": 0
+        },
+        {
+          "cache": {
+            "currsize": 8192,
+            "hits": 9608,
+            "maxsize": 8192,
+            "misses": 8244
+          },
+          "phase": 1
+        },
+        {
+          "cache": {
+            "currsize": 8192,
+            "hits": 18627,
+            "maxsize": 8192,
+            "misses": 16581
+          },
+          "phase": 2
+        },
+        {
+          "cache": {
+            "currsize": 8192,
+            "hits": 27517,
+            "maxsize": 8192,
+            "misses": 24787
+          },
+          "phase": 3
+        },
+        {
+          "cache": {
+            "currsize": 8192,
+            "hits": 36536,
+            "maxsize": 8192,
+            "misses": 33124
+          },
+          "phase": 4
+        }
+      ],
+      "privateCacheMutations": false
+    },
+    "original": {
+      "initialCache": {
+        "currsize": 0,
+        "hits": 0,
+        "maxsize": 8192,
+        "misses": 0
+      },
+      "outputSha256": "4c71217cd3dec4471407d8357240225ba8e76eb2cd5b98977ce8a0aadb08e61d",
+      "phases": [
+        {
+          "cache": {
+            "currsize": 37,
+            "hits": 4591,
+            "maxsize": 8192,
+            "misses": 37
+          },
+          "phase": 0
+        },
+        {
+          "cache": {
+            "currsize": 8192,
+            "hits": 17363,
+            "maxsize": 8192,
+            "misses": 8233
+          },
+          "phase": 1
+        },
+        {
+          "cache": {
+            "currsize": 8192,
+            "hits": 30254,
+            "maxsize": 8192,
+            "misses": 16570
+          },
+          "phase": 2
+        },
+        {
+          "cache": {
+            "currsize": 8192,
+            "hits": 43027,
+            "maxsize": 8192,
+            "misses": 24765
+          },
+          "phase": 3
+        },
+        {
+          "cache": {
+            "currsize": 8192,
+            "hits": 55918,
+            "maxsize": 8192,
+            "misses": 33102
+          },
+          "phase": 4
+        }
+      ],
+      "privateCacheMutations": false
+    }
+  },
+  "publicationSafe": false,
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "randomSeed": 320012,
+  "realCorpusMeasured": false,
+  "segmentation": {
+    "engine": "ICU word break",
+    "icuVersion": "74.2",
+    "koreanUnit": "eojeol",
+    "languages": [
+      "ja",
+      "ko",
+      "zh"
+    ],
+    "offsets": "UTF-16"
+  },
+  "sourcePolicySha256": "6100810b5bd7eca23b063f90dd0c1e81cb3a7f55ba3aeab76f02be84720fb3ae",
+  "status": "passed",
+  "syntheticPair": {
+    "allocationExact": true,
+    "note": "Generated fixture, not catalogue material or real-prefix evidence.",
+    "returnedEvidenceSha256": "bfd137db92eaef038731081f9bcb75168721ea12a08773086b2c02e1e3be39c3",
+    "rows": 97,
+    "stats": {
+      "candidateRows": 97,
+      "eligibleExactTargets": 2,
+      "eligibleTargetOccurrences": 186,
+      "noUsableTarget": 1,
+      "sentenceLengthRejected": 1,
+      "sourceQuarantinedCandidateRows": 1,
+      "translationLengthRejected": 1
+    }
+  },
+  "testsRun": 15
+}

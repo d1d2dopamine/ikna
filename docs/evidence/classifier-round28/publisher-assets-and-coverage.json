@@ -1,0 +1,936 @@
+{
+  "observed_at_utc": "2026-10-11T21:38:00Z",
+  "bicleaner_release": {
+    "api_url": "https://api.github.com/repos/bitextor/bicleaner-data/releases/latest",
+    "tag": "v1.6",
+    "release_id": 86054634,
+    "published_at": "2022-12-15T07:36:51Z",
+    "body": "Bicleaner language packs.\r\n\r\nTrained with Bicleaner 0.16 https://github.com/bitextor/bicleaner\r\n\r\n(Tokenized with Sacremoses -x)",
+    "assets": [
+      {
+        "name": "en-bg.tar.gz",
+        "id": 88212142,
+        "size": 397053400,
+        "digest": null,
+        "updated_at": "2022-12-14T18:36:13Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-bg.tar.gz"
+      },
+      {
+        "name": "en-ca.tar.gz",
+        "id": 93230656,
+        "size": 273582123,
+        "digest": null,
+        "updated_at": "2023-01-27T09:15:06Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-ca.tar.gz"
+      },
+      {
+        "name": "en-cs.tar.gz",
+        "id": 88211807,
+        "size": 359498838,
+        "digest": null,
+        "updated_at": "2022-12-14T18:32:33Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-cs.tar.gz"
+      },
+      {
+        "name": "en-da.tar.gz",
+        "id": 88211601,
+        "size": 333511920,
+        "digest": null,
+        "updated_at": "2022-12-14T18:29:20Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-da.tar.gz"
+      },
+      {
+        "name": "en-de.tar.gz",
+        "id": 88211159,
+        "size": 523179851,
+        "digest": null,
+        "updated_at": "2022-12-14T18:26:18Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-de.tar.gz"
+      },
+      {
+        "name": "en-el.tar.gz",
+        "id": 88210828,
+        "size": 415029223,
+        "digest": null,
+        "updated_at": "2022-12-14T18:21:51Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-el.tar.gz"
+      },
+      {
+        "name": "en-es.tar.gz",
+        "id": 88210456,
+        "size": 351612333,
+        "digest": null,
+        "updated_at": "2022-12-14T18:17:54Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-es.tar.gz"
+      },
+      {
+        "name": "en-et.tar.gz",
+        "id": 88209847,
+        "size": 434084344,
+        "digest": null,
+        "updated_at": "2022-12-14T18:14:46Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-et.tar.gz"
+      },
+      {
+        "name": "en-fi.tar.gz",
+        "id": 88209171,
+        "size": 503190781,
+        "digest": null,
+        "updated_at": "2022-12-14T18:10:45Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-fi.tar.gz"
+      },
+      {
+        "name": "en-fr.tar.gz",
+        "id": 88208986,
+        "size": 301237052,
+        "digest": null,
+        "updated_at": "2022-12-14T18:06:22Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-fr.tar.gz"
+      },
+      {
+        "name": "en-ga.tar.gz",
+        "id": 88208740,
+        "size": 429467347,
+        "digest": null,
+        "updated_at": "2022-12-14T18:03:29Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-ga.tar.gz"
+      },
+      {
+        "name": "en-hr.tar.gz",
+        "id": 88208321,
+        "size": 396828015,
+        "digest": null,
+        "updated_at": "2022-12-14T17:59:31Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-hr.tar.gz"
+      },
+      {
+        "name": "en-hu.tar.gz",
+        "id": 88208060,
+        "size": 415085287,
+        "digest": null,
+        "updated_at": "2022-12-14T17:56:00Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-hu.tar.gz"
+      },
+      {
+        "name": "en-is.tar.gz",
+        "id": 88207752,
+        "size": 420381350,
+        "digest": null,
+        "updated_at": "2022-12-14T17:52:18Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-is.tar.gz"
+      },
+      {
+        "name": "en-it.tar.gz",
+        "id": 88207537,
+        "size": 282449727,
+        "digest": null,
+        "updated_at": "2022-12-14T17:48:14Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-it.tar.gz"
+      },
+      {
+        "name": "en-lt.tar.gz",
+        "id": 88207173,
+        "size": 433983794,
+        "digest": null,
+        "updated_at": "2022-12-14T17:45:29Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-lt.tar.gz"
+      },
+      {
+        "name": "en-lv.tar.gz",
+        "id": 88206889,
+        "size": 395646027,
+        "digest": null,
+        "updated_at": "2022-12-14T17:41:36Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-lv.tar.gz"
+      },
+      {
+        "name": "en-mt.tar.gz",
+        "id": 88206578,
+        "size": 446888765,
+        "digest": null,
+        "updated_at": "2022-12-14T17:38:12Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-mt.tar.gz"
+      },
+      {
+        "name": "en-nb.tar.gz",
+        "id": 88206231,
+        "size": 477583939,
+        "digest": null,
+        "updated_at": "2022-12-14T17:34:23Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-nb.tar.gz"
+      },
+      {
+        "name": "en-nl.tar.gz",
+        "id": 88205751,
+        "size": 555802202,
+        "digest": null,
+        "updated_at": "2022-12-14T17:30:13Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-nl.tar.gz"
+      },
+      {
+        "name": "en-nn.tar.gz",
+        "id": 88205468,
+        "size": 324817842,
+        "digest": null,
+        "updated_at": "2022-12-14T17:25:14Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-nn.tar.gz"
+      },
+      {
+        "name": "en-pl.tar.gz",
+        "id": 88205209,
+        "size": 380483224,
+        "digest": null,
+        "updated_at": "2022-12-14T17:22:18Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-pl.tar.gz"
+      },
+      {
+        "name": "en-pt.tar.gz",
+        "id": 88204930,
+        "size": 431671623,
+        "digest": null,
+        "updated_at": "2022-12-14T17:18:57Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-pt.tar.gz"
+      },
+      {
+        "name": "en-ro.tar.gz",
+        "id": 88204566,
+        "size": 393528818,
+        "digest": null,
+        "updated_at": "2022-12-14T17:14:59Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-ro.tar.gz"
+      },
+      {
+        "name": "en-ru.tar.gz",
+        "id": 88204151,
+        "size": 508534409,
+        "digest": null,
+        "updated_at": "2022-12-14T17:11:31Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-ru.tar.gz"
+      },
+      {
+        "name": "en-sk.tar.gz",
+        "id": 88203767,
+        "size": 336424929,
+        "digest": null,
+        "updated_at": "2022-12-14T17:06:36Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-sk.tar.gz"
+      },
+      {
+        "name": "en-sl.tar.gz",
+        "id": 88202917,
+        "size": 400519843,
+        "digest": null,
+        "updated_at": "2022-12-14T17:03:33Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-sl.tar.gz"
+      },
+      {
+        "name": "en-sv.tar.gz",
+        "id": 88202624,
+        "size": 401161427,
+        "digest": null,
+        "updated_at": "2022-12-14T17:00:04Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-sv.tar.gz"
+      },
+      {
+        "name": "en-uk.tar.gz",
+        "id": 93230669,
+        "size": 336387092,
+        "digest": null,
+        "updated_at": "2023-01-27T09:15:32Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/en-uk.tar.gz"
+      },
+      {
+        "name": "es-ca.tar.gz",
+        "id": 88202296,
+        "size": 371346200,
+        "digest": null,
+        "updated_at": "2022-12-14T16:56:34Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/es-ca.tar.gz"
+      },
+      {
+        "name": "es-de.tar.gz",
+        "id": 93230711,
+        "size": 663843764,
+        "digest": null,
+        "updated_at": "2023-01-27T09:16:21Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/es-de.tar.gz"
+      },
+      {
+        "name": "es-eu.tar.gz",
+        "id": 88202050,
+        "size": 334726249,
+        "digest": null,
+        "updated_at": "2022-12-14T16:53:02Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/es-eu.tar.gz"
+      },
+      {
+        "name": "es-gl.tar.gz",
+        "id": 88201903,
+        "size": 251312756,
+        "digest": null,
+        "updated_at": "2022-12-14T16:50:04Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/es-gl.tar.gz"
+      },
+      {
+        "name": "paracrawl-fastspell.tar.gz",
+        "id": 88215804,
+        "size": 13298180,
+        "digest": null,
+        "updated_at": "2022-12-14T19:14:29Z",
+        "browser_download_url": "https://github.com/bitextor/bicleaner-data/releases/download/v1.6/paracrawl-fastspell.tar.gz"
+      }
+    ]
+  },
+  "matrix_coverage": [
+    {
+      "source": "de",
+      "target": "en",
+      "downloadable_classic_pack": "en-de"
+    },
+    {
+      "source": "de",
+      "target": "es",
+      "downloadable_classic_pack": "es-de"
+    },
+    {
+      "source": "de",
+      "target": "fr",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "de",
+      "target": "it",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "de",
+      "target": "ja",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "de",
+      "target": "ko",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "de",
+      "target": "pl",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "de",
+      "target": "pt",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "de",
+      "target": "ru",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "de",
+      "target": "zh",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "en",
+      "target": "de",
+      "downloadable_classic_pack": "en-de"
+    },
+    {
+      "source": "en",
+      "target": "es",
+      "downloadable_classic_pack": "en-es"
+    },
+    {
+      "source": "en",
+      "target": "fr",
+      "downloadable_classic_pack": "en-fr"
+    },
+    {
+      "source": "en",
+      "target": "it",
+      "downloadable_classic_pack": "en-it"
+    },
+    {
+      "source": "en",
+      "target": "ja",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "en",
+      "target": "ko",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "en",
+      "target": "pl",
+      "downloadable_classic_pack": "en-pl"
+    },
+    {
+      "source": "en",
+      "target": "pt",
+      "downloadable_classic_pack": "en-pt"
+    },
+    {
+      "source": "en",
+      "target": "ru",
+      "downloadable_classic_pack": "en-ru"
+    },
+    {
+      "source": "en",
+      "target": "zh",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "es",
+      "target": "de",
+      "downloadable_classic_pack": "es-de"
+    },
+    {
+      "source": "es",
+      "target": "en",
+      "downloadable_classic_pack": "en-es"
+    },
+    {
+      "source": "es",
+      "target": "fr",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "es",
+      "target": "it",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "es",
+      "target": "ja",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "es",
+      "target": "ko",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "es",
+      "target": "pl",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "es",
+      "target": "pt",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "es",
+      "target": "ru",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "es",
+      "target": "zh",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "fr",
+      "target": "de",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "fr",
+      "target": "en",
+      "downloadable_classic_pack": "en-fr"
+    },
+    {
+      "source": "fr",
+      "target": "es",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "fr",
+      "target": "it",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "fr",
+      "target": "ja",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "fr",
+      "target": "ko",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "fr",
+      "target": "pl",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "fr",
+      "target": "pt",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "fr",
+      "target": "ru",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "fr",
+      "target": "zh",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "it",
+      "target": "de",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "it",
+      "target": "en",
+      "downloadable_classic_pack": "en-it"
+    },
+    {
+      "source": "it",
+      "target": "es",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "it",
+      "target": "fr",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "it",
+      "target": "ja",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "it",
+      "target": "ko",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "it",
+      "target": "pl",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "it",
+      "target": "pt",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "it",
+      "target": "ru",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "it",
+      "target": "zh",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ja",
+      "target": "de",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ja",
+      "target": "en",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ja",
+      "target": "es",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ja",
+      "target": "fr",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ja",
+      "target": "it",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ja",
+      "target": "ko",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ja",
+      "target": "pl",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ja",
+      "target": "pt",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ja",
+      "target": "ru",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ja",
+      "target": "zh",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ko",
+      "target": "de",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ko",
+      "target": "en",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ko",
+      "target": "es",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ko",
+      "target": "fr",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ko",
+      "target": "it",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ko",
+      "target": "ja",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ko",
+      "target": "pl",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ko",
+      "target": "pt",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ko",
+      "target": "ru",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ko",
+      "target": "zh",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pl",
+      "target": "de",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pl",
+      "target": "en",
+      "downloadable_classic_pack": "en-pl"
+    },
+    {
+      "source": "pl",
+      "target": "es",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pl",
+      "target": "fr",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pl",
+      "target": "it",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pl",
+      "target": "ja",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pl",
+      "target": "ko",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pl",
+      "target": "pt",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pl",
+      "target": "ru",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pl",
+      "target": "zh",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pt",
+      "target": "de",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pt",
+      "target": "en",
+      "downloadable_classic_pack": "en-pt"
+    },
+    {
+      "source": "pt",
+      "target": "es",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pt",
+      "target": "fr",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pt",
+      "target": "it",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pt",
+      "target": "ja",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pt",
+      "target": "ko",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pt",
+      "target": "pl",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pt",
+      "target": "ru",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "pt",
+      "target": "zh",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ru",
+      "target": "de",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ru",
+      "target": "en",
+      "downloadable_classic_pack": "en-ru"
+    },
+    {
+      "source": "ru",
+      "target": "es",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ru",
+      "target": "fr",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ru",
+      "target": "it",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ru",
+      "target": "ja",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ru",
+      "target": "ko",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ru",
+      "target": "pl",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ru",
+      "target": "pt",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "ru",
+      "target": "zh",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "zh",
+      "target": "de",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "zh",
+      "target": "en",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "zh",
+      "target": "es",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "zh",
+      "target": "fr",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "zh",
+      "target": "it",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "zh",
+      "target": "ja",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "zh",
+      "target": "ko",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "zh",
+      "target": "pl",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "zh",
+      "target": "pt",
+      "downloadable_classic_pack": null
+    },
+    {
+      "source": "zh",
+      "target": "ru",
+      "downloadable_classic_pack": null
+    }
+  ],
+  "code_packages": {
+    "opusfilter": {
+      "version": "3.3.1",
+      "license": null,
+      "artifacts": [
+        {
+          "filename": "opusfilter-3.3.1-py3-none-any.whl",
+          "url": "https://files.pythonhosted.org/packages/8f/79/b5501a5d85176f3fa2309b147d87f6fa8220cfbd9a8a78a972e97460d4b7/opusfilter-3.3.1-py3-none-any.whl",
+          "size": 68920,
+          "sha256": "832e0369301f73ec66371f25c6362f0e6a4a490acc3b96617d63d3f63ea4429b"
+        },
+        {
+          "filename": "opusfilter-3.3.1.tar.gz",
+          "url": "https://files.pythonhosted.org/packages/79/85/75873617090e696d33aa2d098ad53191ce95bab5453e9d85fdb7522b0b2b/opusfilter-3.3.1.tar.gz",
+          "size": 129964,
+          "sha256": "2e1ff1d8ebc624c4055a759b31f27a06386391368fcdf535c0474ebfc516c12b"
+        }
+      ]
+    },
+    "bicleaner": {
+      "version": "0.17.4",
+      "license": "GNU General Public License v3.0",
+      "artifacts": [
+        {
+          "filename": "bicleaner-0.17.4-py3-none-any.whl",
+          "url": "https://files.pythonhosted.org/packages/e8/49/2f8a8a46a9276e513aa38382e696e8cc0254b531734244961cfcfe2ad781/bicleaner-0.17.4-py3-none-any.whl",
+          "size": 52104,
+          "sha256": "acec8bc350a2fbc20c8000e80b270de681f636aa1cea8177dc328abfc6d472fa"
+        },
+        {
+          "filename": "bicleaner-0.17.4.tar.gz",
+          "url": "https://files.pythonhosted.org/packages/db/ad/7f6fc07f55259a05b8e48af258cf3dc059c84736aaf55d606c527fcee390/bicleaner-0.17.4.tar.gz",
+          "size": 53526,
+          "sha256": "30e222aeee55a606c25cf9918b4011d5668353ce344fa58351e072a39e887c6b"
+        }
+      ]
+    }
+  },
+  "source_commits": {
+    "Helsinki-NLP--OpusFilter--commits.json": "8d7afda9c1cc89bcc8a4192afe88003b14797509",
+    "bitextor--bicleaner--commits.json": "2b728c1574928c3d37e44ba2e73b3b7959b68b31",
+    "bitextor--bicleaner-data--commits.json": "c9e9f0d08e40f01d47b5afb165ed032b25bad7c1",
+    "google--wmt-mqm-human-evaluation--commits.json": "29acd6999aaea3586378c9dcb58d8cc4820cede3"
+  },
+  "fetched_small_assets": [
+    {
+      "file": "mqm-ted-ende.tsv",
+      "url": "https://raw.githubusercontent.com/google/wmt-mqm-human-evaluation/29acd6999aaea3586378c9dcb58d8cc4820cede3/ted/ende/mqm_ted_ende.tsv",
+      "bytes": 2341948,
+      "sha256": "3952dc904997dda31c03421243862cb8a093f9a712fd90dc97b9709b4bb387b3"
+    },
+    {
+      "file": "mqm-LICENSE",
+      "url": "https://raw.githubusercontent.com/google/wmt-mqm-human-evaluation/29acd6999aaea3586378c9dcb58d8cc4820cede3/LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "file": "opusfilter-training.md",
+      "url": "https://raw.githubusercontent.com/Helsinki-NLP/OpusFilter/8d7afda9c1cc89bcc8a4192afe88003b14797509/docs/functions/training_and_using_classifiers.md",
+      "bytes": 2376,
+      "sha256": "2b7e796417e05ab03916801e94afd2be94ca75edbdaf3dfde398a8196691dc6c"
+    },
+    {
+      "file": "opusfilter-classifier.py",
+      "url": "https://raw.githubusercontent.com/Helsinki-NLP/OpusFilter/8d7afda9c1cc89bcc8a4192afe88003b14797509/opusfilter/classifier.py",
+      "bytes": 16384,
+      "sha256": "380b784fec4a0a25b3d352655c42411c9119f03ba503efd181358aaa5e90f919"
+    },
+    {
+      "file": "opusfilter-pypi.json",
+      "url": "https://pypi.org/pypi/opusfilter/json",
+      "bytes": 34556,
+      "sha256": "30df33b5f220cf02e067889e86dd89a3c9a23de4a343cb04d0b1c207259fa6a4"
+    },
+    {
+      "file": "bicleaner-pypi.json",
+      "url": "https://pypi.org/pypi/bicleaner/0.17.4/json",
+      "bytes": 31487,
+      "sha256": "a68fc43340e6eef0feef8b7d6df7a7c1729d1ff605986ba253e47be176a46240"
+    },
+    {
+      "file": "bicleaner-tag.json",
+      "url": "https://api.github.com/repos/bitextor/bicleaner/commits/bicleaner-v0.17.4",
+      "bytes": 8816,
+      "sha256": "c9b64ace870f281c0400652794b086245acd947d0d695ef641ef76a419c25b51"
+    }
+  ],
+  "bicleaner_code_tag_commit": "2b728c1574928c3d37e44ba2e73b3b7959b68b31",
+  "historical_releases_checked": {
+    "api_url": "https://api.github.com/repos/bitextor/bicleaner-data/releases?per_page=10",
+    "tags": [
+      "v1.6",
+      "v1.5",
+      "v1.4",
+      "v1.3",
+      "v1.2"
+    ],
+    "result": "No ja, ko or zh pack listed in any of these five classic releases."
+  }
+}

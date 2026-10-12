@@ -1,0 +1,12 @@
+[
+  "--selected",
+  "/workspace/scratch/8105054a3211/ikna-results/round30/full-control/run-01/selected.jsonl.gz",
+  "--selection-report",
+  "/workspace/scratch/8105054a3211/ikna-results/round30/full-control/run-01/selection.json",
+  "--baseline-directory",
+  "/workspace/scratch/8105054a3211/ikna-results/round30/structural-audit/current-self-baseline",
+  "--baseline-report-sha256",
+  "3f116d0cfcd9bfd9c2b819d11a2a0953085f6a75fe5193314d4a9bf6bf753009",
+  "--output-dir",
+  "/workspace/scratch/8105054a3211/ikna-results/round30/structural-audit/results"
+]

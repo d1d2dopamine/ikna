@@ -1,0 +1,174 @@
+{
+  "shared/build/test-results/desktopTest": {
+    "totals": {
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": [
+      {
+        "name": "dev.ikna.data.dev.DeveloperBootstrapTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.05"
+      },
+      {
+        "name": "dev.ikna.ui.theme.PalettePreviewTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.024"
+      },
+      {
+        "name": "dev.ikna.ui.theme.ReadingCatTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.005"
+      },
+      {
+        "name": "dev.ikna.ui.theme.SignalFrameHoverTest",
+        "tests": "8",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.026"
+      }
+    ]
+  },
+  "desktop/build/test-results/test": {
+    "totals": {
+      "tests": 123,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": [
+      {
+        "name": "dev.ikna.desktop.DesktopRestartTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.023"
+      },
+      {
+        "name": "dev.ikna.desktop.DeveloperSandboxIntegrationTest",
+        "tests": "9",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.925"
+      },
+      {
+        "name": "dev.ikna.desktop.HotkeyRegressionTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.011"
+      },
+      {
+        "name": "dev.ikna.desktop.LearningSimulationTest",
+        "tests": "5",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "2.073"
+      },
+      {
+        "name": "dev.ikna.desktop.TitleBarClicksTest",
+        "tests": "6",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.001"
+      },
+      {
+        "name": "dev.ikna.desktop.WindowBoundsEditsTest",
+        "tests": "6",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.017"
+      },
+      {
+        "name": "dev.ikna.desktop.WindowBoundsTest",
+        "tests": "6",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.001"
+      },
+      {
+        "name": "dev.ikna.desktop.WindowChromeRegressionTest",
+        "tests": "7",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.004"
+      },
+      {
+        "name": "dev.ikna.desktop.WindowFrameLayoutTest",
+        "tests": "7",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.017"
+      },
+      {
+        "name": "dev.ikna.desktop.WindowPlacementMemoryTest",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.001"
+      },
+      {
+        "name": "dev.ikna.domain.fsrs.FsrsOptimizerTest",
+        "tests": "6",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.318"
+      },
+      {
+        "name": "dev.ikna.domain.fsrs.FsrsTest",
+        "tests": "11",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.0"
+      },
+      {
+        "name": "dev.ikna.domain.fsrs.SchedulerDueDayTest",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.001"
+      },
+      {
+        "name": "dev.ikna.domain.grading.DerivedGradingTest",
+        "tests": "25",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.05"
+      },
+      {
+        "name": "dev.ikna.domain.optimizer.LocalOptimizerTest",
+        "tests": "22",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.136"
+      }
+    ]
+  }
+}

@@ -1,0 +1,134 @@
+         32728716 function calls (32644116 primitive calls) in 11.472 seconds
+
+   Ordered by: cumulative time
+   List reduced from 138 to 40 due to restriction <40>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000   11.472   11.472 /workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/dense_pair_candidate_probe.py:358(invoke_pair)
+        1    0.716    0.716   11.472   11.472 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_experiment.py:258(pair_evidence)
+     2286    0.134    0.000   10.160    0.004 /workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/overlap_reuse.py:16(choose_contexts)
+    27436    0.206    0.000    7.588    0.000 {built-in method builtins.min}
+   864108    0.527    0.000    7.382    0.000 /workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/overlap_reuse.py:63(<lambda>)
+   864108    0.683    0.000    6.717    0.000 /workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/overlap_reuse.py:37(maximum_overlap)
+   864108    1.191    0.000    5.775    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:111(context_overlap)
+   864108    1.944    0.000    2.928    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/collections/__init__.py:881(__and__)
+    27432    0.027    0.000    1.530    0.000 {built-in method builtins.any}
+   178308    0.117    0.000    1.503    0.000 /workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/overlap_reuse.py:77(<genexpr>)
+   150876    0.228    0.000    1.386    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:71(near_duplicate)
+   301752    0.161    0.000    1.110    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:66(normalized_words)
+    36692    0.028    0.000    0.979    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:106(_written_counts)
+   301752    0.110    0.000    0.866    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/re/__init__.py:209(findall)
+   169164    0.320    0.000    0.817    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:90(context_quality_key)
+   900801    0.479    0.000    0.816    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/collections/__init__.py:595(__init__)
+    36692    0.058    0.000    0.666    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/segmentation.py:131(word_spans)
+   304873    0.361    0.000    0.586    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/segmentation.py:136(<genexpr>)
+215138/130556    0.090    0.000    0.522    0.000 {built-in method builtins.sorted}
+   301752    0.488    0.000    0.488    0.000 {method 'findall' of 're.Pattern' objects}
+  2592324    0.403    0.000    0.403    0.000 {built-in method builtins.sum}
+  2164639    0.354    0.000    0.354    0.000 {method 'get' of 'dict' objects}
+   900801    0.093    0.000    0.337    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/collections/__init__.py:669(update)
+    64573    0.040    0.000    0.326    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py:299(loads)
+  5565254    0.283    0.000    0.283    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/collections/__init__.py:609(__missing__)
+  2592325    0.274    0.000    0.274    0.000 {method 'values' of 'dict' objects}
+    64573    0.084    0.000    0.270    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:333(decode)
+   301752    0.146    0.000    0.269    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/re/__init__.py:280(_compile)
+   169164    0.109    0.000    0.239    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:62(stable_hash)
+    36692    0.055    0.000    0.215    0.000 {built-in method _collections._count_elements}
+  2676906    0.214    0.000    0.214    0.000 {built-in method builtins.id}
+    32192    0.028    0.000    0.190    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_experiment.py:242(_origin_families)
+1916837/1916835    0.163    0.000    0.163    0.000 {built-in method builtins.len}
+   304873    0.099    0.000    0.159    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:108(<genexpr>)
+    64573    0.136    0.000    0.136    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:344(raw_decode)
+  1267150    0.113    0.000    0.129    0.000 {built-in method builtins.isinstance}
+   268181    0.129    0.000    0.129    0.000 <string>:2(__init__)
+   864110    0.100    0.000    0.100    0.000 {method 'items' of 'dict' objects}
+   301752    0.070    0.000    0.099    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/enum.py:202(__get__)
+   569933    0.084    0.000    0.084    0.000 {method 'casefold' of 'str' objects}
+
+
+         32728716 function calls (32644116 primitive calls) in 11.472 seconds
+
+   Ordered by: internal time
+   List reduced from 138 to 40 due to restriction <40>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+   864108    1.944    0.000    2.928    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/collections/__init__.py:881(__and__)
+   864108    1.191    0.000    5.775    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:111(context_overlap)
+        1    0.716    0.716   11.472   11.472 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_experiment.py:258(pair_evidence)
+   864108    0.683    0.000    6.717    0.000 /workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/overlap_reuse.py:37(maximum_overlap)
+   864108    0.527    0.000    7.382    0.000 /workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/overlap_reuse.py:63(<lambda>)
+   301752    0.488    0.000    0.488    0.000 {method 'findall' of 're.Pattern' objects}
+   900801    0.479    0.000    0.816    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/collections/__init__.py:595(__init__)
+  2592324    0.403    0.000    0.403    0.000 {built-in method builtins.sum}
+   304873    0.361    0.000    0.586    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/segmentation.py:136(<genexpr>)
+  2164639    0.354    0.000    0.354    0.000 {method 'get' of 'dict' objects}
+   169164    0.320    0.000    0.817    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:90(context_quality_key)
+  5565254    0.283    0.000    0.283    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/collections/__init__.py:609(__missing__)
+  2592325    0.274    0.000    0.274    0.000 {method 'values' of 'dict' objects}
+   150876    0.228    0.000    1.386    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:71(near_duplicate)
+  2676906    0.214    0.000    0.214    0.000 {built-in method builtins.id}
+    27436    0.206    0.000    7.588    0.000 {built-in method builtins.min}
+1916837/1916835    0.163    0.000    0.163    0.000 {built-in method builtins.len}
+   301752    0.161    0.000    1.110    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:66(normalized_words)
+   301752    0.146    0.000    0.269    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/re/__init__.py:280(_compile)
+    64573    0.136    0.000    0.136    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:344(raw_decode)
+     2286    0.134    0.000   10.160    0.004 /workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/overlap_reuse.py:16(choose_contexts)
+   268181    0.129    0.000    0.129    0.000 <string>:2(__init__)
+   178308    0.117    0.000    1.503    0.000 /workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/overlap_reuse.py:77(<genexpr>)
+  1267150    0.113    0.000    0.129    0.000 {built-in method builtins.isinstance}
+   301752    0.110    0.000    0.866    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/re/__init__.py:209(findall)
+   169164    0.109    0.000    0.239    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:62(stable_hash)
+   864110    0.100    0.000    0.100    0.000 {method 'items' of 'dict' objects}
+   304873    0.099    0.000    0.159    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:108(<genexpr>)
+   900801    0.093    0.000    0.337    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/collections/__init__.py:669(update)
+215138/130556    0.090    0.000    0.522    0.000 {built-in method builtins.sorted}
+   569933    0.084    0.000    0.084    0.000 {method 'casefold' of 'str' objects}
+    64573    0.084    0.000    0.270    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:333(decode)
+   301752    0.070    0.000    0.099    0.000 /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/enum.py:202(__get__)
+   569933    0.059    0.000    0.059    0.000 {built-in method unicodedata.normalize}
+    36692    0.058    0.000    0.666    0.000 /workspace/scratch/8105054a3211/ikna-work/tools/catalog/segmentation.py:131(word_spans)
+    36692    0.055    0.000    0.215    0.000 {built-in method _collections._count_elements}
+   234200    0.053    0.000    0.053    0.000 {method 'encode' of 'str' objects}
+   169166    0.050    0.000    0.050    0.000 {method 'hexdigest' of '_hashlib.HASH' objects}
+   268181    0.042    0.000    0.042    0.000 {method 'group' of 're.Match' objects}
+   397327    0.041    0.000    0.041    0.000 {method 'end' of 're.Match' objects}
+
+
+   Ordered by: internal time
+   List reduced from 138 to 4 due to restriction <'choose_contexts|context_overlap|near_duplicate|_written_counts'>
+
+Function                                                                                                     was called by...
+                                                                                                                 ncalls  tottime  cumtime
+/workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:111(context_overlap)             <-  864108    1.191    5.775  /workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/overlap_reuse.py:37(maximum_overlap)
+/workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:71(near_duplicate)               <-  150876    0.228    1.386  /workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/overlap_reuse.py:77(<genexpr>)
+/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/overlap_reuse.py:16(choose_contexts)  <-    2286    0.134   10.160  /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_experiment.py:258(pair_evidence)
+/workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:106(_written_counts)             <-   36692    0.028    0.979  /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:111(context_overlap)
+
+
+   Ordered by: internal time
+   List reduced from 138 to 4 due to restriction <'choose_contexts|context_overlap|near_duplicate|_written_counts'>
+
+Function                                                                                                     called...
+                                                                                                                 ncalls  tottime  cumtime
+/workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:111(context_overlap)             ->  864108    1.944    2.928  /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/collections/__init__.py:881(__and__)
+                                                                                                                  36692    0.028    0.979  /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:106(_written_counts)
+                                                                                                                2592324    0.403    0.403  {built-in method builtins.sum}
+                                                                                                                2592324    0.274    0.274  {method 'values' of 'dict' objects}
+/workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:71(near_duplicate)               ->  301752    0.161    1.110  /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:66(normalized_words)
+                                                                                                                 150876    0.015    0.015  {built-in method builtins.abs}
+                                                                                                                 404016    0.033    0.033  {built-in method builtins.len}
+/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/overlap_reuse.py:16(choose_contexts)  ->   84582    0.154    0.351  /workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:90(context_quality_key)
+                                                                                                                  27432    0.027    1.530  {built-in method builtins.any}
+                                                                                                                  84582    0.008    0.008  {built-in method builtins.id}
+                                                                                                                  36576    0.004    0.004  {built-in method builtins.len}
+                                                                                                                  27432    0.206    7.588  {built-in method builtins.min}
+                                                                                                                   2286    0.029    0.496  {built-in method builtins.sorted}
+                                                                                                                  27432    0.005    0.005  {method 'append' of 'list' objects}
+                                                                                                                 109728    0.012    0.012  {method 'get' of 'dict' objects}
+                                                                                                                   2286    0.001    0.001  {method 'pop' of 'list' objects}
+                                                                                                                  27432    0.027    0.027  {method 'remove' of 'list' objects}
+                                                                                                                  27432    0.006    0.006  {method 'update' of 'set' objects}
+/workspace/scratch/8105054a3211/ikna-work/tools/catalog/selection_policy.py:106(_written_counts)             ->   36692    0.025    0.286  /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/collections/__init__.py:595(__init__)
+                                                                                                                  36692    0.058    0.666  /workspace/scratch/8105054a3211/ikna-work/tools/catalog/segmentation.py:131(word_spans)
+
+

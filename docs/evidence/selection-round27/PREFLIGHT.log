@@ -1,0 +1,11 @@
+repo: /workspace/scratch/8105054a3211/ikna-work
+git metadata: absent (not required for source inspection)
+android versionName: 0.11.0 press
+android versionCode: 200110000
+desktop packageVersion: 0.11.0
+Room schema version: 10
+active plan: docs/PLAN-0.12.md
+planning cycle: 0.12.0 press working plan
+release-blockers section: yes
+read next: CONTRIBUTING, ARCHITECTURE, active plan and owning contracts
+preflight is read-only; it does not prove tests/builds pass

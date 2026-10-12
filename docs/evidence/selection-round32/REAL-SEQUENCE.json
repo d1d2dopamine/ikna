@@ -1,0 +1,160 @@
+{
+  "status": "complete-seven-serial-probes",
+  "runs": [
+    {
+      "name": "baseline-01",
+      "mode": "baseline",
+      "startedUtc": "2026-10-12T00:30:27.432866+00:00",
+      "command": [
+        "/workspace/scratch/8105054a3211/ikna-venv/bin/python",
+        "-B",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/dense_pair_candidate_probe.py",
+        "--repo",
+        "/workspace/scratch/8105054a3211/ikna-work",
+        "--control-dir",
+        "/workspace/scratch/8105054a3211/ikna-results/round30",
+        "--output-dir",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/baseline-01",
+        "--mode",
+        "baseline"
+      ],
+      "exitCode": 0,
+      "finishedUtc": "2026-10-12T00:31:04.077537+00:00"
+    },
+    {
+      "name": "candidate-01",
+      "mode": "candidate",
+      "startedUtc": "2026-10-12T00:31:04.078062+00:00",
+      "command": [
+        "/workspace/scratch/8105054a3211/ikna-venv/bin/python",
+        "-B",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/dense_pair_candidate_probe.py",
+        "--repo",
+        "/workspace/scratch/8105054a3211/ikna-work",
+        "--control-dir",
+        "/workspace/scratch/8105054a3211/ikna-results/round30",
+        "--output-dir",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/candidate-01",
+        "--mode",
+        "candidate",
+        "--reference-baseline",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/baseline-01/PROBE.json"
+      ],
+      "exitCode": 0,
+      "finishedUtc": "2026-10-12T00:31:30.580083+00:00"
+    },
+    {
+      "name": "candidate-02",
+      "mode": "candidate",
+      "startedUtc": "2026-10-12T00:31:30.580782+00:00",
+      "command": [
+        "/workspace/scratch/8105054a3211/ikna-venv/bin/python",
+        "-B",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/dense_pair_candidate_probe.py",
+        "--repo",
+        "/workspace/scratch/8105054a3211/ikna-work",
+        "--control-dir",
+        "/workspace/scratch/8105054a3211/ikna-results/round30",
+        "--output-dir",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/candidate-02",
+        "--mode",
+        "candidate",
+        "--reference-baseline",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/baseline-01/PROBE.json"
+      ],
+      "exitCode": 0,
+      "finishedUtc": "2026-10-12T00:31:56.665818+00:00"
+    },
+    {
+      "name": "baseline-02",
+      "mode": "baseline",
+      "startedUtc": "2026-10-12T00:31:56.666394+00:00",
+      "command": [
+        "/workspace/scratch/8105054a3211/ikna-venv/bin/python",
+        "-B",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/dense_pair_candidate_probe.py",
+        "--repo",
+        "/workspace/scratch/8105054a3211/ikna-work",
+        "--control-dir",
+        "/workspace/scratch/8105054a3211/ikna-results/round30",
+        "--output-dir",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/baseline-02",
+        "--mode",
+        "baseline"
+      ],
+      "exitCode": 0,
+      "finishedUtc": "2026-10-12T00:32:32.009509+00:00"
+    },
+    {
+      "name": "baseline-03",
+      "mode": "baseline",
+      "startedUtc": "2026-10-12T00:32:32.010141+00:00",
+      "command": [
+        "/workspace/scratch/8105054a3211/ikna-venv/bin/python",
+        "-B",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/dense_pair_candidate_probe.py",
+        "--repo",
+        "/workspace/scratch/8105054a3211/ikna-work",
+        "--control-dir",
+        "/workspace/scratch/8105054a3211/ikna-results/round30",
+        "--output-dir",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/baseline-03",
+        "--mode",
+        "baseline"
+      ],
+      "exitCode": 0,
+      "finishedUtc": "2026-10-12T00:33:07.473120+00:00"
+    },
+    {
+      "name": "candidate-03",
+      "mode": "candidate",
+      "startedUtc": "2026-10-12T00:33:07.473732+00:00",
+      "command": [
+        "/workspace/scratch/8105054a3211/ikna-venv/bin/python",
+        "-B",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/dense_pair_candidate_probe.py",
+        "--repo",
+        "/workspace/scratch/8105054a3211/ikna-work",
+        "--control-dir",
+        "/workspace/scratch/8105054a3211/ikna-results/round30",
+        "--output-dir",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/candidate-03",
+        "--mode",
+        "candidate",
+        "--reference-baseline",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/baseline-01/PROBE.json"
+      ],
+      "exitCode": 0,
+      "finishedUtc": "2026-10-12T00:33:33.089949+00:00"
+    },
+    {
+      "name": "candidate-cprofile-01",
+      "mode": "candidate-cprofile",
+      "startedUtc": "2026-10-12T00:33:33.090608+00:00",
+      "command": [
+        "/workspace/scratch/8105054a3211/ikna-venv/bin/python",
+        "-B",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/dense_pair_candidate_probe.py",
+        "--repo",
+        "/workspace/scratch/8105054a3211/ikna-work",
+        "--control-dir",
+        "/workspace/scratch/8105054a3211/ikna-results/round30",
+        "--output-dir",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/candidate-cprofile-01",
+        "--mode",
+        "candidate-cprofile",
+        "--reference-baseline",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/baseline-01/PROBE.json",
+        "--reference-candidate",
+        "/workspace/scratch/8105054a3211/ikna-results/round32-overlap-prototype/candidate-01/PROBE.json"
+      ],
+      "exitCode": 0,
+      "finishedUtc": "2026-10-12T00:34:05.560740+00:00"
+    }
+  ],
+  "limits": [
+    "Same exact prefix; no full-workflow speed claim",
+    "One sequential host; OS caches uncontrolled",
+    "Candidate repeats bind first completed same-helper baseline; alternating order is diagnostic, not randomized trial"
+  ]
+}

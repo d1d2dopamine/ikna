@@ -1,0 +1,26 @@
+{
+  "status": "reviewed-standalone-tooling-only",
+  "realMeasurementExecuted": false,
+  "files": {
+    "README.md": {
+      "sha256": "68d43495e8136fda9dea36e880ce384137d1f08d7a019ac3be4ad3d9c98e5e0a",
+      "sizeBytes": 8874
+    },
+    "REVIEW.md": {
+      "sha256": "06c203b2bf4b0a8b667d6a177242a68cb146abdee0ee7e56aefd8c4e219d14b0",
+      "sizeBytes": 1510
+    },
+    "TESTS.log": {
+      "sha256": "9e1800ce64cc46f5fa376a6c8ce546b3925368e657e118bb6d63e74c1516ee00",
+      "sizeBytes": 2787
+    },
+    "dense_pair_probe.py": {
+      "sha256": "3dfe1efe4bce32ff4f791a6c41b3dff7fb89ab7bc7d67083b405196cdb02e0fa",
+      "sizeBytes": 30307
+    },
+    "test_dense_pair_probe.py": {
+      "sha256": "50d1004f86337d7ead642d3de57834fb70cea9bfc083743ce74713d5795e3dce",
+      "sizeBytes": 17918
+    }
+  }
+}

@@ -1,0 +1,4 @@
+PASS: 6 bounds/restore/pacing groups (including all 8 edges/corners)
+[0.000s][warning][perf,memops] Cannot use file /tmp/hsperfdata_agent/50 because it is locked by another process (errno = 11)
+PASS: 6 window title-bar gesture and platform checks
+PASS: 7 picture-layout/trace groups; simulated recording order, not Windows rendering

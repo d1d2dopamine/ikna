@@ -1,0 +1,30 @@
+{
+  "recorded_at_utc": "2026-10-11T21:25:33.925257+00:00",
+  "scope": "Application verification only; no source/UI/schema/version changes",
+  "toolchain": {
+    "gradle": {
+      "version": "8.10.2",
+      "source": "https://services.gradle.org/distributions/gradle-8.10.2-bin.zip",
+      "sha256": "31c55713e40233a8303827ceb42ca48a47267a0ad4bab9177123121e71524c26",
+      "checksum_verified": true
+    },
+    "jdk": {
+      "version": "17.0.20.1+1",
+      "source": "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20.1%2B1/OpenJDK17U-jdk_x64_linux_hotspot_17.0.20.1_1.tar.gz",
+      "sha256": "3808d1d15e3ec6bd5b84057fb5d84c33d8a1536a258146bcea2e603fc726e08e",
+      "checksum_verified": true
+    }
+  },
+  "resources": {
+    "gradle_max_workers": 1,
+    "gradle_heap_mib": 768,
+    "kotlin_daemon_heap_mib": 512,
+    "parallel_gradle_sessions": false
+  },
+  "android_sdk_available": false,
+  "platform_runtime_acceptance": {
+    "Android": "not run",
+    "Windows": "not run",
+    "packaged_Linux": "Headless packaged --selftest and 11-process profile harness PASS; GUI/native restart NOT RUN"
+  }
+}

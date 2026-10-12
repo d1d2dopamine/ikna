@@ -1,0 +1,41 @@
+{
+  "status": "complete-independent-candidate-control-comparison",
+  "selected": {
+    "sha256": "a2a5e4bb1e4079e88c8986443c95761795d5fe66ec14ee46a1f83e099e95df64",
+    "sizeBytes": 255938165,
+    "logicalSha256": "7149ca35ebc44b0833434505a94d187e11194a2eca7d4f45b885b061fb267cd4",
+    "logicalSizeBytes": 1512254677,
+    "memberships": 928162
+  },
+  "wholeRunComparison": {
+    "controlElapsedSeconds": 8335.16600953,
+    "candidateElapsedSeconds": 4288.253240143,
+    "candidateOverControlElapsedRatio": 0.5144772443932168,
+    "controlLifetimePeakRssBytes": 1666994176,
+    "candidateLifetimePeakRssBytes": 1664880640,
+    "controlGuard": {
+      "limits": {
+        "max_rss_bytes": 4294967296,
+        "address_space_bytes": 5368709120,
+        "min_available_bytes": 2147483648,
+        "min_disk_free_bytes": 4294967296,
+        "poll_seconds": 1.0
+      },
+      "sampledPeakRssBytes": 1666170880,
+      "minimumAvailableBytes": 5711769600,
+      "minimumDiskFreeBytes": 14297772032
+    },
+    "candidateGuard": {
+      "limits": {
+        "max_rss_bytes": 4294967296,
+        "address_space_bytes": 5368709120,
+        "min_available_bytes": 2147483648,
+        "min_disk_free_bytes": 3221225472,
+        "poll_seconds": 1.0
+      },
+      "sampledPeakRssBytes": 1664983040,
+      "minimumAvailableBytes": 5818888192,
+      "minimumDiskFreeBytes": 4117577728
+    }
+  }
+}

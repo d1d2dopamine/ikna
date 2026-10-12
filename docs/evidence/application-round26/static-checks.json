@@ -1,0 +1,72 @@
+[
+  {
+    "command": "python3 tools/check_text.py",
+    "exit_code": 0,
+    "duration_seconds": 1.762,
+    "log": "check_text.log",
+    "result": "PASS"
+  },
+  {
+    "command": "python3 tools/check_localization.py",
+    "exit_code": 0,
+    "duration_seconds": 0.05,
+    "log": "check_localization.log",
+    "result": "PASS"
+  },
+  {
+    "command": "python3 tools/check_design_parity.py",
+    "exit_code": 0,
+    "duration_seconds": 0.214,
+    "log": "check_design_parity.log",
+    "result": "PASS"
+  },
+  {
+    "command": "python3 tools/check_classic_cards.py",
+    "exit_code": 0,
+    "duration_seconds": 0.067,
+    "log": "check_classic_cards.log",
+    "result": "PASS"
+  },
+  {
+    "command": "python3 tools/check_palettes.py",
+    "exit_code": 0,
+    "duration_seconds": 0.101,
+    "log": "check_palettes.log",
+    "result": "PASS"
+  },
+  {
+    "command": "python3 tools/make_palette_preview.py --check",
+    "exit_code": 0,
+    "duration_seconds": 0.074,
+    "log": "make_palette_preview_check.log",
+    "result": "PASS"
+  },
+  {
+    "command": "python3 tools/check_hot_reload.py",
+    "exit_code": 0,
+    "duration_seconds": 0.021,
+    "log": "check_hot_reload.log",
+    "result": "PASS"
+  },
+  {
+    "command": "python3 tools/check_android_ci.py --self-test",
+    "exit_code": 0,
+    "duration_seconds": 0.403,
+    "log": "check_android_ci_self-test.log",
+    "result": "PASS"
+  },
+  {
+    "command": "python3 tools/check_android_ci.py",
+    "exit_code": 0,
+    "duration_seconds": 0.407,
+    "log": "check_android_ci.log",
+    "result": "PASS"
+  },
+  {
+    "command": "python3 tools/test_hot_reload.py",
+    "exit_code": 0,
+    "duration_seconds": 0.056,
+    "log": "test_hot_reload.log",
+    "result": "SKIPPED: all 6 tests require Windows cmd.exe"
+  }
+]

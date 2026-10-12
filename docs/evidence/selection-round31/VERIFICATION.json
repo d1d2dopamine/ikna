@@ -1,0 +1,19 @@
+{
+  "status": "complete-compact-evidence-review",
+  "fullWorkflowRerun": false,
+  "stagingRehashedDuringThisReview": false,
+  "returnedPayloadsIndependentlyRehashed": true,
+  "returnedPayloadIdentity": {
+    "sha256": "f551785d003b9a8f0793bedd687829f0a3364ebf47cab80f83d2a1f052ee12bd",
+    "sizeBytes": 31461064
+  },
+  "baselineAndProfileContractsEqual": true,
+  "rawProfileHashesAndFocusedMetricsVerified": true,
+  "historicalToolingManifestVerified": true,
+  "helperSha256": {
+    "dense_pair_probe.py": "3dfe1efe4bce32ff4f791a6c41b3dff7fb89ab7bc7d67083b405196cdb02e0fa"
+  },
+  "baselineProbeSha256": "1a803af7d24c915d266af917c01d45efbcf8d2d2d16843244cbf3d98f04bc7ef",
+  "profileProbeSha256": "2906207a1a2834246c160739ee68d70a434ebe16c9d2abfd83ef302e58a4c39b",
+  "copiedFilesByteIdentical": true
+}

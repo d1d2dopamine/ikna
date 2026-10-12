@@ -5,6 +5,7 @@ import contextlib
 import ctypes.util
 import io
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -36,9 +37,31 @@ class SegmentationTests(unittest.TestCase):
             catalog.words('Read this sentence.', 'en')
             segment.prepare(['en', 'ru'])
     def test_missing_icu_is_not_a_character_fallback(self):
-        with patch.object(ctypes.util, 'find_library', return_value=None):
+        with patch.dict(os.environ, {'IKNA_ICU_LIBRARY': ''}), patch.object(ctypes.util, 'find_library', return_value=None):
             with self.assertRaises(segment.IcuUnavailable):
                 segment._IcuWords()
+    def test_explicit_icu_pin_never_silently_falls_back(self):
+        for value in ('relative-icu.so', '/missing-ikna-icu/library.so'):
+            with patch.dict(os.environ, {'IKNA_ICU_LIBRARY': value}):
+                with patch.object(ctypes.util, 'find_library', side_effect=AssertionError('unexpected fallback')):
+                    with self.assertRaises(segment.IcuUnavailable):
+                        segment._IcuWords()
+
+    def test_required_icu_version_mismatch_fails_closed(self):
+        with patch.dict(os.environ, {'IKNA_ICU_VERSION': '0.0'}):
+            with self.assertRaisesRegex(segment.IcuUnavailable, 'differs from required'):
+                segment._IcuWords()
+
+    def test_changed_pin_rejected_after_engine_and_span_cache_initialization(self):
+        segment.prepare(['zh'])
+        segment.word_spans('我喜欢中文。', 'zh')
+        for changed in ({'IKNA_ICU_VERSION': '0.0'}, {'IKNA_ICU_LIBRARY': '/missing/pinned.so'}):
+            with patch.dict(os.environ, changed):
+                with self.assertRaisesRegex(segment.IcuUnavailable, 'changed after initialization'):
+                    segment.prepare(['zh'])
+                with self.assertRaisesRegex(segment.IcuUnavailable, 'changed after initialization'):
+                    segment.word_spans('我喜欢中文。', 'zh')
+
     def test_utf16_after_emoji_and_supplementary_han(self):
         text = '𠀀🙂我喜欢学习中文。'
         self.assertEqual((9, 11), catalog.offsets(text, '中文', 'zh'))

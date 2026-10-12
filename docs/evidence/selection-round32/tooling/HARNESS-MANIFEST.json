@@ -1,0 +1,32 @@
+{
+  "status": "reviewed-frozen-harness-checkpoint",
+  "scope": "Harness implementation and tiny-fixture review; real measurement results are separate artifacts.",
+  "files": {
+    "dense_pair_candidate_probe.py": {
+      "sha256": "9c77cb25f6ca25eb5c62fd97751cf7b24e7840e264ef4cfa8872a2621f429975",
+      "sizeBytes": 38965
+    },
+    "test_dense_pair_candidate_probe.py": {
+      "sha256": "afc764338e23094d3728af4e5eea3107a1ee999886933dbca62402f32aee3c3b",
+      "sizeBytes": 27392
+    },
+    "HARNESS-README.md": {
+      "sha256": "43ff08fe35573a3da2fe6bdbb3b0e6eec08a4d91eef2b739744ab9d7623b1826",
+      "sizeBytes": 8899
+    },
+    "HARNESS-TESTS.log": {
+      "sha256": "dde0ebf3019d323da40807f61b296b9f03768f82a23898196e8dbc93433fb225",
+      "sizeBytes": 4076
+    }
+  },
+  "candidateModuleBinding": {
+    "path": "overlap_reuse.py",
+    "sha256": "36efac2461e102d1c0ae66282c5ea46facff6c1dcdd6b8bb376828e6e0525e1e",
+    "sizeBytes": 3824
+  },
+  "originalRound31HelperSha256": "3dfe1efe4bce32ff4f791a6c41b3dff7fb89ab7bc7d67083b405196cdb02e0fa",
+  "originalRound31ToolingManifestVerifiedUnchanged": true,
+  "harnessTestsPassed": 31,
+  "independentHarnessTestsPassed": 31,
+  "independentReviewBlockingFindings": []
+}

@@ -1,0 +1,382 @@
+{
+  "status": "complete-independent-candidate-control-comparison",
+  "publicationSafe": false,
+  "productionIntegrationApproved": false,
+  "allReportDifferences": [
+    {
+      "path": "/selectionPipelineSha256/selection_policy.py",
+      "before": "6100810b5bd7eca23b063f90dd0c1e81cb3a7f55ba3aeab76f02be84720fb3ae",
+      "after": "72783a30ada3995c9cc4e32f96a4fc5ff53940756ceb5895c9530ecd9af92edc"
+    }
+  ],
+  "allReportDifferenceCount": 1,
+  "allowedDifference": {
+    "path": "/selectionPipelineSha256/selection_policy.py",
+    "before": "6100810b5bd7eca23b063f90dd0c1e81cb3a7f55ba3aeab76f02be84720fb3ae",
+    "after": "72783a30ada3995c9cc4e32f96a4fc5ff53940756ceb5895c9530ecd9af92edc"
+  },
+  "independentlyComputedCandidateSelected": {
+    "sha256": "a2a5e4bb1e4079e88c8986443c95761795d5fe66ec14ee46a1f83e099e95df64",
+    "sizeBytes": 255938165,
+    "logicalSha256": "7149ca35ebc44b0833434505a94d187e11194a2eca7d4f45b885b061fb267cd4",
+    "logicalSizeBytes": 1512254677,
+    "memberships": 928162
+  },
+  "stageComparison": {
+    "stages": [
+      {
+        "stage": "allocation",
+        "control": {
+          "calls": 330,
+          "failedCalls": 0,
+          "elapsedSeconds": 249.73418711393606,
+          "processCpuSeconds": 250.35092420198168,
+          "exclusiveElapsedSeconds": 249.73418711393606,
+          "exclusiveProcessCpuSeconds": 250.35092420198168,
+          "sampledPeakRssBytes": 1666064384,
+          "rssAttempts": 10801,
+          "rssSamples": 10801
+        },
+        "candidate": {
+          "calls": 330,
+          "failedCalls": 0,
+          "elapsedSeconds": 228.18628886702936,
+          "processCpuSeconds": 228.78870401699498,
+          "exclusiveElapsedSeconds": 228.18628886702936,
+          "exclusiveProcessCpuSeconds": 228.78870401699498,
+          "sampledPeakRssBytes": 1664983040,
+          "rssAttempts": 9200,
+          "rssSamples": 9200
+        },
+        "candidateOverControlElapsedRatio": 0.9137166661243864
+      },
+      {
+        "stage": "context_analysis",
+        "control": {
+          "calls": 11,
+          "failedCalls": 0,
+          "elapsedSeconds": 239.19418808500632,
+          "processCpuSeconds": 238.93582309400006,
+          "exclusiveElapsedSeconds": 239.19418808500632,
+          "exclusiveProcessCpuSeconds": 238.93582309400006,
+          "sampledPeakRssBytes": 1666072576,
+          "rssAttempts": 21964,
+          "rssSamples": 21964
+        },
+        "candidate": {
+          "calls": 11,
+          "failedCalls": 0,
+          "elapsedSeconds": 242.0678255019884,
+          "processCpuSeconds": 241.953347724001,
+          "exclusiveElapsedSeconds": 242.0678255019884,
+          "exclusiveProcessCpuSeconds": 241.953347724001,
+          "sampledPeakRssBytes": 1663418368,
+          "rssAttempts": 22501,
+          "rssSamples": 22501
+        },
+        "candidateOverControlElapsedRatio": 1.0120138262555143
+      },
+      {
+        "stage": "diagnostic_output",
+        "control": {
+          "calls": 1,
+          "failedCalls": 0,
+          "elapsedSeconds": 0.18507978900015587,
+          "processCpuSeconds": 0.18600027399952523,
+          "exclusiveElapsedSeconds": 0.18507978900015587,
+          "exclusiveProcessCpuSeconds": 0.18600027399952523,
+          "sampledPeakRssBytes": 1638768640,
+          "rssAttempts": 20,
+          "rssSamples": 20
+        },
+        "candidate": {
+          "calls": 1,
+          "failedCalls": 0,
+          "elapsedSeconds": 0.17802486599975964,
+          "processCpuSeconds": 0.17946183599997312,
+          "exclusiveElapsedSeconds": 0.17802486599975964,
+          "exclusiveProcessCpuSeconds": 0.17946183599997312,
+          "sampledPeakRssBytes": 1636335616,
+          "rssAttempts": 19,
+          "rssSamples": 19
+        },
+        "candidateOverControlElapsedRatio": 0.9618817211835579
+      },
+      {
+        "stage": "pair_evidence",
+        "control": {
+          "calls": 110,
+          "failedCalls": 0,
+          "elapsedSeconds": 7187.007720789006,
+          "processCpuSeconds": 6853.629665749002,
+          "exclusiveElapsedSeconds": 7187.007720789006,
+          "exclusiveProcessCpuSeconds": 6853.629665749002,
+          "sampledPeakRssBytes": 1666072576,
+          "rssAttempts": 500005,
+          "rssSamples": 500005
+        },
+        "candidate": {
+          "calls": 110,
+          "failedCalls": 0,
+          "elapsedSeconds": 3169.583131643012,
+          "processCpuSeconds": 2840.0836973890023,
+          "exclusiveElapsedSeconds": 3169.583131643012,
+          "exclusiveProcessCpuSeconds": 2840.0836973890023,
+          "sampledPeakRssBytes": 1664983040,
+          "rssAttempts": 249668,
+          "rssSamples": 249668
+        },
+        "candidateOverControlElapsedRatio": 0.4410156847994937
+      },
+      {
+        "stage": "postselection_verification",
+        "control": {
+          "calls": 1,
+          "failedCalls": 0,
+          "elapsedSeconds": 0.4454834870011837,
+          "processCpuSeconds": 0.44264206800016836,
+          "exclusiveElapsedSeconds": 0.4454834870011837,
+          "exclusiveProcessCpuSeconds": 0.44264206800016836,
+          "sampledPeakRssBytes": 1639387136,
+          "rssAttempts": 46,
+          "rssSamples": 46
+        },
+        "candidate": {
+          "calls": 1,
+          "failedCalls": 0,
+          "elapsedSeconds": 0.4352761560003273,
+          "processCpuSeconds": 0.43431317700014915,
+          "exclusiveElapsedSeconds": 0.4352761560003273,
+          "exclusiveProcessCpuSeconds": 0.43431317700014915,
+          "sampledPeakRssBytes": 1637015552,
+          "rssAttempts": 44,
+          "rssSamples": 44
+        },
+        "candidateOverControlElapsedRatio": 0.9770870721391538
+      },
+      {
+        "stage": "ranks",
+        "control": {
+          "calls": 11,
+          "failedCalls": 0,
+          "elapsedSeconds": 125.79860350300078,
+          "processCpuSeconds": 75.00809175099823,
+          "exclusiveElapsedSeconds": 125.79860350300078,
+          "exclusiveProcessCpuSeconds": 75.00809175099823,
+          "sampledPeakRssBytes": 1666170880,
+          "rssAttempts": 12211,
+          "rssSamples": 12211
+        },
+        "candidate": {
+          "calls": 11,
+          "failedCalls": 0,
+          "elapsedSeconds": 126.82665877800173,
+          "processCpuSeconds": 75.86125179599946,
+          "exclusiveElapsedSeconds": 126.82665877800173,
+          "exclusiveProcessCpuSeconds": 75.86125179599946,
+          "sampledPeakRssBytes": 1663418368,
+          "rssAttempts": 12320,
+          "rssSamples": 12320
+        },
+        "candidateOverControlElapsedRatio": 1.0081722312201695
+      },
+      {
+        "stage": "segmentation_setup",
+        "control": {
+          "calls": 1,
+          "failedCalls": 0,
+          "elapsedSeconds": 0.164516803000879,
+          "processCpuSeconds": 0.16544440100000202,
+          "exclusiveElapsedSeconds": 0.164516803000879,
+          "exclusiveProcessCpuSeconds": 0.16544440100000202,
+          "sampledPeakRssBytes": 87449600,
+          "rssAttempts": 18,
+          "rssSamples": 18
+        },
+        "candidate": {
+          "calls": 1,
+          "failedCalls": 0,
+          "elapsedSeconds": 0.18287801000042236,
+          "processCpuSeconds": 0.17970346600000653,
+          "exclusiveElapsedSeconds": 0.18287801000042236,
+          "exclusiveProcessCpuSeconds": 0.17970346600000653,
+          "sampledPeakRssBytes": 86437888,
+          "rssAttempts": 19,
+          "rssSamples": 19
+        },
+        "candidateOverControlElapsedRatio": 1.111606879447112
+      },
+      {
+        "stage": "selected_output",
+        "control": {
+          "calls": 330,
+          "failedCalls": 0,
+          "elapsedSeconds": 43.30270408796059,
+          "processCpuSeconds": 43.595380360008335,
+          "exclusiveElapsedSeconds": 43.30270408796059,
+          "exclusiveProcessCpuSeconds": 43.595380360008335,
+          "sampledPeakRssBytes": 1666064384,
+          "rssAttempts": 4806,
+          "rssSamples": 4806
+        },
+        "candidate": {
+          "calls": 330,
+          "failedCalls": 0,
+          "elapsedSeconds": 43.46670943692152,
+          "processCpuSeconds": 43.76921070899334,
+          "exclusiveElapsedSeconds": 43.46670943692152,
+          "exclusiveProcessCpuSeconds": 43.76921070899334,
+          "sampledPeakRssBytes": 1664974848,
+          "rssAttempts": 4816,
+          "rssSamples": 4816
+        },
+        "candidateOverControlElapsedRatio": 1.0037874158765647
+      },
+      {
+        "stage": "selected_output_finalize",
+        "control": {
+          "calls": 1,
+          "failedCalls": 0,
+          "elapsedSeconds": 0.23744912199981627,
+          "processCpuSeconds": 0.23610569599986775,
+          "exclusiveElapsedSeconds": 0.23744912199981627,
+          "exclusiveProcessCpuSeconds": 0.23610569599986775,
+          "sampledPeakRssBytes": 1665896448,
+          "rssAttempts": 25,
+          "rssSamples": 25
+        },
+        "candidate": {
+          "calls": 1,
+          "failedCalls": 0,
+          "elapsedSeconds": 0.22867597600270528,
+          "processCpuSeconds": 0.22617531699961546,
+          "exclusiveElapsedSeconds": 0.22867597600270528,
+          "exclusiveProcessCpuSeconds": 0.22617531699961546,
+          "sampledPeakRssBytes": 1663418368,
+          "rssAttempts": 24,
+          "rssSamples": 24
+        },
+        "candidateOverControlElapsedRatio": 0.9630525229016522
+      },
+      {
+        "stage": "staging",
+        "control": {
+          "calls": 1,
+          "failedCalls": 0,
+          "elapsedSeconds": 342.062219276002,
+          "processCpuSeconds": 335.108132285,
+          "exclusiveElapsedSeconds": 342.062219276002,
+          "exclusiveProcessCpuSeconds": 335.108132285,
+          "sampledPeakRssBytes": 979587072,
+          "rssAttempts": 30996,
+          "rssSamples": 30996
+        },
+        "candidate": {
+          "calls": 1,
+          "failedCalls": 0,
+          "elapsedSeconds": 329.9844711939986,
+          "processCpuSeconds": 326.491299851,
+          "exclusiveElapsedSeconds": 329.9844711939986,
+          "exclusiveProcessCpuSeconds": 326.491299851,
+          "sampledPeakRssBytes": 957173760,
+          "rssAttempts": 30173,
+          "rssSamples": 30173
+        },
+        "candidateOverControlElapsedRatio": 0.9646913707466239
+      },
+      {
+        "stage": "verification",
+        "control": {
+          "calls": 1,
+          "failedCalls": 0,
+          "elapsedSeconds": 138.01009026300017,
+          "processCpuSeconds": 138.982070903,
+          "exclusiveElapsedSeconds": 138.01009026300017,
+          "exclusiveProcessCpuSeconds": 138.982070903,
+          "sampledPeakRssBytes": 20230144,
+          "rssAttempts": 12885,
+          "rssSamples": 12885
+        },
+        "candidate": {
+          "calls": 1,
+          "failedCalls": 0,
+          "elapsedSeconds": 137.7657751259976,
+          "processCpuSeconds": 138.764691871,
+          "exclusiveElapsedSeconds": 137.7657751259976,
+          "exclusiveProcessCpuSeconds": 138.764691871,
+          "sampledPeakRssBytes": 20213760,
+          "rssAttempts": 12830,
+          "rssSamples": 12830
+        },
+        "candidateOverControlElapsedRatio": 0.9982297298948434
+      }
+    ],
+    "controlTimingSemantics": "inclusive nested windows; exclusive clocks subtract measured children; process CPU includes sampler and other threads; instrumentation overhead included",
+    "candidateTimingSemantics": "inclusive nested windows; exclusive clocks subtract measured children; process CPU includes sampler and other threads; instrumentation overhead included",
+    "controlRssSemantics": "sampled stage-window maximum is a lower bound; shared/current whole-process RSS, not exact allocations or isolated stage memory; nested windows overlap; GIL/scheduling may delay samples",
+    "candidateRssSemantics": "sampled stage-window maximum is a lower bound; shared/current whole-process RSS, not exact allocations or isolated stage memory; nested windows overlap; GIL/scheduling may delay samples"
+  },
+  "evidenceFileSha256": {
+    "/workspace/scratch/8105054a3211/ikna-results/round33-isolated-full-candidate/compare_candidate_control.py": "c81b10f17937204172aa2c3e2231286fab487307c9103633eb06f6196707730e",
+    "/workspace/scratch/8105054a3211/ikna-results/round33-isolated-full-candidate/guard/RESOURCE.json": "62a42ba17f6cbb907f4649db8bc72b6b5217e3f111b4731cce5b0600476df16e",
+    "/workspace/scratch/8105054a3211/ikna-results/round33-isolated-full-candidate/full-control/PROFILE.json": "3fd47f647a263c7f200eabc53259d11ecb27d3a4579a92187f352c648f6fd28f",
+    "/workspace/scratch/8105054a3211/ikna-results/round33-isolated-full-candidate/full-control/run-01/selection.json": "53ac6090a61aa4404017a75bd614f601a28d6a8ea5b90e1e9d7796c6fd276281",
+    "/workspace/scratch/8105054a3211/ikna-results/round30/guard/RESOURCE.json": "b34ca6de7314b540e6e2e6da6bf67be927e9056cbda817943ea31733320390f1",
+    "/workspace/scratch/8105054a3211/ikna-results/round30/full-control/PROFILE.json": "bedc31830cdb89e340636d4f2e7e7a52928074d7c5f1e44f5a181b650dacf761",
+    "/workspace/scratch/8105054a3211/ikna-results/round30/full-control/run-01/selection.json": "3f116d0cfcd9bfd9c2b819d11a2a0953085f6a75fe5193314d4a9bf6bf753009",
+    "/workspace/scratch/8105054a3211/ikna-results/round30/CONTROL-COMPARISON.json": "5af6b001aa2908bc17000f7db67029bbad01eb90350cf716ec72d24bff96ce69",
+    "/workspace/scratch/8105054a3211/ikna-results/round33-isolated-full-candidate/PREPARATION.json": "6f98af7bf49289629e3951a39f90070a79d03818a62626b493732dc2ee46b763",
+    "/workspace/scratch/8105054a3211/ikna-results/round33-isolated-full-candidate/full-control/run-01/selected.jsonl.gz": "a2a5e4bb1e4079e88c8986443c95761795d5fe66ec14ee46a1f83e099e95df64",
+    "/workspace/scratch/8105054a3211/ikna-work/docs/evidence/everyday-round12/EVERYDAY-SELECTION.json.gz": "8db3bf4a8706d45053e646bcfed9c066797bee5e590fabfaf2a093d8a5d78d9e"
+  },
+  "sourceFilesChecked": 237,
+  "candidateFunctionAstEqualsReviewedPrototype": true,
+  "normalSourceUnchanged": true,
+  "isolatedSourceOnlyPolicyChanged": true,
+  "wholeRunComparison": {
+    "controlElapsedSeconds": 8335.16600953,
+    "candidateElapsedSeconds": 4288.253240143,
+    "candidateOverControlElapsedRatio": 0.5144772443932168,
+    "controlLifetimePeakRssBytes": 1666994176,
+    "candidateLifetimePeakRssBytes": 1664880640,
+    "controlGuard": {
+      "limits": {
+        "max_rss_bytes": 4294967296,
+        "address_space_bytes": 5368709120,
+        "min_available_bytes": 2147483648,
+        "min_disk_free_bytes": 4294967296,
+        "poll_seconds": 1.0
+      },
+      "sampledPeakRssBytes": 1666170880,
+      "minimumAvailableBytes": 5711769600,
+      "minimumDiskFreeBytes": 14297772032
+    },
+    "candidateGuard": {
+      "limits": {
+        "max_rss_bytes": 4294967296,
+        "address_space_bytes": 5368709120,
+        "min_available_bytes": 2147483648,
+        "min_disk_free_bytes": 3221225472,
+        "poll_seconds": 1.0
+      },
+      "sampledPeakRssBytes": 1664983040,
+      "minimumAvailableBytes": 5818888192,
+      "minimumDiskFreeBytes": 4117577728
+    }
+  },
+  "fullCandidateGzipCrcRead": true,
+  "exactCompressedSelectedEqual": true,
+  "exactLogicalSelectedEqual": true,
+  "historicalSelectedIdentityEqual": true,
+  "allCountsDecksQualityEqual": true,
+  "comparisonElapsedSeconds": 4.750937980003073,
+  "helperSha256": "c81b10f17937204172aa2c3e2231286fab487307c9103633eb06f6196707730e",
+  "limitations": [
+    "One full control and one full candidate invocation; shared host and uncontrolled OS/filesystem/process cache conditions, not a calibrated repeat-run speedup.",
+    "Pair overlap reuse changes token-cache hit counts/recency; this is part of candidate execution cost.",
+    "Stage wall/CPU include instrumentation overhead; process CPU includes other threads; sampled whole-process stage RSS is not isolated allocation.",
+    "Resource guards used different explicit disk floors (control 4 GiB, candidate 3 GiB); hidden cgroup limits remain unknown.",
+    "No production integration, new admission, semantic quality gain, content freeze or publication.",
+    "No SQLite files opened or hashed by this comparison; selected-material bytes and complete report contracts are the compared outcome."
+  ]
+}

@@ -1,0 +1,20 @@
+test_call_local_state_bounds_and_no_cross_call_reuse (__main__.DifferentialTests.test_call_local_state_bounds_and_no_cross_call_reuse) ... ok
+test_deterministic_random_fixtures (__main__.DifferentialTests.test_deterministic_random_fixtures) ... ok
+test_empty_single_limits_and_missing_language (__main__.DifferentialTests.test_empty_single_limits_and_missing_language) ... ok
+test_exact_threshold_boundaries (__main__.DifferentialTests.test_exact_threshold_boundaries) ... ok
+test_exhaustive_tiny_lists (__main__.DifferentialTests.test_exhaustive_tiny_lists) ... ok
+test_failures_preserve_original_exception (__main__.DifferentialTests.test_failures_preserve_original_exception) ... ok
+test_first_pass_filters_and_second_pass_restores_candidates (__main__.DifferentialTests.test_first_pass_filters_and_second_pass_restores_candidates) ... ok
+test_known_diversity_and_near_duplicate_rejection (__main__.DifferentialTests.test_known_diversity_and_near_duplicate_rejection) ... ok
+test_natural_lru_eviction_and_fresh_reused_process_outputs (__main__.DifferentialTests.test_natural_lru_eviction_and_fresh_reused_process_outputs) ... ok
+test_overlap_call_reduction_and_original_duplicate_trace (__main__.DifferentialTests.test_overlap_call_reduction_and_original_duplicate_trace) ... ok
+test_pair_pruning_counters_quarantine_and_target_allocation (__main__.DifferentialTests.test_pair_pruning_counters_quarantine_and_target_allocation) ... ok
+test_rejection_counter_deduplicates_keys_not_occurrences (__main__.DifferentialTests.test_rejection_counter_deduplicates_keys_not_occurrences) ... ok
+test_repeated_references_equal_copies_duplicate_ids_and_text (__main__.DifferentialTests.test_repeated_references_equal_copies_duplicate_ids_and_text) ... ok
+test_stable_ties_permutations_and_source_priority (__main__.DifferentialTests.test_stable_ties_permutations_and_source_priority) ... ok
+test_unicode_all_supported_languages_empty_tokens_and_normalization (__main__.DifferentialTests.test_unicode_all_supported_languages_empty_tokens_and_normalization) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 2.713s
+
+OK

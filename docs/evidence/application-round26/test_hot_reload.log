@@ -1,0 +1,11 @@
+test_gradle_failure_exit_code_preserved (__main__.NativeHotReloadTests.test_gradle_failure_exit_code_preserved) ... skipped 'requires Windows cmd.exe; no runtime proof on this host'
+test_missing_bridge_environment_fails_without_launching_gradle (__main__.NativeHotReloadTests.test_missing_bridge_environment_fails_without_launching_gradle) ... skipped 'requires Windows cmd.exe; no runtime proof on this host'
+test_missing_gradle_fails_without_launching (__main__.NativeHotReloadTests.test_missing_gradle_fails_without_launching) ... skipped 'requires Windows cmd.exe; no runtime proof on this host'
+test_powershell_stop_policy_keeps_both_streams_and_failure_code (__main__.NativeHotReloadTests.test_powershell_stop_policy_keeps_both_streams_and_failure_code) ... skipped 'requires Windows cmd.exe; no runtime proof on this host'
+test_profile_restart_request_is_consumed_once_and_ignores_invalid_requests (__main__.NativeHotReloadTests.test_profile_restart_request_is_consumed_once_and_ignores_invalid_requests) ... skipped 'requires Windows cmd.exe; no runtime proof on this host'
+test_recompiler_arguments_preserved_and_watch_flags_last (__main__.NativeHotReloadTests.test_recompiler_arguments_preserved_and_watch_flags_last) ... skipped 'requires Windows cmd.exe; no runtime proof on this host'
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.000s
+
+OK (skipped=6)

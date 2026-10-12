@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "status": "child-exited-zero",
+  "publicationSafe": false,
+  "resumable": false,
+  "childPid": 7,
+  "exitCode": 0,
+  "sampleCount": 4287,
+  "sampledPeakRssBytes": 1664983040,
+  "minimumAvailableBytes": 5818888192,
+  "minimumDiskFreeBytes": 4117577728,
+  "limits": {
+    "max_rss_bytes": 4294967296,
+    "address_space_bytes": 5368709120,
+    "min_available_bytes": 2147483648,
+    "min_disk_free_bytes": 3221225472,
+    "poll_seconds": 1.0
+  },
+  "profileArgs": [
+    "--pool",
+    "/workspace/scratch/8105054a3211/ikna-input/admitted-pool/pool/everyday-candidates.jsonl.gz",
+    "--pool-report",
+    "/workspace/scratch/8105054a3211/ikna-input/admitted-pool/reports/EVERYDAY-POOL.json",
+    "--output-dir",
+    "/workspace/scratch/8105054a3211/ikna-results/round33-isolated-full-candidate/full-control",
+    "--input-scope",
+    "full-saved-input",
+    "--measurement-mode",
+    "stages",
+    "--runs",
+    "1",
+    "--max-input-bytes",
+    "545718435",
+    "--max-deck",
+    "8000"
+  ],
+  "limitations": [
+    "sampled thresholds can overshoot between polls",
+    "RLIMIT_AS limits virtual address space, not RSS or total host use",
+    "unavailable cgroup visibility leaves hidden memory limits unknown",
+    "partial SQLite/output is not resumable; successful child exit is diagnostic only",
+    "supervisor SIGKILL leaves last monitoring snapshot incomplete; kernel parent-death signal terminates child, adoptive parent must reap it"
+  ],
+  "temporaryDirectory": "/workspace/scratch/8105054a3211/ikna-results/round33-isolated-full-candidate/guard/tmp",
+  "temporaryDirectoryContract": "child TMPDIR/TMP/TEMP and SQLITE_TMPDIR pinned to monitored filesystem",
+  "preflight": {
+    "rssBytes": 11231232,
+    "virtualBytes": 38993920,
+    "hostAvailableBytes": 7509086208,
+    "availableBytes": 7509086208,
+    "cgroupVisibility": "unavailable",
+    "cgroupHeadroomBytes": null,
+    "diskFreeBytes": 13981155328,
+    "monotonicSeconds": 31480.789240446
+  },
+  "latestSample": {
+    "rssBytes": 1636356096,
+    "virtualBytes": 1795026944,
+    "hostAvailableBytes": 5836054528,
+    "availableBytes": 5836054528,
+    "cgroupVisibility": "unavailable",
+    "cgroupHeadroomBytes": null,
+    "diskFreeBytes": 4117577728,
+    "monotonicSeconds": 35770.372748774
+  }
+}

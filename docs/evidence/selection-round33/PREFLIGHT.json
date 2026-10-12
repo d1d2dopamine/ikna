@@ -1,0 +1,23 @@
+{
+  "utc": "2026-10-12T00:36:02.356333+00:00",
+  "freeDiskBytes": 13981175808,
+  "originalObservedAdditionalPeakDiskBytes": 10576863232,
+  "candidateDiskStopFloorBytes": 3221225472,
+  "reservedCompactEvidenceBytes": 104857600,
+  "projectedMinimumBytes": 3404312576,
+  "projectedMarginAboveFloorAndReserveBytes": 78229504,
+  "capacityProjectionPassed": true,
+  "retainedOriginalEvidence": true,
+  "policyDifferenceOnly": [
+    "selection_policy.py"
+  ],
+  "originalMedianPairSeconds": 13.494454742998641,
+  "candidateMedianPairSeconds": 4.658243359001062,
+  "limits": [
+    "Capacity estimate uses one previous run; guard may stop if actual usage is larger",
+    "No user or original evidence deleted",
+    "No further disk-floor lowering on failure",
+    "Memory limits unchanged; output/quality acceptance unchanged",
+    "Experimental isolated source only; normal selector not integrated"
+  ]
+}

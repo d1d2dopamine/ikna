@@ -1,0 +1,30 @@
+{
+  "files": {
+    "tools/catalog/fixtures/selection_overlap_cache_probe.py": {
+      "bytes": 1838,
+      "sha256": "f284488d7028507d2a7bb02ee86bd009ada9c38f30d5f9b1af60e3cbe8acb03e"
+    },
+    "tools/catalog/fixtures/selection_policy_before_overlap.py": {
+      "bytes": 3450,
+      "sha256": "fb64312f712636dcde11e7a656d123647a6669f73704bcd085f74da4e781fe39"
+    },
+    "tools/catalog/selection_policy.py": {
+      "bytes": 9486,
+      "sha256": "72783a30ada3995c9cc4e32f96a4fc5ff53940756ceb5895c9530ecd9af92edc"
+    },
+    "tools/catalog/test_selection_overlap_reuse.py": {
+      "bytes": 21282,
+      "sha256": "6fbe6682a21068612db034fdc53cc76697498a47bb500ddbff62ff07c4aee836"
+    }
+  },
+  "frozenReferenceChooserSha256": "54f69e0c45fa4426d4a8dc563bd5b6055d5fd0a8d061a2c6f0f072e50c2e098c",
+  "fullCandidateAcceptanceEstablished": false,
+  "originalPolicySha256": "6100810b5bd7eca23b063f90dd0c1e81cb3a7f55ba3aeab76f02be84720fb3ae",
+  "productionEdited": false,
+  "productionFunctionAstEqualToReviewedPrototype": true,
+  "productionFunctionExactSourceEqualToReviewedPrototype": true,
+  "proposedPolicySha256": "72783a30ada3995c9cc4e32f96a4fc5ff53940756ceb5895c9530ecd9af92edc",
+  "reviewedChooserSourceSha256": "f4f1b0a51b8645153b3f4fd08a55caf2d152d1d96add7238cbecd8e4c66d0d2a",
+  "reviewedPrototypeModuleSha256": "36efac2461e102d1c0ae66282c5ea46facff6c1dcdd6b8bb376828e6e0525e1e",
+  "status": "conditional-proposal-only"
+}

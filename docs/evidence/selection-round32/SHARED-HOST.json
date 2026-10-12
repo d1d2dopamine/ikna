@@ -1,0 +1,26 @@
+{
+  "exclusiveHost": false,
+  "limitations": [
+    "No exclusive-host or idle-host timing claim.",
+    "Background and unrelated load were not continuously measured.",
+    "Probe preflight headroom is a snapshot, not continuous resource supervision.",
+    "UTC timestamps identify orchestration intervals; measured pair subinterval UTC endpoints are not recorded."
+  ],
+  "otherKnownHeavyJobs": {
+    "concurrentJobsKnownToCoordinator": false,
+    "wholeHostContinuouslyObserved": false
+  },
+  "probeExecutionsSerial": true,
+  "sameProjectOverlap": {
+    "approximatelyStartedUtc": "2026-10-12T00:32:53Z",
+    "finishedBeforeUtc": "2026-10-12T00:33:03Z",
+    "kind": "Small serial selection/segmentation unittest suite in an isolated candidate source copy",
+    "overlappingProbeInvocation": "baseline-03",
+    "preciseMeasuredPairOverlapUnknown": true,
+    "reportedSuiteElapsedSeconds": 2.24,
+    "source": "Execution coordinator report; suite endpoints are approximate, not measured by probe helper.",
+    "testsPassed": 126
+  },
+  "sequenceFinishedUtc": "2026-10-12T00:34:05.560740+00:00",
+  "sequenceStartedUtc": "2026-10-12T00:30:27.432866+00:00"
+}

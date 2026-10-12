@@ -1,0 +1,17 @@
+{
+  "manifestRegenerationByteIdentical": true,
+  "allPublishedEvidenceHashesVerified": true,
+  "pairs": 300,
+  "globallyUniqueSourceHashes": 300,
+  "calibrationDocs": [
+    "talk.1",
+    "talk.3"
+  ],
+  "heldOutDocs": [
+    "talk.4",
+    "talk.5",
+    "talk.6"
+  ],
+  "textRedistributed": false,
+  "modelRun": false
+}

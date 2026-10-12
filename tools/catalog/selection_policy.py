@@ -121,15 +121,37 @@ def choose_contexts(
     near_duplicate_threshold: float,
     *, diverse: bool = False, lang: str | None = None,
 ) -> tuple[list[dict[str, Any]], int]:
-    """Choose varied contexts without fabricating or rewriting any text."""
+    """Original policy with an O(N), call-local, lazy maximum per object identity.
+
+    selected is append-only. An entry (k, maximum) has evaluated exactly the
+    selected[:k] prefix in order. Later ranking extends that prefix once instead
+    of recomputing it. Entries survive the policy's two passes, but never a call.
+    Dictionary equality/removal remains the original policy's responsibility;
+    object identity is used solely to index independent memoization state.
+    """
     ordered = sorted(contexts, key=context_quality_key)
     quality_keys = {id(context): context_quality_key(context) for context in ordered} if diverse else {}
     selected: list[dict[str, Any]] = []
     used_families: set[str] = set()
     rejected_keys: set[tuple[str, str]] = set()
+    maxima: dict[int, tuple[int, float]] = {}
 
-    # First pass tries to add source-family diversity where multiple corpora
-    # independently support the same target.
+    def maximum_overlap(context: dict[str, Any]) -> float:
+        identity = id(context)
+        seen, maximum = maxima.get(identity, (0, 0.0))
+        count = len(selected)
+        if seen == count:
+            return maximum
+        while seen < count:
+            overlap = context_overlap(context["context"], selected[seen]["context"], lang)
+            # Same left-to-right maximum as the original generator, including
+            # retaining the first equal value. No rounding or approximation.
+            if seen == 0 or overlap > maximum:
+                maximum = overlap
+            seen += 1
+        maxima[identity] = (count, maximum)
+        return maximum
+
     for require_new_source in (True, False):
         remaining = list(ordered)
         while remaining:
@@ -137,15 +159,12 @@ def choose_contexts(
                 remaining = [c for c in remaining if set(c.get("sourceFamilies") or ()) - used_families]
                 if not remaining:
                     break
-            # Keep source/align evidence ahead of diversity. Primary is the
-            # unchanged best evidence. Similar alternatives are reordered, not
-            # forbidden: a grammatical variation can fill a scarce target.
             if diverse and selected:
                 if not lang:
                     raise ValueError("diverse contexts require a learning language")
                 context = min(remaining, key=lambda c: (
                     quality_keys[id(c)][:2],
-                    max(context_overlap(c["context"], old["context"], lang) for old in selected),
+                    maximum_overlap(c),
                     quality_keys[id(c)][2:]))
                 remaining.remove(context)
             else:

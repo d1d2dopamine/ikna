@@ -1,0 +1,11 @@
+{
+  "matchesAllProfileRuns": true,
+  "outputIdentity": {
+    "reportSha256": "a1692d4341629e3d485bc17376b448f0bf3b2e38144812c26f17cd1e6dc80b38",
+    "previewSha256": "544dfacae1d5033b157971b4cb4232fa5c8117510ad5ea32d7aaaa743ae7a1e5",
+    "selectedSha256": "9cdabdfab5ec81ebe4b064a3ae1621539973f180365ba64960e98738d7be2176",
+    "selectedLogicalSha256": "68bd9974a1717dcb792fda841a6c9b796e695ec3fee19345f57d7c64aa984fb4"
+  },
+  "seconds": 2.2622068589989794,
+  "comparisonScope": "same current environment; no instrumentation vs cProfile; no speedup claim"
+}

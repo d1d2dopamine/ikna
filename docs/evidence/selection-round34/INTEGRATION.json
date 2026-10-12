@@ -1,0 +1,43 @@
+{
+  "status": "integrated-and-postintegration-verified",
+  "utc": "2026-10-12T01:53:50.691974+00:00",
+  "acceptanceComparisonSha256": "ae28dc2576d114b573ef239f0e18946843f8035456b6dc488b47ab01ad3668d5",
+  "priorFullSourceCheckpointSha256": "e92926478049d2d9b9b571c7f6464a1baf49cd3d697c85f8c7dc5210e18e6e48",
+  "priorFullSourceCheckpointFile": "ikna-0.12-press-round-33-full-overlap-control.zip",
+  "productionPolicySha256": "72783a30ada3995c9cc4e32f96a4fc5ff53940756ceb5895c9530ecd9af92edc",
+  "identicalToFullyReplayedPolicy": true,
+  "changedOrAddedSourceFiles": {
+    "tools/catalog/fixtures/selection_overlap_cache_probe.py": {
+      "bytes": 1838,
+      "sha256": "f284488d7028507d2a7bb02ee86bd009ada9c38f30d5f9b1af60e3cbe8acb03e"
+    },
+    "tools/catalog/fixtures/selection_policy_before_overlap.py": {
+      "bytes": 3450,
+      "sha256": "fb64312f712636dcde11e7a656d123647a6669f73704bcd085f74da4e781fe39"
+    },
+    "tools/catalog/selection_policy.py": {
+      "bytes": 9486,
+      "sha256": "72783a30ada3995c9cc4e32f96a4fc5ff53940756ceb5895c9530ecd9af92edc"
+    },
+    "tools/catalog/test_selection_overlap_reuse.py": {
+      "bytes": 21282,
+      "sha256": "6fbe6682a21068612db034fdc53cc76697498a47bb500ddbff62ff07c4aee836"
+    }
+  },
+  "productionApplicationUiChanged": false,
+  "persistentAnalysisCacheEnabled": false,
+  "selectionPolicySemanticsChanged": false,
+  "historicalCapUsedForEvidence": 8000,
+  "currentDefaultCapUnchanged": 12000,
+  "notes": [
+    "Only exact chooser implementation and three test-only files integrated",
+    "Archived Round30/33 comparison tools require their original source checkpoints; current source intentionally has new policy/test fingerprints",
+    "No classifier/source-admission/content-freeze/publication action"
+  ],
+  "relevantTestsPassed": 143,
+  "explicitJapaneseQualityRerunPassed": 13,
+  "normalSourceSmokeComparisonSha256": "b55cde4404f3f255b12113e0ac884a8ff21738e3ec2aec37545d8a83737f99f9",
+  "sourceReviewSha256": "b8e69d20d6a1ceb9f2b9dccd553f78f05e10c9ba47dbec47a6ca2a9390b1ef0c",
+  "finalReviewSha256": "1d6a11dde7f071d055e41ab6fdf9950651fe89128a51625c099e9445c13241aa",
+  "textAndLocalizationPassed": true
+}

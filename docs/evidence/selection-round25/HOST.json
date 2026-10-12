@@ -1,0 +1,10 @@
+{
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "machine": "x86_64",
+  "python": "3.12.14",
+  "logicalCpuCount": 9,
+  "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+  "memoryTotalKiB": 10206508,
+  "osPageCacheControlled": false,
+  "concurrentWork": "bounded one-worker application toolchain setup/build; no MVS benchmark CPU load"
+}

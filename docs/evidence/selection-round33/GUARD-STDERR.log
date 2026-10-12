@@ -1,0 +1,375 @@
+Selection: staging admitted candidates
+Selection: staged 250000 candidate rows
+Selection: staged 500000 candidate rows
+Selection: staged 750000 candidate rows
+Selection: staged 1000000 candidate rows
+Selection: staged 1250000 candidate rows
+Selection: staged 1500000 candidate rows
+Selection: staged 1750000 candidate rows
+Selection: staged 2000000 candidate rows
+Selection: staged 2250000 candidate rows
+Selection: staged 2500000 candidate rows
+Selection: staged 2750000 candidate rows
+Selection: staged 3000000 candidate rows
+Selection: staged 3250000 candidate rows
+Selection: staged 3500000 candidate rows
+Selection: staged 3750000 candidate rows
+Selection: staged 4000000 candidate rows
+Selection: staged 4250000 candidate rows
+Selection: staged 4500000 candidate rows
+Selection: staged 4750000 candidate rows
+Selection: staged 5000000 candidate rows
+Selection: staged 5250000 candidate rows
+Selection: staged 5500000 candidate rows
+Selection: staged 5750000 candidate rows
+Selection: staged 6000000 candidate rows
+Selection: staged 6250000 candidate rows
+Selection: staged 6500000 candidate rows
+Selection: staged 6750000 candidate rows
+Selection: staged 7000000 candidate rows
+Selection: staged 7250000 candidate rows
+Selection: staged 7500000 candidate rows
+Selection: staged 7750000 candidate rows
+Selection: staged 8000000 candidate rows
+Selection: staged 8250000 candidate rows
+Selection: staged 8500000 candidate rows
+Selection: staged 8750000 candidate rows
+Selection: staged 9000000 candidate rows
+Selection: staged 9250000 candidate rows
+Selection: staged 9500000 candidate rows
+Selection: staged 9750000 candidate rows
+Selection: staged 10000000 candidate rows
+Selection: staged 10250000 candidate rows
+Selection: staged 10500000 candidate rows
+Selection: staged 10750000 candidate rows
+Selection: staged 11000000 candidate rows
+Selection: staging complete (11099490 unique candidates)
+Selection: early Japanese analysis everyday/ja
+Selection: analyzed everyday/ja 25000/238145 contexts
+Selection: analyzed everyday/ja 50000/238145 contexts
+Selection: analyzed everyday/ja 75000/238145 contexts
+Selection: analyzed everyday/ja 100000/238145 contexts
+Selection: analyzed everyday/ja 125000/238145 contexts
+Selection: analyzed everyday/ja 150000/238145 contexts
+Selection: analyzed everyday/ja 175000/238145 contexts
+Selection: analyzed everyday/ja 200000/238145 contexts
+Selection: analyzed everyday/ja 225000/238145 contexts
+Selection: Japanese analysis complete; deferrals={'jaContextsChecked': 238145, 'ja-morpheme-cut-deferred': 210164, 'ja-oov-boundary-deferred': 1047, 'canonical-target-ambiguous-deferred': 2}
+Selection: context analysis everyday/de
+Selection: analyzed everyday/de 25000/632805 contexts
+Selection: analyzed everyday/de 50000/632805 contexts
+Selection: analyzed everyday/de 75000/632805 contexts
+Selection: analyzed everyday/de 100000/632805 contexts
+Selection: analyzed everyday/de 125000/632805 contexts
+Selection: analyzed everyday/de 150000/632805 contexts
+Selection: analyzed everyday/de 175000/632805 contexts
+Selection: analyzed everyday/de 200000/632805 contexts
+Selection: analyzed everyday/de 225000/632805 contexts
+Selection: analyzed everyday/de 250000/632805 contexts
+Selection: analyzed everyday/de 275000/632805 contexts
+Selection: analyzed everyday/de 300000/632805 contexts
+Selection: analyzed everyday/de 325000/632805 contexts
+Selection: analyzed everyday/de 350000/632805 contexts
+Selection: analyzed everyday/de 375000/632805 contexts
+Selection: analyzed everyday/de 400000/632805 contexts
+Selection: analyzed everyday/de 425000/632805 contexts
+Selection: analyzed everyday/de 450000/632805 contexts
+Selection: analyzed everyday/de 475000/632805 contexts
+Selection: analyzed everyday/de 500000/632805 contexts
+Selection: analyzed everyday/de 525000/632805 contexts
+Selection: analyzed everyday/de 550000/632805 contexts
+Selection: analyzed everyday/de 575000/632805 contexts
+Selection: analyzed everyday/de 600000/632805 contexts
+Selection: analyzed everyday/de 625000/632805 contexts
+Selection: pair everyday/de->en
+Selection: pair everyday/de->es
+Selection: pair everyday/de->fr
+Selection: pair everyday/de->it
+Selection: pair everyday/de->ja
+Selection: pair everyday/de->ko
+Selection: pair everyday/de->pl
+Selection: pair everyday/de->pt
+Selection: pair everyday/de->ru
+Selection: pair everyday/de->zh
+Selection: context analysis everyday/en
+Selection: analyzed everyday/en 25000/1157960 contexts
+Selection: analyzed everyday/en 50000/1157960 contexts
+Selection: analyzed everyday/en 75000/1157960 contexts
+Selection: analyzed everyday/en 100000/1157960 contexts
+Selection: analyzed everyday/en 125000/1157960 contexts
+Selection: analyzed everyday/en 150000/1157960 contexts
+Selection: analyzed everyday/en 175000/1157960 contexts
+Selection: analyzed everyday/en 200000/1157960 contexts
+Selection: analyzed everyday/en 225000/1157960 contexts
+Selection: analyzed everyday/en 250000/1157960 contexts
+Selection: analyzed everyday/en 275000/1157960 contexts
+Selection: analyzed everyday/en 300000/1157960 contexts
+Selection: analyzed everyday/en 325000/1157960 contexts
+Selection: analyzed everyday/en 350000/1157960 contexts
+Selection: analyzed everyday/en 375000/1157960 contexts
+Selection: analyzed everyday/en 400000/1157960 contexts
+Selection: analyzed everyday/en 425000/1157960 contexts
+Selection: analyzed everyday/en 450000/1157960 contexts
+Selection: analyzed everyday/en 475000/1157960 contexts
+Selection: analyzed everyday/en 500000/1157960 contexts
+Selection: analyzed everyday/en 525000/1157960 contexts
+Selection: analyzed everyday/en 550000/1157960 contexts
+Selection: analyzed everyday/en 575000/1157960 contexts
+Selection: analyzed everyday/en 600000/1157960 contexts
+Selection: analyzed everyday/en 625000/1157960 contexts
+Selection: analyzed everyday/en 650000/1157960 contexts
+Selection: analyzed everyday/en 675000/1157960 contexts
+Selection: analyzed everyday/en 700000/1157960 contexts
+Selection: analyzed everyday/en 725000/1157960 contexts
+Selection: analyzed everyday/en 750000/1157960 contexts
+Selection: analyzed everyday/en 775000/1157960 contexts
+Selection: analyzed everyday/en 800000/1157960 contexts
+Selection: analyzed everyday/en 825000/1157960 contexts
+Selection: analyzed everyday/en 850000/1157960 contexts
+Selection: analyzed everyday/en 875000/1157960 contexts
+Selection: analyzed everyday/en 900000/1157960 contexts
+Selection: analyzed everyday/en 925000/1157960 contexts
+Selection: analyzed everyday/en 950000/1157960 contexts
+Selection: analyzed everyday/en 975000/1157960 contexts
+Selection: analyzed everyday/en 1000000/1157960 contexts
+Selection: analyzed everyday/en 1025000/1157960 contexts
+Selection: analyzed everyday/en 1050000/1157960 contexts
+Selection: analyzed everyday/en 1075000/1157960 contexts
+Selection: analyzed everyday/en 1100000/1157960 contexts
+Selection: analyzed everyday/en 1125000/1157960 contexts
+Selection: analyzed everyday/en 1150000/1157960 contexts
+Selection: pair everyday/en->de
+Selection: pair everyday/en->es
+Selection: pair everyday/en->fr
+Selection: pair everyday/en->it
+Selection: pair everyday/en->ja
+Selection: pair everyday/en->ko
+Selection: pair everyday/en->pl
+Selection: pair everyday/en->pt
+Selection: pair everyday/en->ru
+Selection: pair everyday/en->zh
+Selection: context analysis everyday/es
+Selection: analyzed everyday/es 25000/358174 contexts
+Selection: analyzed everyday/es 50000/358174 contexts
+Selection: analyzed everyday/es 75000/358174 contexts
+Selection: analyzed everyday/es 100000/358174 contexts
+Selection: analyzed everyday/es 125000/358174 contexts
+Selection: analyzed everyday/es 150000/358174 contexts
+Selection: analyzed everyday/es 175000/358174 contexts
+Selection: analyzed everyday/es 200000/358174 contexts
+Selection: analyzed everyday/es 225000/358174 contexts
+Selection: analyzed everyday/es 250000/358174 contexts
+Selection: analyzed everyday/es 275000/358174 contexts
+Selection: analyzed everyday/es 300000/358174 contexts
+Selection: analyzed everyday/es 325000/358174 contexts
+Selection: analyzed everyday/es 350000/358174 contexts
+Selection: pair everyday/es->de
+Selection: pair everyday/es->en
+Selection: pair everyday/es->fr
+Selection: pair everyday/es->it
+Selection: pair everyday/es->ja
+Selection: pair everyday/es->ko
+Selection: pair everyday/es->pl
+Selection: pair everyday/es->pt
+Selection: pair everyday/es->ru
+Selection: pair everyday/es->zh
+Selection: context analysis everyday/fr
+Selection: analyzed everyday/fr 25000/566738 contexts
+Selection: analyzed everyday/fr 50000/566738 contexts
+Selection: analyzed everyday/fr 75000/566738 contexts
+Selection: analyzed everyday/fr 100000/566738 contexts
+Selection: analyzed everyday/fr 125000/566738 contexts
+Selection: analyzed everyday/fr 150000/566738 contexts
+Selection: analyzed everyday/fr 175000/566738 contexts
+Selection: analyzed everyday/fr 200000/566738 contexts
+Selection: analyzed everyday/fr 225000/566738 contexts
+Selection: analyzed everyday/fr 250000/566738 contexts
+Selection: analyzed everyday/fr 275000/566738 contexts
+Selection: analyzed everyday/fr 300000/566738 contexts
+Selection: analyzed everyday/fr 325000/566738 contexts
+Selection: analyzed everyday/fr 350000/566738 contexts
+Selection: analyzed everyday/fr 375000/566738 contexts
+Selection: analyzed everyday/fr 400000/566738 contexts
+Selection: analyzed everyday/fr 425000/566738 contexts
+Selection: analyzed everyday/fr 450000/566738 contexts
+Selection: analyzed everyday/fr 475000/566738 contexts
+Selection: analyzed everyday/fr 500000/566738 contexts
+Selection: analyzed everyday/fr 525000/566738 contexts
+Selection: analyzed everyday/fr 550000/566738 contexts
+Selection: pair everyday/fr->de
+Selection: pair everyday/fr->en
+Selection: pair everyday/fr->es
+Selection: pair everyday/fr->it
+Selection: pair everyday/fr->ja
+Selection: pair everyday/fr->ko
+Selection: pair everyday/fr->pl
+Selection: pair everyday/fr->pt
+Selection: pair everyday/fr->ru
+Selection: pair everyday/fr->zh
+Selection: context analysis everyday/it
+Selection: analyzed everyday/it 25000/767032 contexts
+Selection: analyzed everyday/it 50000/767032 contexts
+Selection: analyzed everyday/it 75000/767032 contexts
+Selection: analyzed everyday/it 100000/767032 contexts
+Selection: analyzed everyday/it 125000/767032 contexts
+Selection: analyzed everyday/it 150000/767032 contexts
+Selection: analyzed everyday/it 175000/767032 contexts
+Selection: analyzed everyday/it 200000/767032 contexts
+Selection: analyzed everyday/it 225000/767032 contexts
+Selection: analyzed everyday/it 250000/767032 contexts
+Selection: analyzed everyday/it 275000/767032 contexts
+Selection: analyzed everyday/it 300000/767032 contexts
+Selection: analyzed everyday/it 325000/767032 contexts
+Selection: analyzed everyday/it 350000/767032 contexts
+Selection: analyzed everyday/it 375000/767032 contexts
+Selection: analyzed everyday/it 400000/767032 contexts
+Selection: analyzed everyday/it 425000/767032 contexts
+Selection: analyzed everyday/it 450000/767032 contexts
+Selection: analyzed everyday/it 475000/767032 contexts
+Selection: analyzed everyday/it 500000/767032 contexts
+Selection: analyzed everyday/it 525000/767032 contexts
+Selection: analyzed everyday/it 550000/767032 contexts
+Selection: analyzed everyday/it 575000/767032 contexts
+Selection: analyzed everyday/it 600000/767032 contexts
+Selection: analyzed everyday/it 625000/767032 contexts
+Selection: analyzed everyday/it 650000/767032 contexts
+Selection: analyzed everyday/it 675000/767032 contexts
+Selection: analyzed everyday/it 700000/767032 contexts
+Selection: analyzed everyday/it 725000/767032 contexts
+Selection: analyzed everyday/it 750000/767032 contexts
+Selection: pair everyday/it->de
+Selection: pair everyday/it->en
+Selection: pair everyday/it->es
+Selection: pair everyday/it->fr
+Selection: pair everyday/it->ja
+Selection: pair everyday/it->ko
+Selection: pair everyday/it->pl
+Selection: pair everyday/it->pt
+Selection: pair everyday/it->ru
+Selection: pair everyday/it->zh
+Selection: pair everyday/ja->de
+Selection: pair everyday/ja->en
+Selection: pair everyday/ja->es
+Selection: pair everyday/ja->fr
+Selection: pair everyday/ja->it
+Selection: pair everyday/ja->ko
+Selection: pair everyday/ja->pl
+Selection: pair everyday/ja->pt
+Selection: pair everyday/ja->ru
+Selection: pair everyday/ja->zh
+Selection: context analysis everyday/ko
+Selection: pair everyday/ko->de
+Selection: pair everyday/ko->en
+Selection: pair everyday/ko->es
+Selection: pair everyday/ko->fr
+Selection: pair everyday/ko->it
+Selection: pair everyday/ko->ja
+Selection: pair everyday/ko->pl
+Selection: pair everyday/ko->pt
+Selection: pair everyday/ko->ru
+Selection: pair everyday/ko->zh
+Selection: context analysis everyday/pl
+Selection: analyzed everyday/pl 25000/123779 contexts
+Selection: analyzed everyday/pl 50000/123779 contexts
+Selection: analyzed everyday/pl 75000/123779 contexts
+Selection: analyzed everyday/pl 100000/123779 contexts
+Selection: pair everyday/pl->de
+Selection: pair everyday/pl->en
+Selection: pair everyday/pl->es
+Selection: pair everyday/pl->fr
+Selection: pair everyday/pl->it
+Selection: pair everyday/pl->ja
+Selection: pair everyday/pl->ko
+Selection: pair everyday/pl->pt
+Selection: pair everyday/pl->ru
+Selection: pair everyday/pl->zh
+Selection: context analysis everyday/pt
+Selection: analyzed everyday/pt 25000/355992 contexts
+Selection: analyzed everyday/pt 50000/355992 contexts
+Selection: analyzed everyday/pt 75000/355992 contexts
+Selection: analyzed everyday/pt 100000/355992 contexts
+Selection: analyzed everyday/pt 125000/355992 contexts
+Selection: analyzed everyday/pt 150000/355992 contexts
+Selection: analyzed everyday/pt 175000/355992 contexts
+Selection: analyzed everyday/pt 200000/355992 contexts
+Selection: analyzed everyday/pt 225000/355992 contexts
+Selection: analyzed everyday/pt 250000/355992 contexts
+Selection: analyzed everyday/pt 275000/355992 contexts
+Selection: analyzed everyday/pt 300000/355992 contexts
+Selection: analyzed everyday/pt 325000/355992 contexts
+Selection: analyzed everyday/pt 350000/355992 contexts
+Selection: pair everyday/pt->de
+Selection: pair everyday/pt->en
+Selection: pair everyday/pt->es
+Selection: pair everyday/pt->fr
+Selection: pair everyday/pt->it
+Selection: pair everyday/pt->ja
+Selection: pair everyday/pt->ko
+Selection: pair everyday/pt->pl
+Selection: pair everyday/pt->ru
+Selection: pair everyday/pt->zh
+Selection: context analysis everyday/ru
+Selection: analyzed everyday/ru 25000/993769 contexts
+Selection: analyzed everyday/ru 50000/993769 contexts
+Selection: analyzed everyday/ru 75000/993769 contexts
+Selection: analyzed everyday/ru 100000/993769 contexts
+Selection: analyzed everyday/ru 125000/993769 contexts
+Selection: analyzed everyday/ru 150000/993769 contexts
+Selection: analyzed everyday/ru 175000/993769 contexts
+Selection: analyzed everyday/ru 200000/993769 contexts
+Selection: analyzed everyday/ru 225000/993769 contexts
+Selection: analyzed everyday/ru 250000/993769 contexts
+Selection: analyzed everyday/ru 275000/993769 contexts
+Selection: analyzed everyday/ru 300000/993769 contexts
+Selection: analyzed everyday/ru 325000/993769 contexts
+Selection: analyzed everyday/ru 350000/993769 contexts
+Selection: analyzed everyday/ru 375000/993769 contexts
+Selection: analyzed everyday/ru 400000/993769 contexts
+Selection: analyzed everyday/ru 425000/993769 contexts
+Selection: analyzed everyday/ru 450000/993769 contexts
+Selection: analyzed everyday/ru 475000/993769 contexts
+Selection: analyzed everyday/ru 500000/993769 contexts
+Selection: analyzed everyday/ru 525000/993769 contexts
+Selection: analyzed everyday/ru 550000/993769 contexts
+Selection: analyzed everyday/ru 575000/993769 contexts
+Selection: analyzed everyday/ru 600000/993769 contexts
+Selection: analyzed everyday/ru 625000/993769 contexts
+Selection: analyzed everyday/ru 650000/993769 contexts
+Selection: analyzed everyday/ru 675000/993769 contexts
+Selection: analyzed everyday/ru 700000/993769 contexts
+Selection: analyzed everyday/ru 725000/993769 contexts
+Selection: analyzed everyday/ru 750000/993769 contexts
+Selection: analyzed everyday/ru 775000/993769 contexts
+Selection: analyzed everyday/ru 800000/993769 contexts
+Selection: analyzed everyday/ru 825000/993769 contexts
+Selection: analyzed everyday/ru 850000/993769 contexts
+Selection: analyzed everyday/ru 875000/993769 contexts
+Selection: analyzed everyday/ru 900000/993769 contexts
+Selection: analyzed everyday/ru 925000/993769 contexts
+Selection: analyzed everyday/ru 950000/993769 contexts
+Selection: analyzed everyday/ru 975000/993769 contexts
+Selection: pair everyday/ru->de
+Selection: pair everyday/ru->en
+Selection: pair everyday/ru->es
+Selection: pair everyday/ru->fr
+Selection: pair everyday/ru->it
+Selection: pair everyday/ru->ja
+Selection: pair everyday/ru->ko
+Selection: pair everyday/ru->pl
+Selection: pair everyday/ru->pt
+Selection: pair everyday/ru->zh
+Selection: context analysis everyday/zh
+Selection: analyzed everyday/zh 25000/81217 contexts
+Selection: analyzed everyday/zh 50000/81217 contexts
+Selection: analyzed everyday/zh 75000/81217 contexts
+Selection: pair everyday/zh->de
+Selection: pair everyday/zh->en
+Selection: pair everyday/zh->es
+Selection: pair everyday/zh->fr
+Selection: pair everyday/zh->it
+Selection: pair everyday/zh->ja
+Selection: pair everyday/zh->ko
+Selection: pair everyday/zh->pl
+Selection: pair everyday/zh->pt
+Selection: pair everyday/zh->ru
+Selection: complete

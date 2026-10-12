@@ -1,0 +1,74 @@
+{
+  "status": "complete-integration-evidence",
+  "files": {
+    "FINAL-REVIEW.md": {
+      "sha256": "1d6a11dde7f071d055e41ab6fdf9950651fe89128a51625c099e9445c13241aa",
+      "sizeBytes": 2761
+    },
+    "INITIAL-CLI-FAILURE.json": {
+      "sha256": "e7c52c87487f4bfe7ffbf7e44399b52c91e4465ff78478e05331e58112f50266",
+      "sizeBytes": 2160
+    },
+    "INITIAL-CLI-FAILURE.log": {
+      "sha256": "06bec3b4e23424cfae2fdc552f7894e34ebba5d3af8f13c64d2dc50e87726390",
+      "sizeBytes": 787
+    },
+    "INTEGRATION.json": {
+      "sha256": "8f3d9a688918d141fe34bb4b094d5d56e8eb2ad66973a59727d0373ef8872235",
+      "sizeBytes": 2172
+    },
+    "JAPANESE-QUALITY.log": {
+      "sha256": "42fdf53d89833f9ad125973f0e00a1251756f436f4750865c54f734022cbdff2",
+      "sizeBytes": 628
+    },
+    "PROPOSAL-CONDITIONAL-INTEGRATION.patch": {
+      "sha256": "b7035883d2b3942063939a4c7254435d65db6274db3f546f50d454a222d11837",
+      "sizeBytes": 30296
+    },
+    "PROPOSAL-INDEPENDENT-REVIEW.md": {
+      "sha256": "80c168f52382a5fae949032da45daa721792f3067dbc12375cce4bf3ab72d66d",
+      "sizeBytes": 3456
+    },
+    "PROPOSAL-PROVENANCE.json": {
+      "sha256": "9e3ca3661de07dd9e5c700142cf5be190072535fc7514ee168a1f2e0daf2de58",
+      "sizeBytes": 1428
+    },
+    "SMOKE-02.log": {
+      "sha256": "a80de088df70e52caa49889dd1ddf293d3ad3d9c1eb8d2d0a5a1783dc66433bf",
+      "sizeBytes": 47
+    },
+    "SMOKE-COMPARISON.json": {
+      "sha256": "b55cde4404f3f255b12113e0ac884a8ff21738e3ec2aec37545d8a83737f99f9",
+      "sizeBytes": 1188
+    },
+    "SMOKE-PROFILE.json": {
+      "sha256": "49c6289277d4097b747954a92555acda92fa5861f55c6280e9e11667287b241e",
+      "sizeBytes": 506101
+    },
+    "SMOKE-RESOURCE.json": {
+      "sha256": "6e98dc09b53262955ee00dc384779fd95f08352d1f86e6819906714af620bac0",
+      "sizeBytes": 2227
+    },
+    "SMOKE.log": {
+      "sha256": "26a2373f05d1e7cf3584caf1cab291db7a891837af699f67e1ea94cd4594276f",
+      "sizeBytes": 42
+    },
+    "SOURCE-REVIEW.json": {
+      "sha256": "b8e69d20d6a1ceb9f2b9dccd553f78f05e10c9ba47dbec47a6ca2a9390b1ef0c",
+      "sizeBytes": 586
+    },
+    "TESTS.log": {
+      "sha256": "6c8d21714b566a3c254852873604e485e2193c72745447b2bfd0a8f44da8f17f",
+      "sizeBytes": 6137
+    },
+    "TEXT-LOCALIZATION.log": {
+      "sha256": "e752f9f62ce1ced738880f9f9d158a71c7d483981b891609fb178221b3596152",
+      "sizeBytes": 189
+    }
+  },
+  "limits": [
+    "Large corpus/staging/selected/prefix payloads excluded",
+    "Proposal evidence retains historical conditional status; INTEGRATION.json is the later accepted state",
+    "Full replay executed in isolated source before identical production function integration; current source also has three new test-only files"
+  ]
+}

@@ -10,6 +10,7 @@ import platform
 import re
 import tempfile
 import zlib
+from contextlib import nullcontext
 from pathlib import Path
 
 import catalogue_core as core
@@ -132,9 +133,11 @@ def complete_inventory(report: dict, learn: list[str], meanings: list[str]) -> N
     report["plannedDirectedPairs"] = sum(lang != meaning for lang in learn for meaning in meanings)
 
 
-def build_report(args: argparse.Namespace) -> tuple[dict, list[dict]]:
+def build_report(args: argparse.Namespace, metrics=None) -> tuple[dict, list[dict]]:
+    measure = metrics.measure if metrics is not None else lambda *_a, **_k: nullcontext()
     validate_paths(args)
-    pool_report, identity = validate_pool(args)
+    with measure("verification"):
+        pool_report, identity = validate_pool(args)
     function_top = pool_report.get("sieve", {}).get("functionTop")
     if not isinstance(function_top, int) or function_top < 0:
         raise ValueError("pool report must record its function-word sieve")
@@ -155,11 +158,13 @@ def build_report(args: argparse.Namespace) -> tuple[dict, list[dict]]:
         selected_args.staging = str(Path(td) / "selection.sqlite3")
         if args.selected_output:
             selected_args.selected_output = str(Path(td) / "selected.jsonl.gz")
-        report, preview = selection.build_report(selected_args)
-        if report["stage"].get("uniqueCandidates") != identity["uniqueCandidates"] or report["stage"].get("duplicateCandidates") != 0:
-            raise ValueError("pool is not the unique complete candidate set described by Part 7")
-        if sha256(Path(args.pool)) != identity["poolSha256"] or sha256(Path(args.pool_report)) != identity["poolReportSha256"]:
-            raise ValueError("pool/report changed during selection")
+        report, preview = (selection.build_report(selected_args, metrics=metrics) if metrics is not None
+                           else selection.build_report(selected_args))
+        with measure("postselection_verification"):
+            if report["stage"].get("uniqueCandidates") != identity["uniqueCandidates"] or report["stage"].get("duplicateCandidates") != 0:
+                raise ValueError("pool is not the unique complete candidate set described by Part 7")
+            if sha256(Path(args.pool)) != identity["poolSha256"] or sha256(Path(args.pool_report)) != identity["poolReportSha256"]:
+                raise ValueError("pool/report changed during selection")
         complete_inventory(report, identity["learn"], identity["meanings"])
         report["status"] = "admitted-everyday-selection-review"
         report["admittedInput"] = identity

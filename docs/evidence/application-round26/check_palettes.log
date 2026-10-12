@@ -1,0 +1,14 @@
+test_authored_text_and_light_panels_remain_readable (__main__.PaletteContracts.test_authored_text_and_light_panels_remain_readable) ... ok
+test_boundaries_and_thumbs_are_distinct_without_white_fills (__main__.PaletteContracts.test_boundaries_and_thumbs_are_distinct_without_white_fills) ... ok
+test_danger_is_readable_and_warm_accents_keep_ink (__main__.PaletteContracts.test_danger_is_readable_and_warm_accents_keep_ink) ... ok
+test_every_enabled_label_survives_all_control_states (__main__.PaletteContracts.test_every_enabled_label_survives_all_control_states) ... ok
+test_grey_accents_keep_the_palette_identity (__main__.PaletteContracts.test_grey_accents_keep_the_palette_identity) ... ok
+test_grey_lighting_is_grey_and_a_step_lighter (__main__.PaletteContracts.test_grey_lighting_is_grey_and_a_step_lighter) ... ok
+test_one_provider_drives_both_platforms_and_windows_bar (__main__.PaletteContracts.test_one_provider_drives_both_platforms_and_windows_bar) ... ok
+test_shared_controls_no_longer_invert_the_text_ink (__main__.PaletteContracts.test_shared_controls_no_longer_invert_the_text_ink) ... ok
+test_valid_custom_pairs_keep_their_original_label_and_readability (__main__.PaletteContracts.test_valid_custom_pairs_keep_their_original_label_and_readability) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.045s
+
+OK

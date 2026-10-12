@@ -168,3 +168,21 @@ desktop compilation and debug APK generation, but two newly added desktop tests
 failed among 119. Their incompatible Browse-pool and raw/valid-history assertions
 are corrected; no production behavior changes. New-commit desktop execution and
 real DEV/classic runtime acceptance remain open.
+
+## Round 26 — current desktop build and packaged startup evidence
+
+2026-10-12, Asia/Yekaterinburg. The current unchanged application source now passes
+14 shared and 123 desktop JVM tests, including real-Room DEV integration and
+restart-command tests, and a release Linux app-image build. Actual packaged
+selftest and the isolated 11-process REAL/DEV harness pass. All six DEV scenarios,
+Empty persistence, invalid-request failure/retry and REAL byte isolation are
+verified at packaged process startup. See
+[ROUND-0.12-26-APPLICATION.md](ROUND-0.12-26-APPLICATION.md) for commands, hashes and
+honest environment-failure history.
+
+Desktop Kotlin/Room/Compose compilation and these headless lifecycle cases are
+now verified; old open compilation statements above are historical. GUI entry/
+exit confirmation dialogs, native restart handoff, Windows/Android runtime,
+Browse input/layout and real multi-monitor checks remain open. Android JVM/APK
+execution is blocked before testing by the absent SDK and pending SDK license
+acceptance. No application implementation, appearance, schema or version changed.

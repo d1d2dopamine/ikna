@@ -1,0 +1,18 @@
+{
+  "comparedCheckpointEntries": 885,
+  "changedExistingFiles": [
+    "docs/PLAN-0.12.md",
+    "docs/SELECTION-ENGINE-PLAN-0.12.md",
+    "tools/catalog/selection_policy.py"
+  ],
+  "newSourceFiles": [
+    "tools/catalog/test_selection_overlap_reuse.py",
+    "tools/catalog/fixtures/selection_policy_before_overlap.py",
+    "tools/catalog/fixtures/selection_overlap_cache_probe.py"
+  ],
+  "missingCheckpointFiles": [],
+  "applicationFilesByteIdentical": 360,
+  "signingKeystoreByteIdentical": true,
+  "changedTextTrailingWhitespace": [],
+  "policyExactlyMatchesAcceptedCandidate": true
+}

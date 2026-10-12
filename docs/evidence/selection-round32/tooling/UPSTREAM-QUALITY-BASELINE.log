@@ -1,0 +1,16 @@
+.........Selection: staging admitted candidates
+Selection: staging complete (7 unique candidates)
+Selection: context analysis everyday/ja
+Selection: pair everyday/ja->ru
+Selection: complete
+Selection: staging admitted candidates
+Selection: staging complete (7 unique candidates)
+Selection: early Japanese analysis everyday/ja
+Selection: Japanese analysis complete; deferrals={'ja-morpheme-cut-deferred': 6, 'jaContextsChecked': 7, 'canonical-target-ambiguous-deferred': 8}
+Selection: pair everyday/ja->ru
+Selection: complete
+....
+----------------------------------------------------------------------
+Ran 13 tests in 0.549s
+
+OK

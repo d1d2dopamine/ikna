@@ -18,6 +18,7 @@ import os
 import sqlite3
 import sys
 from collections import Counter, defaultdict
+from contextlib import nullcontext
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -311,14 +312,18 @@ def pair_evidence(db: sqlite3.Connection, collection: str, lang: str, meaning_la
     return out,stats
 
 
-def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,Any]]]:
+def build_report(args: argparse.Namespace, metrics=None) -> tuple[dict[str,Any],list[dict[str,Any]]]:
+    # Diagnostics observe existing stage boundaries; no measured values enter decisions.
+    measure = metrics.measure if metrics is not None else lambda *_a, **_k: nullcontext()
     langs, meanings = validate_args(args)
-    try: prepare(langs)
-    except IcuUnavailable as exc: raise ValueError(str(exc)) from exc
-    japanese_guard = JapaneseBoundaryGuard() if args.quality_policy == "boundary-diversity-v2" and "ja" in langs else None
+    with measure("segmentation_setup"):
+        try: prepare(langs)
+        except IcuUnavailable as exc: raise ValueError(str(exc)) from exc
+        japanese_guard = JapaneseBoundaryGuard() if args.quality_policy == "boundary-diversity-v2" and "ja" in langs else None
     try:
         print("Selection: staging admitted candidates", file=sys.stderr, flush=True)
-        stage_stats=stage(args.candidates,args.staging)
+        with measure("staging"):
+            stage_stats=stage(args.candidates,args.staging)
         print(f"Selection: staging complete ({stage_stats['uniqueCandidates']} unique candidates)", file=sys.stderr, flush=True)
     except Exception:
         if japanese_guard: japanese_guard.close()
@@ -337,22 +342,27 @@ def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,
             for collection, lang in sorted({(c, l) for c, l, m in pairs if l == "ja" and m in meanings and m != l}):
                 key = (collection, lang)
                 print(f"Selection: early Japanese analysis {collection}/{lang}", file=sys.stderr, flush=True)
-                rank_cache[key] = build_ranks(db, collection, lang)
-                quality_counts.update(build_context_analysis(db, collection, lang, rank_cache[key], args.function_top,
-                                                            japanese_guard=japanese_guard, canonical_unique=True))
+                with measure("ranks", collection=collection, lang=lang):
+                    rank_cache[key] = build_ranks(db, collection, lang)
+                with measure("context_analysis", collection=collection, lang=lang):
+                    quality_counts.update(build_context_analysis(db, collection, lang, rank_cache[key], args.function_top,
+                                                                japanese_guard=japanese_guard, canonical_unique=True))
                 print(f"Selection: Japanese analysis complete; deferrals={dict(quality_counts)}", file=sys.stderr, flush=True)
         for collection,lang,meaning_lang in pairs:
             if lang not in langs or meaning_lang not in meanings or lang==meaning_lang: continue
             key=(collection,lang)
             if key not in rank_cache:
                 print(f"Selection: context analysis {collection}/{lang}", file=sys.stderr, flush=True)
-                rank_cache[key]=build_ranks(db,collection,lang)
-                quality_counts.update(build_context_analysis(db,collection,lang,rank_cache[key],args.function_top,
-                                                            japanese_guard=japanese_guard, canonical_unique=diverse))
+                with measure("ranks", collection=collection, lang=lang):
+                    rank_cache[key]=build_ranks(db,collection,lang)
+                with measure("context_analysis", collection=collection, lang=lang):
+                    quality_counts.update(build_context_analysis(db,collection,lang,rank_cache[key],args.function_top,
+                                                                japanese_guard=japanese_guard, canonical_unique=diverse))
             print(f"Selection: pair {collection}/{lang}->{meaning_lang}", file=sys.stderr, flush=True)
-            targets,pair_stats=pair_evidence(
-                db,collection,lang,meaning_lang,morphology,args.evidence_context_limit, diverse=diverse
-            )
+            with measure("pair_evidence", collection=collection, lang=lang, meaningLang=meaning_lang):
+                targets,pair_stats=pair_evidence(
+                    db,collection,lang,meaning_lang,morphology,args.evidence_context_limit, diverse=diverse
+                )
             if diverse: quality_counts["sourceQuarantinedCandidateRows"] += pair_stats["sourceQuarantinedCandidateRows"]
             levels={level:[] for level in core.LEVELS}
             for target in targets: levels[target["level"]].append(target)
@@ -361,44 +371,46 @@ def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,
                 # budget is applied only after assigning distinct natural
                 # contexts, so a target with no unused context cannot waste a
                 # slot merely because it appeared early in a source file.
-                ordered_targets,selection_stats=select_target_ids(levels[level], max(1, len(levels[level])))
-                selected_rows=[]; near_rejected=0; context_collision_rejected=0; budget_rejected=0
-                used_context_ids: set[str] = set()
-                for index,target in enumerate(ordered_targets):
-                    if len(selected_rows) >= args.max_deck:
-                        budget_rejected = len(ordered_targets) - index
-                        break
-                    unused = [ctx for ctx in target["contexts"] if str(ctx.get("contextId") or ctx.get("candidateId")) not in used_context_ids]
-                    if not unused:
-                        context_collision_rejected += 1
-                        continue
-                    contexts,rejected=choose_contexts(unused,args.contexts_per_target,args.near_duplicate_threshold,
-                                                     diverse=diverse, lang=lang)
-                    near_rejected += rejected
-                    if not contexts:
-                        context_collision_rejected += 1
-                        continue
-                    selected_rows.append({
-                        "targetId":target["targetId"],"text":target["text"],"freqRank":target["freqRank"],
-                        "lemmaKey":target["lemmaKey"],"lemmaSource":target["lemmaSource"],
-                        "evidenceContexts":target["evidenceContexts"],"sourceFamilies":target["sourceFamilies"],
-                        "contexts":contexts,
-                    })
-                    for context in contexts:
-                        used_context_ids.add(str(context.get("contextId") or context.get("candidateId")))
-                count=len(selected_rows)
-                deck_id=f"{lang}-{meaning_lang}-{collection}-{level}"
-                if count == 0: decision="omit-no-quality-supply"
-                elif count < args.min_deck: decision="omit-below-minimum"
-                elif count < args.thin_deck: decision="publish-thin"
-                else: decision="publish"
-                if decision.startswith("publish"):
-                    if output:
-                        for row in selected_rows:
-                            output.add({"deckId":deck_id,"collection":collection,"lang":lang,"meaningLang":meaning_lang,"level":level,**row})
-                    evidence_rows = selected_rows if args.preview_limit_per_deck == 0 else selected_rows[:args.preview_limit_per_deck]
-                    for row in evidence_rows:
-                        preview.append({"deckId":deck_id,"collection":collection,"lang":lang,"meaningLang":meaning_lang,"level":level,**row})
+                with measure("allocation", collection=collection, lang=lang, meaningLang=meaning_lang, level=level):
+                    ordered_targets,selection_stats=select_target_ids(levels[level], max(1, len(levels[level])))
+                    selected_rows=[]; near_rejected=0; context_collision_rejected=0; budget_rejected=0
+                    used_context_ids: set[str] = set()
+                    for index,target in enumerate(ordered_targets):
+                        if len(selected_rows) >= args.max_deck:
+                            budget_rejected = len(ordered_targets) - index
+                            break
+                        unused = [ctx for ctx in target["contexts"] if str(ctx.get("contextId") or ctx.get("candidateId")) not in used_context_ids]
+                        if not unused:
+                            context_collision_rejected += 1
+                            continue
+                        contexts,rejected=choose_contexts(unused,args.contexts_per_target,args.near_duplicate_threshold,
+                                                         diverse=diverse, lang=lang)
+                        near_rejected += rejected
+                        if not contexts:
+                            context_collision_rejected += 1
+                            continue
+                        selected_rows.append({
+                            "targetId":target["targetId"],"text":target["text"],"freqRank":target["freqRank"],
+                            "lemmaKey":target["lemmaKey"],"lemmaSource":target["lemmaSource"],
+                            "evidenceContexts":target["evidenceContexts"],"sourceFamilies":target["sourceFamilies"],
+                            "contexts":contexts,
+                        })
+                        for context in contexts:
+                            used_context_ids.add(str(context.get("contextId") or context.get("candidateId")))
+                    count=len(selected_rows)
+                    deck_id=f"{lang}-{meaning_lang}-{collection}-{level}"
+                    if count == 0: decision="omit-no-quality-supply"
+                    elif count < args.min_deck: decision="omit-below-minimum"
+                    elif count < args.thin_deck: decision="publish-thin"
+                    else: decision="publish"
+                with measure("selected_output", collection=collection, lang=lang, meaningLang=meaning_lang, level=level):
+                    if decision.startswith("publish"):
+                        if output:
+                            for row in selected_rows:
+                                output.add({"deckId":deck_id,"collection":collection,"lang":lang,"meaningLang":meaning_lang,"level":level,**row})
+                        evidence_rows = selected_rows if args.preview_limit_per_deck == 0 else selected_rows[:args.preview_limit_per_deck]
+                        for row in evidence_rows:
+                            preview.append({"deckId":deck_id,"collection":collection,"lang":lang,"meaningLang":meaning_lang,"level":level,**row})
                 deck={
                     "deckId":deck_id,"collection":collection,"lang":lang,"meaningLang":meaning_lang,"level":level,
                     "eligibleTargets":len(levels[level]),"selectedTargets":count,"decision":decision,
@@ -436,7 +448,8 @@ def build_report(args: argparse.Namespace) -> tuple[dict[str,Any],list[dict[str,
             report["qualityPolicy"]["sourceQuarantine"] = {"sha256": hashlib.sha256(QUARANTINE_PATH.read_bytes()).hexdigest(),
                 "scope": "exact source version/ref/text on either side; originals preserved; no silent spelling correction"}
         if output:
-            report["selectedMaterial"] = output.finish()
+            with measure("selected_output_finalize"):
+                report["selectedMaterial"] = output.finish()
         print("Selection: complete", file=sys.stderr, flush=True)
         return report,preview
     finally:

@@ -1,0 +1,67 @@
+{
+  "status": "complete-full-input-validation",
+  "identity": {
+    "poolSha256": "57b90b01d5dcb0725743998dccaf307a100e174059a853e01f5f31fc13dd6170",
+    "poolLogicalSha256": "05ccbb5b5217dc050cc5a5e0e1cfca3223657529afa6b3890c9340999d571ab8",
+    "poolReportSha256": "41c7e176d516e6ad89d70954b116d18062baa48857f66ee276bdcfd32dd0438f",
+    "sourceVersion": "2026-10-03-2d4eee105639ba24",
+    "uniqueCandidates": 11099490,
+    "registrySha256": "98695b8beb720899b567c9a6b946eae33bd61952a82a03fe9d3fecfed9fc4066",
+    "learn": [
+      "de",
+      "en",
+      "es",
+      "fr",
+      "it",
+      "ja",
+      "ko",
+      "pl",
+      "pt",
+      "ru",
+      "zh"
+    ],
+    "meanings": [
+      "de",
+      "en",
+      "es",
+      "fr",
+      "it",
+      "ja",
+      "ko",
+      "pl",
+      "pt",
+      "ru",
+      "zh"
+    ],
+    "poolEnvironment": {
+      "python": "3.12.14",
+      "zlib": "1.3",
+      "segmentation": {
+        "engine": "ICU word break",
+        "icuVersion": "74.2",
+        "languages": [
+          "ja",
+          "ko",
+          "zh"
+        ],
+        "offsets": "UTF-16",
+        "koreanUnit": "eojeol"
+      }
+    },
+    "poolPipelineSha256": {
+      "everyday_pool.py": "b1342adb46c5a0f605761051b2d947b0f05a888b12a56578e2351cc94ecbf098",
+      "everyday_rebuild.py": "d63b638e1583b94348e2e82e98666e596c5876f95f05209c3f8cedd01d859c0e",
+      "build_catalogue_v2.py": "e8a3f9986a917174ffcb8c141eff9015964249ad471fd13d53f06fbe9cfe0086",
+      "catalogue_core.py": "984a58be4f88939b37c86e7e677e01ffe7d0f94a2c20f38a56eb6f32b7151e56",
+      "catalogue_v2.py": "92b9b761c4f4419e56eff66dd18a06327224fe8afbc7e8cd74397296b786578b",
+      "segmentation.py": "627b30e28ccb3c31a423d4d83b7968422913efd8cc7d631863d4d4075634b8da",
+      "ingest/model.py": "1d5097bbd68fbcc589f5846efb766785f0e682bfb004aff01c1e2d97b68cf9fc",
+      "ingest/registry.py": "3249cdc94cdb5fc0bb52389a3c6aee33cd4d07eeb46ce747dd23072d65dc3033"
+    }
+  },
+  "seconds": 138.00650118200065,
+  "processPeakRssBytes": 18477056,
+  "python": "3.12.14",
+  "scope": "all 11099490 retained candidates; existing validator unchanged",
+  "publicationSafe": false
+}

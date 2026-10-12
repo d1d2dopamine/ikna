@@ -1,0 +1,9 @@
+Hot Reload source contract: PASS
+  plugin: 1.1.1
+  task: :desktop:hotRun --auto
+  Gradle bootstrap: 8.10.2
+  data: isolated Developer Mode by default
+  source replacement/logging: wired
+  terminal persistence: PowerShell -NoExit
+  Windows recompiler bridge: wired; runtime execution not checked here
+  This source check does not prove a running watcher or successful UI reload.

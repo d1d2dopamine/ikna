@@ -1,0 +1,41 @@
+{
+  "exclusiveHost": false,
+  "reportedOverlappingWork": [
+    {
+      "kind": "unrelated serial local resource diagnostic",
+      "startedUtc": "2026-10-11T22:54:27.101774+00:00",
+      "finishedUtc": "2026-10-11T22:54:46.282727+00:00",
+      "cpuAffinityCount": 2,
+      "sampledPeakRssMiB": 68.6,
+      "reportedBySiblingTask": true,
+      "independentlyMeasuredHere": false
+    },
+    {
+      "kind": "unrelated serial interface checks",
+      "startedUtcApprox": "2026-10-11T23:02:00+00:00",
+      "finishedUtcApprox": "2026-10-11T23:07:00+00:00",
+      "cpuAffinityCount": 2,
+      "resourceProfile": false,
+      "independentlyMeasuredHere": false,
+      "caveat": "Memory not claimed from this check; all unrelated task compute reportedly finished by23:07UTC."
+    }
+  ],
+  "caveat": "Other lightweight shared-host checks may overlap; no isolated-host timing guarantee. No other project code, data or scientific result is part of this diagnostic.",
+  "sameProjectOverlappingAudit": {
+    "kind": "read-only single-archive metadata inspection",
+    "download": {
+      "started_at_utc": "2026-10-11T23:03:09.028017+00:00",
+      "finished_at_utc": "2026-10-11T23:03:34.589724+00:00",
+      "download_seconds": 25.562
+    },
+    "inspection": {
+      "started_at_utc": "2026-10-11T23:04:01.819387+00:00",
+      "finished_at_utc": "2026-10-11T23:04:03.968274+00:00",
+      "elapsed_seconds": 2.149
+    },
+    "downloadPeakRssKiB": 18128,
+    "inspectionPeakRssKiB": 12812,
+    "addressSpaceLimitMiB": 256,
+    "modelExecuted": false
+  }
+}

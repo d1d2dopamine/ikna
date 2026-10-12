@@ -135,3 +135,126 @@ content-evaluation contract, bounded comparison report and an explicit decision
 to retain existing rules, trial a ready classifier or justify a custom one.
 Final packs, publication, runtime app classifiers and learner-state changes are
 outside this round. The implementation work has not begun in this checkpoint.
+
+## Implementation checkpoint — 2026-10-11
+
+[Round 23](ROUND-0.12-23.md) prepares a bounded diagnostic CLI and output-preservation
+regressions. The fixture-only profile is not a bottleneck measurement. Step 1 is
+still open pending the saved admitted pool, representative bounded derivation,
+isolated allocation/output timing, stage memory and controlled cold/reused-input
+evidence. No cache, model, new source or production-policy change is selected.
+
+## Real-input checkpoint — 2026-10-12, Asia/Yekaterinburg
+
+[Round 24](ROUND-0.12-24.md) restores/verifies the full saved pool and records a
+repeatable 14,012-row, 110-direction diagnostic with unchanged selection. The
+largest observed bounded boundary is context analysis; this motivates reuse
+investigation but proves no full-workflow speedup. Sample ranks and ICU 76.1 differ
+from the historical full snapshot contract. Stage memory, isolated allocation,
+controlled cold/reuse evidence and independent classifier labels remain open.
+No cache or classifier is integrated, and production snapshot decisions stay fixed.
+
+## Stage/replay checkpoint — 2026-10-12, Asia/Yekaterinburg
+
+[Round 25](ROUND-0.12-25.md) supplies disjoint selection windows, isolated allocation,
+sampled RSS with explicit uncertainty, two fresh-process/repeated-process comparisons
+on 14,012 and 105,988 saved-source rows, and exact output equivalence against untouched
+round-22 code under pinned ICU 74.2. Original historical binary hashes and OS-cold/
+full-corpus timings remain unavailable/unmeasured; no contrary claim is made.
+
+The measured next experiment is context-analysis reuse only. Cache returned quality
+counts as well as rows, bind exact text/ranks/runtime/policy dependencies, keep all
+provenance validation and downstream selection active, and require end-to-end
+identity/cost evidence before integration. Classifier comparison still needs its
+independent quality labels and rights/reproducibility decision.
+
+## Reuse checkpoint — 2026-10-12, Asia/Yekaterinburg
+
+[Round 27](ROUND-0.12-27.md) implements and measures exact context-analysis reuse
+behind a standalone experiment. Returned quality counters and rows are preserved;
+changed dependencies invalidate keys and incomplete/corrupt entries fail closed.
+Warm-cache savings on the 105,988-row diagnostic are observed, with a first-use
+penalty. Keep production selection unchanged pending full-input resource/cost
+measurement. Full-corpus speed, OS-cold behavior and semantic classifier accuracy
+are not claimed by this checkpoint.
+
+## Content-evaluation checkpoint — 2026-10-12, Asia/Yekaterinburg
+
+[Round 28](ROUND-0.12-28.md) separates mandatory gates from correspondence,
+collection suitability and cloze usefulness; audits one established classifier's
+coverage and prepares an independent ID-only label manifest. Retain rules now.
+Steps 4–5's empirical score/benefit comparison remains unperformed: individual
+pack rights/contents, pinned startup and benchmark-use questions are unresolved.
+A feasible toolkit is not evidence of an accurate 110-direction classifier.
+
+## Full-input readiness — 2026-10-12, Asia/Yekaterinburg
+
+[Round 29](ROUND-0.12-29.md) prepares safe resource-bounded full saved-pool profiling,
+with successful-validation/partial-stage evidence retained on later failure.
+No full-run result exists yet in this checkpoint. Use the accepted historical
+8000cap control explicitly; compare logical output separately from compressed
+bytes because historical/local Python and zlib versions differ. No cache enabled.
+
+## Round 30 — full saved-input control verified
+
+[Round 30](ROUND-0.12-30.md) completes all 11,099,490 candidates and 110 directions
+under historical cap 8000. Independent whole-output checks reproduce both logical
+and compressed historical selection hashes, all counts and deck decisions. The
+full stage profile identifies pair evidence as the dominant cost; bounded
+analysis-cache savings must not be extrapolated to the complete workflow.
+No cache is enabled. A bounded exact pair-function profile is the next diagnostic.
+The current cap-12000 scenario, OS-cold measurement, semantic classifier scoring,
+final assembly and publication remain outside this completed control.
+
+The one-pack [read-only archive audit](CLASSIFIER-ARCHIVE-AUDIT-0.12.md) is complete;
+pack contents do not resolve underlying source provenance or empirical quality.
+Model execution and classifier adoption remain deferred.
+
+## Round 31 — exact dense-prefix cost localized
+
+[Round 31](ROUND-0.12-31.md) measures the unchanged pair-evidence function on an
+exact 32,768-candidate en→de prefix from finalized full staging. Fresh baseline
+and cProfile return byte-identical complete evidence. Repeated overlap maxima
+and Counter intersections dominate evidence pruning in this diagnostic.
+Profiler overhead is not an engine gain; one prefix does not represent all pairs.
+The next scoped prototype may reuse exact call-local overlap maxima while
+preserving all ranking, source, boundary, duplicate and output decisions.
+Production integration still requires differential and real-output evidence.
+
+## Round 32 — bounded exact overlap reuse verified
+
+[Round 32](ROUND-0.12-32.md) verifies the call-local maximum-reuse prototype with
+3,177 differential invocations, real multilingual/Japanese regressions and seven
+exact-output real-prefix runs. Three fresh original/candidate runs observe median
+13.494 s versus 4.658 s on that prefix. LRU recency changes are disclosed and
+included in measurement. Normal production source remains unchanged.
+An isolated full historical candidate replay is the next acceptance gate and
+started separately as Round 33; prefix gains do not establish full-workflow gains.
+
+## Round 33 — full exact candidate accepted
+
+[Round 33](ROUND-0.12-33.md) completes the isolated overlap-reuse replay over all
+11,099,490 candidates and 110 directions under historical cap 8000. Independent
+whole-output CRC/hash verification proves byte-identical selected material,
+counts, decks and quality counters; only the reviewed policy fingerprint differs.
+Observed elapsed time is 4288.253 s versus 8335.166 s control (48.55% lower), with
+shared-host/cache and one-run uncertainty explicitly retained. No guard stopped.
+This closes the full-output/resource gate for the exact call-local optimization.
+Normal source is unchanged in this checkpoint; integration and durable
+independent-reference regression tests are the next separate stage.
+
+## Round 34 — exact overlap optimization integrated
+
+[Round 34](ROUND-0.12-34.md) integrates only the fully replayed call-local maximum
+reuse function and three test-only files. 143 relevant tests pass; explicit
+Japanese-engine rerun and a 105,988-row normal-CLI smoke preserve all expected
+material identities. No UI, policy semantics, default cap or persistent cache
+changes. Original and isolated full candidate evidence plus rollback checkpoint
+are retained. The observed full-control elapsed reduction is 48.55%, with
+one-run/shared-host/cache limitations.
+
+Performance profiling and this justified exact reuse change are complete within
+the reported scope. Empirical classifier scoring/adoption stays deferred on
+provenance/rights, labels/runtime and coverage grounds; retain current rules.
+Android SDK agreement/setup and real-platform GUI acceptance remain separate
+application gates. No final Catalogue assembly, source expansion or publication.

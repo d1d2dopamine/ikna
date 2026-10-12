@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/bitextor/bicleaner-data",
+  "pinned_commit": "c9e9f0d08e40f01d47b5afb165ed032b25bad7c1",
+  "observations": [
+    {
+      "source_url": "https://raw.githubusercontent.com/bitextor/bicleaner-data/c9e9f0d08e40f01d47b5afb165ed032b25bad7c1/README.md",
+      "commit": "c9e9f0d08e40f01d47b5afb165ed032b25bad7c1",
+      "bytes": 164,
+      "sha256": "2f65a897157a87f4442ae73835ae6eb5433d0479eb372219d6cea215bc1c98fb",
+      "observed_at_utc": "2026-10-11T23:04:22.442140+00:00",
+      "http_status": 200,
+      "original_filename": "README.md",
+      "text": "# Bicleaner data\n\nRepository for data models, dictionaries and any dependency that is already generated and trained by Bicleaner developers and publicly available.\n"
+    },
+    {
+      "source_url": "https://raw.githubusercontent.com/bitextor/bicleaner-data/c9e9f0d08e40f01d47b5afb165ed032b25bad7c1/LICENSE",
+      "commit": "c9e9f0d08e40f01d47b5afb165ed032b25bad7c1",
+      "bytes": 35149,
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "observed_at_utc": "2026-10-11T23:04:27.735578+00:00",
+      "http_status": 200,
+      "original_filename": "LICENSE",
+      "evidence_file": "publisher-LICENSE"
+    }
+  ],
+  "publisher_license": "GNU General Public License version 3",
+  "interpretation": "Repository-level GPL-3.0 declaration is positive licensing evidence for the publisher repository. It does not identify per-resource source corpora or prove redistribution rights to every underlying training text. No illegality or definitive model-rights clearance is claimed.",
+  "archive_notice_finding": "No standalone licence, notice, attribution or source-corpus inventory in the complete archive inventory; YAML contains no such fields. Unread payloads were not searched for embedded notices."
+}

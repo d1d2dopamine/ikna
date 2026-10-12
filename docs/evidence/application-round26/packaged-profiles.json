@@ -1,0 +1,139 @@
+{
+  "result": "PASS",
+  "processes": 11,
+  "scope": "Packaged --selftest startup, database/settings and scenario isolation; no GUI or native restart handoff",
+  "real_before_sha256": {
+    "ikna.db": "60ca875822d196ec86e04b5ab53cac55bee06992c32c17d31f00e616da345381",
+    "ikna-settings.preferences_pb": "e32ca45a55525aac7fb3ff454f3bb7b4533ed645372aa87dd052689fd1351524"
+  },
+  "runs": [
+    {
+      "profile": "REAL",
+      "phase": "before",
+      "inventory": {
+        "packs": 1,
+        "chunks": 1435,
+        "cards": 6,
+        "reviews": 0
+      },
+      "output": "selftest: sun.misc.Unsafe present\nselftest: decks=1 cards=6 palette=ink\nselftest: ok\n"
+    },
+    {
+      "profile": "DEVELOPER",
+      "scenario": "empty",
+      "inventory": {
+        "packs": 0,
+        "chunks": 0,
+        "cards": 0,
+        "reviews": 0
+      },
+      "request_consumed": true,
+      "real_files_byte_identical": true,
+      "output": "selftest: sun.misc.Unsafe present\nselftest: decks=0 cards=0 palette=ink\nselftest: ok\n"
+    },
+    {
+      "profile": "DEVELOPER",
+      "phase": "empty-reopen",
+      "inventory": {
+        "packs": 0,
+        "chunks": 0,
+        "cards": 0,
+        "reviews": 0
+      },
+      "output": "selftest: sun.misc.Unsafe present\nselftest: decks=0 cards=0 palette=ink\nselftest: ok\n"
+    },
+    {
+      "profile": "DEVELOPER",
+      "scenario": "early-history",
+      "inventory": {
+        "packs": 4,
+        "chunks": 1507,
+        "cards": 44,
+        "reviews": 48
+      },
+      "request_consumed": true,
+      "real_files_byte_identical": true,
+      "output": "selftest: sun.misc.Unsafe present\nselftest: decks=4 cards=11 palette=ink\nselftest: ok\n"
+    },
+    {
+      "profile": "DEVELOPER",
+      "scenario": "mature-history",
+      "inventory": {
+        "packs": 4,
+        "chunks": 1507,
+        "cards": 72,
+        "reviews": 504
+      },
+      "request_consumed": true,
+      "real_files_byte_identical": true,
+      "output": "selftest: sun.misc.Unsafe present\nselftest: decks=4 cards=3 palette=ink\nselftest: ok\n"
+    },
+    {
+      "profile": "DEVELOPER",
+      "scenario": "browse-ready",
+      "inventory": {
+        "packs": 4,
+        "chunks": 1507,
+        "cards": 72,
+        "reviews": 510
+      },
+      "request_consumed": true,
+      "real_files_byte_identical": true,
+      "output": "selftest: sun.misc.Unsafe present\nselftest: decks=4 cards=20 palette=ink\nselftest: ok\n"
+    },
+    {
+      "profile": "DEVELOPER",
+      "scenario": "rich-statistics",
+      "inventory": {
+        "packs": 4,
+        "chunks": 1507,
+        "cards": 72,
+        "reviews": 1320
+      },
+      "request_consumed": true,
+      "real_files_byte_identical": true,
+      "output": "selftest: sun.misc.Unsafe present\nselftest: decks=4 cards=6 palette=ink\nselftest: ok\n"
+    },
+    {
+      "profile": "DEVELOPER",
+      "scenario": "return-after-break",
+      "inventory": {
+        "packs": 4,
+        "chunks": 1507,
+        "cards": 72,
+        "reviews": 560
+      },
+      "request_consumed": true,
+      "real_files_byte_identical": true,
+      "output": "selftest: sun.misc.Unsafe present\nselftest: decks=4 cards=2 palette=ink\nselftest: ok\n"
+    },
+    {
+      "profile": "DEVELOPER",
+      "phase": "invalid-request",
+      "exit_code": 1,
+      "request_retained": true,
+      "dev_inventory_unchanged": true,
+      "real_files_byte_identical": true,
+      "expected_error": "Invalid pending developer scenario"
+    },
+    {
+      "profile": "DEVELOPER",
+      "phase": "request-recovery",
+      "scenario": "empty",
+      "output": "selftest: sun.misc.Unsafe present\nselftest: decks=0 cards=0 palette=ink\nselftest: ok\n",
+      "request_consumed": true,
+      "real_files_byte_identical": true
+    },
+    {
+      "profile": "REAL",
+      "phase": "after",
+      "inventory": {
+        "packs": 1,
+        "chunks": 1435,
+        "cards": 6,
+        "reviews": 0
+      },
+      "output": "selftest: sun.misc.Unsafe present\nselftest: decks=1 cards=6 palette=ink\nselftest: ok\n"
+    }
+  ]
+}

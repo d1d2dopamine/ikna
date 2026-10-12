@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-12",
+  "timezone": "Asia/Yekaterinburg",
+  "tests": {
+    "segmentation": 19,
+    "stageRecorder": 14,
+    "profile": 11,
+    "diagnosticSampler": 8,
+    "admittedSelection": 17,
+    "quality": 13,
+    "selectionAudit": 7,
+    "selectionPolicyContracts": "pass",
+    "deckBudgetContracts": "pass",
+    "text": "pass",
+    "localization": "pass"
+  },
+  "icuVersion": "74.2",
+  "stageProfileRuns": 8,
+  "perInputAllFourOutputIdentitiesEqual": true,
+  "originalRound22LargerInputOutputEqual": true,
+  "sourceScope": "catalogue tooling only; application bytes unchanged",
+  "knownLimits": [
+    "sampled RSS is lower bound/shared residency",
+    "OS page cache uncontrolled",
+    "not full-corpus selection timing",
+    "original historical ICU binary hash unknown"
+  ],
+  "productionCacheIntegrated": false,
+  "publicationSafe": false
+}

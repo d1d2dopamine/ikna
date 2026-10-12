@@ -1,0 +1,31 @@
+{
+  "recordedAtUtc": "2026-10-11T21:54:03.821606+00:00",
+  "purpose": "Readiness only; large process not yet launched",
+  "preflight": {
+    "rssBytes": 10579968,
+    "virtualBytes": 38354944,
+    "hostAvailableBytes": 7500140544,
+    "availableBytes": 7500140544,
+    "cgroupVisibility": "unavailable",
+    "cgroupHeadroomBytes": null,
+    "diskFreeBytes": 24887521280,
+    "monotonicSeconds": 21762.22866154
+  },
+  "plannedLimits": {
+    "maxRssBytes": 4294967296,
+    "addressSpaceBytes": 5368709120,
+    "minimumAvailableBytes": 2147483648,
+    "minimumDiskFreeBytes": 4294967296
+  },
+  "plannedInput": {
+    "poolSha256": "57b90b01d5dcb0725743998dccaf307a100e174059a853e01f5f31fc13dd6170",
+    "compressedBytes": 545718435,
+    "rows": 11099490
+  },
+  "runs": 1,
+  "maxDeck": 8000,
+  "qualityPolicy": "boundary-diversity-v2",
+  "inputScope": "full-saved-input",
+  "measurementMode": "stages",
+  "cacheEnabled": false
+}

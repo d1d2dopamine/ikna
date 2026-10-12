@@ -1,0 +1,188 @@
+{
+  "status": "complete-isolated-candidate-preintegration-checkpoint",
+  "publicationSafe": false,
+  "productionIntegratedInThisCheckpoint": false,
+  "sourceRootLabel": "ikna-results/round33-isolated-full-candidate",
+  "files": {
+    "CANDIDATE-CONTROL-COMPARISON.json": {
+      "sourceRelativePath": "CANDIDATE-CONTROL-COMPARISON.json",
+      "sha256": "ae28dc2576d114b573ef239f0e18946843f8035456b6dc488b47ab01ad3668d5",
+      "sizeBytes": 16219,
+      "byteIdenticalToSource": true
+    },
+    "PREPARATION.json": {
+      "sourceRelativePath": "PREPARATION.json",
+      "sha256": "6f98af7bf49289629e3951a39f90070a79d03818a62626b493732dc2ee46b763",
+      "sizeBytes": 14503,
+      "byteIdenticalToSource": true
+    },
+    "PREFLIGHT.json": {
+      "sourceRelativePath": "PREFLIGHT.json",
+      "sha256": "b2b1d3d60287bcbd4fa9b4dd492790fed8049b83fe69f8c8db1b1af744f4d273",
+      "sizeBytes": 897,
+      "byteIdenticalToSource": true
+    },
+    "COMMAND.json": {
+      "sourceRelativePath": "COMMAND.json",
+      "sha256": "0186c8b4fd4fdadc82ee94feef16351e662b719d2ae18a639a2e0f8c357f7b39",
+      "sizeBytes": 849,
+      "byteIdenticalToSource": true
+    },
+    "STARTED-UTC.txt": {
+      "sourceRelativePath": "STARTED-UTC.txt",
+      "sha256": "bcc1e23a4d1bb9559d3e6a43155dbba8a34447e08edff1e64829a368bc7f540c",
+      "sizeBytes": 33,
+      "byteIdenticalToSource": true
+    },
+    "FINISHED-UTC.txt": {
+      "sourceRelativePath": "FINISHED-UTC.txt",
+      "sha256": "1ef06af0ca3f6bc280b35ab7543269982ee53f499f44954eed1c771a9f0d09d2",
+      "sizeBytes": 33,
+      "byteIdenticalToSource": true
+    },
+    "EXIT-CODE.txt": {
+      "sourceRelativePath": "EXIT-CODE.txt",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "sizeBytes": 2,
+      "byteIdenticalToSource": true
+    },
+    "SHARED-HOST.json": {
+      "sourceRelativePath": "SHARED-HOST.json",
+      "sha256": "c0d2539a4c0ae66eb22729112381154c61e29e7feef83ef744d8ebaf52a626eb",
+      "sizeBytes": 1183,
+      "byteIdenticalToSource": true
+    },
+    "POLICY-DIFF.patch": {
+      "sourceRelativePath": "POLICY-DIFF.patch",
+      "sha256": "52efb29dc4e7885b489af28a269bbe1fd15173be911f5fc26bd7599ca8269b35",
+      "sizeBytes": 2992,
+      "byteIdenticalToSource": true
+    },
+    "compare_candidate_control.py": {
+      "sourceRelativePath": "compare_candidate_control.py",
+      "sha256": "c81b10f17937204172aa2c3e2231286fab487307c9103633eb06f6196707730e",
+      "sizeBytes": 17665,
+      "byteIdenticalToSource": true
+    },
+    "test_compare_candidate_control.py": {
+      "sourceRelativePath": "test_compare_candidate_control.py",
+      "sha256": "6ddb7c3a52eefec3baa09be7e151fbdc034b99f7f9ec58087d50bf2e52707c1f",
+      "sizeBytes": 6671,
+      "byteIdenticalToSource": true
+    },
+    "COMPARISON-HELPER-README.md": {
+      "sourceRelativePath": "COMPARISON-HELPER-README.md",
+      "sha256": "891075a04e061e85edfac5ca135b8a25b5f1716f83738a11ebe5c6c06d1aecf3",
+      "sizeBytes": 2398,
+      "byteIdenticalToSource": true
+    },
+    "COMPARISON-HELPER-TESTS.log": {
+      "sourceRelativePath": "COMPARISON-HELPER-TESTS.log",
+      "sha256": "5b719d8fc87388e57fd6fea664942877f78bb2487cc8b47ef918be2a67a30502",
+      "sizeBytes": 1661,
+      "byteIdenticalToSource": true
+    },
+    "COMPARISON.log": {
+      "sourceRelativePath": "COMPARISON.log",
+      "sha256": "c77e258f6f24806fff6d58d16838328779550525935c180f074b69d6c9078ee9",
+      "sizeBytes": 1380,
+      "byteIdenticalToSource": true
+    },
+    "TESTS.log": {
+      "sourceRelativePath": "TESTS.log",
+      "sha256": "4410e902b09d396cb20974a4001e2276b2a2860ab045b06383dbee17f93410c1",
+      "sizeBytes": 6120,
+      "byteIdenticalToSource": true
+    },
+    "launch_full_candidate.py": {
+      "sourceRelativePath": "launch_full_candidate.py",
+      "sha256": "08eee0d900f37ad8ddad6e7aa45db3805d828b9814d2a03f3a449d63c476a61e",
+      "sizeBytes": 3854,
+      "byteIdenticalToSource": true
+    },
+    "SUPERVISOR.log": {
+      "sourceRelativePath": "SUPERVISOR.log",
+      "sha256": "a80de088df70e52caa49889dd1ddf293d3ad3d9c1eb8d2d0a5a1783dc66433bf",
+      "sizeBytes": 47,
+      "byteIdenticalToSource": true
+    },
+    "FINAL-ACCEPTANCE-REVIEW.md": {
+      "sourceRelativePath": "FINAL-ACCEPTANCE-REVIEW.md",
+      "sha256": "0d8d1c6dd57bb3f71a1edd2f733578c24e87090e532d8fabcd590ce4a4722df7",
+      "sizeBytes": 3456,
+      "byteIdenticalToSource": true
+    },
+    "PROFILE.json": {
+      "sourceRelativePath": "full-control/PROFILE.json",
+      "sha256": "3fd47f647a263c7f200eabc53259d11ecb27d3a4579a92187f352c648f6fd28f",
+      "sizeBytes": 503879,
+      "byteIdenticalToSource": true
+    },
+    "EVERYDAY-SELECTION.json": {
+      "sourceRelativePath": "full-control/run-01/selection.json",
+      "sha256": "53ac6090a61aa4404017a75bd614f601a28d6a8ea5b90e1e9d7796c6fd276281",
+      "sizeBytes": 238550,
+      "byteIdenticalToSource": true
+    },
+    "RESOURCE.json": {
+      "sourceRelativePath": "guard/RESOURCE.json",
+      "sha256": "62a42ba17f6cbb907f4649db8bc72b6b5217e3f111b4731cce5b0600476df16e",
+      "sizeBytes": 2289,
+      "byteIdenticalToSource": true
+    },
+    "GUARD-STDOUT.log": {
+      "sourceRelativePath": "guard/stdout.log",
+      "sha256": "9ce425de3b1596753b790647d0211d016ea2a817b1a313b9ff796eda4d2f47b5",
+      "sizeBytes": 62,
+      "byteIdenticalToSource": true
+    },
+    "GUARD-STDERR.log": {
+      "sourceRelativePath": "guard/stderr.log",
+      "sha256": "56e625376b482eec13cbf289fad7b0116e16d570d1e1c6f843634e221afb1017",
+      "sizeBytes": 17430,
+      "byteIdenticalToSource": true
+    },
+    "candidate-selection_policy.py": {
+      "sourceRelativePath": "candidate-source/tools/catalog/selection_policy.py",
+      "sha256": "72783a30ada3995c9cc4e32f96a4fc5ff53940756ceb5895c9530ecd9af92edc",
+      "sizeBytes": 9486,
+      "byteIdenticalToSource": true
+    }
+  },
+  "excludedLargeArtifacts": {
+    "full-control/run-01/selection.sqlite3": {
+      "sizeBytes": 9586688000,
+      "reason": "Retained staging; neither opened nor hashed in this compact documentation review."
+    },
+    "full-control/run-01/selected.jsonl.gz": {
+      "sha256": "a2a5e4bb1e4079e88c8986443c95761795d5fe66ec14ee46a1f83e099e95df64",
+      "sizeBytes": 255938165,
+      "logicalSha256": "7149ca35ebc44b0833434505a94d187e11194a2eca7d4f45b885b061fb267cd4",
+      "logicalSizeBytes": 1512254677,
+      "memberships": 928162,
+      "reason": "Full identity proven by retained strict comparison; payload omitted."
+    },
+    "full-control/run-01/preview.jsonl.gz": {
+      "sizeBytes": 1141731,
+      "reason": "Compact delivery omits preview payload; report/profile retain preview contract."
+    },
+    "rawCorpus": {
+      "inputBytes": 545718435,
+      "inputPins": {
+        "pool": "57b90b01d5dcb0725743998dccaf307a100e174059a853e01f5f31fc13dd6170",
+        "poolReport": "41c7e176d516e6ad89d70954b116d18062baa48857f66ee276bdcfd32dd0438f",
+        "registry": "98695b8beb720899b567c9a6b946eae33bd61952a82a03fe9d3fecfed9fc4066"
+      },
+      "reason": "Existing external corpus not recopied."
+    }
+  },
+  "documentationReview": {
+    "copiedFilesIndependentlyHashed": true,
+    "smallCandidateComparisonBindingsVerified": true,
+    "canonicalSelectionReportProfileBindingVerified": true,
+    "normalPolicyStillOriginalAtCheckpoint": true,
+    "fullSelectionOrStructuralAuditRerun": false,
+    "largeSQLiteOrSelectedPayloadRead": false
+  },
+  "historicalPreparationStatusPreserved": true
+}

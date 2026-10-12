@@ -1,0 +1,87 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :app
+Unable to initialize metrics, ensure /home/agent/.android is writable, details: /home/agent/.android/analytics.settings (No such file or directory)
+
+> Task :shared:kmpPartiallyResolvedDependenciesChecker
+> Task :shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared:convertXmlValueResourcesForCommonMain NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForCommonMain NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForCommonMain NO-SOURCE
+> Task :shared:generateResourceAccessorsForCommonMain SKIPPED
+> Task :shared:convertXmlValueResourcesForDesktopMain NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForDesktopMain NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForDesktopMain NO-SOURCE
+> Task :shared:generateResourceAccessorsForDesktopMain SKIPPED
+> Task :shared:convertXmlValueResourcesForJvmShared NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForJvmShared NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForJvmShared NO-SOURCE
+> Task :shared:generateResourceAccessorsForJvmShared SKIPPED
+> Task :shared:generateActualResourceCollectorsForDesktopMain SKIPPED
+> Task :shared:generateComposeResClass SKIPPED
+> Task :shared:generateExpectResourceCollectorsForCommonMain SKIPPED
+> Task :shared:kspKotlinDesktop
+> Task :shared:compileKotlinDesktop
+w: file://<repository>/shared/build/generated/ksp/desktop/desktopMain/kotlin/dev/ikna/data/db/IknaDatabaseConstructor.kt:5:8 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+w: file://<repository>/shared/src/jvmShared/kotlin/dev/ikna/data/db/IknaDatabase.kt:76:1 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+w: file://<repository>/shared/src/jvmShared/kotlin/dev/ikna/ui/dev/DeveloperToolsPanel.kt:31:21 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file://<repository>/shared/src/jvmShared/kotlin/dev/ikna/ui/theme/SignalFrame.kt:179:33 The corresponding parameter in the supertype 'PointerInputModifierNode' is named 'pointerEvent'. This may cause problems when calling this function with named arguments.
+
+> Task :shared:compileDesktopMainJava NO-SOURCE
+> Task :shared:assembleDesktopMainResources
+> Task :shared:desktopProcessResources
+> Task :shared:processDesktopMainResources SKIPPED
+> Task :shared:desktopMainClasses
+> Task :shared:desktopJar
+> Task :shared:convertXmlValueResourcesForCommonTest NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForCommonTest NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForCommonTest NO-SOURCE
+> Task :shared:generateResourceAccessorsForCommonTest SKIPPED
+> Task :shared:convertXmlValueResourcesForDesktopTest NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForDesktopTest NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForDesktopTest NO-SOURCE
+> Task :shared:generateResourceAccessorsForDesktopTest SKIPPED
+> Task :shared:convertXmlValueResourcesForJvmSharedTest NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForJvmSharedTest NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForJvmSharedTest NO-SOURCE
+> Task :shared:generateResourceAccessorsForJvmSharedTest SKIPPED
+> Task :shared:kspTestKotlinDesktop SKIPPED
+> Task :shared:compileTestKotlinDesktop
+> Task :shared:compileDesktopTestJava NO-SOURCE
+> Task :shared:assembleDesktopTestResources
+> Task :shared:desktopTestProcessResources
+> Task :shared:processDesktopTestResources SKIPPED
+> Task :shared:desktopTestClasses
+> Task :shared:desktopTest
+> Task :desktop:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :desktop:convertXmlValueResourcesForMain NO-SOURCE
+> Task :desktop:copyNonXmlValueResourcesForMain NO-SOURCE
+> Task :desktop:prepareComposeResourcesTaskForMain NO-SOURCE
+> Task :desktop:generateResourceAccessorsForMain SKIPPED
+> Task :desktop:generateActualResourceCollectorsForMain SKIPPED
+> Task :desktop:generateComposeResClass SKIPPED
+
+> Task :desktop:compileKotlin
+w: file://<repository>/desktop/src/main/kotlin/dev/ikna/desktop/AddDeckPane.kt:75:21 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file://<repository>/desktop/src/main/kotlin/dev/ikna/desktop/Main.kt:536:20 'fun painterResource(resourcePath: String): Painter' is deprecated. Migrate to the Compose resources library. See https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-images-resources.html If you need to load resources specificly from Java classpath, you should still use the new resource library and use a snippet from https://github.com/JetBrains/compose-multiplatform-core/pull/1457.
+w: file://<repository>/desktop/src/main/kotlin/dev/ikna/desktop/SessionPane.kt:107:21 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+
+> Task :desktop:compileJava
+> Task :desktop:assembleMainResources
+> Task :desktop:processResources
+> Task :desktop:classes
+> Task :desktop:jar
+> Task :desktop:convertXmlValueResourcesForTest NO-SOURCE
+> Task :desktop:copyNonXmlValueResourcesForTest NO-SOURCE
+> Task :desktop:prepareComposeResourcesTaskForTest NO-SOURCE
+> Task :desktop:generateResourceAccessorsForTest SKIPPED
+> Task :desktop:compileTestKotlin
+> Task :desktop:compileTestJava
+> Task :desktop:assembleTestResources
+> Task :desktop:processTestResources
+> Task :desktop:testClasses
+> Task :desktop:test
+
+BUILD SUCCESSFUL in 3m 18s
+20 actionable tasks: 20 executed

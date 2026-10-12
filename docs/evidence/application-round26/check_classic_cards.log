@@ -1,0 +1,10 @@
+test_amnesty_does_not_rewrite_archived_schedules (__main__.ClassicDaoTests.test_amnesty_does_not_rewrite_archived_schedules) ... ok
+test_archive_reads_still_preserve_all_levels (__main__.ClassicDaoTests.test_archive_reads_still_preserve_all_levels) ... ok
+test_due_backlog_forecast_and_next_due_ignore_retired_modes (__main__.ClassicDaoTests.test_due_backlog_forecast_and_next_due_ignore_retired_modes) ... ok
+test_queue_and_leeches_only_return_classic_rows (__main__.ClassicDaoTests.test_queue_and_leeches_only_return_classic_rows) ... ok
+test_undo_restores_valid_answer_count_while_journal_grows (__main__.ClassicDaoTests.test_undo_restores_valid_answer_count_while_journal_grows) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.005s
+
+OK

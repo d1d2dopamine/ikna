@@ -1,0 +1,59 @@
+{
+  "exclusiveHost": false,
+  "sameProjectOverlappingWork": {
+    "kind": "unchanged full selected-material structural audit",
+    "overlapSequence": "Audit started after baseline began and overlapped profiled invocation.",
+    "overlapSequenceSource": "Execution sequencing reported with the completed probe results; exact wall-clock overlap not independently timed here.",
+    "preciseUtcOverlapIntervalAvailable": false,
+    "resourceEvidencePath": "ikna-results/round30/structural-audit/RESOURCE.json",
+    "resourceEvidenceSha256": "3ed2712297b8733466a4d858ee2d8590b6938ed37265bec7ec7c84056d94d1a6",
+    "completedResourceEvidence": {
+      "status": "child-exited-zero",
+      "publicationSafe": false,
+      "resumable": false,
+      "childPid": 7,
+      "limits": {
+        "max_rss_bytes": 2147483648,
+        "min_available_bytes": 2147483648,
+        "min_disk_free_bytes": 4294967296,
+        "addressSpaceBytes": 3221225472,
+        "pollSeconds": 1
+      },
+      "samples": 151,
+      "sampledPeakRssBytes": 301072384,
+      "minimumAvailableBytes": 6874439680,
+      "minimumDiskFreeBytes": 13902340096,
+      "limitations": [
+        "Cgroup visibility may be unavailable; hidden limits remain unknown.",
+        "Sampled resource thresholds may overshoot between polls.",
+        "Current-self-baseline supplies self-consistency only, never independent semantic or historical-preview evidence."
+      ],
+      "preflight": {
+        "rssBytes": 12111872,
+        "virtualBytes": 39268352,
+        "hostAvailableBytes": 7524880384,
+        "availableBytes": 7524880384,
+        "cgroupVisibility": "unavailable",
+        "cgroupHeadroomBytes": null,
+        "diskFreeBytes": 14263619584,
+        "monotonicSeconds": 30219.494378249
+      },
+      "latestSample": {
+        "rssBytes": 280674304,
+        "virtualBytes": 419655680,
+        "hostAvailableBytes": 6991122432,
+        "availableBytes": 6991122432,
+        "cgroupVisibility": "unavailable",
+        "cgroupHeadroomBytes": null,
+        "diskFreeBytes": 13902340096,
+        "monotonicSeconds": 30369.628537633
+      },
+      "exitCode": 0,
+      "elapsedSeconds": 151.13790743500067
+    }
+  },
+  "limitations": [
+    "No isolated-host timing claim; exact overlap fraction/CPU contention was not measured.",
+    "Structural-audit quality findings remain a separate checkpoint."
+  ]
+}

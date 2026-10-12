@@ -1,0 +1,36 @@
+test_adapter_refuses_other_sql_pair_or_second_call (__main__.ProbeTests.test_adapter_refuses_other_sql_pair_or_second_call) ... ok
+test_candidate_binding_reads_ast_without_execution (__main__.ProbeTests.test_candidate_binding_reads_ast_without_execution) ... ok
+test_candidate_bytes_change_or_wrong_definition_refused (__main__.ProbeTests.test_candidate_bytes_change_or_wrong_definition_refused) ... ok
+test_candidate_import_cache_priming_refused (__main__.ProbeTests.test_candidate_import_cache_priming_refused) ... ok
+test_candidate_import_requires_original_dependency_aliases (__main__.ProbeTests.test_candidate_import_requires_original_dependency_aliases) ... ok
+test_candidate_mismatch_and_runtime_failure_never_complete_and_restore (__main__.ProbeTests.test_candidate_mismatch_and_runtime_failure_never_complete_and_restore) ... ok
+test_exact_feature_string_change_changes_digest (__main__.ProbeTests.test_exact_feature_string_change_changes_digest) ... ok
+test_existing_output_refused_before_producer_read (__main__.ProbeTests.test_existing_output_refused_before_producer_read) ... ok
+test_metadata_snapshot_refuses_same_size_rewrite (__main__.ProbeTests.test_metadata_snapshot_refuses_same_size_rewrite) ... ok
+test_missing_analysis_cannot_shift_prefix (__main__.ProbeTests.test_missing_analysis_cannot_shift_prefix) ... ok
+test_modes_require_the_correct_references (__main__.ProbeTests.test_modes_require_the_correct_references) ... ok
+test_new_unpinned_source_refused (__main__.ProbeTests.test_new_unpinned_source_refused) ... ok
+test_original_alias_restored_after_success_and_baseexception (__main__.ProbeTests.test_original_alias_restored_after_success_and_baseexception) ... ok
+test_preexisting_selector_patch_refused_without_clobbering_it (__main__.ProbeTests.test_preexisting_selector_patch_refused_without_clobbering_it) ... ok
+test_prefix_requires_requested_count (__main__.ProbeTests.test_prefix_requires_requested_count) ... ok
+test_producer_gates_accept_complete_synthetic_metadata (__main__.ProbeTests.test_producer_gates_accept_complete_synthetic_metadata) ... ok
+test_producer_incomplete_or_wrong_cap_or_morphology_refused (__main__.ProbeTests.test_producer_incomplete_or_wrong_cap_or_morphology_refused) ... ok
+test_producer_missing_binding_refused (__main__.ProbeTests.test_producer_missing_binding_refused) ... ok
+test_producer_profile_tamper_refused (__main__.ProbeTests.test_producer_profile_tamper_refused) ... ok
+test_producer_unsuccessful_guard_refused (__main__.ProbeTests.test_producer_unsuccessful_guard_refused) ... ok
+test_readonly_write_rejected (__main__.ProbeTests.test_readonly_write_rejected) ... ok
+test_resource_limits_applied_in_separate_tiny_process (__main__.ProbeTests.test_resource_limits_applied_in_separate_tiny_process) ... ok
+test_round31_reference_and_different_candidate_hash_refused (__main__.ProbeTests.test_round31_reference_and_different_candidate_hash_refused) ... ok
+test_runtime_python_mismatch_fails_before_icu_access (__main__.ProbeTests.test_runtime_python_mismatch_fails_before_icu_access) ... ok
+test_schema_and_exact_original_function_prefix (__main__.ProbeTests.test_schema_and_exact_original_function_prefix) ... ok
+test_source_pins_and_registry_are_checked (__main__.ProbeTests.test_source_pins_and_registry_are_checked) ... ok
+test_sqlite_configuration_is_reported_readonly (__main__.ProbeTests.test_sqlite_configuration_is_reported_readonly) ... ok
+test_staging_bytes_and_sidecars_fail_closed (__main__.ProbeTests.test_staging_bytes_and_sidecars_fail_closed) ... ok
+test_streamed_canonical_output_preserves_lists_and_unicode (__main__.ProbeTests.test_streamed_canonical_output_preserves_lists_and_unicode) ... ok
+test_three_modes_fixture_complete_equality_and_correct_ratios (__main__.ProbeTests.test_three_modes_fixture_complete_equality_and_correct_ratios) ... ok
+test_wrong_baseline_contract_or_changed_output_refused (__main__.ProbeTests.test_wrong_baseline_contract_or_changed_output_refused) ... ok
+
+----------------------------------------------------------------------
+Ran 31 tests in 0.176s
+
+OK

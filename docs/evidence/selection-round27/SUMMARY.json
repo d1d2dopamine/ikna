@@ -1,0 +1,230 @@
+{
+  "status": "bounded-real-input-experiment-only",
+  "candidates": 105988,
+  "contexts": 100499,
+  "directedPairs": 110,
+  "runOrder": [
+    "baseline-before",
+    "cache-cold-warm",
+    "cache-warm-fresh",
+    "baseline-after",
+    "baseline-fresh-03",
+    "cache-warm-fresh-03",
+    "cache-warm-fresh-04",
+    "baseline-fresh-04"
+  ],
+  "runs": [
+    {
+      "process": "baseline-before",
+      "run": 1,
+      "mode": "baseline",
+      "seconds": 20.1952233789998,
+      "analysisSeconds": 4.645470696992561,
+      "peakRssBytes": 386535424,
+      "stagingBytes": 120438784
+    },
+    {
+      "process": "cache-cold-warm",
+      "run": 1,
+      "mode": "enabled",
+      "seconds": 24.72030915099822,
+      "analysisSeconds": 8.8966975849944,
+      "peakRssBytes": 374509568,
+      "stagingBytes": 120438784
+    },
+    {
+      "process": "cache-cold-warm",
+      "run": 2,
+      "mode": "enabled",
+      "seconds": 19.378246129002946,
+      "analysisSeconds": 2.135518265000428,
+      "peakRssBytes": 374509568,
+      "stagingBytes": 120438784
+    },
+    {
+      "process": "cache-warm-fresh",
+      "run": 1,
+      "mode": "enabled",
+      "seconds": 17.557843655999022,
+      "analysisSeconds": 2.1076062339961936,
+      "peakRssBytes": 294572032,
+      "stagingBytes": 120438784
+    },
+    {
+      "process": "baseline-after",
+      "run": 1,
+      "mode": "baseline",
+      "seconds": 20.963433591001376,
+      "analysisSeconds": 4.838169729009678,
+      "peakRssBytes": 372244480,
+      "stagingBytes": 120438784
+    },
+    {
+      "process": "baseline-fresh-03",
+      "run": 1,
+      "mode": "baseline",
+      "seconds": 20.293433810998977,
+      "analysisSeconds": 4.733234566003375,
+      "peakRssBytes": 365613056,
+      "stagingBytes": 120438784
+    },
+    {
+      "process": "cache-warm-fresh-03",
+      "run": 1,
+      "mode": "enabled",
+      "seconds": 17.519574079997255,
+      "analysisSeconds": 2.1068282460073533,
+      "peakRssBytes": 298438656,
+      "stagingBytes": 120438784
+    },
+    {
+      "process": "cache-warm-fresh-04",
+      "run": 1,
+      "mode": "enabled",
+      "seconds": 17.534719749000942,
+      "analysisSeconds": 2.083392501990602,
+      "peakRssBytes": 296378368,
+      "stagingBytes": 120438784
+    },
+    {
+      "process": "baseline-fresh-04",
+      "run": 1,
+      "mode": "baseline",
+      "seconds": 20.539175703001092,
+      "analysisSeconds": 4.90362311699937,
+      "peakRssBytes": 384708608,
+      "stagingBytes": 120438784
+    }
+  ],
+  "outputsIdentical": true,
+  "pipelinePinsIdentical": true,
+  "outputIdentity": {
+    "reportSha256": "bb83e6121d4cbb046a33cf68227b2b6fa2060258d95022dbfa0cfd0d06fbb84d",
+    "previewSha256": "50b5b745c0dccb6090304f8754ae96ded77b5dbe2ae74dc5b0e9826f361ef890",
+    "selectedSha256": "2efae253c630285c7b7de5f9de5e076117c39981775cea181e6a7ef51bdc16f6",
+    "selectedLogicalSha256": "7ab05cd6a7a03221cf818176c9671b99f33646fe7f98a173fa716bbb1c7d3d2e"
+  },
+  "baselineFreshMedianSeconds": 20.416304757000034,
+  "warmCacheFreshMedianSeconds": 17.534719749000942,
+  "observedMedianElapsedReductionPercent": 14.11413594328865,
+  "cacheBytes": 9960806,
+  "cacheFiles": [
+    {
+      "name": "125b3c8c240bcc4470466a86dcdec71db92f7b832e0001f60168ac96ea1e8f06.json",
+      "bytes": 2249,
+      "sha256": "4e745c9f19d3f9506a5376ea3060043a0ce524542b7b6f74e389b3b0adc06ff1"
+    },
+    {
+      "name": "125b3c8c240bcc4470466a86dcdec71db92f7b832e0001f60168ac96ea1e8f06.jsonl.gz",
+      "bytes": 873746,
+      "sha256": "932909f4f3c962bd39dd5ad884de3d9c4fce8e6d8d4bd639d479f14fed4a65db"
+    },
+    {
+      "name": "1fb8f04b2b3497c9a20055d1fa850fbf372d75c76e44b5930a47f37d0518de75.json",
+      "bytes": 2586,
+      "sha256": "e9d40b9ff5d2a7cec92228f2b76bbcd2e3005baf927c5b6f96d1d567a6ce44e1"
+    },
+    {
+      "name": "1fb8f04b2b3497c9a20055d1fa850fbf372d75c76e44b5930a47f37d0518de75.jsonl.gz",
+      "bytes": 543980,
+      "sha256": "f5328478716d572a938887e51bf18a029890d12567ce71544883ee097912ac1c"
+    },
+    {
+      "name": "b05540b77751a80e8e74398fd6bb555a8278acd51e009ab55f08f28144c79455.json",
+      "bytes": 2251,
+      "sha256": "8f2c3c1dd0ec2a5531de5d72cd50c87a39a3e6dbf095a208542250cee06d830c"
+    },
+    {
+      "name": "b05540b77751a80e8e74398fd6bb555a8278acd51e009ab55f08f28144c79455.jsonl.gz",
+      "bytes": 919988,
+      "sha256": "e998c495b1f7ebaa5c595fa7553692c08ed78ac3af7af339dcdd42bc83bd710a"
+    },
+    {
+      "name": "b9a5cadc6bf77e856a4b9c3cb88dcc1438ca83afedf5cc668e8f9e0768da4f15.json",
+      "bytes": 2249,
+      "sha256": "9ec8757a0150809435180b4be1fe318a557cd7711c8e66df30c602b8e0be825f"
+    },
+    {
+      "name": "b9a5cadc6bf77e856a4b9c3cb88dcc1438ca83afedf5cc668e8f9e0768da4f15.jsonl.gz",
+      "bytes": 956045,
+      "sha256": "a7616ea5fc0fc6006a949310419bb8de8555e11e082099298b82e857c4dee368"
+    },
+    {
+      "name": "c34db35629b4545295f4f1e8b875980aba516948b4e335b46fe75f9ba7763b08.json",
+      "bytes": 2586,
+      "sha256": "cc84dac06f13f170ab7b0f72e94b808b9c04b56ac0a4c4e473ec43626e39712e"
+    },
+    {
+      "name": "c34db35629b4545295f4f1e8b875980aba516948b4e335b46fe75f9ba7763b08.jsonl.gz",
+      "bytes": 974555,
+      "sha256": "186de029a0db7d37388d94f961b8b820baaa05537fe636a4bcfddca1d4c73597"
+    },
+    {
+      "name": "cea8c4dbe8bae046175c3a745c7bce8cb440e2a332f639cedcf659de53165daf.json",
+      "bytes": 2249,
+      "sha256": "14f47b6c41100245b84fd04b8fbd937c7a5e752ca2cb7b8fda253a622f0b7461"
+    },
+    {
+      "name": "cea8c4dbe8bae046175c3a745c7bce8cb440e2a332f639cedcf659de53165daf.jsonl.gz",
+      "bytes": 905442,
+      "sha256": "20adac21f63765dc1985fc3d6b1cd3ef122b04ae6f752ba05edaecb433fa2a74"
+    },
+    {
+      "name": "e33ebf68ef5f69ef9b0dbeaa407006d30609da52eda0b3ec8b125cfbf58326ba.json",
+      "bytes": 2251,
+      "sha256": "e891ecf43a16916f108626510a6ef839d28710e067c2598714d91470cd5b5d4a"
+    },
+    {
+      "name": "e33ebf68ef5f69ef9b0dbeaa407006d30609da52eda0b3ec8b125cfbf58326ba.jsonl.gz",
+      "bytes": 986532,
+      "sha256": "2ba86f77eb5c9f56ca19ea67893277a2a35ca8c7f29273fac0899700b70890d9"
+    },
+    {
+      "name": "ed103d148e5d515ccc8e2bf7fecb563c5d0f415bae48d64a7c581f3d78eb8548.json",
+      "bytes": 2249,
+      "sha256": "544bad07f71e12e475018d46e96195c70e7f04affcea7029f3d400be0aa39c5c"
+    },
+    {
+      "name": "ed103d148e5d515ccc8e2bf7fecb563c5d0f415bae48d64a7c581f3d78eb8548.jsonl.gz",
+      "bytes": 921776,
+      "sha256": "70a2ba5ba5e2155be8f386ac6c882cefc88137e18d466e961f7a97e0421dc3b1"
+    },
+    {
+      "name": "f07e03d64dbb9b85d74904e1553edabfd5a7bd9a4d1ff38ba17da6379b11b73c.json",
+      "bytes": 2249,
+      "sha256": "79cd12ed0284073a2824899f6dbbac4f145d06c5eea6d39f8ea816051f20b5c8"
+    },
+    {
+      "name": "f07e03d64dbb9b85d74904e1553edabfd5a7bd9a4d1ff38ba17da6379b11b73c.jsonl.gz",
+      "bytes": 984689,
+      "sha256": "55e57956cf5f84cc049163f1eab746065182d83c560df8418f4c708e7d0fc870"
+    },
+    {
+      "name": "fd0037d7016337b67e348e97868e1195276c960dc7dc628e8c499b8f73429f7b.json",
+      "bytes": 2249,
+      "sha256": "a37d25bab074e93421fa3f06c074f8b3d959b5f317657a05c7931ee187ef598b"
+    },
+    {
+      "name": "fd0037d7016337b67e348e97868e1195276c960dc7dc628e8c499b8f73429f7b.jsonl.gz",
+      "bytes": 950233,
+      "sha256": "8bdab44f22c8bb3a60f780be70af499a1decf9db5f0d7efdf41a2170ec4e1531"
+    },
+    {
+      "name": "ff990ad288337efb8ee67087e78cc6bed9d8cedc5b295f17e7e670d87c1bf7aa.json",
+      "bytes": 2975,
+      "sha256": "bfdf6ec6229f587485d9ef57ad0e0fdcb7042feb15c8d7257c470f3f03055292"
+    },
+    {
+      "name": "ff990ad288337efb8ee67087e78cc6bed9d8cedc5b295f17e7e670d87c1bf7aa.jsonl.gz",
+      "bytes": 917677,
+      "sha256": "ce2a9390dadddaff1178dc772ff413c28e3cc27046507eaa7adbe0a8979cc9f4"
+    }
+  ],
+  "limitations": [
+    "Pair-stratified sample ranks, not full pool selection",
+    "OS page cache uncontrolled; fresh process is not OS-cold input",
+    "Small nonrandomized repeat count; no statistical confidence interval",
+    "Cold cache is newly populated analysis cache, not cold filesystem",
+    "No production cache or classifier enabled"
+  ]
+}

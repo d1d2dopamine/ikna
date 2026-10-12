@@ -1,0 +1,24 @@
+{
+  "exclusiveHost": false,
+  "osFilesystemCacheControlled": false,
+  "knownSameProjectOverlap": [
+    {
+      "approximateUtc": "2026-10-12T00:38:00Z/2026-10-12T00:39:00Z",
+      "activity": "compact report ZIP compression and Library transfer",
+      "scope": "about13.2MB compressed delivery, no source/corpus processing",
+      "resourceMeasurement": "not separately sampled"
+    },
+    {
+      "approximateUtc": "2026-10-12T00:59:00Z/2026-10-12T01:02:00Z",
+      "activity": "small conditional integration fixture suites, patch application and independent review",
+      "scope": "synthetic/unit fixtures only, no real corpus runs; each test suite measured a few seconds",
+      "resourceMeasurement": "not separately sampled"
+    }
+  ],
+  "limitations": [
+    "Time ranges are approximate worker-reported activity windows, not full host tracing",
+    "No known concurrent heavy benchmark; unobserved background load remains possible",
+    "Process CPU/RSS belong to the measured selector; other processes are not subtracted from wall time",
+    "One original and one candidate full invocation; resource/time ratios are observed, not a repeated controlled speed estimate"
+  ]
+}

@@ -1,0 +1,696 @@
+{
+  "diagnosticVersion": 1,
+  "publicationSafe": false,
+  "productionSnapshot": false,
+  "sampling": "pair-bottom-sha256-v1",
+  "samplerSha256": "345e16f9576f057f38f0e330d0b449f56a914032e5539171ca5c61066ea5ddc4",
+  "perPairMaximum": 1024,
+  "ordering": "original parent row order, preserved bytes before existing pool builder",
+  "parentPool": {
+    "sha256": "57b90b01d5dcb0725743998dccaf307a100e174059a853e01f5f31fc13dd6170",
+    "sizeBytes": 545718435,
+    "logicalSha256": "05ccbb5b5217dc050cc5a5e0e1cfca3223657529afa6b3890c9340999d571ab8",
+    "logicalSizeBytes": 5320249214,
+    "uniqueCandidates": 11099490,
+    "duplicateCandidatesMerged": 15936
+  },
+  "parentReportSha256": "41c7e176d516e6ad89d70954b116d18062baa48857f66ee276bdcfd32dd0438f",
+  "sampleSourceSha256": "daabe57156fbf7a5411e58f6446cf88a537bbf5ac39ab4665e2508c55986ea1a",
+  "samplePool": {
+    "sha256": "a428ec92e9a0c50e1b3dc075c9b9fd2546c86aff44c0b03ef2f53f4e7b77b7e5",
+    "sizeBytes": 9211785,
+    "logicalSha256": "daabe57156fbf7a5411e58f6446cf88a537bbf5ac39ab4665e2508c55986ea1a",
+    "logicalSizeBytes": 50715949,
+    "uniqueCandidates": 105988,
+    "duplicateCandidatesMerged": 0
+  },
+  "pairs": [
+    {
+      "lang": "de",
+      "meaningLang": "en",
+      "parentRecords": 584927,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "de",
+      "meaningLang": "es",
+      "parentRecords": 100179,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "de",
+      "meaningLang": "fr",
+      "parentRecords": 157190,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "de",
+      "meaningLang": "it",
+      "parentRecords": 32659,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "de",
+      "meaningLang": "ja",
+      "parentRecords": 58359,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "de",
+      "meaningLang": "ko",
+      "parentRecords": 3312,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "de",
+      "meaningLang": "pl",
+      "parentRecords": 21952,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "de",
+      "meaningLang": "pt",
+      "parentRecords": 25390,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "de",
+      "meaningLang": "ru",
+      "parentRecords": 228254,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "de",
+      "meaningLang": "zh",
+      "parentRecords": 38987,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "en",
+      "meaningLang": "de",
+      "parentRecords": 584927,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "en",
+      "meaningLang": "es",
+      "parentRecords": 283558,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "en",
+      "meaningLang": "fr",
+      "parentRecords": 440288,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "en",
+      "meaningLang": "it",
+      "parentRecords": 720920,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "en",
+      "meaningLang": "ja",
+      "parentRecords": 280509,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "en",
+      "meaningLang": "ko",
+      "parentRecords": 11553,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "en",
+      "meaningLang": "pl",
+      "parentRecords": 84126,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "en",
+      "meaningLang": "pt",
+      "parentRecords": 302025,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "en",
+      "meaningLang": "ru",
+      "parentRecords": 826135,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "en",
+      "meaningLang": "zh",
+      "parentRecords": 78053,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "es",
+      "meaningLang": "de",
+      "parentRecords": 100179,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "es",
+      "meaningLang": "en",
+      "parentRecords": 283558,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "es",
+      "meaningLang": "fr",
+      "parentRecords": 61612,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "es",
+      "meaningLang": "it",
+      "parentRecords": 19882,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "es",
+      "meaningLang": "ja",
+      "parentRecords": 39747,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "es",
+      "meaningLang": "ko",
+      "parentRecords": 1103,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "es",
+      "meaningLang": "pl",
+      "parentRecords": 11652,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "es",
+      "meaningLang": "pt",
+      "parentRecords": 77704,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "es",
+      "meaningLang": "ru",
+      "parentRecords": 134968,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "es",
+      "meaningLang": "zh",
+      "parentRecords": 11576,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "fr",
+      "meaningLang": "de",
+      "parentRecords": 157190,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "fr",
+      "meaningLang": "en",
+      "parentRecords": 440288,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "fr",
+      "meaningLang": "es",
+      "parentRecords": 61612,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "fr",
+      "meaningLang": "it",
+      "parentRecords": 89600,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "fr",
+      "meaningLang": "ja",
+      "parentRecords": 43793,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "fr",
+      "meaningLang": "ko",
+      "parentRecords": 2180,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "fr",
+      "meaningLang": "pl",
+      "parentRecords": 5307,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "fr",
+      "meaningLang": "pt",
+      "parentRecords": 35403,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "fr",
+      "meaningLang": "ru",
+      "parentRecords": 455372,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "fr",
+      "meaningLang": "zh",
+      "parentRecords": 21205,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "it",
+      "meaningLang": "de",
+      "parentRecords": 32659,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "it",
+      "meaningLang": "en",
+      "parentRecords": 720920,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "it",
+      "meaningLang": "es",
+      "parentRecords": 19882,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "it",
+      "meaningLang": "fr",
+      "parentRecords": 89600,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "it",
+      "meaningLang": "ja",
+      "parentRecords": 6430,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "it",
+      "meaningLang": "ko",
+      "parentRecords": 214,
+      "sampleRecords": 214
+    },
+    {
+      "lang": "it",
+      "meaningLang": "pl",
+      "parentRecords": 2747,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "it",
+      "meaningLang": "pt",
+      "parentRecords": 15166,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "it",
+      "meaningLang": "ru",
+      "parentRecords": 86657,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "it",
+      "meaningLang": "zh",
+      "parentRecords": 4742,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ja",
+      "meaningLang": "de",
+      "parentRecords": 58359,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ja",
+      "meaningLang": "en",
+      "parentRecords": 280509,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ja",
+      "meaningLang": "es",
+      "parentRecords": 39747,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ja",
+      "meaningLang": "fr",
+      "parentRecords": 43793,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ja",
+      "meaningLang": "it",
+      "parentRecords": 6430,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ja",
+      "meaningLang": "ko",
+      "parentRecords": 2262,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ja",
+      "meaningLang": "pl",
+      "parentRecords": 26307,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ja",
+      "meaningLang": "pt",
+      "parentRecords": 4919,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ja",
+      "meaningLang": "ru",
+      "parentRecords": 31565,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ja",
+      "meaningLang": "zh",
+      "parentRecords": 16210,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ko",
+      "meaningLang": "de",
+      "parentRecords": 3312,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ko",
+      "meaningLang": "en",
+      "parentRecords": 11553,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ko",
+      "meaningLang": "es",
+      "parentRecords": 1103,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ko",
+      "meaningLang": "fr",
+      "parentRecords": 2180,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ko",
+      "meaningLang": "it",
+      "parentRecords": 214,
+      "sampleRecords": 214
+    },
+    {
+      "lang": "ko",
+      "meaningLang": "ja",
+      "parentRecords": 2262,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ko",
+      "meaningLang": "pl",
+      "parentRecords": 94,
+      "sampleRecords": 94
+    },
+    {
+      "lang": "ko",
+      "meaningLang": "pt",
+      "parentRecords": 214,
+      "sampleRecords": 214
+    },
+    {
+      "lang": "ko",
+      "meaningLang": "ru",
+      "parentRecords": 248,
+      "sampleRecords": 248
+    },
+    {
+      "lang": "ko",
+      "meaningLang": "zh",
+      "parentRecords": 2842,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pl",
+      "meaningLang": "de",
+      "parentRecords": 21952,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pl",
+      "meaningLang": "en",
+      "parentRecords": 84126,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pl",
+      "meaningLang": "es",
+      "parentRecords": 11652,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pl",
+      "meaningLang": "fr",
+      "parentRecords": 5307,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pl",
+      "meaningLang": "it",
+      "parentRecords": 2747,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pl",
+      "meaningLang": "ja",
+      "parentRecords": 26307,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pl",
+      "meaningLang": "ko",
+      "parentRecords": 94,
+      "sampleRecords": 94
+    },
+    {
+      "lang": "pl",
+      "meaningLang": "pt",
+      "parentRecords": 1582,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pl",
+      "meaningLang": "ru",
+      "parentRecords": 9521,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pl",
+      "meaningLang": "zh",
+      "parentRecords": 1039,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pt",
+      "meaningLang": "de",
+      "parentRecords": 25390,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pt",
+      "meaningLang": "en",
+      "parentRecords": 302025,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pt",
+      "meaningLang": "es",
+      "parentRecords": 77704,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pt",
+      "meaningLang": "fr",
+      "parentRecords": 35403,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pt",
+      "meaningLang": "it",
+      "parentRecords": 15166,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pt",
+      "meaningLang": "ja",
+      "parentRecords": 4919,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pt",
+      "meaningLang": "ko",
+      "parentRecords": 214,
+      "sampleRecords": 214
+    },
+    {
+      "lang": "pt",
+      "meaningLang": "pl",
+      "parentRecords": 1582,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pt",
+      "meaningLang": "ru",
+      "parentRecords": 34140,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "pt",
+      "meaningLang": "zh",
+      "parentRecords": 1540,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ru",
+      "meaningLang": "de",
+      "parentRecords": 228254,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ru",
+      "meaningLang": "en",
+      "parentRecords": 826135,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ru",
+      "meaningLang": "es",
+      "parentRecords": 134968,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ru",
+      "meaningLang": "fr",
+      "parentRecords": 455372,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ru",
+      "meaningLang": "it",
+      "parentRecords": 86657,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ru",
+      "meaningLang": "ja",
+      "parentRecords": 31565,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ru",
+      "meaningLang": "ko",
+      "parentRecords": 248,
+      "sampleRecords": 248
+    },
+    {
+      "lang": "ru",
+      "meaningLang": "pl",
+      "parentRecords": 9521,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ru",
+      "meaningLang": "pt",
+      "parentRecords": 34140,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "ru",
+      "meaningLang": "zh",
+      "parentRecords": 11826,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "zh",
+      "meaningLang": "de",
+      "parentRecords": 38987,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "zh",
+      "meaningLang": "en",
+      "parentRecords": 78053,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "zh",
+      "meaningLang": "es",
+      "parentRecords": 11576,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "zh",
+      "meaningLang": "fr",
+      "parentRecords": 21205,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "zh",
+      "meaningLang": "it",
+      "parentRecords": 4742,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "zh",
+      "meaningLang": "ja",
+      "parentRecords": 16210,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "zh",
+      "meaningLang": "ko",
+      "parentRecords": 2842,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "zh",
+      "meaningLang": "pl",
+      "parentRecords": 1039,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "zh",
+      "meaningLang": "pt",
+      "parentRecords": 1540,
+      "sampleRecords": 1024
+    },
+    {
+      "lang": "zh",
+      "meaningLang": "ru",
+      "parentRecords": 11826,
+      "sampleRecords": 1024
+    }
+  ],
+  "limitations": [
+    "Pairs are equally capped, not population-weighted; no representativeness claim within defect types.",
+    "Ranks are rebuilt on the bounded sample, not the accepted full-pool frequency space.",
+    "This scan verifies full parent logical identity; it does not independently validate every unsampled origin.",
+    "The independent unchanged full-input validator supplies all-row provenance/schema evidence.",
+    "Do not use diagnostic selection to replace the accepted production snapshot or predict full-corpus speed."
+  ]
+}

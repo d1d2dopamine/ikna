@@ -1,0 +1,123 @@
+{
+  "observed_at_utc": "2026-10-11T23:05:10.979203+00:00",
+  "status": "defer_classifier_integration_and_scored_comparison",
+  "completed_gate": "Single official en-de v1.6 archive acquired, content-pinned, fully listed and bounded metadata inspected without execution.",
+  "rights_status": "Repository GPL-3.0 declaration preserved. No standalone licence, notice, attribution or source-corpus inventory is present among archive member names; model YAML has no licence, source corpus, training split, dates or overlap fields. Notices embedded in unread payloads were not searched. Per-resource and underlying-training-text provenance remains unresolved; no illegality or redistribution permission is inferred.",
+  "archive_bytes": 523179851,
+  "archive_sha256": "c932449563ef0108757382d7d2de2dae2bdd97f78cf9dcee3fcf734a80c5b98d",
+  "archive_members": 15,
+  "regular_member_stored_bytes": 646939311,
+  "model_yaml": {
+    "bytes": 1182,
+    "sha256": "7e8e201e4ddcb362cd0c377396f3574571895694d51716ecd26ee9f400e65730",
+    "source_lang": "en",
+    "target_lang": "de",
+    "classifier_type": "extra_trees",
+    "features_version": 4,
+    "source_lm": "model.lm.en",
+    "target_lm": "model.lm.de",
+    "lm_type": "CHARACTER",
+    "disable_lang_ident": "False",
+    "porn_removal_file": "porn-model.en",
+    "porn_removal_side": "sl",
+    "good_test_histogram_count": 5000,
+    "wrong_test_histogram_count": 4998,
+    "metric_caveat": "Publisher-internal histograms have undocumented source/split/label provenance and are not independent ikna or Tatoeba accuracy evidence."
+  },
+  "referenced_members": [
+    {
+      "yaml_key": "classifier",
+      "member": "en-de/en-de.classifier",
+      "exists": true,
+      "stored_bytes": 274819224
+    },
+    {
+      "yaml_key": "source_dictionary",
+      "member": "en-de/dict-en.gz",
+      "exists": true,
+      "stored_bytes": 27451611
+    },
+    {
+      "yaml_key": "target_dictionary",
+      "member": "en-de/dict-de.gz",
+      "exists": true,
+      "stored_bytes": 46150807
+    },
+    {
+      "yaml_key": "source_word_freqs",
+      "member": "en-de/wordfreq-en.gz",
+      "exists": true,
+      "stored_bytes": 1566172
+    },
+    {
+      "yaml_key": "target_word_freqs",
+      "member": "en-de/wordfreq-de.gz",
+      "exists": true,
+      "stored_bytes": 3666068
+    },
+    {
+      "yaml_key": "source_lm",
+      "member": "en-de/model.lm.en",
+      "exists": true,
+      "stored_bytes": 58232663
+    },
+    {
+      "yaml_key": "target_lm",
+      "member": "en-de/model.lm.de",
+      "exists": true,
+      "stored_bytes": 62336166
+    },
+    {
+      "yaml_key": "porn_removal_file",
+      "member": "en-de/porn-model.en",
+      "exists": true,
+      "stored_bytes": 1213624
+    }
+  ],
+  "core_yaml_classifier_dictionaries_wordfreq_member_bytes": 353655064,
+  "all_yaml_referenced_member_bytes_including_yaml": 475437517,
+  "unreferenced_regular_members": [
+    {
+      "member": "en-de/train.en-de",
+      "bytes": 30758021,
+      "contents_inspected": false
+    },
+    {
+      "member": "en-de/porn-removal.en.ftz",
+      "bytes": 1213624,
+      "contents_inspected": false
+    },
+    {
+      "member": "en-de/lm.de",
+      "bytes": 62357443,
+      "contents_inspected": false
+    },
+    {
+      "member": "en-de/lm.en",
+      "bytes": 58247369,
+      "contents_inspected": false
+    },
+    {
+      "member": "en-de/porn-removal.txt.en",
+      "bytes": 18925337,
+      "contents_inspected": false
+    }
+  ],
+  "resource_caveat": "Member sizes are tar-stored payload sizes; nested .gz resources remain compressed. These totals are not expanded dictionary size, classifier startup RSS or runtime measurements.",
+  "remaining_gates": [
+    "Per-resource and underlying-corpus provenance/rights",
+    "Dependency freeze and isolated startup/resource measurement",
+    "Independent human-label original-text permissions, training overlap and Tatoeba transfer",
+    "Measured incremental benefit at an approved good-material-loss bound",
+    "Unchanged 94/110 directions without a direct classic pack"
+  ],
+  "not_performed": [
+    "Model execution or deserialization",
+    "Dependency installation",
+    "Resource payload extraction or semantic inspection",
+    "Additional model-pack downloads",
+    "Corpus ingestion",
+    "Redistribution/publication",
+    "Changes to ikna runtime/tooling, app visuals, source registry or acceptance rules during the audit; this follow-up adds documentation only"
+  ]
+}

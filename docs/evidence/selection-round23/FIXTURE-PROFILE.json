@@ -1,0 +1,288 @@
+{
+  "profileVersion": 1,
+  "status": "complete-bounded-diagnostic",
+  "publicationSafe": false,
+  "inputPins": {
+    "pool": "43f44a5da4ad0f0b1e248d7f9d8d6093224497a2a2341a68256a739ccec6516b",
+    "poolReport": "7033b0b6e51b18f0a6e66cc2f76e373fb3a4ca2f247963e138f79239dd934eb8",
+    "registry": "98695b8beb720899b567c9a6b946eae33bd61952a82a03fe9d3fecfed9fc4066"
+  },
+  "pipelineSha256": {
+    "build_catalog.py": "89f5b930f735f3d37455811c2626f36a1de004d824850193f9ca4c43b3efc959",
+    "build_catalogue_v2.py": "976a868d70509e77dc020cfe943ad1e1821ae0fd287f13ff6952f384b42dd530",
+    "catalogue_core.py": "38af974c1e853034b0c9343bd41b5bc82f4644d117a11596bf35d50f98c47329",
+    "catalogue_v2.py": "92b9b761c4f4419e56eff66dd18a06327224fe8afbc7e8cd74397296b786578b",
+    "deck_budget_impact.py": "05f4d568f60a92f9357a35c82fa8ba7bce326500c26b62d8a5530adf83e04518",
+    "enrich_morphology.py": "4a5c953da016458c80eef502789059a2b4d4c028ec1071b6279b12622c0bffd3",
+    "everyday_pool.py": "b1342adb46c5a0f605761051b2d947b0f05a888b12a56578e2351cc94ecbf098",
+    "everyday_rebuild.py": "d63b638e1583b94348e2e82e98666e596c5876f95f05209c3f8cedd01d859c0e",
+    "everyday_selection.py": "b9d9afd0e20a97b61016de02420c8fc88f8d6a68b065c2dda2dcc50094de10ec",
+    "globalvoices_attribution.py": "165d117acf7502557ff95b8ff60bc498980bde94666b649ee9be5ebe457d1bdc",
+    "globalvoices_manifest.py": "384235f2f895d9e024861dd5a07e6901e16fe08e265d47872da6260ca848e39a",
+    "globalvoices_manifest_merge.py": "01ff7d2023d9e718a08d21d66be53e08d270c453f6a0bcee27de09b9307beb3b",
+    "globalvoices_native.py": "d8fb7c5e03b05b42496de2f407f7b55e438d6f81dff128d5bb662f2d5a2bae5e",
+    "globalvoices_xces_map.py": "e9bfc7254c7219301e5d8e12ce747fb92cc0002007613036eaa8ced6467ff8ef",
+    "ingest/__init__.py": "c6be30a7f50eb09ed7e3ab31531829dbb468404e456f5203a3f63ebda6443cfb",
+    "ingest/adapters.py": "96972bb6c5624be5a7230d88819f9f817f82debda0f82307f2fc99fa4eae0b4d",
+    "ingest/model.py": "1d5097bbd68fbcc589f5846efb766785f0e682bfb004aff01c1e2d97b68cf9fc",
+    "ingest/registry.py": "3249cdc94cdb5fc0bb52389a3c6aee33cd4d07eeb46ce747dd23072d65dc3033",
+    "ingest_sources.py": "4c818b9e67f3f3fb7526cfc0aab99d1a89de014db2772cc9aca7f4fd4a588d36",
+    "japanese_boundary.py": "8b4b7eabe6a2c5e06e595ed6583c4af45b0969c69dd424137d5aea0dabaa8c45",
+    "knowledge_rebuild.py": "71e79dcfedb1eac11e66add0b3c658fd4f4cad7ead80d391077c028ccb694abd",
+    "make_sample.py": "1d99aba2f26359dddd57195925b53a185b1d31184cd8d31441a509f7c83de617",
+    "meta_info.py": "2dcb895c13f99fa4ff116c90ea1aaec2b8dfb9f3d3fc425a5f7619664c79fd49",
+    "morphology/__init__.py": "f56f4c4b8c210a8cec989178a079087b3ae0a63d8629ee1f4ccf33dd8ca2d848",
+    "morphology/manifest.py": "ab433a49a02c11f82c6f554e6938b54c425cba843e1c287faa1110ed562ef76e",
+    "morphology/model.py": "ee64bbfca21a079a24d39dbe70a9d57391318128f31f7cc80e62bd93831bef63",
+    "morphology/store.py": "d6bb84a21f77216e477df2256ba6e4013cad8ed4736bbac0b0557d054dbe7835",
+    "pool_function_words.py": "11fd4e5158197ce7778801820416a171880125b3d3641d046a00869ea3d90c84",
+    "prepare_ud_manifest.py": "5196f83304951bc894d8c7a5c5da9600966e1e6827db6cd7bc70450aacac2bb3",
+    "publish.py": "17be6cfc6b0e5d8efa6d7d5396e033b554f57609fc719bc9a2f39639cad69b59",
+    "readiness_audit.py": "b72c3ecbb0c9a9ae976052bb9e396d9e3c8781e4f3a560bb8ff03b816b202018",
+    "replenishment_review.py": "826fb51b2c6249bafdce46a9dc088ae53db96764d5b2a7ef41d0d6feff636145",
+    "segmentation.py": "627b30e28ccb3c31a423d4d83b7968422913efd8cc7d631863d4d4075634b8da",
+    "selected_storage_experiment.py": "5016c095ff0ac0e6d0a0ab7ee38ab63995cf49e59f1f412e69eeb1f22d14bfd8",
+    "selection_audit.py": "cb53c756026843234dc6e8ac922da58876fbc3052e3ab355a5d8553030fda80b",
+    "selection_evaluate.py": "6580486c3aedaa9360396078e4c7fe718c6ec6b535afac804e6272f9ec71cb01",
+    "selection_experiment.py": "c2dfcdd495898416441035c887d192ff7f227c193bd5ca4ccd90f2dd661e6dfe",
+    "selection_output.py": "c0a065c53c4dca1c04bb09865add7fc5815b6d375d06b3727e85d7c3862961ac",
+    "selection_policy.py": "6100810b5bd7eca23b063f90dd0c1e81cb3a7f55ba3aeab76f02be84720fb3ae",
+    "selection_profile.py": "ac76ac0f0a959ae7d69c018d95d2f772a74599c58d9283b87f4bb1cc6d98dd38",
+    "storage_experiment.py": "32568a66afac3aa9923df17fbc184a84efd6ee6e9c5987707d448e58e14baaa0",
+    "supply_census.py": "c7b2a406472c825272a7d08d8b4071b785deee090c5160c51b841162e8936468",
+    "supply_census_shards.py": "dca402a9fa51b4df90d32c58703eedee0bcb9f067940bf195c0e2e0803520f8c",
+    "test_build_catalogue_v2.py": "67f3e890495d03034d8541a688479c95e40bde3b32fe1b57e5f80c535fac385e",
+    "test_catalogue_v2_contract.py": "09f611af5e5a552d5756a1f3f57c6a3325b682e0a7c61d7a0f60f32277dafd2b",
+    "test_deck_budget.py": "7ee1942acd5fe9a98c8d6ab9a48bde06f1cec97a20f92da30339316dfdafcd3f",
+    "test_everyday_pool.py": "7319fc77be24cb53f2a97dc709ac85002787439ce924f93601430258a6c8d390",
+    "test_everyday_rebuild.py": "bf45a6a86b2e98dc9e2fe1fa8df9e0dd7fd8f49477c6511c012cebb7aa298521",
+    "test_everyday_selection.py": "e89743a0053639d9323bc9e4646b5e3b184ddccf4292663d0775a19c220119f1",
+    "test_globalvoices_attribution.py": "b58dea3e6d47074e72df53ad32d2c1a2414f0664dd0900ad4e400cf17f04e0d4",
+    "test_globalvoices_manifest_merge.py": "afc688cd220c15c4c61f4457ca930e2ba538c9ddabd19064ea50f218f285ea9b",
+    "test_ingestion.py": "e4c086e2af4b2f6e8f9f2dc4099f2c23f844c4c8c6637bbabb8a7c1710bf9049",
+    "test_knowledge_rebuild.py": "92d6bddec8db8ef5fa12310d0c3866ed62656d0b35db876fd744497824824b25",
+    "test_meta_info.py": "de772e17a691ffb3d940915839661ae6d94b75fd10a9a71a428face798fc6ff2",
+    "test_morphology.py": "03126b505fd6c7cb0d7f42d7c229fd983042116bebc044fbe6c187eb9d93e17e",
+    "test_pool_function_words.py": "c12cd29100fc6da973f507b80b60eaf2f9764d6fe832763663de957c40f3ea4e",
+    "test_readiness_audit.py": "b7d3f23743e9234640f267761a7ae9a8bd9f8567c345b844cd2e87a8f49b9959",
+    "test_replenishment_review.py": "5abe270b7f9383fd5d7bb77a72e605a8a343281961cb11a56b9e1377292bd894",
+    "test_segmentation.py": "e42d04ca744e421ef3cf4be8fb9b9803b1e1a1ff9ab6e1baadf55d567e64c5af",
+    "test_selected_storage_experiment.py": "0eac34e0574b7ac3deb0429b459fcde89419680d0ad123b77305f873b0c5c6bf",
+    "test_selection_audit.py": "6b536f4c5de2a359a87fbcd7d335719164b2b0a71b352d9ce3e2b89217225f1d",
+    "test_selection_policy.py": "5aed38daf7aa866d64b71e9f661cab54d20a4adf80d39a88e69c6495935c3f18",
+    "test_selection_profile.py": "09a81aad239191c82fa4ede5024c180bd1f91e800a2f55a7130800db00d542b7",
+    "test_selection_quality.py": "f802b055897cabf8e9de0812f763a2c98b1a25c680e1e9abc4dcffb26bd4b532",
+    "test_storage_experiment.py": "8fe29ade713f1720c6b33c587e3b80051e6d0c717fc26e652a50e82290653504",
+    "test_supply_census.py": "f0bae2e4a6a4559708d8536e65f141ec1eaeb12c36511e6d060556c53795dd74",
+    "test_supply_census_shards.py": "9ce8f52a36048bc8061f2b7bba9852edda32d35affe6ae073705a760a35a3f1d",
+    "test_v1_v2_parity.py": "33f945e1e2a88927be3fe535437f4a291ffb5887e791dc6917360fc8f5b0f205",
+    "test_wikimatrix_stream_status.py": "3223596635e6ca82f362114063bc2f25f536cbb485652cde8121599eb2eb1add",
+    "wikimatrix_plan.py": "172fb237dcd47009ad96539e73a2fad6c09a4ecf69ab2de564d58c915b87acb9",
+    "wikimatrix_stream_status.py": "ce937fd9400da4873e85dc33a8f27065984449facf50677dc2d308fc5fcb7c89",
+    "sources/selection-quarantine.json": "46e4055fc76803e9756163db4e1ea21e75e2feae7e3d1ad1da3c000fe14fc945",
+    "requirements-selection-quality.txt": "7afb678ab8704856fdfa617b88ffdb1f16f74b553b11abc7ad847dc521a61609"
+  },
+  "inputBytes": 360,
+  "inputScope": "fixture",
+  "settings": {
+    "runs": 2,
+    "max_input_bytes": 67108864,
+    "quality_policy": "boundary-diversity-v2",
+    "max_deck": 20,
+    "min_deck": 1,
+    "thin_deck": 2
+  },
+  "environment": {
+    "python": "3.12.14",
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+    "machine": "x86_64",
+    "processor": "",
+    "logicalCpuCount": 9,
+    "sqlite": "3.53.1"
+  },
+  "measurementContract": {
+    "instrumentation": "cProfile; timings include instrumentation overhead",
+    "elapsed": "admitted.build_report only; selected output included, diagnostic report/preview writes excluded",
+    "inputGuard": "source-file bytes only, not a bound on decompressed bytes, rows, memory or runtime",
+    "boundaries": "cumulative calls overlap; do not sum stages",
+    "allocation": "contextChoice includes evidence pruning; allocation loop is not isolated",
+    "memory": "process lifetime peak RSS only; no stage-local peaks measured",
+    "reuse": "same process and filesystem; database recreated and all input checks repeated",
+    "cold": "OS page cache is uncontrolled; first run is not a proven cold-cache run",
+    "scope": "bounded input results cannot predict full corpus cost or classifier accuracy"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "condition": "first-process-run",
+      "elapsedSeconds": 0.006865858998935437,
+      "processLifetimePeakRssBytes": 24571904,
+      "boundaries": {
+        "verification": {
+          "calls": 1,
+          "selfSeconds": 8.901900000000001e-05,
+          "cumulativeSeconds": 0.0007502870000000001
+        },
+        "staging": {
+          "calls": 1,
+          "selfSeconds": 4.4244000000000005e-05,
+          "cumulativeSeconds": 0.000748664
+        },
+        "ranks": {
+          "calls": 1,
+          "selfSeconds": 1.1069e-05,
+          "cumulativeSeconds": 0.000100191
+        },
+        "contextAnalysis": {
+          "calls": 1,
+          "selfSeconds": 2.0955000000000002e-05,
+          "cumulativeSeconds": 0.000457897
+        },
+        "pairEvidence": {
+          "calls": 1,
+          "selfSeconds": 5.7397000000000006e-05,
+          "cumulativeSeconds": 0.000258438
+        },
+        "targetOrdering": {
+          "calls": 3,
+          "selfSeconds": 1.3939000000000002e-05,
+          "cumulativeSeconds": 4.0962000000000005e-05
+        },
+        "contextChoice": {
+          "calls": 1,
+          "selfSeconds": 1.478e-05,
+          "cumulativeSeconds": 0.000425299
+        },
+        "selectedRowOutput": {
+          "calls": 1,
+          "selfSeconds": 6.54e-06,
+          "cumulativeSeconds": 3.991e-05
+        },
+        "selectedOutputFinalize": {
+          "calls": 1,
+          "selfSeconds": 1.0534000000000001e-05,
+          "cumulativeSeconds": 0.00014300400000000002
+        }
+      },
+      "outputIdentity": {
+        "reportSha256": "f5f1dab97f6adf6bcc6b9f5431fb2fa370e67ccc400491a853171778a1abcc8d",
+        "previewSha256": "44cad00b460c2a8f734810eb8571b5447e37c4f0835556014da8c3c8b6fcdd9b",
+        "selectedSha256": "ff5455082228605103b83d807478bd3c175d82453bf4c8b9f83548d1c2244ded",
+        "selectedLogicalSha256": "8f9b689e014afba8d40eb92e8f10c3bd8b9d04b1200d4dd539cdde348c7d7126"
+      },
+      "stageCounts": {
+        "inputCandidates": 2,
+        "uniqueCandidates": 2,
+        "duplicateCandidates": 0,
+        "uniqueContexts": 2
+      },
+      "summary": {
+        "publish-thin": 1,
+        "eligibleTargets": 11,
+        "selectedTargets": 1,
+        "budgetRejected": 0,
+        "nearDuplicateContextsRejected": 0,
+        "contextCollisionTargetsRejected": 10,
+        "omit-no-quality-supply": 5
+      },
+      "segmentation": {
+        "engine": "legacy-unicode-word-regex",
+        "offsets": "UTF-16"
+      },
+      "stagingBytes": 32768,
+      "selectedBytes": 511
+    },
+    {
+      "run": 2,
+      "condition": "repeated-same-process",
+      "elapsedSeconds": 0.0064481609988433775,
+      "processLifetimePeakRssBytes": 25882624,
+      "boundaries": {
+        "verification": {
+          "calls": 1,
+          "selfSeconds": 5.1114000000000006e-05,
+          "cumulativeSeconds": 0.0006790790000000001
+        },
+        "staging": {
+          "calls": 1,
+          "selfSeconds": 3.7452e-05,
+          "cumulativeSeconds": 0.0007074220000000001
+        },
+        "ranks": {
+          "calls": 1,
+          "selfSeconds": 9.694e-06,
+          "cumulativeSeconds": 9.099700000000001e-05
+        },
+        "contextAnalysis": {
+          "calls": 1,
+          "selfSeconds": 2.0211e-05,
+          "cumulativeSeconds": 0.000507942
+        },
+        "pairEvidence": {
+          "calls": 1,
+          "selfSeconds": 4.6558000000000004e-05,
+          "cumulativeSeconds": 0.00013765700000000001
+        },
+        "targetOrdering": {
+          "calls": 3,
+          "selfSeconds": 1.3551000000000001e-05,
+          "cumulativeSeconds": 3.6896e-05
+        },
+        "contextChoice": {
+          "calls": 1,
+          "selfSeconds": 1.3330000000000001e-05,
+          "cumulativeSeconds": 9.8879e-05
+        },
+        "selectedRowOutput": {
+          "calls": 1,
+          "selfSeconds": 6.1790000000000005e-06,
+          "cumulativeSeconds": 3.5594000000000005e-05
+        },
+        "selectedOutputFinalize": {
+          "calls": 1,
+          "selfSeconds": 9.592e-06,
+          "cumulativeSeconds": 0.000131457
+        }
+      },
+      "outputIdentity": {
+        "reportSha256": "f5f1dab97f6adf6bcc6b9f5431fb2fa370e67ccc400491a853171778a1abcc8d",
+        "previewSha256": "44cad00b460c2a8f734810eb8571b5447e37c4f0835556014da8c3c8b6fcdd9b",
+        "selectedSha256": "ff5455082228605103b83d807478bd3c175d82453bf4c8b9f83548d1c2244ded",
+        "selectedLogicalSha256": "8f9b689e014afba8d40eb92e8f10c3bd8b9d04b1200d4dd539cdde348c7d7126"
+      },
+      "stageCounts": {
+        "inputCandidates": 2,
+        "uniqueCandidates": 2,
+        "duplicateCandidates": 0,
+        "uniqueContexts": 2
+      },
+      "summary": {
+        "publish-thin": 1,
+        "eligibleTargets": 11,
+        "selectedTargets": 1,
+        "budgetRejected": 0,
+        "nearDuplicateContextsRejected": 0,
+        "contextCollisionTargetsRejected": 10,
+        "omit-no-quality-supply": 5
+      },
+      "segmentation": {
+        "engine": "legacy-unicode-word-regex",
+        "offsets": "UTF-16"
+      },
+      "stagingBytes": 32768,
+      "selectedBytes": 511
+    }
+  ],
+  "outputsEqualAcrossRuns": true,
+  "fixtureEvidence": {
+    "source": "tools/catalog/fixtures/ingest/tatoeba",
+    "builder": "test_everyday_selection.EverydaySelectionTests.setUp",
+    "description": "Two retained English-to-Spanish test candidates; not representative corpus performance",
+    "sourceVersion": "2026-09-12",
+    "sourceFileSha256": {
+      "links.csv": "01f372374f3c41dcd07bd2a9cdc9786dcb0b076e62c09ae6c0ca439de1f8ee91",
+      "sentences.csv": "1f78e5ce6030f70defaee1c8dc19b3b09da0dea7ed13aa0bd8b87b1a0804f495",
+      "sentences_detailed.csv": "79cc562062cb8941599eb69d61a15cf44e0c17e7027fdad936967665fb5b4201"
+    }
+  }
+}

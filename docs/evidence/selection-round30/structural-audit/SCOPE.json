@@ -1,0 +1,32 @@
+{
+  "status": "complete-current-self-baseline-structural-audit",
+  "baselineKind": "current-self-baseline",
+  "publicationSafe": false,
+  "semanticAccuracyCertified": false,
+  "historicalPreviewComparison": false,
+  "purpose": "Full selected-material structural/provenance/boundary audit using unchanged selection_evaluate.py. Baseline comparisons are self-consistency only; no quality gain or historical-preview inference.",
+  "baselineFiles": {
+    "reports/EVERYDAY-POOL.json": {
+      "source": "/workspace/scratch/8105054a3211/ikna-input/admitted-pool/reports/EVERYDAY-POOL.json",
+      "sha256": "41c7e176d516e6ad89d70954b116d18062baa48857f66ee276bdcfd32dd0438f",
+      "sizeBytes": 267859
+    },
+    "reports/EVERYDAY-SELECTION.json": {
+      "source": "/workspace/scratch/8105054a3211/ikna-results/round30/full-control/run-01/selection.json",
+      "sha256": "3f116d0cfcd9bfd9c2b819d11a2a0953085f6a75fe5193314d4a9bf6bf753009",
+      "sizeBytes": 238550
+    },
+    "review/everyday-selection-preview.jsonl.gz": {
+      "source": "/workspace/scratch/8105054a3211/ikna-results/round30/full-control/run-01/preview.jsonl.gz",
+      "sha256": "27c8410db1590f80b770a19097d0aaa9111ffb4f9d2d113b2fb641ae626bbd45",
+      "sizeBytes": 1141731
+    }
+  },
+  "selectionReportSha256": "3f116d0cfcd9bfd9c2b819d11a2a0953085f6a75fe5193314d4a9bf6bf753009",
+  "evaluatorSha256": "6580486c3aedaa9360396078e4c7fe718c6ec6b535afac804e6272f9ec71cb01",
+  "evaluationReportSha256": "b4811ef9399d78317a28dfd41c98d697beb42c98874fc979eba9963dcae1f0e6",
+  "memberships": 928162,
+  "contexts": 2094192,
+  "origins": 2094728,
+  "uniqueGlobalTargets": 221653
+}

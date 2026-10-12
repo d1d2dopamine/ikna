@@ -1,0 +1,3 @@
+selftest: sun.misc.Unsafe present
+selftest: decks=1 cards=6 palette=ink
+selftest: ok

@@ -1,0 +1,51 @@
+{
+  "files": {
+    "FUNCTION-DIFF.patch": {
+      "bytes": 3003,
+      "sha256": "1a597f0fe2425962044a4e79f0509c08eb637dfac094aab337dc338cfac7b39c"
+    },
+    "README.md": {
+      "bytes": 10742,
+      "sha256": "072f9e9a075137a7048e2243bd252bff53df850c7543e74738994ab1c40a6265"
+    },
+    "SOURCE-BEFORE.json": {
+      "bytes": 16827,
+      "sha256": "2b878e4f7bddd113e4339c184d8cca10079478c9afcd6dd4dbf4b5583a1bc5f6"
+    },
+    "SOURCE-UNCHANGED.json": {
+      "bytes": 112,
+      "sha256": "cbf31c794c1fc65f161045868b07a4420434da8ae865ed789e6cc006f46cc697"
+    },
+    "TEST-EVIDENCE.json": {
+      "bytes": 4744,
+      "sha256": "397d3636526441c12297d5164f5f1b349cabebda53559338494c67371da55f90"
+    },
+    "TESTS.log": {
+      "bytes": 2153,
+      "sha256": "e65e295a406b5ec25432d62264476a748496d6fe95bfda695b11a68166bd86bf"
+    },
+    "UPSTREAM-QUALITY-BASELINE.log": {
+      "bytes": 628,
+      "sha256": "7feeb233ad74ac7370782900411e69c7a6dbc1fffe751f4194e916771248e615"
+    },
+    "UPSTREAM-QUALITY-CANDIDATE.log": {
+      "bytes": 628,
+      "sha256": "4fd921d84ea87ed08f3a94333247a8b2fab7acc2d8f6f0cc09ad7ec608a28fd8"
+    },
+    "cache_state_probe.py": {
+      "bytes": 1947,
+      "sha256": "08f92f35be4719cd4a42969c42a9fc5732c6d247296fe245d135e7a529569648"
+    },
+    "overlap_reuse.py": {
+      "bytes": 3824,
+      "sha256": "36efac2461e102d1c0ae66282c5ea46facff6c1dcdd6b8bb376828e6e0525e1e"
+    },
+    "test_overlap_reuse.py": {
+      "bytes": 19682,
+      "sha256": "ac8b668d6620810bd96101ed503636cbe88b17f4ed13ce9914f54606adce4455"
+    }
+  },
+  "productionEdited": false,
+  "publicationSafe": false,
+  "realCorpusMeasured": false
+}

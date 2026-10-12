@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.data.dev.DeveloperBootstrapTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-11T21:28:52" hostname="caee1dcfc37b" time="0.05">
+  <properties/>
+  <testcase name="confirmedScenarioRequestsPersistAndClearOnlyAfterAcceptance[desktop]" classname="dev.ikna.data.dev.DeveloperBootstrapTest" time="0.042"/>
+  <testcase name="repeatedProfileSwitchesReplaceTheExistingFileWithoutChangingOtherData[desktop]" classname="dev.ikna.data.dev.DeveloperBootstrapTest" time="0.006"/>
+  <testcase name="failedReplacementDoesNotLeavePartialBootstrapFiles[desktop]" classname="dev.ikna.data.dev.DeveloperBootstrapTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

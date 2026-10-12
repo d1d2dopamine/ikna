@@ -1,0 +1,15 @@
+test_atomic_new_output_never_overwrites_prior_files (test_compare_candidate_control.ComparisonTests.test_atomic_new_output_never_overwrites_prior_files) ... ok
+test_crc_failure_and_missing_final_newline_fail (test_compare_candidate_control.ComparisonTests.test_crc_failure_and_missing_final_newline_fail) ... ok
+test_incomplete_guard_refused_before_profile_read (test_compare_candidate_control.ComparisonTests.test_incomplete_guard_refused_before_profile_read) ... ok
+test_json_duplicate_nonfinite_and_post_read_change_refused (test_compare_candidate_control.ComparisonTests.test_json_duplicate_nonfinite_and_post_read_change_refused) ... ok
+test_only_exact_reviewed_policy_digest_allowed (test_compare_candidate_control.ComparisonTests.test_only_exact_reviewed_policy_digest_allowed) ... ok
+test_other_code_metadata_bytes_counts_and_types_never_ignored (test_compare_candidate_control.ComparisonTests.test_other_code_metadata_bytes_counts_and_types_never_ignored) ... ok
+test_source_snapshot_exact_changed_file_and_ast_only (test_compare_candidate_control.ComparisonTests.test_source_snapshot_exact_changed_file_and_ast_only) ... ok
+test_stage_cpu_wall_rss_and_call_counts (test_compare_candidate_control.ComparisonTests.test_stage_cpu_wall_rss_and_call_counts) ... ok
+test_streamed_raw_logical_crc_and_counts (test_compare_candidate_control.ComparisonTests.test_streamed_raw_logical_crc_and_counts) ... ok
+test_unreviewed_policy_digest_or_no_change_fails (test_compare_candidate_control.ComparisonTests.test_unreviewed_policy_digest_or_no_change_fails) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.004s
+
+OK

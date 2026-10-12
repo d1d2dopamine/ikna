@@ -1,0 +1,3094 @@
+{
+  "evaluationVersion": 1,
+  "status": "complete-selected-material-contracts-passed",
+  "publicationSafe": false,
+  "qualityGatePassed": true,
+  "automaticChecksCompleted": true,
+  "semanticAccuracyCertified": false,
+  "materialReviewCompleted": false,
+  "contentFrozen": false,
+  "sourceVersion": "2026-10-03-2d4eee105639ba24",
+  "admittedInput": {
+    "poolSha256": "57b90b01d5dcb0725743998dccaf307a100e174059a853e01f5f31fc13dd6170",
+    "poolLogicalSha256": "05ccbb5b5217dc050cc5a5e0e1cfca3223657529afa6b3890c9340999d571ab8",
+    "poolReportSha256": "41c7e176d516e6ad89d70954b116d18062baa48857f66ee276bdcfd32dd0438f",
+    "sourceVersion": "2026-10-03-2d4eee105639ba24",
+    "uniqueCandidates": 11099490,
+    "registrySha256": "98695b8beb720899b567c9a6b946eae33bd61952a82a03fe9d3fecfed9fc4066",
+    "learn": [
+      "de",
+      "en",
+      "es",
+      "fr",
+      "it",
+      "ja",
+      "ko",
+      "pl",
+      "pt",
+      "ru",
+      "zh"
+    ],
+    "meanings": [
+      "de",
+      "en",
+      "es",
+      "fr",
+      "it",
+      "ja",
+      "ko",
+      "pl",
+      "pt",
+      "ru",
+      "zh"
+    ],
+    "poolEnvironment": {
+      "python": "3.12.14",
+      "zlib": "1.3",
+      "segmentation": {
+        "engine": "ICU word break",
+        "icuVersion": "74.2",
+        "languages": [
+          "ja",
+          "ko",
+          "zh"
+        ],
+        "offsets": "UTF-16",
+        "koreanUnit": "eojeol"
+      }
+    },
+    "poolPipelineSha256": {
+      "everyday_pool.py": "b1342adb46c5a0f605761051b2d947b0f05a888b12a56578e2351cc94ecbf098",
+      "everyday_rebuild.py": "d63b638e1583b94348e2e82e98666e596c5876f95f05209c3f8cedd01d859c0e",
+      "build_catalogue_v2.py": "e8a3f9986a917174ffcb8c141eff9015964249ad471fd13d53f06fbe9cfe0086",
+      "catalogue_core.py": "984a58be4f88939b37c86e7e677e01ffe7d0f94a2c20f38a56eb6f32b7151e56",
+      "catalogue_v2.py": "92b9b761c4f4419e56eff66dd18a06327224fe8afbc7e8cd74397296b786578b",
+      "segmentation.py": "627b30e28ccb3c31a423d4d83b7968422913efd8cc7d631863d4d4075634b8da",
+      "ingest/model.py": "1d5097bbd68fbcc589f5846efb766785f0e682bfb004aff01c1e2d97b68cf9fc",
+      "ingest/registry.py": "3249cdc94cdb5fc0bb52389a3c6aee33cd4d07eeb46ce747dd23072d65dc3033"
+    }
+  },
+  "selectedMaterial": {
+    "format": "selected-memberships-jsonl-gzip-v1",
+    "sha256": "a2a5e4bb1e4079e88c8986443c95761795d5fe66ec14ee46a1f83e099e95df64",
+    "sizeBytes": 255938165,
+    "logicalSha256": "7149ca35ebc44b0833434505a94d187e11194a2eca7d4f45b885b061fb267cd4",
+    "logicalSizeBytes": 1512254677,
+    "memberships": 928162,
+    "contexts": 2094192,
+    "origins": 2094728,
+    "decks": {
+      "de-en-everyday-advanced": 8000,
+      "de-en-everyday-beginner": 1432,
+      "de-en-everyday-middle": 3470,
+      "de-es-everyday-advanced": 8000,
+      "de-es-everyday-beginner": 1435,
+      "de-es-everyday-middle": 3450,
+      "de-fr-everyday-advanced": 8000,
+      "de-fr-everyday-beginner": 1434,
+      "de-fr-everyday-middle": 3471,
+      "de-it-everyday-advanced": 6888,
+      "de-it-everyday-beginner": 1431,
+      "de-it-everyday-middle": 2976,
+      "de-ja-everyday-advanced": 8000,
+      "de-ja-everyday-beginner": 1433,
+      "de-ja-everyday-middle": 3367,
+      "de-ko-everyday-advanced": 798,
+      "de-ko-everyday-beginner": 920,
+      "de-ko-everyday-middle": 764,
+      "de-pl-everyday-advanced": 4465,
+      "de-pl-everyday-beginner": 1420,
+      "de-pl-everyday-middle": 2657,
+      "de-pt-everyday-advanced": 6467,
+      "de-pt-everyday-beginner": 1427,
+      "de-pt-everyday-middle": 2918,
+      "de-ru-everyday-advanced": 8000,
+      "de-ru-everyday-beginner": 1435,
+      "de-ru-everyday-middle": 3468,
+      "de-zh-everyday-advanced": 8000,
+      "de-zh-everyday-beginner": 1431,
+      "de-zh-everyday-middle": 3202,
+      "en-de-everyday-advanced": 8000,
+      "en-de-everyday-beginner": 1437,
+      "en-de-everyday-middle": 3491,
+      "en-es-everyday-advanced": 8000,
+      "en-es-everyday-beginner": 1437,
+      "en-es-everyday-middle": 3489,
+      "en-fr-everyday-advanced": 8000,
+      "en-fr-everyday-beginner": 1437,
+      "en-fr-everyday-middle": 3491,
+      "en-it-everyday-advanced": 8000,
+      "en-it-everyday-beginner": 1437,
+      "en-it-everyday-middle": 3491,
+      "en-ja-everyday-advanced": 8000,
+      "en-ja-everyday-beginner": 1437,
+      "en-ja-everyday-middle": 3479,
+      "en-ko-everyday-advanced": 1405,
+      "en-ko-everyday-beginner": 1357,
+      "en-ko-everyday-middle": 1639,
+      "en-pl-everyday-advanced": 8000,
+      "en-pl-everyday-beginner": 1437,
+      "en-pl-everyday-middle": 3411,
+      "en-pt-everyday-advanced": 8000,
+      "en-pt-everyday-beginner": 1437,
+      "en-pt-everyday-middle": 3489,
+      "en-ru-everyday-advanced": 8000,
+      "en-ru-everyday-beginner": 1437,
+      "en-ru-everyday-middle": 3491,
+      "en-zh-everyday-advanced": 8000,
+      "en-zh-everyday-beginner": 1437,
+      "en-zh-everyday-middle": 3434,
+      "es-de-everyday-advanced": 8000,
+      "es-de-everyday-beginner": 1438,
+      "es-de-everyday-middle": 3485,
+      "es-en-everyday-advanced": 8000,
+      "es-en-everyday-beginner": 1438,
+      "es-en-everyday-middle": 3494,
+      "es-fr-everyday-advanced": 8000,
+      "es-fr-everyday-beginner": 1438,
+      "es-fr-everyday-middle": 3445,
+      "es-it-everyday-advanced": 5141,
+      "es-it-everyday-beginner": 1429,
+      "es-it-everyday-middle": 2748,
+      "es-ja-everyday-advanced": 8000,
+      "es-ja-everyday-beginner": 1437,
+      "es-ja-everyday-middle": 3295,
+      "es-ko-everyday-advanced": 347,
+      "es-ko-everyday-beginner": 458,
+      "es-ko-everyday-middle": 356,
+      "es-pl-everyday-advanced": 2737,
+      "es-pl-everyday-beginner": 1386,
+      "es-pl-everyday-middle": 2106,
+      "es-pt-everyday-advanced": 8000,
+      "es-pt-everyday-beginner": 1437,
+      "es-pt-everyday-middle": 3478,
+      "es-ru-everyday-advanced": 8000,
+      "es-ru-everyday-beginner": 1438,
+      "es-ru-everyday-middle": 3485,
+      "es-zh-everyday-advanced": 2374,
+      "es-zh-everyday-beginner": 1360,
+      "es-zh-everyday-middle": 1882,
+      "fr-de-everyday-advanced": 8000,
+      "fr-de-everyday-beginner": 1438,
+      "fr-de-everyday-middle": 3494,
+      "fr-en-everyday-advanced": 8000,
+      "fr-en-everyday-beginner": 1438,
+      "fr-en-everyday-middle": 3494,
+      "fr-es-everyday-advanced": 8000,
+      "fr-es-everyday-beginner": 1437,
+      "fr-es-everyday-middle": 3431,
+      "fr-it-everyday-advanced": 8000,
+      "fr-it-everyday-beginner": 1438,
+      "fr-it-everyday-middle": 3328,
+      "fr-ja-everyday-advanced": 8000,
+      "fr-ja-everyday-beginner": 1434,
+      "fr-ja-everyday-middle": 3299,
+      "fr-ko-everyday-advanced": 530,
+      "fr-ko-everyday-beginner": 697,
+      "fr-ko-everyday-middle": 552,
+      "fr-pl-everyday-advanced": 1560,
+      "fr-pl-everyday-beginner": 1193,
+      "fr-pl-everyday-middle": 1392,
+      "fr-pt-everyday-advanced": 8000,
+      "fr-pt-everyday-beginner": 1435,
+      "fr-pt-everyday-middle": 3182,
+      "fr-ru-everyday-advanced": 8000,
+      "fr-ru-everyday-beginner": 1436,
+      "fr-ru-everyday-middle": 3490,
+      "fr-zh-everyday-advanced": 5706,
+      "fr-zh-everyday-beginner": 1435,
+      "fr-zh-everyday-middle": 2885,
+      "it-de-everyday-advanced": 6709,
+      "it-de-everyday-beginner": 1434,
+      "it-de-everyday-middle": 3042,
+      "it-en-everyday-advanced": 8000,
+      "it-en-everyday-beginner": 1439,
+      "it-en-everyday-middle": 3498,
+      "it-es-everyday-advanced": 4959,
+      "it-es-everyday-beginner": 1422,
+      "it-es-everyday-middle": 2644,
+      "it-fr-everyday-advanced": 8000,
+      "it-fr-everyday-beginner": 1438,
+      "it-fr-everyday-middle": 3296,
+      "it-ja-everyday-advanced": 2133,
+      "it-ja-everyday-beginner": 1238,
+      "it-ja-everyday-middle": 1553,
+      "it-ko-everyday-advanced": 53,
+      "it-ko-everyday-beginner": 111,
+      "it-ko-everyday-middle": 61,
+      "it-pl-everyday-advanced": 730,
+      "it-pl-everyday-beginner": 854,
+      "it-pl-everyday-middle": 815,
+      "it-pt-everyday-advanced": 4147,
+      "it-pt-everyday-beginner": 1387,
+      "it-pt-everyday-middle": 2391,
+      "it-ru-everyday-advanced": 8000,
+      "it-ru-everyday-beginner": 1433,
+      "it-ru-everyday-middle": 3351,
+      "it-zh-everyday-advanced": 1164,
+      "it-zh-everyday-beginner": 1007,
+      "it-zh-everyday-middle": 1050,
+      "ja-de-everyday-advanced": 7362,
+      "ja-de-everyday-beginner": 1303,
+      "ja-de-everyday-middle": 3125,
+      "ja-en-everyday-advanced": 8000,
+      "ja-en-everyday-beginner": 1344,
+      "ja-en-everyday-middle": 3296,
+      "ja-es-everyday-advanced": 5400,
+      "ja-es-everyday-beginner": 1289,
+      "ja-es-everyday-middle": 2963,
+      "ja-fr-everyday-advanced": 6634,
+      "ja-fr-everyday-beginner": 1298,
+      "ja-fr-everyday-middle": 3105,
+      "ja-it-everyday-advanced": 1121,
+      "ja-it-everyday-beginner": 1136,
+      "ja-it-everyday-middle": 1438,
+      "ja-ko-everyday-advanced": 469,
+      "ja-ko-everyday-beginner": 708,
+      "ja-ko-everyday-middle": 652,
+      "ja-pl-everyday-advanced": 5071,
+      "ja-pl-everyday-beginner": 1286,
+      "ja-pl-everyday-middle": 2910,
+      "ja-pt-everyday-advanced": 1029,
+      "ja-pt-everyday-beginner": 1061,
+      "ja-pt-everyday-middle": 1208,
+      "ja-ru-everyday-advanced": 5123,
+      "ja-ru-everyday-beginner": 1286,
+      "ja-ru-everyday-middle": 2838,
+      "ja-zh-everyday-advanced": 2811,
+      "ja-zh-everyday-beginner": 1266,
+      "ja-zh-everyday-middle": 2345,
+      "ko-de-everyday-advanced": 1594,
+      "ko-de-everyday-beginner": 883,
+      "ko-de-everyday-middle": 1092,
+      "ko-en-everyday-advanced": 5701,
+      "ko-en-everyday-beginner": 1404,
+      "ko-en-everyday-middle": 2641,
+      "ko-es-everyday-advanced": 588,
+      "ko-es-everyday-beginner": 426,
+      "ko-es-everyday-middle": 446,
+      "ko-fr-everyday-advanced": 1072,
+      "ko-fr-everyday-beginner": 647,
+      "ko-fr-everyday-middle": 748,
+      "ko-it-everyday-advanced": 108,
+      "ko-it-everyday-beginner": 109,
+      "ko-it-everyday-middle": 77,
+      "ko-ja-everyday-advanced": 1375,
+      "ko-ja-everyday-beginner": 733,
+      "ko-ja-everyday-middle": 877,
+      "ko-pl-everyday-advanced": 45,
+      "ko-pl-everyday-beginner": 55,
+      "ko-pl-everyday-middle": 42,
+      "ko-pt-everyday-advanced": 104,
+      "ko-pt-everyday-beginner": 127,
+      "ko-pt-everyday-middle": 93,
+      "ko-ru-everyday-advanced": 123,
+      "ko-ru-everyday-beginner": 140,
+      "ko-ru-everyday-middle": 103,
+      "ko-zh-everyday-advanced": 1526,
+      "ko-zh-everyday-beginner": 833,
+      "ko-zh-everyday-middle": 1030,
+      "pl-de-everyday-advanced": 7130,
+      "pl-de-everyday-beginner": 1429,
+      "pl-de-everyday-middle": 2973,
+      "pl-en-everyday-advanced": 8000,
+      "pl-en-everyday-beginner": 1437,
+      "pl-en-everyday-middle": 3494,
+      "pl-es-everyday-advanced": 3815,
+      "pl-es-everyday-beginner": 1392,
+      "pl-es-everyday-middle": 2276,
+      "pl-fr-everyday-advanced": 2327,
+      "pl-fr-everyday-beginner": 1220,
+      "pl-fr-everyday-middle": 1592,
+      "pl-it-everyday-advanced": 1103,
+      "pl-it-everyday-beginner": 825,
+      "pl-it-everyday-middle": 891,
+      "pl-ja-everyday-advanced": 8000,
+      "pl-ja-everyday-beginner": 1429,
+      "pl-ja-everyday-middle": 3228,
+      "pl-ko-everyday-beginner": 51,
+      "pl-pt-everyday-advanced": 839,
+      "pl-pt-everyday-beginner": 625,
+      "pl-pt-everyday-middle": 629,
+      "pl-ru-everyday-advanced": 3759,
+      "pl-ru-everyday-beginner": 1333,
+      "pl-ru-everyday-middle": 2128,
+      "pl-zh-everyday-advanced": 558,
+      "pl-zh-everyday-beginner": 472,
+      "pl-zh-everyday-middle": 484,
+      "pt-de-everyday-advanced": 6482,
+      "pt-de-everyday-beginner": 1433,
+      "pt-de-everyday-middle": 2960,
+      "pt-en-everyday-advanced": 8000,
+      "pt-en-everyday-beginner": 1438,
+      "pt-en-everyday-middle": 3493,
+      "pt-es-everyday-advanced": 8000,
+      "pt-es-everyday-beginner": 1437,
+      "pt-es-everyday-middle": 3442,
+      "pt-fr-everyday-advanced": 7937,
+      "pt-fr-everyday-beginner": 1435,
+      "pt-fr-everyday-middle": 3123,
+      "pt-it-everyday-advanced": 4131,
+      "pt-it-everyday-beginner": 1403,
+      "pt-it-everyday-middle": 2409,
+      "pt-ja-everyday-advanced": 1441,
+      "pt-ja-everyday-beginner": 1175,
+      "pt-ja-everyday-middle": 1319,
+      "pt-ko-everyday-advanced": 42,
+      "pt-ko-everyday-beginner": 125,
+      "pt-ko-everyday-middle": 55,
+      "pt-pl-everyday-advanced": 607,
+      "pt-pl-everyday-beginner": 634,
+      "pt-pl-everyday-middle": 583,
+      "pt-ru-everyday-advanced": 7790,
+      "pt-ru-everyday-beginner": 1437,
+      "pt-ru-everyday-middle": 3128,
+      "pt-zh-everyday-advanced": 343,
+      "pt-zh-everyday-beginner": 574,
+      "pt-zh-everyday-middle": 460,
+      "ru-de-everyday-advanced": 8000,
+      "ru-de-everyday-beginner": 1439,
+      "ru-de-everyday-middle": 3495,
+      "ru-en-everyday-advanced": 8000,
+      "ru-en-everyday-beginner": 1439,
+      "ru-en-everyday-middle": 3497,
+      "ru-es-everyday-advanced": 8000,
+      "ru-es-everyday-beginner": 1439,
+      "ru-es-everyday-middle": 3487,
+      "ru-fr-everyday-advanced": 8000,
+      "ru-fr-everyday-beginner": 1439,
+      "ru-fr-everyday-middle": 3495,
+      "ru-it-everyday-advanced": 8000,
+      "ru-it-everyday-beginner": 1439,
+      "ru-it-everyday-middle": 3477,
+      "ru-ja-everyday-advanced": 8000,
+      "ru-ja-everyday-beginner": 1435,
+      "ru-ja-everyday-middle": 3175,
+      "ru-ko-everyday-advanced": 79,
+      "ru-ko-everyday-beginner": 124,
+      "ru-ko-everyday-middle": 85,
+      "ru-pl-everyday-advanced": 3498,
+      "ru-pl-everyday-beginner": 1308,
+      "ru-pl-everyday-middle": 1946,
+      "ru-pt-everyday-advanced": 8000,
+      "ru-pt-everyday-beginner": 1437,
+      "ru-pt-everyday-middle": 3191,
+      "ru-zh-everyday-advanced": 4734,
+      "ru-zh-everyday-beginner": 1361,
+      "ru-zh-everyday-middle": 2328,
+      "zh-de-everyday-advanced": 8000,
+      "zh-de-everyday-beginner": 1439,
+      "zh-de-everyday-middle": 3376,
+      "zh-en-everyday-advanced": 8000,
+      "zh-en-everyday-beginner": 1440,
+      "zh-en-everyday-middle": 3494,
+      "zh-es-everyday-advanced": 2369,
+      "zh-es-everyday-beginner": 1348,
+      "zh-es-everyday-middle": 2066,
+      "zh-fr-everyday-advanced": 5319,
+      "zh-fr-everyday-beginner": 1432,
+      "zh-fr-everyday-middle": 2916,
+      "zh-it-everyday-advanced": 937,
+      "zh-it-everyday-beginner": 945,
+      "zh-it-everyday-middle": 1051,
+      "zh-ja-everyday-advanced": 4618,
+      "zh-ja-everyday-beginner": 1429,
+      "zh-ja-everyday-middle": 2826,
+      "zh-ko-everyday-advanced": 916,
+      "zh-ko-everyday-beginner": 833,
+      "zh-ko-everyday-middle": 918,
+      "zh-pl-everyday-advanced": 427,
+      "zh-pl-everyday-beginner": 479,
+      "zh-pl-everyday-middle": 510,
+      "zh-pt-everyday-advanced": 370,
+      "zh-pt-everyday-beginner": 557,
+      "zh-pt-everyday-middle": 510,
+      "zh-ru-everyday-advanced": 3208,
+      "zh-ru-everyday-beginner": 1385,
+      "zh-ru-everyday-middle": 2329
+    },
+    "completeIncludedDecisions": true,
+    "publicationSafe": false
+  },
+  "evaluationPipelineSha256": {
+    "selection_evaluate.py": "6580486c3aedaa9360396078e4c7fe718c6ec6b535afac804e6272f9ec71cb01",
+    "selection_audit.py": "cb53c756026843234dc6e8ac922da58876fbc3052e3ab355a5d8553030fda80b",
+    "japanese_boundary.py": "8b4b7eabe6a2c5e06e595ed6583c4af45b0969c69dd424137d5aea0dabaa8c45",
+    "selection_policy.py": "6100810b5bd7eca23b063f90dd0c1e81cb3a7f55ba3aeab76f02be84720fb3ae",
+    "catalogue_core.py": "38af974c1e853034b0c9343bd41b5bc82f4644d117a11596bf35d50f98c47329",
+    "catalogue_v2.py": "92b9b761c4f4419e56eff66dd18a06327224fe8afbc7e8cd74397296b786578b",
+    "segmentation.py": "2db162e0b449f1a2be05fd0fc0288109cc92a4a42f07141ec321f6279a153b10",
+    "ingest/model.py": "1d5097bbd68fbcc589f5846efb766785f0e682bfb004aff01c1e2d97b68cf9fc",
+    "ingest/registry.py": "3249cdc94cdb5fc0bb52389a3c6aee33cd4d07eeb46ce747dd23072d65dc3033",
+    "requirements-selection-quality.txt": "7afb678ab8704856fdfa617b88ffdb1f16f74b553b11abc7ad847dc521a61609",
+    "sources/selection-quarantine.json": "46e4055fc76803e9756163db4e1ea21e75e2feae7e3d1ad1da3c000fe14fc945"
+  },
+  "memberships": 928162,
+  "uniqueGlobalTargets": 221653,
+  "contexts": 2094192,
+  "origins": 2094728,
+  "similarAlternatePairsInformational": 1424,
+  "singleCharacterCjkMembershipsInformational": {
+    "ja": 6504,
+    "ko": 732,
+    "zh": 10721
+  },
+  "lostPreviouslyIncludedPairs": [],
+  "decks": [
+    {
+      "deckId": "de-en-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "de-en-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1432,
+      "afterSelected": 1432,
+      "delta": 0
+    },
+    {
+      "deckId": "de-en-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3470,
+      "afterSelected": 3470,
+      "delta": 0
+    },
+    {
+      "deckId": "de-es-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "de-es-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1435,
+      "afterSelected": 1435,
+      "delta": 0
+    },
+    {
+      "deckId": "de-es-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3450,
+      "afterSelected": 3450,
+      "delta": 0
+    },
+    {
+      "deckId": "de-fr-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "de-fr-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1434,
+      "afterSelected": 1434,
+      "delta": 0
+    },
+    {
+      "deckId": "de-fr-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3471,
+      "afterSelected": 3471,
+      "delta": 0
+    },
+    {
+      "deckId": "de-it-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 6888,
+      "afterSelected": 6888,
+      "delta": 0
+    },
+    {
+      "deckId": "de-it-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1431,
+      "afterSelected": 1431,
+      "delta": 0
+    },
+    {
+      "deckId": "de-it-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2976,
+      "afterSelected": 2976,
+      "delta": 0
+    },
+    {
+      "deckId": "de-ja-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "de-ja-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1433,
+      "afterSelected": 1433,
+      "delta": 0
+    },
+    {
+      "deckId": "de-ja-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3367,
+      "afterSelected": 3367,
+      "delta": 0
+    },
+    {
+      "deckId": "de-ko-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 798,
+      "afterSelected": 798,
+      "delta": 0
+    },
+    {
+      "deckId": "de-ko-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 920,
+      "afterSelected": 920,
+      "delta": 0
+    },
+    {
+      "deckId": "de-ko-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 764,
+      "afterSelected": 764,
+      "delta": 0
+    },
+    {
+      "deckId": "de-pl-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 4465,
+      "afterSelected": 4465,
+      "delta": 0
+    },
+    {
+      "deckId": "de-pl-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1420,
+      "afterSelected": 1420,
+      "delta": 0
+    },
+    {
+      "deckId": "de-pl-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2657,
+      "afterSelected": 2657,
+      "delta": 0
+    },
+    {
+      "deckId": "de-pt-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 6467,
+      "afterSelected": 6467,
+      "delta": 0
+    },
+    {
+      "deckId": "de-pt-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1427,
+      "afterSelected": 1427,
+      "delta": 0
+    },
+    {
+      "deckId": "de-pt-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2918,
+      "afterSelected": 2918,
+      "delta": 0
+    },
+    {
+      "deckId": "de-ru-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "de-ru-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1435,
+      "afterSelected": 1435,
+      "delta": 0
+    },
+    {
+      "deckId": "de-ru-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3468,
+      "afterSelected": 3468,
+      "delta": 0
+    },
+    {
+      "deckId": "de-zh-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "de-zh-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1431,
+      "afterSelected": 1431,
+      "delta": 0
+    },
+    {
+      "deckId": "de-zh-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3202,
+      "afterSelected": 3202,
+      "delta": 0
+    },
+    {
+      "deckId": "en-de-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "en-de-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1437,
+      "afterSelected": 1437,
+      "delta": 0
+    },
+    {
+      "deckId": "en-de-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3491,
+      "afterSelected": 3491,
+      "delta": 0
+    },
+    {
+      "deckId": "en-es-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "en-es-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1437,
+      "afterSelected": 1437,
+      "delta": 0
+    },
+    {
+      "deckId": "en-es-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3489,
+      "afterSelected": 3489,
+      "delta": 0
+    },
+    {
+      "deckId": "en-fr-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "en-fr-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1437,
+      "afterSelected": 1437,
+      "delta": 0
+    },
+    {
+      "deckId": "en-fr-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3491,
+      "afterSelected": 3491,
+      "delta": 0
+    },
+    {
+      "deckId": "en-it-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "en-it-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1437,
+      "afterSelected": 1437,
+      "delta": 0
+    },
+    {
+      "deckId": "en-it-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3491,
+      "afterSelected": 3491,
+      "delta": 0
+    },
+    {
+      "deckId": "en-ja-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "en-ja-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1437,
+      "afterSelected": 1437,
+      "delta": 0
+    },
+    {
+      "deckId": "en-ja-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3479,
+      "afterSelected": 3479,
+      "delta": 0
+    },
+    {
+      "deckId": "en-ko-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1405,
+      "afterSelected": 1405,
+      "delta": 0
+    },
+    {
+      "deckId": "en-ko-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1357,
+      "afterSelected": 1357,
+      "delta": 0
+    },
+    {
+      "deckId": "en-ko-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1639,
+      "afterSelected": 1639,
+      "delta": 0
+    },
+    {
+      "deckId": "en-pl-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "en-pl-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1437,
+      "afterSelected": 1437,
+      "delta": 0
+    },
+    {
+      "deckId": "en-pl-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3411,
+      "afterSelected": 3411,
+      "delta": 0
+    },
+    {
+      "deckId": "en-pt-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "en-pt-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1437,
+      "afterSelected": 1437,
+      "delta": 0
+    },
+    {
+      "deckId": "en-pt-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3489,
+      "afterSelected": 3489,
+      "delta": 0
+    },
+    {
+      "deckId": "en-ru-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "en-ru-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1437,
+      "afterSelected": 1437,
+      "delta": 0
+    },
+    {
+      "deckId": "en-ru-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3491,
+      "afterSelected": 3491,
+      "delta": 0
+    },
+    {
+      "deckId": "en-zh-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "en-zh-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1437,
+      "afterSelected": 1437,
+      "delta": 0
+    },
+    {
+      "deckId": "en-zh-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3434,
+      "afterSelected": 3434,
+      "delta": 0
+    },
+    {
+      "deckId": "es-de-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "es-de-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1438,
+      "afterSelected": 1438,
+      "delta": 0
+    },
+    {
+      "deckId": "es-de-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3485,
+      "afterSelected": 3485,
+      "delta": 0
+    },
+    {
+      "deckId": "es-en-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "es-en-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1438,
+      "afterSelected": 1438,
+      "delta": 0
+    },
+    {
+      "deckId": "es-en-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3494,
+      "afterSelected": 3494,
+      "delta": 0
+    },
+    {
+      "deckId": "es-fr-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "es-fr-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1438,
+      "afterSelected": 1438,
+      "delta": 0
+    },
+    {
+      "deckId": "es-fr-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3445,
+      "afterSelected": 3445,
+      "delta": 0
+    },
+    {
+      "deckId": "es-it-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 5141,
+      "afterSelected": 5141,
+      "delta": 0
+    },
+    {
+      "deckId": "es-it-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1429,
+      "afterSelected": 1429,
+      "delta": 0
+    },
+    {
+      "deckId": "es-it-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2748,
+      "afterSelected": 2748,
+      "delta": 0
+    },
+    {
+      "deckId": "es-ja-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "es-ja-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1437,
+      "afterSelected": 1437,
+      "delta": 0
+    },
+    {
+      "deckId": "es-ja-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3295,
+      "afterSelected": 3295,
+      "delta": 0
+    },
+    {
+      "deckId": "es-ko-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 347,
+      "afterSelected": 347,
+      "delta": 0
+    },
+    {
+      "deckId": "es-ko-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 458,
+      "afterSelected": 458,
+      "delta": 0
+    },
+    {
+      "deckId": "es-ko-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 356,
+      "afterSelected": 356,
+      "delta": 0
+    },
+    {
+      "deckId": "es-pl-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2737,
+      "afterSelected": 2737,
+      "delta": 0
+    },
+    {
+      "deckId": "es-pl-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1386,
+      "afterSelected": 1386,
+      "delta": 0
+    },
+    {
+      "deckId": "es-pl-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2106,
+      "afterSelected": 2106,
+      "delta": 0
+    },
+    {
+      "deckId": "es-pt-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "es-pt-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1437,
+      "afterSelected": 1437,
+      "delta": 0
+    },
+    {
+      "deckId": "es-pt-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3478,
+      "afterSelected": 3478,
+      "delta": 0
+    },
+    {
+      "deckId": "es-ru-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "es-ru-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1438,
+      "afterSelected": 1438,
+      "delta": 0
+    },
+    {
+      "deckId": "es-ru-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3485,
+      "afterSelected": 3485,
+      "delta": 0
+    },
+    {
+      "deckId": "es-zh-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2374,
+      "afterSelected": 2374,
+      "delta": 0
+    },
+    {
+      "deckId": "es-zh-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1360,
+      "afterSelected": 1360,
+      "delta": 0
+    },
+    {
+      "deckId": "es-zh-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1882,
+      "afterSelected": 1882,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-de-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-de-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1438,
+      "afterSelected": 1438,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-de-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3494,
+      "afterSelected": 3494,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-en-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-en-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1438,
+      "afterSelected": 1438,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-en-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3494,
+      "afterSelected": 3494,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-es-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-es-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1437,
+      "afterSelected": 1437,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-es-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3431,
+      "afterSelected": 3431,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-it-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-it-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1438,
+      "afterSelected": 1438,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-it-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3328,
+      "afterSelected": 3328,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-ja-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-ja-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1434,
+      "afterSelected": 1434,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-ja-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3299,
+      "afterSelected": 3299,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-ko-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 530,
+      "afterSelected": 530,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-ko-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 697,
+      "afterSelected": 697,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-ko-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 552,
+      "afterSelected": 552,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-pl-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1560,
+      "afterSelected": 1560,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-pl-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1193,
+      "afterSelected": 1193,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-pl-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1392,
+      "afterSelected": 1392,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-pt-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-pt-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1435,
+      "afterSelected": 1435,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-pt-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3182,
+      "afterSelected": 3182,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-ru-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-ru-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1436,
+      "afterSelected": 1436,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-ru-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3490,
+      "afterSelected": 3490,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-zh-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 5706,
+      "afterSelected": 5706,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-zh-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1435,
+      "afterSelected": 1435,
+      "delta": 0
+    },
+    {
+      "deckId": "fr-zh-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2885,
+      "afterSelected": 2885,
+      "delta": 0
+    },
+    {
+      "deckId": "it-de-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 6709,
+      "afterSelected": 6709,
+      "delta": 0
+    },
+    {
+      "deckId": "it-de-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1434,
+      "afterSelected": 1434,
+      "delta": 0
+    },
+    {
+      "deckId": "it-de-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3042,
+      "afterSelected": 3042,
+      "delta": 0
+    },
+    {
+      "deckId": "it-en-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "it-en-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1439,
+      "afterSelected": 1439,
+      "delta": 0
+    },
+    {
+      "deckId": "it-en-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3498,
+      "afterSelected": 3498,
+      "delta": 0
+    },
+    {
+      "deckId": "it-es-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 4959,
+      "afterSelected": 4959,
+      "delta": 0
+    },
+    {
+      "deckId": "it-es-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1422,
+      "afterSelected": 1422,
+      "delta": 0
+    },
+    {
+      "deckId": "it-es-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2644,
+      "afterSelected": 2644,
+      "delta": 0
+    },
+    {
+      "deckId": "it-fr-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "it-fr-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1438,
+      "afterSelected": 1438,
+      "delta": 0
+    },
+    {
+      "deckId": "it-fr-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3296,
+      "afterSelected": 3296,
+      "delta": 0
+    },
+    {
+      "deckId": "it-ja-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2133,
+      "afterSelected": 2133,
+      "delta": 0
+    },
+    {
+      "deckId": "it-ja-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1238,
+      "afterSelected": 1238,
+      "delta": 0
+    },
+    {
+      "deckId": "it-ja-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1553,
+      "afterSelected": 1553,
+      "delta": 0
+    },
+    {
+      "deckId": "it-ko-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 53,
+      "afterSelected": 53,
+      "delta": 0
+    },
+    {
+      "deckId": "it-ko-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 111,
+      "afterSelected": 111,
+      "delta": 0
+    },
+    {
+      "deckId": "it-ko-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 61,
+      "afterSelected": 61,
+      "delta": 0
+    },
+    {
+      "deckId": "it-pl-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 730,
+      "afterSelected": 730,
+      "delta": 0
+    },
+    {
+      "deckId": "it-pl-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 854,
+      "afterSelected": 854,
+      "delta": 0
+    },
+    {
+      "deckId": "it-pl-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 815,
+      "afterSelected": 815,
+      "delta": 0
+    },
+    {
+      "deckId": "it-pt-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 4147,
+      "afterSelected": 4147,
+      "delta": 0
+    },
+    {
+      "deckId": "it-pt-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1387,
+      "afterSelected": 1387,
+      "delta": 0
+    },
+    {
+      "deckId": "it-pt-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2391,
+      "afterSelected": 2391,
+      "delta": 0
+    },
+    {
+      "deckId": "it-ru-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "it-ru-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1433,
+      "afterSelected": 1433,
+      "delta": 0
+    },
+    {
+      "deckId": "it-ru-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3351,
+      "afterSelected": 3351,
+      "delta": 0
+    },
+    {
+      "deckId": "it-zh-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1164,
+      "afterSelected": 1164,
+      "delta": 0
+    },
+    {
+      "deckId": "it-zh-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1007,
+      "afterSelected": 1007,
+      "delta": 0
+    },
+    {
+      "deckId": "it-zh-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1050,
+      "afterSelected": 1050,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-de-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 7362,
+      "afterSelected": 7362,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-de-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1303,
+      "afterSelected": 1303,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-de-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3125,
+      "afterSelected": 3125,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-en-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-en-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1344,
+      "afterSelected": 1344,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-en-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3296,
+      "afterSelected": 3296,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-es-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 5400,
+      "afterSelected": 5400,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-es-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1289,
+      "afterSelected": 1289,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-es-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2963,
+      "afterSelected": 2963,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-fr-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 6634,
+      "afterSelected": 6634,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-fr-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1298,
+      "afterSelected": 1298,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-fr-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3105,
+      "afterSelected": 3105,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-it-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1121,
+      "afterSelected": 1121,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-it-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1136,
+      "afterSelected": 1136,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-it-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1438,
+      "afterSelected": 1438,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-ko-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 469,
+      "afterSelected": 469,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-ko-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 708,
+      "afterSelected": 708,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-ko-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 652,
+      "afterSelected": 652,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-pl-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 5071,
+      "afterSelected": 5071,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-pl-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1286,
+      "afterSelected": 1286,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-pl-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2910,
+      "afterSelected": 2910,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-pt-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1029,
+      "afterSelected": 1029,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-pt-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1061,
+      "afterSelected": 1061,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-pt-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1208,
+      "afterSelected": 1208,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-ru-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 5123,
+      "afterSelected": 5123,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-ru-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1286,
+      "afterSelected": 1286,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-ru-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2838,
+      "afterSelected": 2838,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-zh-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2811,
+      "afterSelected": 2811,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-zh-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1266,
+      "afterSelected": 1266,
+      "delta": 0
+    },
+    {
+      "deckId": "ja-zh-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2345,
+      "afterSelected": 2345,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-de-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1594,
+      "afterSelected": 1594,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-de-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 883,
+      "afterSelected": 883,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-de-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1092,
+      "afterSelected": 1092,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-en-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 5701,
+      "afterSelected": 5701,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-en-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1404,
+      "afterSelected": 1404,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-en-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2641,
+      "afterSelected": 2641,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-es-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 588,
+      "afterSelected": 588,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-es-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 426,
+      "afterSelected": 426,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-es-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 446,
+      "afterSelected": 446,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-fr-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1072,
+      "afterSelected": 1072,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-fr-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 647,
+      "afterSelected": 647,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-fr-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 748,
+      "afterSelected": 748,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-it-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 108,
+      "afterSelected": 108,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-it-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 109,
+      "afterSelected": 109,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-it-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 77,
+      "afterSelected": 77,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-ja-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1375,
+      "afterSelected": 1375,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-ja-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 733,
+      "afterSelected": 733,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-ja-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 877,
+      "afterSelected": 877,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-pl-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 45,
+      "afterSelected": 45,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-pl-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 55,
+      "afterSelected": 55,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-pl-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 42,
+      "afterSelected": 42,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-pt-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 104,
+      "afterSelected": 104,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-pt-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 127,
+      "afterSelected": 127,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-pt-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 93,
+      "afterSelected": 93,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-ru-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 123,
+      "afterSelected": 123,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-ru-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 140,
+      "afterSelected": 140,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-ru-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 103,
+      "afterSelected": 103,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-zh-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1526,
+      "afterSelected": 1526,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-zh-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 833,
+      "afterSelected": 833,
+      "delta": 0
+    },
+    {
+      "deckId": "ko-zh-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1030,
+      "afterSelected": 1030,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-de-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 7130,
+      "afterSelected": 7130,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-de-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1429,
+      "afterSelected": 1429,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-de-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2973,
+      "afterSelected": 2973,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-en-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-en-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1437,
+      "afterSelected": 1437,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-en-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3494,
+      "afterSelected": 3494,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-es-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3815,
+      "afterSelected": 3815,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-es-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1392,
+      "afterSelected": 1392,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-es-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2276,
+      "afterSelected": 2276,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-fr-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2327,
+      "afterSelected": 2327,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-fr-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1220,
+      "afterSelected": 1220,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-fr-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1592,
+      "afterSelected": 1592,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-it-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1103,
+      "afterSelected": 1103,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-it-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 825,
+      "afterSelected": 825,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-it-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 891,
+      "afterSelected": 891,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-ja-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-ja-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1429,
+      "afterSelected": 1429,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-ja-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3228,
+      "afterSelected": 3228,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-ko-everyday-advanced",
+      "beforeDecision": "omit-below-minimum",
+      "afterDecision": "omit-below-minimum",
+      "beforeSelected": 30,
+      "afterSelected": 30,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-ko-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 51,
+      "afterSelected": 51,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-ko-everyday-middle",
+      "beforeDecision": "omit-below-minimum",
+      "afterDecision": "omit-below-minimum",
+      "beforeSelected": 32,
+      "afterSelected": 32,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-pt-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 839,
+      "afterSelected": 839,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-pt-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 625,
+      "afterSelected": 625,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-pt-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 629,
+      "afterSelected": 629,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-ru-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3759,
+      "afterSelected": 3759,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-ru-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1333,
+      "afterSelected": 1333,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-ru-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2128,
+      "afterSelected": 2128,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-zh-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 558,
+      "afterSelected": 558,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-zh-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 472,
+      "afterSelected": 472,
+      "delta": 0
+    },
+    {
+      "deckId": "pl-zh-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 484,
+      "afterSelected": 484,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-de-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 6482,
+      "afterSelected": 6482,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-de-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1433,
+      "afterSelected": 1433,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-de-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2960,
+      "afterSelected": 2960,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-en-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-en-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1438,
+      "afterSelected": 1438,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-en-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3493,
+      "afterSelected": 3493,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-es-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-es-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1437,
+      "afterSelected": 1437,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-es-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3442,
+      "afterSelected": 3442,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-fr-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 7937,
+      "afterSelected": 7937,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-fr-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1435,
+      "afterSelected": 1435,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-fr-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3123,
+      "afterSelected": 3123,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-it-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 4131,
+      "afterSelected": 4131,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-it-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1403,
+      "afterSelected": 1403,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-it-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2409,
+      "afterSelected": 2409,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-ja-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1441,
+      "afterSelected": 1441,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-ja-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1175,
+      "afterSelected": 1175,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-ja-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1319,
+      "afterSelected": 1319,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-ko-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 42,
+      "afterSelected": 42,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-ko-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 125,
+      "afterSelected": 125,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-ko-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 55,
+      "afterSelected": 55,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-pl-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 607,
+      "afterSelected": 607,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-pl-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 634,
+      "afterSelected": 634,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-pl-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 583,
+      "afterSelected": 583,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-ru-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 7790,
+      "afterSelected": 7790,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-ru-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1437,
+      "afterSelected": 1437,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-ru-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3128,
+      "afterSelected": 3128,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-zh-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 343,
+      "afterSelected": 343,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-zh-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 574,
+      "afterSelected": 574,
+      "delta": 0
+    },
+    {
+      "deckId": "pt-zh-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 460,
+      "afterSelected": 460,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-de-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-de-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1439,
+      "afterSelected": 1439,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-de-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3495,
+      "afterSelected": 3495,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-en-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-en-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1439,
+      "afterSelected": 1439,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-en-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3497,
+      "afterSelected": 3497,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-es-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-es-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1439,
+      "afterSelected": 1439,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-es-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3487,
+      "afterSelected": 3487,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-fr-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-fr-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1439,
+      "afterSelected": 1439,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-fr-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3495,
+      "afterSelected": 3495,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-it-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-it-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1439,
+      "afterSelected": 1439,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-it-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3477,
+      "afterSelected": 3477,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-ja-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-ja-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1435,
+      "afterSelected": 1435,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-ja-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3175,
+      "afterSelected": 3175,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-ko-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 79,
+      "afterSelected": 79,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-ko-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 124,
+      "afterSelected": 124,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-ko-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 85,
+      "afterSelected": 85,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-pl-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3498,
+      "afterSelected": 3498,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-pl-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1308,
+      "afterSelected": 1308,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-pl-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1946,
+      "afterSelected": 1946,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-pt-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-pt-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1437,
+      "afterSelected": 1437,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-pt-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3191,
+      "afterSelected": 3191,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-zh-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 4734,
+      "afterSelected": 4734,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-zh-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1361,
+      "afterSelected": 1361,
+      "delta": 0
+    },
+    {
+      "deckId": "ru-zh-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2328,
+      "afterSelected": 2328,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-de-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-de-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1439,
+      "afterSelected": 1439,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-de-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3376,
+      "afterSelected": 3376,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-en-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 8000,
+      "afterSelected": 8000,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-en-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1440,
+      "afterSelected": 1440,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-en-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3494,
+      "afterSelected": 3494,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-es-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2369,
+      "afterSelected": 2369,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-es-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1348,
+      "afterSelected": 1348,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-es-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2066,
+      "afterSelected": 2066,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-fr-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 5319,
+      "afterSelected": 5319,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-fr-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1432,
+      "afterSelected": 1432,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-fr-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2916,
+      "afterSelected": 2916,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-it-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 937,
+      "afterSelected": 937,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-it-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 945,
+      "afterSelected": 945,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-it-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1051,
+      "afterSelected": 1051,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-ja-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 4618,
+      "afterSelected": 4618,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-ja-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1429,
+      "afterSelected": 1429,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-ja-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2826,
+      "afterSelected": 2826,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-ko-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 916,
+      "afterSelected": 916,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-ko-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 833,
+      "afterSelected": 833,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-ko-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 918,
+      "afterSelected": 918,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-pl-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 427,
+      "afterSelected": 427,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-pl-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 479,
+      "afterSelected": 479,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-pl-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 510,
+      "afterSelected": 510,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-pt-everyday-advanced",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 370,
+      "afterSelected": 370,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-pt-everyday-beginner",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 557,
+      "afterSelected": 557,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-pt-everyday-middle",
+      "beforeDecision": "publish-thin",
+      "afterDecision": "publish-thin",
+      "beforeSelected": 510,
+      "afterSelected": 510,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-ru-everyday-advanced",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 3208,
+      "afterSelected": 3208,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-ru-everyday-beginner",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 1385,
+      "afterSelected": 1385,
+      "delta": 0
+    },
+    {
+      "deckId": "zh-ru-everyday-middle",
+      "beforeDecision": "publish",
+      "afterDecision": "publish",
+      "beforeSelected": 2329,
+      "afterSelected": 2329,
+      "delta": 0
+    }
+  ],
+  "baselinePreviewComparison": {
+    "memberships": 3280,
+    "retained": 3280,
+    "absent": 0,
+    "retainedWithChangedContexts": 0,
+    "absentSamples": [],
+    "changedSamples": []
+  },
+  "limitations": [
+    "Complete count deltas compare bound full reports; exact identity/context deltas cover only the old preview.",
+    "Lexical boundaries, provenance and structural checks do not certify translation truth or every pedagogical choice.",
+    "A lost previously included language pair stops automatic progression; counts/semantic quality are separate.",
+    "No new manual-review prerequisite is introduced. Census/freeze/storage and publication remain separate stages."
+  ],
+  "selectionReportFileSha256": "3f116d0cfcd9bfd9c2b819d11a2a0953085f6a75fe5193314d4a9bf6bf753009",
+  "baselineReportFileSha256": "3f116d0cfcd9bfd9c2b819d11a2a0953085f6a75fe5193314d4a9bf6bf753009"
+}

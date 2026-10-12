@@ -1,0 +1,134 @@
+{
+  "experimentVersion": 1,
+  "status": "complete-bounded-cache-experiment",
+  "publicationSafe": false,
+  "productionCacheEnabled": false,
+  "mode": "enabled",
+  "profileFile": "PROFILE.json",
+  "cacheEvents": [
+    {
+      "collection": "everyday",
+      "lang": "ja",
+      "status": "hit",
+      "key": "c1ce49114881183141be40454db19f3a2849348e5c824ee22db60373dbfeaeb4",
+      "rows": 9785,
+      "dataBytes": 917677,
+      "dataSha256": "ce2a9390dadddaff1178dc772ff413c28e3cc27046507eaa7adbe0a8979cc9f4",
+      "publicationSafe": false
+    },
+    {
+      "collection": "everyday",
+      "lang": "de",
+      "status": "hit",
+      "key": "55610c9519c43f46d2ba50825603165b793942d87de3cf45c6994237ec6a0d88",
+      "rows": 10015,
+      "dataBytes": 986532,
+      "dataSha256": "2ba86f77eb5c9f56ca19ea67893277a2a35ca8c7f29273fac0899700b70890d9",
+      "publicationSafe": false
+    },
+    {
+      "collection": "everyday",
+      "lang": "en",
+      "status": "hit",
+      "key": "30400f13872b3d83ccbefcb2efc1775ee9ff60f565124d97b24b4798eb36fd58",
+      "rows": 10125,
+      "dataBytes": 919988,
+      "dataSha256": "e998c495b1f7ebaa5c595fa7553692c08ed78ac3af7af339dcdd42bc83bd710a",
+      "publicationSafe": false
+    },
+    {
+      "collection": "everyday",
+      "lang": "es",
+      "status": "hit",
+      "key": "702116f3a8df18160c5a8307c056d2844cbe7f6abc4e1a280c6e6c1669e07a2a",
+      "rows": 9987,
+      "dataBytes": 956045,
+      "dataSha256": "a7616ea5fc0fc6006a949310419bb8de8555e11e082099298b82e857c4dee368",
+      "publicationSafe": false
+    },
+    {
+      "collection": "everyday",
+      "lang": "fr",
+      "status": "hit",
+      "key": "4e4d0bd725a185d7499019ce6f0ceb491d916995cba1287464470cd13990f61a",
+      "rows": 9977,
+      "dataBytes": 984689,
+      "dataSha256": "55e57956cf5f84cc049163f1eab746065182d83c560df8418f4c708e7d0fc870",
+      "publicationSafe": false
+    },
+    {
+      "collection": "everyday",
+      "lang": "it",
+      "status": "hit",
+      "key": "d0acad855b03e278dd98ec449085a0e93d985b150c022112a731e4c2db22b399",
+      "rows": 9193,
+      "dataBytes": 873746,
+      "dataSha256": "932909f4f3c962bd39dd5ad884de3d9c4fce8e6d8d4bd639d479f14fed4a65db",
+      "publicationSafe": false
+    },
+    {
+      "collection": "everyday",
+      "lang": "ko",
+      "status": "hit",
+      "key": "a8ef99d48430d47c1cfc5d54ae7fa58a818a96145ebc48a6cb9b2dfe540a4a55",
+      "rows": 5085,
+      "dataBytes": 543980,
+      "dataSha256": "f5328478716d572a938887e51bf18a029890d12567ce71544883ee097912ac1c",
+      "publicationSafe": false
+    },
+    {
+      "collection": "everyday",
+      "lang": "pl",
+      "status": "hit",
+      "key": "388cd58a5266f9b2c4fc857edd0faade34dcb1698ffb7c040c233f655e91df90",
+      "rows": 8768,
+      "dataBytes": 905442,
+      "dataSha256": "20adac21f63765dc1985fc3d6b1cd3ef122b04ae6f752ba05edaecb433fa2a74",
+      "publicationSafe": false
+    },
+    {
+      "collection": "everyday",
+      "lang": "pt",
+      "status": "hit",
+      "key": "8c741d09d9a50d2efdc96c446c54f56588356530ca9c21fd8cfdc33ef6e185ed",
+      "rows": 9044,
+      "dataBytes": 921776,
+      "dataSha256": "70a2ba5ba5e2155be8f386ac6c882cefc88137e18d466e961f7a97e0421dc3b1",
+      "publicationSafe": false
+    },
+    {
+      "collection": "everyday",
+      "lang": "ru",
+      "status": "hit",
+      "key": "efca74a7dd6b5ca726cbdec99d30b4980501d69a0299bd73e63843fbe0968d8e",
+      "rows": 9357,
+      "dataBytes": 950233,
+      "dataSha256": "8bdab44f22c8bb3a60f780be70af499a1decf9db5f0d7efdf41a2170ec4e1531",
+      "publicationSafe": false
+    },
+    {
+      "collection": "everyday",
+      "lang": "zh",
+      "status": "hit",
+      "key": "69adff07a04d3db476ea034ced69c3d5d8fa73f90f76eaab8854465dbb5c7ad8",
+      "rows": 9163,
+      "dataBytes": 974555,
+      "dataSha256": "186de029a0db7d37388d94f961b8b820baaa05537fe636a4bcfddca1d4c73597",
+      "publicationSafe": false
+    }
+  ],
+  "outputIdentities": [
+    {
+      "reportSha256": "bb83e6121d4cbb046a33cf68227b2b6fa2060258d95022dbfa0cfd0d06fbb84d",
+      "previewSha256": "50b5b745c0dccb6090304f8754ae96ded77b5dbe2ae74dc5b0e9826f361ef890",
+      "selectedSha256": "2efae253c630285c7b7de5f9de5e076117c39981775cea181e6a7ef51bdc16f6",
+      "selectedLogicalSha256": "7ab05cd6a7a03221cf818176c9671b99f33646fe7f98a173fa716bbb1c7d3d2e"
+    }
+  ],
+  "elapsedSeconds": [
+    17.58709726199959
+  ],
+  "mandatoryChecks": "unchanged complete supplied-input validation, staging and ranks; downstream evidence/allocation/output recomputed",
+  "timingScope": "selection call includes cache key/integrity/import/write costs; profile provenance/final diagnostics separately outside call",
+  "limits": "bounded same-input experiment; no full-corpus speedup, new quality claim or production cache admission"
+}

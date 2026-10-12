@@ -1,0 +1,19 @@
+{
+  "deliveryVersion": 1,
+  "slimPurpose": "Code and reports below the 20000000-byte attachment limit; no code/assets/signing/schema files removed",
+  "retainedFullArchive": "ikna-0.12-press-round-25-pinned-stage-profile.zip",
+  "retainedFullArchiveSha256": "47c581464b18d8d588984f29df0f9b48174f656425bdaaba2768aaa440245c0c",
+  "optionalInputArchive": "ikna-round25-optional-diagnostic-input.zip",
+  "optionalInputArchiveSha256": "4c962dc2a29a11554a2887e0d737097807348be0291ff413634d8491a62d3a4f",
+  "optionalInputArchiveBytes": 9214810,
+  "omittedOnly": [
+    {
+      "path": "docs/evidence/selection-round25/diagnostic-pool-1024.jsonl.gz",
+      "sizeBytes": 9211785,
+      "sha256": "a428ec92e9a0c50e1b3dc075c9b9fd2546c86aff44c0b03ef2f53f4e7b77b7e5"
+    }
+  ],
+  "restore": "Extract the optional input archive at the project root; it restores the original relative path. Alternatively regenerate from the pinned saved source pool with selection_diagnostic_pool.py --per-pair 1024.",
+  "testsRepeatedForPackaging": false,
+  "previousValidationPreserved": true
+}

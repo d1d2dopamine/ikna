@@ -1,0 +1,159 @@
+..................Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+.Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+.Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+.Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+.Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+...Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+..Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+.Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+..Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+.Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+.Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+...........................................Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+.Selection: staging admitted candidates
+Selection: staging complete (1 unique candidates)
+Selection: context analysis everyday/zh
+Selection: pair everyday/zh->en
+Selection: complete
+Selection: staging admitted candidates
+Selection: staging complete (1 unique candidates)
+Selection: context analysis everyday/ja
+Selection: pair everyday/ja->en
+Selection: complete
+Selection: staging admitted candidates
+Selection: staging complete (1 unique candidates)
+Selection: context analysis everyday/ko
+Selection: pair everyday/ko->en
+Selection: complete
+..Selection: staging admitted candidates
+Selection: staging complete (4 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+...Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+...Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+.....Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+Selection: staging admitted candidates
+Selection: staging complete (2 unique candidates)
+Selection: context analysis everyday/en
+Selection: pair everyday/en->es
+Selection: complete
+...........Selection: staging admitted candidates
+Selection: staging complete (7 unique candidates)
+Selection: context analysis everyday/ja
+Selection: pair everyday/ja->ru
+Selection: complete
+Selection: staging admitted candidates
+Selection: staging complete (7 unique candidates)
+Selection: early Japanese analysis everyday/ja
+Selection: Japanese analysis complete; deferrals={'ja-morpheme-cut-deferred': 6, 'jaContextsChecked': 7, 'canonical-target-ambiguous-deferred': 8}
+Selection: pair everyday/ja->ru
+Selection: complete
+...........
+----------------------------------------------------------------------
+Ran 111 tests in 1.245s
+
+OK

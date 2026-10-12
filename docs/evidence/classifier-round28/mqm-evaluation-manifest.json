@@ -1,0 +1,3918 @@
+{
+  "schema": "ikna-external-mqm-id-manifest-v1",
+  "role": "evaluation-only; never catalogue candidates",
+  "source_commit": "29acd6999aaea3586378c9dcb58d8cc4820cede3",
+  "source_path": "ted/ende/mqm_ted_ende.tsv",
+  "source_sha256": "3952dc904997dda31c03421243862cb8a093f9a712fd90dc97b9709b4bb387b3",
+  "language_pair": "en-de",
+  "labels": "independent single-rater MQM annotations; no-error is observed label, not guaranteed correctness",
+  "split_rule": "talk.1/talk.3 calibration; talk.4/talk.5/talk.6 held out; hash-priority selection; globally unique source text; errors sampled first",
+  "counts": {
+    "calibration/major_accuracy_error": 50,
+    "calibration/explicit_no_error": 50,
+    "held_out/major_accuracy_error": 100,
+    "held_out/explicit_no_error": 100
+  },
+  "pairs": [
+    {
+      "system": "metricsystem4",
+      "doc": "talk.3",
+      "seg_id": "237",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "6ac659d13169bef5fc84b4f16506b075df8c712d10901703beed7c92a695f25b",
+      "target_sha256": "609e8885616d82bb0654a1c2d236be0a9d2d7dfa78700eaca3436e5eb1ac758c",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "02b5e704aa25501078144e6cb1dfe79b14935da12babb95d933942f907b41fab"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.3",
+      "seg_id": "227",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "bd9e4df124b912da4e6613b7ed61cfe3a6195ff86d0ad5434ec44ef8d3579dd4",
+      "target_sha256": "e7bc571e2064100e88bf08813d41c67ce9c67f47869f5af67cfc0f4458f2402e",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "02d8ff5a2e814a50f558fa0dc4a8110395f16922d894c728d1da06242ab4846d"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.1",
+      "seg_id": "135",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "e7d2b5db2b935dc313c86bbac031d1a3da25c0e6b6a3c1965a03c7e44158f921",
+      "target_sha256": "336f6c9a5b3df5501925109091b2150e53846e32024345c287ccf4abc3d81e44",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "03b6aedcfffad62ea13bb6a8ef4b610c5d1cf22653446d95bf42fabb2a2b2370"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.1",
+      "seg_id": "77",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "f37244aca361d7fa6ce031e1baf063199a625901fd2291d8566e231910ad4b4b",
+      "target_sha256": "be891e27544ee7ed654cd6d6485c340c39f70628a2b89c8ffd584169c6cc69ce",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "065c8e27bdbd830d98586fdd5f7e989043eaaaf0d2f1e2daaf15a15850077245"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.1",
+      "seg_id": "50",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "911c5fd88e7d82ca30442303138a150d1dff9996e573b826aab88c4961d8073e",
+      "target_sha256": "4f6bace161dcd9748f495206a8b8d34959c045b9e0e06d29180bc745ed2060ae",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0884b14ca44cca60f438a621e87c7d61c2cd19976a4555de678dece971cf1500"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.1",
+      "seg_id": "90",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "9765b8efc168d7a788164bf9be6a1de5a597998a377b099c55c410247867c61a",
+      "target_sha256": "bbfa7e6f8dc88ce2ed354eafcefec64691d7acbd85d055b81c557f603bbbf47c",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "08b50e0b18d930971375d5e147ae9f0f60443b20c5c9280d8e3458b4387a183b"
+    },
+    {
+      "system": "ref",
+      "doc": "talk.1",
+      "seg_id": "32",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "9ebcf4d795a62388270e291de554a83fcef7eb058cbb70814d10653e08a7d320",
+      "target_sha256": "9b6fcce6688df2b77f1dfd8a721b8d47e40c7aceb7e0b4953f85ed8f580afdd1",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "09fa51bf56ef6cf65dda0cbf3923121bce2fa3bdcdcd9369708340a6794fefdf"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.1",
+      "seg_id": "133",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "aeabeab7b7927400a6fc27fed6077e540ad1ec9127b3b8001ad0e847b5072bad",
+      "target_sha256": "78d3ca469cc61e48e4cc20b8c7a65157d9513aba7a5f5e18342ae6a9a495c29b",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0b0ef6625a214b1fc8eb53d5e60c9fdf57c82b5cbb09eeaba9e476e984b068cc"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.1",
+      "seg_id": "27",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "e802e4cc7214d60c5c10ed1677fd4f1255b22425d925590b1f4c798e22753962",
+      "target_sha256": "12cb7a2aa8d3d2cd4f1f2f2bcf2c02b4177d19e3eeac3377d63b4bf9d6ca5de6",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0ba068a53333cca4132f71c9044662fb8afd5770858400470fffecc85ab6b6c8"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.1",
+      "seg_id": "97",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "5eb6833eb8f9a91cfab5b9d9e3f591f62931eef2966e4684680a00e5b7f94bb6",
+      "target_sha256": "ccc44f710116e066abb33ca44790fb616c90695397909a2ad709b482ea3cd6ee",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0d77ae55705be8cc05adb4a3a55a261d2d0dddb6123be37ac3db4ec4a67e777d"
+    },
+    {
+      "system": "metricsystem3",
+      "doc": "talk.1",
+      "seg_id": "18",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "822e50c999309cb9732dc3b4e92e316d103d75e8860ee6b03840fab89e0b348a",
+      "target_sha256": "c4f1c332956df8372c3c159718076919c083b38d9b2ed1a5f7ed763974c9476e",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0e2f3e525ade2a07215395b3358a8ba031f6aea2194cd740c14a5e82f55fe3b8"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.1",
+      "seg_id": "99",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "16bb6d7e305058ffd0f7de344a8fc631ede8a98b68d4853e9d36f71ab32d0828",
+      "target_sha256": "7e98e1a8d3bb3c4f80823e15da12f396d6c0ec0f84028a45decf96b9cda6c909",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0f9f75a5ee5d5744f56b8e1697a60faf9f12d5cf8e3935d0b5205d6be275244d"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.1",
+      "seg_id": "31",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "5cfd520adb0609c1015c74df2dcad04520b34ba1c5c5f5957c8f701fca266b8c",
+      "target_sha256": "7b29187f868b89b9a7320ba91a2164e9f2d3c290d83f0296bf297cc0f38b4de4",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0fdb19bb471664db7ed49c312548d9e582865b1874c5d01da7eeaf07414a0c76"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.1",
+      "seg_id": "56",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "9eeb505b7e9843f8ff5ac9cebcf4f63b83ad940797fb17ec231f672f623542d0",
+      "target_sha256": "bfde00b9be6c54d9c95096e61fd3e5d17809e7ee725154c6f5335e8ee1c7c441",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "1092d410efeda40a4f33927830b9884b68eeb7a9af1f9743870b8f04bee85311"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.1",
+      "seg_id": "86",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "260add1b153b3f816a2f1b868d37cf9e0212eddc600fecd4957616c1769a5696",
+      "target_sha256": "201b32111e86195a5fc54c36cf8b23bef097fca6731923d2d9e88cd188fb4766",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "11fcf0005cd97b62a67aac6d20475024187c67650727e41e7868de93efe720b2"
+    },
+    {
+      "system": "ref",
+      "doc": "talk.1",
+      "seg_id": "30",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "4cf7624fcb57e4be3ae52a6bea01bccc441aa89a463ce050e1593837497ae645",
+      "target_sha256": "69b048bea7d268cebb38c31e42d40c88014206eb5080aab18d3c6332aa583abe",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "146750e1f9a51b2c2b2192405b2ac80cf95a706a91037188d6e965a288c1a566"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.1",
+      "seg_id": "57",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "ca65b6db9cce8d32f137be26485cad056ec04f1b5e2a18ec30ce03b435a3ef90",
+      "target_sha256": "b692f049063df6ec28b9e00eec8a8db139c944e18f5190676b73b2554f64029e",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "14f10dc14f80c7e2c958f74fd25d36a871b4c45003cf9fe691bd1be6c5cc54c0"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.1",
+      "seg_id": "3",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "1f4e2f6a8683638d5d40b6c1ad3c1518135e099a0c968d7c5afdc0cd690143a0",
+      "target_sha256": "ee2608e3a9f407abf02010397827c809e02dbdd79d86970f3fbcba0e6ab2c151",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "165b466bc7e075d7a020f5a345f050bf11c2c335184ec3c0cad0d2c710fa794f"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.1",
+      "seg_id": "138",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "cfdb3a146999ad57602a3353e0c43dd41cbca53891d8f4486d2ed2d37795940e",
+      "target_sha256": "68494c6902a8d424ba0da82fc192d3f25758494ceebb49fe2ff3a34cb29923be",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "169a048d67718dbbddf20777a39f578ca59be7d98e3221acfb05a2be376d7040"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.1",
+      "seg_id": "100",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "162d10ffcfa42db06160752914665aad410e42465503def3b0e33e88739e1a64",
+      "target_sha256": "b8ba3e092f314f5168e7c9de4454416aa68922ad1c4c489f6cf070029441bd29",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "172a62081a312d6a227eb108e7224e5b371bc631321e266887fe8b6ffb58677f"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.3",
+      "seg_id": "218",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "60a30a4a8b67efb2b9689f96106a8405ee8f5a6390a40affcc46e9dcc72bfab7",
+      "target_sha256": "5931a2eb199d23826dccb7d5dcb148399a1dd02a4858840bf9a268496b1ccbc2",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "178c41987ef8f75dc9f1cf4c8d767d3d3ccbf7c5c566fd53ff5af54c8881ee8b"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.1",
+      "seg_id": "6",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "2499e064f8f81973bed5d91afeefdf0ddde8daff1d0d76ca7ce444daab37bbbe",
+      "target_sha256": "b836bd209222458fe7e8458f50ea697e1d0c5f33a61fe07c9ee2909dbf62728c",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "18325c0de6edc853795c9b4b41d40e2572609d84d8b82bba1b0ab83c79f053f9"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.1",
+      "seg_id": "53",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "3d15508b39c964d6b44bb68004e207eda9a5279acd0c7113f3d616c3a7ac4b32",
+      "target_sha256": "85199f771acdb3d6d2bdbe116a7ca1394f63d7f40881f0fe480d7a28ecee08eb",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "1b272be4e1aeb647a22106c30499946593d401f6d68fd272feff3b42ae9e677a"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.1",
+      "seg_id": "11",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "da7218c9d52fbf5c4bd8a5f8cc7c03f69d518799df76976e06ca0b7340c0d974",
+      "target_sha256": "d668aecef474b729d118eaa360bec36d05f9e16b70f78aeb38f966e7f0212f34",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "1b8ea22a272936dbe0986c27605f40a1bfc0a1869b6004db53cbc0ad6f0ac821"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.1",
+      "seg_id": "48",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "460aa67e637482b6830f64b2547951c09345c05a3ae6f4fcba866d80fdb589c5",
+      "target_sha256": "dde039c1211dbab9d0243b95b0ae2fbe14988c40f09aca41f05c91cab7fc1511",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "1cb73a6dafbb8a1548bb77b9c8cfb15bc0df4762ae878424dcc19ded0a5fa306"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.1",
+      "seg_id": "5",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "74c1fc2077fa250444b4c4070f8847e193f2f854a8f58273eef96e049b0cb964",
+      "target_sha256": "65989347cb2ddbffd14c2694248c2bbfa877f2f25805cefec089afef9ddaf2df",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "1d4a0c797b3c29f579925104bb60cb2a50f013ee1e273f27442e1e370611ed29"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.1",
+      "seg_id": "107",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "c9833d6e592169ad30332e5a12510569c99a7b8c210033b1328d49b521f8c094",
+      "target_sha256": "22627040b6879a7e25cb7a1e8337161c8918d4ecc59a0954a05e80c4946bf4a3",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "21197d57ecc963f9ab33ec188ae9f1f35ac98152cc7a3edde78f4d2dffa6f05a"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.1",
+      "seg_id": "119",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "e11af87798d6f1bbc19124074388f6672ac6266b0bee3bf566e7e31951e2f4c8",
+      "target_sha256": "3dbf4f5c0f0ca19723af94a672c5cdedbc3388c6e1bd055253c5b1813cde3785",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "2241705a08511fa20c76532c9d6efb84d635da5e7bfcb20691ab5a2a451c6f15"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.1",
+      "seg_id": "10",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "48aadc7985a9f5645dfd32f8c8abd07abc34fc8d3ae12ab06a5dbf932d89d816",
+      "target_sha256": "c6dbeeb113f7f77336b539a5d5bc991feb67575b72d462e7bdb85d16debc675d",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "22737a4f9955425c6d0aedaf7d77c5f6cc4d4b3cb795e06cee610817d86910e1"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.1",
+      "seg_id": "134",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "08f7d35dc6e9dc3b2748a28e309e3b72832f184f21ce6ff19d2ce8c9d4d09088",
+      "target_sha256": "13f36bae6fe98b16e63b9995c12a444440b29adf27ce6a10ef8ff420245a44dc",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "2401d54410d50f235ab0b4108033a576f0c473b965233bd4961df2c5551efa7a"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.1",
+      "seg_id": "17",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "74311ae323abaf6e24ef5d19a7472fa3eddce707f4568b42b1c05403bd4b31c9",
+      "target_sha256": "ea6026013f1d74b3166195dfcff9d0ea092b35e5ebc5cb1e0ed3113ef44e0266",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "2436cbcaf90fa54c2dbc33389de613c6bab8afd33a2f016156f533da9fba0674"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.1",
+      "seg_id": "116",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "912e72c98c3e66ad423e253ffeb97f63f1974157783ab5181173b01e34853acb",
+      "target_sha256": "4443a1dc7562e1b264fd84d4e8de92a78ec6bc3afce34bf5061d4e60f0730b7e",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "24b201a1bd0ace047bb029d10dd86868770f2318dcae908fc6a2283a5db642fc"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.1",
+      "seg_id": "49",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "f0af7c8536f6ab163dfa84a0f40a876243f9a54073350ee0090d110c711fba3e",
+      "target_sha256": "afb4797ea08d5fa507ab5c7dbb96567c4f8ac045d11efac83e56e01d59f3e0ef",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "27f0e959e095c0a88d0831dd65c76f0e3565924aadf6d8e6853a209ee03db14d"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.1",
+      "seg_id": "122",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "689dc77326e9f4ea86faabbf9b67f8f6c193bede34bc16226f1366fbde8227ba",
+      "target_sha256": "069cd58452e637012291ef839071f45cafdc58ef4594221551f888bd11d52f93",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "2aeb2f57e58a3c50a86b4e34343ddcaf09b8d5cd29b1a44c1844a6c1bb3cfa16"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.1",
+      "seg_id": "41",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "4edc658e80bdc53ed79eab6ecba3c4b91aa5e7e9d267b75f4f8b4e7f9b098a5e",
+      "target_sha256": "8ceb9b7c35eb5c161848100d0f4231a403d1d7eff74e368aa06b44c190eceed7",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "2f8385bb7b8170e89751cf19a81f302a8f0b142cb634a5fd15eb64abcda6c639"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.1",
+      "seg_id": "112",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "4cea4ad2e3fcea8bbcb4e561614a346d2e28876397eb39d01e5c0c339c5d1982",
+      "target_sha256": "ccb4c78a75d045ec4f49a5b587c0ea42c9eab597b0dc6d9a74e5b59128f10304",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "302f8a85f8c16ecaf155750b3788b64abd03a6364a312f5694a3a1e2dc91dfa6"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.1",
+      "seg_id": "108",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "9e9d765a964ec72814a599bc1e4fadb61744daf23a397ffe375fa1b80aab0eb9",
+      "target_sha256": "78240555808b5effab3e2a56b7369f4bda6984393d7acd045d868e63b7f4335c",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "31eb7a55fb3cab2e8c932e6e08c3226fd4ccb4bb6509e339313ec4e488bd9293"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.1",
+      "seg_id": "66",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "aa6a319f386ebcf15cc425b74ea696cee8d3747febbaba29c5095f867982be1d",
+      "target_sha256": "974e70fc6d7c5dc38c2c3bbf6df09f7fbe371f3a4822be653da9d2a26ef1cb8f",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "322c38b3f47503f270a3a7dd973de7ade5f171cdd7d136d825801032f76cffee"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.1",
+      "seg_id": "114",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "118a416f839c34b0dd1563038af8a7344aa6e77e9ebd18ba627a059c9f8292bb",
+      "target_sha256": "093c13cdbadb880eb703509e72b9326d45bf4f92fa0a38dbd3bbf10056b03a2a",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "3284a52c865bda547e57137ff89b1db09d8e7c0807431370ae1fc10633126a0c"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.1",
+      "seg_id": "96",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "1e2b4e1776605788f2ba1c6db97bed85c55f74bc952537adb03c2d3a5f2d85bf",
+      "target_sha256": "5dc8bb126f0a003274106591b7854f78af679fe5570c1c071a38939db6229439",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "353556798534259b09eb18cab6efad22ab933e629e56b650839ee3d33f1d466d"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.1",
+      "seg_id": "63",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "68b8e46e061fdb2a3327d90a34870dec6e7d98364d17ae42ddd9e67815780fd4",
+      "target_sha256": "f87c2dfe13098fbb49a2b9e478d4326e65add3d3a0766f8707efdd4beedb9a6f",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "36b4d0a4bffb688ed9aa24893713c355cfb51850f3d7c9a2cc1c89ab39c98139"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.1",
+      "seg_id": "23",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "e6b22f2c694ae5b443b5199bfa7367a277dd853ccf2b7c82821be7ea698102dc",
+      "target_sha256": "daaff4a0a585578b2c41e8f6e61e5ffcdf68f3e1f0f7f63660784bb4d95ca267",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "3808851d02fc1016859ab70827d9d8186735cd37a87724155a8c6ba644da4e9c"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.1",
+      "seg_id": "136",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "5c1114fbff341926b6298b8ca2bdafa6ceb4191552b0bbabd535fba49328503e",
+      "target_sha256": "7f8444e085b90d7997736aa787367e118900e8cb5afeb825871aac396bdd01e7",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "408a2b7a30b8eb8be15d1782413c20ef70377f31069c38e92f5adf2fcfd0f5c1"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.1",
+      "seg_id": "40",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "9ec4737bc95f074ba88c145c189a7c75568bf588b9187fa44967d2fed2b0ea94",
+      "target_sha256": "cc4c0aabc5861046e3f007622e2964739dbed5ce7c80e626649322f67ce37da3",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "4399766c3f024273e4354d632fb686874fc3b152ffc944dd226ea81714bcf383"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.3",
+      "seg_id": "224",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "85d73a2518e64716d74db403215b0419612c9b9db70bc6fc2393df38743ccec0",
+      "target_sha256": "44116f28c7081a78855cdf501f98eeac8b6efa2903d02ead3f81df87c71d1437",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "46257e605dd2fa00956419f316a8349fc11046fb564d2631458055a349beacbe"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.1",
+      "seg_id": "93",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "ba4a9ec6e964bb44ae6f640f1081daae2eb9ab4297c563309914378e7523d418",
+      "target_sha256": "e90fa9be3f938b95a06d0070c2cdfd70dbb428e84ce93f6925384c32ce1f81a6",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "482891835db96ec8766f24a0579cfd24e817406ab36b87b473e0b425fd08a67c"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.1",
+      "seg_id": "132",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "5d9430081135dd639ed20ca18da8aaeda5d5e9bd5fa6ab30c41296603615043b",
+      "target_sha256": "525c568fc13d137cb049c6bb4aca17df0f9981b374aea477a7663c112f502005",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "489817080a636ba94a5ac7418bfd32631c3ba72ea7d2ed00a93fca2dd434fa79"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.3",
+      "seg_id": "238",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "7cbc80cb4153a4f281a8e6725f85e89ed2fdbf0ddf368f6caa15f401650e0e10",
+      "target_sha256": "7ad3e160b790f8224f0071860a9a00e28587e8eb4d8628716afdf38b6c913fc9",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "49338ecad3ba116f5955c32e2ae6a6f02d02b8e1da7362df4a1386788602e563"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.3",
+      "seg_id": "226",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "97ee09ed2a7f5443f345287416caaf1d8ee0abe8ff763c4fe6b7c0bd0b301672",
+      "target_sha256": "3848b9d02ecebd679d0b7a815532dffd24a5c81b5b40b68bd48ee5ef797563a8",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "4c0d989586d104b34395e463eb46b687d42f3d9015cec22f69b78eff064d5952"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.1",
+      "seg_id": "9",
+      "split": "calibration",
+      "label": "major_accuracy_error",
+      "source_sha256": "05170769a733c9c2ca5feb89aabcddd6094f72ed72d1d87e828e12ac55074193",
+      "target_sha256": "37c13a3562c4635c2483d7b632517695d6f865b81ad8862f937b66220469c83d",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "4c5276bd6262e906d858c9cd5a2e82d97b950eaff638131b15f2cb7a72d0e4bc"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.1",
+      "seg_id": "38",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "3aabfc734c3198b860c37c979477f2b0336f0adc9382a20041305c7a08e6060b",
+      "target_sha256": "f07ade86a6131d23eeffda24a453bf1014e2ead76b89251ec8a60cabe8c4790b",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "002bafa6ddacb22f0cd4bfab2eb9797d96888c8e687c1b606dc8032057cec0ec"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.3",
+      "seg_id": "244",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "f7aa801b417bce3260494e572c1200e5c2ec48d4301573fdd1decf1dc6c5bace",
+      "target_sha256": "d8ff6091cf4347e7d4e68d13cdfa0b7f76b44901bfe725b2caea9fe4a30ce919",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "014b4d54e5864fb47998db3103674254b0d7911d4924ea657e2a05a7059c6b1c"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.1",
+      "seg_id": "140",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "725f861c2e84c427af110066676af86221fb795e91c6a266202349e0eb65133d",
+      "target_sha256": "23c4578151ee2e3822c3e5409bb5861b43719ec6e2f36011ff567c9f2ca30692",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "016cf170017cd8e09e168ddc3ebfa4725fd5ddbf5a3ecc1e2c07652089848a31"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.3",
+      "seg_id": "220",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "fb3530122de7c77b90300adf61c9a646454d21ecb49e88d1b548710b83f0b5b9",
+      "target_sha256": "5f7c5f9fbc4284c9e1d695db98bbe9ad8d06be1f28053e1686bd11ca45b4d6ef",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "01a6f9a3f064e9088b771559fdc8844734640b824e4e9e5c5d7d7e425725ab85"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.3",
+      "seg_id": "236",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "bf34dd898656cfeb38771df3dc3bbc33d5770f015c358dbf68ac5721542f714b",
+      "target_sha256": "284bf0e7517b4a1e13b42816f7869be6c8f94611f9978dda8edd42a8eefdfcd8",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "01b702df80cf5968809467712c3da21bbd10fee13506ffd207bce6b9b6b6b8ff"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.1",
+      "seg_id": "129",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "a5e04a8de454a08d6c97b5edbf553a5a62aa564e4a71eb36d1669275e5200c71",
+      "target_sha256": "c0acb22a481ef490f35e886d1b4ffe07a7766cf724d6798872bcd569fbfe5f82",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "01e6690e67af47be6439d715d4c1f9c300c4bb9b37b0d4ff5be1cc756dad84a9"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.1",
+      "seg_id": "44",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "36ebcfcae969642e7f6c430b0b9bbd1a5995777ef261b0d9fb15028ebb5336b3",
+      "target_sha256": "33124de71517b4e4e4c32d754ced325969e4c88aacb0ac100f513f3ef67c8248",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "025d88569016045dbc8940e60f99b9ae4eaa8346367d087cc4d2d3a614b33a67"
+    },
+    {
+      "system": "ref",
+      "doc": "talk.1",
+      "seg_id": "109",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "1d5a12883d01d28b86f1045b7b76ee4483fe21a4c48c3b757d043f67aa2b43cb",
+      "target_sha256": "2d0588d2951d5770d26024b4cfbfaf9fac09dbf812cae84dbc28a44a18d86e97",
+      "raters": [
+        "rater2"
+      ],
+      "priority": "0273101c3a9937792490915f97ca7f884dfe11da4fca05057d444f2f717a512d"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.1",
+      "seg_id": "94",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "33f981d4c97d886bd2c17a1fb37b10423053abb37a0d5ce0c85b34a8dbf122fd",
+      "target_sha256": "703286f69d435d4c173847facd449b122a96a12325f1a8b714bdcc894ed71486",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0313f74a67b02ad6153aae2b36373f56363d296c64681d2257a628029bbd5989"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.1",
+      "seg_id": "60",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "87d5fd5c9e8168fd4cb68d2384fe4c14ee507607b555643a85f708416085e147",
+      "target_sha256": "b62aacfd6f8b73a99c37a296a42dce045524aa3877b0a06ed5b3688d928b49db",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "031ae5b2b61763b94b7c70b3a1897f3c7bc0d21170e75925ebf0a3f5e5309d12"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.1",
+      "seg_id": "72",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "af4b7b8488db22d378df7f09fa0645f91ad694014ac5444ed1dec5aa48509103",
+      "target_sha256": "6b2519073bc45b0b5c7bf04b7b0d143752545bee8a3b0cc287146d2f1d7f5f21",
+      "raters": [
+        "rater2"
+      ],
+      "priority": "0388ad0d399f848e2b6ce6ab095c4242e3ff9d4a610d9c75b7401b9df39538f0"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.1",
+      "seg_id": "26",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "5fb8051b4d8f082528584d27140e73213c4dc3e71b6f0682eda1ecccd129bdeb",
+      "target_sha256": "e6871dac50e4cf513005da073451ed7d76341d38c55bf5f612f907dd099ceb2b",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "03cc3cc722b35150ee0a8160b4a3852feaf714740bbaa4a6e4b10a0bbe4e7109"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.3",
+      "seg_id": "231",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "a643d321a634794d68eab0299792cc3aada38206691e2faee6f8cfd6aa91a661",
+      "target_sha256": "fae4534564d1fac7f7797f11dd73dc25b14767e5863243087c54961c9ddff300",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "03facab1996fe0f0a215da293f3da1f79aad8b892a6e8e83cd2992d4de84143e"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.1",
+      "seg_id": "46",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "8e2ba8d52160f608eee1dff2140f8fa9efe1c86446824753d0ec47b4a8aa6b4a",
+      "target_sha256": "62671531bf584f1846d009842a944e8d600b14d849c32dc1c8a08327b82df7d4",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "044c1d75a5f03d0fa1beb6619f9b06b53ff5d8a04153872ff6ee7bb9ae899fe8"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.3",
+      "seg_id": "221",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "cf4ee07d86af09e74882945430053394983a91879a7c9b9a7fbd3f4a7fb017b2",
+      "target_sha256": "517a3a9b3259262005f74063581c4297d0a45b930d5d2b15b07c5267c6459745",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "045ff5c571f999bfdc438291b8721b8a8cdc707cab5408ef846803f742f89967"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.1",
+      "seg_id": "126",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "0575a1e0e85cdf9a7c666a5b90ff602e5c08d06001c53a2a16ead931e88fc760",
+      "target_sha256": "c10eabe0efe8c12bb767b3691f2fa7121b63b073765e65d78bb3b264e760ee63",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "057d3921fa1608cb38c1b07c6f18829212a0de2855bcb89c0d6d823316e248b5"
+    },
+    {
+      "system": "ref",
+      "doc": "talk.1",
+      "seg_id": "139",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "2f0ae002ad5af267597a2279ef84257e84849249f289021016cf1ad27124a53f",
+      "target_sha256": "c793dc874028ae2fb348133db6f241f2441054b7e3afb719e91bb290889048f8",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "05f26d32e252c9231ebe23298cdcb97c68b3b04663039011a1cacf702c2647dd"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.3",
+      "seg_id": "225",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "a6ac63b7293d8468517d78092c27ceff3dffe92918f2c999dcabe171644d6b13",
+      "target_sha256": "1d269afe6b90c1725835d7de0936525272dccd3101c3db09eae389d66b3745b8",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "062800fe799a4529e5850a1f1ecadf1207f0057ac8604aa1332716d1e6402f55"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.1",
+      "seg_id": "75",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "f962ca0425655664f47e566e6b6e960de11c26caab852c1887acfe7ad7182fc8",
+      "target_sha256": "03685e34d462e0b41a79592f08b3586d8918d4655ea552fa41f1ed0898c6a197",
+      "raters": [
+        "rater2"
+      ],
+      "priority": "066f033d9611e251cb69575a16f83aec4a62733f7ab1b1bfe13e36dd40fd9ac6"
+    },
+    {
+      "system": "metricsystem3",
+      "doc": "talk.1",
+      "seg_id": "106",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "a03946fff0b561e5f2fcc0ff69916427f18c61dece758d73b64875a0acd22582",
+      "target_sha256": "707537a4d5291869075605e46126c182c3a9f6ac08873204045d4be3d157f56b",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "068d06687aa110cce14f1f5936ec4f4433cd738f76e2f77b97fbcdfbee60d995"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.1",
+      "seg_id": "115",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "cf63ff116e0391c9ab446b9d98692effdf440d4ddd33d8e7b60651661ef2b8e1",
+      "target_sha256": "2da07cd184e2d2640efe3a7c9602cc470f79697b294f8a825b4e4db533c4cdc1",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "06b8b853938afe70e22658a75326bcc88571332a7d41d53b7b7194145b74e69d"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.3",
+      "seg_id": "247",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "8569efc4ed5a6273140c2b6ec0ab8d99f4398210808fbb7c0cbbae4fbcc21350",
+      "target_sha256": "f923f1001c61673323e2504d20c5eb042c74e96cea0f7e14c57a01a95058f633",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "07068ae8e0f51363bf26abbb0b3b2c09c9634953977206cc79228f90a0a0f0f1"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.3",
+      "seg_id": "230",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "95af25bc352793b6ee415305a25844145abe08d01d3115219f92160336d48f68",
+      "target_sha256": "2f88d59b7a213f9b003a706a859910a59f7ad0e269acdaac2e9aaf1d96e21937",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "070eeb3873adc93934b9379d9162486042228ae9294991a6fa96e44e0fb910a5"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.3",
+      "seg_id": "228",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "9ed0cbf0d3ce70ab5a49095c3048b640cdc1da88f11c161736280dd598e03335",
+      "target_sha256": "73c42c17490f0080946b57e7331951ab3b1fa742147e71476970b3b0cc5f33bd",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "07488777fd6e51595c0e7bf7e68e72be1afcce3f9373ae3ce76b7c3832feb06c"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.1",
+      "seg_id": "51",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "1b8c1590261c18cfed50efcda22068f5eee547c6d6fa9feda06e77e0580f1b78",
+      "target_sha256": "29409389aaea821cb24c2813428790bb5ac72178daf081571a80608a39073c5b",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "074a950923875600f8603319fa2c16ed4fef822807ad0ec609cd8480591ccc14"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.1",
+      "seg_id": "92",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "abff9b969db3b2925fa3269d8c2d5320d8778af607a3665894d210099ae45653",
+      "target_sha256": "d42782443c61708bb567ad6e98b9c1c4476f3471d7150ff9b2c6ab3a1c496f3c",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0781d21d434d28b8aa3c93779a57eb160744591c055a14661d8f687fad6afa12"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.3",
+      "seg_id": "233",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "a85c9492355c29e51258f06de4c345fb2665f7cccf377a6f14a2874b88cc6d57",
+      "target_sha256": "cc5c74e63dc6e2659e227fdc0c248b09672ea6586aca2852d1de433114973b76",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "07f0a1f3ad4f87a7373361edcbed413a0864b2e93be00b05c4edf5a60bc8fed6"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.1",
+      "seg_id": "80",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "886ea14e28c04698349bba67f595fd4f564bab30ef924e7f99b818cf3dab027d",
+      "target_sha256": "f0240e0aca4afffb02414ccbecd8f0be14e90b0d3bd709adb3f418b25d509e3a",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "0830ec7bc83aa99f2a27c8f8c93281ce571d9e0c71ba8dcea37e2bc1bfc450f1"
+    },
+    {
+      "system": "ref",
+      "doc": "talk.3",
+      "seg_id": "240",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "36a379a027e9273090279fbe2e67d18af75909b28058ab59b4da8046f5bf29c8",
+      "target_sha256": "41235554275caeb1729e029a42c9f083b79095337bcf80d678080ddd508a37b7",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "08688f93f6a8bae4c94ef8fd2c1e10defdad22f80440ff70f0dd47935909c7fd"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.1",
+      "seg_id": "125",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "47adb2bef6cf6cf29a575172b931d0480269924a32c76ff1951a5691ef2801d8",
+      "target_sha256": "33fc880e7c989498c4d13307489e0a9b000aea5a1f19e4fedee0ce16210fe64f",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "08a63cacb4f53007743daa111736a9d8cc651cd08bbf47a1313a80cc38f3b4ee"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.1",
+      "seg_id": "88",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "65f95940c71fd8913a32a13403ab5ed350ac26710aea9b9f505d75d7660395db",
+      "target_sha256": "929b2e41c2f217ba01da0813579fc4b2de6657a33f705d508ba369dbcc52a4d5",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "08ba11f1b98da524af462712d0fd0398d0257ddb8e9d5addddf45ceef7fe038f"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.1",
+      "seg_id": "20",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "96620a6aac7a6108f0a066ee371fece370fc163165ac4912f4f71715777fed19",
+      "target_sha256": "2e54b81db1a5efa92cf5f582083e3915c2573d77c473061cf275825576fa440d",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "09047a9d0e3ef9bee8d10b25309e575f9e7906979a1c6adf4825676ec17c97eb"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.3",
+      "seg_id": "232",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "1de9a5f14b11bef027385410a9408bfd4d797ba8e8fa202261fa340303c4433d",
+      "target_sha256": "cb1614bbcaefa2c2cf71c0a0c5f0ef6497bb8063a19a544a06a826a4e08bd2a8",
+      "raters": [
+        "rater2"
+      ],
+      "priority": "0933d307a78634c733aa4b02ddd91457af5cde356ca14ce200d9ceddf18a942d"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.1",
+      "seg_id": "42",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "ee580c9b5fb82e42bbafd4e1d1ffd49e175db97c708d9a5b1dae10c8ba4007fe",
+      "target_sha256": "e7e3bb188aac88037f55663e302b2d9c8fafc1ed9e7053c936b160c6c8b4250c",
+      "raters": [
+        "rater2"
+      ],
+      "priority": "097a09a069f6b51086bf5519b0f3d05465f7ad6bc9b55f523a99eae50982cf15"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.1",
+      "seg_id": "12",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "e6f6cdcfc52fe61183a0cb9431e8650f66b53de261141e3c0dd673416678a4cd",
+      "target_sha256": "c2653b30e1ed87cb6083aabd4a81ffbfecf0d492dadc2fb1b7fb78248d3c0dcf",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0999a0bc48d30f4222211a271821e3335ff132c5f3309184af34fcc9ac0ad350"
+    },
+    {
+      "system": "metricsystem3",
+      "doc": "talk.1",
+      "seg_id": "102",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "2ea1a1a96cc7e06427f21b38edd2ab91031a1b47065b5ccd843a3dd56c351696",
+      "target_sha256": "bc59dfc6a0fa887bc79c659a676465305886362fbec6ddc488de4580a332aaea",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "09a8175440a9f62a695b37956bed4a41cd326efc6498202beff479bb1aba94cd"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.1",
+      "seg_id": "33",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "f950660a6666e7752a50aa70d71b14eeb9df6eecfa2d4661350a1703f9543229",
+      "target_sha256": "5dd1993e56929f165454d1c8a2bd1a5b2c9a1c04c9f69350d2c4f15fb2426f4d",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0a10807cc2293e7fcea84e128cac674f8760d05545901dea4b4bc21f6e4524dc"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.1",
+      "seg_id": "89",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "51b82961420cd7ec12f01eb7967bb998063fff1970133dd7bbaec358d435971c",
+      "target_sha256": "c0dfcb40504dec1f4945d6dd9c1401efadbc34c5bdec4051e0c6da4516da69b0",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "0acbade9606c8deabc06412479ffc0f82819fb2cd70cab51ab29f45de52eebeb"
+    },
+    {
+      "system": "metricsystem3",
+      "doc": "talk.1",
+      "seg_id": "64",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "fb633b3ef5b79b1cc749679050558f849c7c0920993655609bcf09dfd80ffe28",
+      "target_sha256": "0a50d90b8c8032aca064663081446e250c762a9e39ce624f8a208d5f65a72030",
+      "raters": [
+        "rater2"
+      ],
+      "priority": "0b499fecebf348e175cd5ae8926aafc1281d68709d7f94de0bacb7d7577bf25c"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.3",
+      "seg_id": "235",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "c4dd247264d1e823f2132555c362b42a6ebd4d8defcb78b9d47f5e8f0c6c9bdc",
+      "target_sha256": "ea56c7aba24ea53ebf3295bc1c036ad783f35e7a679f25962afad26838089a4d",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0bc27edd8fbb58c9f1dfa7a4355c979f9a9a308d6702cdf7fc90fb33e20d3364"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.1",
+      "seg_id": "2",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "bcdb07179831d899f59ad5867a8b6a406db26a4c7cb8f852dd3e7f801d4ec98b",
+      "target_sha256": "c4bc862629e0bd75daedb6c6f514dfb9e803e140339189feb8740ec7d9cfdbef",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0bc35be4eaf29e04b02656023a2d84f194f2c994d63f1e8a9ddd8122bb84dbbb"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.1",
+      "seg_id": "124",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "d6f6a37d93d20a45ea50533b2ad1bab5c28448f77deef39ece4407f7710b7592",
+      "target_sha256": "64f388654aaf7960b8973ad1b9e395d3a74ee5bb76042a52df239cc2f1eeb52d",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0c155d9e4990fbd12ecaef54154c6768cf824b929eb9424297af101295a14145"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.1",
+      "seg_id": "15",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "467a418e324f351f154f8b0e767ac27963c23e7b0f975eef9ba515a3eed05f30",
+      "target_sha256": "72cb409f7613fc336ab396ba3df8f4f76176683a98f351edacbe197d1e343e31",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0c3766e0e06f418aaa86366a90254fe59694ed90d1be81bf6c1c2bc52879e3ca"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.3",
+      "seg_id": "229",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "ee107f9ea5ad5aca1bc5811b85adf9904ec4e38ced8b4990abbbed8e1efaf243",
+      "target_sha256": "4764a518b93a6ea965b75428b99d5a86c8b17238205527d08e86daa0687963cc",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0c5ec0b851d638825fa9e9d15e258ab318381821dbf3a60c571eaad4e04f8bd2"
+    },
+    {
+      "system": "metricsystem3",
+      "doc": "talk.1",
+      "seg_id": "130",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "3244aa2ad4b2de5fe72e54af226e9d276693b1af70f09ed78e247df013b50982",
+      "target_sha256": "9baf5739d23c6e40d6564281e5f2c21681c1005407a76c6ef44da2495b1cba25",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0cc4d75deb2da9803d37e93e94ec0815f7efc27c6159833c251e527463f8c874"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.1",
+      "seg_id": "39",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "4884f94fd54488c4e66a6f8346a2df6e5523a5a1f293a9037bb675a3e45bab93",
+      "target_sha256": "2b03d968712952d01825002ec75cb0150b6ee1b0e9113e6b5be92c9b676e4999",
+      "raters": [
+        "rater2"
+      ],
+      "priority": "0d5dd21d4badc7ba4dd41790e29c229bd6b2df6ee271e553679a6b1669efeacb"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.1",
+      "seg_id": "91",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "45a282832bfdd43e6890d62b19c8ddbb32f025a7b95eead3a4278d0212f7b6bb",
+      "target_sha256": "2241caad59fdb2f650edfc2f944a444d9dd9e483f31cafed01ded590bcac6ef4",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0d9135463c92bbf310657177b328aa091ceed045972af327d5ada213a6fceede"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.1",
+      "seg_id": "54",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "70b138a6d44e28df55fb83d97691cd4a7c3ef952e35fd924d726c9c44c82a1b1",
+      "target_sha256": "d387f4c297f06f36ea98ee66a79c32b25f9386cf00261cbc8debc5177792ef89",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0dddcb7137341ca87a6461f10a56e43a8d74ce247c79756a4fd8c6ec0cf1deba"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.1",
+      "seg_id": "47",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "bdddd4f06cb17edf3b2b6e72e59da10a30f4e0733d960a0a72e7705b4020c0ff",
+      "target_sha256": "9e221d858a28c8dc8985cab4400c992a01a8fcc3e5f3a755adbcb583611dc9ce",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "0e49b9f2ab2fc209354a5ea5233fe547116cefa4cc9e3bc646fee5608df18ad1"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.3",
+      "seg_id": "241",
+      "split": "calibration",
+      "label": "explicit_no_error",
+      "source_sha256": "af0790cd5593cc80210662c56ff196c2921bdc9f8bb630dd2e19114663395834",
+      "target_sha256": "66ebaaa5a62d05fba5b9998d1a89d03a2a2758415bf0d4e2ee668f2a1f45dc1c",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0eb4b0f544b4b714881cf3188a9020e08caee88295934230810f5f68b141a3d9"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.4",
+      "seg_id": "291",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "08e72ed3f21b7a3ef24f585af9ee9335d0fd4ac9106f7098cb7cb1d472ba9630",
+      "target_sha256": "2e4d47950af64ad0e001efd7bddb36762d1bd6d3a517de44c209c5a38a11cd9a",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "001d478c7c6d44de444229776bd1b875ff038f490378c7feebdea6043d77c1d1"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.4",
+      "seg_id": "325",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "732730a3e51c83672e51ef6a6cf001dc2bf38e0f47fa3bdcd259e7b06ca80d19",
+      "target_sha256": "2207318d1d6c108a4738e0271fec45b37ed8a69750e55a2f36dd633295632781",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0169a5c62e44e153fefa2a833e1463852f3954e14633a6183866c6b38957d524"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.6",
+      "seg_id": "500",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "d02b2b0bcb55ba7ff8f3e2aa78ecad4d9658a33d6b824eabaa3d3c60eb9352c8",
+      "target_sha256": "e605391be5c9db7dbc1dbb4af2239ddd8823a613c45fa2ee0b72ee22fd084317",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "018784530bb6a346ae9dc06c4086c0aa348e525ad80a9d2a9b8371e7ee2ff085"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.4",
+      "seg_id": "268",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "8789228f751d642b9c5b9618474f9e62bb350296b49c4540001b89fca6823dea",
+      "target_sha256": "d24775bf4f4ff8126a762025edb644f5b55d0dc1c98928f65e7b9857eedbddb5",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "02472dfe5a6c2d509a04be3f7d47e75a2c44a1df6f95c2b26e48ab901e92a93d"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.6",
+      "seg_id": "589",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "3c9ae033f00be12bc05a647eabeeb8b352f7b835aebe650210dc6dc0c1c80e07",
+      "target_sha256": "4648ba860b418f79b2fb2e7b8e90877702951a3a97d76116d7b138902d50e872",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "02494fd9f9961d37c784e6f4bea4cfffc5cb4775d762e689a454dd5818de587e"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.6",
+      "seg_id": "578",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "fe49f33147a13e9cb437b66b11a187247d9575754e36687ea83c744f7da386f5",
+      "target_sha256": "a8488e9f52644a153372e2caa186e3e1d305053f716718047d576ea1fb20fdeb",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "02c8e12b05b8b8771479b6a13fa5c8cb678259e526250722078035817b7822c0"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.6",
+      "seg_id": "452",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "f2ba7dd54b6fc10f7fc40c0cb08c631cbcc98cb6451ec8529e22ebfdacf4802d",
+      "target_sha256": "9273c34d2347e829445ce141090f07391a318467bcc89cc49235b4954b336232",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "03c7cc258bccd5f224c5860c982a9dd70527ed0593dbbe17c07bc57c3ed474bd"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.5",
+      "seg_id": "382",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "c40a9bace43f4b49219dcde8fab5dd2a72f81907bb7dc32486bb1a69ee903146",
+      "target_sha256": "d6df79788536620c60ed7b9c74e600e48cf1c83883f0f40874c84966abe29ae6",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0410dc1cdcf8f140d0f02b24f87d38f964183d1f4b9c8ba986be7c1bafa9b883"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.4",
+      "seg_id": "282",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "8dffc9e96609f00861086cd42692747b4899b98ea82908552a316600eb2bb231",
+      "target_sha256": "646407517c4aa4b197de13d9b3b8a6b10a364d7f7455a13eca9fc6d1104ff1d4",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0467f986a6d404ffb3c065705b338c1e34c72087f5ce0d35ead0d8e648df84ac"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.6",
+      "seg_id": "593",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "b45ea499fb2897eb3a538378c630910fb0b48775c9006b882e823c23a854aa91",
+      "target_sha256": "0c870d9eae0a1065d7fbf176e7969377be3f68c62c667698bbc8812f5928242b",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "052d25ef05147b3f7d08b0c7c12390686b10d8175343fb898b3f972bfaf66741"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.6",
+      "seg_id": "491",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "8cecb757fb3abe630663e9fc5efbc41f44c93d53932d0547ee1fac79a1c92929",
+      "target_sha256": "b6640ac8efd8029e8313843c6c6a575d51a089c89c77523e547255291ec35040",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0570151d2d2330751f1a060dc250ad9c787667b6fe05511a46e172f9e23213d8"
+    },
+    {
+      "system": "metricsystem3",
+      "doc": "talk.4",
+      "seg_id": "287",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "81763cca8cfadeb4d6a11ff1e7639f6ab2d4d4b4907f0cc828cfce8d7936d911",
+      "target_sha256": "12b9a2d33bbf4eefff167f8b9cb7f7366e6fa6dc47df89280b0b2d60162734c3",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "058426d9d0504a68e3363199117a4e367bcea027583f7bbfe18f76db82a2b2f1"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.6",
+      "seg_id": "564",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "154a8061090e1f9d948d9a62f735f59742898c3ec180faa2c24a4d181f6596e8",
+      "target_sha256": "ef20a78ae8eed0d5987d1cfa9ba4f8c7b7e3b9fb70901bb1e8fcc55c3bc38b9d",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "05d095465d992b4070839ce51f07e5d2afe03c26cc1bccd8a6a72a5369fe51be"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.4",
+      "seg_id": "322",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "baa96a8930d5a243e214a3e22a7bfd705cd1a36b0366114f412b977e753d7f40",
+      "target_sha256": "02291c1686767926df1ff762690e2ca44dbe98fe968dc5f39bc2156561909470",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "05fe88a9073a5278ff4febf878b35a08de1b9a8ce409694b3acc055ba1605aec"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.6",
+      "seg_id": "485",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "62734e978835ec30891c1d7d7cfd2ad871fac5907046214de223edca64cdb81e",
+      "target_sha256": "652f9c27af7672f7b030d24386a17bec55bdd61566f6fa51d0da3bde20eea891",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "064af89dbe58384c80586b601077c22b9421921a81dc8dcb18b52a8fde784c1c"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.4",
+      "seg_id": "284",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "5723344baf0f53b54c3e57f3e883f5e33290e32ca4e0b2f67e617ee24ddfc9d7",
+      "target_sha256": "66603664c2bfad4ad71e7ded3f118eee399d026b131373c29680e804e0d689ea",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0653d24e00919944a467638e9fd62d4746f88f75a29fb27a756bcbd70ca7af16"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.6",
+      "seg_id": "463",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "2eadf642a257ff97ebb2f1c8f54dc32a37fe869e19fb1019a36017a6529b2b5b",
+      "target_sha256": "571a836ad24154250016a02e3ff1c64a38ca45a0c276e786ae9913c2d3c9cabe",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "081d056494dc7b5370873db3948f357c35c72668d28815b8f28b4a3f0ebe9783"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.5",
+      "seg_id": "402",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "8c7e8c832337f5e41a4cf3f6f83a4d58cf23fb57e9270df0b30cfe70042e1775",
+      "target_sha256": "b4cc0620795793209881caef38819c485daf8283d01f3433ee4588ead905cd55",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "090ffed20153802308a78946d1df8cf64f3db90f9aa048f64e3d9a7dc8369554"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.4",
+      "seg_id": "275",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "0ca291d37258687a39a2f2a1f0ce90b7369c0559896f63108752d2e6d764527f",
+      "target_sha256": "66086564405915574eaa4df170873631ca5b2242660a13f75cbfce3fb7d0bf1a",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0928546a427b7685f256ca3756402952927c5d00a042f02c968d6017c563932a"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.4",
+      "seg_id": "249",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "e3fb5719c4a70d0351ef5a0c36468420afdffb5f6ba8b44e444fba98cb7c6b5b",
+      "target_sha256": "b81411775998804e2fd04181de24dd572f4a75aee98c6debc5c4c9e52026c1aa",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "092e400c00335243e818ba2485ae71bc47e185b7055782267fbaf1361c2696d3"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.6",
+      "seg_id": "464",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "4fc502c3550912b7bf6494a26c926405c406ac63c7117aad13baa75209cadfcc",
+      "target_sha256": "5519068ad238d783061e41686e4de4be6db5d63a001a0b0bb309128e5a9dfd6a",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0930431f99cab8df74451b0d1947ca03c5fee910ee82d2a0ae54c4fcb31e747e"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.6",
+      "seg_id": "554",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "978c3d47302a998be52425316613c089c32687a2feae211015dbf4356812a071",
+      "target_sha256": "b45404db097351a890c9c695eb7f78f778b9a0f71e892f62761a30bd2233b289",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "094f9b391aa2ebdf543040ae3d8f0d1ac3f3e5c9aa793ed0a0aa4c6ff84b1f7e"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.5",
+      "seg_id": "426",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "81cff75571baf076515732692f93d1ebe2e15d31a8547f67f8b799157bdfb68b",
+      "target_sha256": "02b53e027352e46818320d82afea3e0fd4843068d7b07eabcb0f5c44d2fd1a05",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0978cddec62b9371125fb1d335ea27a9a2bb3a7ed8a3037afbadb959641ec747"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.6",
+      "seg_id": "497",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "d141aace9f1ed05ccc7345759ef51d21da95cab2a80c9f03caa3eac388c790ed",
+      "target_sha256": "fe61482a5376111f1f2708e18cfc46c37abf40cae26368be3a207cfba7a0c1e1",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "09958aa1669630c2bc28871d01dd8c832b04019dccc21d28a88f8aba6282d999"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.6",
+      "seg_id": "527",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "9ad73400c6c6eda658259961e976391ec93a855b9c5b723f316139b09f5a09c2",
+      "target_sha256": "3b945d36057dcdf56742d178fb950ef3c99ac9be4fc517fb82b5961539d03ff9",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "09a95d706a2b4050be755f0140c5fe123a58a3cf28619dd11e123d9b7f93e368"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.4",
+      "seg_id": "338",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "6d05febb4c85c541b3fe764cee2f7f79def06fee1d446be8b69f94a563b08369",
+      "target_sha256": "616e542558dad34dfdc78ae0e30cdd249f849c82c73c6f7b28724e62d0ec0314",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0a515e424585a6b4fd828918b1ea9244444a16e71f4d3363f8305e1186d7d2b4"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.4",
+      "seg_id": "313",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "2772029329b0e14c13bfe60f8479d62d5e7af1a840755b0c1c9076ac7c8b59f2",
+      "target_sha256": "6f40eeb9e9e631f709a5d351874f2a31a6e8816cf7a97bf8e21dc00d115bd3ca",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0b170c5f3b8033862781c34fbc5c65b5d7b1284fd5bbc29537c90930e1fc417a"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.4",
+      "seg_id": "264",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "17b4d1e8d936301c71568e219deab259632f7e2be3863eec3ce2a3e13d81f407",
+      "target_sha256": "d19b10044f03033f9bffd3be8fd7702640410fa182adacd056b05f286e509c18",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0b295976ef5b4f5a639f394953a7ba8ef9d6d04a06f37a5b502c80461551ee95"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.4",
+      "seg_id": "312",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "af2b24b32912018ddbb5b1d1106f5d616d43f39d6065a1f5d482bbd9c505bd87",
+      "target_sha256": "dc75e10273798bfd04823a963025f80cae4efa5bc6fd0d762b8a3333c724cb87",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0c136998aa22893af2bf020a6d637dbba0254d738da633917ad2002a722ddfe2"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.4",
+      "seg_id": "319",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "44645b2fdc4d936ac7a8d51cb9a910a88ccf13e2610509b71af47b701fc0c2a6",
+      "target_sha256": "51929d1a174a6c3d8cb1ec7059008f9f70997f0340b5efcd4822be76d3979f9b",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0d0599ea407d2fd21f9b9bd54301b327fe83d5d16a210d1c0a8469aca521e1bb"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.6",
+      "seg_id": "562",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "fcfe7318a3b72ffca223216dee74c09d23cfe0db24fa7744770feaa9c23bee32",
+      "target_sha256": "d5980ffe107a41ccec61d929c1d8c0522e456300f756bbd431612a6a69ea7d72",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0da21e5d809d6fc5018344c9560917b648d92932c095138306a37b87430f84f5"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.6",
+      "seg_id": "583",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "8a18e53f7f342df7b4d97315917065e4f1a6f55960248bdab25fda62250dca68",
+      "target_sha256": "e847313d6f414957ec3f58316fd11166c66cbc899630aa7d7157965f38f7a8c3",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0de3beac9c29599bc2cc70bed9a52d3bcc4acbe7a418b5861839421a41e5616f"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.6",
+      "seg_id": "555",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "ca27804d4ce628d1bd4ba77211f8ebc281251e7b1c0a449cd6cbc058c937fabf",
+      "target_sha256": "9cc73273aa7c658e68d0bf123c4c7f14f9f600bc69076ee99e7a5b641800f3ac",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0e349e84f617d9b3f8659819e5086cd331648570d03fc67b0a31dadc407e53ef"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.4",
+      "seg_id": "344",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "c6d38480bafc970fff6dab14980a0e480e93bc9eaca81bcad3ca7cfb6331933e",
+      "target_sha256": "767549a44bee88dfc877c6c4bb758baa7d340709559cac6d2ba5894a844c64b3",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0e536bdccf7871ca8ca817e73ce1f5b7241913656e24bdda7f93251b47db4b72"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.5",
+      "seg_id": "394",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "63fab2e9c7cccd6217a1224b5b6ec673fc35753481fe29a5f3157debfdca86b0",
+      "target_sha256": "39db9c2955bf02dc5fcdddc31ac7c93e203651649618bcddb8fa4e1a79444fd8",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0f89b1abb0322928930d1e1174f98b0d00f9b0ea5a801d426bc1f548878a62ed"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.6",
+      "seg_id": "538",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "0ef26ba22c4717796f2ffd5a423b95aa6e7d9703f28fb1bef70902b1dbaacbdc",
+      "target_sha256": "87595ec9f8d3bea400a850bdc5baf0c33e09dcb034d499c0b65194e8c3973899",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0faf09ddfb05876e2eb1c6a9bc7eddd2e767cb4512b90fa9acc3788e1dd778e9"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.4",
+      "seg_id": "335",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "96f30a577b34717d0129d73ef0d0b54442d5ba47e0f3d2e7d203134f78bd402d",
+      "target_sha256": "07778e6a0a6783dca70a20765a1e6d81abafb35a95d7c50b94f26f657f1ad2ce",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "10cd1b17306ad26b19030ddc0e4fe7f42b4cfadd4195af71de21ce8474ffdff1"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.6",
+      "seg_id": "535",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "423209adb58313e4d5c990b93f93075743cb87e0e51673d4c917c1c6b9dcb911",
+      "target_sha256": "99ef41a23e7ff264f95f7129188dea65f27bc3f727eb549e1b7e8f936974d679",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "11bab3909f66957f3a090348a045989889d47a452deb0ce8540561bac695b3cb"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.4",
+      "seg_id": "294",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "a304e4b3890fb8903831a24bee5294021a91acfa000cf31b9b45f426ffcea567",
+      "target_sha256": "0d1922f79017ca0ff5ec240a31b5c8f211e45276bfca40c3692dbdf70a293ad7",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "1236aaa74ed55bdbf4a13507a20c8bcd70e9c13a5f96fbaad4d02ddab3c8bcf1"
+    },
+    {
+      "system": "ref",
+      "doc": "talk.4",
+      "seg_id": "299",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "2999f506a2f654b6a203d26a403580f0eb750d4119338460c631f499546a9f60",
+      "target_sha256": "828b4bdbd40629725ca19c970a8fffa982bf2d6e3a23e17671315c566827f032",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "124b4c7921b8082fb92eb1d73b1eacc4c34ddecfa56ad83a890836776d14a286"
+    },
+    {
+      "system": "metricsystem3",
+      "doc": "talk.6",
+      "seg_id": "604",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "d6cd8ee367000ee87d1332f0001bc0c962b7f5cecf51ef4d851cbce6418c8ec4",
+      "target_sha256": "2d0bb0132e18bf2f91a1a6bc939e106f1c83750fedb76cca9e9ebc8f4b7da476",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "135ddebafc6f50a396967c73c9f2db0d50f4d6eec2fe75081b535701a3c82a4b"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.5",
+      "seg_id": "415",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "ebd5c6aa88bfba7b514a786ac706461b6525739d40381b0425c00a1d41de55eb",
+      "target_sha256": "a7df688b463dfeeab2dd94d5934ac15794c9433bca8c203e5e9b1cd65a8cd0af",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "149a3725b06f2f7a41d5c4a1fa63ecd80d2fe88cbb5d9d26e8618e74d67c4289"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.4",
+      "seg_id": "365",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "2132e27662df47922dfb20beee254e213ebcab47b3a683f83f78a82f707ff017",
+      "target_sha256": "743a46d3542264c8810eebf57841ca1d611188759ca4a5594ec409bbbbc039dc",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "14dda275fd308b9d486753791488aaa859f4141b53fa68397a94d2cde95bc015"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.5",
+      "seg_id": "428",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "2895fb856a2775c3d36c386e82eeaffc81dec9708e55a75f395172c0a98a2e89",
+      "target_sha256": "a22c24e722fd88031d847dfd9b65bb392b4e37b4e51a60949f863b68a9cb712c",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "14e4ee2d6fa5ec5ca6df0bd2ddff7b5eaa54e92a11e260588a1bbac50c91b15b"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.6",
+      "seg_id": "540",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "f1bf7eca8e67af174bcb406421396b85b82e18a081cade693cebfe3c5b246ca4",
+      "target_sha256": "8b14d14ec84673ec85143dfdd70211de090b23f2ae137e52158e187506c611f1",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "160e9f965777f4eb494cd16329d8dfbd41c7b91209d94dbf75d4abfdf148bfa8"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.6",
+      "seg_id": "449",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "b38e77195f543bc7b3b89abdd9a2699f970c3eb2ff094319dac57246fe009c91",
+      "target_sha256": "20bf2567053fdb77901d3b0c3b7bebf5999fa98e946dc1c445b3107e93444c91",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "164d701a1528e4f5ddb44e57a2ed08d81ce4614031e889e3d6bf6250c8752294"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.4",
+      "seg_id": "251",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "5d8337954ecc0be8b53b02c99e2e4fa1ed61fc97c04a6b17b758ff4203591132",
+      "target_sha256": "8f8df0e71c2f00fa1e0a33e0a14e116a25d7b187c21a2628ee46c92a4ae78de2",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "16cabb34aceaa94c3d569873ad336af97b391cbd0c3c1ce2c8b804098d05a97b"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.6",
+      "seg_id": "504",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "c2e56416d962474573e04425b810d89864651035e8abdf39204241662b2ce567",
+      "target_sha256": "ea5bc5e7ffb0be9a18695c3e80d0b2002aa3daa1eca8bada9d711a76c2f34d4d",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "1734756d5ff0bdee8d3837ee98a6618c1b8d1b7421d68d7d6eb9c076309b8472"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.4",
+      "seg_id": "293",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "650b746a69beb8191c253fa00f7597b51e53203f18d9b2c0303d0865e268ef2a",
+      "target_sha256": "f495dfed9aa12243065facc9f8d7a973b2620cac82ed418786dae6f298d5d3f3",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "1754c719060151831f8455fa6aa375e0f127dd487757cade52681384714f3558"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.6",
+      "seg_id": "523",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "10417581e7690bb0fc9e26f99e766b9962c0d8f995e36a196bb627dac95823c5",
+      "target_sha256": "7fd668a85065c10ed71431bb0e49d7b46debeba1ebebc85b9fc736b6b7e18066",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "17c7069bc7053323f8d728fd9b953d7ec035e7bff9437441229e535f3a51300c"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.4",
+      "seg_id": "278",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "c2338802f8cf33bb6169354d63e81a4a1e87ff54667982885197d0ef9ba50023",
+      "target_sha256": "49b9f4467bba2e9394f4f97c09d7b811e59f098857329a9780484c9f50d5818c",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "17f51610e2b032a543a854278ed0bc4440be612b076fddad3d02230e5f49a20e"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.5",
+      "seg_id": "419",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "378b534a4c4853294e234987c4b1a6d63aef8084dc9989e417f3db34ac87fe56",
+      "target_sha256": "45613167c0c36f294ba6c355052d3135a1214394c6a3223a307f6b3ed918e7d9",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "18152e056044397592881e24bcf73baeab1b061a14d21392d80b969243f95ca3"
+    },
+    {
+      "system": "metricsystem3",
+      "doc": "talk.6",
+      "seg_id": "598",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "cd61fc47436bb9931adb18c6955957e190e17f2b1a3bd977400784b17ca1b776",
+      "target_sha256": "a2b641b7d864345e8d2a0c6a25830784895e64a4a627e5f3160355bb827d1c30",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "19675b8f481aa7f28d858ca9c142841df8a74d289492167d47bb2b5e1e8ebc9c"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.4",
+      "seg_id": "267",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "c81adc9c85a2fe386f8c5047ccc3a2c674cdc57cc14bea06e4b703bf913f7e10",
+      "target_sha256": "c414d56a11b27db4cccf5f5d1a0543fc2de91fe7d19d79bc8e8932f702d901d2",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "1a9d802d5b781854145dd4688291807075073714a691ad7db4fed4b5de721a28"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.4",
+      "seg_id": "314",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "785786a96a91434662e91e9e15c645387ca1f0de7afc5f8f4c46ae762bd045ca",
+      "target_sha256": "939def985aa1c2883bf9245551acf81a1a051f1fc6d2b27c0b49877629bf8557",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "1afd0257af8ee7fb640b8964ee8eb61c455bf27eaae50ca059c9b955e49327b3"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.4",
+      "seg_id": "340",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "fc60039978cbf264eecfb0fab1c7e327d962f79c54a29f49d8ac04d3ecf51937",
+      "target_sha256": "5ed5498daa694dea1b655f101f56f448b6ff0ed066ca7ec4916c9eb92a3c4663",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "1b70a9f75d0ea0ef6eee780d426d1893ba5885b62b3ea31315853f305e2cbbf1"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.4",
+      "seg_id": "265",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "2b68ddb3676931d822b3016fb54457bb1682fe32f10efba4d702952de7112c21",
+      "target_sha256": "809a9b92b93c30fd9f346e6c4bd5d785027772fdf6c5c7b7d7110cef9dd88bb2",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "1dc8413235219a8556dbb729fd33b498123d010d4490d67b2c26717419974835"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.4",
+      "seg_id": "337",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "00e14f1a1912e76b50d8108137846a468be14bf125e9df9f7b8c8144aea3b12a",
+      "target_sha256": "19939965e44ef539fba0591b3d73bd88aa21c2cd3c0e40beff6c0b25ea3b959c",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "1e998e91c48dee77c7a5989406b1ed561f0ffdc78f134822b6b038159b895c95"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.4",
+      "seg_id": "273",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "3b83759f2c5ceb89597a905d0bfab88ace6befc3cb5560cce7afd7c739f66e0a",
+      "target_sha256": "7927460b6d2dfa70746d9526f6e7ccd8774b4b3f3c1721fbaab98a308d38c691",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "1f4f7e0e084eef0a04ff0f36618840d9270c7bd98e441872b9ef43cca06176fe"
+    },
+    {
+      "system": "ref",
+      "doc": "talk.5",
+      "seg_id": "436",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "ccf58dcf1cd4ae7b312400adfa88e933b1f8ee7f9f47310f0bdac61efac7048a",
+      "target_sha256": "87cdd6fa47fa640c92b475c4603ae63c49bdedc5185e93b26c83095b7ac73399",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "1f7ab0575159fb3b770b5641a3864a7e18df2c595c0f855ea3a7c82743190917"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.5",
+      "seg_id": "416",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "10212a4b44b4ddcdcf4121d3f76611ca7207afe4c8232b5973c68b8250f129e2",
+      "target_sha256": "8967ece9c2e67b8b680e685d40d5abbfbae62aca9cc2f5b68cb93362063c16f2",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "1fcf544d990823eda7588240b629e4f99a4af0c49cd991ff9b492b39b4d09108"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.4",
+      "seg_id": "290",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "d6095ff86f012bb340912f988fdfa9eece80dd2fe2e8d28d46149fdb10d55236",
+      "target_sha256": "982d223cd275f8dd6baf8a3bac95c8d6223b617c671e1770333b5ba226b3da69",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "2051ccd02f56c91b2940ff22dddf946712db3a44635ce093c0f7b9607363792c"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.6",
+      "seg_id": "519",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "e6560ca78a4436007ad4cf9864c32c8c7d72dc2dd181758d9cb1d6ee038d1644",
+      "target_sha256": "fe70d3587e2b48ee534e3c7f032da1130e772eb32c29cba54b9338884649e5bd",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "20d827d1fc32c54ba2879228e6c099e0071b1dc0d4d232f2ab8ed4074d2aa08c"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.6",
+      "seg_id": "451",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "0c2273669bf3e44bcc29432d91ae6f34d98ec8b71f4d0d0327c5db2c2755b5bb",
+      "target_sha256": "fe3f4b420c353be0d301d54a39bd8d46567d2eeca61486bdeaaabdfe4ddf2ee1",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "219aa694212737a8c2e653a37b4662d7b480a7a0af36ad991d847799b9b2f1e4"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.6",
+      "seg_id": "509",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "036e410a3778b1cd947778639c490ca397f6bfd90beb48aea4cdf21ad253a936",
+      "target_sha256": "801259dcdae7e3cb267f568273d554a08f94c62ab69e2ff28a49852774f57a18",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "21d1e64d8da94f2f4d8554cfe28831baa28e26b293aeb43ebf2fad876c562253"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.4",
+      "seg_id": "336",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "10deaf320760f18afc69ed471e88002ae4d1e908f4da37bb9f8f89454bb1b190",
+      "target_sha256": "65e8db8962e974df631b51a284c717d0988954d7e7ef7b1ead8e4478e61bfb88",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "21daa8b242ff32c4c92abb96d78fdc5372ca0af5118ddbdf8504d76cabb8d593"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.4",
+      "seg_id": "297",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "c2bce0e869980b6f25fe782880fa1f15d5b7f3fa12807d3ced07a58ae8a3ddbb",
+      "target_sha256": "71c46da9074c73d6cc6c15b940f336217c0a36e8108da9595136082cd20a91ae",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "2400a6db0af2071ecffafa32068084ff7c17a12d6f81720f3d91a39f5101a558"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.5",
+      "seg_id": "395",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "08ae82ca88d7ae252fe1e670b314cce92767bea1ecbe9841e7a787a85a2bac3e",
+      "target_sha256": "f227210880099f14b83531d00e1dba09cce7ae5ab8cc475c1d3ab420ea9af467",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "24f661dfd61209cca6b75f2859f228ea7fa807312830517410ccf976af13ca17"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.6",
+      "seg_id": "486",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "1ae61bc997bdfee275b912ff0c7d95dc7a0da8e0701e26a3bcae2664cd6f6cac",
+      "target_sha256": "27fa0da5b9e599d306389ac45e18ca238c6fb12bafc7211d5beff38eb0ecf4b2",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "257615ff1e9837489b37e37f008504d0052843463a328ba07a96f14d9ee95448"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.6",
+      "seg_id": "577",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "ecd1bfc75e7b5a26b95ffe52715897298821e9ce8495d2b529b6a2ed7688666b",
+      "target_sha256": "24c8806c2e842a46686db06bcc74442a233ec30887a994774ee841813ec6e773",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "257eaf035bb879d93f758313e0fc013af7e4ddb459e7ea1c2208f0e52b209b40"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.6",
+      "seg_id": "501",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "7c268e00485072e0b34f23a17ec9fd85ab1210764ef45a8d992a2d504d240a42",
+      "target_sha256": "15504352cf085e7d465c3b312dae912bf514232441a10f0f87a15781924b61a9",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "26077a2c465f25edb7975dd4662a87cc78e4608a566fbbbdf2b1be1387f31a12"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.6",
+      "seg_id": "482",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "3c1dc4d50345de4b075cfdcd156b6b062f5aafde10cc2b6d79ff44f7b0d4ab04",
+      "target_sha256": "61fe6af8691bd5e89d3cfb4a8c226f1989cef4876d5e37a81d59e7ff534b4175",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "26602bde689b144c4278a9e1dd3df0aef55989820aa5df9ec3abb2f0896f1045"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.6",
+      "seg_id": "573",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "89dba615e563f52e9cfa37a2fbf873ccb6220086eff14c3baefe3ce2afcb212f",
+      "target_sha256": "429d7b88fea90609178a5167272e62a876fd376e96979f3e26fda9e592327ef4",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "27449acb0de8291e7fa7d8da5c1169606e94629af9896dd78e347be73d298b37"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.6",
+      "seg_id": "549",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "6fbe4181944064eeceb90fa496f5787eb5cc0584064eead64356b2bc86603a19",
+      "target_sha256": "6c7ca3d4107167e6217744fc7a690f44591ac48d6b4bd753d94bccc5941bf272",
+      "raters": [
+        "rater2"
+      ],
+      "priority": "27712bb6e61397ccb1a09d2a813a511edb624776197e19892ceef7c0a266462e"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.4",
+      "seg_id": "374",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "59c7adf1047a1c66d785fa719701d198ba81b7baf93ae333a60448717d0a90e4",
+      "target_sha256": "4bc78c70dd402516b5dfa6f6b7ed6c1d37da770b24ec188ba207c670ace47666",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "27cd0036a6cf83148f288720648f5c14df7507996436097753db69dbf47c46b9"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.5",
+      "seg_id": "441",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "2c8ce44943633fb39b91ac931a36989af9ffb44937f336262c849fca408d44c2",
+      "target_sha256": "fc0e5314bea2f52001403517c7488c7f42c661e3f8a1a90835b0bac07ce90792",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "2804ec11359c4f8d4df5e5e9852646b68d7972abd58916d8e35ce591b804c084"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.6",
+      "seg_id": "465",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "837cbd3b7d4ba88796aabc326a0181d0f5a4b01451d7d8c81d1e72189979fc41",
+      "target_sha256": "be45f94603815666d97c1b871610df7442f11f99c43cae0bd239e44b1980f36b",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "2919b3353d2ffde27de602586b623bcc4301acb8d76bc8d429a6a9fa360941e9"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.5",
+      "seg_id": "432",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "e48925308eea3746895d4209e048aba3d11fe701c70f2a485ea9eecd3d45ade9",
+      "target_sha256": "3563b6701336cca24f70d0fdd414a6bf7f41233808685c397df5888ae081d990",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "2981abdbb6154f6b365435a66af4a570bd3ad5ecafb32547190f85b92bc29b71"
+    },
+    {
+      "system": "metricsystem3",
+      "doc": "talk.6",
+      "seg_id": "568",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "fd600424877290eb5004faaf35b8500ebbca22742ff0f733345171800d0ec805",
+      "target_sha256": "b42842da4e57ba9530c792f46ac6c662455c3b19d01f558b5e4814f6d0520bfc",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "298bdd9899d7259b90e1d296f5a0ffbb410d95686c740c25a2349c2138ec1654"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.4",
+      "seg_id": "328",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "67852c1b1f7db49158f80cb10a47d15d8a08c32307c83d8c8c639c4af3ba5f65",
+      "target_sha256": "311bee41918557228ca01df522868d32064d1c5ba1e1dcdbbd1031a5e19e691f",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "299017af8c46943f9bb46a906d9797d30bdf129b4fdcaad4ce8ca10c3a17d023"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.6",
+      "seg_id": "521",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "26900bca7d0f5cc5da92919a0b65a489a4f0ee351a0e719cd1e7dc16117dc733",
+      "target_sha256": "e6ce9cd9d5db58d7ed57b9f7be5e70fc7887f4dacdab240d53d5551aebd1a9ad",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "2acdaedc6be5834c271fc5dd965588d74260a0dfbcd8560e1d9f5c692662c98c"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.4",
+      "seg_id": "286",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "7774b1b58b53aa8fa22b254304d86ca0230eda601fc26cd334b33a7dd6c36a32",
+      "target_sha256": "1edc4816d4d6da30e58a7d81afa9b94f347871fd2890a3dee3f78c2422a1d5c1",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "2c4b50ba8f3709cafd43935586a274823c649d3c1f37846d1d5a1fee3ac98bb5"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.6",
+      "seg_id": "492",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "6cf378999b6f80770dde7d61a21553b91a7325d674a352f839f0c0c84841bea5",
+      "target_sha256": "f0080366f4bc4c7ef91db2d942a23a04767ee2a9fa6f0f8d1857afef46176fda",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "2d5ccedd4e278c2f412172b686df545d9ea7d4f950fa6cd46ac5951789fdb38e"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.5",
+      "seg_id": "427",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "65dbfe198474dcc9227306ec46e936e3dc59a47ae466309ee34976d3908acdd2",
+      "target_sha256": "482aa85f62f1c0896451c7c5947e7cf9b99ae22522d7834a52612eeeb5217677",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "2d672dbc7e9df8fda9c4f39d9d52c9b6c05709d99af098d0fa7a679d9d52d442"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.6",
+      "seg_id": "470",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "92eca3ff9a4752df841a7127afdddedb02b945edce78526eefe7435a9b625658",
+      "target_sha256": "4a66f3fbd666ed3ce1878ff36310f32b110cb96be0a9e531cdaeddcba5aa621a",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "2e3684b1655b5506e13e8aab43ea3f895752156a494006e8765c719276205439"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.6",
+      "seg_id": "601",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "05ac38eada0f9e56b8b5189111676df0e988bee0a9803b48dc6297168216b447",
+      "target_sha256": "01c252bd7ea5d02f7a6817cb6bc14bf380718df8ad49d6b354c87c9460d6703a",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "303bd7fc52d23eb17f1a7fc8c4a25e3883709e93e13f66642e5ae9000327fca0"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.6",
+      "seg_id": "484",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "c86d779adcb4a82d5ec39e7226809150b9ac6836dd9aae7dc520871be254ec1a",
+      "target_sha256": "7deb2a5deb1b991ed12778ee03eb068e3f1681ec6019d3c5ee347b8a3c228dd6",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "32257e64c47f4bb17535dfae6ed8ee6059c319a5626508ff663edf079d79c88f"
+    },
+    {
+      "system": "ref",
+      "doc": "talk.4",
+      "seg_id": "355",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "40af689559cf14510510607a3ffa14121998ba6ff13b8ebaf644c3cd2f067e5e",
+      "target_sha256": "d34d90e14ae5edbf75acd780e001dc225bf91b14c74091b7d84bfceb72a31795",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "338afc5b9ce2cf68206d7e7cf4cf2c0079400506cce5cf1a25a01a29736a2bae"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.4",
+      "seg_id": "360",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "0f4ca3e010d3a4da422fe04ff2b8976916f9f5fc2682a751318ce7d2114cb1c6",
+      "target_sha256": "4ab5136b395c135259eb713f360ec43eb4b92af50210a4cb153582f7d3b771b9",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "33fcdad6931b110fc729b906976286803cd4bf7065951cfaed54069b81e55414"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.6",
+      "seg_id": "541",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "53a19bf149f6b5366aa9574cbddcd98eea77a53d1a8c8ae58d137b455e17b065",
+      "target_sha256": "8b9bc59ed651e2dfa582ce9339fe358bc6ded221e53110914325d6e63055a461",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "33feea3796682bef6044ff76e148f53c2b60df77d350284239b26f8e7788f3a4"
+    },
+    {
+      "system": "ref",
+      "doc": "talk.4",
+      "seg_id": "311",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "5a5fdaae817a5182a58863e479d4bb07f00c76d1bc83615c2da0b7159bc6d1cc",
+      "target_sha256": "95fddd021acd5e1797ccfd979a599108c4c2c448171a36e77ecbcc78fc460094",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "35c63dc6205bfb8855f4fd71edb17259d01ba63db7dbc7a8782d10dc023e0209"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.6",
+      "seg_id": "574",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "adca974b93f82d0951df81c7e552cdbd718a0402d3862fa5fef1965d96da1885",
+      "target_sha256": "d2091aca6d5b3ff982e9e53363871efc78c67a56f2923ed25b0ba448218ec0a3",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "3682e619df8c1d6601476d7703e8fd6f90bfba87d637936d37671503e7fe06a5"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.5",
+      "seg_id": "381",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "075642d67a9505c0493c79ff283edb4401ce07c9f36455e48abf88762524c01b",
+      "target_sha256": "ac94c97ecf36bec2088b53c8e088395910c5d83f81506f752133671152501010",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "389897c6a93ed05fc0fb32a15b408fcfbd916c600b5090221be53da158aadfe3"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.5",
+      "seg_id": "380",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "ad77d089f74fc8a811f00e34ca197a636c3550e429d65128cfeed6cba8f25444",
+      "target_sha256": "bb4ee00925f5f0341b0f5e4bdbfc652c386a9803bf5aebc2d5820a3a1e87c0fc",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "3b35571c627b8acceeb74f28d383d249ae1d0190f57260e6f5df77c7717a1eb5"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.6",
+      "seg_id": "503",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "03d973cfe95afa019718f36aee31fb261eea434aaf38676006d6cdf30f3e0e02",
+      "target_sha256": "bf0339d197768c62dd26515d02acea329db68262bac2bb0d083882cfbe344ef6",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "3bba9a34a99c7a64db2284a1f92941dcde466bcc645f7285750a2bd8eabede16"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.4",
+      "seg_id": "310",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "d24aecc5c5297f5c70525e3ac5b1d23d56ae324a0ebcd155f0e24537776549d6",
+      "target_sha256": "5359f6339928b710da345b95fd4fb075ca7ea554a50460c8f48a8f97987d2c77",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "3bf875d31cb2ffaef5382d2bac14a13a2e74e657dab9f1c281e0f3721f71017a"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.4",
+      "seg_id": "269",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "31c051eecebe5fcbb6f2698d9e7a0f494de93c2677d235539112c3af99cb61a3",
+      "target_sha256": "083b5cfef4f34ba84db0b7b25173a4997acf6ef0a0f45b19ef2ba2f12ca9b308",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "3c7f733ecc610e228c0543971c94fa5420219c9207ded3223875c0bd3bab245b"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.4",
+      "seg_id": "367",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "bd4347355297f53b1f974d032dd97db2032557a9947ecc7a64141f7145fb61fe",
+      "target_sha256": "5d23489cb25168afad8202398dd0e477db09b17916e3323362be05f640d4c733",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "3c9c4957ff26b596dea292913e30e2f25e5674fc3a1b75c1f2916e8f14271c42"
+    },
+    {
+      "system": "ref",
+      "doc": "talk.4",
+      "seg_id": "306",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "0790d5108015a47d7ffcb0ac0c18902e44996e5be90f3baa11b2ebab15e0e9be",
+      "target_sha256": "5e9a23b95f7829f09a227d32958d86fd2d3c34dfa3606ea3b151131a2e17b9cf",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "3cfad6f596e4a16b4d0bab235d5d31ad009c7ab17e9e948ee2909c9e60f50ec9"
+    },
+    {
+      "system": "ref",
+      "doc": "talk.6",
+      "seg_id": "600",
+      "split": "held_out",
+      "label": "major_accuracy_error",
+      "source_sha256": "45dbb8308a6a80357b408a72cce7800bcf006c3cb7b33087dded5d1d7a2240ca",
+      "target_sha256": "a2f7f56ad914af35fac0471aac24514691da08797176544de945e746c5342560",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "3d28e53b76a96808f6b679d59979b3690fd5337aa17d30681b15589955642589"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.6",
+      "seg_id": "534",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "8ffbf5958951e2f1e4806c20335f2aded3784e690641f775b0edf9a0e60b1ba1",
+      "target_sha256": "1545a9c692dd76d75e349aa0b2eb112eb2b8ae8947ba4d0cc467665ca01f6b2d",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "000d72ae036ad4b902e4c0e812b55d9378e68ca362f7fad3da34039df96cae62"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.6",
+      "seg_id": "566",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "07d22cac2dbdae990668973fa77eb2b458effe6dacd55ad2758507ae29b03e28",
+      "target_sha256": "45c8f893b3e2b0a6f4ce2b023ad7cc8a45a5227ecddc2c56ae1e28ae3d7debd1",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "001002bea3828f085168b466180285fc83812775889fc8552c43796486f537fc"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.6",
+      "seg_id": "498",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "f1676cb023c2257bc00c750968143e104cdb20dcf38f239e8483b90b81d1c6c0",
+      "target_sha256": "f2d995b3b3ce91485ef104be1e009aef6281ea0507ed442b19de1163739981b6",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "0025b684f63c86e853ca255254f1c725feeb2609a5c544ea2b3afb1fc8a58cea"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.4",
+      "seg_id": "254",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "a6eb1103225a85740f8c90dc7a1207cc1800e5f4a00b44431eebd287f2da678c",
+      "target_sha256": "b961e192f1e554984c1244104f42fc6bb419c0993140c2439fdf0f3b0d69d724",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "003ad179be49cc18cfb497a58eaeb3a99bcebddf53447a6043afefbafdf5d5c3"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.4",
+      "seg_id": "346",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "148690aed91c83c8c9e96b99cbbe675fd18bdb570e457c935b23f65951e6f51a",
+      "target_sha256": "ed8de286e0ecf69812a62bb85436fcf5a194efa383125373c83aebbaadde4960",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "004501839c84800a4db74838fa9256a2dca95964a5ce51cadcc15e6b54b6e310"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.5",
+      "seg_id": "397",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "f4aecba7ef6f1a29656f944e008cb069758dab9dafb47d6138c10306626fc553",
+      "target_sha256": "1534b9919e593dee83c25770d7ff0b011e553617b3581dc546675d5470a7c8c5",
+      "raters": [
+        "rater2"
+      ],
+      "priority": "00465f1aec988ab173aa9f9c5b14d9f7056bde2426ca90538608f51af3fe3a28"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.4",
+      "seg_id": "262",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "beb48d5fde1f0533b80eb3debac5221ebae7994c6afa8e368301bcc7e2c7f2d0",
+      "target_sha256": "c06be2aab6f2571e5ba1cb470fc513504894d2c15da1b892e25004406afe3d35",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "00a06a70e2f85a6e77f5dee323414dea7e703e628cbd3f22cf024809cc4123de"
+    },
+    {
+      "system": "metricsystem3",
+      "doc": "talk.5",
+      "seg_id": "417",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "8bb61d247862e2b39b7af53efd71bf0270a55a2e855b91ab6044d8c648a519f9",
+      "target_sha256": "04cf2fb8e3155662f0428b43101fd08c795d5e865efd7d183f00b41294ca0c0b",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "00ba7b27d74c3d2c1fc05090bcace3d5ee3b89abbeb0386e234dcce41dbe721e"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.4",
+      "seg_id": "368",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "db07bda3ec9cc756abdaa7af2247a5efcc184c877bd9b67391e80ed258e4079e",
+      "target_sha256": "b26f327645d1220b937ed27d4cf92ad860a7aedf5ab8016cb9338ab5940cc619",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "00bab638a22fa32dbe349c1dcfba06462aa354c9b6b02efa1813e82b2cacb407"
+    },
+    {
+      "system": "ref",
+      "doc": "talk.5",
+      "seg_id": "424",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "59074b2109f6809d60e81d32d92be93db79e847e763674931fc44bb8db7873f8",
+      "target_sha256": "94894d4dd1f1884b2deef0c712bf7052677c4a3c701cb13415747b989895d82c",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "00bc7d95dea0d6b692295defc168ec257e1c23a208feea1f8b9e68b7c5868dec"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.4",
+      "seg_id": "274",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "2600432506e04ad60f66ce7f1058cc34cd83a8343820217de17267a938da2917",
+      "target_sha256": "b5a26e3eb082e7954fc2ff30099e7b354cb81fe445f56a97c30e3dc88e3c0d73",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "00e30cf7109bcdc7926b71ebe2f877e8ec7c2014b1d335660d62861edb7a233f"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.6",
+      "seg_id": "537",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "1c2f06d1713782fe33e27b4add229bf3ed6fe5e14ad0bbb8fe39ed05fe5e0065",
+      "target_sha256": "0c58888ead4a29d9beb9cd3bcf1875e0b5a624c622e0360a913332ec06f78c8a",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "00ebbb30da8e933d062f2113ac870691373de385b8077ede2e043628d4375ff6"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.6",
+      "seg_id": "556",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "d466ef0decabf63863dabe23c0fd9faf73fd4372060d54697bb79ded09121dd7",
+      "target_sha256": "694d32a7f64a307e1ff36457b2c30cf20d89e442b93605fe1d1c29b79ddc456d",
+      "raters": [
+        "rater2"
+      ],
+      "priority": "00ecc5197f12fefb2e4b9437fc0c6604a24d90e678a535f608f827b95cf0ee66"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.6",
+      "seg_id": "456",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "0a583c668f47432b3a359bf87b9d62f5d81ff47494b7532274177195f1a3c116",
+      "target_sha256": "5045cebe7333bbab18ec04d34815842c4cd1705d98110b5ff089771b59d6883c",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "00ffa7a3fdc9abee1f5d7097fba38bc66cfbe99d63a923eb3890f46b38f466d0"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.5",
+      "seg_id": "388",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "e4830a8a625c07bfc66ed8f251afb4cb27bdff956cb2cd69195220d628cac28e",
+      "target_sha256": "ba871e1351535789291a7cf07bf777d24b03f9d96be2656506741f8f00518108",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "0101581b86ce21cc695bcb53ee9e93374d349941f8e53ec07d69a9a88dcd1975"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.6",
+      "seg_id": "591",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "ab6319c35694612d11a9fe0a0a2889bf27f26c4287efa0081909f44c6dacc4e6",
+      "target_sha256": "dda700a2aefd4df3d01c8a87c27b309f7df4df493f53ec4f1562eff7f59bf8e6",
+      "raters": [
+        "rater2"
+      ],
+      "priority": "0110b671623243fb86acdb7b71a3b3f8c3a13b07bdad37ef0603ab63a69872f8"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.5",
+      "seg_id": "411",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "6a318e8a18977299d36b96da1b482399b8e2ac72ba51e0e449824f9aef5abebe",
+      "target_sha256": "bc8175b39f38d949d10296b844cb5f9b68541612160ee14d78e596a067b02330",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "01556c37946f4f476d5312015577255592d7a1f6559f0c55c19e68361a833dbf"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.6",
+      "seg_id": "473",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "1c5218de68ccb96d3643a77ac1a9c055f8b1084d87bd894a9848aea8d934d2d0",
+      "target_sha256": "c059968892875c646504f6db017e2247f205420b2c35cc72e933ade5a8b3a171",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "017e00434d809fc3766c43db01cef5f3dbfe1110a462ec3595001f546c3d06bb"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.6",
+      "seg_id": "567",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "907b8d894c2d93194e326e9014cf0453c8e74750a61775118aa243d298289ba8",
+      "target_sha256": "19a03936dc653d81ed2f090b0a2f1971ee77223ceb402651478f587b07bee54e",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "01de61eecd60cdcaca7c494348600a77546f9431d16a00f661c4dd925db491b1"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.4",
+      "seg_id": "330",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "255801b232183fd437a4cfceb6deabdd08c33e811b9cf0fe225f2cabfbbabd25",
+      "target_sha256": "5341bea349482352fd951ca89e964650374ae7c219173cb64fe97903e017ee36",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "01ef556a1c61147d8da62c270f4f43eb42808c5f13938362c241a19d959aaa2f"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.5",
+      "seg_id": "378",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "4b621418686c88126f2c3971bab1eda34ed95da6fd0e472bcf6959cb58d977d6",
+      "target_sha256": "fc2096ac2602c9dc1159787bdac55496178466b4f518aa400273129de588045b",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "02013e64bbe47da97eb358b77cd94d0cb984b8eccbfd02499cab94e97c8e3165"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.4",
+      "seg_id": "272",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "9713dd834cbe4753e4dd88b11d645c17d9cd8fca1263f8dbfa78be74cfde66fc",
+      "target_sha256": "09727435dbb52e9543c3a402e8b3553467f7e9d4e495537d4eba56db8dd8893f",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0220033a67176b2b1c0af2a2f3ed0250a3e372f91523ded119e512d42af2649d"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.6",
+      "seg_id": "563",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "ba71fe73699b5c592da2e1aef8a32ef3940da5cd0b28f323d63ed58adaa36ef4",
+      "target_sha256": "263d9f3dc78d6ba10ecb59334442813df6d8b8f3e516b1fba3196642dfb2ff88",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "0220a3ca9bc019cacc8d37538f52c044dc9bb0a3685c3829368e9cdbae7b12eb"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.6",
+      "seg_id": "488",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "e2aefeedbfe4ffe90014dc1c7e862ab78724db333106b1d0dbb1128cf4f794c8",
+      "target_sha256": "f354fbcc43a6da6f2257df03a44614149d36cba8a959e488a17e90c81588dceb",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "024b0e414168db3b104a0b6759b12f5924ea2021078eac4455c52ebd9d499c71"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.4",
+      "seg_id": "304",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "91a8e0f457a555162e3bc10e32dafc1120ddd102738c032b018f0eccd1b35a3d",
+      "target_sha256": "c830600a2e640734cb3fcabfa40ce7fe82d7d4beb3ff1d6a6c0314594e12ecba",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "02629068d58cc215bbaf784d51a6c1434ad96240ce71e4526c7766c9b238ed49"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.4",
+      "seg_id": "354",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "dc685b1be1c0df281e5f96aefae653eda204985a340decc1a3da4333357c23a1",
+      "target_sha256": "5e4363984d00ab1d035dc1c96f6f884a7e5d879ad5fbee134ef3ebe00369a022",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "026fba37a1a0cef47b2628236c7e8c4c2e359fadd3ceb91731eb9f73f19d9e4e"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.6",
+      "seg_id": "479",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "da7198aa1dcb37362c3214297a8b55d965931de430be5f26f9e9575839435ff7",
+      "target_sha256": "2ada0953c755fa64ef2cabb2d4b7c190af90135a36710c6ccfda487ac8bb72f4",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "02942f23113d687e4c144a0ab98c27981ee0e60af679576607ade65ee1672522"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.6",
+      "seg_id": "542",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "9ec70d1b954c41f1db44cb1abfcc326c7bd6c119c31abe20a3fd51bbfc7044ea",
+      "target_sha256": "037d13f06ecd9ef72a99b024b740a9467c8c02918b1d557ef5cef86998531cef",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "02fae0607b14a19f5abc121e7e22d9611617214428a18941afdcec4a49841139"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.4",
+      "seg_id": "261",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "e8607fa56ea34820c6b7eddbc791083d1d9b0d549aa6d50b35300cfe5f7cc028",
+      "target_sha256": "af2aadb9cba83cfa10a9f35eadee04e67def7d0e9a55bb4ace70681e1a22c3a3",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "031bb1556ca6203dc198838abf325eb9fd6191b580c251a05ad42087399b210d"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.5",
+      "seg_id": "390",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "f6d192d6c9be74110d98bc6d0f9e8e432b3b932a1ccd1135a5bc9c3647ee1149",
+      "target_sha256": "538b481bd9bc31565a0f51b2badc21ca821bd47e52e7876afe595f07e3262347",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "031c2ff4efa19ea6d7dc60bbe3cba0a1e81016c7c23838e7d3cd7172014b06ba"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.6",
+      "seg_id": "565",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "03820744e43204051f27ddcd1586bdcb7758af90e2f9aeb3deb890f8612b05cb",
+      "target_sha256": "d5fa3d6617525321be9f913621dab3e80318e08b45b4d40a67c2190ada2c1c25",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "03af45780f0a985c9f6e12a9228bbc12b8653e6ba91e75b34c6f600bfd1987bd"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.6",
+      "seg_id": "587",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "47e55121d337311c71aef1a5af529349065b2b00b5ed1e4480f02a777ca4f3cc",
+      "target_sha256": "9d8c5b6280a3ff0d0fa5f457c1f60e04520c494f06b23e39ae8551c1469a6b31",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "03d051c07d6f3c9a02e5ff3248c618a693a0b0f53f77f2c49691b4090a9f2cff"
+    },
+    {
+      "system": "metricsystem3",
+      "doc": "talk.4",
+      "seg_id": "281",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "fda9dc85115bf2474631795744ec54aa84c178393c8efb784a424fbcd03fd2f3",
+      "target_sha256": "f81e57e256247d8cff1bc1cd71a69b9f4ba416c3f20f48c859411e5a16453fd1",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "03d5f6953260be0f394102809922ec3a8841ce60f79e6ebbfa4e8b535d638a9c"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.6",
+      "seg_id": "513",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "0b535ab3fd192fbd4c840e26615e2a0258c3093970661371c8e4a59232b01927",
+      "target_sha256": "6487ddd79b5ff117c7d8662b1566a717a1b73ebc13ea5b8387bef8ea9c25c075",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "03e4977e0686dc36237a2e6213b5253a1edba0b2ac768d69e2cb4632c1dcdf06"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.4",
+      "seg_id": "257",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "5c4e47ac5cbc379b651dc5b416900005a221b1008b5fedc4266cc77ba865bd38",
+      "target_sha256": "44c36b9b32137059587ea250ed2e135aee6a33a901ec8bc56322684dc18e3c24",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "0423a5f78fdc4a42b785c1f85a0bb2f9b0401817543aa9a3c2e932c2eeb4a2b2"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.5",
+      "seg_id": "423",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "1517d3033832e1eaa5ca8cf28fc63f65728cf6e5f18ba85da70c4894bd478719",
+      "target_sha256": "69fa6b94aa6dd1a3ca40fd126f0bba5b589278494308ef827b6e9102d3ae9470",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0424670ea718c61359af1953f369f39e426e0092a7cc093210a93a2bcfed52b1"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.6",
+      "seg_id": "559",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "84ece9984e31a96274135f0b700f256e6d3c302da06c314d816ae59a00b4d0a8",
+      "target_sha256": "cea912683a7a6e9d9b6126a3b50709b0a3985ec12608f0fd5a20cef13e364927",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "0431363d55c39c7b4b42ad74cadd1af552eb78041f9535841cb4eb0ed1d19b23"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.6",
+      "seg_id": "552",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "1bff34d81a348f0c922067d2dae0f6fe37b14ee1ba86efc0b98fb08b2c73ceb2",
+      "target_sha256": "afe140b6181180305752f056b998b54395f73a749b8e0ed4c00bde93952c0f90",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "044a00918e87e64c1ab519f1381281f743ca243dfd1fb82c3aef1f4eee78294b"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.4",
+      "seg_id": "303",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "e46f434c78f6f514b98666c4bd5c7e9efd8a49807d25e9ca12257c125a2e7374",
+      "target_sha256": "708b7499991d6c5ab811a12af08b3ff5d3cedb9810ac58b1aaf49c4a8ed9ecb7",
+      "raters": [
+        "rater2"
+      ],
+      "priority": "044e951632795575b3df450d0c481f70ac2cb1b35a271818b0d22707e856ef7d"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.6",
+      "seg_id": "494",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "6a21f9c08fd9c2285f7b26098183c19901c4962311a6edae2aee6f7105dcc03b",
+      "target_sha256": "6abf1c93de13f6ef9cd1b1f7999ba2122deffeab042e079ad96a860dc0cee92c",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "047ba824aa251b75a4054d7e22ae634667569dfbe96fccb2324be9cb5e12301d"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.6",
+      "seg_id": "594",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "5ff53726754fb63b51cc53567a25c32c033faab9531548db5ddc3fb1aca31ff9",
+      "target_sha256": "5ef84c422cfc164df140b1899a2a774dd533c88c06db427bbe5642b97226c4b7",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "049b5a46c5fb6e42b6d5b360f98244d00867b865cee6c793bc5ec0546ac9bbf1"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.6",
+      "seg_id": "476",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "65c5ac41fee2610ced0c9fc13859248af40a3ef12ec1b26e344550b2d5e4441d",
+      "target_sha256": "34f8ff9ebaa4a2727f3e3359bc808cf4b252ab126ee3c6376ee77c122913a556",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "04aeca326199e397771d9ac5c396a0ce49300750238e3ab27709154f4dc291c3"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.4",
+      "seg_id": "318",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "b89b91a83bc600c90a92cc79847389690743adbd14aef1f630f7c5d5281399b8",
+      "target_sha256": "b8dc855020f5e5b5ea15c4ec733ce300eb745d5a40323e445dec05aa1fd0bdb4",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "04afade0c081c3ca5ab9c11fafdb1c1767ae701a2f9ad29036cf45aa0f7af2eb"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.6",
+      "seg_id": "576",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "fbe6cdd5823b7e8463d871f330d85004cd1f217eb31d4fb7104b2c1434dc96cb",
+      "target_sha256": "57da47e12e0a2d662739fc37b5d4e9c6416c001407b097e90059d10be4571405",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "04b1e9c6dacffd32dd311e80927edc0faeeca0540102cd76812495b648174e9f"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.4",
+      "seg_id": "329",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "d4b527241aa8063e4529b019cf91db0c7ff73073b27ca50c4e5b3edd4021202f",
+      "target_sha256": "c5c6cfa09cab6bf75af8b669e048f520b9ecbac7d3b34e5b59f856b1c9c38b82",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "04b3a3dab0623331ab46aa7ac132a124b701d7f9ae654a1003f5d917b2e2cc64"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.6",
+      "seg_id": "603",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "618158dff9be0313fe32477defefe91313e9b84772a3472323f1495b321ccc4f",
+      "target_sha256": "94c68dc706fd9afc5f95198e7f070953abb0e2bca668bb4933c8312160804739",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "04c1539bdb244a4bd48eeeed9667111c3a1a1f7269399d2aab3a86bb13d55533"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.4",
+      "seg_id": "358",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "40a12f9ae3eb044646a53df86a5a9de16bd3ac6e9e3d66bc1368b1608ca7d14e",
+      "target_sha256": "8b34895daa60784e13525b0e2e3880b3a42d9c9e64bbeb3b40fcd9e0a8608084",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "04c574d50e3b7af7cb3da4e6c5bde2a2f5dba2ee1460a4dc2d62beb422984737"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.6",
+      "seg_id": "481",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "1fd95e579b571abe966f29be48c7a87d7176d755ad9765c8b2dee5c0b17f80a3",
+      "target_sha256": "bb0a1bd0e28e12b78799b28382d89c9be956834350fce35801e2dd3589d3f6dd",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "050ab82415d84ed18bfd5224eeb4940ff616de362bad1bf2f7146be35e645c60"
+    },
+    {
+      "system": "ref",
+      "doc": "talk.6",
+      "seg_id": "466",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "c2b01e78d34951ef1ac29dbd6133b885617c8b4e91ba763f18701e1ba53cbd96",
+      "target_sha256": "fee887e84bc7d9ad0c3670ed7674b493ab824e6a8e470f0171287e86a5dcbe1c",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "053f0ec726190863221cd96e4ee15b04c2c25eadd3bccc6709c35361f3e65062"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.6",
+      "seg_id": "560",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "06d73b422b0f6a43c3390b3e1eff83e3a02452afdafeac718a3f6964a491d282",
+      "target_sha256": "d1bd077787996c51a3713525b7fc1c42a095a64143846524f7303bf0b45b4856",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "05642c69d1cf49d016e927c03f4e381ae1e8447ba3b0b54200d5716046cf13a5"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.4",
+      "seg_id": "350",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "2f95c3507deda48372647c6ea0981ff669be9e744b376aa637faf4afbcfbe478",
+      "target_sha256": "40169f340fb7f0dab9138cb786dc3c4bec2f4c4c742d4c4e56e9f3d3d60c4abf",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0576ad4f2a32e512a76bb75fd2d7a80d2766a92280ee91cae8ba2a986c32727c"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.4",
+      "seg_id": "347",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "b8c090f07081e43d60130192c30bf78e871284d4adb38cd54da1a3e9003d0ab2",
+      "target_sha256": "b8b2eca72216cd8227aec0f266800a337629dadbc14828629c2e41f5b07073a5",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "059377d9abcc31baed42242e4c3ad03cd06e0cf49b6fd92cda71c063346a079b"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.4",
+      "seg_id": "288",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "e0f0651d577322188fc6a4657899a3286079c83f83b949d2880833aaa5c44a85",
+      "target_sha256": "e9f1bf5c0de6206c80b837c638177c0277d7cfc7ca08c21a4a49734057d28076",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0594e23d44215e27fecede63a3b6c6d685894b4b2a76d6b6d3924527d45e4247"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.4",
+      "seg_id": "277",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "239ce4bdf4e7db73c39612f0f36073a6492f39f452c90a951068854716ff1713",
+      "target_sha256": "32697c4814ad796af47b758b01f2c3614bae89f8f862e1f2a5b85897521a3905",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "05b9ebd6e720f5f155114726cf57f521df8a7461bca41837d775f61569690c5c"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.5",
+      "seg_id": "410",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "685dbe89946d76af48d72cad24e72ff5cbd1b932b5f35e5019403c2ae70a8198",
+      "target_sha256": "796f3f521be2e0ceb38f34adf57b98d2e73eaf4a8c552bad2c8dd22e856ee470",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "05e7961eefde70b335d871439ce5a0aff1002ee1b677f61ca651939da41b8d5d"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.5",
+      "seg_id": "393",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "f3d281d10a080d65b8a3f9c2790ce1dc6346e80c9b8745712934c1b9144f40bc",
+      "target_sha256": "a20116c4aa524f4dbe0360002b41ab89c82622c7f3248b59e0e2c7a432883fea",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0649f333d72eb8381ea4dcdbce697341a5acca32139c1f7def821804fa2db00b"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.6",
+      "seg_id": "588",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "db0030652b7614e74bb966a67229791762014801ff196fe542b6332edf5a719e",
+      "target_sha256": "8d55676327a93e34552d83a9f233dfd2a80f0a3dc248fbe822e25c3cf0a85e0f",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "065e7582122320b7e8294d06b4026e94452126081692b5e4c5222b2443138087"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.5",
+      "seg_id": "389",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "498aa6e9fc3986465bb3e7411ab79f7be0ce75f59288eb7983397e8cc44a37b6",
+      "target_sha256": "5b5bdcfa5696bfa7f568b91ddb869d8dac166c2c5b4e23499a275ddaf836a608",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "066740f16d179f1cecf299d7d7723b091d72ea5713522cdcf0ddf30d554f4027"
+    },
+    {
+      "system": "ref",
+      "doc": "talk.6",
+      "seg_id": "585",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "b5616e5b82ad440d88c3a638c11219cdcb4a3788f1d4e93b11098e322f497d11",
+      "target_sha256": "194d1da61a0e2b58dce49c4feccfa18b054ed65f28fb1aaea1a7bc2958402843",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "06846c326e2bc248fbd76c48c2e625a8fcf5bede41d0539f6107f906b580021b"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.6",
+      "seg_id": "544",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "f8a315b19feae6801b8de69ec8951d861c831adecb92ff258df8b964c54cb75d",
+      "target_sha256": "19b62374d96b9ac56d9b2f723db05901bf8533b36a13c23946d613102aa70dcb",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "06b25a7b599c8c649a11d296408fb5db6ceb22fdddf78a4e03cd1dc43a53d89b"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.4",
+      "seg_id": "371",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "d44e86672a6d8a9b08269ea0c88a9dd65b1a670028b62c361718af9eafd9a7ac",
+      "target_sha256": "f59dd35b0cfbc8f8f898b389040d4f1dce5a2cef243ff7bee0d132ed9037e74c",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "06f8f4108ec89b44f2b61532f0a5676db5404e94f50b7ea6cfbf714e26689794"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.6",
+      "seg_id": "471",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "821db9480a6496ac31ed501c53a27ce960018c12c0a9419923196046f5fc2f2f",
+      "target_sha256": "787e98770286f9434b152e147714574267f99f1fffa116c6bacf3c0d6e679cfa",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0744ede474b50d729abd13015ed65783858d0cfde7455d02d6033ac44bc7be93"
+    },
+    {
+      "system": "ref",
+      "doc": "talk.4",
+      "seg_id": "298",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "cc1faf74fe62ef58ab878adbce05b12c88a7b2a5b613369e919d200fdda06cf6",
+      "target_sha256": "9814fb3db786601ddccc8382c45ce237200f2f04d1e9a878d1c6cb179c1cee0b",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0751b664aadf810a3d09fb0b13f5a56108725aa8f8b902cf8c584c6f44e08b4f"
+    },
+    {
+      "system": "ref",
+      "doc": "talk.5",
+      "seg_id": "386",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "564f743007f09419f43d847bd9a4dcadd89069921bbfedac9eaf397fd43a3927",
+      "target_sha256": "eb61b0c95e429759de32db8e74c71eebbc7e2203b9168ebafa6a2823907ed2d2",
+      "raters": [
+        "rater2"
+      ],
+      "priority": "078185ee43b4aeea0e044947b4b5402cb7ee6d126d5ae15e9ecc37307eff8d4f"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.5",
+      "seg_id": "385",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "3313ba4565be43c010c66685aaa55b81e67e92f94e9f6d5543869190608e899f",
+      "target_sha256": "2ea8a97f9264ca703a0c293f3377fad6dc02124653e3495ef2719888e8e6e624",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0790b1dfc7ac2ec9431d9e7cd86bf38dae6d0ff1d4c0729b68708cc82b608094"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.6",
+      "seg_id": "536",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "792bfeaac94a9401c00b28f18f013b63d5bb4887507219f1347d4b99736f8834",
+      "target_sha256": "7e7ae05efdaf475f44c75f258edaadfeab1bfb0daf1de103c8b8df7d11b85b8f",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "07c323561668f8727c7f3e71eb1f6f3f9b9f6fabedd520d41cbafbbf39a89d47"
+    },
+    {
+      "system": "metricsystem1",
+      "doc": "talk.4",
+      "seg_id": "326",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "9dbdc66a35000f62d5a9ef9e95041b91aff57eb98b788f3be28a89e69c36ff80",
+      "target_sha256": "c2c60e41fdd11a2f9d3b12d8bf7c93996440931e33c62952d16ef6261d62677a",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "07d805147e1751bcb2cbcac497da14d6153e782d09ff481d1a643de339cc1eab"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.6",
+      "seg_id": "507",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "d02041ffbbcdeaf8372765c7cd35dae1bdc99144c5e4c9a4ac6e8117b8bcce9c",
+      "target_sha256": "8390f83a6897c28d1f605c0a32c9025dfafe9daa0c7e9ae44c2bc03e2845f241",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "080318e0273e235e3ecfa395559bb1d0728095d757cb7505eff7415b58b6bbb9"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.6",
+      "seg_id": "553",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "40c9a56b241e6c839890ad6819767be384020ec7f1f14e30be353a7b91041016",
+      "target_sha256": "207ff6d6932a7fba333045a8e04dc9901edead4212c61ab55881c5495404b1d7",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "08203e27dd6886253a4119b7bf0e4d8e2c90d91d3b72b55c140c5503e263b806"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.4",
+      "seg_id": "345",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "ff1de967cf1183819d6c69d32afc3898e1b3fc2dd7445e8f7b1106925a6c1409",
+      "target_sha256": "d8ef82cde953a036601626406e197eb96cf173ef64b5277a0a636a3f8a121baf",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "08289bbd4f0ca71e29a516e0ed0b0a5708bb5605aade003b4ba3146e8c676fbd"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.6",
+      "seg_id": "522",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "76eeefa1e0497c5a25d9d39b8ad6aecb73b1c547cb1fc9c31e3a6329ca944681",
+      "target_sha256": "ec01c56d918d39979d1c259eb1f9dc9a9401c276a31738242da2e53ff8d6e171",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "08463c4272dfecea0328b7a3e692f7cdacced80ba8e6f39ee1f75f42de4571ee"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.6",
+      "seg_id": "489",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "e7d5adde7521ea9029d6021ea7cc0312e242df2a0e9c0667f168e68accd27cca",
+      "target_sha256": "53e95cdad0f8335671cc011930f35087f4a4b8ab300e096ec63f7b35e2e8707a",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "0847dc006185a6d803190d413308b0aecf534ae77b11d86d367ac810c84aec89"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.6",
+      "seg_id": "477",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "67b841af486f4ad4ecf2db668dc804a2b0ab1aa04ec2141b2700e8696bc2fabe",
+      "target_sha256": "d263301efb6a09d49fa24da198bb5f3026e533e4ccb7232643ad8b80f23fb01e",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "08666d68963149c1ab53de2145f913353c03eb9d74df33907772d31657133286"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.6",
+      "seg_id": "478",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "31490489b3c371558b0a97ad5ff5121f5c6eec677bbb8fcb80cb1a6a19ad3a0b",
+      "target_sha256": "36f6bb44fc7c7f47574aff9fecd3e64bc1d3627e2981f989f952d81fda1470a3",
+      "raters": [
+        "rater2"
+      ],
+      "priority": "087debf95652394e955f78a2c428ff1279747e16ece51a6f0ca859d7cff33024"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.5",
+      "seg_id": "420",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "78ca5afaa81b9878fbedbd3c0e5d452e0efe1b072373e15a054c4033db0073a7",
+      "target_sha256": "017b561e454b76a61d8bd50628b9240b14cc9b77074d2699c20fb40cf954a9bd",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "08d9f91209dc5a46fdb797e1889cf516eb500423af506b3ced05e47fbdf78575"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.4",
+      "seg_id": "331",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "c0d2814f4a8460d929fc33d3604d2ba253e68266953aef1c53968dab7dffdc9c",
+      "target_sha256": "8096705ad756b1d2bd6960d315768d1bc5b58be92378c18d69d15ef1b5840696",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "093e5eec2184df7d66a56bb929663cfce1acbd0f32683248387ca74481b9b5a5"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.4",
+      "seg_id": "266",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "ec40b6b97910c5237017b55d4236e052eb56f66fba813aef8c8731b087f2d80f",
+      "target_sha256": "a47a7d00763c2adb779ada246028923ee907b8d30b8b2c8584ee58240336fded",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "094ac63d3d91d4b2d8d50da8836ca93528f245f87012fe6ca7eae781ea7cc8e2"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.5",
+      "seg_id": "406",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "0e4e68c997c1bc38f79a44ebfe48978e37a593479776a7b3faa8e0581ab7a02b",
+      "target_sha256": "86f280b26513125ba67228faee856734d820e25d027f1538cda4dd1bb0aa288f",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "094ef4e6b9b8913049cf3884e03ec9e71ca273b95e363e57d36c16d024db551a"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.6",
+      "seg_id": "499",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "f2ff6f6018591207fabdd015cd58f25bdb2b7324a5a1a75155e36795063720e4",
+      "target_sha256": "2bcbfecfc656ee09f465d690678efd0b47e43c3fb0051995ef27a9108d4b06f3",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0972f94de32acd2fa841e97eced61f732601d2812137afe348f620995238b324"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.6",
+      "seg_id": "551",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "f161ff5676d0e87b22633785c2ba4b107e9c6a91be0c36a29a5a90be5c881309",
+      "target_sha256": "d3affb36c3e868389d28edeb65fdacd71648d64140dd3a0fe4c67976923e9b07",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "09866dd4bacea1229abee8f7306d7968426cd89cf439fa4f73a9bc7c0e6e1040"
+    },
+    {
+      "system": "eTranslation",
+      "doc": "talk.6",
+      "seg_id": "472",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "a52ae458bad49bf2211641987518da727c1e21d7a169af60dccd62b656a053a6",
+      "target_sha256": "c7c27efbe0f04a1379736ea87c832af3154de5e4c4508d71aa1d38d5ad22e958",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "09ce80b1d2b465db46e4d596c81ca93f2435abc351b0928bc6ee370ffd16bf6f"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.4",
+      "seg_id": "342",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "d8b47c6cba5060a3fee5ae95bb950af269df917dcb2b849b7c96d1bff5317599",
+      "target_sha256": "7f6b65045ef6c86a9c3a0a53ef040f63c63de44caa9a935a5b5e4a3e54c7f3c9",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "09fc1e0897f12eca6403eae8ec722f50a9797a32a99ba6e20f6dae4c0de32c42"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.4",
+      "seg_id": "292",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "4896419c4df387d292ee979d099c0a1dd93583ae84f646627fcbd53642e720fc",
+      "target_sha256": "ad1fb223b8d26cc3b5795d803e7c05df33077f5f512862a37393cb6cd8babed1",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "0a31fc99f1659d991a491640c2da713840a2902ab76e638e22b3a853d380182b"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.4",
+      "seg_id": "357",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "ec1863289b344f420e53e6462bd3c5795cd8ba479090b6bc0624b09053b48dc3",
+      "target_sha256": "315432e84fa66a0238ced22e3e820c554ef606c103001263adf508347f87d010",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0a3c6b6777f3c5505a52a3c9709abc907f248f9424f7db54d922ae7c8a740385"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.6",
+      "seg_id": "558",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "23adc8177c7f0358d7dcaf3fca95a4a9962b0dd6565a875a254df6b5188dc5bc",
+      "target_sha256": "54fb42e27187f6ec05bffaee469a68550b1ecaba1e03870632cd78407c175909",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0a454550b5f2f45bba3e3d1f197a83fc9cc2776f9243b36bc42e0b42c6159902"
+    },
+    {
+      "system": "Facebook-AI",
+      "doc": "talk.5",
+      "seg_id": "438",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "986be7aa11a93f57a0c8b3e6fc0c4861506c2fa279180d4c5094816cd72d8f05",
+      "target_sha256": "351ef3bcdb33155402c632d9db844573a8a88ae58847adcc29ddfeb96609e1b7",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0a8933e8368959cb88e118fae14807c0f010a54840b15d276ab67e63f5677be3"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.6",
+      "seg_id": "517",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "823c0b8fb4ef59527ba10dfe4cd01a60ae36bdd90ba5a82a15197613bb6957a0",
+      "target_sha256": "a65ab609e938d7f5c07dc94f9f740d0a1c3ef10e9c45b8b60e9b34a27640ab7d",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0abfff85043e66964b8191b370b103e5879ee8a5de7bee3e4b3ff7081d3abe7b"
+    },
+    {
+      "system": "UEdin",
+      "doc": "talk.5",
+      "seg_id": "383",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "7291ebb64d391e7fcda6ff1e4b0b52352e86ea739ed0e941668447beeba4f0ef",
+      "target_sha256": "17cadba4904edb5df5d5c662c7384f35a6b7ab5dc22839851d15ab61790cbaa5",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "0ac40716e2c4a770045a39c5c2122ff6295f77a03e03d2db8e3e83bcb51eea59"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.6",
+      "seg_id": "575",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "6938d679a0e86a0bced07dfee28da5f481d1afa3c81cc130fa2d7657f7b529df",
+      "target_sha256": "d6a4d7bfc34fae2ea810eff80e5dd91e80ea03790b343351fa4260751c4a4e8f",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0ace3384eb208d9fcff83ec246f235158c267fdde1f6bcc8bbb603bdda8cfd8a"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.4",
+      "seg_id": "302",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "f0abdfbca0a244ac5ce53b8f3b41575dfed5aef26d8da830e3100eaaa0c0c1cf",
+      "target_sha256": "5658a26de922532f13856a4533332751731cd473e85d515e168040edb5c215b1",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "0acf8b32b24b37a9f8649df13e62c63c49dd9e0d0a0e52f97a3c87bd6da8cf77"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.6",
+      "seg_id": "570",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "cc6d88c13873a3208fe6c870b519bacb5fb87ff79e1bff487b71dc2deec0bbe2",
+      "target_sha256": "2ca661dfbf1e85183756961c83b2749e7e81ba34ebd6c6622ace945ba1b3cfb7",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0ad1cc7a2d22e87300b2f6d14bec9fd3a4f0cc0189f3a903375326ef929e79f5"
+    },
+    {
+      "system": "metricsystem2",
+      "doc": "talk.6",
+      "seg_id": "526",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "032a25fb02fa6760c2b1d77bb2cae7018aa37243f36f416ab14f5fc86ed81ee2",
+      "target_sha256": "1f7aac126591e6f7c185ecc2bcfcc2e7d2d6bb4cd119aed4081bb2ad22e64788",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0ad333562da18fe182c0f72e23dc65f38fd377cc41ac050a73ebc91695a9fa02"
+    },
+    {
+      "system": "metricsystem4",
+      "doc": "talk.4",
+      "seg_id": "279",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "d54a918ab1aad4c485eb863980b23059ace1503ebfc06cac8d03d34a881bb413",
+      "target_sha256": "d59360195e0107cd76464517c01ed730c2dc7450a7da94824a5da32a6c31d69f",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0b0ab2919e67646f4d6507766d9ab62feeed860abeabe634a4ed7d7f907ffc7e"
+    },
+    {
+      "system": "Online-W",
+      "doc": "talk.6",
+      "seg_id": "548",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "b8e77f4eeb44a280fc74dd87efc4a7dbb7e4badb86b132eba9fa440e79c6fecb",
+      "target_sha256": "0931367d102a642380170eda40cebfe1e481565b1a60d4c0462a814040889adc",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "0b12bd801c2c5847981a0a24f24222e4e1b7a4171382ebd6240481fb6a407f86"
+    },
+    {
+      "system": "VolcTrans-GLAT",
+      "doc": "talk.5",
+      "seg_id": "439",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "1541f2e218da13f7d323dbc1a22942b7cfce5120e20d265e2c427651380d540c",
+      "target_sha256": "9939d86e28efc6e476353622fa64d88599fecebc37b15ba10be61266c12d4ba0",
+      "raters": [
+        "rater2"
+      ],
+      "priority": "0b5b3996d7d1e4605dc8f0f8bdfb456f26f4d3439244076f26b3438aa4946682"
+    },
+    {
+      "system": "HuaweiTSC",
+      "doc": "talk.6",
+      "seg_id": "530",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "dc63cb2f10002e5cc7b5b655f707876257444ceb81dc1d2fdfd6814208260888",
+      "target_sha256": "9e15c54fa8c9748f5d1bf587ef877e0062d9577e4daa8a18588c4ae1973b9d94",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "0b988445c6c34882a028f1d310729cd74e4177bfde1ef694cbb7f9a7ac146ffe"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.4",
+      "seg_id": "301",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "5ce74eb6a51d5aebd74db0b2a5a3291b4653db4e12d3ff0ae55ad33abf5ce7bd",
+      "target_sha256": "37fc32105aabd757074a20b599d003a1238f047235f3ad7eb17521d3fb2bd4e6",
+      "raters": [
+        "rater3"
+      ],
+      "priority": "0bc12eb948e0774bbd70f049c99e298b8b3abe0bab870e93d722af4d69884c44"
+    },
+    {
+      "system": "VolcTrans-AT",
+      "doc": "talk.6",
+      "seg_id": "586",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "9db86e012ddf43a007ec4f42b5bf660a1dd12073f927b64917bd7083ddc12dcc",
+      "target_sha256": "16a5b96d966e3755718738c7e6f6ef98153d212d63ea40419cf530bc0aa82625",
+      "raters": [
+        "rater1"
+      ],
+      "priority": "0bfa4df43c72110d7c896b759fa6d5d1f76659bed8ffaa6bb0434708485ab207"
+    },
+    {
+      "system": "Nemo",
+      "doc": "talk.4",
+      "seg_id": "370",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "6a102daf938bd0665de202c58e30c58d11f471c1d0be2d20fb50cf14fbd0ac4b",
+      "target_sha256": "6aac3baac9a4c8ca8d5cf4a72f283439e8a0fe32c97c7ce43b4d8e04f6848576",
+      "raters": [
+        "rater4"
+      ],
+      "priority": "0c0061c3c59ce6b41f80947530810e699423686dffc0e65447f105e196d26fa1"
+    },
+    {
+      "system": "metricsystem5",
+      "doc": "talk.6",
+      "seg_id": "597",
+      "split": "held_out",
+      "label": "explicit_no_error",
+      "source_sha256": "7553215c1b1a7cd3680e4f4ddc5839aa7186e8162e67771b27f2ba608dea78b0",
+      "target_sha256": "76bc682cb395bf02583e21014766027b6d21745d5b32200c179a2672690d5325",
+      "raters": [
+        "rater2"
+      ],
+      "priority": "0c077780c59167e6a15597746968da65639b53d2289648a6e5c3e72df33caaca"
+    }
+  ]
+}
