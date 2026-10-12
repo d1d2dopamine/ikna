@@ -1,0 +1,17 @@
+{
+  "realOwnedChildStarted": true,
+  "expectedNegativeInputRejected": true,
+  "guardStatus": "child-failed",
+  "childExitCode": 1,
+  "diagnosticStatus": {
+    "complete": false,
+    "errorType": "ValueError",
+    "publicationSafe": false,
+    "reasonCode": "diagnostic-failed",
+    "stage": "full-admitted-pool-validation",
+    "status": "failed-allocation-evidence-diagnostic"
+  },
+  "hardAddressSpaceCeilingBytes": 5368709120,
+  "fullCorpusRun": false,
+  "toolSha256": "9bce7297349c64b21f34d1f9e1ed8522fac308bd34fbb1217742aa2ff704f52d"
+}

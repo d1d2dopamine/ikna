@@ -1,0 +1,21 @@
+{
+  "inputSourceZipSha256": "c0f0c13229a094069d746035056f709e7b0dd06bd8ebadd2b04f683ba4cdc40e",
+  "reportSha256": "53ac6090a61aa4404017a75bd614f601a28d6a8ea5b90e1e9d7796c6fd276281",
+  "scope": "historical saved Everyday control, cap8000; not full default12000 census",
+  "directionConvention": "lang=language learned, meaningLang=translation language",
+  "thresholdsAreNotFullCoverageAcceptance": true,
+  "decks": 330,
+  "normal": 257,
+  "thin": 71,
+  "omitted": 2,
+  "below1000Eligible": 53,
+  "allocationCrosses1000": 20,
+  "weakDirections": 27,
+  "weakWithKorean": 48,
+  "gapToThinBoundary1000": 39269,
+  "countsMatchRound30": true,
+  "noWeakBudgetRejections": true,
+  "corporaIncluded": false,
+  "gapToThinBoundary1000Base": "selectedTargets before omission",
+  "includedOutputGapToThinBoundary1000": 39331
+}

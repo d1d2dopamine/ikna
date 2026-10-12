@@ -1,0 +1,28 @@
+{
+  "url": "https://downloads.tatoeba.org/exports/per_language/kor/kor-pol_links.tsv.bz2",
+  "retrievedUtc": "2026-10-12T08:47:49.557812+00:00",
+  "headers": {
+    "Content-Length": "565",
+    "Last-Modified": "Sat, 10 Oct 2026 06:40:10 GMT",
+    "ETag": "\"6ac9ddca-235\""
+  },
+  "compressedBytes": 565,
+  "compressedSha256": "9c8153d5e0d17e532efe1266c5cb5d1d1d0d06ba61dde448ae8d83e5db641182",
+  "logicalBytes": 1339,
+  "logicalSha256": "1de17feb6333b51d14f2d93bf8b2e4f69197c2c5dd36158e787aaf681ba1a243",
+  "rows": 94,
+  "uniqueDirectedEdges": 94,
+  "uniqueColumn1Ids": 92,
+  "uniqueColumn2Ids": 91,
+  "sentenceTextFetched": false,
+  "admissionOrYieldClaim": false,
+  "savedBaselineRows": 188,
+  "savedBaselineUniqueEdges": 94,
+  "currentOverlapWithSavedBaseline": 94,
+  "currentEdgesAbsentFromSavedBaseline": 0,
+  "savedBaselineEdgesAbsentFromCurrent": 0,
+  "baselineIsCompleteHistoricalPool": false,
+  "baselineIsCompleteHistoricalPair": true,
+  "baselineScope": "188 directed rows from full historical pool, comprising all94uniquepl-koedges",
+  "baselinePassportSha256": "8166d0bc6b8ffd0b0c5ea148cd76b8cbf014033865ee36b3409e232d19cfab28"
+}

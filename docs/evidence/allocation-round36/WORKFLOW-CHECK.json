@@ -1,0 +1,18 @@
+{
+  "yamlParsed": true,
+  "embeddedPythonBlocksCompiled": 2,
+  "onlyWorkflowDispatch": true,
+  "permissions": {
+    "contents": "read",
+    "actions": "read"
+  },
+  "explicitMetadataUploadPaths": [
+    "allocation-guard/RESOURCE.json",
+    "allocation-reports/DECKS.json",
+    "allocation-reports/INPUTS.json",
+    "allocation-reports/LOSSES.jsonl",
+    "allocation-reports/STATUS.json",
+    "allocation-reports/SUMMARY.json"
+  ],
+  "dispatched": false
+}

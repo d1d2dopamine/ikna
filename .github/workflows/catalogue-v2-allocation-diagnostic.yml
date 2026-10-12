@@ -1,0 +1,110 @@
+name: catalogue v2 allocation evidence diagnostic
+
+# Saved-pool diagnosis only: no fresh source, selector change or publication.
+on:
+  workflow_dispatch:
+    inputs:
+      input_run_id:
+        description: "Exact saved admitted-pool run; no moving-latest fallback"
+        required: true
+        default: "37458524156"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: catalogue-v2-allocation-diagnostic
+  cancel-in-progress: false
+
+jobs:
+  allocation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      INPUT_RUN_ID: ${{ inputs.input_run_id }}
+      PYTHONUNBUFFERED: "1"
+      PYTHONHASHSEED: "0"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      IKNA_ICU_VERSION: "74.2"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate exact input and host capacity before download
+        run: |
+          python3 - <<'PY'
+          import os, re, shutil
+          assert re.fullmatch(r'[1-9][0-9]*', os.environ['INPUT_RUN_ID'])
+          assert shutil.disk_usage('.').free >= 6 * 1024**3, 'Need at least 6 GiB free before acquisition'
+          PY
+      - name: Pinned boundary runtime and focused tests
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libicu-dev
+          python3 -m pip install --only-binary=:all: --require-hashes -r tools/catalog/requirements-selection-quality.txt
+          python3 tools/catalog/test_selection_quality.py --require-japanese-engine
+          python3 -m unittest discover -s tools/catalog -p 'test_allocation_diagnostic*.py' -v
+      - name: Reuse existing admitted input
+        uses: actions/download-artifact@v5
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.input_run_id }}
+          name: catalogue-v2-everyday-admitted-pool
+          path: allocation-input
+      - name: Bind the exact pool and original report
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          def one(name):
+              paths = list(Path('allocation-input').rglob(name))
+              assert len(paths) == 1 and paths[0].is_file() and not paths[0].is_symlink(), 'Expected one exact input'
+              path = paths[0].resolve()
+              assert path.is_relative_to(Path('allocation-input').resolve()), 'Input escaped artifact root'
+              assert '\n' not in str(path) and '\r' not in str(path), 'Unsafe input pathname'
+              return path
+          def sha(path):
+              with path.open('rb') as handle:
+                  return hashlib.file_digest(handle, 'sha256').hexdigest()
+          pool, report = one('everyday-candidates.jsonl.gz'), one('EVERYDAY-POOL.json')
+          baseline = json.loads(Path('docs/evidence/selection-round33/EVERYDAY-SELECTION.json').read_text())
+          admitted = baseline['admittedInput']
+          assert sha(pool) == admitted['poolSha256'], 'Pool identity mismatch'
+          assert sha(report) == admitted['poolReportSha256'], 'Pool report identity mismatch'
+          observed = json.loads(report.read_text())
+          assert observed['sourceVersion'] == admitted['sourceVersion'], 'Source version mismatch'
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write('POOL_INPUT=' + str(pool) + '\n')
+              env.write('POOL_REPORT=' + str(report) + '\n')
+          PY
+      - name: Diagnose only saved allocation-limited cells under guards
+        run: |
+          python3 tools/catalog/allocation_diagnostic_guard.py \
+            --evidence-dir allocation-guard \
+            --max-rss-bytes 4294967296 \
+            --address-space-bytes 5368709120 \
+            --min-available-bytes 2147483648 \
+            --min-disk-free-bytes 3221225472 \
+            --max-wall-seconds 5400 -- \
+            --pool "$POOL_INPUT" \
+            --pool-report "$POOL_REPORT" \
+            --selection-report docs/evidence/selection-round33/EVERYDAY-SELECTION.json \
+            --scratch allocation-scratch \
+            --out allocation-reports
+      - name: Keep only compact diagnostic metadata, including resource stops
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: catalogue-v2-allocation-diagnostic-metadata
+          path: |
+            allocation-reports/SUMMARY.json
+            allocation-reports/DECKS.json
+            allocation-reports/INPUTS.json
+            allocation-reports/STATUS.json
+            allocation-reports/LOSSES.jsonl
+            allocation-guard/RESOURCE.json
+          if-no-files-found: warn
+          retention-days: 90

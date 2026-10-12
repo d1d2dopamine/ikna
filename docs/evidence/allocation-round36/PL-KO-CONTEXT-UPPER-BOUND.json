@@ -1,0 +1,14 @@
+{
+  "scope": "2026-10-10 direct link snapshot; pre-quality resource bound, not final coverage acceptance",
+  "evidence": "../catalogue-round35/LINKS.json",
+  "directEdges": 94,
+  "polishSourceSentenceIds": 91,
+  "koreanSourceSentenceIds": 92,
+  "maximumMembershipsPerLevelBeforeOtherFilters": {
+    "pl-ko": 91,
+    "ko-pl": 92
+  },
+  "reason": "one target membership needs at least one source context; source context IDs cannot be reused within a deck",
+  "textEditsChecked": false,
+  "newSourceOrRuleChange": false
+}

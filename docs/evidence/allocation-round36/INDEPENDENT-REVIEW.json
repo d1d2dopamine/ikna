@@ -1,0 +1,244 @@
+{
+  "reviewVersion": 1,
+  "reviewType": "independent static source/workflow review plus reading existing bounded test evidence",
+  "status": "final static review and existing bounded checks accepted; full-input result pending",
+  "sourceBindings": {
+    ".github/workflows/catalogue-v2-allocation-diagnostic.yml": {
+      "sha256": "05dfaa3a62925b2bbf8ba62ae74dd26a1a2a3ca9d71dbf7734f2ae17fe8adb86",
+      "sizeBytes": 4691
+    },
+    "tools/catalog/allocation_diagnostic.py": {
+      "sha256": "9bce7297349c64b21f34d1f9e1ed8522fac308bd34fbb1217742aa2ff704f52d",
+      "sizeBytes": 33956
+    },
+    "tools/catalog/allocation_diagnostic_guard.py": {
+      "sha256": "b4d4cd183c926de4cc48358a22006af8dcb41b9f280cc0075c8bac07ad85b564",
+      "sizeBytes": 12792
+    },
+    "tools/catalog/test_allocation_diagnostic.py": {
+      "sha256": "f8f3c67a081294585ed5af00388ce9b4b58e9dff89788aa0f26dc9020cd8252d",
+      "sizeBytes": 45720
+    },
+    "tools/catalog/test_allocation_diagnostic_guard.py": {
+      "sha256": "b0a970a4e45b55b7ae05ac9e7fdc618d3fcee6b1650403c190aed842a3280ccf",
+      "sizeBytes": 18277
+    }
+  },
+  "scope": {
+    "diagnosticCells": 20,
+    "directedPairs": 13,
+    "candidateRows": 33515,
+    "globalRankLearningLanguages": 8,
+    "baselineCheckedDecks": 39,
+    "historicalCap": 8000,
+    "currentDefaultCapChanged": false
+  },
+  "semanticChecks": [
+    {
+      "check": "global rank scope and first representative",
+      "result": "verified in source",
+      "detail": "Complete admitted pool is validated. Global rank context DB includes all deduplicated contexts for the eight learning languages across meaning directions, uses original context key and INSERT OR IGNORE first representative, and builds ranks with unchanged ORDER BY context_key/Counter traversal. Scoped analysis representatives are copied from that global DB, not reranked from the thirteen pair subset."
+    },
+    {
+      "check": "exact baseline contract",
+      "result": "verified in source; full-input runtime pending",
+      "detail": "Source fingerprints and runtime/quality/source pins fail closed. Allocation traversal matches production, and all 39 scoped pair/level records require equality of eligible/selected counts, morphology deferrals, near-duplicate rejections, collisions, cap rejections, pair statistics and decisions. Diagnostic output is restricted to 20 historical allocation-limited cells."
+    },
+    {
+      "check": "full versus bounded graph",
+      "result": "verified in source",
+      "detail": "Both graphs use unchanged pair_evidence. Pair-row-sized evidence limit prevents retention pruning in the full graph; metadata excluding contexts must match bounded targets exactly. Full edges receive canonical/UTF-16/Japanese checks. Bounded edge payloads must be contained unchanged in the full graph."
+    },
+    {
+      "check": "strict three-context constructive witness",
+      "result": "verified in source",
+      "detail": "All recomputed baseline targets and primary/alternate reservations are locked. Witnesses add only lost targets having exactly three distinct unused context resources passing the unchanged context chooser and near-duplicate checks. Baseline assignment digest must remain equal. This is append-only lower-bound evidence, not reassignment, primary-only matching, maximum optimization or admission."
+    },
+    {
+      "check": "cap and claim scope",
+      "result": "verified in source and saved inventory",
+      "detail": "Every selected diagnostic cell has eligibleTargets at most 1811, so appending from this fixed lost-target set cannot exceed historical cap8000. The report explicitly does not claim exact comparison with unavailable historical full assignment payload, global quality totals, semantic certification, optimality or production-policy change."
+    }
+  ],
+  "privacyAndWorkflowChecks": [
+    "Outputs are fixed INPUTS.json, STATUS.json, SUMMARY.json, DECKS.json and LOSSES.jsonl; witness records are nested in DECKS. They contain IDs, counts, pins/hashes and diagnostics, not source/translation text or rank wordlists.",
+    "Exceptions are converted to controlled reason codes without interpolating source-bearing str(error); existing context-analysis stderr is captured. Corpus graph/rank payloads stay in scratch SQLite.",
+    "Workflow uses manual dispatch, read-only contents/actions permissions, exact saved artifact name/run choice and baseline-bound pool/report SHA-256 plus sourceVersion, with no fresh/latest fallback.",
+    "Artifact-selected paths are resolved inside the acquisition directory and reject CR/LF before GITHUB_ENV export. Upload uses exact metadata allowlist plus RESOURCE.json, excluding corpus, scratch and captured stdout/stderr.",
+    "Guard routes only the fixed child tool, requires fresh disjoint output directories and matching monitored filesystem, redirects TMPDIR/TMP/TEMP/SQLITE_TMPDIR, applies RSS/available-memory/disk/wall sampling and hard RLIMIT_AS, terminates only its owned child, uses parent-death protection and labels preserved partial state non-resumable."
+  ],
+  "resolvedDuringReview": [
+    "Metadata wildcard upload replaced with explicit allowlist.",
+    "Artifact path resolve/root and newline checks added.",
+    "MANIFEST/FAILED/separate-WITNESSES intermediate names aligned to agreed five-file output contract.",
+    "Synthetic staging fixture no longer asserts duplicate-ignore behavior against the deliberately strict accepted duplicateCandidates=0 staging contract."
+  ],
+  "observedExistingEvidence": {
+    "realReportPreflight": {
+      "exactHistoricalSourceFilesVerified": 14,
+      "cells": 20,
+      "pairs": 13,
+      "learningLanguages": [
+        "de",
+        "fr",
+        "it",
+        "ja",
+        "ko",
+        "pl",
+        "pt",
+        "zh"
+      ],
+      "candidateRows": 33515,
+      "corpusRead": false,
+      "runtimeValidated": false,
+      "retainedPoolReportContractVerified": true,
+      "retainedPoolReportSha256": "41c7e176d516e6ad89d70954b116d18062baa48857f66ee276bdcfd32dd0438f",
+      "rawPoolValidated": false
+    },
+    "guardTests": {
+      "tests": 20,
+      "passed": true,
+      "source": "GUARD-TESTS.log",
+      "executedByIndependentReviewer": false
+    },
+    "negativeOwnedChildSmoke": {
+      "realOwnedChildStarted": true,
+      "expectedNegativeInputRejected": true,
+      "guardStatus": "child-failed",
+      "childExitCode": 1,
+      "diagnosticStatus": {
+        "complete": false,
+        "errorType": "ValueError",
+        "publicationSafe": false,
+        "reasonCode": "diagnostic-failed",
+        "stage": "input-verification",
+        "status": "failed-allocation-evidence-diagnostic"
+      },
+      "hardAddressSpaceCeilingBytes": 5368709120,
+      "fullCorpusRun": false
+    },
+    "combinedTests": {
+      "tests": 45,
+      "passed": true,
+      "source": "COMBINED-TESTS.log",
+      "executedByIndependentReviewer": false
+    },
+    "finalNegativeOwnedChildSmoke": {
+      "realOwnedChildStarted": true,
+      "expectedNegativeInputRejected": true,
+      "guardStatus": "child-failed",
+      "childExitCode": 1,
+      "diagnosticStatus": {
+        "complete": false,
+        "errorType": "ValueError",
+        "publicationSafe": false,
+        "reasonCode": "diagnostic-failed",
+        "stage": "full-admitted-pool-validation",
+        "status": "failed-allocation-evidence-diagnostic"
+      },
+      "hardAddressSpaceCeilingBytes": 5368709120,
+      "fullCorpusRun": false,
+      "toolSha256": "9bce7297349c64b21f34d1f9e1ed8522fac308bd34fbb1217742aa2ff704f52d"
+    }
+  },
+  "pending": [
+    "No real admitted pool was read or downloaded by this reviewer; no complete diagnostic Actions run occurred.",
+    "Real-run baseline equality, runtime/resource feasibility and recoverable strict-three additions remain unmeasured until the user-run workflow completes."
+  ],
+  "limitations": [
+    "Review binds the exact source hashes above; later material edits require review refresh.",
+    "One full pool admission validation plus separate global/scoped staging remain necessary passes; no full selection/corpus publication is performed.",
+    "Sampled resource limits can overshoot; hard address-space limit is not an RSS guarantee.",
+    "This review contains no corpus text excerpts and does not authorize workflow dispatch or source admission."
+  ],
+  "finalConfirmation": {
+    "status": "final reviewed source has no material unresolved finding",
+    "previousSourceBindings": {
+      ".github/workflows/catalogue-v2-allocation-diagnostic.yml": {
+        "sha256": "05dfaa3a62925b2bbf8ba62ae74dd26a1a2a3ca9d71dbf7734f2ae17fe8adb86",
+        "sizeBytes": 4691
+      },
+      "tools/catalog/allocation_diagnostic.py": {
+        "sha256": "a5fa8f03e3dd24a6e21b7c14c7d3582ca39adf214a4c809f0ad2f445d6d0ac5d",
+        "sizeBytes": 33114
+      },
+      "tools/catalog/allocation_diagnostic_guard.py": {
+        "sha256": "b4d4cd183c926de4cc48358a22006af8dcb41b9f280cc0075c8bac07ad85b564",
+        "sizeBytes": 12792
+      },
+      "tools/catalog/test_allocation_diagnostic.py": {
+        "sha256": "6ce93c7c8472ea6cdba05a55efded686ae43d97d394eb615e3e2688f5d1a7577",
+        "sizeBytes": 26629
+      },
+      "tools/catalog/test_allocation_diagnostic_guard.py": {
+        "sha256": "b0a970a4e45b55b7ae05ac9e7fdc618d3fcee6b1650403c190aed842a3280ccf",
+        "sizeBytes": 18277
+      }
+    },
+    "currentSourceBindings": {
+      ".github/workflows/catalogue-v2-allocation-diagnostic.yml": {
+        "sha256": "05dfaa3a62925b2bbf8ba62ae74dd26a1a2a3ca9d71dbf7734f2ae17fe8adb86",
+        "sizeBytes": 4691
+      },
+      "tools/catalog/allocation_diagnostic.py": {
+        "sha256": "9bce7297349c64b21f34d1f9e1ed8522fac308bd34fbb1217742aa2ff704f52d",
+        "sizeBytes": 33956
+      },
+      "tools/catalog/allocation_diagnostic_guard.py": {
+        "sha256": "b4d4cd183c926de4cc48358a22006af8dcb41b9f280cc0075c8bac07ad85b564",
+        "sizeBytes": 12792
+      },
+      "tools/catalog/test_allocation_diagnostic.py": {
+        "sha256": "f8f3c67a081294585ed5af00388ce9b4b58e9dff89788aa0f26dc9020cd8252d",
+        "sizeBytes": 45720
+      },
+      "tools/catalog/test_allocation_diagnostic_guard.py": {
+        "sha256": "b0a970a4e45b55b7ae05ac9e7fdc618d3fcee6b1650403c190aed842a3280ccf",
+        "sizeBytes": 18277
+      }
+    },
+    "changedFiles": [
+      "tools/catalog/allocation_diagnostic.py",
+      "tools/catalog/test_allocation_diagnostic.py"
+    ],
+    "method": "Re-read revised functions and test coverage against the earlier reviewed source text. Snapshot hashes bind both observations; no unavailable repository diff is claimed.",
+    "checkedChanges": [
+      "Added controlled failure-stage labels for admitted-pool, report-lineage and runtime validation; no raw exception text introduced.",
+      "SQLite connection contexts now use explicit closing; graph/staging persistence still commits before closure.",
+      "Additional target rank/length and source-family/context length checks strengthen the unchanged full-edge contract.",
+      "Added duplicate baseline-target and lost-target-already-selected rejection, explicit witness cap check, complete-baseline ownership label and baseline decision metadata.",
+      "Output names remain the agreed five-file allowlist; witness records remain metadata-only inside DECKS.json.",
+      "Synthetic duplicate rejection and final input/source drift checks are present; global rank, allocation and strict-three semantics remain within the original scope."
+    ],
+    "observedTestEvidence": {
+      "combinedTests": 45,
+      "allocationSyntheticTests": 25,
+      "guardTests": 20,
+      "passed": true,
+      "log": "COMBINED-TESTS.log",
+      "logSha256": "912ca4db8a2e3333bfa5631a51fb4a142ada8ba39c0a8dc80d57e30680cf7a30",
+      "executedByIndependentReviewer": false,
+      "finalNegativeOwnedChildSmoke": {
+        "realOwnedChildStarted": true,
+        "expectedNegativeInputRejected": true,
+        "guardStatus": "child-failed",
+        "childExitCode": 1,
+        "diagnosticStatus": {
+          "complete": false,
+          "errorType": "ValueError",
+          "publicationSafe": false,
+          "reasonCode": "diagnostic-failed",
+          "stage": "full-admitted-pool-validation",
+          "status": "failed-allocation-evidence-diagnostic"
+        },
+        "hardAddressSpaceCeilingBytes": 5368709120,
+        "fullCorpusRun": false,
+        "toolSha256": "9bce7297349c64b21f34d1f9e1ed8522fac308bd34fbb1217742aa2ff704f52d"
+      }
+    },
+    "additionalTestsRequiredByReview": false,
+    "fullInputRunPerformed": false,
+    "realRecoverableAdditionsMeasured": false,
+    "acceptanceLimit": "Readiness and bounded synthetic/negative-process evidence only. Real admitted-pool validation, full runtime/resource feasibility, exact 39-cell baseline equality and 20-cell loss/witness results await the user-run workflow."
+  }
+}

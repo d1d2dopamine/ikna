@@ -1,0 +1,341 @@
+{
+  "classificationVersion": 1,
+  "scope": "Read-only classification of original supplied Round34 evidence; no source mutation or test execution.",
+  "originalArchive": {
+    "path": "ikna-0.12-press-round-34-exact-overlap-integration(1).zip",
+    "sizeBytes": 13400153,
+    "sha256": "c0f0c13229a094069d746035056f709e7b0dd06bd8ebadd2b04f683ba4cdc40e",
+    "members": 906,
+    "preserveUnmodified": true
+  },
+  "payloadEntries": [
+    {
+      "path": "docs/evidence/everyday-round09/CARDS.html",
+      "classification": "embedded_corpus_preview",
+      "rationale": "Populated HTML embeds 3280 real preview memberships.",
+      "newPackageAction": "Omit original payload; optionally provide a separately named metadata-only projection. Preserve original externally.",
+      "projectionOmittedFields": "Entire populated viewer; keep generic tools/catalog/selection_review.html.",
+      "dependentScriptsOrInstructions": [
+        "tools/catalog/selection_audit.py generates this from explicit --zip/--notes inputs.",
+        "tools/catalog/test_selection_review.cjs accepts a generated viewer path; historical CHECKS.json names this populated file.",
+        "docs/EVERYDAY-POOL.md and ROUND-0.12-09.md historical links."
+      ],
+      "directUnitTestDependencyFound": false,
+      "originalByteLength": 6019996,
+      "originalSha256": "313581780216570d325dea7e998409b4feb835dc80cd3599d3779b2f7318cd04",
+      "presentInOriginalRound34": true
+    },
+    {
+      "path": "docs/evidence/everyday-round09/MANUAL-REVIEW.json",
+      "classification": "structured_corpus_sample",
+      "rationale": "27 cards, 73 original source/translation contexts and highlight surfaces.",
+      "newPackageAction": "Omit original payload; optionally provide a separately named metadata-only projection. Preserve original externally.",
+      "projectionOmittedFields": "cards; manually review comments for quoted corpus text if creating a summary.",
+      "dependentScriptsOrInstructions": [
+        "tools/catalog/selection_audit.py accepts optional external --notes.",
+        "docs/EVERYDAY-POOL.md:128 historical exact rerun needs original external notes."
+      ],
+      "directUnitTestDependencyFound": false,
+      "originalByteLength": 87192,
+      "originalSha256": "68ad48fb34fcb8f7aa4dbf72cf9edf6dd85b1abe067914c3f6e621ea6ffba421",
+      "presentInOriginalRound34": true
+    },
+    {
+      "path": "docs/evidence/everyday-round10.json",
+      "classification": "report_with_corpus_sample",
+      "rationale": "8 Japanese source examples plus 2 extracted quarantine target strings.",
+      "newPackageAction": "Omit original payload; optionally provide a separately named metadata-only projection. Preserve original externally.",
+      "projectionOmittedFields": [
+        "boundedOldPreviewJapaneseCheck.examples",
+        "exactSourceQuarantine.records[].text"
+      ],
+      "dependentScriptsOrInstructions": [
+        "ROUND-0.12-10.md evidence link. Preserve functional tools/catalog/sources/selection-quarantine.json."
+      ],
+      "directUnitTestDependencyFound": false,
+      "originalByteLength": 17438,
+      "originalSha256": "39bd51a1514c74dea0ba9bff5b287e715e075d0d741e8fd937de91120b112d8d",
+      "presentInOriginalRound34": true
+    },
+    {
+      "path": "docs/evidence/everyday-round12/COVERAGE.json",
+      "classification": "report_with_corpus_sample",
+      "rationale": "25 absent and 30 changed examples; 236 source/translation context records.",
+      "newPackageAction": "Omit original payload; optionally provide a separately named metadata-only projection. Preserve original externally.",
+      "projectionOmittedFields": [
+        "baselinePreviewComparison.absentSamples",
+        "baselinePreviewComparison.changedSamples"
+      ],
+      "dependentScriptsOrInstructions": [
+        "tools/catalog/selection_evaluate.py produces QUALITY from explicit inputs.",
+        "everyday-round15/SNAPSHOT.json pins original QUALITY bytes; preserve the old hash."
+      ],
+      "directUnitTestDependencyFound": false,
+      "originalByteLength": 511665,
+      "originalSha256": "152d46a0a65f34804a8a00c82ba6bb25e5c1036c9566ccc814d3b9c48c2fadde",
+      "presentInOriginalRound34": true
+    },
+    {
+      "path": "docs/evidence/everyday-round12/QUALITY.json.gz",
+      "classification": "report_with_corpus_sample",
+      "rationale": "25 absent and 30 changed examples; 236 source/translation context records.",
+      "newPackageAction": "Omit original payload; optionally provide a separately named metadata-only projection. Preserve original externally.",
+      "projectionOmittedFields": [
+        "baselinePreviewComparison.absentSamples",
+        "baselinePreviewComparison.changedSamples"
+      ],
+      "dependentScriptsOrInstructions": [
+        "tools/catalog/selection_evaluate.py produces QUALITY from explicit inputs.",
+        "everyday-round15/SNAPSHOT.json pins original QUALITY bytes; preserve the old hash."
+      ],
+      "directUnitTestDependencyFound": false,
+      "originalByteLength": 35797,
+      "originalSha256": "be4db3f7d7a2aa613bc16121a73275a960f85e431e0662a61a2fb311f405d7bf",
+      "presentInOriginalRound34": true
+    },
+    {
+      "path": "docs/evidence/everyday-round12/EVERYDAY-POOL.json.gz",
+      "classification": "report_with_corpus_sample",
+      "rationale": "550 real target/context/meaning samples in top-level samples.",
+      "newPackageAction": "Omit original payload; optionally provide a separately named metadata-only projection. Preserve original externally.",
+      "projectionOmittedFields": [
+        "samples"
+      ],
+      "dependentScriptsOrInstructions": [
+        "tools/catalog/everyday_selection.py --pool-report binds original report bytes.",
+        "tools/catalog/selection_profile.py --pool-report and selection_diagnostic_pool.py --pool-report require external matching originals.",
+        "tools/catalog/pool_function_words.py verifies the original report hash inside explicit --archive.",
+        "Metadata projection is not a replacement for the original hash-bound CLI input."
+      ],
+      "directUnitTestDependencyFound": false,
+      "originalByteLength": 57484,
+      "originalSha256": "9abf25741287cb189ae97c6f0e5eaaf2194997a1365dd3b67cfbbe9c08d373b9",
+      "presentInOriginalRound34": true
+    },
+    {
+      "path": "docs/evidence/everyday-round19/EVERYDAY-POOL.json",
+      "classification": "report_with_corpus_sample",
+      "rationale": "550 real target/context/meaning samples in top-level samples.",
+      "newPackageAction": "Omit original payload; optionally provide a separately named metadata-only projection. Preserve original externally.",
+      "projectionOmittedFields": [
+        "samples"
+      ],
+      "dependentScriptsOrInstructions": [
+        "tools/catalog/everyday_selection.py --pool-report binds original report bytes.",
+        "tools/catalog/selection_profile.py --pool-report and selection_diagnostic_pool.py --pool-report require external matching originals.",
+        "tools/catalog/pool_function_words.py verifies the original report hash inside explicit --archive.",
+        "Metadata projection is not a replacement for the original hash-bound CLI input."
+      ],
+      "directUnitTestDependencyFound": false,
+      "originalByteLength": 267859,
+      "originalSha256": "41c7e176d516e6ad89d70954b116d18062baa48857f66ee276bdcfd32dd0438f",
+      "presentInOriginalRound34": true
+    },
+    {
+      "path": "docs/evidence/selection-round24/EVERYDAY-POOL.json",
+      "classification": "report_with_corpus_sample",
+      "rationale": "550 real target/context/meaning samples in top-level samples.",
+      "newPackageAction": "Omit original payload; optionally provide a separately named metadata-only projection. Preserve original externally.",
+      "projectionOmittedFields": [
+        "samples"
+      ],
+      "dependentScriptsOrInstructions": [
+        "tools/catalog/everyday_selection.py --pool-report binds original report bytes.",
+        "tools/catalog/selection_profile.py --pool-report and selection_diagnostic_pool.py --pool-report require external matching originals.",
+        "tools/catalog/pool_function_words.py verifies the original report hash inside explicit --archive.",
+        "Metadata projection is not a replacement for the original hash-bound CLI input."
+      ],
+      "directUnitTestDependencyFound": false,
+      "originalByteLength": 259168,
+      "originalSha256": "af48b85ecd6ae21a756ef304999ddd984f996c383a8ce729d0b55e36a3eee489",
+      "presentInOriginalRound34": true
+    },
+    {
+      "path": "docs/evidence/selection-round25/EVERYDAY-POOL-1024.json",
+      "classification": "report_with_corpus_sample",
+      "rationale": "550 real target/context/meaning samples in top-level samples.",
+      "newPackageAction": "Omit original payload; optionally provide a separately named metadata-only projection. Preserve original externally.",
+      "projectionOmittedFields": [
+        "samples"
+      ],
+      "dependentScriptsOrInstructions": [
+        "tools/catalog/everyday_selection.py --pool-report binds original report bytes.",
+        "tools/catalog/selection_profile.py --pool-report and selection_diagnostic_pool.py --pool-report require external matching originals.",
+        "tools/catalog/pool_function_words.py verifies the original report hash inside explicit --archive.",
+        "Metadata projection is not a replacement for the original hash-bound CLI input."
+      ],
+      "directUnitTestDependencyFound": false,
+      "originalByteLength": 263332,
+      "originalSha256": "6e13a1073ac25b7862d16327a841bb28089585969d4717937c42930977f1ab2e",
+      "presentInOriginalRound34": true
+    },
+    {
+      "path": "docs/evidence/everyday-round15/ALLOCATION-WITNESS.json",
+      "classification": "derived_corpus_target_assignment",
+      "rationale": "224 assignment entries contain source-derived target text; no sentence payload found.",
+      "newPackageAction": "Omit original payload; optionally provide a separately named metadata-only projection. Preserve original externally.",
+      "projectionOmittedFields": [
+        "levels.*.*.assignments[].text"
+      ],
+      "dependentScriptsOrInstructions": [
+        "Archived ALLOCATION-ANALYSIS.py.gz produces this from an external pl-ko-witness.json.",
+        "everyday-round15/SNAPSHOT.json pins original bytes. No production default-input consumer found."
+      ],
+      "directUnitTestDependencyFound": false,
+      "originalByteLength": 50359,
+      "originalSha256": "577153309c259b88eaa4e892777b3fd1c1897b4d3b64ca2a92602cc570164422",
+      "presentInOriginalRound34": true
+    },
+    {
+      "path": "docs/evidence/everyday-round19/FUNCTION-WORDS.json",
+      "classification": "derived_corpus_lexical_prefix",
+      "rationale": "660 real corpus-derived forms: 60 for each of 11 languages.",
+      "newPackageAction": "Omit original payload; optionally provide a separately named metadata-only projection. Preserve original externally.",
+      "projectionOmittedFields": [
+        "languages.*.functionForms"
+      ],
+      "dependentScriptsOrInstructions": [
+        "tools/catalog/pool_function_words.py produces this from explicit archive and expected hashes.",
+        "test_pool_function_words.py uses synthetic generated inputs and checks output basenames; it does not read this historical file.",
+        "Future final-pack enrichment needs regenerated/external exact forms, not a metadata projection."
+      ],
+      "directUnitTestDependencyFound": false,
+      "originalByteLength": 55723,
+      "originalSha256": "f2f6d6da6c650d31f13f546292de173168e6b475f44b891ed3da44b00f1b3877",
+      "presentInOriginalRound34": true
+    },
+    {
+      "path": "docs/evidence/everyday-round20/PL-KO-BASELINE.jsonl.gz",
+      "classification": "corpus_subset",
+      "rationale": "Direct bilingual source/translation candidate records.",
+      "newPackageAction": "Omit original payload; optionally provide a separately named metadata-only projection. Preserve original externally.",
+      "projectionOmittedFields": "Entire JSONL payload; retain BASELINE-PASSPORT metadata.",
+      "dependentScriptsOrInstructions": [
+        "tools/catalog/replenishment_review.py --baseline accepts an explicit external path.",
+        "ROUND-0.12-20.md:139-140 historical command must document external inputs."
+      ],
+      "directUnitTestDependencyFound": false,
+      "originalByteLength": 10980,
+      "originalSha256": "7a861d648025196bbf507495d937664b675daff419722e58dcabd451c66c75b2",
+      "presentInOriginalRound34": true
+    },
+    {
+      "path": "docs/evidence/everyday-round20/PL-KO-RANKS.json.gz",
+      "classification": "derived_corpus_rank_wordlist",
+      "rationale": "Surface-to-rank maps: 19593 Korean and 51382 Polish forms.",
+      "newPackageAction": "Omit original payload; optionally provide a separately named metadata-only projection. Preserve original externally.",
+      "projectionOmittedFields": [
+        "ranks"
+      ],
+      "dependentScriptsOrInstructions": [
+        "tools/catalog/replenishment_review.py --ranks accepts an explicit external path and verifies source/pool identity.",
+        "BASELINE-PASSPORT.json pins exact original bytes."
+      ],
+      "directUnitTestDependencyFound": false,
+      "originalByteLength": 462859,
+      "originalSha256": "cdb3ac19359d7d111d6d931f59efcbe3b091a26f68d3cc1aec5b2bfdc7c9afb2",
+      "presentInOriginalRound34": true
+    },
+    {
+      "path": "docs/evidence/selection-round24/diagnostic-pool.jsonl.gz",
+      "classification": "corpus_subset",
+      "rationale": "14012 saved real candidate rows with source/translation text.",
+      "newPackageAction": "Omit original payload; optionally provide a separately named metadata-only projection. Preserve original externally.",
+      "projectionOmittedFields": "Entire JSONL payload; retain DIAGNOSTIC/hash evidence.",
+      "dependentScriptsOrInstructions": [
+        "tools/catalog/selection_profile.py --pool and --pool-report need exact external originals.",
+        "tools/catalog/selection_diagnostic_pool.py regenerates from the pinned full pool.",
+        "Round24 historical commands are not self-contained after omission."
+      ],
+      "directUnitTestDependencyFound": false,
+      "originalByteLength": 1303792,
+      "originalSha256": "00bad6f1ded14554ef630bbdf640cfdc44c9c528bf6baf250d818e543e961fb1",
+      "presentInOriginalRound34": true
+    }
+  ],
+  "alreadyExternal": [
+    {
+      "path": "docs/evidence/selection-round25/diagnostic-pool-1024.jsonl.gz",
+      "presentInOriginalRound34": false,
+      "role": "105988 real candidate rows. Keep absent; do not bundle old optional-input ZIP. INPUT-DELIVERY.json retains identity."
+    }
+  ],
+  "retainOriginalCompactEvidence": [
+    {
+      "paths": [
+        "docs/evidence/everyday-round12/EVERYDAY-SELECTION.json.gz",
+        "docs/evidence/selection-round30/EVERYDAY-SELECTION.json",
+        "docs/evidence/selection-round33/EVERYDAY-SELECTION.json",
+        "docs/evidence/selection-round30/structural-audit/QUALITY.json"
+      ],
+      "reason": "Counts, IDs and policies; latest structural QUALITY sample arrays are empty. Historical compare_historical.py and compare_candidate_control.py hard-code original Round12 selection report: retain exact bytes."
+    },
+    {
+      "paths": [
+        "docs/evidence/everyday-round09/AUDIT.json",
+        "docs/evidence/everyday-round09/AUDIT.md",
+        "docs/evidence/everyday-round12/COVERAGE.md",
+        "docs/evidence/everyday-round15/CENSUS.json",
+        "docs/evidence/everyday-round15/CENSUS.md",
+        "docs/evidence/everyday-round15/SNAPSHOT.json",
+        "docs/evidence/everyday-round20/FILES.json",
+        "docs/evidence/everyday-round20/REVISIONS.json",
+        "docs/evidence/everyday-round20/BASELINE-PASSPORT.json",
+        "docs/evidence/everyday-round20/REPLENISHMENT.json"
+      ],
+      "reason": "Aggregates, source IDs, original hashes, acquisition pins and compact explanatory report text. COVERAGE.md has no before/after sentence records; unlike COVERAGE.json it should remain."
+    },
+    {
+      "paths": [
+        "docs/evidence/classifier-round28/mqm-evaluation-manifest.json",
+        "docs/evidence/classifier-archive-round30/en-de.metadata.yaml",
+        "docs/evidence/classifier-archive-round30/publisher-LICENSE",
+        "docs/evidence/classifier-round28/mqm-LICENSE"
+      ],
+      "reason": "MQM IDs/hashes/labels only, inert model metadata and license texts; not corpus sentence payload."
+    },
+    {
+      "paths": [
+        "docs/evidence/selection-round*/PROFILE*.json",
+        "docs/evidence/selection-round25/*FINAL*.json",
+        "docs/evidence/selection-round27/*PROFILE.json",
+        "docs/evidence/selection-round34/SMOKE-PROFILE.json",
+        "docs/evidence/selection-round31/*/PROBE.json",
+        "docs/evidence/selection-round32/*/PROBE.json",
+        "docs/evidence/corpus-round21/opus-*.json"
+      ],
+      "reason": "Inspected JSON structures contain metrics and publisher metadata, not source/meaning sentence arrays. Key names ranks/context/source alone do not imply corpus payload."
+    }
+  ],
+  "preserveFunctionalSources": [
+    {
+      "paths": [
+        "tools/catalog/fixtures/**",
+        "tools/catalog/test_*",
+        "docs/evidence/selection-round*/tooling/*.py",
+        "docs/evidence/everyday-round15/CENSUS-ANALYSIS.py.gz",
+        "docs/evidence/everyday-round15/ALLOCATION-ANALYSIS.py.gz",
+        "docs/evidence/everyday-round10-fix1.json"
+      ],
+      "reason": "Keep synthetic/unit-test fixtures and implementation/analysis code. Round10-fix1 explicitly identifies its Japanese strings as constructed regressions, not observed corpus records."
+    },
+    {
+      "paths": [
+        "app/**",
+        "shared/**",
+        "desktop/**"
+      ],
+      "reason": "Preserve original app source/assets/signing identity. Pack manifests/config and intended app assets are outside evidence corpus cleanup scope. Ignored downloaded build prerequisites stay outside delivery."
+    }
+  ],
+  "dependencyRules": [
+    "Projections get new filenames, derived status, omitted JSON paths and original SHA-256. Never replace an original historical file under its old name while retaining its old hash or claiming byte identity.",
+    "Preserve original attached ZIP and original evidence outside new ZIP. This classification requires no deletion.",
+    "Explicit external CLI --pool/--pool-report/--ranks/--baseline/--notes inputs preserve function. Document retrieval/regeneration route and expected identity; no silent latest-corpus substitution.",
+    "Update reproduction guidance or provide an omissions/index manifest explaining externalized inputs; do not leave an apparent bundled-input promise.",
+    "No direct embedded historical-payload dependency found in current tools/catalog/test_* or original Actions workflows. test_replenishment_review.py and test_pool_function_words.py use generated/synthetic inputs; do not disable them.",
+    "Newly staged catalogue-v2-wmt-provenance-review.yml reads retained FILES.json, REVISIONS.json and REPLENISHMENT.json. It is not part of original Round34, and this inspection is not evidence of a workflow run.",
+    "Retain historical whole-source manifests as historical identities. Packaging exclusions change the current manifest; do not weaken old replay checks to conceal that difference."
+  ],
+  "inspection": "Inspected JSON/JSON.gz field trees, populated HTML role, gzip file roles, source/workflow/test references. No model deserialization, corpus reselection, test execution or download."
+}

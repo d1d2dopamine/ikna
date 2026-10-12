@@ -1,0 +1,18 @@
+[
+  {
+    "file": "wmt24pp--en-ko_KR.jsonl",
+    "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-ko_KR.jsonl",
+    "sizeBytes": 1223239,
+    "sha256": "4520124f3769cd711aab0c939aeb849a225dce51b761eeb419f46e555b02d7e5",
+    "retrievedUtc": "2026-10-12T08:51:29.358700+00:00",
+    "sizeAndSha256Verified": true
+  },
+  {
+    "file": "wmt24pp--en-pl_PL.jsonl",
+    "url": "https://huggingface.co/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/en-pl_PL.jsonl",
+    "sizeBytes": 934176,
+    "sha256": "ad7c214d3e6842740f3e7a1cf99ddf1762b8ab55cc42c4092404dbc14cd50add",
+    "retrievedUtc": "2026-10-12T08:51:37.904825+00:00",
+    "sizeAndSha256Verified": true
+  }
+]

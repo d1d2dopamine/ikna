@@ -1,0 +1,29 @@
+{
+  "baselineArchive": "ikna-0.12-press-round-35-provenance-and-gap-map-no-corpora.zip",
+  "baselineSha256": "a49e0ba100680cc74d99ca1e61088485eddc549a5b4885ea02aa775c36282d43",
+  "changedExistingFiles": [
+    "docs/PLAN-0.12.md"
+  ],
+  "newFiles": [
+    ".github/workflows/catalogue-v2-allocation-diagnostic.yml",
+    "docs/ROUND-0.12-36.md",
+    "docs/evidence/allocation-round36/ALLOCATION-CELLS.csv",
+    "docs/evidence/allocation-round36/ARTIFACT-STATUS.json",
+    "docs/evidence/allocation-round36/COMBINED-TESTS.log",
+    "docs/evidence/allocation-round36/INDEPENDENT-REVIEW.json",
+    "docs/evidence/allocation-round36/NEGATIVE-SMOKE-FINAL.json",
+    "docs/evidence/allocation-round36/PL-KO-CONTEXT-UPPER-BOUND.json",
+    "docs/evidence/allocation-round36/REAL-REPORT-PREFLIGHT.json",
+    "docs/evidence/allocation-round36/SCOPE.json",
+    "docs/evidence/allocation-round36/TEXT-CHECK.log",
+    "docs/evidence/allocation-round36/WORKFLOW-CHECK.json",
+    "tools/catalog/allocation_diagnostic.py",
+    "tools/catalog/allocation_diagnostic_guard.py",
+    "tools/catalog/test_allocation_diagnostic.py",
+    "tools/catalog/test_allocation_diagnostic_guard.py"
+  ],
+  "applicationAssetsUnchanged": true,
+  "productionSelectorUnchanged": true,
+  "corpusEvidenceStillExcluded": 14,
+  "fullPoolDiagnosticExecuted": false
+}

@@ -1,0 +1,50 @@
+{
+  "url": "https://api.github.com/repos/d1d2dopamine/ikna/actions/runs/37458524156/artifacts?per_page=100",
+  "httpStatus": 200,
+  "responseSha256": "9ee040cb9927e5dedb16d377e626ac21b91d086a391b7d29613891ef5e89092c",
+  "response": {
+    "total_count": 2,
+    "artifacts": [
+      {
+        "id": 11416257701,
+        "node_id": "MDg6QXJ0aWZhY3QxMTQxNjI1NzcwMQ==",
+        "name": "catalogue-v2-everyday-selection-review",
+        "size_in_bytes": 1793840,
+        "url": "https://api.github.com/repos/d1d2dopamine/ikna/actions/artifacts/11416257701",
+        "archive_download_url": "https://api.github.com/repos/d1d2dopamine/ikna/actions/artifacts/11416257701/zip",
+        "expired": false,
+        "digest": "sha256:22e0f8372d09e70993db4b2aacf787b913c44379a21ec823ae1551ef7eb4fded",
+        "created_at": "2026-10-06T13:24:44Z",
+        "updated_at": "2026-10-06T13:24:44Z",
+        "expires_at": "2027-01-04T11:45:28Z",
+        "workflow_run": {
+          "id": 37458524156,
+          "repository_id": 1323344044,
+          "head_repository_id": 1323344044,
+          "head_branch": "main",
+          "head_sha": "47a393466e50ac5490ede8bba9173472726a1b9a"
+        }
+      },
+      {
+        "id": 11414433600,
+        "node_id": "MDg6QXJ0aWZhY3QxMTQxNDQzMzYwMA==",
+        "name": "catalogue-v2-everyday-admitted-pool",
+        "size_in_bytes": 545984900,
+        "url": "https://api.github.com/repos/d1d2dopamine/ikna/actions/artifacts/11414433600",
+        "archive_download_url": "https://api.github.com/repos/d1d2dopamine/ikna/actions/artifacts/11414433600/zip",
+        "expired": false,
+        "digest": "sha256:0f02c2acfbab21d1e90c3d88f1dda0db61ca789f9507b05a483ea7f2a20884e3",
+        "created_at": "2026-10-06T12:43:01Z",
+        "updated_at": "2026-10-06T12:43:01Z",
+        "expires_at": "2027-01-04T11:45:28Z",
+        "workflow_run": {
+          "id": 37458524156,
+          "repository_id": 1323344044,
+          "head_repository_id": 1323344044,
+          "head_branch": "main",
+          "head_sha": "47a393466e50ac5490ede8bba9173472726a1b9a"
+        }
+      }
+    ]
+  }
+}

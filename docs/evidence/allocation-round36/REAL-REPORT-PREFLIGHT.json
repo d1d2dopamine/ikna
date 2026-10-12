@@ -1,0 +1,21 @@
+{
+  "exactHistoricalSourceFilesVerified": 14,
+  "cells": 20,
+  "pairs": 13,
+  "learningLanguages": [
+    "de",
+    "fr",
+    "it",
+    "ja",
+    "ko",
+    "pl",
+    "pt",
+    "zh"
+  ],
+  "candidateRows": 33515,
+  "corpusRead": false,
+  "runtimeValidated": false,
+  "retainedPoolReportContractVerified": true,
+  "retainedPoolReportSha256": "41c7e176d516e6ad89d70954b116d18062baa48857f66ee276bdcfd32dd0438f",
+  "rawPoolValidated": false
+}

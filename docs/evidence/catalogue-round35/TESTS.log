@@ -1,0 +1,27 @@
+test_blank_lines_follow_original_reader (test_wmt_provenance_manifest.ClassifierTests.test_blank_lines_follow_original_reader) ... ok
+test_duplicate_and_mismatched_anchors_refuse (test_wmt_provenance_manifest.ClassifierTests.test_duplicate_and_mismatched_anchors_refuse) ... ok
+test_invalid_flag_types_and_locale_refuse (test_wmt_provenance_manifest.ClassifierTests.test_invalid_flag_types_and_locale_refuse) ... ok
+test_json_duplicates_bad_encoding_nonfinite_and_malformed_refuse (test_wmt_provenance_manifest.ClassifierTests.test_json_duplicates_bad_encoding_nonfinite_and_malformed_refuse) ... ok
+test_malformed_anchor_and_text_types_refuse (test_wmt_provenance_manifest.ClassifierTests.test_malformed_anchor_and_text_types_refuse) ... ok
+test_missing_fields_and_unexpected_schema_refuse (test_wmt_provenance_manifest.ClassifierTests.test_missing_fields_and_unexpected_schema_refuse) ... ok
+test_original_join_parity_and_decision_precedence (test_wmt_provenance_manifest.ClassifierTests.test_original_join_parity_and_decision_precedence) ... ok
+test_original_join_parity_over_shuffled_multirow_fixture (test_wmt_provenance_manifest.ClassifierTests.test_original_join_parity_over_shuffled_multirow_fixture) ... ok
+test_raw_utf8_hashes_and_separate_original_ids (test_wmt_provenance_manifest.ClassifierTests.test_raw_utf8_hashes_and_separate_original_ids) ... ok
+test_source_and_domain_mismatches_refuse_even_for_bad_sources (test_wmt_provenance_manifest.ClassifierTests.test_source_and_domain_mismatches_refuse_even_for_bad_sources) ... ok
+test_aggregate_drift_and_rejection_reason_drift_refuse_without_output (test_wmt_provenance_manifest.FileGateTests.test_aggregate_drift_and_rejection_reason_drift_refuse_without_output) ... ok
+test_cli_repeat_bytes_and_safe_stdout (test_wmt_provenance_manifest.FileGateTests.test_cli_repeat_bytes_and_safe_stdout) ... ok
+test_committed_round20_metadata_contract_is_still_605 (test_wmt_provenance_manifest.FileGateTests.test_committed_round20_metadata_contract_is_still_605) ... ok
+test_exact_aggregate_metadata_only_and_determinism (test_wmt_provenance_manifest.FileGateTests.test_exact_aggregate_metadata_only_and_determinism) ... ok
+test_expected_pins_revision_and_original_source_must_match (test_wmt_provenance_manifest.FileGateTests.test_expected_pins_revision_and_original_source_must_match) ... ok
+test_hash_and_size_failures_before_any_parsing (test_wmt_provenance_manifest.FileGateTests.test_hash_and_size_failures_before_any_parsing) ... ok
+test_invalid_expected_counts_flags_and_reasons_refuse (test_wmt_provenance_manifest.FileGateTests.test_invalid_expected_counts_flags_and_reasons_refuse) ... ok
+test_missing_duplicate_and_malformed_pins_refuse (test_wmt_provenance_manifest.FileGateTests.test_missing_duplicate_and_malformed_pins_refuse) ... ok
+test_missing_file_and_malformed_verified_json_have_safe_errors (test_wmt_provenance_manifest.FileGateTests.test_missing_file_and_malformed_verified_json_have_safe_errors) ... ok
+test_only_two_requested_files_are_needed (test_wmt_provenance_manifest.FileGateTests.test_only_two_requested_files_are_needed) ... ok
+test_output_cannot_overwrite_or_enter_input_directory (test_wmt_provenance_manifest.FileGateTests.test_output_cannot_overwrite_or_enter_input_directory) ... ok
+test_parse_uses_already_verified_bytes (test_wmt_provenance_manifest.FileGateTests.test_parse_uses_already_verified_bytes) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.028s
+
+OK

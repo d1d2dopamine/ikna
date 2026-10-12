@@ -1,0 +1,61 @@
+name: catalogue v2 WMT provenance review
+
+# Reconstruct Round20 anchor metadata only. No selection, admission or publication.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  provenance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test metadata-only extraction
+        run: python3 -m unittest discover -s tools/catalog -p test_wmt_provenance_manifest.py -v
+      - name: Fetch only the two hash-pinned official inputs
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, urllib.request
+          from pathlib import Path
+          from urllib.parse import urlparse
+          root = Path(os.environ['RUNNER_TEMP']) / 'ikna-wmt-provenance-inputs'
+          root.mkdir(exist_ok=False)
+          entries = json.loads(Path('docs/evidence/everyday-round20/FILES.json').read_text())
+          expected = {'wmt24pp--en-pl_PL.jsonl', 'wmt24pp--en-ko_KR.jsonl'}
+          chosen = [entry for entry in entries if entry['file'] in expected]
+          assert len(chosen) == 2 and {e['file'] for e in chosen} == expected
+          prefix = '/datasets/google/wmt24pp/resolve/fd7405c06494bc66a57b25f55d217a72f96e60dc/'
+          for entry in chosen:
+              url = urlparse(entry['url'])
+              assert url.scheme == 'https' and url.netloc == 'huggingface.co'
+              assert url.path.startswith(prefix) and not url.query and not url.fragment
+              assert 0 < entry['sizeBytes'] <= 2_000_000
+              request = urllib.request.Request(entry['url'], headers={'User-Agent': 'ikna-provenance-review'})
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  data = response.read(entry['sizeBytes'] + 1)
+              assert len(data) == entry['sizeBytes'], 'Unexpected input size'
+              assert hashlib.sha256(data).hexdigest() == entry['sha256'], 'Input hash mismatch'
+              (root / entry['file']).write_bytes(data)
+          PY
+      - name: Reconstruct and check Round20 anchor decisions
+        run: |
+          mkdir provenance-reports
+          python3 tools/catalog/wmt_provenance_manifest.py \
+            --primary "$RUNNER_TEMP/ikna-wmt-provenance-inputs" \
+            --manifest docs/evidence/everyday-round20/FILES.json \
+            --revisions docs/evidence/everyday-round20/REVISIONS.json \
+            --expected docs/evidence/everyday-round20/REPLENISHMENT.json \
+            --out provenance-reports/WMT-ANCHORS.json
+      - name: Keep metadata only
+        uses: actions/upload-artifact@v6
+        with:
+          name: catalogue-v2-wmt-provenance-metadata
+          path: provenance-reports/WMT-ANCHORS.json
+          if-no-files-found: error
+          retention-days: 90

@@ -815,3 +815,25 @@ the reported scope. Empirical classifier scoring/adoption stays deferred on
 provenance/rights, labels/runtime and coverage grounds; retain current rules.
 Android SDK agreement/setup and real-platform GUI acceptance remain separate
 application gates. No final Catalogue assembly, source expansion or publication.
+
+## Round 35 — full-coverage diagnosis and provenance recovery
+
+The owner's current goal is full coverage together with quality, with no corpus
+payloads in delivered source ZIPs. [Round35](ROUND-0.12-35.md) recovers the exact
+historical Everyday deficit map without another selection run, checks the tiny
+current pl-ko direct-link metadata, and adds a nonpublishing metadata-only WMT
+anchor-reconstruction path. No count threshold, source admission or selector
+policy is relaxed. The old605segment pilot remains conditional; original-text
+rights and usable-content checks are unresolved. Corpus collection stays in the
+manual Actions path; source packages retain code/config/tests and compact reports.
+
+## Round 36 — targeted allocation diagnostic readiness
+
+[Round 36](ROUND-0.12-36.md) prepares a one-run, saved-pool Actions diagnostic for
+20 allocation-limited Everyday cells. It preserves global ranks and every baseline
+quality/profile constraint, distinguishes bounded-evidence loss from occupied
+contexts, and permits only a conservative strict-three-context additive witness.
+No production selector change or real full-input result is claimed at readiness.
+The remaining 53 cells' eligible-supply deficit stays separate from allocation.
+Corpus payloads remain outside delivered source packages. Source admission and
+full-coverage acceptance are unchanged and unresolved where previously stated.

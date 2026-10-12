@@ -1,0 +1,27 @@
+{
+  "scope": "saved Everyday historical cap8000; diagnostic1000 boundary is not final coverage acceptance",
+  "allocationCells": 20,
+  "allocationPairs": 13,
+  "allocationLearningLanguages": [
+    "de",
+    "fr",
+    "it",
+    "ja",
+    "ko",
+    "pl",
+    "pt",
+    "zh"
+  ],
+  "candidateRowsAcrossDistinctPairs": 33515,
+  "allocationEligible": 24095,
+  "allocationSelected": 16444,
+  "allocationCollisionLosses": 7651,
+  "allocationGapToDiagnostic1000": 3556,
+  "sourceLimitedCells": 53,
+  "sourceLimitedEligibleGapToDiagnostic1000": 27301,
+  "sourceLimitedSelectedGapToDiagnostic1000": 35713,
+  "sourceLimitedCollisionLosses": 8412,
+  "fullDiagnosticExecuted": false,
+  "newSourceAdmitted": false,
+  "productionSelectionChanged": false
+}

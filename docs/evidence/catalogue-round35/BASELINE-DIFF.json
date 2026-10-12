@@ -1,0 +1,9 @@
+{
+  "baselineEntries": 906,
+  "changedExistingFiles": [
+    "docs/PLAN-0.12.md"
+  ],
+  "missingFromLocalSource": [],
+  "selectorUnchanged": true,
+  "applicationAssetFilesUnchanged": true
+}
