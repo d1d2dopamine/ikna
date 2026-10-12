@@ -1,0 +1,13 @@
+{
+  "initialToolSha256": "10b97c75e737572198d98d55c4f40c5586da793efb3b6178dbeee053cf21bdbb",
+  "initialRunUtc": "2026-10-12T13:56:00Z",
+  "corrections": [
+    "Initial no-corpus-text-fetched wording was too broad: full metadata may embed examples; no corpus file or deliberate row sample was requested.",
+    "Initial networkRequests counted top-level operations and permitted same-host redirects; final tool rejects all redirects.",
+    "Initial rank gave pair archives and repository language tags equal weight; final weighting distinguishes them."
+  ],
+  "initialAndIntermediateLiveBatches": 2,
+  "topLevelMetadataOperationsBeforeFinalBatch": 6,
+  "rawResponsesRetainedOutsideSource": true,
+  "oldResultsAreNotFinalToolEvidence": true
+}

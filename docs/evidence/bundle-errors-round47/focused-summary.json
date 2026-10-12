@@ -1,0 +1,30 @@
+[
+  {
+    "name": "dev.ikna.desktop.BundleComponentFailureTest",
+    "tests": "7",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "dev.ikna.desktop.BundleRestoreFailureTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "dev.ikna.desktop.BundleWriteSafetyTest",
+    "tests": "6",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "dev.ikna.desktop.PhoneBackupWriteSafetyTest",
+    "tests": "4",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  }
+]

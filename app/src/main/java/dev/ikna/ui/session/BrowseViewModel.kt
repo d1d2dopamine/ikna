@@ -14,6 +14,7 @@ import kotlinx.coroutines.sync.withLock
 
 data class BrowseUiState(
     val loading: Boolean = true,
+    val loadFailed: Boolean = false,
     val queue: List<SessionCard> = emptyList(),
     val deckTitle: String = ""
 )
@@ -28,16 +29,28 @@ class BrowseViewModel(
     private val work = Mutex()
     private val exposureAttempts = linkedSetOf<String>()
 
-    init {
+    private val loadGate = CardLoadGate()
+
+    init { load() }
+
+    fun load() {
+        if (!loadGate.tryStart()) return
+        _state.value = BrowseUiState(deckTitle = _state.value.deckTitle)
         viewModelScope.launch {
-            work.withLock {
-                val plan = repo.startBrowse(deckId)
-                _state.value = BrowseUiState(
-                    loading = false,
-                    queue = plan.cards,
-                    deckTitle = plan.deckTitle
-                )
-            }
+            try {
+                work.withLock {
+                    cardLoadResult { repo.startBrowse(deckId) }.fold(
+                        onSuccess = { plan ->
+                            _state.value = BrowseUiState(
+                                loading = false, queue = plan.cards, deckTitle = plan.deckTitle
+                            )
+                        },
+                        onFailure = {
+                            _state.value = _state.value.copy(loading = false, loadFailed = true)
+                        }
+                    )
+                }
+            } finally { loadGate.finish() }
         }
     }
 
@@ -52,7 +65,7 @@ class BrowseViewModel(
                 for (index in indices.sorted()) {
                     val card = queue.getOrNull(index) ?: continue
                     if (!exposureAttempts.add(card.card.key)) continue
-                    runCatching { repo.recordBrowse(card, deckId) }
+                    cardLoadResult { repo.recordBrowse(card, deckId) }
                 }
             }
         }

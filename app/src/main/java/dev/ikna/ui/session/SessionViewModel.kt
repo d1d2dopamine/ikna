@@ -12,7 +12,6 @@ import dev.ikna.domain.grading.INPUT_SWIPE
 import dev.ikna.domain.session.SessionCard
 import dev.ikna.domain.session.ReviewSignals
 import dev.ikna.domain.session.ReviewSignalTracker
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -66,7 +65,6 @@ class SessionViewModel(
      * where the model is read into memory, and it is needed on every card.
      */
     private val langReady = HashMap<String, Boolean>()
-    private var undoToken = 0
     private var hintsShown = 0
     private var swipesDone = 0
 
@@ -85,10 +83,12 @@ class SessionViewModel(
      *
      * A mutex rather than a flag: the point is not to drop the second action, it
      * is to run it after the first one has finished. Nothing slow is ever held
-     * under it — the undo countdown, speech and prefetching stay on their own
-     * coroutines below, or a six second timer would freeze the screen.
+     * under it: speech and prefetching stay on their own coroutines below.
+     * Undo feedback has no timer; it stays available until dismissed or replaced
+     * by a later action.
      */
     private val work = Mutex()
+    private val loadGate = CardLoadGate()
 
     /**
      * Cards of this session's scope that were already answered when it was last
@@ -98,7 +98,13 @@ class SessionViewModel(
     private var doneAtLoad = 0
 
     private fun serially(block: suspend () -> Unit) {
-        viewModelScope.launch { work.withLock { block() } }
+        viewModelScope.launch {
+            work.withLock {
+                cardLoadResult { block() }.onFailure {
+                    _state.value = _state.value.failedLoad()
+                }
+            }
+        }
     }
 
     init {
@@ -113,19 +119,21 @@ class SessionViewModel(
      */
     private fun warmUpSpeech() {
         viewModelScope.launch {
-            val prefs = settings.current()
-            if (!prefs.speechEnabled) return@launch
-            // Who is allowed to speak is settled before a single card is
-            // rendered, and never changes for the rest of the session. Speed
-            // and pitch used to be written here instead, and they were part of
-            // the name of every cached file -- which is what made the first
-            // card of a session silent until its mark was pressed.
-            speaker.setPhoneVoice(prefs.phoneVoice)
-            // Whether the mark is drawn is decided per card, by the language in
-            // front of the user; this call only pays the cost of starting an
-            // engine while there is still time to spare.
-            speaker.warmUp()
-            onCardShown()
+            cardLoadResult {
+                val prefs = settings.current()
+                if (!prefs.speechEnabled) return@cardLoadResult
+                // Who is allowed to speak is settled before a single card is
+                // rendered, and never changes for the rest of the session. Speed
+                // and pitch used to be written here instead, and they were part of
+                // the name of every cached file -- which is what made the first
+                // card of a session silent until its mark was pressed.
+                speaker.setPhoneVoice(prefs.phoneVoice)
+                // Whether the mark is drawn is decided per card, by the language in
+                // front of the user; this call only pays the cost of starting an
+                // engine while there is still time to spare.
+                speaker.warmUp()
+                onCardShown()
+            }
         }
     }
 
@@ -139,13 +147,15 @@ class SessionViewModel(
         val card = s.current ?: return
         if (!s.speakable) return
         viewModelScope.launch {
-            val prefs = settings.current()
-            if (!prefs.speechEnabled) return@launch
-            // Cheap when nothing changed, and it is what makes the switch in
-            // settings take effect on the very next press, without leaving the
-            // session to do it.
-            speaker.setPhoneVoice(prefs.phoneVoice)
-            speaker.speak(spokenText(card), card.chunk.lang)
+            cardLoadResult {
+                val prefs = settings.current()
+                if (!prefs.speechEnabled) return@cardLoadResult
+                // Cheap when nothing changed, and it is what makes the switch in
+                // settings take effect on the very next press, without leaving the
+                // session to do it.
+                speaker.setPhoneVoice(prefs.phoneVoice)
+                speaker.speak(spokenText(card), card.chunk.lang)
+            }
         }
     }
 
@@ -161,38 +171,40 @@ class SessionViewModel(
     private fun onCardShown() {
         reviewSignals = ReviewSignalTracker()
         viewModelScope.launch {
-            val s = _state.value
-            val card = s.current ?: return@launch
-            val prefs = settings.current()
-            if (!prefs.speechEnabled) return@launch
+            cardLoadResult {
+                val s = _state.value
+                val card = s.current ?: return@cardLoadResult
+                val prefs = settings.current()
+                if (!prefs.speechEnabled) return@cardLoadResult
 
-            // Whether this card can be spoken is a question about its language.
-            // It used to be asked once, about the phone's engine, and never
-            // about the model -- so a deck in the model's language stayed silent
-            // whenever the phone had no voice for it, and a deck the model does
-            // not speak showed a mark that did nothing when pressed.
-            val lang = card.chunk.lang
-            val ready = canSpeak(lang)
-            if (ready != _state.value.speechReady) {
-                _state.value = _state.value.copy(speechReady = ready)
+                // Whether this card can be spoken is a question about its language.
+                // It used to be asked once, about the phone's engine, and never
+                // about the model -- so a deck in the model's language stayed silent
+                // whenever the phone had no voice for it, and a deck the model does
+                // not speak showed a mark that did nothing when pressed.
+                val lang = card.chunk.lang
+                val ready = canSpeak(lang)
+                if (ready != _state.value.speechReady) {
+                    _state.value = _state.value.copy(speechReady = ready)
+                }
+                if (!ready) return@cardLoadResult
+
+                val key = card.card.key
+                // Rendered first, played second. The old order asked for audio that
+                // nothing had written yet, so the one card meant to speak by itself
+                // -- a phrase met for the first time -- was the one that never did.
+                speaker.prefetch(spokenText(card), lang)
+                // Every card, or only a phrase being met for the first time. Either
+                // way the card has to still be the card in front: rendering can take
+                // a moment, and sound that arrives over the next card is worse than
+                // no sound at all.
+                val speaks = prefs.autoSpeakEvery || card.isFirstContact
+                if (speaks && _state.value.current?.card?.key == key) {
+                    speaker.speakIfReady(spokenText(card), lang)
+                }
+
+                s.nextCard?.let { ahead -> speaker.prefetch(spokenText(ahead), ahead.chunk.lang) }
             }
-            if (!ready) return@launch
-
-            val key = card.card.key
-            // Rendered first, played second. The old order asked for audio that
-            // nothing had written yet, so the one card meant to speak by itself
-            // -- a phrase met for the first time -- was the one that never did.
-            speaker.prefetch(spokenText(card), lang)
-            // Every card, or only a phrase being met for the first time. Either
-            // way the card has to still be the card in front: rendering can take
-            // a moment, and sound that arrives over the next card is worse than
-            // no sound at all.
-            val speaks = prefs.autoSpeakEvery || card.isFirstContact
-            if (speaks && _state.value.current?.card?.key == key) {
-                speaker.speakIfReady(spokenText(card), lang)
-            }
-
-            s.nextCard?.let { ahead -> speaker.prefetch(spokenText(ahead), ahead.chunk.lang) }
         }
     }
 
@@ -224,44 +236,47 @@ class SessionViewModel(
         speaker.stop()
     }
 
-    fun load(showLoading: Boolean = true) {
+    fun load() {
+        if (!loadGate.tryStart()) return
+        _state.value = _state.value.beginLoad()
         serially {
-            if (showLoading) _state.value = _state.value.copy(loading = true)
-            val plan = repo.buildSession(deckId)
-            planned = plan.cards
-            answeredKeys.clear()
-            doneAtLoad = plan.sessionDone
-            val prefs = settings.current()
-            hintsShown = prefs.revealHintsShown
-            swipesDone = prefs.swipesDone
+            try {
+                val plan = repo.buildSession(deckId)
+                planned = plan.cards
+                answeredKeys.clear()
+                doneAtLoad = plan.sessionDone
+                val prefs = settings.current()
+                hintsShown = prefs.revealHintsShown
+                swipesDone = prefs.swipesDone
 
-            // Measured if there is enough history, remembered otherwise. The
-            // fresh measurement is also written down, so the next session that
-            // cannot measure anything still knows what an answer costs.
-            val measured = repo.medianAnswerMs()
-            if (measured != null) settings.setAnswerMs(measured.toInt())
-            val remembered = prefs.answerMs.takeIf { it > 0 }?.toLong()
-            _state.value = SessionUiState(
-                loading = false,
-                queue = plan.cards,
-                index = 0,
-                revealed = false,
-                remaining = plan.cards.size,
-                answeredToday = plan.answeredToday,
-                sessionDone = plan.sessionDone,
-                sessionTotal = plan.sessionTotal,
-                deckTitle = plan.deckTitle,
-                dailyMinimum = repo.dailyMinimum(),
-                perCardMs = measured ?: remembered,
-                reason = plan.reason,
-                nextDueAt = plan.nextDueAt,
-                canUndo = plan.answeredToday > 0,
-                showRevealHint = hintsShown < HINT_LIMIT,
-                swipeFluent = swipesDone >= SWIPE_FLUENCY,
-                finished = plan.cards.isEmpty()
-            )
-            shownAt = System.currentTimeMillis()
-            onCardShown()
+                // Measured if there is enough history, remembered otherwise. The
+                // fresh measurement is also written down, so the next session that
+                // cannot measure anything still knows what an answer costs.
+                val measured = repo.medianAnswerMs()
+                if (measured != null) settings.setAnswerMs(measured.toInt())
+                val remembered = prefs.answerMs.takeIf { it > 0 }?.toLong()
+                _state.value = SessionUiState(
+                    loading = false,
+                    queue = plan.cards,
+                    index = 0,
+                    revealed = false,
+                    remaining = plan.cards.size,
+                    answeredToday = plan.answeredToday,
+                    sessionDone = plan.sessionDone,
+                    sessionTotal = plan.sessionTotal,
+                    deckTitle = plan.deckTitle,
+                    dailyMinimum = repo.dailyMinimum(),
+                    perCardMs = measured ?: remembered,
+                    reason = plan.reason,
+                    nextDueAt = plan.nextDueAt,
+                    canUndo = plan.answeredToday > 0,
+                    showRevealHint = hintsShown < HINT_LIMIT,
+                    swipeFluent = swipesDone >= SWIPE_FLUENCY,
+                    finished = plan.cards.isEmpty()
+                )
+                shownAt = System.currentTimeMillis()
+                onCardShown()
+            } finally { loadGate.finish() }
         }
     }
 
@@ -318,7 +333,6 @@ class SessionViewModel(
 
         // Undo belongs to answers. There is nothing to take back here, and
         // leaving the offer up would suggest the card came back.
-        undoToken++
 
         _state.value = s.copy(
             queue = queue,
@@ -366,8 +380,6 @@ class SessionViewModel(
         if (secondPass) drilled += card.card.key
         val queue = if (rating == Rating.AGAIN || secondPass) s.queue + card else s.queue
         val nextIndex = s.index + 1
-        undoToken++
-        val token = undoToken
 
         _state.value = s.copy(
             queue = queue,
@@ -396,10 +408,6 @@ class SessionViewModel(
         onCardShown()
 
         serially { repo.answer(card, rating, duration, now, signals) }
-        viewModelScope.launch {
-            delay(UNDO_WINDOW_MS)
-            if (token == undoToken) _state.value = _state.value.copy(undoVisible = false)
-        }
     }
 
     /**
@@ -408,13 +416,15 @@ class SessionViewModel(
      * has to be reversible without thinking.
      */
     fun undo() {
+        if (_state.value.loading || _state.value.loadFailed) return
+        _state.value = _state.value.copy(loading = true)
         serially {
             val key = repo.undoLast()
             if (key == null) {
-                _state.value = _state.value.copy(undoVisible = false, canUndo = false, undoFailed = true)
+                _state.value = _state.value.copy(loading = false, undoVisible = false, canUndo = false, undoFailed = true)
                 return@serially
             }
-            undoToken++
+
             val plan = repo.buildSession(deckId)
             planned = plan.cards
             answeredKeys.clear()
@@ -422,6 +432,7 @@ class SessionViewModel(
             val ordered = plan.cards.sortedBy { if (it.card.key == key) 0 else 1 }
             _state.value = _state.value.copy(
                 loading = false,
+                loadFailed = false,
                 queue = ordered,
                 index = 0,
                 revealed = false,
@@ -443,7 +454,6 @@ class SessionViewModel(
     }
 
     fun dismissUndo() {
-        undoToken++
         _state.value = _state.value.copy(undoVisible = false)
     }
 
@@ -453,10 +463,12 @@ class SessionViewModel(
      * heavier queue tomorrow.
      */
     fun addExtra() {
+        if (_state.value.loading || _state.value.loadFailed) return
+        _state.value = _state.value.copy(loading = true)
         serially {
             val added = repo.addExtra(EXTRA_BATCH, deckId)
             if (added == 0) {
-                _state.value = _state.value.copy(noMoreExtra = true)
+                _state.value = _state.value.copy(loading = false, noMoreExtra = true, finished = _state.value.index >= _state.value.queue.size)
                 return@serially
             }
             val plan = repo.buildSession(deckId)
@@ -464,6 +476,8 @@ class SessionViewModel(
             answeredKeys.clear()
             doneAtLoad = plan.sessionDone
             _state.value = _state.value.copy(
+                loading = false,
+                loadFailed = false,
                 queue = plan.cards,
                 index = 0,
                 revealed = false,
@@ -483,7 +497,6 @@ class SessionViewModel(
     }
 
     companion object {
-        private const val UNDO_WINDOW_MS = 6_000L
         private const val EXTRA_BATCH = 5
         /** The tap hint disappears once, after five cards. No permanent chrome. */
         private const val HINT_LIMIT = 5

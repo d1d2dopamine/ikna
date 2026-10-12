@@ -1,7 +1,17 @@
 package dev.ikna.desktop
 import dev.ikna.ui.catalog.IknaCatalogDeckRow
+import dev.ikna.data.catalog.CatalogFilter
+import dev.ikna.data.catalog.decksFor
+import dev.ikna.data.catalog.learnableLangs
+import dev.ikna.data.catalog.levelsFor
+import dev.ikna.data.catalog.meaningLangsFor
+import dev.ikna.data.catalog.normalizeCatalogFilter
+import dev.ikna.data.catalog.subjectsFor
 import dev.ikna.data.catalog.tatoebaSentenceUrl
+import dev.ikna.data.catalog.tierOf
 
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -13,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -32,6 +43,9 @@ import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.Space
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import java.awt.Desktop
 import java.net.URI
@@ -61,11 +75,9 @@ fun CatalogPane(
 
     var index by remember { mutableStateOf<CatalogIndex?>(null) }
     var loading by remember { mutableStateOf(true) }
-    var lang by remember { mutableStateOf<String?>(null) }
-    var meaning by remember { mutableStateOf<String?>(null) }
-    var subject by remember { mutableStateOf<String?>(null) }
-    var level by remember { mutableStateOf<String?>(null) }
-    var note by remember { mutableStateOf<String?>(null) }
+    var filter by remember { mutableStateOf(CatalogFilter()) }
+    val notes = remember { mutableStateMapOf<String, String>() }
+    val planRefreshFailures = remember { mutableStateMapOf<String, Boolean>() }
     var busyDeck by remember { mutableStateOf<String?>(null) }
     var progress by remember { mutableStateOf(0f) }
     var installed by remember { mutableStateOf<Set<String>>(emptySet()) }
@@ -76,14 +88,25 @@ fun CatalogPane(
     var preview by remember { mutableStateOf<List<CatalogPreviewCard>>(emptyList()) }
 
     suspend fun refreshInstalled() {
-        installed = runCatching {
+        installed = try {
             container.deckRepository.decks().map { it.id }.toSet()
-        }.getOrDefault(emptySet())
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            installed
+        }
+    }
+
+    suspend fun refreshStudyPlan(packId: String) {
+        planRefreshFailures[packId] = !dev.ikna.data.catalog.refreshCatalogStudyPlan {
+            container.learningRepository.invalidatePlan()
+        }
     }
 
     suspend fun load() {
         loading = true
         index = runCatching { fetch.index() }.getOrNull()
+        index?.let { filter = normalizeCatalogFilter(it, filter) }
         loading = false
     }
 
@@ -93,213 +116,219 @@ fun CatalogPane(
     }
 
     val current = index
-    val decks = current?.decks.orEmpty()
-        .filter { lang == null || it.lang == lang }
-        .filter { meaning == null || it.meaningLang == meaning }
-        .filter { subject == null || it.subject == subject }
-        .filter { level == null || it.level == level }
+    val decks = current?.let { decksFor(it, filter) }.orEmpty()
 
-    DesktopScrollablePane(S.t("cat.001"), onBack) {
+    // The pane owns jobs and status; lazy row disposal only releases the presentation.
+    DesktopLazyPane(S.t("cat.001"), onBack) {
+        item(key = "catalog-intro") {
+            Column(Modifier.fillMaxWidth()) {
+                Spacer(Modifier.height(Space.lg))
+                Spacer(Modifier.height(Space.xs))
+                Text(
+                    text = S.t("cat.002"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = palette.muted
+                )
 
-Spacer(Modifier.height(Space.lg))
-Spacer(Modifier.height(Space.xs))
-Text(
-    text = S.t("cat.002"),
-    style = MaterialTheme.typography.bodySmall,
-    color = palette.muted
-)
-
-Spacer(Modifier.height(Space.lg))
-
-when {
-    loading -> {
-        Text(
-            text = S.t("cat.003"),
-            style = MaterialTheme.typography.labelSmall,
-            color = palette.muted
-        )
-        Spacer(Modifier.height(Space.lg))
-        IknaLatticePlaceholder()
-    }
-
-    current == null -> {
-        Text(
-            text = S.t("cat.004"),
-            style = MaterialTheme.typography.bodyMedium,
-            color = palette.ink
-        )
-        Spacer(Modifier.height(Space.md))
-        IknaWideButton(
-            label = S.t("cat.006"),
-            filled = true,
-            onClick = { scope.launch { load() } }
-        )
-        Spacer(Modifier.height(Space.md))
-        IknaTextButton(
-            label = S.t("cat.005"),
-            onClick = { openInBrowser(CATALOG_PAGE_URL) },
-            color = palette.accent
-        )
-    }
-
-    else -> {
-        Text(
-            text = S.t("cat.026") + current.builtAt,
-            style = MaterialTheme.typography.labelSmall,
-            color = palette.muted
-        )
-
-        Spacer(Modifier.height(Space.lg))
-        FilterRow(
-            title = S.t("cat.007"),
-            values = current.decks.map { it.lang }.distinct().sorted(),
-            selected = lang,
-            palette = palette,
-            labelOf = { it.uppercase() },
-            onPick = { picked -> lang = picked; meaning = null; subject = null; level = null }
-        )
-        FilterRow(
-            title = S.t("cat.008"),
-            values = current.decks
-                .filter { lang == null || it.lang == lang }
-                .map { it.meaningLang }.distinct().sorted(),
-            selected = meaning,
-            palette = palette,
-            labelOf = { it.uppercase() },
-            onPick = { picked -> meaning = picked }
-        )
-        FilterRow(
-            title = S.t("cat.009"),
-            values = current.decks
-                .map { it.subject }.filter { it.isNotEmpty() }
-                .distinct().sorted(),
-            selected = subject,
-            palette = palette,
-            labelOf = { it },
-            onPick = { picked -> subject = picked }
-        )
-        FilterRow(
-            title = S.t("cat.010"),
-            values = listOf("beginner", "middle", "advanced")
-                .filter { value -> current.decks.any { it.level == value } },
-            selected = level,
-            palette = palette,
-            labelOf = { levelLabel(it) },
-            onPick = { picked -> level = picked }
-        )
-
-        // How well this pair is served, computed by the
-        // pipeline rather than decided here.
-        val pair = current.pairs.firstOrNull {
-            it.lang == lang && it.meaningLang == meaning
+                Spacer(Modifier.height(Space.lg))
+            }
         }
-        if (lang != null && meaning != null) {
-            Spacer(Modifier.height(Space.md))
-            Text(
-                text = when {
-                    pair == null -> S.t("cat.014")
-                    pair.tier == TIER_FULL -> S.t("cat.012")
-                    else -> S.t("cat.013")
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = palette.muted
-            )
-        }
-
-        Spacer(Modifier.height(Space.lg))
-        IknaRule()
-
-        if (decks.isEmpty()) {
-            Spacer(Modifier.height(Space.lg))
-            Text(
-                text = S.t("cat.030"),
-                style = MaterialTheme.typography.bodyMedium,
-                color = palette.muted
-            )
-            Spacer(Modifier.height(Space.lg))
-            IknaLatticePlaceholder()
-        }
-
-        decks.forEach { deck ->
-            val packId = packIdOf(deck)
-            Spacer(Modifier.height(Space.lg))
-            IknaCatalogDeckRow(deck = deck, open = openDeckId == packId,
-                installed = packId in installed, busy = busyDeck == packId,
-                blocked = busyDeck != null, importing = busyDeck == packId && progress >= 1f,
-                fraction = progress, percent = (progress * 100).toInt(),
-                previewLoading = previewLoading && previewFor == packId,
-                previewFailed = !previewLoading && previewFor == packId && preview.isEmpty(),
-                previewCards = if (previewFor == packId) preview else emptyList(),
-                onOpen = { openDeckId = if (openDeckId == packId) null else packId },
-                onSource = { id -> tatoebaSentenceUrl(id)?.let(::openInBrowser) },
-                onPreview = {
-                    val request = ++previewToken
-                    previewFor = packId; previewLoading = true; preview = emptyList()
-                    scope.launch {
-                        val result = runCatching { fetch.preview(deck) }.getOrNull().orEmpty()
-                        if (request == previewToken) { preview = result; previewLoading = false }
+        when {
+            loading -> {
+                item(key = "catalog-loading") {
+                    Column(Modifier.fillMaxWidth()) {
+                        Text(
+                            text = S.t("cat.003"),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.muted
+                        )
+                        Spacer(Modifier.height(Space.lg))
+                        IknaLatticePlaceholder()
                     }
-                }, onInstall = {
-                        scope.launch {
-                            busyDeck = packId
-                            progress = 0f
-                            note = null
-                            val text = runCatching {
-                                fetch.deck(deck) { read, total ->
-                                    progress = if (total <= 0L) 0f
-                                    else (read.toFloat() / total).coerceIn(0f, 1f)
-                                }
-                            }.getOrNull()
-                            if (text == null) {
-                                busyDeck = null
-                                note = S.t("cat.020")
-                                return@launch
-                            }
-                            progress = 1f
-                            val report = runCatching {
-                                container.packLoader.importJsonl(
-                                    packId = packId,
-                                    title = deck.title,
-                                    lang = deck.lang,
-                                    text = text
-                                )
-                            }.getOrNull()
-                            busyDeck = null
-                            if (report == null || report.installed == 0) {
-                                note = S.t("cat.021")
-                                return@launch
-                            }
-                            runCatching {
-                                container.learningRepository.invalidatePlan()
-                            }
-                            refreshInstalled()
-                            onChanged()
-                            note = S.t("cat.022") + report.installed
+                }
+            }
+            current == null -> {
+                item(key = "catalog-error") {
+                    Column(Modifier.fillMaxWidth()) {
+                        Text(
+                            text = S.t("cat.004"),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = palette.ink
+                        )
+                        Spacer(Modifier.height(Space.md))
+                        IknaWideButton(
+                            label = S.t("cat.006"),
+                            filled = true,
+                            onClick = { scope.launch { load() } }
+                        )
+                        Spacer(Modifier.height(Space.md))
+                        IknaTextButton(
+                            label = S.t("cat.005"),
+                            onClick = { openInBrowser(CATALOG_PAGE_URL) },
+                            color = palette.accent
+                        )
+                    }
+                }
+            }
+            else -> {
+                item(key = "catalog-filters") {
+                    Column(Modifier.fillMaxWidth()) {
+                        Text(
+                            text = S.t("cat.026") + current.builtAt,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.muted
+                        )
+
+                        Spacer(Modifier.height(Space.lg))
+                        FilterRow(
+                            title = S.t("cat.007"),
+                            values = learnableLangs(current),
+                            selected = filter.lang.ifEmpty { null },
+                            palette = palette,
+                            labelOf = { it.uppercase() },
+                            onPick = { picked -> filter = normalizeCatalogFilter(current, filter.copy(lang = picked.orEmpty())) }
+                        )
+                        FilterRow(
+                            title = S.t("cat.008"),
+                            values = meaningLangsFor(current, filter.lang),
+                            selected = filter.meaningLang.ifEmpty { null },
+                            palette = palette,
+                            labelOf = { it.uppercase() },
+                            onPick = { picked -> filter = normalizeCatalogFilter(current, filter.copy(meaningLang = picked.orEmpty())) }
+                        )
+                        FilterRow(
+                            title = S.t("cat.009"),
+                            values = subjectsFor(current, filter),
+                            selected = filter.subject.ifEmpty { null },
+                            palette = palette,
+                            labelOf = { it },
+                            onPick = { picked -> filter = normalizeCatalogFilter(current, filter.copy(subject = picked.orEmpty())) }
+                        )
+                        FilterRow(
+                            title = S.t("cat.010"),
+                            values = levelsFor(current, filter),
+                            selected = filter.level.ifEmpty { null },
+                            palette = palette,
+                            labelOf = { levelLabel(it) },
+                            onPick = { picked -> filter = normalizeCatalogFilter(current, filter.copy(level = picked.orEmpty())) }
+                        )
+
+                        // How well this pair is served, computed by the
+                        // pipeline rather than decided here.
+                        val tier = tierOf(current, filter.lang, filter.meaningLang)
+                        if (filter.lang.isNotEmpty() && filter.meaningLang.isNotEmpty()) {
+                            Spacer(Modifier.height(Space.md))
+                            Text(
+                                text = when {
+                                    tier == null -> S.t("cat.014")
+                                    tier == TIER_FULL -> S.t("cat.012")
+                                    else -> S.t("cat.013")
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = palette.muted
+                            )
                         }
-                })
-            Spacer(Modifier.height(Space.md)); IknaRule()
+
+                        Spacer(Modifier.height(Space.lg))
+                        IknaRule()
+                    }
+                }
+                if (decks.isEmpty()) {
+                    item(key = "catalog-empty") {
+                        Column(Modifier.fillMaxWidth()) {
+                            Spacer(Modifier.height(Space.lg))
+                            Text(
+                                text = S.t("cat.030"),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = palette.muted
+                            )
+                            Spacer(Modifier.height(Space.lg))
+                            IknaLatticePlaceholder()
+                        }
+                    }
+                }
+                items(decks, key = { "deck:${it.id}" }, contentType = { "deck" }) { deck ->
+                    Column(Modifier.fillMaxWidth()) {
+                        val packId = packIdOf(deck)
+                        Spacer(Modifier.height(Space.lg))
+                        IknaCatalogDeckRow(deck = deck, resultNote = notes[packId],
+                            planRefreshFailed = planRefreshFailures[packId] == true,
+                            onRetryPlan = { scope.launch { refreshStudyPlan(packId) } }, open = openDeckId == packId,
+                            installed = packId in installed, busy = busyDeck == packId,
+                            blocked = busyDeck != null, importing = busyDeck == packId && progress >= 1f,
+                            fraction = progress, percent = (progress * 100).toInt(),
+                            previewLoading = previewLoading && previewFor == packId,
+                            previewFailed = !previewLoading && previewFor == packId && preview.isEmpty(),
+                            previewCards = if (previewFor == packId) preview else emptyList(),
+                            onOpen = { openDeckId = if (openDeckId == packId) null else packId },
+                            onSource = { id -> tatoebaSentenceUrl(id)?.let(::openInBrowser) },
+                            onPreview = {
+                                val request = ++previewToken
+                                previewFor = packId; previewLoading = true; preview = emptyList()
+                                scope.launch {
+                                    val result = runCatching { fetch.preview(deck) }.getOrNull().orEmpty()
+                                    if (request == previewToken) { preview = result; previewLoading = false }
+                                }
+                            }, onInstall = {
+                                    scope.launch {
+                                        busyDeck = packId
+                                        progress = 0f
+                                        notes.remove(packId)
+                                        try {
+                                            val text = fetch.deck(deck) { read, total ->
+                                                progress = if (total <= 0L) 0f
+                                                else (read.toFloat() / total).coerceIn(0f, 1f)
+                                            }
+                                            currentCoroutineContext().ensureActive()
+                                            if (text == null) {
+                                                notes[packId] = S.t("cat.020")
+                                                return@launch
+                                            }
+                                            progress = 1f
+                                            val report = try {
+                                                container.importCatalogDeck(
+                                                    packId = packId,
+                                                    title = deck.title,
+                                                    lang = deck.lang,
+                                                    text = text
+                                                )
+                                            } catch (cancelled: CancellationException) {
+                                                throw cancelled
+                                            } catch (_: Exception) {
+                                                null
+                                            }
+                                            currentCoroutineContext().ensureActive()
+                                            if (report == null || report.installed == 0) {
+                                                notes[packId] = S.t("cat.021")
+                                                return@launch
+                                            }
+                                            installed = installed + packId
+                                            refreshStudyPlan(packId)
+                                            refreshInstalled()
+                                            currentCoroutineContext().ensureActive()
+                                            onChanged()
+                                            notes[packId] = S.t("cat.022") + report.installed
+                                        } finally {
+                                            busyDeck = null
+                                        }
+                                    }
+                            })
+                        Spacer(Modifier.height(Space.md)); IknaRule()
+                    }
+                }
+                item(key = "catalog-footer") {
+                    Column(Modifier.fillMaxWidth()) {
+                        Spacer(Modifier.height(Space.lg))
+                        IknaTextButton(
+                            label = S.t("cat.005"),
+                            onClick = { openInBrowser(CATALOG_PAGE_URL) },
+                            color = palette.muted
+                        )
+                    }
+                }
+            }
         }
-
-        note?.let { text ->
-            Spacer(Modifier.height(Space.lg))
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodyMedium,
-                color = palette.ink
-            )
-        }
-
-        Spacer(Modifier.height(Space.lg))
-        IknaTextButton(
-            label = S.t("cat.005"),
-            onClick = { openInBrowser(CATALOG_PAGE_URL) },
-            color = palette.muted
-        )
-    }
-}
-
-Spacer(Modifier.height(Space.xxl))
-
+        item(key = "catalog-bottom-space") { Spacer(Modifier.height(Space.xxl)) }
     }
 }
 

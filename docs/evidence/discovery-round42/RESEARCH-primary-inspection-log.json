@@ -1,0 +1,20 @@
+[
+  {
+    "name": "apple-hat-card",
+    "requested_url": "https://huggingface.co/datasets/apple/hat/raw/main/README.md",
+    "started_utc": "2026-10-12T13:55:09.528428+00:00",
+    "read_scope": "dataset_card_or_file_metadata_only",
+    "status": 200,
+    "resolved_url": "https://huggingface.co/datasets/apple/hat/raw/main/README.md",
+    "finished_utc": "2026-10-12T13:55:13.280152+00:00"
+  },
+  {
+    "name": "apple-hat-info",
+    "requested_url": "https://huggingface.co/api/datasets/apple/hat?blobs=true",
+    "started_utc": "2026-10-12T13:55:13.280169+00:00",
+    "read_scope": "dataset_card_or_file_metadata_only",
+    "status": 200,
+    "resolved_url": "https://huggingface.co/api/datasets/apple/hat?blobs=true",
+    "finished_utc": "2026-10-12T13:55:16.887373+00:00"
+  }
+]

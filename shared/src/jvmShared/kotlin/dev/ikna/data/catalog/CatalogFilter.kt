@@ -51,10 +51,25 @@ fun subjectsFor(index: CatalogIndex, filter: CatalogFilter): List<String> =
 fun levelsFor(index: CatalogIndex, filter: CatalogFilter): List<String> {
     val present = index.decks
         .filter { matchesLangs(it, filter) }
+        .filter { filter.subject.isEmpty() || it.subject == filter.subject }
         .map { it.level }
         .filter { it.isNotEmpty() }
         .distinct()
     return LEVEL_ORDER.filter { present.contains(it) } + present.filter { !LEVEL_ORDER.contains(it) }.sorted()
+}
+
+/**
+ * Keep selections that are still offered, clearing unavailable dependent values
+ * in question order. Search is deliberate free text and is never silently reset.
+ */
+fun normalizeCatalogFilter(index: CatalogIndex, filter: CatalogFilter): CatalogFilter {
+    var current = filter.copy(lang = filter.lang.takeIf { it in learnableLangs(index) }.orEmpty())
+    current = current.copy(meaningLang = current.meaningLang
+        .takeIf { it in meaningLangsFor(index, current.lang) }.orEmpty())
+    current = current.copy(subject = current.subject
+        .takeIf { it in subjectsFor(index, current) }.orEmpty())
+    return current.copy(level = current.level
+        .takeIf { it in levelsFor(index, current) }.orEmpty())
 }
 
 /** The decks a filter leaves, in the order they are drawn. */

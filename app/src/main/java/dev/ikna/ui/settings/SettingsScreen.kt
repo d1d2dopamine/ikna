@@ -1,5 +1,9 @@
 package dev.ikna.ui.settings
 
+import dev.ikna.data.export.backupJournalThenWipe
+import dev.ikna.data.export.PreWipeBackupException
+import kotlinx.coroutines.CancellationException
+
 import dev.ikna.data.prefs.suppressedOf
 import dev.ikna.data.dev.IknaDataProfile
 import dev.ikna.ui.text.S
@@ -48,6 +52,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -136,6 +143,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var message by remember { mutableStateOf<String?>(null) }
+    var restoreMessage by remember { mutableStateOf<String?>(null) }
     var confirmReset by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
 
@@ -257,42 +265,48 @@ fun SettingsScreen(
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
             busy = true
-            val text = withContext(Dispatchers.IO) {
-                runCatching {
-                    context.contentResolver.openInputStream(uri)
-                        ?.bufferedReader()?.use { it.readText() } ?: ""
-                }.getOrDefault("")
-            }
-
-            // One button for both files. Asking the user which of the two they
-            // picked would be asking them to remember a distinction the app
-            // invented; the file says what it is in its first line.
-            if (SettingsBackup.looksLikeSettings(text)) {
-                val snapshot = SettingsBackup.decode(text)
-                if (snapshot == null) {
-                    message = S.t("set.005")
-                } else {
-                    SettingsBackup.apply(container.settings, snapshot)
-                    val restoredFontMode = snapshot.fontMode.takeIf { it.isNotBlank() }?.let { raw ->
-                        runCatching { FontMode.valueOf(raw) }.getOrNull()
-                    } ?: if (snapshot.fontName.isNotBlank()) FontMode.CUSTOM else FontMode.GEOLOGICA
-                    message = if (restoredFontMode == FontMode.CUSTOM && snapshot.fontName.isNotBlank()) {
-                        S.t("set.007") + snapshot.fontName + S.t("set.008")
-                    } else {
-                        S.t("set.006")
-                    }
+            restoreMessage = null
+            try {
+                val text = withContext(Dispatchers.IO) {
+                    val input = context.contentResolver.openInputStream(uri)
+                        ?: throw java.io.IOException("Restore source could not be opened")
+                    input.bufferedReader().use { it.readText() }
                 }
-                busy = false
-                return@launch
-            }
 
-            val result = withContext(Dispatchers.IO) {
-                container.restoreRepository.restoreFromJsonl(text)
+                // One button for both files. Asking the user which of the two they
+                // picked would be asking them to remember a distinction the app
+                // invented; the file says what it is in its first line.
+                if (SettingsBackup.looksLikeSettings(text)) {
+                    val snapshot = SettingsBackup.decode(text)
+                    if (snapshot == null) {
+                        restoreMessage = S.t("set.005")
+                    } else {
+                        SettingsBackup.apply(container.settings, snapshot)
+                        val restoredFontMode = snapshot.fontMode.takeIf { it.isNotBlank() }?.let { raw ->
+                            runCatching { FontMode.valueOf(raw) }.getOrNull()
+                        } ?: if (snapshot.fontName.isNotBlank()) FontMode.CUSTOM else FontMode.GEOLOGICA
+                        restoreMessage = if (restoredFontMode == FontMode.CUSTOM && snapshot.fontName.isNotBlank()) {
+                            S.t("set.007") + snapshot.fontName + S.t("set.008")
+                        } else {
+                            S.t("set.006")
+                        }
+                    }
+                    return@launch
+                }
+
+                val result = withContext(Dispatchers.IO) {
+                    container.restoreRepository.restoreFromJsonl(text)
+                }
+                restoreMessage = S.t("set.009") + result.imported +
+                    S.t("set.010") + result.replayed +
+                    (if (result.skipped > 0) S.t("set.011") + result.skipped else "")
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                restoreMessage = S.t("restore.001")
+            } finally {
+                busy = false
             }
-            busy = false
-            message = S.t("set.009") + result.imported +
-                S.t("set.010") + result.replayed +
-                (if (result.skipped > 0) S.t("set.011") + result.skipped else "")
         }
     }
 
@@ -931,6 +945,16 @@ fun SettingsScreen(
                             )
                         }
 
+                        restoreMessage?.let { status ->
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                text = status,
+                                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
                         // Cards taken out of rotation by "this card is wrong".
                         //
                         // Marking a card wrong has to be one tap and no dialog, or it
@@ -1147,19 +1171,33 @@ fun SettingsScreen(
                                         wipeArmed = false
                                         busy = true
                                         scope.launch {
-                                            withContext(Dispatchers.IO) {
-                                                // Export first: if it fails, the wipe
-                                                // still proceeds, because the user
-                                                // asked for a wipe, not for a backup.
-                                                runCatching { container.jsonExporter.export() }
-                                                container.wipeDatabase()
-                                                container.settings.clearAll()
+                                            try {
+                                                withContext(Dispatchers.IO) {
+                                                    backupJournalThenWipe(
+                                                        exportJournal = { container.jsonExporter.export() },
+                                                        exportSettings = {
+                                                            container.jsonExporter.exportSettings(
+                                                                SettingsBackup.encode(
+                                                                    container.settings.current(),
+                                                                    synthetic = container.isDeveloperMode
+                                                                )
+                                                            )
+                                                        },
+                                                        wipe = {
+                                                            container.wipeDatabase()
+                                                            container.settings.clearAll()
+                                                        }
+                                                    )
+                                                }
+                                                dev.ikna.ProfileRestartActivity.restart(context)
+                                            } catch (cancelled: CancellationException) {
+                                                throw cancelled
+                                            } catch (failure: Exception) {
+                                                message = S.t(if (failure is PreWipeBackupException)
+                                                    "wipe.001" else "wipe.002")
+                                            } finally {
+                                                busy = false
                                             }
-                                            // Restart the process: repositories, workers
-                                            // and session state all outlive the tables
-                                            // otherwise, and a half-empty app in memory
-                                            // looks exactly like a bug.
-                                            dev.ikna.ProfileRestartActivity.restart(context)
                                         }
                                     }
                                 }

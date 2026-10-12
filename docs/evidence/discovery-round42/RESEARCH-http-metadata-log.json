@@ -1,0 +1,44 @@
+[
+  {
+    "name": "opus-pl-ko-latest-moses",
+    "requested_url": "https://opus.nlpl.eu/opusapi/?source=pl&target=ko&preprocessing=moses&version=latest",
+    "started_utc": "2026-10-12T13:53:12.433966+00:00",
+    "transport": "python urllib.request",
+    "read_scope": "metadata_only_no_corpus_payloads",
+    "status": 200,
+    "resolved_url": "https://opus.nlpl.eu/opusapi?source=pl&target=ko&preprocessing=moses&version=latest",
+    "content_type": "application/json",
+    "etag": null,
+    "link": null,
+    "rows": 22,
+    "finished_utc": "2026-10-12T13:53:22.606435+00:00"
+  },
+  {
+    "name": "hf-name-polish-korean",
+    "requested_url": "https://huggingface.co/api/datasets?search=polish-korean&limit=30&full=true",
+    "started_utc": "2026-10-12T13:53:22.606512+00:00",
+    "transport": "python urllib.request",
+    "read_scope": "metadata_only_no_corpus_payloads",
+    "status": 200,
+    "resolved_url": "https://huggingface.co/api/datasets?search=polish-korean&limit=30&full=true",
+    "content_type": "application/json; charset=utf-8",
+    "etag": "W/\"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w\"",
+    "link": null,
+    "rows": 0,
+    "finished_utc": "2026-10-12T13:53:25.003598+00:00"
+  },
+  {
+    "name": "hf-pl-ko-translation",
+    "requested_url": "https://huggingface.co/api/datasets?filter=language%3Apl&filter=language%3Ako&filter=task_categories%3Atranslation&limit=30&full=true",
+    "started_utc": "2026-10-12T13:53:25.003659+00:00",
+    "transport": "python urllib.request",
+    "read_scope": "metadata_only_no_corpus_payloads",
+    "status": 200,
+    "resolved_url": "https://huggingface.co/api/datasets?filter=language%3Apl&filter=language%3Ako&filter=task_categories%3Atranslation&limit=30&full=true",
+    "content_type": "application/json; charset=utf-8",
+    "etag": "W/\"eaaab-bxOtzInYXu9TssefY0fmkxEsV6E\"",
+    "link": "<https://huggingface.co/api/datasets?filter=language%3Apl&filter=language%3Ako&filter=task_categories%3Atranslation&limit=30&full=true&cursor=eyIkb3IiOlt7InRyZW5kaW5nU2NvcmUiOjAsIl9pZCI6eyIkZ3QiOiI2NTM2OGExNTU2OGQ4YmU4ZmFkZDhhMTEifX0seyJ0cmVuZGluZ1Njb3JlIjp7IiRsdCI6MH19LHsidHJlbmRpbmdTY29yZSI6bnVsbH1dfQ%3D%3D>; rel=\"next\"",
+    "rows": 30,
+    "finished_utc": "2026-10-12T13:53:27.379306+00:00"
+  }
+]

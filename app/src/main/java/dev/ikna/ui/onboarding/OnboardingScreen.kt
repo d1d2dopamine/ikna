@@ -1,17 +1,19 @@
 package dev.ikna.ui.onboarding
 
 import dev.ikna.ui.text.S
+import dev.ikna.data.repo.prepareFirstSession
+import kotlinx.coroutines.CancellationException
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
 import dev.ikna.ui.theme.IknaTextButton
+import dev.ikna.ui.theme.IknaScrollableColumn
 import dev.ikna.ui.theme.IknaWideButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -64,19 +67,47 @@ private val SLIDES = listOf(
  *
  * The static answer demo sits beside the third screen because that is where an
  * error and its effect on the next review are explained. The final screen stays
- * visually quiet so its data and feedback promise is the last thing read.
+ * visually quiet, with a short starter explanation and an optional Catalogue route.
  */
 @Composable
-fun OnboardingScreen(container: AppContainer, onDone: () -> Unit) {
+fun OnboardingScreen(container: AppContainer, onDone: (FirstStudyDestination) -> Unit) {
     var step by remember { mutableStateOf(0) }
     var busy by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
+    var destination by remember { mutableStateOf(FirstStudyDestination.SESSION) }
     val scope = rememberCoroutineScope()
     val slide = SLIDES[step]
 
-    Column(
+    fun finish(selected: FirstStudyDestination) {
+        if (busy) return
+        destination = selected
+        busy = true
+        failed = false
+        scope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    prepareFirstSession(
+                        installPacks = { container.packLoader.installBundledPacks() },
+                        preparePlan = { container.learningRepository.ensureDailyPlan() },
+                        markComplete = { container.settings.setOnboardingDone(true) }
+                    )
+                }
+                onDone(destination)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                failed = true
+            } finally {
+                busy = false
+            }
+        }
+    }
+
+    IknaScrollableColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(28.dp),
+        scrollKey = step,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(48.dp))
@@ -99,6 +130,16 @@ fun OnboardingScreen(container: AppContainer, onDone: () -> Unit) {
             GestureDemo()
         }
 
+        if (step == SLIDES.lastIndex) {
+            Spacer(Modifier.height(20.dp))
+            Text(
+                text = S.t("onb.014"),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+
         Spacer(Modifier.weight(1f))
 
         // Square marks, like every other mark in the app. These were the only
@@ -119,9 +160,20 @@ fun OnboardingScreen(container: AppContainer, onDone: () -> Unit) {
 
         Spacer(Modifier.height(20.dp))
 
+        if (failed) {
+            Text(
+                text = S.t("onb.013"),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(12.dp))
+        }
+
         IknaWideButton(
             label = when {
                 busy -> S.t("onb.007")
+                failed -> S.t("load.002")
                 step < SLIDES.lastIndex -> S.t("onb.008")
                 else -> S.t("onb.009")
             },
@@ -132,19 +184,7 @@ fun OnboardingScreen(container: AppContainer, onDone: () -> Unit) {
                 if (step < SLIDES.lastIndex) {
                     step++
                 } else {
-                    busy = true
-                    scope.launch {
-                        withContext(Dispatchers.IO) {
-                            // The starter deck installs itself; the first plan is
-                            // built before the screen changes, so the user lands
-                            // on a card and not on an empty state.
-                            runCatching { container.packLoader.installBundledPacks() }
-                            runCatching { container.learningRepository.ensureDailyPlan() }
-                        }
-                        container.settings.setOnboardingDone(true)
-                        busy = false
-                        onDone()
-                    }
+                    finish(if (failed) destination else FirstStudyDestination.SESSION)
                 }
             }
         )
@@ -156,7 +196,12 @@ fun OnboardingScreen(container: AppContainer, onDone: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else {
-            Spacer(Modifier.height(44.dp))
+            IknaTextButton(
+                label = S.t("onb.015"),
+                enabled = !busy,
+                onClick = { finish(FirstStudyDestination.CATALOGUE) },
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -176,7 +221,7 @@ private fun GestureDemo() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(132.dp)
+            .heightIn(min = 132.dp)
             .border(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Text(
@@ -185,14 +230,17 @@ private fun GestureDemo() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .align(Alignment.BottomStart)
+                .fillMaxWidth(0.5f)
                 .padding(start = 20.dp, bottom = 12.dp)
         )
         Text(
             text = S.t("card.004"),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.primary,
+            textAlign = TextAlign.End,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
+                .fillMaxWidth(0.5f)
                 .padding(end = 20.dp, bottom = 12.dp)
         )
     }

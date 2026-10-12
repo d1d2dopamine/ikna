@@ -77,6 +77,9 @@ class AppContainer(
 
     val packLoader = PackLoader(context, db.chunkDao())
 
+    suspend fun importCatalogDeck(packId: String, title: String, lang: String, text: String) =
+        dev.ikna.data.catalog.importCatalogDeck(db, packLoader, packId, title, lang, text)
+
     private val componentRepository = ComponentRepository(
         componentDao = db.componentDao(),
         chunkDao = db.chunkDao(),
@@ -93,6 +96,7 @@ class AppContainer(
     )
 
     val learningRepository = LearningRepository(
+        db = db,
         cardDao = db.cardDao(),
         chunkDao = db.chunkDao(),
         reviewDao = db.reviewDao(),
@@ -106,12 +110,15 @@ class AppContainer(
         baseConfig = config
     )
 
+    val studyStatsRepository = dev.ikna.data.repo.StudyStatsRepository(db, config.dayStartHour)
+
     val deckRepository = DeckRepository(
         chunkDao = db.chunkDao(),
         packLoader = packLoader
     )
 
     val restoreRepository = RestoreRepository(
+        db = db,
         cardDao = db.cardDao(),
         reviewDao = db.reviewDao(),
         statsDao = db.statsDao(),

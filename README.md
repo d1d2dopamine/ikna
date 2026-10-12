@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/brand/ikna-banner.png" alt="ikna" width="900">
+  <img src="docs/assets/brand/ikna-banner.png" alt="ikna" width="600">
 </p>
 
 <h1 align="center" id="ikna"></h1>
@@ -14,13 +14,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/latest"><img src="https://img.shields.io/github/v/release/d1d2dopamine/ikna?style=flat-square&label=release" alt="release"></a>
-  <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
-  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/made%20with-Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="kotlin"></a>
-  <img src="https://img.shields.io/badge/Android-10%2B-3DDC84?style=flat-square&logo=android&logoColor=white" alt="android">
-  <img src="https://img.shields.io/badge/Windows-x64-0078D4?style=flat-square&logo=windows11&logoColor=white" alt="windows x64">
-  <img src="https://img.shields.io/badge/AppImage-x86__64-2E2E2E?style=flat-square&logo=appimage&logoColor=white" alt="AppImage x86_64">
+  <a href="https://github.com/d1d2dopamine/ikna/releases/latest"><img src="https://img.shields.io/github/v/release/d1d2dopamine/ikna?style=flat-square&label=release&color=0078D4&labelColor=0078D4" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square&color=0078D4&labelColor=0078D4" alt="build"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-0078D4?style=flat-square&color=0078D4&labelColor=0078D4" alt="license"></a>
+  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/made%20with-Kotlin-0078D4?style=flat-square&logo=kotlin&logoColor=white&color=0078D4&labelColor=0078D4" alt="kotlin"></a>
+  <img src="https://img.shields.io/badge/Android-10%2B-0078D4?style=flat-square&logo=android&logoColor=white&color=0078D4&labelColor=0078D4" alt="android">
+  <img src="https://img.shields.io/badge/Windows-x64-0078D4?style=flat-square&logo=windows11&logoColor=white&color=0078D4&labelColor=0078D4" alt="windows x64">
+  <img src="https://img.shields.io/badge/AppImage-x86__64-0078D4?style=flat-square&logo=appimage&logoColor=white&color=0078D4&labelColor=0078D4" alt="AppImage x86_64">
 </p>
 
 <p align="center">
@@ -126,7 +126,7 @@ ikna is free software under the **GNU General Public License, version 3 or (at y
 ---
 
 <p align="center">
-  <img src="docs/assets/brand/ikna-banner.png" alt="ikna" width="900">
+  <img src="docs/assets/brand/ikna-banner.png" alt="ikna" width="600">
 </p>
 
 <h1 align="center" id="русский"></h1>
@@ -141,13 +141,13 @@ ikna is free software under the **GNU General Public License, version 3 or (at y
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/latest"><img src="https://img.shields.io/github/v/release/d1d2dopamine/ikna?style=flat-square&label=release" alt="release"></a>
-  <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square" alt="build"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square" alt="license"></a>
-  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/made%20with-Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="kotlin"></a>
-  <img src="https://img.shields.io/badge/Android-10%2B-3DDC84?style=flat-square&logo=android&logoColor=white" alt="android">
-  <img src="https://img.shields.io/badge/Windows-x64-0078D4?style=flat-square&logo=windows11&logoColor=white" alt="windows x64">
-  <img src="https://img.shields.io/badge/AppImage-x86__64-2E2E2E?style=flat-square&logo=appimage&logoColor=white" alt="AppImage x86_64">
+  <a href="https://github.com/d1d2dopamine/ikna/releases/latest"><img src="https://img.shields.io/github/v/release/d1d2dopamine/ikna?style=flat-square&label=release&color=0078D4&labelColor=0078D4" alt="release"></a>
+  <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&label=build&style=flat-square&color=0078D4&labelColor=0078D4" alt="build"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-0078D4?style=flat-square&color=0078D4&labelColor=0078D4" alt="license"></a>
+  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/made%20with-Kotlin-0078D4?style=flat-square&logo=kotlin&logoColor=white&color=0078D4&labelColor=0078D4" alt="kotlin"></a>
+  <img src="https://img.shields.io/badge/Android-10%2B-0078D4?style=flat-square&logo=android&logoColor=white&color=0078D4&labelColor=0078D4" alt="android">
+  <img src="https://img.shields.io/badge/Windows-x64-0078D4?style=flat-square&logo=windows11&logoColor=white&color=0078D4&labelColor=0078D4" alt="windows x64">
+  <img src="https://img.shields.io/badge/AppImage-x86__64-0078D4?style=flat-square&logo=appimage&logoColor=white&color=0078D4&labelColor=0078D4" alt="AppImage x86_64">
 </p>
 
 <p align="center">

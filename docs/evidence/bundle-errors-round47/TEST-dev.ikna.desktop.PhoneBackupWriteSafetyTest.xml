@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.PhoneBackupWriteSafetyTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-12T15:11:07" hostname="disposable-test-host" time="0.009">
+  <properties/>
+  <testcase name="midHistoryFailurePreservesPreviousFilesAndCleansTemp" classname="dev.ikna.desktop.PhoneBackupWriteSafetyTest" time="0.002"/>
+  <testcase name="cancellationDuringHistoryDoesNotPublishPartialFile" classname="dev.ikna.desktop.PhoneBackupWriteSafetyTest" time="0.002"/>
+  <testcase name="emptyHistoryDoesNotReplaceAnEarlierJournal" classname="dev.ikna.desktop.PhoneBackupWriteSafetyTest" time="0.001"/>
+  <testcase name="secondFileFailureDoesNotUndoAlreadyPublishedCompleteHistory" classname="dev.ikna.desktop.PhoneBackupWriteSafetyTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

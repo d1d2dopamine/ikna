@@ -492,6 +492,17 @@ interface ReviewDao {
     @Query("SELECT COUNT(DISTINCT chunkId) FROM reviews WHERE " + NOT_RETRACTED)
     suspend fun distinctTargetCount(): Int
 
+    /** Statistics uses one bounded, chronological, undo-aware journal snapshot. */
+    @Query("SELECT * FROM reviews WHERE ts BETWEEN :from AND :until AND " + NOT_RETRACTED +
+        " AND rating BETWEEN 1 AND 4 ORDER BY ts ASC, id ASC")
+    suspend fun studyAnswersBetween(from: Long, until: Long): List<ReviewEntity>
+
+    /** First retained answer, not an inferred date of learning or first exposure. */
+    @Query("SELECT COUNT(*) FROM (SELECT chunkId, MIN(ts) AS firstTs FROM reviews WHERE " +
+        NOT_RETRACTED + " AND rating BETWEEN 1 AND 4 AND ts <= :until GROUP BY chunkId) " +
+        "WHERE firstTs >= :from")
+    suspend fun firstRecordedTargetCount(from: Long, until: Long): Int
+
     /**
      * The questions already answered today. This is what makes the session
      * counter monotonic: today's remaining set is the day's plan minus these,

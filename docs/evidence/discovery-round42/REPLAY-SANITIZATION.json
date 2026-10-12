@@ -1,0 +1,23 @@
+{
+  "opus.json": {
+    "originalResponseSha256": "2b55713b542f11290271a46ef8120e79b32be506c524487a8ad64b72426c06ad",
+    "originalBytes": 6470,
+    "sanitizedSha256": "075fb052a1589a6599c07be53598db5aba75ffa92ffb3120469aad72271f76a3",
+    "sanitizedBytes": 8987,
+    "transformation": "OPUS metadata only; HF identity/revision/tags only, descriptions/cardData/examples omitted"
+  },
+  "hf-search.json": {
+    "originalResponseSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "originalBytes": 2,
+    "sanitizedSha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "sanitizedBytes": 3,
+    "transformation": "OPUS metadata only; HF identity/revision/tags only, descriptions/cardData/examples omitted"
+  },
+  "hf-tags.json": {
+    "originalResponseSha256": "d94985b29e59cb78b736d8f7f0a3136087af544f4e34d53b1fc3fc98baaf65b0",
+    "originalBytes": 961195,
+    "sanitizedSha256": "9e8b991fa98763d2718b5848894f8bbeff25cbf231b6d07dd0206103e0b391ec",
+    "sanitizedBytes": 96386,
+    "transformation": "OPUS metadata only; HF identity/revision/tags only, descriptions/cardData/examples omitted"
+  }
+}

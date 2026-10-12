@@ -10,6 +10,9 @@ import dev.ikna.data.pack.PackChunk
 import dev.ikna.data.pack.PackLoader
 import dev.ikna.data.pack.SeedFormat
 import dev.ikna.data.repo.RestoreRepository
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.serialization.json.Json
 import java.io.BufferedInputStream
 import java.io.File
@@ -84,6 +87,8 @@ class AnkiImporter(
             val collection = extractCollection(packageFile, work)
             val parsed = readCollection(collection.file, collection.kind, appLanguage)
             commit(parsed)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (known: AnkiImportException) {
             throw known
         } catch (problem: Throwable) {
@@ -93,9 +98,21 @@ class AnkiImporter(
         }
     }
 
-    private suspend fun commit(parsed: ParsedPackage): AnkiImportResult = db.inTransaction {
+    private suspend fun commit(parsed: ParsedPackage): AnkiImportResult {
+        // Capture before Room switches to its database job. A nested restore
+        // cannot recover this originating caller from inside the transaction.
+        val caller = currentCoroutineContext()
+        caller.ensureActive()
+        return db.inTransaction {
+            caller.ensureActive()
+            commitBody(parsed) { caller.ensureActive() }.also { caller.ensureActive() }
+        }
+    }
+
+    private suspend fun commitBody(parsed: ParsedPackage, checkActive: () -> Unit): AnkiImportResult {
         var installed = 0
         for (deck in parsed.decks) {
+            checkActive()
             // A changed template may produce fewer tokens on re-import. Remove
             // only this deterministic pack's derived token rows, then rebuild
             // them from the newly rendered questions inside the same transaction.
@@ -114,6 +131,7 @@ class AnkiImporter(
 
         if (installed == 0) throw AnkiImportException(AnkiImportError.NO_USABLE_CARDS)
 
+        checkActive()
         val restored = if (parsed.reviews.isNotEmpty()) {
             val text = buildString {
                 parsed.reviews.forEach { record ->
@@ -129,7 +147,8 @@ class AnkiImporter(
             null
         }
 
-        AnkiImportResult(
+        checkActive()
+        return AnkiImportResult(
             decks = parsed.decks.size,
             cards = installed,
             reviewEventsImported = restored?.imported ?: 0,

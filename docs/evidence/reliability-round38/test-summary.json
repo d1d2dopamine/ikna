@@ -1,0 +1,16 @@
+{
+  "shared": {
+    "suites": 8,
+    "tests": 39,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "desktop": {
+    "suites": 16,
+    "tests": 130,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

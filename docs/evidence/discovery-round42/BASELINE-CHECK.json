@@ -1,0 +1,11 @@
+{
+  "baselineArchive": "ikna-0.12-press-round-41-first-study-lazy-catalogue-no-corpora.zip",
+  "baselineSha256": "918d0f3a9117e31a0a5373ec5d6a07fe29b3443b67efa059354345dc0f6c897b",
+  "existingFilesChangedBeforePackaging": [
+    "docs/PLAN-0.12.md"
+  ],
+  "applicationFilesChanged": 0,
+  "sourcePoliciesChanged": 0,
+  "productionSelectorChanged": false,
+  "uiRounds37Through41Preserved": true
+}

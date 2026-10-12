@@ -33,6 +33,7 @@ import dev.ikna.ui.decks.AnkiImportScreen
 import dev.ikna.ui.decks.DeckScreen
 import dev.ikna.ui.decks.DecksHomeState
 import dev.ikna.ui.decks.DecksScreen
+import dev.ikna.ui.onboarding.FirstStudyDestination
 import dev.ikna.ui.onboarding.OnboardingScreen
 import dev.ikna.ui.search.DeckSearchScreen
 import dev.ikna.ui.session.SessionScreen
@@ -70,6 +71,11 @@ object Routes {
     const val DEBUG = "debug"
 
     const val ALL_DECKS = "all"
+
+    fun firstStudy(destination: FirstStudyDestination): String = when (destination) {
+        FirstStudyDestination.SESSION -> session(null)
+        FirstStudyDestination.CATALOGUE -> CATALOG
+    }
 
     fun session(deckId: String?): String = "session/" + (deckId ?: ALL_DECKS)
 
@@ -178,10 +184,12 @@ fun IknaNavHost(
             composable(Routes.ONBOARDING) {
                 OnboardingScreen(
                     container = container,
-                    onDone = {
+                    onDone = { destination ->
+                        // Keep Home underneath so Back never reopens the introduction.
                         navController.navigate(Routes.HOME) {
                             popUpTo(Routes.ONBOARDING) { inclusive = true }
                         }
+                        navController.navigate(Routes.firstStudy(destination))
                     }
                 )
             }

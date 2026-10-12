@@ -63,7 +63,7 @@ fun BrowseScreen(
 
     LaunchedEffect(deckId) {
         developerBlockers = if (container.isDeveloperMode) {
-            val availability = runCatching {
+            val availability = cardLoadResult {
                 container.learningRepository.browseDeckAvailability(listOf(deckId))[deckId]
             }.getOrNull()
             availability?.takeIf { it.forcedByDeveloper && it.blockers.isNotEmpty() }
@@ -116,6 +116,8 @@ fun BrowseScreen(
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+                state.loadFailed -> IknaCardLoadFailure(browse = true, onRetry = vm::load)
 
                 state.queue.isEmpty() -> IknaBrowseEmptyState()
 

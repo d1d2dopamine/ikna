@@ -1,6 +1,8 @@
 package dev.ikna.ui.text
 
 val STRINGS_EN: Map<String, String> = mapOf(
+    "backup.001" to "Could not finish saving. Check free space and access to the folder, then try again.",
+    "restore.001" to "Could not finish restoring. Check the file and try again.",
 	// Напоминание
 	"app.001" to "Reminder",
 	// Одно напоминание в день, если минимум ещё не сделан
@@ -34,7 +36,13 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// Своя колода
 	"deckrepo.001" to "Your own deck",
 	// Статистика
-	"stats.001" to "Statistics",
+	"stats.a11y.activity" to "Days with a session: {active} of {total}.",
+    "stats.a11y.hours" to "Strongest observed hour: {hours}",
+    "stats.a11y.hour" to "{hour}: {percent}% recalled; reviews: {answers}.",
+    "stats.a11y.small_sample" to "Small sample.",
+    "stats.a11y.forecast_day" to "Next {days} days, starting tomorrow. Scheduled reviews: {reviews}.",
+    "stats.a11y.no_data" to "No data yet.",
+    "stats.001" to "Statistics",
 	// ПОСЛЕДНИЕ 30 ДНЕЙ
 	"stats.002" to "LAST 30 DAYS",
 	// Каждая метка — день с занятием, справа сегодня. Пропуск ничего не обнуляет и не обрывает:
@@ -663,8 +671,8 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"voice.010" to "Test the voice",
 	// Своя модель
 	"voice.011" to "Your models",
-	// Модель приносите вы: папка Kokoro или Piper с телефона. Ничего не скачивается — у приложения нет доступа в интернет.
-	"voice.012" to "You bring the model: a Kokoro or Piper folder from the phone. Nothing is downloaded — the app has no internet access.",
+	// Speech is local; model acquisition, catalogue and update checks need network access.
+	"voice.012" to "Speech runs on your device. Add a Kokoro or Piper model from an archive or folder; this screen does not download models. The catalogue and update checks use the internet.",
 	// Убрать модель
 	"voice.013" to "Remove the model",
 	// Язык модели
@@ -1016,6 +1024,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
     // Подгруппа «Редкого» и причина отключённой загрузки в каталоге
     "set.144" to "Diagnostics and maintenance",
     "cat.042" to "Waiting for another download to finish.",
+    "cat.043" to "The deck is saved, but the study plan could not be refreshed. Try refreshing the plan again.",
     "pc.021" to "Cards, dates, statistics, settings, the installed decks and the answer log all go. Deck texts are saved to the export folder first. The answer log is not: export it before erasing.",
 "pc.025" to "{reveal} reveals · {miss} / {know} answer · {undo} undo",
     "dev.024" to "The app will restart into your normal profile. Test decks and the DEV badge will disappear from the interface; sandbox data stays saved separately.",
@@ -1044,4 +1053,40 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "dev.tools.021" to "Restriction bypass",
     "dev.tools.022" to "on",
     "dev.tools.023" to "off",
+    "load.001" to "Cards could not be loaded. Try again.",
+    "load.002" to "TRY AGAIN",
+    "load.003" to "Reading could not be opened. Try again.",
+    "load.004" to "The app could not be prepared. Try again.",
+    "onb.013" to "The first cards could not be prepared. Try again.",
+    "wipe.001" to "Nothing was erased. The backup could not be saved. Check storage space and folder access, then try again.",
+    "wipe.002" to "The erase could not be completed. Try again.",
+    "wipe.003" to "Nothing was erased. Deck texts could not be saved. Check storage space and folder access, then try again.",
+
+    "onb.014" to "The starter deck is beginner English with Russian meanings, if included in this build. For another language pair, check the Catalogue.",
+    "onb.015" to "CHOOSE IN CATALOGUE",
+
+    "study.001" to "7 days",
+    "study.002" to "30 days",
+    "study.003" to "Cards answered",
+    "study.004" to "First recorded",
+    "study.005" to "Review answers",
+    "study.006" to "All answers in this period: {count}",
+    "study.007" to "Recalled on review: {recalled} of {total}.",
+    "study.008" to "How these numbers work",
+    "study.009" to "Cards are counted by learning target, without counting the same target again in another deck. First recorded means the earliest retained answer, not when you first encountered a word. Reviews exclude first answers.",
+    "study.010" to "After a difficult answer",
+    "study.011" to "Within this period, a missed review was followed by at least two recalled reviews without another miss. This is a journal observation, not a claim that the card is permanently learned.",
+    "study.012" to "Repeated difficulties",
+    "study.013" to "Within this period, the card was missed at least twice, including its latest review. You can inspect its text and meaning. This is not a rating of your ability.",
+    "study.014" to "Show details",
+    "study.015" to "Hide details",
+    "study.016" to "No matching answers in this period.",
+    "study.017" to "No answers recorded in this period yet. Restored journal answers count here too.",
+    "study.018" to "Card text unavailable",
+    "study.019" to "Showing {shown} of {total}, most recent answers first.",
+    "study.020" to "These counts use retained answers and exclude undone answers. After import, restore or clearing data, the available journal determines the result; it is not your complete language-learning history. Period counts can decrease as older answers leave the window.",
+    "study.021" to "Period: {from} to {to}. The study day begins at {hour}:00 in {zone}.",
+    "study.022" to "For {count} answers, first-answer versus review status is unknown. They count toward all answers, but not review measures.",
+    "study.023" to "Missed reviews: {misses}. Recalled reviews after the latest miss: {later}.",
+    "study.024" to "Could not load statistics. Try again.",
 )

@@ -1,0 +1,56 @@
+{
+  "scope": "Desktop single-file backup publication; disposable fixtures only.",
+  "baseline": {
+    "tests": 4,
+    "failed": 3,
+    "passed": 1,
+    "behavior": "Production serialization boundary extracted without altering original direct-write or suppression logic. Mid-ZIP failure replaced previous bytes; deck IOException and CancellationException were suppressed."
+  },
+  "focused": {
+    "tests": 18,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "new_tests": 16,
+    "existing_restore_tests": 2,
+    "suites": [
+      {
+        "name": "dev.ikna.desktop.BundleWriteSafetyTest",
+        "tests": "6",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "dev.ikna.desktop.AtomicBackupFileTest",
+        "tests": "6",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "dev.ikna.desktop.PhoneBackupWriteSafetyTest",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "dev.ikna.desktop.BundleRestoreFailureTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      }
+    ]
+  },
+  "fixture_correction": "First fixed run passed 17/18. The public developer-profile integration fixture incorrectly expected SettingsBackup.decode to accept synthetic settings; that method intentionally rejects them. Corrected only the test to verify the serialized synthetic marker and rejection. Final focused run passed 18/18.",
+  "command": "gradle --offline --no-daemon --max-workers=1 -Dorg.gradle.jvmargs=-Xmx768m -Dkotlin.daemon.jvm.options=-Xmx512m :desktop:test --tests dev.ikna.desktop.BundleWriteSafetyTest --tests dev.ikna.desktop.AtomicBackupFileTest --tests dev.ikna.desktop.PhoneBackupWriteSafetyTest --tests dev.ikna.desktop.BundleRestoreFailureTest",
+  "limits": [
+    "Linux/JDK17 disposable filesystem fixtures; Windows and unsupported atomic-replacement providers not exercised.",
+    "Atomic publication is per-file, not a transaction for the phone export pair.",
+    "Cancellation observed before publication preserves previous destination; cancellation after publication may leave complete new file.",
+    "No crash/power-loss durability claim."
+  ],
+  "sanitization": "Repository, workspace and home paths replaced with placeholders; test hostname replaced with disposable-test-host."
+}

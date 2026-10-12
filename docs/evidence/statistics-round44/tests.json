@@ -1,0 +1,158 @@
+{
+  "shared": {
+    "totals": {
+      "tests": 69,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "classes": [
+      {
+        "name": "dev.ikna.data.catalog.CatalogFilterNormalizationTest",
+        "tests": 6
+      },
+      {
+        "name": "dev.ikna.data.catalog.CatalogPlanRefreshTest",
+        "tests": 2
+      },
+      {
+        "name": "dev.ikna.data.dev.DeveloperBootstrapTest",
+        "tests": 3
+      },
+      {
+        "name": "dev.ikna.data.export.PreWipeBackupTest",
+        "tests": 7
+      },
+      {
+        "name": "dev.ikna.data.pack.BundledPackFailureTest",
+        "tests": 5
+      },
+      {
+        "name": "dev.ikna.data.repo.FirstSessionPreparationTest",
+        "tests": 5
+      },
+      {
+        "name": "dev.ikna.data.repo.StudyStatsTest",
+        "tests": 8
+      },
+      {
+        "name": "dev.ikna.ui.session.CardLoadingTest",
+        "tests": 8
+      },
+      {
+        "name": "dev.ikna.ui.stats.StatsDescriptionsTest",
+        "tests": 4
+      },
+      {
+        "name": "dev.ikna.ui.theme.PalettePreviewTest",
+        "tests": 2
+      },
+      {
+        "name": "dev.ikna.ui.theme.ReadingCatTest",
+        "tests": 1
+      },
+      {
+        "name": "dev.ikna.ui.theme.SignalFrameFeedbackTest",
+        "tests": 7
+      },
+      {
+        "name": "dev.ikna.ui.theme.SignalFrameHoverTest",
+        "tests": 8
+      },
+      {
+        "name": "dev.ikna.ui.theme.TransientNoticeTest",
+        "tests": 3
+      }
+    ]
+  },
+  "desktop": {
+    "totals": {
+      "tests": 142,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "classes": [
+      {
+        "name": "dev.ikna.desktop.CatalogImportIntegrationTest",
+        "tests": 5
+      },
+      {
+        "name": "dev.ikna.desktop.DesktopRestartTest",
+        "tests": 3
+      },
+      {
+        "name": "dev.ikna.desktop.DeveloperSandboxIntegrationTest",
+        "tests": 9
+      },
+      {
+        "name": "dev.ikna.desktop.FirstStudyRouteTest",
+        "tests": 1
+      },
+      {
+        "name": "dev.ikna.desktop.HotkeyRegressionTest",
+        "tests": 2
+      },
+      {
+        "name": "dev.ikna.desktop.LearningSimulationTest",
+        "tests": 5
+      },
+      {
+        "name": "dev.ikna.desktop.LearningWriteAtomicityTest",
+        "tests": 4
+      },
+      {
+        "name": "dev.ikna.desktop.PreWipeDeckBackupTest",
+        "tests": 7
+      },
+      {
+        "name": "dev.ikna.desktop.StudyStatsRepositoryTest",
+        "tests": 2
+      },
+      {
+        "name": "dev.ikna.desktop.TitleBarClicksTest",
+        "tests": 6
+      },
+      {
+        "name": "dev.ikna.desktop.WindowBoundsEditsTest",
+        "tests": 6
+      },
+      {
+        "name": "dev.ikna.desktop.WindowBoundsTest",
+        "tests": 6
+      },
+      {
+        "name": "dev.ikna.desktop.WindowChromeRegressionTest",
+        "tests": 7
+      },
+      {
+        "name": "dev.ikna.desktop.WindowFrameLayoutTest",
+        "tests": 7
+      },
+      {
+        "name": "dev.ikna.desktop.WindowPlacementMemoryTest",
+        "tests": 4
+      },
+      {
+        "name": "dev.ikna.domain.fsrs.FsrsOptimizerTest",
+        "tests": 6
+      },
+      {
+        "name": "dev.ikna.domain.fsrs.FsrsTest",
+        "tests": 11
+      },
+      {
+        "name": "dev.ikna.domain.fsrs.SchedulerDueDayTest",
+        "tests": 4
+      },
+      {
+        "name": "dev.ikna.domain.grading.DerivedGradingTest",
+        "tests": 25
+      },
+      {
+        "name": "dev.ikna.domain.optimizer.LocalOptimizerTest",
+        "tests": 22
+      }
+    ]
+  }
+}

@@ -1,5 +1,7 @@
 package dev.ikna.data.pack
 
+import java.io.FileNotFoundException
+import java.io.InputStream
 import dev.ikna.data.db.ChunkDao
 import dev.ikna.platform.Assets
 import dev.ikna.data.db.ChunkEntity
@@ -62,17 +64,21 @@ class PackLoader(
         for (manifest in index.packs) {
             val installed = chunkDao.pack(manifest.id)
             if (installed != null && installed.version >= manifest.version) continue
-            // A deck named in the manifest whose file is not in this build is skipped
-            // rather than fatal. The manifest is the list of what ships; a file missing
-            // from it must cost the other decks nothing, and an empty first run is a
-            // worse answer than one deck short.
-            runCatching { install(manifest) }
+            // Some source-only builds intentionally omit a bundled data file.
+            // Skip only that absence. Parse, read and database failures must reach
+            // the first-run/retry UI rather than masquerade as an installed deck.
+            val source = try {
+                assets.open("packs/" + manifest.file)
+            } catch (_: FileNotFoundException) {
+                continue
+            }
+            install(manifest, source)
         }
     }
 
-    private suspend fun install(manifest: PackManifest) {
+    private suspend fun install(manifest: PackManifest, source: InputStream) {
         var count = 0
-        assets.open("packs/" + manifest.file).bufferedReader().useLines { lines ->
+        source.bufferedReader().useLines { lines ->
             count = insertChunks(manifest.id, manifest.lang, lines)
         }
         val existing = chunkDao.pack(manifest.id)

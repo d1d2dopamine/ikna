@@ -52,6 +52,7 @@ import dev.ikna.ui.theme.hexOf
 import dev.ikna.ui.theme.palettePreviewUsesGrey
 import dev.ikna.ui.theme.parseHexColor
 import dev.ikna.ui.theme.ratioText
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -109,6 +110,7 @@ fun SettingsPane(
     var developerRestarting by remember { mutableStateOf(false) }
     var resetAsking by remember { mutableStateOf(false) }
     var wipeArmed by remember { mutableStateOf(false) }
+    var wiping by remember { mutableStateOf(false) }
     var diagOpen by remember { mutableStateOf(false) }
     var diagText by remember { mutableStateOf("") }
 
@@ -625,6 +627,7 @@ fun SettingsPane(
                         Spacer(Modifier.height(10.dp))
                         IknaButton(
                             label = if (wipeArmed) S.t("set.073") else S.t("set.074"),
+                            enabled = !wiping,
                             palette = palette
                         ) {
                             if (!wipeArmed) {
@@ -632,32 +635,28 @@ fun SettingsPane(
                                 dataNote = S.t("set.075")
                             } else {
                                 wipeArmed = false
+                                wiping = true
                                 scope.launch {
-                                    val wiped = withContext(Dispatchers.IO) {
-                                        // A failed courtesy export must not turn
-                                        // the explicit second press into a no-op.
-                                        runCatching {
-                                            val target = File(container.home, "export")
-                                            target.mkdirs()
-                                            container.deckRepository.decks().forEach { deck ->
-                                                val body = container.deckRepository.exportText(deck.id)
-                                                if (body.isNotBlank()) {
-                                                    File(target, fileNameFor(deck.title)).writeText(body)
-                                                }
-                                            }
-                                        }.onFailure { error ->
-                                            logLine("pre-wipe export failed: " + error)
+                                    try {
+                                        withContext(Dispatchers.IO) {
+                                            backupDeckTextsThenWipe(
+                                                exportRoot = File(container.home, "export"),
+                                                decks = { container.deckRepository.decks() },
+                                                fileName = { deck -> fileNameFor(deck.title) },
+                                                exportText = { deck -> container.deckRepository.exportText(deck.id) },
+                                                wipe = { container.wipeAllData() }
+                                            )
                                         }
-
-                                        runCatching { container.wipeAllData() }
-                                    }
-                                    wiped.onSuccess {
                                         dataNote = null
                                         onWiped()
-                                    }.onFailure { error ->
-                                        logLine("wipe failed: " + error)
-                                        dataNote = S.t("pc.013") + " " +
-                                            iknaLogFile(container.home).absolutePath
+                                    } catch (cancelled: CancellationException) {
+                                        throw cancelled
+                                    } catch (error: Exception) {
+                                        logLine("backup or wipe failed: " + error)
+                                        dataNote = S.t(if (error is PreWipeDeckBackupException)
+                                            "wipe.003" else "wipe.002")
+                                    } finally {
+                                        wiping = false
                                     }
                                 }
                             }

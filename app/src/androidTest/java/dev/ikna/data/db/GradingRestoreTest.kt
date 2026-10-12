@@ -29,7 +29,7 @@ class GradingRestoreTest {
         try {
             val scheduler = Scheduler(dayStartHour = 4)
             val restore = RestoreRepository(
-                db.cardDao(), db.reviewDao(), db.statsDao(), db.planDao(),
+                db, db.cardDao(), db.reviewDao(), db.statsDao(), db.planDao(),
                 ComponentRepository(db.componentDao(), db.chunkDao(), db.reviewDao()),
                 scheduler, GovernorConfig()
             )

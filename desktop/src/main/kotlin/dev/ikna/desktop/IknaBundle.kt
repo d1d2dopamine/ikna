@@ -1,9 +1,14 @@
 package dev.ikna.desktop
 
+import dev.ikna.data.db.ReviewEntity
 import dev.ikna.data.export.ReviewRecord
 import dev.ikna.data.export.SettingsBackup
 import java.io.File
 import java.io.InputStream
+import java.io.OutputStream
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -75,11 +80,8 @@ object IknaBundle {
         "ikna-" + stamp(now) + EXTENSION
 
     /**
-     * Writes the whole install into one file.
-     *
-     * The log is written first and the decks last, which is also the order the
-     * restore needs them in; a reader that stops early still has the part that
-     * cannot be regenerated.
+     * Writes reviews, settings and nonempty exported decks into one complete ZIP.
+     * A failed export never publishes a partial bundle over a previous backup.
      */
     suspend fun write(container: DesktopContainer, target: File): BundleWrite {
         val reviews = container.db.reviewDao().all()
@@ -91,32 +93,49 @@ object IknaBundle {
         // portable bundle that a real profile could later import as content.
         val decks = if (container.isDeveloperMode) emptyList() else container.deckRepository.decks()
 
-        target.parentFile?.mkdirs()
+        return write(target, reviews, settings, decks.map { it.id }, container.isDeveloperMode,
+            container.deckRepository::exportText)
+    }
+
+    /** Internal serialization boundary; callers supply a snapshot and a deck reader. */
+    internal suspend fun write(
+        target: File,
+        reviews: List<ReviewEntity>,
+        settings: String,
+        decks: List<String>,
+        synthetic: Boolean,
+        exportDeck: suspend (String) -> String
+    ): BundleWrite {
+        val caller = currentCoroutineContext()
+        caller.ensureActive()
         var deckCount = 0
-        ZipOutputStream(target.outputStream().buffered()).use { zip ->
-            zip.putNextEntry(ZipEntry(ENTRY_REVIEWS))
-            for (review in reviews) {
-                val line = ReviewRecord.json.encodeToString(
-                    ReviewRecord.serializer(),
-                    ReviewRecord.of(review, synthetic = container.isDeveloperMode)
-                )
-                zip.write((line + "\n").toByteArray(Charsets.UTF_8))
-            }
-            zip.closeEntry()
-
-            zip.putNextEntry(ZipEntry(ENTRY_SETTINGS))
-            zip.write(settings.toByteArray(Charsets.UTF_8))
-            zip.closeEntry()
-
-            for (deck in decks) {
-                val body = runCatching {
-                    container.deckRepository.exportText(deck.id)
-                }.getOrNull().orEmpty()
-                if (body.isBlank()) continue
-                zip.putNextEntry(ZipEntry(ENTRY_DECKS + safeName(deck.id) + ".txt"))
-                zip.write(body.toByteArray(Charsets.UTF_8))
+        writeBackupAtomically(target) { temporary ->
+            ZipOutputStream(temporary.outputStream().buffered()).use { zip ->
+                zip.putNextEntry(ZipEntry(ENTRY_REVIEWS))
+                for (review in reviews) {
+                    caller.ensureActive()
+                    val line = ReviewRecord.json.encodeToString(
+                        ReviewRecord.serializer(),
+                        ReviewRecord.of(review, synthetic = synthetic)
+                    )
+                    zip.writeChecked((line + "\n").toByteArray(Charsets.UTF_8), caller)
+                }
                 zip.closeEntry()
-                deckCount += 1
+
+                zip.putNextEntry(ZipEntry(ENTRY_SETTINGS))
+                zip.writeChecked(settings.toByteArray(Charsets.UTF_8), caller)
+                zip.closeEntry()
+
+                for (deck in decks) {
+                    caller.ensureActive()
+                    val body = exportDeck(deck)
+                    caller.ensureActive()
+                    if (body.isBlank()) continue
+                    zip.putNextEntry(ZipEntry(ENTRY_DECKS + safeName(deck) + ".txt"))
+                    zip.writeChecked(body.toByteArray(Charsets.UTF_8), caller)
+                    zip.closeEntry()
+                    deckCount += 1
+                }
             }
         }
 
@@ -129,51 +148,71 @@ object IknaBundle {
     }
 
     /**
-     * Writes the two files the phone's own restore reads, under the names it
-     * expects.
-     *
-     * This is the other direction of the sync, and it costs nothing: the phone
-     * already knows how to read a review log and a settings object, so the
-     * computer writing them is enough. No change on the phone, no new format
-     * for it to learn, and nothing to go wrong on the side I am not allowed to
-     * break.
+     * Writes the phone-compatible review log (when nonempty) and settings.
+     * Each file is replaced atomically, but the pair is not one transaction:
+     * a later failure can leave an earlier complete file already updated.
      */
     suspend fun writeForPhone(
         container: DesktopContainer,
         directory: File,
         now: Long = System.currentTimeMillis()
-    ): List<String> {
-        directory.mkdirs()
-        val written = mutableListOf<String>()
+    ): List<String> = writeForPhone(
+        directory,
+        container.db.reviewDao().all(),
+        SettingsBackup.encode(container.settings.current(), synthetic = container.isDeveloperMode),
+        container.isDeveloperMode,
+        now
+    )
 
-        val reviews = container.db.reviewDao().all()
+    internal suspend fun writeForPhone(
+        directory: File,
+        reviews: List<ReviewEntity>,
+        settings: String,
+        synthetic: Boolean,
+        now: Long
+    ): List<String> {
+        val caller = currentCoroutineContext()
+        caller.ensureActive()
+        val written = mutableListOf<String>()
         if (reviews.isNotEmpty()) {
             val file = File(directory, "ikna-reviews-" + stamp(now) + ".jsonl")
-            file.bufferedWriter().use { out ->
-                for (review in reviews) {
-                    out.write(
-                        ReviewRecord.json.encodeToString(
-                            ReviewRecord.serializer(),
-                            ReviewRecord.of(review, synthetic = container.isDeveloperMode)
+            writeBackupAtomically(file) { temporary ->
+                temporary.bufferedWriter().use { out ->
+                    for (review in reviews) {
+                        caller.ensureActive()
+                        out.write(
+                            ReviewRecord.json.encodeToString(
+                                ReviewRecord.serializer(),
+                                ReviewRecord.of(review, synthetic = synthetic)
+                            )
                         )
-                    )
-                    out.newLine()
+                        out.newLine()
+                    }
                 }
             }
             written += file.name
         }
 
-        val settings = SettingsBackup.encode(
-            container.settings.current(),
-            synthetic = container.isDeveloperMode
-        )
         if (settings.isNotBlank()) {
             val file = File(directory, "ikna-settings-" + stamp(now) + ".json")
-            file.writeText(settings)
+            writeBackupAtomically(file) { temporary ->
+                temporary.outputStream().buffered().use {
+                    it.writeChecked(settings.toByteArray(Charsets.UTF_8), caller)
+                }
+            }
             written += file.name
         }
-
         return written
+    }
+
+    private fun OutputStream.writeChecked(bytes: ByteArray, caller: CoroutineContext) {
+        var offset = 0
+        while (offset < bytes.size) {
+            caller.ensureActive()
+            val count = minOf(COPY_BUFFER, bytes.size - offset)
+            write(bytes, offset, count)
+            offset += count
+        }
     }
 
     /**
@@ -285,14 +324,13 @@ object IknaBundle {
         var count = 0
         for ((name, body) in decks) {
             if (body.isBlank()) continue
-            val ok = runCatching {
-                container.deckRepository.importText(
-                    fileName = name,
-                    text = body,
-                    fallbackTitle = name.removeSuffix(".txt")
-                )
-            }.isSuccess
-            if (ok) count += 1
+            // Blank entries are optional; an attempted import that fails is not.
+            container.deckRepository.importText(
+                fileName = name,
+                text = body,
+                fallbackTitle = name.removeSuffix(".txt")
+            )
+            count += 1
         }
         return count
     }
@@ -301,13 +339,16 @@ object IknaBundle {
         if (text.isBlank()) {
             null
         } else {
-            runCatching { container.restoreRepository.restoreFromJsonl(text) }.getOrNull()
+            container.restoreRepository.restoreFromJsonl(text)
         }
 
     private suspend fun applySettings(container: DesktopContainer, text: String): Boolean {
         if (text.isBlank()) return false
         val snapshot = SettingsBackup.decode(text) ?: return false
-        return runCatching { SettingsBackup.apply(container.settings, snapshot) }.isSuccess
+        // Rejected snapshots remain skippable. Storage failures and cancellation
+        // after accepting a snapshot must reach the restore caller.
+        SettingsBackup.apply(container.settings, snapshot)
+        return true
     }
 
     private fun empty(kind: BundleKind) = BundleRead(

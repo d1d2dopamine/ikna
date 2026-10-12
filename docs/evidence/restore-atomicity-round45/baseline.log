@@ -1,0 +1,93 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :app
+Unable to initialize metrics, ensure <home>/.android is writable, details: <home>/.android/analytics.settings (No such file or directory)
+
+> Task :desktop:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :desktop:convertXmlValueResourcesForMain NO-SOURCE
+> Task :desktop:copyNonXmlValueResourcesForMain NO-SOURCE
+> Task :desktop:prepareComposeResourcesTaskForMain NO-SOURCE
+> Task :desktop:generateResourceAccessorsForMain SKIPPED
+> Task :desktop:generateActualResourceCollectorsForMain SKIPPED
+> Task :desktop:generateComposeResClass SKIPPED
+> Task :shared:kmpPartiallyResolvedDependenciesChecker
+> Task :shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared:convertXmlValueResourcesForCommonMain NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForCommonMain NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForCommonMain NO-SOURCE
+> Task :shared:generateResourceAccessorsForCommonMain SKIPPED
+> Task :shared:convertXmlValueResourcesForDesktopMain NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForDesktopMain NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForDesktopMain NO-SOURCE
+> Task :shared:generateResourceAccessorsForDesktopMain SKIPPED
+> Task :shared:convertXmlValueResourcesForJvmShared NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForJvmShared NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForJvmShared NO-SOURCE
+> Task :shared:generateResourceAccessorsForJvmShared SKIPPED
+> Task :shared:generateActualResourceCollectorsForDesktopMain SKIPPED
+> Task :shared:generateComposeResClass SKIPPED
+> Task :shared:generateExpectResourceCollectorsForCommonMain SKIPPED
+> Task :shared:kspKotlinDesktop
+> Task :shared:compileKotlinDesktop FROM-CACHE
+> Task :shared:compileDesktopMainJava NO-SOURCE
+> Task :shared:assembleDesktopMainResources
+> Task :shared:desktopProcessResources
+> Task :shared:processDesktopMainResources SKIPPED
+> Task :shared:desktopMainClasses
+> Task :shared:desktopJar
+> Task :desktop:compileKotlin FROM-CACHE
+> Task :desktop:compileJava FROM-CACHE
+> Task :desktop:assembleMainResources
+> Task :desktop:processResources
+> Task :desktop:classes
+> Task :desktop:jar
+> Task :desktop:convertXmlValueResourcesForTest NO-SOURCE
+> Task :desktop:copyNonXmlValueResourcesForTest NO-SOURCE
+> Task :desktop:prepareComposeResourcesTaskForTest NO-SOURCE
+> Task :desktop:generateResourceAccessorsForTest SKIPPED
+
+> Task :desktop:compileTestKotlin
+w: file://<project>/desktop/src/test/kotlin/dev/ikna/desktop/LearningWriteAtomicityTest.kt:131:48 The corresponding parameter in the supertype 'CardDao' is named 'cards'. This may cause problems when calling this function with named arguments.
+w: file://<project>/desktop/src/test/kotlin/dev/ikna/desktop/RestoreAtomicityTest.kt:134:48 The corresponding parameter in the supertype 'CardDao' is named 'cards'. This may cause problems when calling this function with named arguments.
+w: file://<project>/desktop/src/test/kotlin/dev/ikna/desktop/RestoreAtomicityTest.kt:138:48 The corresponding parameter in the supertype 'ReviewDao' is named 'reviews'. This may cause problems when calling this function with named arguments.
+w: file://<project>/desktop/src/test/kotlin/dev/ikna/desktop/RestoreAtomicityTest.kt:144:48 The corresponding parameter in the supertype 'StatsDao' is named 'stats'. This may cause problems when calling this function with named arguments.
+
+> Task :desktop:compileTestJava
+> Task :desktop:assembleTestResources
+> Task :desktop:processTestResources
+> Task :desktop:testClasses
+
+> Task :desktop:test
+
+RestoreAtomicityTest > standalone replay cancellation at every stage preserves all prior tables FAILED
+    java.lang.AssertionError at Assert.java:89
+        Caused by: java.lang.AssertionError at RestoreAtomicityTest.kt:32
+
+RestoreAtomicityTest > restore cancellation at every stage rolls back durably and retry is idempotent FAILED
+    java.lang.AssertionError at Assert.java:89
+        Caused by: java.lang.AssertionError at RestoreAtomicityTest.kt:26
+
+RestoreAtomicityTest > restore failure at every stage rolls back durably and retry is idempotent FAILED
+    java.lang.AssertionError at Assert.java:89
+        Caused by: java.lang.AssertionError at RestoreAtomicityTest.kt:23
+
+RestoreAtomicityTest > standalone replay failure at every stage preserves all prior tables FAILED
+    java.lang.AssertionError at Assert.java:89
+        Caused by: java.lang.AssertionError at RestoreAtomicityTest.kt:29
+
+6 tests completed, 4 failed
+
+> Task :desktop:test FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':desktop:test'.
+> There were failing tests. See the report at: file://<project>/desktop/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+BUILD FAILED in 45s
+16 actionable tasks: 13 executed, 3 from cache

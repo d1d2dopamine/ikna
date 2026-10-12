@@ -226,7 +226,7 @@ class DeveloperSandboxIntegrationTest {
     }
 
     @Test
-    fun `classic answer keeps scheduling and undo without creating another mode`() = runBlocking {
+    fun `classic answer keeps scheduling and delayed undo without creating another mode`() = runBlocking {
         val home = Files.createTempDirectory("ikna-classic-answer").toFile()
         val container = DesktopContainer(home, IknaDataProfile.DEVELOPER)
         val now = 1_800_000_000_000L
@@ -250,7 +250,8 @@ class DeveloperSandboxIntegrationTest {
             assertEquals(before.reps + 1, requireNotNull(dao.card(before.chunkId, 0)).reps)
             assertEquals(null, dao.card(before.chunkId, 1))
             assertEquals(null, dao.card(before.chunkId, 2))
-            assertTrue(container.learningRepository.undoLast(now + 1_000L) != null)
+            // The visible Undo action now survives pauses longer than the old six seconds.
+            assertTrue(container.learningRepository.undoLast(now + 60_000L) != null)
             assertEquals(before, dao.card(before.chunkId, 0))
             // total() counts non-retracted answers; undo restores that count.
             // The raw journal still appends both the answer and its retraction.

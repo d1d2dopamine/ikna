@@ -85,7 +85,10 @@ interactive parent until the pointer leaves it. Keyboard focus shows the same fr
 without requiring pointer motion on the borderless controls; a bordered control
 thickens its own boundary instead, because the overlay that lets outer frames
 escape scroll clipping must not carry a focus ring over unrelated text. Pressing
-freezes its current phase, and disabling animations makes it fully static.
+freezes an already visible frame's phase, and disabling animations makes it fully
+static. A touch press alone does not activate a frame. Controls keep their existing
+pressed fills; borderless controls use a restrained local press wash. Keyboard
+focus, pointer hover and selected navigation remain distinct from that feedback.
 
 Hover arbitration belongs to attached pointer modifiers. It checks the current
 root-space pointer against clipped input bounds, clears on cancellation/detach,
@@ -312,3 +315,83 @@ history**. Every answer is fed back through the same scheduler, and the cards, t
 word layer and every statistic are recomputed from it. That is why the log may only
 ever gain rows: given the answers, everything else is derivable, including by a
 future version with a different algorithm.
+
+## Preparation and recoverable failures
+
+A failed card or Browse load has its own retry state. It must not display the
+ordinary empty-day or finished-session message, expose an old card for grading,
+or mark the introduction complete. Introduction completion follows successful
+bundled-content preparation and daily-plan preparation. Intentionally omitted
+optional source-build packs remain optional; actual parse/storage errors propagate.
+
+Erasing data first finishes the promised export. Android saves the review log
+when nonempty and the settings; desktop saves deck texts and still asks the user
+to export review history separately. An export failure blocks deletion and leaves
+a retryable explanation. Desktop attempts use separate folders so retries and
+identically named decks cannot overwrite an earlier text copy.
+
+## Catalogue outcomes and Undo timing
+
+Catalogue results belong to their deck row and remain visible through another
+installation. Installed content and metadata commit together. A failed plan
+refresh after that commit is a separate, retryable outcome; it must not relabel
+a saved deck as a failed install or repeat the import. Dependent filters retain
+valid selections and clear only unavailable choices, leaving typed search intact.
+
+Undo has no automatic reading deadline. Its existing close action and replacement
+by a later action remain; it is not an indefinitely retained multi-step history.
+
+## Reading space and minimum targets
+
+Onboarding and study-state reading content keeps its ordinary spacing when it
+fits and scrolls when it does not. Horizontal grading must not capture vertical
+reading scrolls. Deck rows may grow; fixed artwork dimensions do not cap text or
+hit targets. Ordinary icon/text/wide controls have minimum 48dp targets, and
+labels may wrap rather than being cut off. Toggle artwork stays compact within
+its larger hit area. Device checks at large text remain required.
+
+Canvas charts expose concise text equivalents of existing observations, not new
+scores or inferred ability. Missing data, observed zero and insufficient samples
+remain distinct. Preserve the repository's qualified-hour verdict.
+
+## First study choice
+
+The four authored introduction slides stay intact. The last slide names the
+starter precisely: beginner English with Russian meanings, only if included in
+this build. It offers the existing Catalogue for another language pair without
+promising that pair is available or adding a questionnaire. Both choices retain
+successful preparation before completion; an intentionally absent optional pack
+can still produce a valid empty plan. START opens the whole-day session on both
+platforms. Android keeps Home below that first destination for Back; ordinary
+launch and return navigation are unchanged. A failed preparation retains the
+selected destination for Retry.
+
+Source/locale/design checks cover this contract; new platform routing and optional
+pack preparation fixtures require the normal Kotlin test suites. Real Android and
+Windows checks, including large text and a missing optional starter, remain open.
+
+## Catalogue viewport and brief notices
+
+Catalogue rows are lazy and keyed by their stable catalogue identity. One bounded
+viewport holds filters and rows; jobs and outcomes belong to the screen rather
+than recycled rows. Scrolling must not start or cancel a download.
+
+Brief informational notices respect the platform's recommended accessibility
+reading time and expose a polite live region. An error requiring a decision or
+retry is persistent; a short informational notice does not replace that state.
+
+## Statistics content: retained journal facts (Round 44)
+
+The active statistics screen uses three small 7/30-day counts: distinct answered
+global targets, first retained answers and known repeat answers. Context and
+concrete material are optional disclosures. Recorded recovery needs at least two
+subsequent known recalls after a known repeat miss, without a later retained miss;
+this is not permanent learning. Repeated difficulties describe answers, not the
+learner. Unknown snapshots, undo and incomplete/imported history remain explicit.
+
+Do not restore attendance pressure, best-hour prescriptions, a percentage of
+language knowledge or an obligation forecast to the primary view. Do not label
+per-answer timing as session duration. Loading errors must not become zeroes.
+Windows are local calendar study days through the read time, with the current
+zone and configured day boundary available in the explanation. Changing this
+presentation never changes Scheduler/Governor or review history.

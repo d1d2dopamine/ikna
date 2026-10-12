@@ -1,0 +1,106 @@
+{
+  "existing_changes": [
+    {
+      "path": "app/src/main/java/dev/ikna/data/export/JsonExporter.kt",
+      "status": "changed"
+    },
+    {
+      "path": "app/src/main/java/dev/ikna/ui/onboarding/OnboardingScreen.kt",
+      "status": "changed"
+    },
+    {
+      "path": "app/src/main/java/dev/ikna/ui/session/BrowseScreen.kt",
+      "status": "changed"
+    },
+    {
+      "path": "app/src/main/java/dev/ikna/ui/session/BrowseViewModel.kt",
+      "status": "changed"
+    },
+    {
+      "path": "app/src/main/java/dev/ikna/ui/session/SessionScreen.kt",
+      "status": "changed"
+    },
+    {
+      "path": "app/src/main/java/dev/ikna/ui/session/SessionViewModel.kt",
+      "status": "changed"
+    },
+    {
+      "path": "app/src/main/java/dev/ikna/ui/settings/SettingsScreen.kt",
+      "status": "changed"
+    },
+    {
+      "path": "desktop/src/main/kotlin/dev/ikna/desktop/BrowsePane.kt",
+      "status": "changed"
+    },
+    {
+      "path": "desktop/src/main/kotlin/dev/ikna/desktop/DesktopContainer.kt",
+      "status": "changed"
+    },
+    {
+      "path": "desktop/src/main/kotlin/dev/ikna/desktop/OnboardingPane.kt",
+      "status": "changed"
+    },
+    {
+      "path": "desktop/src/main/kotlin/dev/ikna/desktop/SessionPane.kt",
+      "status": "changed"
+    },
+    {
+      "path": "desktop/src/main/kotlin/dev/ikna/desktop/SettingsPane.kt",
+      "status": "changed"
+    },
+    {
+      "path": "desktop/src/main/kotlin/dev/ikna/desktop/Shell.kt",
+      "status": "changed"
+    },
+    {
+      "path": "shared/src/jvmShared/kotlin/dev/ikna/data/pack/PackLoader.kt",
+      "status": "changed"
+    },
+    {
+      "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/session/SessionUiState.kt",
+      "status": "changed"
+    },
+    {
+      "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsDe.kt",
+      "status": "changed"
+    },
+    {
+      "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsEn.kt",
+      "status": "changed"
+    },
+    {
+      "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsEs.kt",
+      "status": "changed"
+    },
+    {
+      "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsFr.kt",
+      "status": "changed"
+    },
+    {
+      "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsPl.kt",
+      "status": "changed"
+    },
+    {
+      "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsPt.kt",
+      "status": "changed"
+    },
+    {
+      "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsRu.kt",
+      "status": "changed"
+    }
+  ],
+  "new_source_files": [
+    "desktop/src/main/kotlin/dev/ikna/desktop/PreWipeDeckBackup.kt",
+    "desktop/src/test/kotlin/dev/ikna/desktop/PreWipeDeckBackupTest.kt",
+    "shared/src/jvmShared/kotlin/dev/ikna/data/export/PreWipeBackup.kt",
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/FirstSessionPreparation.kt",
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/session/CardLoadFailure.kt",
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/session/CardLoading.kt",
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/data/export/PreWipeBackupTest.kt",
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/data/pack/BundledPackFailureTest.kt",
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/data/repo/FirstSessionPreparationTest.kt",
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/ui/session/CardLoadingTest.kt"
+  ],
+  "readme_preserved": true,
+  "schema_preserved": true
+}

@@ -1,6 +1,8 @@
 package dev.ikna.data.repo
 
 import dev.ikna.data.dev.DeveloperAccess
+import dev.ikna.data.db.IknaDatabase
+import dev.ikna.data.db.inTransaction
 import dev.ikna.data.db.CardDao
 import dev.ikna.data.db.CardEntity
 import dev.ikna.data.db.BrowseDao
@@ -55,10 +57,13 @@ import java.time.temporal.ChronoUnit
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 class LearningRepository(
+    private val db: IknaDatabase,
     private val cardDao: CardDao,
     private val chunkDao: ChunkDao,
     private val reviewDao: ReviewDao,
@@ -1147,13 +1152,27 @@ class LearningRepository(
         }
     }
 
+    /**
+     * Commit the schedule, immutable answer and all derived DB writes together.
+     * Settings callbacks only read preferences here; Room cannot roll back
+     * external settings or in-memory state. All injected DAOs must use [db].
+     */
     suspend fun answer(
         sessionCard: SessionCard,
         rating: Rating,
         durationMs: Long,
         now: Long,
         signals: ReviewSignals = ReviewSignals()
-    ) = writeLock.withLock { answerLocked(sessionCard, rating, durationMs, now, signals) }
+    ) = writeLock.withLock {
+        val callerContext = currentCoroutineContext()
+        callerContext.ensureActive()
+        db.inTransaction {
+            answerLocked(sessionCard, rating, durationMs, now, signals)
+            // Room uses its database job for the writer block. The originating
+            // session may have been cancelled while its DB writes were running.
+            callerContext.ensureActive()
+        }
+    }
 
     private suspend fun answerLocked(
         sessionCard: SessionCard,
@@ -1307,7 +1326,15 @@ class LearningRepository(
      * could be undone (answers recorded before this version carry no snapshot).
      */
     suspend fun undoLast(now: Long = System.currentTimeMillis()): String? =
-        writeLock.withLock { undoLastLocked(now) }
+        writeLock.withLock {
+            val callerContext = currentCoroutineContext()
+            callerContext.ensureActive()
+            db.inTransaction {
+                val restoredKey = undoLastLocked(now)
+                callerContext.ensureActive()
+                restoredKey
+            }
+        }
 
     private suspend fun undoLastLocked(now: Long): String? {
         val last = reviewDao.lastAnswer() ?: return null

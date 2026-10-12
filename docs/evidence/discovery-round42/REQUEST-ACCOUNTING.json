@@ -1,0 +1,27 @@
+{
+  "controlledCliLiveBatches": 3,
+  "controlledCliTopLevelHttpOperations": 9,
+  "finalCliHttpOperationsWithRedirectsDisabled": 3,
+  "separateResearchExplicitHttpOperations": 11,
+  "researchHttpBreakdown": {
+    "metadataApiReads": 8,
+    "documentationCardReads": 3
+  },
+  "separateResearchWebInvocations": 15,
+  "separateResearchWebSuboperations": {
+    "search": 4,
+    "open": 30,
+    "click": 4,
+    "find": 3
+  },
+  "webOpenClickResults": {
+    "success": 15,
+    "error": 18,
+    "unverifiedTruncatedResult": 1
+  },
+  "underlyingWireRequestsAndSearchFanout": "unmetered; not an exact globalHTTPtotal",
+  "paidApiCalls": 0,
+  "corpusArchiveDownloads": 0,
+  "deliberateDatasetRowRequests": 0,
+  "incidentalViewerMetadata": "One primary dataset landing page rendered sample rows; no such rows retained in deliverables."
+}

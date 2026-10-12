@@ -76,7 +76,7 @@ class JsonExporter(
     private fun stamp(now: Long): String = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         .format(Instant.ofEpochMilli(now).atZone(ZoneId.systemDefault()))
 
-    private fun write(name: String, mime: String, body: (BufferedWriter) -> Unit): String? {
+    private fun write(name: String, mime: String, body: (BufferedWriter) -> Unit): String {
         val resolver = context.contentResolver
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
@@ -84,9 +84,11 @@ class JsonExporter(
             put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS + "/ikna")
         }
 
-        val uri = resolver.insert(MediaStore.Files.getContentUri("external"), values) ?: return null
-        val stream = resolver.openOutputStream(uri) ?: return null
-        stream.bufferedWriter().use { out -> body(out) }
+        writeExportDocument(
+            create = { resolver.insert(MediaStore.Files.getContentUri("external"), values) },
+            open = { uri -> resolver.openOutputStream(uri) },
+            body = body
+        )
         return name
     }
 }

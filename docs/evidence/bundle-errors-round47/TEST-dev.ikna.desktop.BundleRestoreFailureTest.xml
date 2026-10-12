@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.BundleRestoreFailureTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-12T15:11:07" hostname="disposable-test-host" time="0.014">
+  <properties/>
+  <testcase name="optionalEmptyJournalStillAllowsAnEmptyBundle" classname="dev.ikna.desktop.BundleRestoreFailureTest" time="0.005"/>
+  <testcase name="rejectedJournalIsNotReportedAsSuccessfulBundleRestore" classname="dev.ikna.desktop.BundleRestoreFailureTest" time="0.009"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

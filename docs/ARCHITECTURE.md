@@ -97,6 +97,14 @@ same scheduler. Two details matter:
   same file twice a no-op, and what lets a file be merged into a database that has
   been used since the export.
 
+JSONL parsing and validation complete before the restore opens its writer
+transaction. Signature lookup, both history-insertion passes and all derived
+replay writes commit together; standalone replay has the same protection. A
+failure or originating-caller cancellation before the commit gate rolls them
+back together. Cancellation is checked between bounded batches and replay steps.
+Anki retains its outer transaction and checks its own originating caller before
+commit; cancellation during nested replay may be noticed only when replay returns.
+
 `planCompleted` is not restored. A day's plan is not an answer, so it is not in
 the log; guessing it would hand the accelerator a run of clean days that nobody
 studied. It restarts.

@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -271,7 +273,7 @@ fun IknaIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    size: Dp = 44.dp,
+    size: Dp = 48.dp,
     glyphSize: Dp = 20.dp,
     color: Color = MaterialTheme.colorScheme.onBackground,
     /** Persistent navigation state; ordinary buttons should leave this false. */
@@ -283,7 +285,7 @@ fun IknaIconButton(
     Box(
         modifier = modifier
             .iknaInspect("IknaIconButton[${label ?: glyph.name}]")
-            .size(size)
+            .size(size.coerceAtLeast(48.dp))
             .semantics {
                 role = Role.Button
                 if (selected) this.selected = true
@@ -309,10 +311,10 @@ fun IknaIconButton(
 }
 
 /**
- * Full-width rectangular button with a fixed height.
+ * Full-width rectangular button with a stable minimum height.
  *
- * Fixed height matters more than it looks: the answer buttons must never change
- * size between cards, or the target moves under a thumb that is already moving.
+ * The usual height stays stable; larger text may wrap and grow the control
+ * instead of clipping its label.
  *
  * [quiet] uses a readable subdued label without changing the geometry. Disabled
  * controls alone lose opacity; an enabled answer must not become hard to read.
@@ -361,7 +363,7 @@ fun IknaWideButton(
         modifier = modifier
             .iknaInspect("IknaWideButton[$label]")
             .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier)
-            .height(height)
+            .heightIn(min = height.coerceAtLeast(48.dp))
             .clip(iknaControlShape())
             .background(fillColor.copy(alpha = fillColor.alpha * alpha))
             .border(if (enabled && focused) 2.dp else 1.dp, boundary.copy(alpha = alpha), iknaControlShape())
@@ -370,19 +372,19 @@ fun IknaWideButton(
                 interaction,
                 enabled = enabled,
                 cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp),
-                placement = SignalFramePlacement.Outer
+                placement = SignalFramePlacement.Outer,
+                pressFeedback = false
             )
             .clickable(interactionSource = interaction, indication = null,
                 enabled = enabled, role = Role.Button, onClick = onClick)
-            .then(if (fillWidth) Modifier else Modifier.padding(horizontal = Space.md)),
+            .padding(horizontal = Space.md, vertical = Space.sm),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
             color = (if (quiet) colors.quietLabel else colors.label).copy(alpha = alpha),
-            textAlign = TextAlign.Center,
-            maxLines = 1
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -414,7 +416,7 @@ fun IknaTextButton(
     Box(
         modifier = modifier
             .iknaInspect("IknaTextButton[$label]")
-            .height(44.dp)
+            .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
             .hoverable(interaction, enabled = enabled)
             .iknaSignalFrame(interaction, enabled = enabled)
             .clickable(
@@ -424,14 +426,14 @@ fun IknaTextButton(
                 role = Role.Button,
                 onClick = onClick
             )
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = 8.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
             color = color.copy(alpha = alpha),
-            maxLines = 1
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -504,19 +506,11 @@ fun IknaToggle(
         modifier = modifier
             .iknaInspect("IknaToggle[${label ?: if (checked) "on" else "off"}]")
             .width(56.dp)
-            .height(32.dp)
-            .background(trackColor.copy(alpha = alpha), iknaToggleTrackShape())
-            .border(if (enabled && focused) 2.dp else 1.dp, boundary.copy(alpha = alpha), iknaToggleTrackShape())
+            .height(48.dp)
             // Position and a solid/outlined thumb identify the state without
             // relying on hue. The platform still announces a real switch.
             .semantics { if (label != null) contentDescription = label }
             .hoverable(interaction, enabled = enabled)
-            .iknaSignalFrame(
-                interaction,
-                enabled = enabled,
-                cornerRadius = iknaFrameRadius(rounded = 16.dp, angular = 7.dp),
-                placement = SignalFramePlacement.Outer
-            )
             .toggleable(
                 value = checked,
                 interactionSource = interaction,
@@ -524,6 +518,17 @@ fun IknaToggle(
                 enabled = enabled,
                 role = Role.Switch,
                 onValueChange = onCheckedChange
+            )
+            // The hit target is 48dp tall; the authored track stays 32dp.
+            .padding(vertical = 8.dp)
+            .background(trackColor.copy(alpha = alpha), iknaToggleTrackShape())
+            .border(if (enabled && focused) 2.dp else 1.dp, boundary.copy(alpha = alpha), iknaToggleTrackShape())
+            .iknaSignalFrame(
+                interaction,
+                enabled = enabled,
+                cornerRadius = iknaFrameRadius(rounded = 16.dp, angular = 7.dp),
+                placement = SignalFramePlacement.Outer,
+                pressFeedback = false
             )
             .padding(4.dp),
         contentAlignment = Alignment.CenterStart
@@ -586,7 +591,8 @@ fun IknaChip(
             .iknaSignalFrame(
                 interaction,
                 cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 7.dp),
-                placement = SignalFramePlacement.Outer
+                placement = SignalFramePlacement.Outer,
+                pressFeedback = false
             )
             .clickable(interactionSource = interaction, indication = null,
                 role = Role.Button, onClick = onClick)

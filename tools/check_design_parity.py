@@ -89,16 +89,19 @@ class DesignContracts(unittest.TestCase):
     def test_same_stats_renderer_and_empty_states(self):
         for base, name in [(ANDROID, 'ui/stats/StatsScreen.kt'), (DESKTOP, 'StatsPane.kt')]:
             platform = read(base, name)
-            self.assertIn('IknaStatsContent(', platform)
+            self.assertIn('IknaStudyStatsContent(', platform)
+            self.assertIn('IknaStatsLoadFailure', platform)
+            self.assertIn('catch (cancelled: CancellationException)', platform)
             # Statistics describes evidence; today's governor load already lives
             # on the deck screen and must never come back as a quota here.
             for forbidden in ['currentDailyTarget()', 'normIsMeasured()', 'knownWordCount()', 'answeredToday()']:
                 self.assertNotIn(forbidden, platform)
-        source = read(SHARED, 'ui/stats/StatsContent.kt')
-        for required in ['ActivityMap(', 'HourBars(', 'ForecastBars(', 'Leeches(', 'HistoryMetric(',
-                         'targetsWithHistory', 'answers30', 'stats.030', 'IknaLatticePlaceholder()', 'displayLarge']:
+        source = read(SHARED, 'ui/stats/StudyStatsContent.kt')
+        for required in ['StudyMetric(', 'StudyTargetGroup(', 'firstRecordedTargets',
+                         'repeatAnswers', 'unclassifiedAnswers', 'study.020', 'study.021']:
             self.assertIn(required, source)
-        self.assertNotIn('Minutes(digest)', source)
+        for retired in ['ActivityMap(', 'HourBars(', 'ForecastBars(', 'Minutes(', 'retention']:
+            self.assertNotIn(retired, source)
 
     def test_stats_history_uses_global_targets_and_best_hour_waits_for_evidence(self):
         dao = read(SHARED, 'data/db/Daos.kt')
@@ -221,7 +224,7 @@ class DesignContracts(unittest.TestCase):
         for required in ['maxWidth >= 900.dp', '380.dp', '340.dp', '300.dp', 'deckListState', '.clipToBounds()']:
             self.assertIn(required, source)
         for name in ['StatsPane', 'SettingsPane', 'DeckPane', 'SearchPane', 'CatalogPane', 'AddDeckPane', 'AnkiPane', 'BackupPane']:
-            self.assertRegex(read(DESKTOP, name + '.kt'), r'Desktop(?:ScrollablePane|PaneFrame)\(')
+            self.assertRegex(read(DESKTOP, name + '.kt'), r'Desktop(?:ScrollablePane|LazyPane|PaneFrame)\(')
         self.assertIn('readingWidth: Dp = 760.dp', read(DESKTOP, 'PaneChrome.kt'))
         self.assertIn('IknaBottomBar', read(DESKTOP, 'PaneChrome.kt'))
 
@@ -461,6 +464,18 @@ class DesignContracts(unittest.TestCase):
                          'settings.setOnboardingDone(true)']:
             self.assertIn(required, container)
 
+    def test_undo_feedback_has_no_expiring_ui_timer(self):
+        android = read(ANDROID, 'ui/session/SessionViewModel.kt')
+        desktop = read(DESKTOP, 'SessionPane.kt')
+        for source in (android, desktop):
+            self.assertNotIn('UNDO_WINDOW_MS', source)
+            self.assertNotIn('undoToken', source)
+            self.assertNotIn('delay(6_000L)', source)
+            self.assertIn('undoVisible = true', source)
+            self.assertIn('undoVisible = false', source)
+        self.assertIn('fun dismissUndo()', android)
+        self.assertIn('onDismiss = { undoVisible = false }', desktop)
+
     def test_progress_counts_session_and_deck_and_preserves_subpercent(self):
         session = read(SHARED, 'ui/session/SessionChrome.kt')
         # The word "today" is gone from the session header by owner decision;
@@ -485,7 +500,7 @@ class DesignContracts(unittest.TestCase):
         # the default and no pane overrides it, so a drifted size or weight is
         # a failing test rather than a surprise.
         chrome = read(DESKTOP, 'PaneChrome.kt')
-        assert chrome.count('titleStyle: TextStyle = MaterialTheme.typography.headlineSmall') == 2
+        assert chrome.count('titleStyle: TextStyle = MaterialTheme.typography.headlineSmall') == 3
         for dp, _, fns in os.walk(ROOT / 'desktop' / 'src' / 'main' / 'kotlin'):
             for fn in fns:
                 if not fn.endswith('.kt'):
@@ -582,15 +597,17 @@ class DesignContracts(unittest.TestCase):
         for required in [
             'private val DECK_ROW_HEIGHT = 52.dp',
             'private val DECK_MARK_SIZE = 52.dp',
-            'private val DECK_INFO_HEIGHT = 34.dp',
+            'private val DECK_INFO_HEIGHT = 48.dp',
             'private val DECK_PROGRESS_HEIGHT = 14.dp',
             '.hoverable(interaction)\n            .clipToBounds()\n            .iknaSignalFrame(\n                interaction,\n                cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp),\n                placement = SignalFramePlacement.Outer\n            )\n            .clickable(interactionSource = interaction, indication = null, onClick = onOpen)',
             '.size(DECK_MARK_SIZE)',
-            'modifier = Modifier.weight(1f).fillMaxHeight()',
-            'modifier = Modifier.height(DECK_INFO_HEIGHT)',
+            'Column(modifier = Modifier.weight(1f))',
+            'modifier = Modifier.heightIn(min = DECK_INFO_HEIGHT)',
+            '.heightIn(min = DECK_ROW_HEIGHT)',
+            'size = 48.dp',
             'verticalArrangement = Arrangement.SpaceBetween',
             'Spacer(Modifier.height(Space.xs))\n                IknaDeckProgress(',
-            'modifier = Modifier.height(DECK_PROGRESS_HEIGHT)'
+            'modifier = Modifier.heightIn(min = DECK_PROGRESS_HEIGHT)'
         ]:
             self.assertIn(required, shared_rows)
         row = shared_rows[shared_rows.index('fun IknaDeckRow('):shared_rows.index('/** Makes the long-term bar')]
@@ -673,11 +690,10 @@ class DesignContracts(unittest.TestCase):
             'collectIsHoveredAsState()',
             'collectIsFocusedAsState()',
             'collectIsPressedAsState()',
-            'val moving = enabled && motionEnabled && !pressed && when (placement) {',
-            'SignalFramePlacement.Outer -> hoverOwner || pressed',
-            'SignalFramePlacement.Inner -> hoverOwner || focused || pressed || selected',
-            'SignalFramePlacement.Outer -> hoverOwner',
-            'SignalFramePlacement.Inner -> hoverOwner || selected',
+            'val feedback = signalFrameFeedback(',
+            'val active = feedback.frameVisible',
+            'val moving = feedback.frameMoving',
+            'if (feedback.pressVisible)',
             'drawWithCache',
             'PathEffect.dashPathEffect(',
             'StrokeCap.Round',
@@ -690,6 +706,10 @@ class DesignContracts(unittest.TestCase):
             'coordinates.size.height'
         ]:
             self.assertIn(required, frame)
+        feedback = read(SHARED, 'ui/theme/SignalFrameFeedback.kt')
+        self.assertIn('frameVisible = enabled && (hoverOwner || (inner && (focused || selected)))', feedback)
+        self.assertIn('pressVisible = enabled && pressed && pressFeedback', feedback)
+        self.assertNotIn('hoverOwner || pressed', feedback)
         self.assertNotIn('LaunchedEffect(moving)', frame)
         self.assertNotIn('rememberInfiniteTransition', frame)
         self.assertNotIn('coordinator.setHovered(frameId, enabled && hovered)', frame)

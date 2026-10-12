@@ -111,8 +111,10 @@ fun SessionScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        IknaSessionTopBar(state = state)
-        IknaTodayProgress(state = state)
+        if (!state.loading && !state.loadFailed) {
+            IknaSessionTopBar(state = state)
+            IknaTodayProgress(state = state)
+        }
 
         Box(
             modifier = Modifier
@@ -126,6 +128,8 @@ fun SessionScreen(
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+                state.loadFailed -> IknaCardLoadFailure(onRetry = { vm.load() })
 
                 card != null -> SwipeableCard(
                     key = card.card.key + ":" + state.index,
@@ -196,7 +200,7 @@ fun SessionScreen(
         }
 
         IknaSessionUndoBar(
-            visible = state.undoVisible,
+            visible = state.undoVisible && !state.loading && !state.loadFailed,
             failed = state.undoFailed,
             wrong = state.wrongMarked,
             wrongSourceId = state.wrongSourceId,

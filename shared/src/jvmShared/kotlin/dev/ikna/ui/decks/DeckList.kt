@@ -10,10 +10,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -52,7 +52,7 @@ import dev.ikna.ui.theme.iknaNumberStyle
 
 private val DECK_ROW_HEIGHT = 52.dp
 private val DECK_MARK_SIZE = 52.dp
-private val DECK_INFO_HEIGHT = 34.dp
+private val DECK_INFO_HEIGHT = 48.dp
 private val DECK_PROGRESS_HEIGHT = 14.dp
 
 /*
@@ -65,7 +65,7 @@ private val DECK_PROGRESS_HEIGHT = 14.dp
  * its end,
  * the row has no outline and is separated by space, the square is filled when the
  * deck owes work and hollow when it does not, and the percentage sits beside
- * today's figure rather than under the bar so that every row is the same height.
+ * today's figure rather than under the bar while the row can grow for larger text and reachable actions.
  */
 
 /**
@@ -149,7 +149,7 @@ fun IknaDeckRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(DECK_ROW_HEIGHT)
+            .heightIn(min = DECK_ROW_HEIGHT)
             .hoverable(interaction)
             .clipToBounds()
             .iknaSignalFrame(
@@ -163,13 +163,13 @@ fun IknaDeckRow(
     ) {
         IknaDeckMark(deck = deck, owes = owes, look = look)
         Spacer(Modifier.width(Space.md))
-        Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+        Column(modifier = Modifier.weight(1f)) {
             Row(
-                modifier = Modifier.height(DECK_INFO_HEIGHT),
+                modifier = Modifier.heightIn(min = DECK_INFO_HEIGHT),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
@@ -197,7 +197,7 @@ fun IknaDeckRow(
                 IknaIconButton(
                     glyph = IknaGlyph.BROWSE,
                     onClick = onBrowse,
-                    size = 32.dp,
+                    size = 48.dp,
                     glyphSize = 18.dp,
                     color = if (browseAvailable) accent else muted,
                     label = S.t(if (browseAvailable) "a11y.012" else "a11y.015")
@@ -205,7 +205,7 @@ fun IknaDeckRow(
                 IknaIconButton(
                     glyph = IknaGlyph.DOTS,
                     onClick = onOpenDeck,
-                    size = 32.dp,
+                    size = 48.dp,
                     glyphSize = 18.dp,
                     color = muted,
                     label = S.t("a11y.010")
@@ -218,14 +218,13 @@ fun IknaDeckRow(
                 )
             }
             if (deck.isActive) {
-                // Keep the original 52dp square. Compact one-line text and a
-                // bounded progress line end at its lower edge instead of making
-                // the mark grow to cover an overflowing column.
+                // Keep the original 52dp square; the row can grow independently
+                // for readable text and non-overlapping 48dp action targets.
                 Spacer(Modifier.height(Space.xs))
                 IknaDeckProgress(
                     introduced = deck.introduced,
                     total = deck.total,
-                    modifier = Modifier.height(DECK_PROGRESS_HEIGHT),
+                    modifier = Modifier.heightIn(min = DECK_PROGRESS_HEIGHT),
                     color = if (owes) accent else muted
                 )
             }

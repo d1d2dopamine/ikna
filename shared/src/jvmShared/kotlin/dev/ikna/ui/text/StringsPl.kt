@@ -1,6 +1,8 @@
 package dev.ikna.ui.text
 
 val STRINGS_PL: Map<String, String> = mapOf(
+    "backup.001" to "Nie udało się ukończyć zapisywania. Sprawdź wolne miejsce i dostęp do folderu, a następnie spróbuj ponownie.",
+    "restore.001" to "Nie udało się ukończyć przywracania. Sprawdź plik i spróbuj ponownie.",
 	// Напоминание
 	"app.001" to "Przypomnienie",
 	// Одно напоминание в день, если минимум ещё не сделан
@@ -34,7 +36,13 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// Своя колода
 	"deckrepo.001" to "Własna talia",
 	// Статистика
-	"stats.001" to "Statystyka",
+	"stats.a11y.activity" to "Dni z nauką: {active} z {total}.",
+    "stats.a11y.hours" to "Godzina z najlepszym zaobserwowanym wynikiem: {hours}",
+    "stats.a11y.hour" to "{hour}: przypomniano {percent}%; liczba powtórek: {answers}.",
+    "stats.a11y.small_sample" to "Mała próba.",
+    "stats.a11y.forecast_day" to "Następne {days} dni, od jutra. Zaplanowane powtórki: {reviews}.",
+    "stats.a11y.no_data" to "Brak danych.",
+    "stats.001" to "Statystyka",
 	// ПОСЛЕДНИЕ 30 ДНЕЙ
 	"stats.002" to "OSTATNIE 30 DNI",
 	// Каждая метка — день с занятием, справа сегодня. Пропуск ничего не обнуляет и не обрывает:
@@ -663,8 +671,8 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"voice.010" to "Sprawdź głos",
 	// Своя модель
 	"voice.011" to "Twoje modele",
-	// Модель приносите вы: папка Kokoro или Piper с телефона. Ничего не скачивается — у приложения нет доступа в интернет.
-	"voice.012" to "Model wybierasz sam: folder Kokoro albo Piper z telefonu. Nic się nie pobiera — aplikacja nie ma dostępu do internetu.",
+	// Speech is local; model acquisition, catalogue and update checks need network access.
+	"voice.012" to "Odczyt działa na urządzeniu. Dodaj model Kokoro lub Piper z archiwum albo folderu; ten ekran nie pobiera modeli. Katalog i sprawdzanie aktualizacji korzystają z internetu.",
 	// Убрать модель
 	"voice.013" to "Usuń model",
 	// Язык модели
@@ -1016,6 +1024,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
     // Подгруппа «Редкого» и причина отключённой загрузки в каталоге
     "set.144" to "Diagnostyka i konserwacja",
     "cat.042" to "Najpierw skończy się inne pobieranie.",
+    "cat.043" to "Talia jest zapisana, ale nie udało się odświeżyć planu nauki. Spróbuj odświeżyć plan ponownie.",
     "pc.021" to "Fiszki, daty, statystyki, ustawienia, zainstalowane talie i dziennik odpowiedzi znikają. Teksty talii są najpierw zapisane w folderze export. Dziennik odpowiedzi — nie: wyeksportuj go wcześniej.",
 "pc.025" to "{reveal} — ujawnij · {miss} / {know} — odpowiedź · {undo} — cofnij",
     "dev.024" to "Aplikacja uruchomi się ponownie w zwykłym profilu. Testowe talie i oznaczenie DEV znikną z interfejsu; dane piaskownicy pozostaną zapisane osobno.",
@@ -1044,4 +1053,40 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "dev.tools.021" to "Omijanie ograniczeń",
     "dev.tools.022" to "włączone",
     "dev.tools.023" to "wyłączone",
+    "load.001" to "Nie udało się wczytać kart. Spróbuj ponownie.",
+    "load.002" to "SPRÓBUJ PONOWNIE",
+    "load.003" to "Nie udało się otworzyć czytania. Spróbuj ponownie.",
+    "load.004" to "Nie udało się przygotować aplikacji. Spróbuj ponownie.",
+    "onb.013" to "Nie udało się przygotować pierwszych kart. Spróbuj ponownie.",
+    "wipe.001" to "Nic nie usunięto. Nie udało się zapisać kopii. Sprawdź wolne miejsce i dostęp do folderu, a potem spróbuj ponownie.",
+    "wipe.002" to "Nie udało się dokończyć usuwania. Spróbuj ponownie.",
+    "wipe.003" to "Nic nie usunięto. Nie udało się zapisać tekstów talii. Sprawdź wolne miejsce i dostęp do folderu, a potem spróbuj ponownie.",
+
+    "onb.014" to "Talia startowa to angielski dla początkujących z tłumaczeniami na rosyjski, jeśli jest dołączona do tej wersji. Innej pary językowej możesz poszukać w katalogu.",
+    "onb.015" to "WYBIERZ W KATALOGU",
+
+    "study.001" to "7 dni",
+    "study.002" to "30 dni",
+    "study.003" to "Karty z odpowiedziami",
+    "study.004" to "Pierwszy zapis",
+    "study.005" to "Odpowiedzi w powtórkach",
+    "study.006" to "Wszystkie odpowiedzi w tym okresie: {count}",
+    "study.007" to "Przypomniane w powtórkach: {recalled} z {total}.",
+    "study.008" to "Jak liczymy te dane",
+    "study.009" to "Karty są liczone według celu nauki, bez ponownego liczenia tego samego celu w innej talii. Pierwszy zapis oznacza najwcześniejszą zachowaną odpowiedź, a nie pierwsze spotkanie ze słowem. Pierwsze odpowiedzi nie liczą się jako powtórki.",
+    "study.010" to "Po trudności",
+    "study.011" to "W tym okresie po nieudanej powtórce nastąpiły co najmniej dwie udane powtórki bez kolejnego zapomnienia. To obserwacja z dziennika, nie stwierdzenie, że karta została opanowana na zawsze.",
+    "study.012" to "Powtarzające się trudności",
+    "study.013" to "W tym okresie karta została zapomniana co najmniej dwa razy, również podczas ostatniej powtórki. Możesz zobaczyć jej tekst i tłumaczenie. To nie jest ocena twoich umiejętności.",
+    "study.014" to "Pokaż szczegóły",
+    "study.015" to "Ukryj szczegóły",
+    "study.016" to "Brak odpowiedzi spełniających te warunki w tym okresie.",
+    "study.017" to "W tym okresie nie ma jeszcze zapisanych odpowiedzi. Odpowiedzi z przywróconego dziennika też się liczą.",
+    "study.018" to "Tekst karty jest niedostępny",
+    "study.019" to "Pokazano {shown} z {total}, zaczynając od najnowszych odpowiedzi.",
+    "study.020" to "Te liczby obejmują zachowane odpowiedzi, bez odpowiedzi cofniętych. Po imporcie, przywróceniu lub usunięciu danych wynik zależy od dostępnego dziennika; nie opisuje całej twojej historii nauki języka. Liczby mogą maleć, gdy starsze odpowiedzi wypadają z wybranego okresu.",
+    "study.021" to "Okres: od {from} do {to}. Dzień nauki zaczyna się o {hour}:00 w strefie {zone}.",
+    "study.022" to "Przy {count} odpowiedziach nie wiadomo, czy były to pierwsze odpowiedzi, czy powtórki. Wliczają się do wszystkich odpowiedzi, ale nie do danych o powtórkach.",
+    "study.023" to "Nieudane powtórki: {misses}. Udane powtórki po ostatnim zapomnieniu: {later}.",
+    "study.024" to "Nie udało się wczytać statystyk. Spróbuj ponownie.",
 )

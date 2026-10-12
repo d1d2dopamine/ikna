@@ -837,3 +837,99 @@ No production selector change or real full-input result is claimed at readiness.
 The remaining 53 cells' eligible-supply deficit stays separate from allocation.
 Corpus payloads remain outside delivered source packages. Source admission and
 full-coverage acceptance are unchanged and unresolved where previously stated.
+
+## Round 38: interface reliability
+
+[Round 38](ROUND-0.12-38.md) implements the first owner-approved interface-audit
+stage: fail-closed pre-wipe export, visible preparation/session/Browse failures,
+retry/cancellation handling and correct propagation of bundled-pack failures.
+39 shared and 130 desktop JVM tests pass; the Linux release image and the
+11-process disposable-profile headless harness pass. README Round 37 and all
+Catalogue policies/content remain unchanged. Android SDK/device and real GUI/
+Windows acceptance remain open; this does not close the whole interface audit.
+
+## Round 39 — catalogue outcomes and persistent Undo
+
+2026-10-12: [Round 39](ROUND-0.12-39.md) adds per-deck outcomes, dependent-filter
+normalization, atomic/cancellation-aware catalogue installation, separate plan
+refresh retry and Undo without an automatic six-second expiry. Format/content,
+learning policy and learner history remain unchanged. Shared/desktop evidence
+is recorded with the stage; Android and GUI acceptance remain open.
+
+Current Windows report is non-smooth edge resize/maximize and missing minimize
+animation. The owner explicitly retired the old white-flash report; historical
+round descriptions are retained as dated evidence, not current bug status.
+
+## Round 40 — touch feedback and constrained layouts
+
+2026-10-12: [Round 40](ROUND-0.12-40.md) separates touch press feedback from the
+Signal Frame, adds scrollable reading/onboarding states and minimum 48dp targets,
+and supplies concise statistics semantics and accurate voice help. Existing
+visual identity, authored onboarding copy and learning behavior are retained.
+Source/JVM evidence is recorded; actual large-text, gesture and accessibility
+acceptance is explicitly open.
+
+## Round 41 — first study and long catalogue lists
+
+2026-10-12: [Round 41](ROUND-0.12-41.md) makes the optional starter pair explicit,
+provides direct Catalogue choice, aligns START with session entry, uses keyed
+lazy catalogue rows and honors accessibility timeout for brief notices. Final
+JVM/Linux evidence is recorded with the round. No Windows runtime fix is claimed;
+current resize/maximize lag and absent minimize animation remain open pending
+actual build/platform evidence. Android and graphical device acceptance remain
+open rather than inferred from source tests.
+
+## Round 42 — bounded Polish/Korean source discovery
+
+2026-10-12: [Round 42](ROUND-0.12-42.md) executes a three-query public metadata
+pilot against the exact six weak pl/ko cells. Pair archives and broad repository
+language tags remain distinct; known family warnings preserve meaningful new
+versions/subsets and unknown evidence stays visible. Three primary-source
+follow-ups establish no new sampling-ready human-only source. No catalogue
+admission, corpus payload, app/UI change or generated/rewritten card text occurs.
+The owner's explicit no-AI-card-text rule also covers examples and translations
+prepared for later human review. Replayable sanitized metadata, tests and honest
+negative-result limitations accompany the source; no exhaustive-search claim.
+
+## Round 43 — atomic learning writes
+
+2026-10-12: owner asked to continue Ikna/MVS/Vespian while away and explicitly
+excluded Catalogue v2 work. [Round 43](ROUND-0.12-43.md) reproduces and fixes
+partial answer/Undo writes using one database transaction per operation, preserving
+existing learning rules and review history. Fault/cancellation/reopen/retry tests
+and full JVM checks pass. Android/Windows device evidence remains open. Statistics
+content is a separately requested next application stage.
+
+## Round 44 — meaningful retained-journal statistics
+
+2026-10-12: the owner requested replacement of statistics content.
+[Round 44](ROUND-0.12-44.md) shows small 7/30-day factual counts and optional
+concrete-card observations, replacing attendance/best-hour/forecast emphasis in
+the active renderer. Identity, unknown snapshots, Undo, imports, local-time/DST
+bounds and missing content are explicit; no session-time/proficiency inference
+or new tracking is added. Loading failures have retry UI rather than false zero
+history. Catalogue/discovery remains unchanged; device acceptance remains open.
+
+## Round 45 — atomic journal restore and visible failure
+
+2026-10-12: [Round 45](ROUND-0.12-45.md) reproduces partial restore/replay writes
+and false successful desktop bundle reporting, then places journal import and
+all derived rebuilding in one cancellation-aware database transaction. Errors
+are visible and restore controls recover. This does not promise whole-bundle
+rollback across separately imported decks/settings. Platform acceptance remains
+open; Catalogue/discovery is unchanged.
+
+## Round 46 — safe backup publication
+
+2026-10-12: [Round 46](ROUND-0.12-46.md) reproduces damage to an existing backup
+on mid-write failure and hidden deck-export errors/cancellation. File publication
+is a separate reliability stage from Round45 database restore atomicity. Preserve
+the old destination until a completed replacement can be published; retain the
+existing format and empty-deck behavior, and report save failures accurately.
+
+## Round 47 — visible bundle component failures
+
+2026-10-12: [Round 47](ROUND-0.12-47.md) continues the restore-error work by
+preserving operational deck/settings exceptions instead of returning a false
+successful bundle result. Deliberate blank/synthetic/compatibility skips and the
+existing parser policy remain intact. This does not add whole-bundle rollback.

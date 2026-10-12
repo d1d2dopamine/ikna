@@ -48,6 +48,7 @@ import dev.ikna.ui.decks.IknaTodayBlock
 import dev.ikna.ui.nav.sharedAxisEnter
 import dev.ikna.ui.nav.sharedAxisExit
 import dev.ikna.ui.session.browseUnavailableText
+import dev.ikna.ui.onboarding.FirstStudyDestination
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
@@ -63,6 +64,8 @@ import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaPanel
 import dev.ikna.ui.theme.IknaTheme
 import dev.ikna.ui.theme.IknaTransientNotice
+import dev.ikna.ui.theme.IknaTextButton
+import kotlinx.coroutines.CancellationException
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.theme.Space
@@ -128,6 +131,15 @@ class DesktopUi {
         reload += 1
     }
 
+    /** Apply the first-launch choice without changing ordinary return navigation. */
+    fun completeFirstRun(destination: FirstStudyDestination) {
+        resetForFirstRun()
+        show(when (destination) {
+            FirstStudyDestination.SESSION -> Pane.SESSION
+            FirstStudyDestination.CATALOGUE -> Pane.CATALOG
+        })
+    }
+
     /** Everything held only by the running window must match a first launch. */
     fun resetForFirstRun() {
         pane = Pane.SESSION
@@ -164,19 +176,33 @@ fun IknaDesktopApp(
         S.apply(settings.language, settings.pseudoLocale)
     }
 
+    // Saving the flag can recompose before the preparation coroutine resumes on
+    // Main. Keep its pane alive until the successful callback applies the route.
+    var firstRunVisible by remember { mutableStateOf(false) }
     LaunchedEffect(storedSettings?.onboardingDone) {
-        if (storedSettings?.onboardingDone == false) ui.resetForFirstRun()
+        if (storedSettings?.onboardingDone == false) {
+            firstRunVisible = true
+            ui.resetForFirstRun()
+        }
     }
 
     val contentFont = rememberContentFont(settings.fontMode, settings.fontName)
 
     var ready by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            runCatching { container.install() }
-                .onFailure { error -> logLine("install failed: " + error) }
+    var startupFailed by remember { mutableStateOf(false) }
+    var installAttempt by remember { mutableStateOf(0) }
+    LaunchedEffect(installAttempt) {
+        ready = false
+        startupFailed = false
+        try {
+            withContext(Dispatchers.IO) { container.install() }
+            ready = true
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            logLine("install failed: " + error)
+            startupFailed = true
         }
-        ready = true
     }
 
     IknaTheme(
@@ -196,7 +222,17 @@ fun IknaDesktopApp(
                 // but do not repeat ikna in its top-left corner.
                 titleBar(palette, settings.onboardingDone)
             Box(Modifier.weight(1f).fillMaxWidth()) {
-                if (!ready || storedSettings == null) {
+                if (startupFailed && storedSettings != null) {
+                    Column(
+                        Modifier.fillMaxSize().padding(Space.lg),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(S.t("load.004"), style = MaterialTheme.typography.bodyMedium)
+                        Spacer(Modifier.height(Space.md))
+                        IknaTextButton(S.t("load.002"), onClick = { installAttempt++ })
+                    }
+                } else if (!ready || storedSettings == null) {
                     Column(
                         Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center,
@@ -206,8 +242,11 @@ fun IknaDesktopApp(
                         Spacer(Modifier.height(Space.lg))
                         Box(Modifier.width(220.dp)) { IknaLatticePlaceholder() }
                     }
-                } else if (!settings.onboardingDone) {
-                    DesktopOnboardingPane(container) { ui.resetForFirstRun() }
+                } else if (!settings.onboardingDone || firstRunVisible) {
+                    DesktopOnboardingPane(container) { destination ->
+                        ui.completeFirstRun(destination)
+                        firstRunVisible = false
+                    }
                 } else {
                     DesktopShell(container, settings, palette, ui, onRestartRequested)
                 }

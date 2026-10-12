@@ -1,5 +1,7 @@
 package dev.ikna.desktop
 
+import dev.ikna.data.repo.prepareFirstSession
+
 import dev.ikna.data.db.openIknaDatabase
 import dev.ikna.data.db.wipeAllData
 import dev.ikna.data.dev.DATA_PROFILE_FILE
@@ -68,6 +70,9 @@ class DesktopContainer(
 
     val packLoader = PackLoader(ClasspathAssets, db.chunkDao())
 
+    suspend fun importCatalogDeck(packId: String, title: String, lang: String, text: String) =
+        dev.ikna.data.catalog.importCatalogDeck(db, packLoader, packId, title, lang, text)
+
     val componentRepository = ComponentRepository(
         componentDao = db.componentDao(),
         chunkDao = db.chunkDao(),
@@ -81,6 +86,7 @@ class DesktopContainer(
     )
 
     val learningRepository = LearningRepository(
+        db = db,
         cardDao = db.cardDao(),
         chunkDao = db.chunkDao(),
         reviewDao = db.reviewDao(),
@@ -93,6 +99,8 @@ class DesktopContainer(
         selector = ChunkSelector(),
         baseConfig = config
     )
+
+    val studyStatsRepository = dev.ikna.data.repo.StudyStatsRepository(db, config.dayStartHour)
 
     val deckRepository = DeckRepository(
         chunkDao = db.chunkDao(),
@@ -108,6 +116,7 @@ class DesktopContainer(
      * had the answers been given here.
      */
     val restoreRepository = RestoreRepository(
+        db = db,
         cardDao = db.cardDao(),
         reviewDao = db.reviewDao(),
         statsDao = db.statsDao(),
@@ -181,11 +190,15 @@ class DesktopContainer(
      * introduction. Safe after a full wipe because bundled packs are upserts.
      */
     suspend fun completeOnboarding() {
-        if (!isDeveloperMode || settings.current().developerScenario != DeveloperScenario.EMPTY.id) {
-            packLoader.installBundledPacks()
-        }
-        learningRepository.ensureDailyPlan()
-        settings.setOnboardingDone(true)
+        prepareFirstSession(
+            installPacks = {
+                if (!isDeveloperMode || settings.current().developerScenario != DeveloperScenario.EMPTY.id) {
+                    packLoader.installBundledPacks()
+                }
+            },
+            preparePlan = { learningRepository.ensureDailyPlan() },
+            markComplete = { settings.setOnboardingDone(true) }
+        )
     }
 
     /**

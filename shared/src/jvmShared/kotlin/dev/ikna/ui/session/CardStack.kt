@@ -6,10 +6,9 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -57,6 +56,7 @@ import dev.ikna.domain.grading.INPUT_SWIPE
 import dev.ikna.domain.session.ReviewSignalTracker
 import dev.ikna.domain.session.ReviewSignals
 import dev.ikna.domain.session.TimingDiscardReason
+import dev.ikna.ui.theme.IknaScrollableColumn
 import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.theme.Space
 import kotlinx.coroutines.flow.first
@@ -264,17 +264,18 @@ fun SwipeableCard(
             // On the whole screen rather than on the card: the card moves, and a
             // touch area that moves with it stops accepting the second half of a
             // long drag.
+            // Vertical drags belong to the reading viewport, never a rating.
             .pointerInput(key, signals) {
-                detectDragGestures(
+                detectHorizontalDragGestures(
                     onDragStart = {
                         tracker.resetTracking()
                         armed.value = null
                         gradable.value = revealedNow.value
                         if (gradable.value) signals.dragStarted()
                     },
-                    onDrag = { change, delta ->
+                    onHorizontalDrag = { change, delta ->
                         tracker.addPosition(change.uptimeMillis, change.position)
-                        val next = drag.value + delta.x
+                        val next = drag.value + delta
                         drag.value = next
                         if (gradable.value) {
                             // One tick when the gesture becomes an answer, one when
@@ -460,7 +461,7 @@ fun ChunkCard(
                 }
         )
 
-        Column(
+        IknaScrollableColumn(
             modifier = Modifier
                 .fillMaxHeight()
                 // The reading measure: the phrase composes as a centred column,
@@ -469,7 +470,8 @@ fun ChunkCard(
                 .widthIn(max = 680.dp)
                 .align(Alignment.Center)
                 .padding(horizontal = Space.lg)
-                .padding(top = Space.lg, bottom = RAIL_HEIGHT)
+                .padding(top = Space.lg, bottom = RAIL_HEIGHT),
+            scrollKey = prompt
         ) {
             Text(
                 text = label.uppercase(),

@@ -1,0 +1,45 @@
+{
+  "verified_at_utc": "2026-10-12T10:54:41.879069+00:00",
+  "temurin_release": "https://github.com/adoptium/temurin17-binaries/releases/tag/jdk-17.0.20.1%2B1",
+  "temurin_release_metadata": "https://api.github.com/repos/adoptium/temurin17-binaries/releases/latest",
+  "gradle_distribution": "https://services.gradle.org/distributions/gradle-8.10.2-bin.zip",
+  "gradle_checksum": "https://services.gradle.org/distributions/gradle-8.10.2-bin.zip.sha256",
+  "temurin_assets": [
+    {
+      "name": "OpenJDK17U-jdk_x64_linux_hotspot_17.0.20.1_1.tar.gz",
+      "browser_download_url": "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20.1%2B1/OpenJDK17U-jdk_x64_linux_hotspot_17.0.20.1_1.tar.gz",
+      "size": 193252603
+    },
+    {
+      "name": "OpenJDK17U-jdk_x64_linux_hotspot_17.0.20.1_1.tar.gz.sha256.txt",
+      "browser_download_url": "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20.1%2B1/OpenJDK17U-jdk_x64_linux_hotspot_17.0.20.1_1.tar.gz.sha256.txt",
+      "size": 118
+    }
+  ],
+  "verified": [
+    {
+      "archive": "gradle-8.10.2-bin.zip",
+      "sha256": "31c55713e40233a8303827ceb42ca48a47267a0ad4bab9177123121e71524c26",
+      "checksum_file": "gradle-8.10.2-bin.zip.sha256"
+    },
+    {
+      "archive": "OpenJDK17U-jdk_x64_linux_hotspot_17.0.20.1_1.tar.gz",
+      "sha256": "3808d1d15e3ec6bd5b84057fb5d84c33d8a1536a258146bcea2e603fc726e08e",
+      "checksum_file": "OpenJDK17U-jdk_x64_linux_hotspot_17.0.20.1_1.tar.gz.sha256.txt"
+    }
+  ],
+  "scope": "Portable cloud toolchain; no Android SDK installation or system-wide change.",
+  "verification": {
+    "sharedJvmTests": 39,
+    "desktopJvmTests": 130,
+    "newBehavioralTests": 32,
+    "sourceDesignChecks": 42,
+    "interfaceLanguages": 7,
+    "localizationKeysPerLanguage": 743,
+    "linuxReleasePackage": "PASS",
+    "packagedProcesses": 11,
+    "GUI": "NOT RUN",
+    "AndroidBuildAndDevice": "NOT RUN: SDK not installed; agreement pending",
+    "Windows": "NOT RUN: affected build/recording pending"
+  }
+}

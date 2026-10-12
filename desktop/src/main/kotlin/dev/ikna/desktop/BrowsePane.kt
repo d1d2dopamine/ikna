@@ -29,6 +29,8 @@ import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.phoneticsFor
 import dev.ikna.domain.phonetics.Phonetics
 import dev.ikna.domain.session.BrowsePlan
+import dev.ikna.ui.session.cardLoadResult
+import dev.ikna.ui.session.IknaCardLoadFailure
 import dev.ikna.ui.session.BrowseFeedCard
 import dev.ikna.ui.session.BrowseViewportItem
 import dev.ikna.ui.session.IknaBrowseEmptyState
@@ -55,13 +57,15 @@ fun BrowsePane(
 ) {
     var plan by remember(deckId) { mutableStateOf<BrowsePlan?>(null) }
     var loading by remember(deckId) { mutableStateOf(true) }
+    var loadFailed by remember(deckId) { mutableStateOf(false) }
+    var reload by remember(deckId) { mutableStateOf(0) }
     var developerBlockers by remember(deckId) { mutableStateOf<String?>(null) }
     val listState = rememberLazyListState()
     val exposureAttempts = remember(deckId) { linkedSetOf<String>() }
 
     LaunchedEffect(deckId) {
         developerBlockers = if (container.isDeveloperMode) {
-            val availability = runCatching {
+            val availability = cardLoadResult {
                 container.learningRepository.browseDeckAvailability(listOf(deckId))[deckId]
             }.getOrNull()
             availability?.takeIf { it.forcedByDeveloper && it.blockers.isNotEmpty() }
@@ -69,9 +73,14 @@ fun BrowsePane(
         } else null
     }
 
-    LaunchedEffect(deckId) {
+    LaunchedEffect(deckId, reload) {
         loading = true
-        plan = runCatching { container.learningRepository.startBrowse(deckId) }.getOrNull()
+        loadFailed = false
+        plan = null
+        cardLoadResult { container.learningRepository.startBrowse(deckId) }.fold(
+            onSuccess = { plan = it },
+            onFailure = { loadFailed = true }
+        )
         loading = false
     }
 
@@ -92,7 +101,7 @@ fun BrowsePane(
             for (index in indices) {
                 val card = cards.getOrNull(index) ?: continue
                 if (!exposureAttempts.add(card.card.key)) continue
-                val recorded = runCatching {
+                val recorded = cardLoadResult {
                     container.learningRepository.recordBrowse(card, deckId)
                 }.getOrDefault(false)
                 changed = changed || recorded
@@ -126,6 +135,10 @@ fun BrowsePane(
                     style = MaterialTheme.typography.labelMedium,
                     color = palette.muted
                 )
+
+                loadFailed -> IknaCardLoadFailure(browse = true, onRetry = {
+                    if (!loading) { loading = true; reload += 1 }
+                })
 
                 cards.isEmpty() -> IknaBrowseEmptyState()
 

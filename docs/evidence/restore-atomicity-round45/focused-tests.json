@@ -1,0 +1,32 @@
+{
+  "classes": {
+    "dev.ikna.desktop.AnkiRestoreAtomicityTest": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dev.ikna.desktop.RestoreAtomicityTest": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dev.ikna.desktop.BundleRestoreFailureTest": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "fault_and_cancellation_scenarios": 62,
+  "baseline": {
+    "tests": 6,
+    "failures": 4
+  },
+  "bundle_baseline": {
+    "tests": 2,
+    "failures": 1
+  },
+  "fixture_correction": "First APKG test used an unreachable component upsert hook for zero-weight whole-card tokens; changed the test hook to component clear. No production change was needed."
+}

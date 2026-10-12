@@ -1,0 +1,63 @@
+{
+  "checkedUtc": "2026-10-12T13:56:57.261207+00:00",
+  "inspectedLeadFamilies": [
+    {
+      "id": "tldr-pages",
+      "status": "needs-investigation",
+      "novelty": "Newly triaged source; already present in earlier raw OPUS inventory, not a newly discovered family.",
+      "pair_evidence": "OPUS latest v2026-07-07 ko-pl,2441 alignment pairs; volume is metadata only.",
+      "rights": "Primary LICENSE.md states CC-BY4.0 for pages; scripts are separately MIT.",
+      "human_lineage": "Community-maintained translations; CONTRIBUTING permits MT tools as reference with thorough proofreading. Human-only ancestry is not established for the corpus or any inspected subset.",
+      "domain": "Technical command documentation. No sample assessment performed.",
+      "sources": [
+        "https://github.com/tldr-pages/tldr",
+        "https://github.com/tldr-pages/tldr/blob/main/LICENSE.md",
+        "https://github.com/tldr-pages/tldr/blob/main/CONTRIBUTING.md"
+      ]
+    },
+    {
+      "id": "community-datasets/udhr",
+      "status": "needs-investigation",
+      "novelty": "HF-discovered lead not found in current Ikna corpus prose reviews.",
+      "pair_evidence": "Repository metadata lists Polish and Korean among independent translations of the same declaration; full-document structure, no sentence alignment validated.",
+      "rights": "Card tag unknown; card prose claims Unicode license while source copyright remains OHCHR. Current Unicode license alone does not establish authority over both underlying translations.",
+      "human_lineage": "Card says documents come from OHCHR via Unicode project. Primary Unicode page confirms project retirement Jan2024 and redirects to OHCHR; specific Polish/Korean translation credits were not verified.",
+      "current_source_movement": "github.com/unicode-org/udhr redirects to github.com/eric-muller/udhr; current project site efele.net/udhr inaccessible via web tool.",
+      "blockers": "OHCHR translation-project primary page returned403 via web tool. Rights and exact pl/ko lineage remain open; retain visible lead.",
+      "sources": [
+        "https://huggingface.co/datasets/community-datasets/udhr/blob/main/README.md",
+        "https://www.unicode.org/udhr/",
+        "https://github.com/eric-muller/udhr",
+        "https://www.unicode.org/license.txt",
+        "https://www.ohchr.org/en/human-rights/universal-declaration/universal-declaration-human-rights/about-universal-declaration-human-rights-translation-project"
+      ]
+    },
+    {
+      "id": "apple/hat",
+      "status": "excluded-for-human-parallel-production",
+      "novelty": "Newly triaged HF lead.",
+      "pair_evidence": "38 English-centric configs; no Polish-Korean config.",
+      "rights": "Publisher CC-BY-NC-ND4.0; crawled-source rights not traced by this inspection.",
+      "human_lineage": "Publisher explicitly states neural MT translated web sentences; professional translators labeled hallucinations. target_text is machine-translated output.",
+      "reason": "Not a human-translated parallel source, regardless of benchmark category.",
+      "sources": [
+        "https://huggingface.co/datasets/apple/hat/raw/main/README.md",
+        "https://huggingface.co/api/datasets/apple/hat?blobs=true"
+      ]
+    }
+  ],
+  "metadataFalsePositives": [
+    {
+      "id": "vpermilp/nllb-200-distilled-600M-rust",
+      "revision": "8e52fee18a694d4351608ea0b51406c380b08153",
+      "observation": "Description is a model card, not verified parallel-text supply."
+    },
+    {
+      "id": "Nicolas-BZRD/English_French_Songs_Lyrics_Translation_Original",
+      "revision": "f2b64a358132305095e602ce11819d834344d90f",
+      "observation": "Description scopes translated lyrics to French; broad tags do not establish Polish-Korean data."
+    }
+  ],
+  "samplingDecision": "No inspected lead established human-only translation ancestry plus appropriate original rights; no corpus archive or row endpoint requested. Unreviewed leads remain visible.",
+  "reviewMethod": "Three primary-source followups manually chosen from live metadata; ranking alone is not source selection or quality certification."
+}

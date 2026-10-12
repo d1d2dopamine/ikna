@@ -66,8 +66,8 @@ folder; everything in it is copied into the app's own storage, which takes from 
 few seconds to about a minute and shows a running count of files.
 
 The app **never downloads a model**, and there is nowhere in it to ask for one:
-its only network request asks the releases page about a new version. The model
-download happens in a browser, once.
+the model download happens in a browser, before importing it. Speech runs on the
+device. Catalogue downloads and update checks are separate network features.
 
 ### Where to get one
 

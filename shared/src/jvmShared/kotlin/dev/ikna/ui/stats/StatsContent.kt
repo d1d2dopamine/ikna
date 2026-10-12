@@ -7,6 +7,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.unit.dp
@@ -75,9 +77,10 @@ fun IknaStatsContent(days: List<Boolean>, forecast: List<Int>, digest: StatsDige
 private fun HistoryMetric(label: String, value: String, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         // Three metrics share one row on phone and desktop. Reserve the same
-        // label height so a translated two-line label does not push only one
+        // minimum label height, while allowing larger translated text to grow;
+        // at ordinary sizes a two-line label does not push only one
         // number down and make the row look broken.
-        Box(Modifier.height(44.dp), contentAlignment = Alignment.TopStart) {
+        Box(Modifier.heightIn(min = 44.dp), contentAlignment = Alignment.TopStart) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
@@ -167,7 +170,8 @@ private fun Retention(digest: StatsDigest) {
             // An unfinished piece of the same lattice used by real charts. A
             // dash looked like a value that failed to load; this says that the
             // structure exists and does not have enough observations yet.
-            IknaLatticePlaceholder()
+            val description = S.t("stats.013") + digest.retentionSample + "."
+            IknaLatticePlaceholder(Modifier.semantics { contentDescription = description })
         }
         return
     }
@@ -210,7 +214,10 @@ private fun BestHours(digest: StatsDigest) {
             S.t("stats.028")
         }
     ) {
-        if (best == null) IknaLatticePlaceholder() else HourBars(digest.hours)
+        if (best == null) {
+            val description = S.t("stats.028")
+            IknaLatticePlaceholder(Modifier.semantics { contentDescription = description })
+        } else HourBars(digest.hours, best)
     }
 }
 
@@ -283,7 +290,7 @@ private fun Label(text: String) {
  * Thirty marks in a row, oldest on the left, today on the right.
  *
  * Filled means there was a session. Hollow means there was not. Nothing is
- * coloured red, nothing is counted out loud.
+ * coloured red; the semantic description summarizes the same session days.
  */
 @Composable
 private fun ActivityMap(days: List<Boolean>) {
@@ -291,12 +298,14 @@ private fun ActivityMap(days: List<Boolean>) {
     val idle = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.22f)
     // Repository order is most recent first; drawing goes the other way round.
     val ordered = days.reversed()
+    val description = activityDescription(days)
     val rounded = LocalIknaAppearanceVariant.current == IknaAppearanceVariant.ROUNDED
 
     Canvas(
         modifier = Modifier
             .fillMaxWidth()
             .height(36.dp)
+            .semantics { contentDescription = description }
     ) {
         val count = 30
         val gap = size.width * 0.012f
@@ -318,11 +327,12 @@ private fun ActivityMap(days: List<Boolean>) {
 
 /** Twenty-four columns, midnight to midnight; height is recall inside that hour. */
 @Composable
-private fun HourBars(hours: List<HourSlice>) {
+private fun HourBars(hours: List<HourSlice>, bestHour: Int) {
     val accent = MaterialTheme.colorScheme.primary
     val faint = MaterialTheme.colorScheme.primary.copy(alpha = 0.30f)
     val empty = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.18f)
     val byHour = hours.associateBy { it.hour }
+    val description = hoursDescription(hours, bestHour)
     val rounded = LocalIknaAppearanceVariant.current == IknaAppearanceVariant.ROUNDED
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -330,6 +340,7 @@ private fun HourBars(hours: List<HourSlice>) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(96.dp)
+                .semantics { contentDescription = description }
         ) {
             val count = 24
             val gap = size.width * 0.010f
@@ -423,6 +434,7 @@ private fun ForecastBlock(forecast: List<Int>) {
 
 @Composable
 private fun ForecastBars(values: List<Int>) {
+    val description = forecastDescription(values)
     val accent = MaterialTheme.colorScheme.primary
     val base = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.22f)
     val rounded = LocalIknaAppearanceVariant.current == IknaAppearanceVariant.ROUNDED
@@ -432,6 +444,7 @@ private fun ForecastBars(values: List<Int>) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp)
+                .semantics { contentDescription = description }
         ) {
             if (values.isEmpty()) return@Canvas
             val peak = (values.maxOrNull() ?: 0).coerceAtLeast(1)
@@ -462,9 +475,6 @@ private fun ForecastBars(values: List<Int>) {
         }
     }
 }
-
-/** Mirrors the repository's floor for calling an hour measured rather than guessed. */
-private const val HOUR_CONFIDENT = 12
 
 private fun hourText(hour: Int): String =
     String.format(Locale.getDefault(), "%02d:00", hour)

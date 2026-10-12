@@ -12,6 +12,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.ikna.ui.text.S
@@ -19,6 +22,7 @@ import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.Space
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -60,21 +64,27 @@ fun BackupPane(
         if (busy) return
         busy = true
         saved = null
+        loaded = null
         phone = emptyList()
         failure = ""
         scope.launch {
-            val result = runCatching {
-                withContext(Dispatchers.IO) { IknaBundle.read(container, file) }
-            }
-            busy = false
-            val read = result.getOrNull()
-            if (read == null || read.kind == BundleKind.UNKNOWN) {
+            try {
+                val read = withContext(Dispatchers.IO) { IknaBundle.read(container, file) }
+                if (read.kind == BundleKind.UNKNOWN) {
+                    loaded = null
+                    failure = S.t("restore.001")
+                } else {
+                    loaded = read
+                    onChanged()
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
                 loaded = null
-                failure = S.t("bk.013")
-                logLine("restore failed: " + result.exceptionOrNull())
-            } else {
-                loaded = read
-                onChanged()
+                failure = S.t("restore.001")
+                logLine("restore failed: $error")
+            } finally {
+                busy = false
             }
         }
     }
@@ -93,18 +103,20 @@ fun BackupPane(
         if (busy) return
         val target = chooseSaveTarget(container) ?: return
         busy = true
+        saved = null
         loaded = null
         phone = emptyList()
         failure = ""
         scope.launch {
-            val result = runCatching {
-                withContext(Dispatchers.IO) { IknaBundle.write(container, target) }
-            }
-            busy = false
-            saved = result.getOrNull()
-            if (saved == null) {
-                failure = S.t("bk.013")
-                logLine("bundle write failed: " + result.exceptionOrNull())
+            try {
+                saved = withContext(Dispatchers.IO) { IknaBundle.write(container, target) }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                failure = S.t("backup.001")
+                logLine("bundle write failed: $error")
+            } finally {
+                busy = false
             }
         }
     }
@@ -114,17 +126,20 @@ fun BackupPane(
         busy = true
         saved = null
         loaded = null
+        phone = emptyList()
         failure = ""
         scope.launch {
-            val target = File(container.home, "export")
-            val result = runCatching {
-                withContext(Dispatchers.IO) { IknaBundle.writeForPhone(container, target) }
-            }
-            busy = false
-            phone = result.getOrNull().orEmpty()
-            if (phone.isEmpty()) {
-                failure = S.t("bk.014")
-                logLine("phone export produced nothing: " + result.exceptionOrNull())
+            try {
+                val target = File(container.home, "export")
+                phone = withContext(Dispatchers.IO) { IknaBundle.writeForPhone(container, target) }
+                if (phone.isEmpty()) failure = S.t("bk.014")
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                failure = S.t("backup.001")
+                logLine("phone export failed: $error")
+            } finally {
+                busy = false
             }
         }
     }
@@ -163,7 +178,8 @@ IknaWideButton(
 
 if (failure.isNotBlank()) {
     Spacer(Modifier.height(Space.md))
-    BackupLine(failure, palette)
+    Text(failure, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        style = MaterialTheme.typography.bodyMedium, color = palette.ink)
 }
 
 val done = saved

@@ -22,47 +22,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
-import dev.ikna.data.repo.StatsDigest
+import dev.ikna.data.repo.StudyStats
+import kotlinx.coroutines.CancellationException
+import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 
-/*
- * Statistics without a score.
- *
- * The old screen printed "N of 30" above a sentence promising there were no
- * streaks, which is a streak with extra steps: one number that climbs while you
- * show up and drops the moment you miss. Everything here measures the schedule
- * or the material instead. The history block reports only accumulated facts,
- * retention says whether the intervals fit, the hours wait for enough evidence
- * before naming a pattern, and the last blocks show troublesome targets and the
- * scheduler's near-term forecast.
- *
- * Nothing here can be broken or lost, and every figure without enough data
- * behind it says so in words instead of printing a confident zero.
- *
- * Why the words are hidden now. Every figure on this screen once had its explanation
- * printed under it permanently, and the screen came out as thirty-odd sentences
- * of small grey prose that had to be read in order,
- * which is precisely the thing this app exists to avoid. The explanations were
- * not wrong, they were just always on. Each block keeps its own "?" and hands
- * the sentence over when it is asked for, so the default state of the screen is
- * numbers and shapes and the reasoning is one tap away, in the same place, every
- * time.
- */
+/** Shared factual journal summary; loading failures never become empty history. */
 
 private val EDGE = 20.dp
 
 @Composable
 fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
-    var days by remember { mutableStateOf(emptyList<Boolean>()) }
-    var forecast by remember { mutableStateOf(emptyList<Int>()) }
-    var digest by remember { mutableStateOf(StatsDigest()) }
-
-    LaunchedEffect(Unit) {
-        days = container.learningRepository.activityMap()
-        forecast = container.learningRepository.forecast(14)
-        digest = container.learningRepository.statsDigest()
+    var snapshot by remember { mutableStateOf<StudyStats?>(null) }
+    var failed by remember { mutableStateOf(false) }
+    var reload by remember { mutableStateOf(0) }
+    LaunchedEffect(reload) {
+        failed = false
+        snapshot = null
+        try {
+            snapshot = container.studyStatsRepository.load()
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            failed = true
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -80,7 +65,11 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
             )
 
             Spacer(Modifier.height(32.dp))
-            IknaStatsContent(days, forecast, digest)
+            when {
+                failed -> IknaStatsLoadFailure { reload++ }
+                snapshot == null -> IknaLatticePlaceholder()
+                else -> IknaStudyStatsContent(requireNotNull(snapshot))
+            }
 
             // Room for the bar to sit over nothing but background.
             Spacer(Modifier.height(96.dp))

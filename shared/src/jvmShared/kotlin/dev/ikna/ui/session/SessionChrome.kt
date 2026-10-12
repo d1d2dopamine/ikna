@@ -96,11 +96,12 @@ fun IknaSessionEmptyState(
     animations: Boolean,
     onExtra: () -> Unit
 ) {
-    Column(
+    IknaScrollableColumn(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = EDGE),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         // The app's own mark, drawn once when the day closes. This was a Lottie
         // file: an animation runtime plus a JSON asset, shipped to play one shape

@@ -5,6 +5,8 @@ import dev.ikna.data.db.ComponentDao
 import dev.ikna.data.db.ComponentEntity
 import dev.ikna.data.db.ReviewDao
 import dev.ikna.domain.governor.ComponentKey
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlin.math.max
 import kotlin.math.pow
 
@@ -96,8 +98,15 @@ class ComponentRepository(
      *    thousands of round trips through SQLite for a table that fits in
      *    memory, and it runs at the end of every restore.
      */
-    suspend fun rebuildFromReviews() {
+    suspend fun rebuildFromReviews(checkActive: () -> Unit = {}) {
+        val caller = currentCoroutineContext()
+        fun checkCancellation() {
+            caller.ensureActive()
+            checkActive() // Restore supplies the context captured outside Room.
+        }
+        checkCancellation()
         componentDao.clear()
+        checkCancellation()
         val answers = reviewDao.allAnswers()
         if (answers.isEmpty()) return
 
@@ -109,12 +118,13 @@ class ComponentRepository(
         val tokens = answers.map { it.chunkId }
             .distinct()
             .chunked(TOKEN_QUERY_BATCH)
-            .flatMap { chunkDao.tokensFor(it) }
+            .flatMap { checkCancellation(); chunkDao.tokensFor(it) }
             .filter { it.weight > 0.0 }
             .groupBy { it.chunkId }
 
         val acc = HashMap<ComponentKey, ComponentEntity>()
         for (r in answers) {
+            checkCancellation()
             val success = if (r.outcomeRating >= 3) 1.0 else 0.0
             for (t in tokens[r.chunkId].orEmpty()) {
                 val key = ComponentKey(t.lemma, t.pos)
@@ -134,7 +144,11 @@ class ComponentRepository(
             }
         }
 
-        acc.values.chunked(UPSERT_BATCH).forEach { componentDao.upsertAll(it) }
+        acc.values.chunked(UPSERT_BATCH).forEach {
+            checkCancellation()
+            componentDao.upsertAll(it)
+        }
+        checkCancellation()
     }
 
     /** Danger zone: wipes the derived word layer. Rebuildable from `reviews`. */

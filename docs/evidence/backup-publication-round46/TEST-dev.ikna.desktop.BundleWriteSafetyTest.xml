@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.BundleWriteSafetyTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-12T15:02:03" hostname="disposable-test-host" time="0.163">
+  <properties/>
+  <testcase name="deckCancellationPropagatesAndPreservesPreviousBackup" classname="dev.ikna.desktop.BundleWriteSafetyTest" time="0.005"/>
+  <testcase name="nonSuspendingExporterCancellationIsCheckedBeforePublication" classname="dev.ikna.desktop.BundleWriteSafetyTest" time="0.002"/>
+  <testcase name="successfulReplacementIsReadableAndKeepsEmptyHistorySemantics" classname="dev.ikna.desktop.BundleWriteSafetyTest" time="0.002"/>
+  <testcase name="publicBundleAndPhoneWritersPreserveFormatsAndDeveloperIsolation" classname="dev.ikna.desktop.BundleWriteSafetyTest" time="0.15"/>
+  <testcase name="deckExportFailurePropagatesAndPreservesPreviousBackup" classname="dev.ikna.desktop.BundleWriteSafetyTest" time="0.001"/>
+  <testcase name="midZipFailurePreservesOldDestinationAndCleansTemporaryFile" classname="dev.ikna.desktop.BundleWriteSafetyTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

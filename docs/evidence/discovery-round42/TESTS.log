@@ -1,0 +1,48 @@
+test_bad_schema (test_corpus_discovery.DiscoveryTest.test_bad_schema) ... ok
+test_exact_dedup_preserves_discovery_routes (test_corpus_discovery.DiscoveryTest.test_exact_dedup_preserves_discovery_routes) ... ok
+test_existing_output_untouched (test_corpus_discovery.DiscoveryTest.test_existing_output_untouched) ... ok
+test_explicit_pair (test_corpus_discovery.DiscoveryTest.test_explicit_pair) ... ok
+test_family_does_not_delete_subset (test_corpus_discovery.DiscoveryTest.test_family_does_not_delete_subset) ... ok
+test_hf_tags_not_direct_pair (test_corpus_discovery.DiscoveryTest.test_hf_tags_not_direct_pair) ... ok
+test_input_shape_gate (test_corpus_discovery.DiscoveryTest.test_input_shape_gate) ... ok
+test_known_family_aliases (test_corpus_discovery.DiscoveryTest.test_known_family_aliases) ... ok
+test_live_byte_limit (test_corpus_discovery.DiscoveryTest.test_live_byte_limit) ... ok
+test_new_revision_keeps_lead_without_old_demotion (test_corpus_discovery.DiscoveryTest.test_new_revision_keeps_lead_without_old_demotion) ... ok
+test_no_content_fields_emitted (test_corpus_discovery.DiscoveryTest.test_no_content_fields_emitted) ... ok
+test_no_substring_false_family (test_corpus_discovery.DiscoveryTest.test_no_substring_false_family) ... ok
+test_nonallowlisted_url_rejected_before_network (test_corpus_discovery.DiscoveryTest.test_nonallowlisted_url_rejected_before_network) ... ok
+test_other_pair_not_inferred (test_corpus_discovery.DiscoveryTest.test_other_pair_not_inferred) ... ok
+test_pair_metadata_outranks_broad_tags (test_corpus_discovery.DiscoveryTest.test_pair_metadata_outranks_broad_tags) ... ok
+test_partial_reports_failures (test_corpus_discovery.DiscoveryTest.test_partial_reports_failures) ... ok
+test_redirect_stays_host_https (test_corpus_discovery.DiscoveryTest.test_redirect_stays_host_https) ... ok
+test_replay_complete_and_manifest (test_corpus_discovery.DiscoveryTest.test_replay_complete_and_manifest) ... ok
+test_revision_bound_false_positive_demotion (test_corpus_discovery.DiscoveryTest.test_revision_bound_false_positive_demotion) ... ok
+test_unknown_remains_visible (test_corpus_discovery.DiscoveryTest.test_unknown_remains_visible) ... ok
+test_versions_preserved (test_corpus_discovery.DiscoveryTest.test_versions_preserved) ... ok
+test_blank_lines_follow_original_reader (test_wmt_provenance_manifest.ClassifierTests.test_blank_lines_follow_original_reader) ... ok
+test_duplicate_and_mismatched_anchors_refuse (test_wmt_provenance_manifest.ClassifierTests.test_duplicate_and_mismatched_anchors_refuse) ... ok
+test_invalid_flag_types_and_locale_refuse (test_wmt_provenance_manifest.ClassifierTests.test_invalid_flag_types_and_locale_refuse) ... ok
+test_json_duplicates_bad_encoding_nonfinite_and_malformed_refuse (test_wmt_provenance_manifest.ClassifierTests.test_json_duplicates_bad_encoding_nonfinite_and_malformed_refuse) ... ok
+test_malformed_anchor_and_text_types_refuse (test_wmt_provenance_manifest.ClassifierTests.test_malformed_anchor_and_text_types_refuse) ... ok
+test_missing_fields_and_unexpected_schema_refuse (test_wmt_provenance_manifest.ClassifierTests.test_missing_fields_and_unexpected_schema_refuse) ... ok
+test_original_join_parity_and_decision_precedence (test_wmt_provenance_manifest.ClassifierTests.test_original_join_parity_and_decision_precedence) ... ok
+test_original_join_parity_over_shuffled_multirow_fixture (test_wmt_provenance_manifest.ClassifierTests.test_original_join_parity_over_shuffled_multirow_fixture) ... ok
+test_raw_utf8_hashes_and_separate_original_ids (test_wmt_provenance_manifest.ClassifierTests.test_raw_utf8_hashes_and_separate_original_ids) ... ok
+test_source_and_domain_mismatches_refuse_even_for_bad_sources (test_wmt_provenance_manifest.ClassifierTests.test_source_and_domain_mismatches_refuse_even_for_bad_sources) ... ok
+test_aggregate_drift_and_rejection_reason_drift_refuse_without_output (test_wmt_provenance_manifest.FileGateTests.test_aggregate_drift_and_rejection_reason_drift_refuse_without_output) ... ok
+test_cli_repeat_bytes_and_safe_stdout (test_wmt_provenance_manifest.FileGateTests.test_cli_repeat_bytes_and_safe_stdout) ... ok
+test_committed_round20_metadata_contract_is_still_605 (test_wmt_provenance_manifest.FileGateTests.test_committed_round20_metadata_contract_is_still_605) ... ok
+test_exact_aggregate_metadata_only_and_determinism (test_wmt_provenance_manifest.FileGateTests.test_exact_aggregate_metadata_only_and_determinism) ... ok
+test_expected_pins_revision_and_original_source_must_match (test_wmt_provenance_manifest.FileGateTests.test_expected_pins_revision_and_original_source_must_match) ... ok
+test_hash_and_size_failures_before_any_parsing (test_wmt_provenance_manifest.FileGateTests.test_hash_and_size_failures_before_any_parsing) ... ok
+test_invalid_expected_counts_flags_and_reasons_refuse (test_wmt_provenance_manifest.FileGateTests.test_invalid_expected_counts_flags_and_reasons_refuse) ... ok
+test_missing_duplicate_and_malformed_pins_refuse (test_wmt_provenance_manifest.FileGateTests.test_missing_duplicate_and_malformed_pins_refuse) ... ok
+test_missing_file_and_malformed_verified_json_have_safe_errors (test_wmt_provenance_manifest.FileGateTests.test_missing_file_and_malformed_verified_json_have_safe_errors) ... ok
+test_only_two_requested_files_are_needed (test_wmt_provenance_manifest.FileGateTests.test_only_two_requested_files_are_needed) ... ok
+test_output_cannot_overwrite_or_enter_input_directory (test_wmt_provenance_manifest.FileGateTests.test_output_cannot_overwrite_or_enter_input_directory) ... ok
+test_parse_uses_already_verified_bytes (test_wmt_provenance_manifest.FileGateTests.test_parse_uses_already_verified_bytes) ... ok
+
+----------------------------------------------------------------------
+Ran 43 tests in 0.034s
+
+OK

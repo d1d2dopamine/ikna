@@ -1,5 +1,10 @@
 package dev.ikna.data.repo
 
+import dev.ikna.data.db.IknaDatabase
+import dev.ikna.data.db.inTransaction
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlin.coroutines.CoroutineContext
 import dev.ikna.data.db.CardDao
 import dev.ikna.data.db.CardEntity
 import dev.ikna.data.db.DailyStatEntity
@@ -35,6 +40,7 @@ data class RestoreResult(val imported: Int, val skipped: Int, val replayed: Int)
  * back.
  */
 class RestoreRepository(
+    private val db: IknaDatabase,
     private val cardDao: CardDao,
     private val reviewDao: ReviewDao,
     private val statsDao: StatsDao,
@@ -45,9 +51,12 @@ class RestoreRepository(
 ) {
 
     suspend fun restoreFromJsonl(text: String): RestoreResult {
+        val caller = currentCoroutineContext()
+        caller.ensureActive()
         var skipped = 0
         val records = ArrayList<ReviewRecord>()
         for (line in text.lineSequence()) {
+            caller.ensureActive()
             if (line.isBlank()) continue
             val rec = runCatching {
                 ReviewRecord.json.decodeFromString(ReviewRecord.serializer(), line)
@@ -68,15 +77,29 @@ class RestoreRepository(
 
         if (records.isEmpty()) return RestoreResult(imported = 0, skipped = skipped, replayed = 0)
 
+        // Parse, validate and sort before locking the writer. History and every
+        // derived write below share the same transaction, including key lookup.
+        val sorted = records.sortedBy { it.ts }
+        return db.inTransaction {
+            caller.ensureActive()
+            restoreValidated(sorted, skipped, caller).also { caller.ensureActive() }
+        }
+    }
+
+    private suspend fun restoreValidated(
+        sorted: List<ReviewRecord>, initiallySkipped: Int, caller: CoroutineContext
+    ): RestoreResult {
+        var skipped = initiallySkipped
         // Signature -> the id that answer has *here*. Seeded with what is
         // already stored, so importing the same file twice is a no-op.
         val known = HashMap<String, Long>()
-        for (k in reviewDao.keys()) known[k.signature] = k.id
+        for (k in reviewDao.keys()) {
+            caller.ensureActive()
+            known[k.signature] = k.id
+        }
 
         // Id in the file -> id here. This is what makes `undoOf` survive.
         val remap = HashMap<Long, Long>()
-
-        val sorted = records.sortedBy { it.ts }
 
         // Pass one: the answers. They have to land before the retractions,
         // because a retraction is only meaningful once the row it points at
@@ -84,6 +107,7 @@ class RestoreRepository(
         val staged = HashSet<String>()
         val answers = ArrayList<Pair<ReviewRecord, ReviewEntity>>()
         for (rec in sorted) {
+            caller.ensureActive()
             if (rec.undoOf != null) continue
             val existing = known[rec.signature]
             if (existing != null) {
@@ -99,7 +123,7 @@ class RestoreRepository(
             }
             answers += rec to rec.toEntity()
         }
-        var imported = insertRecords(answers, known, remap)
+        var imported = insertRecords(answers, known, remap, caller)
 
         // Pass two: the retractions, each re-pointed at the local id of the
         // answer it undoes. One whose target cannot be resolved is dropped
@@ -108,6 +132,7 @@ class RestoreRepository(
         val stagedUndo = HashSet<String>()
         val retractions = ArrayList<Pair<ReviewRecord, ReviewEntity>>()
         for (rec in sorted) {
+            caller.ensureActive()
             val target = rec.undoOf ?: continue
             if (known.containsKey(rec.signature) || !stagedUndo.add(rec.signature)) {
                 skipped++
@@ -120,26 +145,29 @@ class RestoreRepository(
             }
             retractions += rec to rec.toEntity(undoOf = here)
         }
-        imported += insertRecords(retractions, known, remap)
+        imported += insertRecords(retractions, known, remap, caller)
 
-        val replayed = replayFromLog()
+        val replayed = replayFromLogBody(caller)
         return RestoreResult(imported = imported, skipped = skipped, replayed = replayed)
     }
 
     /**
      * Inserts a batch and records the ids SQLite assigned, in order.
      *
-     * Batched because a per-row insert is a transaction per row, and a log with
-     * four months in it makes that the slowest thing the app ever does.
+     * Bounded batches keep DAO work and cancellation latency manageable while
+     * the enclosing transaction protects the entire restore.
      */
     private suspend fun insertRecords(
         pending: List<Pair<ReviewRecord, ReviewEntity>>,
         known: MutableMap<String, Long>,
-        remap: MutableMap<Long, Long>
+        remap: MutableMap<Long, Long>,
+        caller: CoroutineContext
     ): Int {
         var imported = 0
         for (part in pending.chunked(INSERT_BATCH)) {
+            caller.ensureActive()
             val ids = reviewDao.insertAll(part.map { it.second })
+            caller.ensureActive()
             for ((i, pair) in part.withIndex()) {
                 val newId = ids.getOrNull(i) ?: continue
                 if (newId <= 0L) continue
@@ -163,9 +191,23 @@ class RestoreRepository(
      * this runs on the main path of every restore.
      */
     suspend fun replayFromLog(): Int {
+        val caller = currentCoroutineContext()
+        caller.ensureActive()
+        return db.inTransaction {
+            caller.ensureActive()
+            replayFromLogBody(caller).also { caller.ensureActive() }
+        }
+    }
+
+    /** Runs only inside the owning transaction; Room's job is not the caller's. */
+    private suspend fun replayFromLogBody(caller: CoroutineContext): Int {
+        caller.ensureActive()
         cardDao.clear()
+        caller.ensureActive()
         statsDao.clear()
+        caller.ensureActive()
         planDao.clear()
+        caller.ensureActive()
 
         val answers = reviewDao.allAnswers()
         val boundary = DayBoundary(config.dayStartHour)
@@ -173,6 +215,7 @@ class RestoreRepository(
         val days = LinkedHashMap<String, DailyStatEntity>()
 
         for (r in answers) {
+            caller.ensureActive()
             val key = r.chunkId + ":" + r.level
             val card = cards[key] ?: CardEntity(
                 chunkId = r.chunkId,
@@ -214,8 +257,15 @@ class RestoreRepository(
             )
         }
 
-        cards.values.chunked(WRITE_BATCH).forEach { cardDao.upsertAll(it) }
-        days.values.chunked(WRITE_BATCH).forEach { statsDao.upsertAll(it) }
+        cards.values.chunked(WRITE_BATCH).forEach {
+            caller.ensureActive()
+            cardDao.upsertAll(it)
+        }
+        days.values.chunked(WRITE_BATCH).forEach {
+            caller.ensureActive()
+            statsDao.upsertAll(it)
+        }
+        caller.ensureActive()
 
         // Every card above was written visible, because the log records when an
         // answer happened and never records what was hidden at the time. A file
@@ -231,7 +281,9 @@ class RestoreRepository(
             System.currentTimeMillis() - config.amnestyAfterDays * DAY_MS
         )
 
-        components.rebuildFromReviews()
+        caller.ensureActive()
+        components.rebuildFromReviews { caller.ensureActive() }
+        caller.ensureActive()
         return answers.size
     }
 

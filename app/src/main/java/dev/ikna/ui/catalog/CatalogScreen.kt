@@ -3,7 +3,6 @@ package dev.ikna.ui.catalog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,13 +14,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -42,6 +42,7 @@ import dev.ikna.data.catalog.catalogPackId
 import dev.ikna.data.catalog.decksFor
 import dev.ikna.data.catalog.learnableLangs
 import dev.ikna.data.catalog.levelsFor
+import dev.ikna.data.catalog.normalizeCatalogFilter
 import dev.ikna.data.catalog.meaningLangsFor
 import dev.ikna.data.catalog.progressFractionOf
 import dev.ikna.data.catalog.progressPercentOf
@@ -60,6 +61,9 @@ import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.Space
 import dev.ikna.ui.update.installedVersion
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -114,7 +118,8 @@ fun CatalogScreen(
 	var importing by remember { mutableStateOf(false) }
 	var readBytes by remember { mutableStateOf(0L) }
 	var totalBytes by remember { mutableStateOf(0L) }
-	var note by remember { mutableStateOf<String?>(null) }
+	val notes = remember { mutableStateMapOf<String, String>() }
+	val planRefreshFailures = remember { mutableStateMapOf<String, Boolean>() }
 	var installed by remember { mutableStateOf(emptySet<String>()) }
 	var previewId by remember { mutableStateOf<String?>(null) }
 	var previewLoading by remember { mutableStateOf(false) }
@@ -128,14 +133,18 @@ fun CatalogScreen(
 	// deck installed here has to stop being offered the moment it lands.
 	suspend fun refreshInstalled() {
 		installed = withContext(Dispatchers.IO) {
-			runCatching { container.deckRepository.decks().map { it.id }.toSet() }
-				.getOrDefault(emptySet())
+			try {
+				container.deckRepository.decks().map { it.id }.toSet()
+			} catch (cancelled: CancellationException) {
+				throw cancelled
+			} catch (_: Exception) {
+				installed
+			}
 		}
 	}
 
 	suspend fun load() {
 		loading = true
-		note = null
 		val fetched = CatalogFetch(installedVersion(context)).index()
 		index = fetched
 		loading = false
@@ -145,9 +154,9 @@ fun CatalogScreen(
 		// glosses. The language being learned is never guessed: it is the one
 		// question only the person can answer.
 		val meanings = meaningLangsFor(fetched, "")
-		filter = filter.copy(
+		filter = normalizeCatalogFilter(fetched, filter.copy(
 			meaningLang = if (meanings.contains(S.lang)) S.lang else ""
-		)
+		))
 	}
 
 	LaunchedEffect(Unit) {
@@ -155,49 +164,59 @@ fun CatalogScreen(
 		load()
 	}
 
+	suspend fun refreshStudyPlan(deckId: String) {
+		planRefreshFailures[deckId] = !dev.ikna.data.catalog.refreshCatalogStudyPlan {
+			container.learningRepository.invalidatePlan()
+		}
+	}
+
 	fun install(deck: CatalogDeck) {
 		if (busyId != null || previewLoading) return
 		scope.launch {
 			busyId = deck.id
 			importing = false
-			note = null
+			notes.remove(deck.id)
 			readBytes = 0L
 			totalBytes = deck.sizeBytes
-			val text = CatalogFetch(installedVersion(context)).deck(deck) { read, total ->
-				readBytes = read
-				if (total > 0L) totalBytes = total
-			}
-			if (text == null) {
-				busyId = null
-				note = S.t("cat.020")
-				return@launch
-			}
-			// The same importer a shared deck file goes through, with the deck's
-			// own identifier so downloading it twice replaces it instead of
-			// leaving two copies with one history split between them.
-			importing = true
-			val result = withContext(Dispatchers.IO) {
-				runCatching {
-					container.packLoader.importJsonl(
+			try {
+				val text = CatalogFetch(installedVersion(context)).deck(deck) { read, total ->
+					readBytes = read
+					if (total > 0L) totalBytes = total
+				}
+				currentCoroutineContext().ensureActive()
+				if (text == null) {
+					notes[deck.id] = S.t("cat.020")
+					return@launch
+				}
+				importing = true
+				val result = try {
+					container.importCatalogDeck(
 						packId = catalogPackId(deck.id),
 						title = deck.title,
 						lang = deck.lang,
 						text = text
 					)
-				}.getOrNull()
-			}
-			// A deck added now is wanted now: the day was planned before it
-			// existed, so the plan is dropped and built again.
-			if (result != null && result.installed > 0) {
-				container.learningRepository.invalidatePlan()
-			}
-			refreshInstalled()
-			importing = false
-			busyId = null
-			note = if (result == null || result.installed == 0) {
-				S.t("cat.021")
-			} else {
-				S.t("cat.022") + result.installed
+				} catch (cancelled: CancellationException) {
+					throw cancelled
+				} catch (_: Exception) {
+					null
+				}
+				currentCoroutineContext().ensureActive()
+				// A deck added now is wanted now: rebuild the day's plan.
+				if (result != null && result.installed > 0) {
+					installed = installed + catalogPackId(deck.id)
+					refreshStudyPlan(deck.id)
+				}
+				refreshInstalled()
+				currentCoroutineContext().ensureActive()
+				notes[deck.id] = if (result == null || result.installed == 0) {
+					S.t("cat.021")
+				} else {
+					S.t("cat.022") + result.installed
+				}
+			} finally {
+				importing = false
+				busyId = null
 			}
 		}
 	}
@@ -241,219 +260,219 @@ fun CatalogScreen(
 				)
 			}
 
-			Column(
+			// Keep work/state above the lazy viewport: scrolling a row out never cancels its download.
+			LazyColumn(
 				modifier = Modifier
 					.weight(1f)
-					.verticalScroll(rememberScrollState())
+					.fillMaxWidth()
 					.padding(horizontal = Edge)
 			) {
-				Spacer(Modifier.height(Space.md))
-				Text(
-					text = S.t("cat.002"),
-					style = MaterialTheme.typography.bodyMedium
-				)
-
-				val list = index
-				if (loading) {
-					Spacer(Modifier.height(Space.lg))
-					Text(
-						text = S.t("cat.003"),
-						style = MaterialTheme.typography.labelLarge,
-						color = ink
-					)
-				} else if (list == null) {
-					// A list that did not arrive is not an error to be explained away:
-					// the same page can be read in a browser, and the deck that ships
-					// with the app is still there.
-					Spacer(Modifier.height(Space.lg))
-					Text(
-						text = S.t("cat.004"),
-						style = MaterialTheme.typography.bodyMedium,
-						color = muted
-					)
-					Spacer(Modifier.height(Space.md))
-					IknaWideButton(
-						label = S.t("cat.006"),
-						filled = true,
-						onClick = { scope.launch { load() } }
-					)
-					Spacer(Modifier.height(Space.sm))
-					IknaWideButton(
-						label = S.t("cat.005"),
-						onClick = { openPage(context) }
-					)
-				} else {
-					Spacer(Modifier.height(Space.lg))
-					IknaRule()
-					Spacer(Modifier.height(Space.lg))
-
-					Text(
-						text = S.t("cat.007"),
-						style = MaterialTheme.typography.labelMedium,
-						color = muted
-					)
-					Spacer(Modifier.height(Space.sm))
-					CodeChips(
-						options = learnableLangs(list),
-						current = filter.lang,
-						onPick = { picked ->
-							// Changing what is being learned drops the narrower answers:
-							// a topic that existed for one language rarely exists for the
-							// next, and a filter nobody can see is a list that looks empty.
-							filter = filter.copy(lang = picked, subject = "", level = "")
-							openId = null
-						}
-					)
-
-					Spacer(Modifier.height(Space.md))
-					Text(
-						text = S.t("cat.008"),
-						style = MaterialTheme.typography.labelMedium,
-						color = muted
-					)
-					Spacer(Modifier.height(Space.sm))
-					CodeChips(
-						options = meaningLangsFor(list, filter.lang),
-						current = filter.meaningLang,
-						onPick = { picked ->
-							filter = filter.copy(meaningLang = picked, subject = "", level = "")
-							openId = null
-						}
-					)
-
-					val subjects = subjectsFor(list, filter)
-					if (subjects.isNotEmpty()) {
+				item(key = "catalog-intro") {
+					Column(Modifier.fillMaxWidth()) {
 						Spacer(Modifier.height(Space.md))
 						Text(
-							text = S.t("cat.009"),
-							style = MaterialTheme.typography.labelMedium,
-							color = muted
-						)
-						Spacer(Modifier.height(Space.sm))
-						PickChips(
-							options = subjects,
-							label = { it },
-							current = filter.subject,
-							onPick = { picked -> filter = filter.copy(subject = picked) }
-						)
-					}
-
-					val levels = levelsFor(list, filter)
-					if (levels.isNotEmpty()) {
-						Spacer(Modifier.height(Space.md))
-						Text(
-							text = S.t("cat.010"),
-							style = MaterialTheme.typography.labelMedium,
-							color = muted
-						)
-						Spacer(Modifier.height(Space.sm))
-						PickChips(
-							options = levels,
-							label = { levelLabel(it) },
-							current = filter.level,
-							onPick = { picked -> filter = filter.copy(level = picked) }
-						)
-					}
-
-					// What the pipeline measured for this pair, said before the list
-					// rather than discovered by scrolling it.
-					val tier = tierOf(list, filter.lang, filter.meaningLang)
-					if (filter.lang.isNotEmpty() && filter.meaningLang.isNotEmpty()) {
-						Spacer(Modifier.height(Space.md))
-						Text(
-							text = when (tier) {
-								TIER_FULL -> S.t("cat.012")
-								null -> S.t("cat.014")
-								else -> S.t("cat.013")
-							},
-							style = MaterialTheme.typography.bodySmall,
-							color = muted
-						)
-					}
-
-					Spacer(Modifier.height(Space.lg))
-					IknaRule()
-					Spacer(Modifier.height(Space.lg))
-
-					val decks = decksFor(list, filter)
-					if (decks.isEmpty()) {
-						Column {
-							Text(
-								text = S.t("cat.030"),
-								style = MaterialTheme.typography.bodyMedium,
-								color = muted
-							)
-							Spacer(Modifier.height(Space.lg))
-							IknaLatticePlaceholder()
-						}
-					} else {
-						decks.forEach { deck ->
-							IknaCatalogDeckRow(
-								deck = deck,
-								open = openId == deck.id,
-								installed = installed.contains(catalogPackId(deck.id)),
-								busy = busyId == deck.id,
-								blocked = (busyId != null && busyId != deck.id) || previewLoading,
-								importing = importing && busyId == deck.id,
-								fraction = progressFractionOf(readBytes, totalBytes),
-								percent = progressPercentOf(readBytes, totalBytes),
-								previewLoading = previewLoading && previewId == deck.id,
-								previewFailed = previewFailed && previewId == deck.id,
-								previewCards = if (previewId == deck.id) previewCards else emptyList(),
-								onOpen = {
-									val next = if (openId == deck.id) null else deck.id
-									openId = next
-									if (next != previewId) {
-										previewToken++
-										previewId = null
-										previewLoading = false
-										previewFailed = false
-										previewCards = emptyList()
-									}
-								},
-								onPreview = { preview(deck) },
-								onSource = { id -> openTatoeba(context, id) },
-								onInstall = { install(deck) }
-							)
-							Spacer(Modifier.height(Space.md))
-							IknaRule()
-							Spacer(Modifier.height(Space.md))
-						}
-					}
-
-					if (list.builtAt.isNotEmpty()) {
-						Spacer(Modifier.height(Space.sm))
-						Text(
-							text = S.t("cat.026") + list.builtAt,
-							style = MaterialTheme.typography.labelMedium,
-							color = muted
-						)
-					}
-				}
-
-				val shown = note
-				if (shown != null) {
-					Spacer(Modifier.height(Space.lg))
-					Box(
-						modifier = Modifier
-							.fillMaxWidth()
-							.background(MaterialTheme.colorScheme.surface)
-							.padding(Space.md)
-					) {
-						Text(
-							text = shown,
+							text = S.t("cat.002"),
 							style = MaterialTheme.typography.bodyMedium
 						)
 					}
-					Spacer(Modifier.height(Space.md))
-					IknaWideButton(
-						label = S.t("add.026"),
-						onClick = onBack,
-						enabled = busyId == null
-					)
 				}
+				val list = index
+				if (loading) {
+					item(key = "catalog-loading") {
+						Column(Modifier.fillMaxWidth()) {
+							Spacer(Modifier.height(Space.lg))
+							Text(
+								text = S.t("cat.003"),
+								style = MaterialTheme.typography.labelLarge,
+								color = ink
+							)
+						}
+					}
+				} else if (list == null) {
+					item(key = "catalog-error") {
+						Column(Modifier.fillMaxWidth()) {
+							// A list that did not arrive is not an error to be explained away:
+							// the same page can be read in a browser, and the deck that ships
+							// with the app is still there.
+							Spacer(Modifier.height(Space.lg))
+							Text(
+								text = S.t("cat.004"),
+								style = MaterialTheme.typography.bodyMedium,
+								color = muted
+							)
+							Spacer(Modifier.height(Space.md))
+							IknaWideButton(
+								label = S.t("cat.006"),
+								filled = true,
+								onClick = { scope.launch { load() } }
+							)
+							Spacer(Modifier.height(Space.sm))
+							IknaWideButton(
+								label = S.t("cat.005"),
+								onClick = { openPage(context) }
+							)
+						}
+					}
+				} else {
+					item(key = "catalog-filters") {
+						Column(Modifier.fillMaxWidth()) {
+							Spacer(Modifier.height(Space.lg))
+							IknaRule()
+							Spacer(Modifier.height(Space.lg))
 
-				Spacer(Modifier.height(Space.xxl))
+							Text(
+								text = S.t("cat.007"),
+								style = MaterialTheme.typography.labelMedium,
+								color = muted
+							)
+							Spacer(Modifier.height(Space.sm))
+							CodeChips(
+								options = learnableLangs(list),
+								current = filter.lang,
+								onPick = { picked ->
+									// Keep only dependent answers offered for this language.
+									filter = normalizeCatalogFilter(list, filter.copy(lang = picked))
+									openId = null
+								}
+							)
+
+							Spacer(Modifier.height(Space.md))
+							Text(
+								text = S.t("cat.008"),
+								style = MaterialTheme.typography.labelMedium,
+								color = muted
+							)
+							Spacer(Modifier.height(Space.sm))
+							CodeChips(
+								options = meaningLangsFor(list, filter.lang),
+								current = filter.meaningLang,
+								onPick = { picked ->
+									filter = normalizeCatalogFilter(list, filter.copy(meaningLang = picked))
+									openId = null
+								}
+							)
+
+							val subjects = subjectsFor(list, filter)
+							if (subjects.isNotEmpty()) {
+								Spacer(Modifier.height(Space.md))
+								Text(
+									text = S.t("cat.009"),
+									style = MaterialTheme.typography.labelMedium,
+									color = muted
+								)
+								Spacer(Modifier.height(Space.sm))
+								PickChips(
+									options = subjects,
+									label = { it },
+									current = filter.subject,
+									onPick = { picked -> filter = normalizeCatalogFilter(list, filter.copy(subject = picked)) }
+								)
+							}
+
+							val levels = levelsFor(list, filter)
+							if (levels.isNotEmpty()) {
+								Spacer(Modifier.height(Space.md))
+								Text(
+									text = S.t("cat.010"),
+									style = MaterialTheme.typography.labelMedium,
+									color = muted
+								)
+								Spacer(Modifier.height(Space.sm))
+								PickChips(
+									options = levels,
+									label = { levelLabel(it) },
+									current = filter.level,
+									onPick = { picked -> filter = normalizeCatalogFilter(list, filter.copy(level = picked)) }
+								)
+							}
+
+							// What the pipeline measured for this pair, said before the list
+							// rather than discovered by scrolling it.
+							val tier = tierOf(list, filter.lang, filter.meaningLang)
+							if (filter.lang.isNotEmpty() && filter.meaningLang.isNotEmpty()) {
+								Spacer(Modifier.height(Space.md))
+								Text(
+									text = when (tier) {
+										TIER_FULL -> S.t("cat.012")
+										null -> S.t("cat.014")
+										else -> S.t("cat.013")
+									},
+									style = MaterialTheme.typography.bodySmall,
+									color = muted
+								)
+							}
+
+							Spacer(Modifier.height(Space.lg))
+							IknaRule()
+							Spacer(Modifier.height(Space.lg))
+						}
+					}
+					val decks = decksFor(list, filter)
+					if (decks.isEmpty()) {
+						item(key = "catalog-empty") {
+							Column(Modifier.fillMaxWidth()) {
+								Text(
+									text = S.t("cat.030"),
+									style = MaterialTheme.typography.bodyMedium,
+									color = muted
+								)
+								Spacer(Modifier.height(Space.lg))
+								IknaLatticePlaceholder()
+							}
+						}
+					} else {
+						items(decks, key = { "deck:${it.id}" }, contentType = { "deck" }) { deck ->
+							Column(Modifier.fillMaxWidth()) {
+								IknaCatalogDeckRow(
+									deck = deck,
+									resultNote = notes[deck.id],
+									planRefreshFailed = planRefreshFailures[deck.id] == true,
+									onRetryPlan = { scope.launch { refreshStudyPlan(deck.id) } },
+									open = openId == deck.id,
+									installed = installed.contains(catalogPackId(deck.id)),
+									busy = busyId == deck.id,
+									blocked = (busyId != null && busyId != deck.id) || previewLoading,
+									importing = importing && busyId == deck.id,
+									fraction = progressFractionOf(readBytes, totalBytes),
+									percent = progressPercentOf(readBytes, totalBytes),
+									previewLoading = previewLoading && previewId == deck.id,
+									previewFailed = previewFailed && previewId == deck.id,
+									previewCards = if (previewId == deck.id) previewCards else emptyList(),
+									onOpen = {
+										val next = if (openId == deck.id) null else deck.id
+										openId = next
+										if (next != previewId) {
+											previewToken++
+											previewId = null
+											previewLoading = false
+											previewFailed = false
+											previewCards = emptyList()
+										}
+									},
+									onPreview = { preview(deck) },
+									onSource = { id -> openTatoeba(context, id) },
+									onInstall = { install(deck) }
+								)
+								Spacer(Modifier.height(Space.md))
+								IknaRule()
+								Spacer(Modifier.height(Space.md))
+							}
+						}
+					}
+					item(key = "catalog-footer") {
+						Column(Modifier.fillMaxWidth()) {
+							if (list.builtAt.isNotEmpty()) {
+								Spacer(Modifier.height(Space.sm))
+								Text(
+									text = S.t("cat.026") + list.builtAt,
+									style = MaterialTheme.typography.labelMedium,
+									color = muted
+								)
+							}
+						}
+					}
+				}
+				item(key = "catalog-bottom-space") { Spacer(Modifier.height(Space.xxl)) }
 			}
 		}
 		IknaBottomBar(modifier = Modifier.align(Alignment.BottomCenter)) {

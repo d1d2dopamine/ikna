@@ -1,0 +1,48 @@
+{
+  "status": "complete-metadata-discovery",
+  "networkRequests": 3,
+  "automaticRedirectsEnabled": false,
+  "successfulQueries": 3,
+  "metadataBytes": 967667,
+  "rawRows": 52,
+  "distinctLeads": 52,
+  "exactDuplicateRecords": 0,
+  "unknownFamilyLeads": 29,
+  "familyHints": {
+    "unknown": 29,
+    "ccmatrix": 2,
+    "globalvoices": 1,
+    "paracrawl": 2,
+    "nllb": 3,
+    "ted": 5,
+    "opensubtitles": 2,
+    "tatoeba": 2,
+    "wikimatrix": 1,
+    "opus100": 1,
+    "flores": 4
+  },
+  "corpusDownloads": 0,
+  "metadataMayContainEmbeddedExamples": true,
+  "sampledRows": 0,
+  "admittedCards": 0,
+  "generatedCardTexts": 0,
+  "paidApiCalls": 0,
+  "elapsedSeconds": 14.162741790001746,
+  "limits": {
+    "requests": 3,
+    "bytesPerResponse": 2097152,
+    "recordsPerResponse": 500,
+    "socketTimeoutSeconds": 30,
+    "totalWallDeadlineEnforcedByTool": false
+  },
+  "limitations": [
+    "Metadata badges do not establish original rights, human authorship, alignment or useful yield.",
+    "Unknown evidence remains visible for bounded primary-source investigation.",
+    "Name-based family hints are not content deduplication and do not reject genuinely new subsets.",
+    "Discovery covers only these queries and first HF page (limit30); no pagination, exhaustive-search or absence claim.",
+    "Repository language tags are not proof of direct pl-ko pairs; API counts are alignments, not cards.",
+    "No corpus archives or row endpoints are requested; full metadata may embed examples. Raw responses stay outside deliverables.",
+    "No card text is generated, translated, rewritten or published by this tool."
+  ],
+  "toolSha256": "7859441b619845440d265f9d666c5fcfac55c31c533a44cfe383ab8dcc706080"
+}

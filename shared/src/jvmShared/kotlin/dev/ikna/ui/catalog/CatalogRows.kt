@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -16,6 +19,9 @@ import dev.ikna.data.catalog.*
 @Composable
 fun IknaCatalogDeckRow(
 	deck: CatalogDeck,
+	resultNote: String? = null,
+	planRefreshFailed: Boolean = false,
+	onRetryPlan: () -> Unit = {},
 	open: Boolean,
 	installed: Boolean,
 	busy: Boolean,
@@ -171,14 +177,16 @@ fun IknaCatalogDeckRow(
 					color = muted,
 					modifier = Modifier.weight(1f)
 				)
-				IknaTextButton(
-					label = S.t("cat.035"),
-					onClick = onInstall,
-					enabled = !blocked,
-					color = muted
-				)
+				if (open) {
+					IknaTextButton(
+						label = S.t("cat.035"),
+						onClick = onInstall,
+						enabled = !blocked,
+						color = muted
+					)
+				}
 			}
-			if (blocked && !busy && !previewLoading) {
+			if (open && blocked && !busy && !previewLoading) {
 				// The row itself is quiet, so the only reason this button is off is
 				// another deck's download; say so instead of leaving a dead button.
 				Spacer(Modifier.height(Space.xs))
@@ -188,7 +196,8 @@ fun IknaCatalogDeckRow(
 					color = muted
 				)
 			}
-		} else {
+		} else if (open) {
+			// Download is offered only below the visible licence and attribution.
 			Spacer(Modifier.height(Space.md))
 			IknaWideButton(
 				label = S.t("cat.018"),
@@ -206,6 +215,25 @@ fun IknaCatalogDeckRow(
 				)
 			}
 		}
+		if (planRefreshFailed) {
+			Spacer(Modifier.height(Space.md))
+			Text(S.t("cat.043"), style = MaterialTheme.typography.bodyMedium, color = ink,
+				modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+			IknaTextButton(label = S.t("load.002"), onClick = onRetryPlan, enabled = !blocked)
+		}
+		resultNote?.let { note ->
+			Spacer(Modifier.height(Space.md))
+			Text(
+				text = note,
+				style = MaterialTheme.typography.bodyMedium,
+				color = ink,
+				modifier = Modifier.fillMaxWidth()
+					.semantics { liveRegion = LiveRegionMode.Polite }
+					.background(MaterialTheme.colorScheme.surface)
+					.padding(Space.md)
+			)
+		}
+
 	}
 }
 

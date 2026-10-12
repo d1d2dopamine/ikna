@@ -1,6 +1,8 @@
 package dev.ikna.desktop
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -44,6 +46,23 @@ fun DesktopScrollablePane(title: String, onBack: () -> Unit,
             // deck list: on a wide window the empty side is intentional space.
             Column(Modifier.widthIn(max = readingWidth).fillMaxWidth().align(Alignment.CenterHorizontally), content = content)
             Spacer(Modifier.height(Space.xxl))
+        }
+    }
+}
+
+/** The same frame/reading measure as DesktopScrollablePane, with one bounded lazy viewport. */
+@Composable
+fun DesktopLazyPane(title: String, onBack: () -> Unit,
+    titleStyle: TextStyle = MaterialTheme.typography.headlineSmall,
+    readingWidth: Dp = 760.dp, content: LazyListScope.() -> Unit) {
+    DesktopPaneFrame(title, onBack, titleStyle) {
+        Box(Modifier.fillMaxSize().padding(horizontal = 40.dp)) {
+            LazyColumn(
+                modifier = Modifier.widthIn(max = readingWidth).fillMaxWidth().fillMaxHeight()
+                    .align(Alignment.TopCenter),
+                contentPadding = PaddingValues(top = Space.md, bottom = Space.xxl),
+                content = content
+            )
         }
     }
 }

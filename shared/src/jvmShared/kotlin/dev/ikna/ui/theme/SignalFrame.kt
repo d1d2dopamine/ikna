@@ -326,7 +326,8 @@ internal fun BoxScope.SignalFrameOverlay(coordinator: SignalFrameCoordinator) {
  * own a visible boundary place the same signal just outside it. Hover and
  * selected navigation may travel around the perimeter; keyboard focus remains
  * visible but still, pressing freezes the current phase, and disabling
- * animations keeps the same frame static.
+ * animations keeps the same frame static. A press alone never creates a frame;
+ * controls without their own pressed fill receive a quiet local wash instead.
  *
  * Focus on a bordered (Outer) control is the exception: the overlay escapes
  * every viewport clip on purpose, so a focus ring painted there would trail a
@@ -344,7 +345,9 @@ fun Modifier.iknaSignalFrame(
     enabled: Boolean = true,
     selected: Boolean = false,
     cornerRadius: Dp? = null,
-    placement: SignalFramePlacement = SignalFramePlacement.Inner
+    placement: SignalFramePlacement = SignalFramePlacement.Inner,
+    /** False when the host already paints its own pressed fill. */
+    pressFeedback: Boolean = true
 ): Modifier {
     // Interaction hover only controls the nested-parent fade cut. Ownership
     // comes from the attached pointer node and actual root-space hit bounds.
@@ -371,14 +374,18 @@ fun Modifier.iknaSignalFrame(
     // the root overlay carries only pointer presence. Overlay frames
     // intentionally escape viewport clipping, so a focus ring that lived there
     // would keep painting over unrelated text after the control scrolls away.
-    val active = enabled && when (placement) {
-        SignalFramePlacement.Outer -> hoverOwner || pressed
-        SignalFramePlacement.Inner -> hoverOwner || focused || pressed || selected
-    }
-    val moving = enabled && motionEnabled && !pressed && when (placement) {
-        SignalFramePlacement.Outer -> hoverOwner
-        SignalFramePlacement.Inner -> hoverOwner || selected
-    }
+    val feedback = signalFrameFeedback(
+        enabled = enabled,
+        placement = placement,
+        hoverOwner = hoverOwner,
+        focused = focused,
+        pressed = pressed,
+        selected = selected,
+        motionEnabled = motionEnabled,
+        pressFeedback = pressFeedback
+    )
+    val active = feedback.frameVisible
+    val moving = feedback.frameMoving
 
     SideEffect {
         coordinator.setMoving(frameId, moving)
@@ -432,6 +439,20 @@ fun Modifier.iknaSignalFrame(
     }
 
     return this
+        // Unlike the root overlay this feedback stays inside the hit target and
+        // its ancestor viewport. No extra animation, gesture or semantics node.
+        .drawWithCache {
+            val radius = effectiveRadius.toPx()
+            onDrawWithContent {
+                drawContent()
+                if (feedback.pressVisible) {
+                    drawRoundRect(
+                        color = colors.mark.copy(alpha = 0.08f),
+                        cornerRadius = CornerRadius(radius, radius)
+                    )
+                }
+            }
+        }
         .then(SignalFramePointerElement(coordinator, frameId, enabled))
         .onSizeChanged { size ->
             coordinator.setArea(frameId, size.width.toFloat() * size.height.toFloat())

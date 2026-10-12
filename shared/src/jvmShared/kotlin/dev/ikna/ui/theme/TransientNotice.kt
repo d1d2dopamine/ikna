@@ -11,6 +11,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.platform.LocalAccessibilityManager
+import androidx.compose.ui.platform.AccessibilityManager
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,10 +34,13 @@ fun IknaTransientNotice(
     modifier: Modifier = Modifier,
     durationMillis: Long = NOTICE_MILLIS
 ) {
-    LaunchedEffect(message, durationMillis) {
+    val accessibility = LocalAccessibilityManager.current
+    val timeout = noticeTimeoutMillis(durationMillis, accessibility)
+    val dismiss = rememberUpdatedState(onDismiss)
+    LaunchedEffect(message, timeout) {
         if (message != null) {
-            delay(durationMillis.coerceAtLeast(1L))
-            onDismiss()
+            delay(timeout)
+            dismiss.value()
         }
     }
     if (message == null) return
@@ -41,6 +50,7 @@ fun IknaTransientNotice(
             modifier = Modifier
                 .widthIn(max = 560.dp)
                 .fillMaxWidth()
+                .semantics { liveRegion = LiveRegionMode.Polite }
                 .clip(iknaControlShape())
                 .background(MaterialTheme.colorScheme.background)
                 .border(1.dp, LocalIknaControlColors.current.outline, iknaControlShape())
@@ -59,4 +69,16 @@ fun IknaTransientNotice(
             )
         }
     }
+}
+
+/** Honor accessibility's reading time without shortening the ordinary duration. */
+internal fun noticeTimeoutMillis(requested: Long, accessibility: AccessibilityManager?): Long {
+    val minimum = requested.coerceAtLeast(1L)
+    val recommended = accessibility?.calculateRecommendedTimeoutMillis(
+        originalTimeoutMillis = minimum,
+        containsIcons = false,
+        containsText = true,
+        containsControls = true
+    ) ?: minimum
+    return recommended.coerceAtLeast(minimum)
 }

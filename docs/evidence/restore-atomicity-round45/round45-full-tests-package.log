@@ -1,0 +1,147 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :app
+Unable to initialize metrics, ensure <home>/.android is writable, details: <home>/.android/analytics.settings (No such file or directory)
+
+> Task :shared:kmpPartiallyResolvedDependenciesChecker
+> Task :shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared:convertXmlValueResourcesForCommonMain NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForCommonMain NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForCommonMain NO-SOURCE
+> Task :shared:generateResourceAccessorsForCommonMain SKIPPED
+> Task :shared:convertXmlValueResourcesForDesktopMain NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForDesktopMain NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForDesktopMain NO-SOURCE
+> Task :shared:generateResourceAccessorsForDesktopMain SKIPPED
+> Task :shared:convertXmlValueResourcesForJvmShared NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForJvmShared NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForJvmShared NO-SOURCE
+> Task :shared:generateResourceAccessorsForJvmShared SKIPPED
+> Task :shared:generateActualResourceCollectorsForDesktopMain SKIPPED
+> Task :shared:generateComposeResClass SKIPPED
+> Task :shared:generateExpectResourceCollectorsForCommonMain SKIPPED
+> Task :shared:kspKotlinDesktop UP-TO-DATE
+> Task :shared:compileKotlinDesktop UP-TO-DATE
+> Task :shared:compileDesktopMainJava NO-SOURCE
+> Task :shared:assembleDesktopMainResources UP-TO-DATE
+> Task :shared:desktopProcessResources UP-TO-DATE
+> Task :shared:processDesktopMainResources SKIPPED
+> Task :shared:desktopMainClasses UP-TO-DATE
+> Task :shared:desktopJar UP-TO-DATE
+> Task :shared:convertXmlValueResourcesForCommonTest NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForCommonTest NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForCommonTest NO-SOURCE
+> Task :shared:generateResourceAccessorsForCommonTest SKIPPED
+> Task :shared:convertXmlValueResourcesForDesktopTest NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForDesktopTest NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForDesktopTest NO-SOURCE
+> Task :shared:generateResourceAccessorsForDesktopTest SKIPPED
+> Task :shared:convertXmlValueResourcesForJvmSharedTest NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForJvmSharedTest NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForJvmSharedTest NO-SOURCE
+> Task :shared:generateResourceAccessorsForJvmSharedTest SKIPPED
+> Task :shared:kspTestKotlinDesktop SKIPPED
+> Task :shared:compileTestKotlinDesktop
+> Task :shared:compileDesktopTestJava NO-SOURCE
+> Task :shared:assembleDesktopTestResources
+> Task :shared:desktopTestProcessResources
+> Task :shared:processDesktopTestResources SKIPPED
+> Task :shared:desktopTestClasses
+> Task :shared:desktopTest
+> Task :desktop:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :desktop:convertXmlValueResourcesForMain NO-SOURCE
+> Task :desktop:copyNonXmlValueResourcesForMain NO-SOURCE
+> Task :desktop:prepareComposeResourcesTaskForMain NO-SOURCE
+> Task :desktop:generateResourceAccessorsForMain SKIPPED
+> Task :desktop:generateActualResourceCollectorsForMain SKIPPED
+> Task :desktop:generateComposeResClass SKIPPED
+> Task :desktop:compileKotlin UP-TO-DATE
+> Task :desktop:compileJava UP-TO-DATE
+> Task :desktop:assembleMainResources UP-TO-DATE
+> Task :desktop:processResources UP-TO-DATE
+> Task :desktop:classes UP-TO-DATE
+> Task :desktop:jar UP-TO-DATE
+> Task :desktop:convertXmlValueResourcesForTest NO-SOURCE
+> Task :desktop:copyNonXmlValueResourcesForTest NO-SOURCE
+> Task :desktop:prepareComposeResourcesTaskForTest NO-SOURCE
+> Task :desktop:generateResourceAccessorsForTest SKIPPED
+> Task :desktop:compileTestKotlin UP-TO-DATE
+> Task :desktop:compileTestJava UP-TO-DATE
+> Task :desktop:assembleTestResources UP-TO-DATE
+> Task :desktop:processTestResources UP-TO-DATE
+> Task :desktop:testClasses UP-TO-DATE
+> Task :desktop:test
+> Task :desktop:checkRuntime FROM-CACHE
+> Task :desktop:createRuntimeImage
+> Task :desktop:prepareAppResources NO-SOURCE
+> Task :desktop:unpackDefaultComposeDesktopJvmApplicationResources
+
+> Task :desktop:proguardReleaseJars
+ProGuard, version 7.7.0
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/desktop.kotlin_module]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: there were 48 duplicate class definitions.
+      (https://www.guardsquare.com/proguard/manual/troubleshooting#duplicateclass)
+Note: com.github.luben.zstd.util.Native: can't find dynamically referenced class org.osgi.framework.BundleEvent
+Note: the configuration keeps the entry point 'dev.ikna.desktop.MainKt { androidx.compose.ui.window.WindowPlacement asComposePlacement(dev.ikna.desktop.DesktopWindowPlacement); }', but not the descriptor class 'dev.ikna.desktop.DesktopWindowPlacement'
+Note: the configuration keeps the entry point 'dev.ikna.desktop.MainKt { void saveGeometry-NXuqAC8(java.io.File,long,androidx.compose.ui.window.WindowPosition,dev.ikna.desktop.DesktopWindowPlacement); }', but not the descriptor class 'dev.ikna.desktop.DesktopWindowPlacement'
+Note: the configuration keeps the entry point 'dev.ikna.desktop.MainKt { void installDropTarget(java.awt.Component,dev.ikna.desktop.DesktopUi); }', but not the descriptor class 'dev.ikna.desktop.DesktopUi'
+Note: the configuration keeps the entry point 'dev.ikna.desktop.MainKt { boolean handleWindowKey-mqHlkV4(java.lang.Object,dev.ikna.desktop.DesktopUi,kotlin.jvm.functions.Function0); }', but not the descriptor class 'dev.ikna.desktop.DesktopUi'
+Note: the configuration keeps the entry point 'dev.ikna.desktop.MainKt { void access$installDropTarget(java.awt.Component,dev.ikna.desktop.DesktopUi); }', but not the descriptor class 'dev.ikna.desktop.DesktopUi'
+Note: the configuration keeps the entry point 'dev.ikna.desktop.MainKt { androidx.compose.ui.window.WindowPlacement access$asComposePlacement(dev.ikna.desktop.DesktopWindowPlacement); }', but not the descriptor class 'dev.ikna.desktop.DesktopWindowPlacement'
+Note: the configuration keeps the entry point 'dev.ikna.desktop.MainKt { void access$saveGeometry-NXuqAC8(java.io.File,long,androidx.compose.ui.window.WindowPosition,dev.ikna.desktop.DesktopWindowPlacement); }', but not the descriptor class 'dev.ikna.desktop.DesktopWindowPlacement'
+Note: the configuration keeps the entry point 'dev.ikna.desktop.MainKt { boolean access$handleWindowKey-mqHlkV4(java.lang.Object,dev.ikna.desktop.DesktopUi,kotlin.jvm.functions.Function0); }', but not the descriptor class 'dev.ikna.desktop.DesktopUi'
+Note: the configuration explicitly specifies 'sun.misc.Unsafe' to keep library class 'sun.misc.Unsafe'
+
+> Task :desktop:createReleaseDistributable
+The distribution is written to <project>/desktop/build/compose/binaries/main-release/app
+
+BUILD SUCCESSFUL in 1m 10s
+25 actionable tasks: 10 executed, 1 from cache, 14 up-to-date
