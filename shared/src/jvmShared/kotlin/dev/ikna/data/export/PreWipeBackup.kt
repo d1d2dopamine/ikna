@@ -29,7 +29,8 @@ suspend fun backupJournalThenWipe(
 }
 
 /** A provider's null document/stream is a storage failure, never an empty log. */
-internal fun <T : Any> writeExportDocument(
+// Public because the Android app module supplies its MediaStore adapter.
+fun <T : Any> writeExportDocument(
     create: () -> T?,
     open: (T) -> OutputStream?,
     body: (BufferedWriter) -> Unit

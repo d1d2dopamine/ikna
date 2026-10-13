@@ -1,0 +1,18 @@
+[
+  {
+    "original_filename": "Вставленный текст.txt",
+    "bytes": 75677,
+    "sha256": "25528a2523e1852dabee560874e11197bd2bca10758009ae90395637bd3d9152",
+    "project": "ikna",
+    "cause": "JsonExporter.kt:87 cannot access shared internal writeExportDocument",
+    "packaged_filename": "user-ci-build-original.txt"
+  },
+  {
+    "original_filename": "Вставленный текст.md",
+    "bytes": 32413,
+    "sha256": "0f8f48778b622475a66a71b0d073840bf1229fe9ca6ade2d9a0b1df2b743ffa7",
+    "project": "ikna",
+    "cause": "JsonExporter.kt:87 cannot access shared internal writeExportDocument",
+    "packaged_filename": "user-ci-test-apk-original.md"
+  }
+]

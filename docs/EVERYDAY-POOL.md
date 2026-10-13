@@ -103,7 +103,7 @@ selection JSON/Markdown, selected-material samples, bounded JSONL preview,
 the bound pool report and input reference. The full pool is in the separate
 same-run `catalogue-v2-everyday-admitted-pool` artifact. Current v2 defaults are
 12,000 maximum targets per level, 40 minimum, 1,000 thin-deck threshold and
-three contexts per target. To replay the historical selection, explicitly pass
+up to three contexts per target. To replay the historical selection, explicitly pass
 `--max-deck 8000`; existing evidence and source passports remain unchanged.
 Review rows are limited to the first ten policy-ranked
 targets per publishable deck; they are not full selected assets or representative

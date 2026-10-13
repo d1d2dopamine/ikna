@@ -933,3 +933,22 @@ existing format and empty-deck behavior, and report save failures accurately.
 preserving operational deck/settings exceptions instead of returning a false
 successful bundle result. Deliberate blank/synthetic/compatibility skips and the
 existing parser policy remain intact. This does not add whole-bundle rollback.
+
+## Round 48 — authorized Android build validation
+
+2026-10-12: the owner authorized the Android SDK agreement and cloud installation.
+[Round 48](ROUND-0.12-48.md) reproduces an Android cross-module export-helper
+visibility error and makes its existing API callable from the app module, with
+an app-side regression. No catalogue, cosmetic or release-version changes.
+Record assembly, JVM and actual instrumentation outcomes separately.
+
+## Round 49 — exact-source selection analysis
+
+2026-10-12: [Round49](ROUND-0.12-49.md) audits all188 saved pl/ko rows,
+separates admissibility from allocation, and fixes reuse of token analysis across
+raw Unicode variants without changing canonical frequency ranks or quality rules.
+Persistent experimental analysis cache is version2; old entries are not reused.
+Pinned ICU74.2 replay preserves all six levels and exact selected assignments;
+actual admitted-card delta is zero. Full-pool impact/performance is unmeasured.
+Contexts-per-target is a maximum of3, not a universal minimum; Round36's strict
+three-context append-only witness retains its narrower historical meaning.

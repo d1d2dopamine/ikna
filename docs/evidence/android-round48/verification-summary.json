@@ -1,0 +1,32 @@
+{
+  "sharedAndroid": {
+    "tests": 69,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "appReleaseJvm": {
+    "tests": 565,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "apkBuilds": [
+    {
+      "path": "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk",
+      "bytes": 873901,
+      "sha256": "2cde75cd2fd17ebe1b684b950cc63b3c0b2e19198adf3c394d32e8f159997235",
+      "abi": "x86_64",
+      "signing": "ordinary debug identity; not the tracked update key"
+    },
+    {
+      "path": "app/build/outputs/apk/debug/app-debug.apk",
+      "bytes": 65646265,
+      "sha256": "fab85ea32f80d7ebcadaf44ceda5b0462535eb0799dac6f9473fde5e79b07dd1",
+      "abi": "x86_64",
+      "signing": "ordinary debug identity; not the tracked update key"
+    }
+  ],
+  "instrumentationExecuted": false,
+  "releaseR8Validated": false
+}

@@ -1,0 +1,26 @@
+test_raw_variant_cannot_inherit_a_nonexistent_token (source_identity_regression.SourceIdentityTests.test_raw_variant_cannot_inherit_a_nonexistent_token) ... 
+  test_raw_variant_cannot_inherit_a_nonexistent_token (source_identity_regression.SourceIdentityTests.test_raw_variant_cannot_inherit_a_nonexistent_token) (order=(0, 1)) ... FAIL
+  test_raw_variant_cannot_inherit_a_nonexistent_token (source_identity_regression.SourceIdentityTests.test_raw_variant_cannot_inherit_a_nonexistent_token) (order=(1, 0)) ... FAIL
+
+======================================================================
+FAIL: test_raw_variant_cannot_inherit_a_nonexistent_token (source_identity_regression.SourceIdentityTests.test_raw_variant_cannot_inherit_a_nonexistent_token) (order=(0, 1))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "round49/tools/catalog/test_selection_source_identity.py", line 47, in test_raw_variant_cannot_inherit_a_nonexistent_token
+    self.assertEqual(len(spans), context["tokenCount"])
+AssertionError: 6 != 5
+
+======================================================================
+FAIL: test_raw_variant_cannot_inherit_a_nonexistent_token (source_identity_regression.SourceIdentityTests.test_raw_variant_cannot_inherit_a_nonexistent_token) (order=(1, 0))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "round49/tools/catalog/test_selection_source_identity.py", line 47, in test_raw_variant_cannot_inherit_a_nonexistent_token
+    self.assertEqual(len(spans), context["tokenCount"])
+AssertionError: 5 != 6
+
+----------------------------------------------------------------------
+Ran 1 test in 0.005s
+
+FAILED (failures=2)
+Production module under test: round48/tools/catalog/selection_experiment.py
+EXPECTED_BASELINE_FAILURE_CONFIRMED: 2 failed permutation assertions, no infrastructure errors

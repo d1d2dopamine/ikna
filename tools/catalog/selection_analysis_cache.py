@@ -27,7 +27,9 @@ from pathlib import Path
 
 from segmentation import CJK, prepare
 
-CACHE_VERSION = 1
+# Version 1 keyed analysis by normalized frequency contexts. It cannot safely
+# supply boundaries for distinct raw source variants and is never migrated.
+CACHE_VERSION = 2
 HERE = Path(__file__).resolve().parent
 SOURCE_ROOT = HERE.parent.parent
 IMPLEMENTATIONS = (
@@ -60,14 +62,24 @@ def _file_sha(path):
 
 
 def _contexts(db, collection, lang):
-    return db.execute("SELECT context_key,context FROM context WHERE collection=? AND lang=? ORDER BY context_key",
+    return db.execute("SELECT analysis_key,context FROM analysis_context WHERE collection=? AND lang=? ORDER BY analysis_key",
                       (collection, lang))
+
+
+def _representative_digest(db, collection, lang):
+    digest = hashlib.sha256()
+    for row in db.execute("SELECT context_key,context FROM context WHERE collection=? AND lang=? ORDER BY context_key",
+                          (collection, lang)):
+        digest.update(_json(list(row)) + b"\n")
+    return digest.hexdigest()
 
 
 def _context_digest(db, collection, lang):
     digest = hashlib.sha256()
     count = 0
-    for row in _contexts(db, collection, lang):
+    # The representative mapping also affects preserved presentation surfaces.
+    for row in db.execute("SELECT analysis_key,context_key,context FROM analysis_context "
+                          "WHERE collection=? AND lang=? ORDER BY analysis_key", (collection, lang)):
         digest.update(_json(list(row)) + b"\n")
         count += 1
     return digest.hexdigest(), count
@@ -84,7 +96,7 @@ def _row(value, collection, lang, expected_key):
     if (not isinstance(value, list) or len(value) != 5 or
             value[:3] != [collection, lang, expected_key] or
             type(value[3]) is not int or value[3] < 0 or not isinstance(value[4], str)):
-        raise CacheIntegrityError("cache row schema or exact context-key alignment mismatch")
+        raise CacheIntegrityError("cache row schema or exact analysis-key alignment mismatch")
     choices = json.loads(value[4])
     if not isinstance(choices, list) or any(
         not isinstance(c, list) or len(c) != 4 or type(c[0]) is not int or c[0] < 1
@@ -116,9 +128,11 @@ def _identity(db, collection, lang, ranks, function_top, japanese_guard,
             raise ValueError("Japanese cache needs verified engine/dictionary guard evidence")
     contexts_sha, count = _context_digest(db, collection, lang)
     identity = {
-        "cacheVersion": CACHE_VERSION, "analysisSchema": ["collection", "lang", "context_key", "token_count", "choices_json"],
+        "cacheVersion": CACHE_VERSION, "analysisIdentity": "exact-utf8-source-v1",
+        "analysisSchema": ["collection", "lang", "analysis_key", "token_count", "choices_json"],
         "collection": collection, "lang": lang, "contextTextSha256": contexts_sha,
         "contextCount": count, "ranksSha256": _sha(sorted(ranks.items())),
+        "frequencyRepresentativesSha256": _representative_digest(db, collection, lang),
         "registrySha256": registry_sha256, "functionTop": function_top,
         "canonicalUnique": canonical_unique, "japaneseGuard": guard_evidence,
         "python": platform.python_version(), "pythonImplementation": platform.python_implementation(),
@@ -170,7 +184,7 @@ def _restore(db, data_path, manifest, collection, lang):
     with tempfile.TemporaryDirectory(prefix="ikna-analysis-verify-") as temp:
         verified = sqlite3.connect(str(Path(temp) / "verified.sqlite"))
         try:
-            verified.execute("CREATE TABLE rows(collection TEXT,lang TEXT,context_key TEXT PRIMARY KEY,token_count INTEGER,choices_json TEXT)")
+            verified.execute("CREATE TABLE rows(collection TEXT,lang TEXT,analysis_key TEXT PRIMARY KEY,token_count INTEGER,choices_json TEXT)")
             with data_path.open("rb") as raw:
                 if os.fstat(raw.fileno()).st_size != manifest["dataBytes"] or hashlib.file_digest(raw, "sha256").hexdigest() != manifest["dataSha256"]:
                     raise CacheIntegrityError("cache compressed bytes/hash mismatch")
@@ -209,7 +223,7 @@ def _restore(db, data_path, manifest, collection, lang):
                 db.execute("SAVEPOINT analysis_cache_restore")
                 try:
                     db.execute("DELETE FROM context_analysis WHERE collection=? AND lang=?", (collection, lang))
-                    cursor = verified.execute("SELECT * FROM rows ORDER BY context_key")
+                    cursor = verified.execute("SELECT * FROM rows ORDER BY analysis_key")
                     while batch := cursor.fetchmany(BATCH_SIZE):
                         db.executemany("INSERT INTO context_analysis VALUES(?,?,?,?,?)", batch)
                     db.execute("RELEASE analysis_cache_restore")
@@ -233,7 +247,7 @@ def _publish(db, root, data_path, manifest_path, identity, key, counts, collecti
         with data_temp.open("wb") as raw:
             with gzip.GzipFile(filename="", fileobj=raw, mode="wb", mtime=0) as stream:
                 contexts = iter(_contexts(db, collection, lang))
-                for row in db.execute("SELECT * FROM context_analysis WHERE collection=? AND lang=? ORDER BY context_key", (collection, lang)):
+                for row in db.execute("SELECT * FROM context_analysis WHERE collection=? AND lang=? ORDER BY analysis_key", (collection, lang)):
                     expected = next(contexts, None)
                     if expected is None:
                         raise CacheIntegrityError("computed analysis has foreign or excess rows")
@@ -294,7 +308,8 @@ def run_cached_analysis(db, collection, lang, ranks, function_top, japanese_guar
             # trust stale analysis from this staging DB. A miss always computes.
             db.execute("DELETE FROM context_analysis WHERE collection=? AND lang=?", (collection, lang))
             counts = _counts(compute())
-            if _context_digest(db, collection, lang) != (identity["contextTextSha256"], identity["contextCount"]):
+            if (_context_digest(db, collection, lang) != (identity["contextTextSha256"], identity["contextCount"]) or
+                    _representative_digest(db, collection, lang) != identity["frequencyRepresentativesSha256"]):
                 raise CacheIntegrityError("input contexts changed during analysis")
             manifest = _publish(db, root, data_path, manifest_path, identity, key, counts, collection, lang)
             status = "miss"

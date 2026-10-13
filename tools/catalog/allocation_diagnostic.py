@@ -182,7 +182,7 @@ def stage_scoped(pool, global_path, subset_path, pairs, langs, batch_size=5000):
     require(pool.resolve() not in (global_path.resolve(), subset_path.resolve()), "staging-overwrites-input")
     wanted, languages = set(map(tuple, pairs)), set(langs)
     global_db, subset = sqlite3.connect(global_path), sqlite3.connect(subset_path)
-    stats = Counter(); context_batch, candidate_batch = [], []
+    stats = Counter(); context_batch, candidate_batch, analysis_batch = [], [], []
     try:
         global_db.executescript("PRAGMA journal_mode=OFF; PRAGMA synchronous=OFF; PRAGMA temp_store=FILE;"
                                "PRAGMA cache_size=-65536; CREATE TABLE context(collection TEXT,lang TEXT,context_key TEXT,context TEXT,"
@@ -190,8 +190,9 @@ def stage_scoped(pool, global_path, subset_path, pairs, langs, batch_size=5000):
         subset.executescript(selection.SCHEMA)
         def flush():
             global_db.executemany("INSERT OR IGNORE INTO context VALUES(?,?,?,?)", context_batch)
-            subset.executemany("INSERT INTO candidate VALUES(?,?,?,?,?,?,?,?,?)", candidate_batch)
-            context_batch.clear(); candidate_batch.clear()
+            subset.executemany("INSERT INTO candidate VALUES(?,?,?,?,?,?,?,?,?,?)", candidate_batch)
+            subset.executemany("INSERT OR IGNORE INTO analysis_context VALUES(?,?,?,?,?)", analysis_batch)
+            context_batch.clear(); candidate_batch.clear(); analysis_batch.clear()
         opener = gzip.open if pool.suffix == ".gz" else open
         with opener(pool, "rb") as handle:
             while raw := handle.readline(MAX_ROW_BYTES + 1):
@@ -208,12 +209,14 @@ def stage_scoped(pool, global_path, subset_path, pairs, langs, batch_size=5000):
                 key = selection._context_key(record.collection, record.lang, record.context)
                 context_batch.append((record.collection, record.lang, key, record.context))
                 if (record.lang, record.meaning_lang) in wanted:
+                    analysis_key = selection._analysis_key(record.collection, record.lang, record.context)
                     origins = [o.to_dict() for o in record.origins]
                     scores = [o.alignment_score for o in record.origins if o.alignment_score is not None]
                     candidate_batch.append((record.id, record.collection, record.lang, record.meaning_lang, key,
                                             record.context, record.meaning,
                                             json.dumps(origins, ensure_ascii=False, separators=(",", ":")),
-                                            max(scores) if scores else None))
+                                            max(scores) if scores else None, analysis_key))
+                    analysis_batch.append((record.collection, record.lang, analysis_key, key, record.context))
                     stats["retainedCandidateRows"] += 1
                 if len(context_batch) >= batch_size:
                     flush()
@@ -227,7 +230,7 @@ def stage_scoped(pool, global_path, subset_path, pairs, langs, batch_size=5000):
             subset.execute("INSERT INTO context VALUES(?,?,?,?)", (collection, lang, key, row[0]))
         subset.commit()
         stats["globalRankContexts"] = global_db.execute("SELECT COUNT(*) FROM context").fetchone()[0]
-        stats["retainedAnalysisContexts"] = subset.execute("SELECT COUNT(*) FROM context").fetchone()[0]
+        stats["retainedAnalysisContexts"] = subset.execute("SELECT COUNT(*) FROM analysis_context").fetchone()[0]
         return dict(stats)
     except sqlite3.IntegrityError:
         raise DiagnosticError("duplicate-retained-candidate-identity") from None

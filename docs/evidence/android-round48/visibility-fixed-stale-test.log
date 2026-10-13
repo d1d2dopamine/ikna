@@ -1,0 +1,170 @@
+Picked up JAVA_TOOL_OPTIONS: -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=42701 -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=42701 -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :app
+Unable to initialize metrics, ensure <home>/.android is writable, details: <home>/.android/analytics.settings (No such file or directory)
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+
+> Task :shared:kmpPartiallyResolvedDependenciesChecker
+> Task :shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared:convertXmlValueResourcesForAndroidMain NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForAndroidMain NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForAndroidMain NO-SOURCE
+> Task :shared:generateResourceAccessorsForAndroidMain SKIPPED
+> Task :shared:convertXmlValueResourcesForCommonMain NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForCommonMain NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForCommonMain NO-SOURCE
+> Task :shared:generateResourceAccessorsForCommonMain SKIPPED
+> Task :shared:convertXmlValueResourcesForJvmShared NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForJvmShared NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForJvmShared NO-SOURCE
+> Task :shared:generateResourceAccessorsForJvmShared SKIPPED
+> Task :shared:generateActualResourceCollectorsForAndroidMain SKIPPED
+> Task :shared:generateComposeResClass SKIPPED
+> Task :shared:preBuild UP-TO-DATE
+> Task :shared:preDebugBuild UP-TO-DATE
+> Task :shared:generateDebugResValues UP-TO-DATE
+> Task :shared:generateDebugResources UP-TO-DATE
+> Task :shared:packageDebugResources UP-TO-DATE
+> Task :shared:parseDebugLocalResources UP-TO-DATE
+> Task :shared:generateDebugRFile UP-TO-DATE
+> Task :shared:generateExpectResourceCollectorsForCommonMain SKIPPED
+> Task :shared:convertXmlValueResourcesForAndroidDebug NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForAndroidDebug NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForAndroidDebug NO-SOURCE
+> Task :shared:generateResourceAccessorsForAndroidDebug SKIPPED
+> Task :shared:kspDebugKotlinAndroid
+> Task :shared:compileDebugKotlinAndroid
+w: file://<project>/shared/build/generated/ksp/android/androidDebug/kotlin/dev/ikna/data/db/IknaDatabaseConstructor.kt:5:8 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+w: file://<project>/shared/src/jvmShared/kotlin/dev/ikna/data/db/IknaDatabase.kt:76:1 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+w: file://<project>/shared/src/jvmShared/kotlin/dev/ikna/data/dev/DeveloperMode.kt:71:5 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'File?'.
+w: file://<project>/shared/src/jvmShared/kotlin/dev/ikna/data/dev/DeveloperMode.kt:72:37 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'File?'.
+w: file://<project>/shared/src/jvmShared/kotlin/dev/ikna/ui/dev/DeveloperToolsPanel.kt:31:21 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file://<project>/shared/src/jvmShared/kotlin/dev/ikna/ui/theme/SignalFrame.kt:179:33 The corresponding parameter in the supertype 'PointerInputModifierNode' is named 'pointerEvent'. This may cause problems when calling this function with named arguments.
+
+> Task :shared:javaPreCompileDebug UP-TO-DATE
+> Task :shared:compileDebugJavaWithJavac NO-SOURCE
+> Task :shared:bundleLibRuntimeToJarDebug
+> Task :shared:bundleLibCompileToJarDebug
+> Task :shared:preDebugUnitTestBuild UP-TO-DATE
+> Task :shared:generateDebugUnitTestStubRFile UP-TO-DATE
+> Task :shared:convertXmlValueResourcesForAndroidUnitTest NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForAndroidUnitTest NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForAndroidUnitTest NO-SOURCE
+> Task :shared:generateResourceAccessorsForAndroidUnitTest SKIPPED
+> Task :shared:convertXmlValueResourcesForAndroidUnitTestDebug NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForAndroidUnitTestDebug NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForAndroidUnitTestDebug NO-SOURCE
+> Task :shared:generateResourceAccessorsForAndroidUnitTestDebug SKIPPED
+> Task :shared:convertXmlValueResourcesForCommonTest NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForCommonTest NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForCommonTest NO-SOURCE
+> Task :shared:generateResourceAccessorsForCommonTest SKIPPED
+> Task :shared:convertXmlValueResourcesForJvmSharedTest NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForJvmSharedTest NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForJvmSharedTest NO-SOURCE
+> Task :shared:generateResourceAccessorsForJvmSharedTest SKIPPED
+> Task :shared:kspDebugUnitTestKotlinAndroid SKIPPED
+> Task :shared:compileDebugUnitTestKotlinAndroid
+> Task :shared:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :shared:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :shared:processDebugJavaRes UP-TO-DATE
+> Task :shared:processDebugUnitTestJavaRes UP-TO-DATE
+
+> Task :shared:testDebugUnitTest
+Picked up JAVA_TOOL_OPTIONS: -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=42701 -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=42701 -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts
+
+> Task :app:buildKotlinToolingMetadata UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :shared:preReleaseBuild UP-TO-DATE
+> Task :shared:writeReleaseAarMetadata UP-TO-DATE
+> Task :app:checkReleaseAarMetadata UP-TO-DATE
+> Task :app:generateReleaseResValues UP-TO-DATE
+> Task :shared:generateReleaseResValues UP-TO-DATE
+> Task :shared:generateReleaseResources UP-TO-DATE
+> Task :shared:packageReleaseResources UP-TO-DATE
+> Task :app:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :app:generateReleaseResources UP-TO-DATE
+> Task :app:mergeReleaseResources UP-TO-DATE
+> Task :app:packageReleaseResources UP-TO-DATE
+> Task :app:parseReleaseLocalResources UP-TO-DATE
+> Task :app:createReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksRelease UP-TO-DATE
+> Task :shared:extractDeepLinksRelease UP-TO-DATE
+> Task :shared:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseMainManifest UP-TO-DATE
+> Task :app:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseManifestForPackage UP-TO-DATE
+> Task :shared:parseReleaseLocalResources UP-TO-DATE
+> Task :shared:generateReleaseRFile UP-TO-DATE
+> Task :app:processReleaseResources UP-TO-DATE
+> Task :shared:convertXmlValueResourcesForAndroidRelease NO-SOURCE
+> Task :shared:copyNonXmlValueResourcesForAndroidRelease NO-SOURCE
+> Task :shared:prepareComposeResourcesTaskForAndroidRelease NO-SOURCE
+> Task :shared:generateResourceAccessorsForAndroidRelease SKIPPED
+> Task :shared:kspReleaseKotlinAndroid
+
+> Task :shared:compileReleaseKotlinAndroid
+w: file://<project>/shared/build/generated/ksp/android/androidRelease/kotlin/dev/ikna/data/db/IknaDatabaseConstructor.kt:5:8 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+w: file://<project>/shared/src/jvmShared/kotlin/dev/ikna/data/db/IknaDatabase.kt:76:1 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+w: file://<project>/shared/src/jvmShared/kotlin/dev/ikna/data/dev/DeveloperMode.kt:71:5 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'File?'.
+w: file://<project>/shared/src/jvmShared/kotlin/dev/ikna/data/dev/DeveloperMode.kt:72:37 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'File?'.
+w: file://<project>/shared/src/jvmShared/kotlin/dev/ikna/ui/dev/DeveloperToolsPanel.kt:31:21 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file://<project>/shared/src/jvmShared/kotlin/dev/ikna/ui/theme/SignalFrame.kt:179:33 The corresponding parameter in the supertype 'PointerInputModifierNode' is named 'pointerEvent'. This may cause problems when calling this function with named arguments.
+
+> Task :shared:javaPreCompileRelease UP-TO-DATE
+> Task :shared:compileReleaseJavaWithJavac NO-SOURCE
+> Task :shared:bundleLibCompileToJarRelease
+
+> Task :app:compileReleaseKotlin
+w: file://<project>/app/src/main/java/dev/ikna/audio/Speaker.kt:240:30 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file://<project>/app/src/main/java/dev/ikna/ui/decks/AddDeckScreen.kt:89:18 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+
+> Task :app:javaPreCompileRelease FROM-CACHE
+> Task :app:compileReleaseJavaWithJavac NO-SOURCE
+> Task :app:bundleReleaseClassesToRuntimeJar
+> Task :app:bundleReleaseClassesToCompileJar
+
+> Task :app:compileReleaseUnitTestKotlin
+w: file://<project>/app/src/test/java/dev/ikna/data/anki/AnkiBridgeContractTest.kt:10:29 Java type mismatch: inferred type is 'String?', but 'String' was expected.
+
+> Task :app:preReleaseUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
+
+> Task :app:compileReleaseUnitTestJavaWithJavac
+Picked up JAVA_TOOL_OPTIONS: -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=42701 -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=42701 -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts
+
+Picked up JAVA_TOOL_OPTIONS: -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=42701 -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=42701 -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts
+
+Picked up JAVA_TOOL_OPTIONS: -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=42701 -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=42701 -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts
+
+
+> Task :app:processReleaseJavaRes
+> Task :app:processReleaseUnitTestJavaRes
+> Task :shared:bundleLibRuntimeToJarRelease
+> Task :shared:processReleaseJavaRes
+
+> Task :app:testReleaseUnitTest
+Picked up JAVA_TOOL_OPTIONS: -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=42701 -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=42701 -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts
+
+MobileDeckUiContractTest > shared row restores the compact mark and bounds every line to it FAILED
+    java.lang.AssertionError at MobileDeckUiContractTest.kt:48
+
+565 tests completed, 1 failed
+
+> Task :app:testReleaseUnitTest FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:testReleaseUnitTest'.
+> There were failing tests. See the report at: file://<project>/app/build/reports/tests/testReleaseUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+BUILD FAILED in 1m 30s
+55 actionable tasks: 20 executed, 2 from cache, 33 up-to-date

@@ -322,8 +322,8 @@ class DifferentialTests(unittest.TestCase):
             elif i == 96:
                 text = quarantine["text"]
                 origins[0].update(sourceFamily=quarantine_key[0], sourceVersion=quarantine_key[1], contextRef=quarantine_key[2])
-            db.execute("INSERT INTO candidate VALUES(?,?,?,?,?,?,?,?,?)",
-                       (f"candidate:{i:03}", "everyday", "en", "de", f"key:{i}", text, meaning, json.dumps(origins), None))
+            db.execute("INSERT INTO candidate VALUES(?,?,?,?,?,?,?,?,?,?)",
+                       (f"candidate:{i:03}", "everyday", "en", "de", f"key:{i}", text, meaning, json.dumps(origins), None, f"key:{i}"))
             db.execute("INSERT INTO context_analysis VALUES(?,?,?,?,?)",
                        ("everyday", "en", f"key:{i}", 10, json.dumps(choices)))
         db.commit()

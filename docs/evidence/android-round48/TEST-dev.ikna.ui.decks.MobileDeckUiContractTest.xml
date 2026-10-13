@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.ui.decks.MobileDeckUiContractTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-12T16:36:19" hostname="disposable-test-host" time="0.038">
+  <properties/>
+  <testcase name="mobile new deck screen keeps actions and drops duplicate prose" classname="dev.ikna.ui.decks.MobileDeckUiContractTest" time="0.034"/>
+  <testcase name="shared row preserves the compact mark while text and touch targets can grow" classname="dev.ikna.ui.decks.MobileDeckUiContractTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

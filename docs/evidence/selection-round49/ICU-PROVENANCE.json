@@ -1,0 +1,11 @@
+{
+  "url": "https://github.com/unicode-org/icu/releases/download/release-74-2/icu4c-74_2-Ubuntu22.04-x64.tgz",
+  "bytes": 16198713,
+  "sha512": "00b661b7d391a98b1414b41deb1985a76d9e64dc2cdadaa496a3f30badb91588e41e79a381e4b058a146b1bf81c04b22dc113eafa4c574fd783c47bd9c2492a7",
+  "icuVersion": "74.2",
+  "unicodeVersion": "15.1",
+  "safeArchiveMembers": 279,
+  "isolatedRuntime": true,
+  "systemInstalled": false,
+  "runtimePackaged": false
+}

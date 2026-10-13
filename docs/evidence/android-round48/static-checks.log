@@ -1,0 +1,23 @@
+test_accepts_normal_methods_and_quoted_keywords (__main__.AndroidCiChecks.test_accepts_normal_methods_and_quoted_keywords) ... ok
+test_android_scope_does_not_reject_legal_jvm_test_names (__main__.AndroidCiChecks.test_android_scope_does_not_reject_legal_jvm_test_names) ... ok
+test_ci_builds_test_apk_before_emulator_and_retains_failure_logs (__main__.AndroidCiChecks.test_ci_builds_test_apk_before_emulator_and_retains_failure_logs) ... ok
+test_ignores_comments_raw_strings_and_escaped_literals (__main__.AndroidCiChecks.test_ignores_comments_raw_strings_and_escaped_literals) ... ok
+test_logging_wrapper_preserves_gradle_exit_status_and_arguments (__main__.AndroidCiChecks.test_logging_wrapper_preserves_gradle_exit_status_and_arguments) ... ok
+test_logging_wrapper_reports_skip_when_bash_is_absent (__main__.AndroidCiChecks.test_logging_wrapper_reports_skip_when_bash_is_absent) ... ok
+test_no_version_bump_or_min_sdk_workaround_and_updated_actions (__main__.AndroidCiChecks.test_no_version_bump_or_min_sdk_workaround_and_updated_actions) ... ok
+test_project_names_are_safe_and_all_device_tests_remain_enabled (__main__.AndroidCiChecks.test_project_names_are_safe_and_all_device_tests_remain_enabled) ... ok
+test_rejects_original_error_and_other_unsafe_quoted_identifiers (__main__.AndroidCiChecks.test_rejects_original_error_and_other_unsafe_quoted_identifiers) ... ok
+test_reports_source_line_after_comments (__main__.AndroidCiChecks.test_reports_source_line_after_comments) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.361s
+
+OK
+DEX-safe Kotlin identifier check passed: 175 Android-bound files; JVM-only tests excluded.
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+OK
+Language registry OK: 7 languages, 778 keys each; English fallback, tokens, labels and selectors agree.
+Repository text is valid UTF-8/NFC; 922 text files and 7 localization tables passed.

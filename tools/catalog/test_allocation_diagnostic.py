@@ -89,9 +89,9 @@ class SyntheticCase(unittest.TestCase):
             db_path.unlink()
         with sqlite3.connect(db_path) as db:
             db.executescript(selection.SCHEMA)
-            db.execute("INSERT INTO candidate VALUES(?,?,?,?,?,?,?,?,?)", (
+            db.execute("INSERT INTO candidate VALUES(?,?,?,?,?,?,?,?,?,?)", (
                 "synthetic-pair-marker", "everyday", "en", "es", "marker",
-                "Synthetic pair marker.", "Synthetic translation.", "[]", None))
+                "Synthetic pair marker.", "Synthetic translation.", "[]", None, "marker"))
         db.close()
         args = selection.parser().parse_args([
             "--candidates", str(self.root / "unused-synthetic-input.jsonl"),
@@ -195,7 +195,7 @@ class ScopedStagingTests(SyntheticCase):
             full_ranks = selection.build_ranks(full, "everyday", "en")
             selection.build_context_analysis(full, "everyday", "en", full_ranks, 0, canonical_unique=True)
             selection.build_context_analysis(subset, "everyday", "en", ranks, 0, canonical_unique=True)
-            query = "SELECT * FROM context_analysis WHERE context_key IN (SELECT context_key FROM candidate WHERE meaning_lang='es') ORDER BY context_key"
+            query = "SELECT * FROM context_analysis WHERE analysis_key IN (SELECT analysis_key FROM candidate WHERE meaning_lang='es') ORDER BY analysis_key"
             self.assertEqual(full.execute(query).fetchall(), subset.execute(query).fetchall())
             full_targets, full_stats = selection.pair_evidence(full, "everyday", "en", "es", None, 12, diverse=True)
             subset_targets, subset_stats = selection.pair_evidence(subset, "everyday", "en", "es", None, 12, diverse=True)
@@ -298,9 +298,9 @@ class FullEvidenceReferenceTests(SyntheticCase):
                 text = f"Fixture sentinel marker{index:02d} carries an entirely synthetic sentence."
                 context = evidence(ref, text)
                 context_key = selection._context_key("everyday", "en", text)
-                db.execute("INSERT INTO candidate VALUES(?,?,?,?,?,?,?,?,?)", (
+                db.execute("INSERT INTO candidate VALUES(?,?,?,?,?,?,?,?,?,?)", (
                     context["candidateId"], "everyday", "en", "es", context_key,
-                    text, context["meaning"], json.dumps(context["origins"]), None))
+                    text, context["meaning"], json.dumps(context["origins"]), None, context_key))
                 db.execute("INSERT INTO context VALUES(?,?,?,?)", ("everyday", "en", context_key, text))
                 db.execute("INSERT INTO context_analysis VALUES(?,?,?,?,?)", (
                     "everyday", "en", context_key, 10,
@@ -743,7 +743,7 @@ class MetadataGateTests(SyntheticCase):
 
         def duplicate_analysis(db, collection, lang, *_args, **_kwargs):
             choice = [61, "lanternword", selection.target_id("en", "lanternword"), "beginner"]
-            for (key,) in db.execute("SELECT context_key FROM context"):
+            for (key,) in db.execute("SELECT analysis_key FROM analysis_context"):
                 db.execute("INSERT INTO context_analysis VALUES(?,?,?,?,?)",
                            (collection, lang, key, 8, json.dumps([choice, choice])))
             db.commit()

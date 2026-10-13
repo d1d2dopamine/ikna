@@ -22,8 +22,11 @@ class AnalysisCacheTests(unittest.TestCase):
         self.db.executescript(selection.SCHEMA)
         self.collection, self.lang = "everyday", "en"
         for text in ("Straße STRASSE mountains beyond the valley.", "Walking beside beautiful rivers today."):
+            context_key = selection._context_key(self.collection, self.lang, text)
             self.db.execute("INSERT INTO context VALUES(?,?,?,?)", (self.collection, self.lang,
-                selection._context_key(self.collection, self.lang, text), text))
+                context_key, text))
+            self.db.execute("INSERT INTO analysis_context VALUES(?,?,?,?,?)", (self.collection, self.lang,
+                selection._analysis_key(self.collection, self.lang, text), context_key, text))
         self.db.commit()
         self.ranks = selection.build_ranks(self.db, self.collection, self.lang)
         self.calls = 0
@@ -43,7 +46,7 @@ class AnalysisCacheTests(unittest.TestCase):
         return cache.run_cached_analysis(self.db, compute=compute or self.compute, **self.options)
 
     def rows(self):
-        return self.db.execute("SELECT * FROM context_analysis ORDER BY collection,lang,context_key").fetchall()
+        return self.db.execute("SELECT * FROM context_analysis ORDER BY collection,lang,analysis_key").fetchall()
 
     def paths(self, diagnostic):
         root = Path(self.options["cache_dir"])
@@ -97,6 +100,7 @@ class AnalysisCacheTests(unittest.TestCase):
         class Guard:
             evidence = {"engine": "fixture", "version": "1", "dictionarySha256": "c" * 64}
         self.db.execute("UPDATE context SET lang='ja'")
+        self.db.execute("UPDATE analysis_context SET lang='ja'")
         self.db.commit()
         self.options.update(lang="ja", japanese_guard=Guard(), runtime_identity={"icuLibraries": {
             "main": "d" * 64, "uc": "e" * 64, "data": "f" * 64}})
@@ -160,6 +164,31 @@ class AnalysisCacheTests(unittest.TestCase):
         original = cache._file_sha
         with patch.object(cache, "_file_sha", side_effect=lambda path: "f" * 64 if str(path).endswith("selection_policy.py") else original(path)):
             self.assertEqual("miss", self.run_cache()[1]["status"])
+
+    def test_version_one_cache_is_not_reused_or_rewritten(self):
+        self.assertEqual(2, cache.CACHE_VERSION)
+        with patch.object(cache, "CACHE_VERSION", 1):
+            _, old = self.run_cache()
+        saved = [p.read_bytes() for p in self.paths(old)]
+        _, current = self.run_cache()
+        self.assertEqual("miss", current["status"])
+        self.assertNotEqual(old["key"], current["key"])
+        self.assertEqual(saved, [p.read_bytes() for p in self.paths(old)])
+
+    def test_new_raw_variant_invalidates_even_with_unchanged_frequency_contexts_and_ranks(self):
+        _, first = self.run_cache()
+        original = self.db.execute("SELECT * FROM context ORDER BY context_key").fetchall()
+        text = "STRASSE Straße mountains beyond the valley."
+        key = selection._context_key(self.collection, self.lang, text)
+        self.db.execute("INSERT INTO analysis_context VALUES(?,?,?,?,?)", (self.collection, self.lang,
+            selection._analysis_key(self.collection, self.lang, text), key, text))
+        self.db.commit()
+        _, changed = self.run_cache()
+        self.assertEqual("miss", changed["status"])
+        self.assertNotEqual(first["key"], changed["key"])
+        self.assertEqual(3, changed["rows"])
+        self.assertEqual(original, self.db.execute("SELECT * FROM context ORDER BY context_key").fetchall())
+        self.assertEqual(self.ranks, selection.build_ranks(self.db, self.collection, self.lang))
 
     def test_corrupt_bytes_fail_without_mutation(self):
         _, diagnostic = self.run_cache()
@@ -236,7 +265,7 @@ class AnalysisCacheTests(unittest.TestCase):
         self.db.execute("UPDATE context_analysis SET token_count=999")
         self.db.commit()
         second_key = self.rows()[1][2]
-        self.db.execute(f"CREATE TRIGGER fail_restore BEFORE INSERT ON context_analysis WHEN NEW.context_key='{second_key}' BEGIN SELECT RAISE(ABORT,'fixture restore failure'); END")
+        self.db.execute(f"CREATE TRIGGER fail_restore BEFORE INSERT ON context_analysis WHEN NEW.analysis_key='{second_key}' BEGIN SELECT RAISE(ABORT,'fixture restore failure'); END")
         with patch.object(cache, "BATCH_SIZE", 1):
             self.assert_unchanged_failure(diagnostic)
         self.assertEqual("off", self.db.execute("PRAGMA journal_mode").fetchone()[0])
@@ -286,6 +315,7 @@ class AnalysisCacheTests(unittest.TestCase):
 
     def test_empty_context_scope_preserves_empty_counts(self):
         self.db.execute("DELETE FROM context")
+        self.db.execute("DELETE FROM analysis_context")
         self.db.commit()
         self.assertEqual({}, self.run_cache()[0])
         counts, diagnostic = self.run_cache()

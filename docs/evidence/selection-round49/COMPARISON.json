@@ -1,0 +1,14 @@
+{
+  "scope": "saved 188 directed records only",
+  "beforeSourceArchiveSha256": "a6d0da18f7424730fe39b82bc77ebf52a31e8aa6f4d12cd199f9e63227caa249",
+  "historicalCountersMatched": true,
+  "beforeAfterReplayEqual": true,
+  "beforeAfterSelectedAssignmentsByteIdentical": true,
+  "selectedAssignmentSha256": "b6249a463934844919c313f8c0268a2f18cabac28ae239dcf6e3415330ea47d1",
+  "historicalFullAssignmentsAvailable": false,
+  "selectedMembershipsBeforeOmission": 255,
+  "includedMemberships": 193,
+  "retainedContextOccurrencesBeforeOmission": 276,
+  "admittedCardDelta": 0,
+  "fullPoolImpactMeasured": false
+}

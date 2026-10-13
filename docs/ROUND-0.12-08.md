@@ -51,7 +51,7 @@ does not replace the prior successful staging result.
 Selection inherits the pool's scope/function-word sieve, includes every planned
 directed pair/level (zero-source omissions too), and records input/pipeline and
 environment identities. Existing defaults are unchanged: 8,000 safety budget,
-40 minimum, 1,000 thin threshold, three contexts per target. No filling, target
+40 minimum, 1,000 thin threshold, up to three contexts per target. No filling, target
 identity change, runtime sentence synthesis or learner-data mutation.
 
 The review JSONL/Markdown keeps at most ten policy-ranked targets per publishable

@@ -1,0 +1,72 @@
+{
+  "official_download_page": "https://developer.android.com/studio",
+  "terms": "https://developer.android.com/studio/terms",
+  "accepted_license": "android-sdk-license",
+  "accepted_date_utc": "2026-10-12",
+  "command_line_tools_archive": "commandlinetools-linux-15859902_latest.zip",
+  "command_line_tools_sha256": "4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583",
+  "sha256_matches_official_page": true,
+  "packages": [
+    {
+      "path": "platform-tools",
+      "properties": {
+        "Pkg.UserSrc": "false",
+        "Pkg.Revision": "37.0.1"
+      }
+    },
+    {
+      "path": "platforms/android-35",
+      "properties": {
+        "Pkg.Desc": "Android SDK Platform 15",
+        "Pkg.UserSrc": "false",
+        "Platform.Version": "15",
+        "Platform.CodeName": "",
+        "Pkg.Revision": "2",
+        "AndroidVersion.ApiLevel": "35",
+        "AndroidVersion.ExtensionLevel": "13",
+        "AndroidVersion.IsBaseSdk": "true",
+        "Layoutlib.Api": "15",
+        "Layoutlib.Revision": "1",
+        "Platform.MinToolsRev": "22"
+      }
+    },
+    {
+      "path": "build-tools/35.0.0",
+      "properties": {
+        "Pkg.UserSrc": "false",
+        "Pkg.Revision": "35.0.0",
+        "#Pkg.Revision": "35.0.0 rc4"
+      }
+    },
+    {
+      "path": "build-tools/34.0.0",
+      "properties": {
+        "Pkg.UserSrc": "false",
+        "Pkg.Revision": "34.0.0",
+        "#Pkg.Revision": "34.0.0 rc3"
+      }
+    },
+    {
+      "path": "cmdline-tools/15859902",
+      "properties": {
+        "Pkg.Revision": "22.0",
+        "Pkg.Path": "cmdline-tools;22.0",
+        "Pkg.Desc": "Android SDK Command-line Tools"
+      }
+    }
+  ],
+  "sherpa_version": "1.10.46",
+  "sherpa_official_release": "https://github.com/k2-fsa/sherpa-onnx/releases/tag/v1.10.46",
+  "sherpa_download_sha256": "4008c4ec831ea9c34499eba9f633853ad2107ea70a19db7d6c3063e0af0f24cb",
+  "sherpa_upstream_checksum_pin": false,
+  "starter_existing_pin_verified": true,
+  "starter_sha256": "70a84018057208aae631ce00f16b4c1d7be009660a9b75fee39dfa167530f8f7",
+  "emulator": {
+    "version": "37.2.12",
+    "build_id": "16428233",
+    "image": "system-images;android-35;default;x86_64",
+    "image_revision": 2,
+    "acceleration_check": "exit3: CPU lacks vmx/svm; /dev/kvm absent",
+    "device_execution": "not yet attempted"
+  }
+}

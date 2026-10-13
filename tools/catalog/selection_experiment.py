@@ -86,6 +86,11 @@ def _context_key(collection: str, lang: str, context: str) -> str:
     return hashlib.sha256((collection+"\0"+lang+"\0"+text).encode("utf-8")).hexdigest()
 
 
+def _analysis_key(collection: str, lang: str, context: str) -> str:
+    """Exact source identity; never normalize text used for token boundaries."""
+    return hashlib.sha256((collection+"\0"+lang+"\0"+context).encode("utf-8")).hexdigest()
+
+
 SCHEMA = """
 PRAGMA journal_mode=OFF;
 PRAGMA synchronous=OFF;
@@ -95,15 +100,20 @@ PRAGMA cache_size=-262144;
 PRAGMA mmap_size=268435456;
 CREATE TABLE candidate(
  id TEXT PRIMARY KEY, collection TEXT, lang TEXT, meaning_lang TEXT,
- context_key TEXT, context TEXT, meaning TEXT, origins_json TEXT, max_alignment REAL
+ context_key TEXT, context TEXT, meaning TEXT, origins_json TEXT, max_alignment REAL,
+ analysis_key TEXT
 );
 CREATE TABLE context(
  collection TEXT, lang TEXT, context_key TEXT, context TEXT,
  PRIMARY KEY(collection,lang,context_key)
 );
+CREATE TABLE analysis_context(
+ collection TEXT, lang TEXT, analysis_key TEXT, context_key TEXT, context TEXT,
+ PRIMARY KEY(collection,lang,analysis_key)
+);
 CREATE TABLE context_analysis(
- collection TEXT, lang TEXT, context_key TEXT, token_count INTEGER, choices_json TEXT,
- PRIMARY KEY(collection,lang,context_key)
+ collection TEXT, lang TEXT, analysis_key TEXT, token_count INTEGER, choices_json TEXT,
+ PRIMARY KEY(collection,lang,analysis_key)
 );
 """
 
@@ -112,17 +122,21 @@ CREATE INDEX candidate_pair ON candidate(collection,lang,meaning_lang,id);
 """
 
 
-def _flush_stage(db: sqlite3.Connection, candidates: list[tuple], contexts: list[tuple]) -> None:
+def _flush_stage(db: sqlite3.Connection, candidates: list[tuple], contexts: list[tuple],
+                 analysis_contexts: list[tuple]) -> None:
     if candidates:
         db.executemany(
-            "INSERT OR IGNORE INTO candidate VALUES(?,?,?,?,?,?,?,?,?)", candidates
+            "INSERT OR IGNORE INTO candidate VALUES(?,?,?,?,?,?,?,?,?,?)", candidates
         )
     if contexts:
         db.executemany(
             "INSERT OR IGNORE INTO context VALUES(?,?,?,?)", contexts
         )
+    if analysis_contexts:
+        db.executemany("INSERT OR IGNORE INTO analysis_context VALUES(?,?,?,?,?)", analysis_contexts)
     candidates.clear()
     contexts.clear()
+    analysis_contexts.clear()
 
 
 def stage(paths: Iterable[str], db_path: str, batch_size: int = 50000) -> dict[str, int]:
@@ -137,6 +151,7 @@ def stage(paths: Iterable[str], db_path: str, batch_size: int = 50000) -> dict[s
     stats = Counter()
     candidate_batch: list[tuple] = []
     context_batch: list[tuple] = []
+    analysis_batch: list[tuple] = []
     try:
         db.executescript(SCHEMA)
         for source in paths:
@@ -154,16 +169,19 @@ def stage(paths: Iterable[str], db_path: str, batch_size: int = 50000) -> dict[s
                     origins=[origin.to_dict() for origin in record.origins]
                     scores=[origin.alignment_score for origin in record.origins if origin.alignment_score is not None]
                     ckey=_context_key(record.collection,record.lang,record.context)
+                    akey=_analysis_key(record.collection,record.lang,record.context)
                     candidate_batch.append((
                         record.id,record.collection,record.lang,record.meaning_lang,ckey,
                         record.context,record.meaning,
                         json.dumps(origins,ensure_ascii=False,separators=(",", ":")),
                         max(scores) if scores else None,
+                        akey,
                     ))
                     context_batch.append((record.collection,record.lang,ckey,record.context))
+                    analysis_batch.append((record.collection,record.lang,akey,ckey,record.context))
                     if len(candidate_batch) >= batch_size:
-                        _flush_stage(db,candidate_batch,context_batch)
-        _flush_stage(db,candidate_batch,context_batch)
+                        _flush_stage(db,candidate_batch,context_batch,analysis_batch)
+        _flush_stage(db,candidate_batch,context_batch,analysis_batch)
         db.commit()
         # Building the pair index after the bulk load is materially faster than
         # maintaining it for every one of millions of inserts. The primary-key
@@ -191,43 +209,63 @@ def build_context_analysis(
     japanese_guard: JapaneseBoundaryGuard | None = None,
     canonical_unique: bool = False,
 ) -> dict:
-    # A context is shared by many meaning languages (especially MASSIVE).  The
-    # historical experiment tokenised and ranked that same sentence once per
-    # directed pair.  Precompute target choices once per exact context instead;
-    # this changes no selection semantics, only the amount of repeated work.
+    # Keep historical frequency-context identity separate from exact source
+    # analysis. Casefolding can change word boundaries (e.g. dotted capital I).
+    # Exact raw text is still analyzed only once across meaning languages.
     existing=db.execute(
         "SELECT COUNT(*) FROM context_analysis WHERE collection=? AND lang=?",
         (collection,lang),
     ).fetchone()[0]
     expected=db.execute(
-        "SELECT COUNT(*) FROM context WHERE collection=? AND lang=?",
+        "SELECT COUNT(*) FROM analysis_context WHERE collection=? AND lang=?",
         (collection,lang),
     ).fetchone()[0]
     if existing == expected and expected:
         return {}
     db.execute("DELETE FROM context_analysis WHERE collection=? AND lang=?",(collection,lang))
     batch=[]; quality_counts=Counter(); checked = 0
-    for context_key,text in db.execute(
-        "SELECT context_key,context FROM context WHERE collection=? AND lang=? ORDER BY context_key",
-        (collection,lang),
-    ):
+
+    def analyze(text, key):
         token_count=len(core.words(text,lang))
         choices=phrase_choices(text,ranks,lang,function_top)
+        counts=Counter()
         try:
             if canonical_unique:
                 choices, rejected, _ = filter_unique_choices(text, choices, lang)
-                quality_counts.update(rejected)
+                counts.update(rejected)
             if lang == "ja" and japanese_guard is not None:
                 choices, rejected, _ = japanese_guard.filter(text, choices)
-                quality_counts.update(rejected)
-                quality_counts["jaContextsChecked"] += 1
+                counts.update(rejected)
+                counts["jaContextsChecked"] += 1
         except ValueError as exc:
-            raise ValueError(f"Context analysis failed: collection={collection} lang={lang} key={context_key} text={text[:512]!r}: {exc}") from exc
+            raise ValueError(f"Context analysis failed: collection={collection} lang={lang} key={key} text={text[:512]!r}: {exc}") from exc
+        return token_count, choices, counts
+
+    representative_key = None
+    representative = None
+    for analysis_key,context_key,text,representative_text in db.execute(
+        "SELECT s.analysis_key,s.context_key,s.context,c.context FROM analysis_context s JOIN context c "
+        "ON c.collection=s.collection AND c.lang=s.lang AND c.context_key=s.context_key "
+        "WHERE s.collection=? AND s.lang=? ORDER BY s.context_key,s.analysis_key", (collection,lang),
+    ):
+        if context_key != representative_key:
+            representative_key = context_key
+            representative = analyze(representative_text, context_key)
+        token_count, choices, counts = (representative if text == representative_text
+                                        else analyze(text, analysis_key))
+        # Preserve historical presentation surfaces for harmless variants only
+        # after checking the actual source under every existing boundary gate.
+        # Raw offsets are never copied; downstream resolves the original token.
+        if (token_count == representative[0] and
+                [(c[0], c[2], c[3]) for c in choices] ==
+                [(c[0], c[2], c[3]) for c in representative[1]]):
+            choices = representative[1]
+        quality_counts.update(counts)
         checked += 1
         if checked % 25000 == 0:
             print(f"Selection: analyzed {collection}/{lang} {checked}/{expected} contexts", file=sys.stderr, flush=True)
         batch.append((
-            collection,lang,context_key,token_count,
+            collection,lang,analysis_key,token_count,
             json.dumps(choices,ensure_ascii=False,separators=(",", ":")),
         ))
         if len(batch) >= batch_size:
@@ -235,6 +273,8 @@ def build_context_analysis(
             batch.clear()
     if batch:
         db.executemany("INSERT INTO context_analysis VALUES(?,?,?,?,?)",batch)
+    if checked != expected:
+        raise ValueError("Exact source analysis is missing a frequency-context representative")
     db.commit()
     return dict(quality_counts)
 
@@ -263,7 +303,7 @@ def pair_evidence(db: sqlite3.Connection, collection: str, lang: str, meaning_la
     rows=db.execute(
         "SELECT c.id,c.context,c.meaning,c.origins_json,c.max_alignment,a.token_count,a.choices_json "
         "FROM candidate c JOIN context_analysis a "
-        "ON a.collection=c.collection AND a.lang=c.lang AND a.context_key=c.context_key "
+        "ON a.collection=c.collection AND a.lang=c.lang AND a.analysis_key=c.analysis_key "
         "WHERE c.collection=? AND c.lang=? AND c.meaning_lang=? ORDER BY c.id",
         (collection,lang,meaning_lang),
     )

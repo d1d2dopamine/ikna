@@ -27,7 +27,7 @@ class MobileDeckUiContractTest {
     }
 
     @Test
-    fun `shared row restores the compact mark and bounds every line to it`() {
+    fun `shared row preserves the compact mark while text and touch targets can grow`() {
         val android = androidSource("DecksScreen.kt")
         val shared = sharedSource("DeckList.kt")
 
@@ -37,18 +37,24 @@ class MobileDeckUiContractTest {
         for (required in listOf(
             "private val DECK_ROW_HEIGHT = 52.dp",
             "private val DECK_MARK_SIZE = 52.dp",
-            "private val DECK_INFO_HEIGHT = 34.dp",
+            "private val DECK_INFO_HEIGHT = 48.dp",
             "private val DECK_PROGRESS_HEIGHT = 14.dp",
-            ".height(DECK_ROW_HEIGHT)\n            .hoverable(interaction)\n            .clipToBounds()\n            .iknaSignalFrame(\n                interaction,\n                cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp),\n                placement = SignalFramePlacement.Outer\n            )\n            .clickable(interactionSource = interaction, indication = null, onClick = onOpen)",
-            "modifier = Modifier.weight(1f).fillMaxHeight()",
-            "modifier = Modifier.height(DECK_INFO_HEIGHT)",
+            ".heightIn(min = DECK_ROW_HEIGHT)\n            .hoverable(interaction)\n            .clipToBounds()\n            .iknaSignalFrame(\n                interaction,\n                cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp),\n                placement = SignalFramePlacement.Outer\n            )\n            .clickable(interactionSource = interaction, indication = null, onClick = onOpen)",
+            "Column(modifier = Modifier.weight(1f))",
+            "modifier = Modifier.heightIn(min = DECK_INFO_HEIGHT)",
             "verticalArrangement = Arrangement.SpaceBetween",
             "Spacer(Modifier.height(Space.xs))\n                IknaDeckProgress(",
-            "modifier = Modifier.height(DECK_PROGRESS_HEIGHT)"
+            "modifier = Modifier.heightIn(min = DECK_PROGRESS_HEIGHT)"
         )) assertTrue(required, shared.contains(required))
 
         val row = shared.substringAfter("fun IknaDeckRow(")
             .substringBefore("/** Makes the long-term bar")
+        // The visual mark stays compact; text and 48dp actions must not be clipped
+        // back into a fixed-height information row at larger font scales.
+        assertFalse(row.contains(".height(DECK_ROW_HEIGHT)"))
+        assertFalse(row.contains(".height(DECK_INFO_HEIGHT)"))
+        assertFalse(row.contains(".fillMaxHeight()"))
+        assertTrue(row.split("size = 48.dp,").size == 3)
         assertFalse(row.contains("68.dp"))
         assertTrue(row.contains("style = MaterialTheme.typography.labelSmall"))
         assertTrue(row.split("overflow = TextOverflow.Ellipsis").size >= 2)
