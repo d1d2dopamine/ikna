@@ -4,6 +4,8 @@ import dev.ikna.data.db.ChunkDao
 import dev.ikna.data.db.ComponentDao
 import dev.ikna.data.db.ComponentEntity
 import dev.ikna.data.db.ReviewDao
+import dev.ikna.data.db.IknaDatabase
+import dev.ikna.data.db.inTransaction
 import dev.ikna.domain.governor.ComponentKey
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -24,7 +26,8 @@ import kotlin.math.pow
 class ComponentRepository(
     private val componentDao: ComponentDao,
     private val chunkDao: ChunkDao,
-    private val reviewDao: ReviewDao
+    private val reviewDao: ReviewDao,
+    private val db: IknaDatabase? = null
 ) {
 
     suspend fun componentsFor(lemmas: List<String>): Map<ComponentKey, ComponentEntity> =
@@ -98,16 +101,37 @@ class ComponentRepository(
      *    thousands of round trips through SQLite for a table that fits in
      *    memory, and it runs at the end of every restore.
      */
-    suspend fun rebuildFromReviews(checkActive: () -> Unit = {}) {
+    var historyBoundary: (() -> Long?)? = null
+
+    suspend fun rebuildFromReviews(orderedAnswers: List<dev.ikna.data.db.ReviewEntity>? = null, checkActive: () -> Unit = {}) {
+        val caller = currentCoroutineContext()
+        val check = { caller.ensureActive(); checkActive() }
+        if (db != null) db.inTransaction { rebuildBody(orderedAnswers, check) }
+        else rebuildBody(orderedAnswers, check)
+    }
+
+    private suspend fun rebuildBody(orderedAnswers: List<dev.ikna.data.db.ReviewEntity>?, checkActive: () -> Unit) {
         val caller = currentCoroutineContext()
         fun checkCancellation() {
             caller.ensureActive()
             checkActive() // Restore supplies the context captured outside Room.
         }
         checkCancellation()
+        val configuredBoundary = if (orderedAnswers == null) historyBoundary?.invoke() else null
+        val activeBoundary = if (orderedAnswers == null) db?.historyBoundaryDao()?.current()?.afterLocalId ?: configuredBoundary else null
+        val cutoff = activeBoundary ?: 0L
         componentDao.clear()
         checkCancellation()
-        val answers = reviewDao.allAnswers()
+        val answers = orderedAnswers ?: reviewDao.allAnswers().filter { it.id > cutoff }.let { rows ->
+            if (activeBoundary == null) rows else {
+                val journal = reviewDao.all().filter { it.id > cutoff }
+                val stable = dev.ikna.data.export.JournalIdentity.normalize(journal.map {
+                    dev.ikna.data.export.ReviewRecord.of(it)
+                })
+                val identities = journal.zip(stable).associate { it.first.id to it.second.eventId!! }
+                rows.sortedWith(compareBy<dev.ikna.data.db.ReviewEntity> { it.ts }.thenBy { identities[it.id] })
+            }
+        }
         if (answers.isEmpty()) return
 
         // Eager, not a Sequence, and that is load-bearing rather than a style

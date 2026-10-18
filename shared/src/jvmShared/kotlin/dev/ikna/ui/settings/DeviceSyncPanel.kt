@@ -1,0 +1,226 @@
+package dev.ikna.ui.settings
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import dev.ikna.ui.text.S
+import dev.ikna.ui.theme.IknaTextButton
+import dev.ikna.ui.theme.IknaTextField
+import dev.ikna.ui.theme.IknaWideButton
+
+/** Transport-independent presentation states; never display raw transport exceptions. */
+enum class DeviceSyncStatus { OFF, UNPAIRED, WAITING, CONNECTING, SYNCING, UP_TO_DATE, ERROR }
+enum class DeviceSyncError { NETWORK, INVALID_INVITATION, EXPIRED_INVITATION, UNTRUSTED_DEVICE, MERGE_FAILED, UNAVAILABLE, HISTORY_MISMATCH, CONTENT_MISSING, ADOPTION, PROFILE_TOO_LARGE, INCOMPATIBLE_PROTOCOL, JOURNAL_ITEM_TOO_LARGE, JOURNAL_RECONCILIATION }
+
+data class DeviceSyncPeerUiState(
+    val id: String, val fingerprint: String, val address: String,
+    val lastSuccessText: String? = null, val error: String? = null,
+) {
+    override fun toString(): String = "DeviceSyncPeerUiState(device=<redacted>)"
+}
+
+data class DeviceSyncUiState(
+    val enabled: Boolean = false,
+    val paired: Boolean = false,
+    val peers: List<DeviceSyncPeerUiState> = emptyList(),
+    val status: DeviceSyncStatus = DeviceSyncStatus.OFF,
+    val localAddresses: List<String> = emptyList(),
+    val invitation: String? = null,
+    val lastSuccessText: String? = null,
+    val error: DeviceSyncError? = null,
+    val blockedAfterReset: Boolean = false,
+    val canStartNewHistory: Boolean = false,
+    val busy: Boolean = false
+) {
+    // Invitations contain pairing credentials. Do not accidentally include them in logs.
+    override fun toString(): String = "DeviceSyncUiState(enabled=$enabled, paired=$paired, status=$status, error=$error, blockedAfterReset=$blockedAfterReset, busy=$busy)"
+}
+
+/**
+ * This panel never starts network work during composition and never writes the clipboard.
+ * The controller must independently enforce consent, expiry, trust and reset boundaries.
+ * Invitation and consent inputs deliberately do not survive navigation/process recreation.
+ */
+@Composable
+fun DeviceSyncPanel(
+    state: DeviceSyncUiState,
+    onEnabledChange: (Boolean) -> Unit,
+    onCreateInvitation: (String) -> Unit,
+    onPair: (String) -> Unit,
+    onRevoke: () -> Unit,
+    onRevokePeer: (String) -> Unit,
+    onStartNewHistory: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var revokeId by remember(state.peers.map { it.id }) { mutableStateOf<String?>(null) }
+    var pasted by remember(state.enabled, state.paired, state.blockedAfterReset) { mutableStateOf("") }
+    var consent by remember(state.enabled, state.paired, state.blockedAfterReset) { mutableStateOf(false) }
+    var confirmNewHistory by remember(state.blockedAfterReset, state.canStartNewHistory) { mutableStateOf(false) }
+    var address by remember(state.localAddresses) { mutableStateOf(state.localAddresses.firstOrNull().orEmpty()) }
+    val canPair = state.enabled && !state.paired && !state.blockedAfterReset && !state.busy && consent
+    val pair = {
+        if (canPair && pasted.isNotBlank()) {
+            val invitation = pasted.trim()
+            pasted = ""
+            consent = false
+            onPair(invitation)
+        }
+    }
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        IknaSettingsToggleRow(
+            title = S.t("sync.enabled"),
+            subtitle = S.t("sync.scope"),
+            checked = state.enabled,
+            enabled = !state.blockedAfterReset,
+            onCheckedChange = onEnabledChange
+        )
+        Text(
+            text = S.t(when (state.status) {
+                DeviceSyncStatus.OFF -> "sync.status.off"
+                DeviceSyncStatus.UNPAIRED -> "sync.status.unpaired"
+                DeviceSyncStatus.WAITING -> "sync.status.waiting"
+                DeviceSyncStatus.CONNECTING -> "sync.status.connecting"
+                DeviceSyncStatus.SYNCING -> "sync.status.syncing"
+                DeviceSyncStatus.UP_TO_DATE -> "sync.status.current"
+                DeviceSyncStatus.ERROR -> "sync.status.error"
+            }),
+            style = MaterialTheme.typography.bodyMedium
+        )
+        state.lastSuccessText?.let {
+            Text(S.t("sync.last_success").replace("{time}", it), style = MaterialTheme.typography.bodySmall)
+        }
+        state.error?.let {
+            Text(
+                text = S.t(when (it) {
+                    DeviceSyncError.NETWORK -> "sync.error.network"
+                    DeviceSyncError.INVALID_INVITATION -> "sync.error.invalid"
+                    DeviceSyncError.EXPIRED_INVITATION -> "sync.error.expired"
+                    DeviceSyncError.UNTRUSTED_DEVICE -> "sync.error.trust"
+                    DeviceSyncError.MERGE_FAILED -> "sync.error.merge"
+                    DeviceSyncError.UNAVAILABLE -> "sync.error.unavailable"
+                    DeviceSyncError.HISTORY_MISMATCH -> "sync.error.history_mismatch"
+                    DeviceSyncError.CONTENT_MISSING -> "sync.error.content_missing"
+                    DeviceSyncError.ADOPTION -> "sync.error.adoption"
+                    DeviceSyncError.PROFILE_TOO_LARGE -> "sync.error.profile_too_large"
+                    DeviceSyncError.INCOMPATIBLE_PROTOCOL -> "sync.error.protocol"
+                    DeviceSyncError.JOURNAL_ITEM_TOO_LARGE -> "sync.error.journal_item_too_large"
+                    DeviceSyncError.JOURNAL_RECONCILIATION -> "sync.error.journal_reconciliation"
+                }),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+        if (state.blockedAfterReset) {
+            Text(S.t("sync.reset_blocked"), style = MaterialTheme.typography.bodySmall)
+            if (!state.canStartNewHistory) {
+                Text(S.t("sync.reset_required"), style = MaterialTheme.typography.bodySmall)
+            }
+            IknaSettingsToggleRow(
+                title = S.t("sync.new_history_confirm"),
+                subtitle = S.t("sync.new_history_scope"),
+                checked = confirmNewHistory,
+                enabled = state.canStartNewHistory && !state.busy,
+                onCheckedChange = { confirmNewHistory = it }
+            )
+            IknaWideButton(
+                label = S.t("sync.new_history"),
+                enabled = state.canStartNewHistory && confirmNewHistory && !state.busy,
+                onClick = {
+                    if (state.canStartNewHistory && confirmNewHistory && !state.busy) {
+                        confirmNewHistory = false
+                        onStartNewHistory()
+                    }
+                }
+            )
+        } else if (state.enabled && !state.paired) {
+            IknaSettingsToggleRow(
+                title = S.t("sync.consent"),
+                subtitle = S.t("sync.merge_scope"),
+                checked = consent,
+                enabled = !state.busy,
+                onCheckedChange = { consent = it }
+            )
+            if (state.localAddresses.size > 1) {
+                Text(S.t("sync.address"), style = MaterialTheme.typography.bodySmall)
+                state.localAddresses.forEach { candidate ->
+                    IknaSettingsToggleRow(
+                        title = candidate,
+                        subtitle = null,
+                        checked = address == candidate,
+                        enabled = !state.busy,
+                        onCheckedChange = { if (it) address = candidate }
+                    )
+                }
+            }
+            IknaWideButton(
+                label = S.t("sync.create"),
+                enabled = canPair && address.isNotBlank(),
+                onClick = { if (canPair && address.isNotBlank()) onCreateInvitation(address) }
+            )
+            state.invitation?.takeIf { it.isNotBlank() }?.let { invitation ->
+                Text(S.t("sync.invitation_private"), style = MaterialTheme.typography.bodySmall)
+                SelectionContainer {
+                    Text(invitation, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+            IknaTextField(
+                value = pasted,
+                onValueChange = { pasted = it },
+                placeholder = S.t("sync.paste"),
+                onSearch = pair,
+                modifier = Modifier.fillMaxWidth(),
+                maxLength = 4096
+            )
+            IknaWideButton(
+                label = S.t("sync.pair"),
+                enabled = canPair && pasted.isNotBlank(),
+                onClick = pair
+            )
+        }
+        if (state.peers.isNotEmpty()) {
+            Text(S.t("sync.devices"), style = MaterialTheme.typography.titleSmall)
+            Text(S.t("sync.devices_scope"), style = MaterialTheme.typography.bodySmall)
+            state.peers.forEach { peer ->
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    SelectionContainer {
+                        Text(S.t("sync.device_fingerprint").replace("{fingerprint}", peer.fingerprint),
+                            style = MaterialTheme.typography.bodySmall)
+                    }
+                    Text(S.t("sync.device_address").replace("{address}", peer.address), style = MaterialTheme.typography.bodySmall)
+                    Text(peer.lastSuccessText?.let { S.t("sync.device_success").replace("{time}", it) }
+                        ?: S.t("sync.device_no_exchange"), style = MaterialTheme.typography.bodySmall)
+                    if (peer.error != null) Text(S.t("sync.device_error"),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                    IknaSettingsToggleRow(
+                        title = S.t("sync.device_revoke_confirm"),
+                        subtitle = S.t("sync.device_revoke_scope"),
+                        checked = revokeId == peer.id,
+                        enabled = !state.busy,
+                        onCheckedChange = { revokeId = if (it) peer.id else null }
+                    )
+                    IknaWideButton(label = S.t("sync.device_revoke"),
+                        enabled = revokeId == peer.id && !state.busy,
+                        onClick = {
+                            if (revokeId == peer.id && !state.busy) {
+                                revokeId = null
+                                onRevokePeer(peer.id)
+                            }
+                        })
+                }
+            }
+        }
+        if (state.paired || state.invitation != null || state.blockedAfterReset) {
+            IknaTextButton(label = S.t("sync.revoke"), onClick = onRevoke)
+        }
+    }
+}

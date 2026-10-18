@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.IncrementalJournalRepositoryTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-17T21:53:26" hostname="d0d72dd907ef" time="1.522">
+  <properties/>
+  <testcase name="wrong stream cursor direction content boundary and absent index fail closed" classname="dev.ikna.desktop.IncrementalJournalRepositoryTest" time="0.049"/>
+  <testcase name="indexed replay equals full normalization with same-time legacy undo and unindexed modern rows" classname="dev.ikna.desktop.IncrementalJournalRepositoryTest" time="0.049"/>
+  <testcase name="consent maps legacy and undo without rewriting history and survives reopen" classname="dev.ikna.desktop.IncrementalJournalRepositoryTest" time="0.032"/>
+  <testcase name="checked duration includes committed unindexed local rows and rejected page does not advance" classname="dev.ikna.desktop.IncrementalJournalRepositoryTest" time="0.026"/>
+  <testcase name="crafted known-only inventory stops cumulative resolution before retaining an oversized page" classname="dev.ikna.desktop.IncrementalJournalRepositoryTest" time="0.126"/>
+  <testcase name="external restore and full wipe invalidate stream without reusing consent" classname="dev.ikna.desktop.IncrementalJournalRepositoryTest" time="0.024"/>
+  <testcase name="undo dependency digest is verified and both append and checkpoint are atomic" classname="dev.ikna.desktop.IncrementalJournalRepositoryTest" time="0.029"/>
+  <testcase name="unmapped legacy and oversized new record reject before entity materialization" classname="dev.ikna.desktop.IncrementalJournalRepositoryTest" time="0.018"/>
+  <testcase name="indexed raw identities and undo pointers cannot be masked by canonical mapping" classname="dev.ikna.desktop.IncrementalJournalRepositoryTest" time="0.028"/>
+  <testcase name="duplicate old pages acknowledge durable checkpoint without replay or journal scan" classname="dev.ikna.desktop.IncrementalJournalRepositoryTest" time="0.259"/>
+  <testcase name="bootstrap index and receipt failure roll back together" classname="dev.ikna.desktop.IncrementalJournalRepositoryTest" time="0.019"/>
+  <testcase name="fixed highwater bounded pages restart and later append preserve exact events" classname="dev.ikna.desktop.IncrementalJournalRepositoryTest" time="0.377"/>
+  <testcase name="content identity never queries reviews and postconsent oversized history remains pageable" classname="dev.ikna.desktop.IncrementalJournalRepositoryTest" time="0.455"/>
+  <testcase name="originating caller cancellation during append rolls back history index replay and checkpoint" classname="dev.ikna.desktop.IncrementalJournalRepositoryTest" time="0.031"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

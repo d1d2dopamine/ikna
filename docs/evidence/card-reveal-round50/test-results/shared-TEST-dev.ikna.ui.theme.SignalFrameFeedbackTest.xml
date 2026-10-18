@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.ui.theme.SignalFrameFeedbackTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:05:33" hostname="3b7663fd5f9d" time="0.001">
+  <properties/>
+  <testcase name="selectedNavigationPersistsWithoutHoverAndRespectsReducedMotion[desktop]" classname="dev.ikna.ui.theme.SignalFrameFeedbackTest" time="0.0"/>
+  <testcase name="mouseHoverSurvivesPressAndResumesMotionOnRelease[desktop]" classname="dev.ikna.ui.theme.SignalFrameFeedbackTest" time="0.0"/>
+  <testcase name="keyboardFocusIsVisibleAndStillInsideBorderlessControls[desktop]" classname="dev.ikna.ui.theme.SignalFrameFeedbackTest" time="0.001"/>
+  <testcase name="disablingAControlSuppressesStaleInteractionAndLocationState[desktop]" classname="dev.ikna.ui.theme.SignalFrameFeedbackTest" time="0.0"/>
+  <testcase name="reducedMotionKeepsTouchFeedbackAndStaticMouseAffordance[desktop]" classname="dev.ikna.ui.theme.SignalFrameFeedbackTest" time="0.0"/>
+  <testcase name="hostsWithTheirOwnPressedFillDoNotReceiveADuplicateWash[desktop]" classname="dev.ikna.ui.theme.SignalFrameFeedbackTest" time="0.0"/>
+  <testcase name="touchPressAndReleaseNeverCreateAPerimeterOrStartTheClock[desktop]" classname="dev.ikna.ui.theme.SignalFrameFeedbackTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.TitleBarClicksTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:08:42" hostname="3b7663fd5f9d" time="0.001">
+  <properties/>
+  <testcase name="movedFrameIsNotClick" classname="dev.ikna.desktop.TitleBarClicksTest" time="0.001"/>
+  <testcase name="doubleClick" classname="dev.ikna.desktop.TitleBarClicksTest" time="0.0"/>
+  <testcase name="secondaryAndLongPress" classname="dev.ikna.desktop.TitleBarClicksTest" time="0.0"/>
+  <testcase name="intervalAndDistance" classname="dev.ikna.desktop.TitleBarClicksTest" time="0.0"/>
+  <testcase name="dragIsNotClick" classname="dev.ikna.desktop.TitleBarClicksTest" time="0.0"/>
+  <testcase name="windowsOnly" classname="dev.ikna.desktop.TitleBarClicksTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

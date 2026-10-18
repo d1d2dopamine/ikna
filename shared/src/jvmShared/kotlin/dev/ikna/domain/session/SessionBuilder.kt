@@ -38,7 +38,9 @@ data class SessionPlan(
     val sessionTotal: Int = cards.size,
     /** How many of those are already answered. Drives the progress band. */
     val sessionDone: Int = 0,
-    val forcedByDeveloper: Boolean = false
+    val forcedByDeveloper: Boolean = false,
+    /** Ordinary answers eligible for the minimum; factual totals remain answeredToday. */
+    val goalAnswersToday: Int = answeredToday
 ) {
     /**
      * Monotonic by construction: the plan is fixed for the day and answers only

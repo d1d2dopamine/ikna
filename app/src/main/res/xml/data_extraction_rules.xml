@@ -5,13 +5,13 @@
 
     cloud-backup uploads to the user's Google account. The database is the
     review log: every phrase studied, every rating, every timestamp. PRIVACY.md
-    says that stays on the phone, so cloud-backup lists nothing but the
-    settings, and allowBackup is off in the manifest. The supported way to move it is the export, which the user
-    triggers and places themselves.
+    keeps this out of cloud backup, so only preferences are listed here and
+    allowBackup is off in the manifest. Explicit export and opt-in paired LAN
+    sync are separate user-controlled history transfer routes.
 
-    device-transfer is a direct copy to a new phone during setup, with no server
-    in between, so the database goes with it - that is a move, not a copy to a
-    stranger.
+    device-transfer can carry the database including its nonsecret history
+    boundary. Private pairing credentials in files/device-sync are not included;
+    a transferred reset database requires explicit local generation recovery.
 -->
 <data-extraction-rules>
     <cloud-backup>
@@ -26,6 +26,9 @@
     </cloud-backup>
     <device-transfer>
         <include domain="database" path="ikna.db" />
+        <!-- Database-only adopted slots, their SQLite sidecars and durable selector.
+             Pairing keys remain in files/device-sync and are NOT included. -->
+        <include domain="file" path="sync-profiles/" />
         <include domain="sharedpref" path="." />
     </device-transfer>
 </data-extraction-rules>

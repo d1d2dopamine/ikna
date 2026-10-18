@@ -1,0 +1,404 @@
+{
+  "observed_at_utc": "2026-10-17T22:26:02.003704+00:00",
+  "target": ":desktop:test",
+  "suites": [
+    {
+      "name": "dev.ikna.desktop.AnkiRestoreAtomicityTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.451,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.AtomicBackupFileTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.013,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.BundleComponentFailureTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.258,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.BundleRestoreFailureTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.014,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.BundleWriteSafetyTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.156,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.CardRevealPointerIntegrationTest",
+      "tests": 32,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 2,
+      "seconds": 6.47,
+      "skipped_cases": [
+        "secondaryMouseShortDragDoesNotRevealOrGrade[mouse=false]",
+        "secondaryMouseLongDragDoesNotRevealOrGrade[mouse=false]"
+      ]
+    },
+    {
+      "name": "dev.ikna.desktop.CatalogImportIntegrationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.131,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.DesktopRestartTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.004,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.DeveloperSandboxIntegrationTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.483,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.DeviceProfileAdoptionIntegrationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.459,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.DeviceSyncControllerIntegrationTest",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 47.769,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.DeviceSyncProcessIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 23.816,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.FirstStudyRouteTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.002,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.HotkeyRegressionTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.005,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.IncrementalJournalRepositoryTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.745,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.JournalSyncIntegrationTest",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.241,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.LearningSimulationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.654,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.LearningWriteAtomicityTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.315,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.PhoneBackupWriteSafetyTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.009,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.PreWipeDeckBackupTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.011,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.ProfileAdoptionIntegrationTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.105,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.ProfileRetainedDataWiperIntegrationTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.092,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.ProfileSlotMigrationIntegrationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.107,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.ProfileTransferIntegrationTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.215,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.ProfileTransferResourceSafetyTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.28,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.RestoreAtomicityTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 14.445,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.StudyStatsRepositoryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.018,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.TitleBarClicksTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.001,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.WindowBoundsEditsTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.008,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.WindowBoundsTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.001,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.WindowChromeRegressionTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.002,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.WindowFrameLayoutTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.012,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.desktop.WindowPlacementMemoryTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.001,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.domain.fsrs.FsrsOptimizerTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.373,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.domain.fsrs.FsrsTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.0,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.domain.fsrs.SchedulerDueDayTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.001,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.domain.grading.DerivedGradingTest",
+      "tests": 25,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.032,
+      "skipped_cases": []
+    },
+    {
+      "name": "dev.ikna.domain.optimizer.LocalOptimizerTest",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.1,
+      "skipped_cases": []
+    }
+  ],
+  "totals": {
+    "tests": 299,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2,
+    "passed": 297
+  },
+  "source_stable": true,
+  "compile_input_count": 454,
+  "aggregate_sha256": "4f842b954a89eebe8b8e63e1ccc9cdbd7c55ccf0f3638dec879145660482c285",
+  "prior_evidence": "Round54 full four targets and APK/distributable smoke remain unchanged-production evidence; they were not rerun in Round55.",
+  "xmlSha256": {
+    "TEST-dev.ikna.desktop.AnkiRestoreAtomicityTest.xml": "72c736873661534629ef7e6e3b3af3ab80242fd055efa4620b997881c7af0115",
+    "TEST-dev.ikna.desktop.AtomicBackupFileTest.xml": "decc60039efac89cb8f7f02b5bf8b9cf016a499d76a3f7a280343702bbbe3842",
+    "TEST-dev.ikna.desktop.BundleComponentFailureTest.xml": "6af054f5e5bf0f86ca1a90566912a158e8c6dcb347b6fcc3c45e4bb1bbd167d9",
+    "TEST-dev.ikna.desktop.BundleRestoreFailureTest.xml": "de51896f64c0def3051fbbb0cb2a4f5c1cf2a3e3fb0575a34d7c5476c4ed4392",
+    "TEST-dev.ikna.desktop.BundleWriteSafetyTest.xml": "290b92c833cbdfb33c423bd8834b3a25119ee9cba84e906ed8a4e187306e7756",
+    "TEST-dev.ikna.desktop.CardRevealPointerIntegrationTest.xml": "aff77b08ba38ddf1e0b92fcc14a646f927570a6c861eb06b5cba51b980a47d7b",
+    "TEST-dev.ikna.desktop.CatalogImportIntegrationTest.xml": "38ef38c6c96cef7e1468970e55a2557ef67175568149fe3b4b3d4111f9b7f4c1",
+    "TEST-dev.ikna.desktop.DesktopRestartTest.xml": "a97a0a1226c956bff4a88507d0d73519591e67c5da8c18462bbf6d5792d91aef",
+    "TEST-dev.ikna.desktop.DeveloperSandboxIntegrationTest.xml": "5a0db1e83b460762267b3e89f76571959d95d70324485e8205df44627daee70f",
+    "TEST-dev.ikna.desktop.DeviceProfileAdoptionIntegrationTest.xml": "c035e442cb78d08faf148fa3ab22e5821dc6ba802f32768b28ab788dc7473fa0",
+    "TEST-dev.ikna.desktop.DeviceSyncControllerIntegrationTest.xml": "17f49cc6092f6174ccccc3adfe05c94992544acac64d4afc3c64ecbabc0d84c9",
+    "TEST-dev.ikna.desktop.DeviceSyncProcessIntegrationTest.xml": "d34b54d029b8495554831f72a7b7938ced6bf83fb6fe3af53815d618c35adc14",
+    "TEST-dev.ikna.desktop.FirstStudyRouteTest.xml": "c86669aa17468685aebe83521c2cbeed4e1ff7fd0f339f3a287cbbae9eb0f1e8",
+    "TEST-dev.ikna.desktop.HotkeyRegressionTest.xml": "f359fd78fd7a9bd09d833fcbfabe5bddd21fab62e71609695a231a4bde366463",
+    "TEST-dev.ikna.desktop.IncrementalJournalRepositoryTest.xml": "ccced3fdb2f18461f3fd77131fb0b78547c9ba0f4d8a0f0927a182c93237ba44",
+    "TEST-dev.ikna.desktop.JournalSyncIntegrationTest.xml": "568fed1689f441a5d4371b77af9a9836b1df58728bcf993dc135f1d969207366",
+    "TEST-dev.ikna.desktop.LearningSimulationTest.xml": "d96d60f8af269a879dc81b4ac7f1774ca9c827a0496ef136f069f1d00568543f",
+    "TEST-dev.ikna.desktop.LearningWriteAtomicityTest.xml": "997f293037a5ed0eb7c39fba50c6fe151a50c660efeb4d87b21c1616d5b09aaf",
+    "TEST-dev.ikna.desktop.PhoneBackupWriteSafetyTest.xml": "604f8a70cd7654b2cd18b1069cf7db9ac219dba53fa1944ee305b9ba0266c7b7",
+    "TEST-dev.ikna.desktop.PreWipeDeckBackupTest.xml": "36c3be3d6f4c38a742a0da24ce1ecbc89505658ffa41901214011058ab4108e6",
+    "TEST-dev.ikna.desktop.ProfileAdoptionIntegrationTest.xml": "3500177763dac0aa492a94a9304baa440cedc6f99b95ffddfeb9769826651f2a",
+    "TEST-dev.ikna.desktop.ProfileRetainedDataWiperIntegrationTest.xml": "b98553390c98c42c45bf8615cb7153070c859af5d1458c0626c172d5bf537093",
+    "TEST-dev.ikna.desktop.ProfileSlotMigrationIntegrationTest.xml": "e231e21078237d529cea6775b7db6c60dfef4738caa0dad2c8089a0a3b516e4e",
+    "TEST-dev.ikna.desktop.ProfileTransferIntegrationTest.xml": "314895d020ff3045f52c33a771cd370b97db59ee477c7a3f3bc234b68c85f1a9",
+    "TEST-dev.ikna.desktop.ProfileTransferResourceSafetyTest.xml": "172638e3ac632c51a9b4d4b0e1987b99f4ada79e6cc88eb5ee51a535519f7285",
+    "TEST-dev.ikna.desktop.RestoreAtomicityTest.xml": "72b63eb9eb1773f6dd04f55dd94b0dc3cf49d540ba603113469e42a9a11a38a7",
+    "TEST-dev.ikna.desktop.StudyStatsRepositoryTest.xml": "6fe1d4e7786dc4a99407eccc1e20ee82fbe36a90be6012407550b59c88115458",
+    "TEST-dev.ikna.desktop.TitleBarClicksTest.xml": "ed0495772c47de83721fda03cc8c29f233f72741ea511979334fe8c2faad7d79",
+    "TEST-dev.ikna.desktop.WindowBoundsEditsTest.xml": "ba5eb61dd0cc93154f1999b3c26019ce5ab666537133d00f6f15de39dcf93264",
+    "TEST-dev.ikna.desktop.WindowBoundsTest.xml": "1df75452c423911c7316a8f509e52f05df11eff694581807c697beb4d1b7a7a5",
+    "TEST-dev.ikna.desktop.WindowChromeRegressionTest.xml": "63edd0fcc4429d496df86c21c0a1b7cbcc07618313dee485ef772328e9f26fa5",
+    "TEST-dev.ikna.desktop.WindowFrameLayoutTest.xml": "711aba7927ff9803af9392b0142a2f6bb652289db5c75eae6bbae8f215548241",
+    "TEST-dev.ikna.desktop.WindowPlacementMemoryTest.xml": "675f60e7d20ea31b824ceda9cdb57835a015a3fa30d31aad6a3341170ad6fbe3",
+    "TEST-dev.ikna.domain.fsrs.FsrsOptimizerTest.xml": "a15f45757bc9ae63cfd14988a482172791c75a16a6bf14b424dcc033b631557b",
+    "TEST-dev.ikna.domain.fsrs.FsrsTest.xml": "51c148575e4997b1abc6be6e0f3f846fa128af992de8fa3d68156b0c4dd79cab",
+    "TEST-dev.ikna.domain.fsrs.SchedulerDueDayTest.xml": "b560d30a82b7c57c41de468fb84847794e2883d9182a7985362796eaba835790",
+    "TEST-dev.ikna.domain.grading.DerivedGradingTest.xml": "e4b9eebdb31be3fd7569534d488bc5ac7fa2cdd441c65dbc90633cb00225f3e6",
+    "TEST-dev.ikna.domain.optimizer.LocalOptimizerTest.xml": "2d6b56e02c9b6ae17e9515843df6f5dd619cea95746a2896052245bcfb9a224d"
+  },
+  "logSha256": "9e96dc8898348d04f051b7a40dfd482d294967ddc9c4a11b9ac1df35d0659923",
+  "sourceManifestSha256": "0007b9db1a456ed1c306121394662247f0918c96a7a9b06ee9bac919618ac82b"
+}

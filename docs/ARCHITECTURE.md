@@ -69,8 +69,9 @@ which is what makes it safe to change the component model later.
    recorded.
 7. The database is excluded from Android's cloud backup (`allowBackup="false"`,
    plus an explicit exclusion in `res/xml/data_extraction_rules.xml`). It is a
-   record of everything the user has studied, and PRIVACY.md says it stays on the
-   phone. Device-to-device transfer is still allowed.
+   record of everything the user has studied. Optional paired synchronization
+   exchanges explicitly approved content/history with another device; see
+   PRIVACY.md. Operating-system device-to-device transfer is still allowed.
 
 ## Developer data isolation
 
@@ -93,9 +94,13 @@ same scheduler. Two details matter:
   new ids, in a second pass after every answer has one. Importing ids verbatim
   either collides with existing rows or attaches an old retraction to an unrelated
   answer.
-- **Identity is `chunkId:level:ts`, not the id.** That is what makes importing the
-  same file twice a no-op, and what lets a file be merged into a database that has
-  been used since the export.
+- **Portable event identity is distinct from local row identity.** Modern reviews
+  carry immutable event IDs and Undo references those IDs. Legacy history is
+  normalized from canonical payloads and resolved Undo dependencies; ambiguous
+  legacy multiplicity fails closed. Equal target/level/timestamp alone does not
+  prove that two concurrent reviews are the same event. Conflicting payloads for
+  one portable ID are rejected. See [incremental sync](SYNC-INCREMENTAL-0.12.md)
+  for the consent-bound index and checkpoint contract.
 
 JSONL parsing and validation complete before the restore opens its writer
 transaction. Signature lookup, both history-insertion passes and all derived
@@ -105,9 +110,11 @@ back together. Cancellation is checked between bounded batches and replay steps.
 Anki retains its outer transaction and checks its own originating caller before
 commit; cancellation during nested replay may be noticed only when replay returns.
 
-`planCompleted` is not restored. A day's plan is not an answer, so it is not in
+For manual log restore, `planCompleted` is not restored. A day's plan is not an answer, so it is not in
 the log; guessing it would hand the accelerator a run of clean days that nobody
-studied. It restarts.
+studied. It restarts. Automatic peer journal merge instead preserves local
+completion/budget state and invalidates the queued plan only when new events
+change learning state; a no-op exchange does not replay history.
 
 ## Packs
 

@@ -1,0 +1,97 @@
+{
+  "observed_at_utc": "2026-10-17T20:19:30.883596+00:00",
+  "tests": {
+    "shared_desktop": {
+      "tests": 115,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 19,
+      "skipped_cases": []
+    },
+    "desktop": {
+      "tests": 266,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 2,
+      "suites": 34,
+      "skipped_cases": [
+        "secondaryMouseShortDragDoesNotRevealOrGrade[mouse=false]",
+        "secondaryMouseLongDragDoesNotRevealOrGrade[mouse=false]"
+      ]
+    },
+    "shared_android_unit": {
+      "tests": 108,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 18,
+      "skipped_cases": []
+    },
+    "app_android_unit": {
+      "tests": 565,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 67,
+      "skipped_cases": []
+    }
+  },
+  "builds": {
+    "assembleDebug": "PASS",
+    "createDistributable": "PASS",
+    "apk": {
+      "path": "app/build/outputs/apk/debug/app-debug.apk",
+      "bytes": 68188585,
+      "sha256": "19f011743e23bcfc94e20f6585888f9ebba280ad6e7e66a43faca3b22aeb39ad",
+      "signature_verified": true,
+      "signature_scheme_v2": true,
+      "certificate_sha256": "7ab1a6528157f00c76d0b1e2aeab3bf844786ce4c253d3cbe3cd5e50f5adbd17"
+    },
+    "packaged_launcher": {
+      "path": "desktop/build/compose/binaries/main/app/Ikna/bin/Ikna",
+      "sha256": "b3d3030696eb10c223bed43a426fb8b9a9250960e982a02cfe153d05ecb947c2"
+    },
+    "application_jars": {
+      "desktop/build/compose/binaries/main/app/Ikna/lib/app/shared-desktop-6ce8aa705ce59012b8d3617b37624521.jar": "65245ee399a93806c455af414d41eb8c443139168141472d1c3cb8fd349fa04e",
+      "desktop/build/compose/binaries/main/app/Ikna/lib/app/desktop-898c22b4d2e46ad5f6b051eaf0c726f.jar": "fe5daf249d2c6412d5b86d6fc002c8c3e8f194e12deb01ec3fd3f9758eb1220e"
+    }
+  },
+  "packaged_linux_selftest": {
+    "exit_code": 0,
+    "LD_BIND_NOW": "1",
+    "isolated_home": "Fresh isolated temporary home",
+    "output": "selftest: sun.misc.Unsafe present\nselftest: decks=0 cards=0 palette=ink\nselftest: ok\n"
+  },
+  "source_manifest": {
+    "path": "round52-build-sources.sha256",
+    "sha256": "effb2c0cae1b52851a9638b8caf8b40c078a9ebda4b57d9c5ff76e8ec9dfefc8",
+    "all_entries_verified_unchanged": true
+  },
+  "limitations": [
+    "Controller sync tests use two real Room stores and pinned TLS sockets in one JVM, not physical devices.",
+    "Android selector/adoption runtime and physical Android/Windows sync remain unverified.",
+    "Packaged Linux smoke is headless selftest, not GUI/native restart validation.",
+    "Seven platform-specific real SQLite selector tests run on desktop; Android unit suite has108 other tests."
+  ],
+  "logs": [
+    "round52-full-tests-final.log",
+    "round52-shared-desktop-clean-rebuild.log",
+    "round52-test-source-inspection.log",
+    "round52-adoption-fixed.log",
+    "round52-build-artifacts.log",
+    "round52-apk-signature.log",
+    "round52-packaged-selftest.log",
+    "round52-source-stability.log"
+  ],
+  "logHashes": {
+    "round52-full-tests-final.log": "e829550eaa29fbe11dd7058be3b5ecba9dab9c806bbbfc43a431b6d870666902",
+    "round52-shared-desktop-clean-rebuild.log": "306b02c6fd08b6ec4aa7b30b40c2569ed995084d0ba3b57318c786b9cf5c0419",
+    "round52-test-source-inspection.log": "62564f09da34508336fc3738a6515039690ce45820aa82757049a95f9d4ed2b9",
+    "round52-adoption-fixed.log": "b44c753ae4e8c5265f767402753932482df831fe3872dfe027e3227f69ea3499",
+    "round52-build-artifacts.log": "f7af6dda441f1dbb267fe46f294d9093acfafc6213f66ff627b0f2909ee0b2cc",
+    "round52-apk-signature.log": "edcc90a98c177c592141672ab42f0eb0205300eb4c21ed33078fb140570c9dd8",
+    "round52-packaged-selftest.log": "ff16d590727ea90bf8d9b6cac004498bab0471e1b9bce7dc734e996de0df14f4",
+    "round52-source-stability.log": "a3a9f01b699117ba46a1644af80b36cc3342687f0c2844a1f2ffd573e18f6893"
+  }
+}

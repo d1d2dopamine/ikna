@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.data.export.PreWipeBackupTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:05:33" hostname="3b7663fd5f9d" time="0.01">
+  <properties/>
+  <testcase name="cancellationIsNotReportedAsBackupFailureAndNeverWipes[desktop]" classname="dev.ikna.data.export.PreWipeBackupTest" time="0.002"/>
+  <testcase name="nullDocumentAndNullStreamAreStorageFailures[desktop]" classname="dev.ikna.data.export.PreWipeBackupTest" time="0.001"/>
+  <testcase name="writeAndCloseFailuresPropagateAndSuccessfulContentIsComplete[desktop]" classname="dev.ikna.data.export.PreWipeBackupTest" time="0.002"/>
+  <testcase name="journalAndSettingsFinishBeforeWipe[desktop]" classname="dev.ikna.data.export.PreWipeBackupTest" time="0.001"/>
+  <testcase name="emptyHistoryStillRequiresSettingsBackup[desktop]" classname="dev.ikna.data.export.PreWipeBackupTest" time="0.001"/>
+  <testcase name="storageFailureAndMissingSettingsBlockWipeAndAllowRetry[desktop]" classname="dev.ikna.data.export.PreWipeBackupTest" time="0.001"/>
+  <testcase name="wipeFailureRemainsDistinctFromBackupFailure[desktop]" classname="dev.ikna.data.export.PreWipeBackupTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

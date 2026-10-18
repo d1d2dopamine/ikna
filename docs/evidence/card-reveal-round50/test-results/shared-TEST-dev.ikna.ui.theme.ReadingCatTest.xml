@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.ui.theme.ReadingCatTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:05:33" hostname="3b7663fd5f9d" time="0.006">
+  <properties/>
+  <testcase name="artworkRolesFollowEveryLightingAndPreserveAlpha[desktop]" classname="dev.ikna.ui.theme.ReadingCatTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

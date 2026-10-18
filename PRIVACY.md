@@ -1,63 +1,62 @@
 # Privacy
 
-ikna has no servers, no accounts and no analytics. There is nothing to opt out
-of, because there is nothing collecting anything.
+ikna has no hosted account service and no analytics. Optional paired-device
+synchronization uses a local listener only while the application is active and
+you have enabled the feature. It is off by default.
 
 ## What leaves your device
 
-Nothing about you.
+Public downloads use ordinary requests without your review history:
 
-The app makes requests, and all of them are the same shape: a GET for a file that
-is public anyway, with no body, no account, no identifier and no card in it.
-
-| Request | When | What is asked for |
+| Request | When | What is transferred |
 | --- | --- | --- |
-| The update check | Once a day, and only if the switch in Settings is on | The releases page's latest tag |
-| The update download | Only when you press the button in that window | The APK of that release |
-| The catalogue index | Only when you open the catalogue screen | One small list of ready-made decks |
-| A catalogue deck | Only when you tap a deck in that list | That deck's file |
+| Update check | When enabled, at most daily, or explicitly requested | Public release metadata |
+| Update download | When requested | Release APK |
+| Catalogue index/deck | When opened or selected | Public catalogue files |
+| Paired local sync | After explicit enablement and pairing, while apps are active | Encrypted installed-deck/card/context content and active review/undo journal for preview; after mutual approval, compatible content and learning changes |
 
-Nothing is uploaded in any of them, and nothing is sent to us, because there is no
-us to send it to: those files sit on the releases page of this repository, and the
-request looks exactly like a browser downloading them. See
-[`docs/UPDATES.md`](docs/UPDATES.md) and [`docs/SOURCES.md`](docs/SOURCES.md).
-
-With the update switch off, the app never opens a socket on its own — the only
-remaining requests are the two the catalogue makes, and both of them happen
-because you pressed something.
+Synchronization does not send data to an Ikna server. It sends personal learning
+history and installed card content to the device you explicitly pair. Pairing authorizes the preview transfer; both devices must additionally approve the exact proposal before learning data changes. Treat pairing invitations as secrets;
+do not publish them or include them in bug reports. Disabling updates does not
+disable separately enabled synchronization. Disable sync or revoke pairing in
+Settings to stop it. See [sync scope and recovery](docs/SYNC-PROFILES-0.12.md),
+[updates](docs/UPDATES.md) and [sources](docs/SOURCES.md).
 
 ## What is stored, and where
 
 | Data | Where it lives |
 | --- | --- |
-| Your answers, card schedules, word-level state, daily counts | `ikna.db`, in ikna's data directory |
+| Your answers, card schedules, word-level state, daily counts | `ikna.db` or the selected UUID-named private profile database |
 | Settings: theme, colours, font, language and platform options | ikna's data directory |
 | A font you imported | copied into ikna's data directory |
 | Android review/settings export | `Documents/ikna/`, on your own device |
 | Desktop data | `%APPDATA%\Ikna` on Windows; `~/.ikna` on Linux |
 | Android widget text | Android private storage |
+| Pairing certificate/private key, peer credentials and local sync configuration | Private `device-sync` directory; excluded from ordinary exports and Android transfer rules |
 
 On Android, the export in `Documents/ikna/` is deliberately outside the app
 sandbox so it can survive an uninstall and a new phone. On desktop, cards and
 settings live outside the program files and a complete portable backup can be
-written to a location you choose. None of those files are uploaded by ikna. Copying
-them elsewhere — or not — is your decision.
+written to a location you choose. Ordinary exports are not automatically uploaded. If you separately enable paired
+sync, profile content and the active review journal are exchanged with the paired device as described above.
+
+Profile adoption retains the previous private database for explicit recovery. It does not create a backup of device settings or media. The explicit erase-everything action also clears retained and unfinished profile databases, with partial failures reported. Its automatic export covers only the current profile. Nonsecret slot origin metadata remains; it contains no learner content and grants no sync permission. This is application-level deletion, not a forensic secure-erasure guarantee. Database selection uses a separate nonsecret SQLite journal.
 
 ## Android cloud backup
 
 Android can copy an app's data into your Google account automatically. Ikna turns
 that off (`android:allowBackup="false"`), and `res/xml/data_extraction_rules.xml`
-excludes `ikna.db` from cloud backup explicitly. Your review log — every phrase
-you studied, how you rated it and when — is not uploaded anywhere, including by
-the operating system on your behalf.
+excludes `ikna.db` from cloud backup explicitly. These rules do not include the review log in cloud backup. Optional paired LAN
+sync is a separate explicit transfer of learning history.
 
 Direct device-to-device transfer, the copy Android makes during setup when you
 move to a new phone, is still allowed: it goes straight to the new device with no
-server in between. Settings are also included in cloud backup, since they are
-preferences rather than a record of what you have been reading.
+server in between. The extraction rules list shared preferences for cloud backup; actual OS behavior
+also depends on the manifest and platform. The transfer rules include the legacy database and the dedicated `sync-profiles` database directory, including retained recovery databases and SQLite sidecars. Pairing keys and consent configuration are not included; a new pairing and preview are required. Actual operating-system transfer has not been verified on physical devices.
 
-The deliberate way to move your history is the export in `Documents/ikna/`, which
-you control.
+You can also move history through an explicit export in `Documents/ikna/` or the
+paired local synchronization controls. Reset-generation recovery rules are
+described in the sync documentation.
 
 ## Speech
 
@@ -75,8 +74,8 @@ appear at all.
 
 - **Notifications** — the daily reminder. Refuse it and the rest of the app works
   unchanged.
-- **Internet** — the four requests in the table above, and nothing else. Turn the
-  update check off and stay out of the catalogue, and it is never used.
+- **Internet** — public downloads and the separately enabled authenticated local
+  synchronization listener/exchanges described above.
 - **Requesting an install** — the right to hand a downloaded APK to the system
   installer, which then shows its own prompt and checks the signature itself. It
   installs nothing on its own, and Android makes you allow it per app.

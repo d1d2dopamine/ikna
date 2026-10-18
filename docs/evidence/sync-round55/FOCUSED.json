@@ -1,0 +1,26 @@
+{
+  "tests": 2,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "elapsed_seconds": 22.69,
+  "cases": [
+    {
+      "name": "process kill before page commit rolls back and resumes exact union",
+      "classname": "dev.ikna.desktop.DeviceSyncProcessIntegrationTest",
+      "time": "11.839"
+    },
+    {
+      "name": "process kill after page commit before ack resumes without duplicate replay",
+      "classname": "dev.ikna.desktop.DeviceSyncProcessIntegrationTest",
+      "time": "10.851"
+    }
+  ],
+  "output": "Process crash acceptance: point=precommit, sharedZone=Europe/Tallinn, events=277, undoEdges=2, restartedPeers=2, noOpRounds=3\nProcess crash acceptance: point=postcommit, sharedZone=Europe/Tallinn, events=277, undoEdges=2, restartedPeers=2, noOpRounds=3\n",
+  "unchanged_source_inputs": 454,
+  "aggregate_sha256": "4f842b954a89eebe8b8e63e1ccc9cdbd7c55ccf0f3638dec879145660482c285",
+  "xmlSha256": {
+    "TEST-dev.ikna.desktop.DeviceSyncProcessIntegrationTest.xml": "f3bdd70b3eebc14319e0e216eaf3afaa9613556052897c008576ecd7f57be06f"
+  },
+  "logSha256": "173cdbb272873992a4984f9e647c3e9756b54bf8647b7511331db1d607a8a2c0"
+}

@@ -47,10 +47,149 @@ class RestoreRepository(
     private val planDao: PlanDao,
     private val components: ComponentRepository,
     private val scheduler: Scheduler,
-    private val config: GovernorConfig
+    private val config: GovernorConfig,
+    private val beforeExternalRestore: suspend () -> Long = { 0L },
+    private val afterExternalRestore: suspend (Long) -> Unit = {}
 ) {
 
-    suspend fun restoreFromJsonl(text: String): RestoreResult {
+    val incrementalJournal by lazy { IncrementalJournalRepository(db, this) }
+
+    val profileTransfer: ProfileTransferRepository by lazy { ProfileTransferRepository(db, this) }
+
+    /** Local archive boundary installed by the sync controller, also used by maintenance replay. */
+    var historyBoundary: (() -> Long?)? = null
+
+    /** Production wiring serializes the whole merge with local plan/answer writes.
+     * Lock order is learning mutex, then Room; callbacks run after this guard returns. */
+    var journalMergeGuard: suspend (suspend () -> RestoreResult) -> RestoreResult = { it() }
+
+    suspend fun persistedHistoryBoundary() = db.historyBoundaryDao().current()
+
+    internal suspend fun validateSyncBoundary(afterLocalId: Long, boundaryToken: String?) {
+        val marker = db.historyBoundaryDao().current()
+        require(marker?.token == boundaryToken && (marker == null || marker.afterLocalId == afterLocalId)) {
+            "History reset marker differs from pairing state; reset progress before starting a new sync history"
+        }
+    }
+
+    /** Consistent full snapshot, including undo targets; never a delta protocol. */
+    suspend fun maxJournalId(): Long {
+        val caller = currentCoroutineContext()
+        caller.ensureActive()
+        return db.inTransaction { reviewDao.maxId().also { caller.ensureActive() } }
+    }
+
+    suspend fun snapshotJournal(afterLocalId: Long = 0L, boundaryToken: String? = null): List<ReviewRecord> {
+        val caller = currentCoroutineContext()
+        caller.ensureActive()
+        return db.inTransaction {
+            caller.ensureActive()
+            validateSyncBoundary(afterLocalId, boundaryToken)
+            val rows = reviewDao.afterId(afterLocalId)
+            caller.ensureActive()
+            dev.ikna.data.export.JournalIdentity.normalize(rows.map {
+                caller.ensureActive()
+                ReviewRecord.of(it)
+            }).sortedWith(compareBy<ReviewRecord> { it.ts }.thenBy { it.eventId })
+                .also { caller.ensureActive() }
+        }
+    }
+
+    /** Strict, additive union. Any invalid payload rolls back history AND derived writes. */
+    suspend fun mergeJournal(records: List<ReviewRecord>, afterLocalId: Long = 0L, boundaryToken: String? = null): RestoreResult =
+        journalMergeGuard { mergeJournalLocked(records, afterLocalId, boundaryToken) }
+
+    internal suspend fun mergeJournalLocked(records: List<ReviewRecord>, afterLocalId: Long, boundaryToken: String?): RestoreResult {
+        val caller = currentCoroutineContext()
+        caller.ensureActive()
+        val incoming = validateJournalRecords(records)
+        return db.inTransaction {
+            caller.ensureActive()
+            validateSyncBoundary(afterLocalId, boundaryToken)
+            val localRows = reviewDao.afterId(afterLocalId)
+            val local = dev.ikna.data.export.JournalIdentity.normalize(localRows.map { ReviewRecord.of(it) })
+            val union = LinkedHashMap<String, ReviewRecord>()
+            for (r in local + incoming) {
+                val old = union.putIfAbsent(r.eventId!!, r)
+                require(old == null || old == r) { "Conflicting payload for event ${r.eventId}" }
+            }
+            require(union.size <= 1_000_000) { "Journal exceeds supported event count" }
+            var totalDuration = 0L
+            for (r in union.values) {
+                totalDuration = Math.addExact(totalDuration, r.durationMs)
+                caller.ensureActive()
+                require(db.chunkDao().chunk(r.chunkId) != null) { "Install the matching deck before syncing target ${r.chunkId}" }
+                r.undoEventId?.let { target ->
+                    val answer = union[target]
+                    require(answer != null && answer.undoEventId == null && answer.chunkId == r.chunkId &&
+                        answer.level == r.level && answer.purpose == r.purpose) { "Missing or invalid undo target" }
+                }
+            }
+            val ids = local.zip(localRows).associate { it.first.eventId!! to it.second.id }.toMutableMap()
+            val additions = union.values.filter { it.eventId !in ids }
+                .sortedWith(compareBy<ReviewRecord> { it.ts }.thenBy { it.eventId })
+            for (r in additions.filter { it.undoEventId == null }) {
+                caller.ensureActive()
+                ids[r.eventId!!] = reviewDao.insert(r.toEntity(undoOf = null))
+            }
+            for (r in additions.filter { it.undoEventId != null }) {
+                caller.ensureActive()
+                ids[r.eventId!!] = reviewDao.insert(r.toEntity(undoOf = ids.getValue(r.undoEventId!!)))
+            }
+            val replayed = if (additions.isEmpty()) 0 else {
+                val count = replayFromLogBody(caller, sync = true, afterLocalId = afterLocalId)
+                // Old queue entries can refer to cards made ineligible by the merge.
+                // Completion and admission budgets live in stats and remain untouched.
+                planDao.clear()
+                count
+            }
+            caller.ensureActive()
+            RestoreResult(additions.size, records.size - additions.size, replayed)
+        }
+    }
+
+    internal fun validateJournalRecords(records: List<ReviewRecord>): List<ReviewRecord> {
+        require(records.all { it.eventId != null }) { "Sync requires portable event identities" }
+        val incoming = dev.ikna.data.export.JournalIdentity.normalize(records)
+        incoming.forEach { r ->
+            require(!r.synthetic && r.chunkId.isNotBlank() && r.level in 0..2 && r.ts in 0..253402300799999L &&
+                r.durationMs >= 0 && r.elapsedDays.isFinite() && r.elapsedDays >= 0 &&
+                r.stabilityBefore.isFinite() && r.stabilityAfter.isFinite() &&
+                r.difficultyBefore.isFinite() && r.difficultyAfter.isFinite() &&
+                r.stabilityBefore in 0.0..1.0e9 && r.stabilityAfter in 0.0..1.0e9 &&
+                r.difficultyBefore in 1.0..10.0 && r.difficultyAfter in 1.0..10.0 &&
+                (r.prevStability == null || (r.prevStability.isFinite() && r.prevStability in 0.0..1.0e9)) &&
+                (r.prevDifficulty == null || (r.prevDifficulty.isFinite() && r.prevDifficulty in 1.0..10.0)) &&
+                (r.prevReps == null || r.prevReps in 0..1_000_000) &&
+                (r.prevLapses == null || r.prevLapses in 0..1_000_000) &&
+                (r.prevLastReviewAt == null || r.prevLastReviewAt in 0..253402300799999L) &&
+                (r.prevDueAt == null || r.prevDueAt in 0..253402300799999L) &&
+                (r.swipeVelocityX == null || r.swipeVelocityX.isFinite()) &&
+                (r.latencyMs == null || r.latencyMs >= 0)) { "Invalid journal observation" }
+            require(if (r.undoEventId == null) r.rating in 1..4 else r.rating == 0) { "Invalid journal rating" }
+            require(r.inputRating == null || r.inputRating in 1..4) { "Invalid original rating" }
+            require(r.gradingVersion == null || r.gradingVersion == 1) { "Unsupported grading version" }
+            require(r.gradingVersion != 1 || (r.inputRating == 3 && r.rating in listOf(2, 4))) { "Invalid derived grading" }
+            r.fsrsParameters?.let(dev.ikna.domain.fsrs.FsrsSnapshotCodec::decode)
+        }
+        return incoming
+    }
+
+    class ExternalRestorePreparation internal constructor(internal val owner: RestoreRepository, internal val generation: Long)
+
+    /** Call before acquiring an outer Room transaction (e.g. atomic Anki import). */
+    suspend fun prepareExternalRestore(): ExternalRestorePreparation {
+        val generation = beforeExternalRestore()
+        return ExternalRestorePreparation(this, generation)
+    }
+
+    /** Finalize only after the OUTERMOST content/history transaction has committed. */
+    suspend fun completeExternalRestore(preparation: ExternalRestorePreparation) {
+        require(preparation.owner === this) { "Restore preparation belongs to another repository" }
+        afterExternalRestore(preparation.generation)
+    }
+
+    suspend fun restoreFromJsonl(text: String, preparation: ExternalRestorePreparation? = null): RestoreResult {
         val caller = currentCoroutineContext()
         caller.ensureActive()
         var skipped = 0
@@ -58,6 +197,17 @@ class RestoreRepository(
         for (line in text.lineSequence()) {
             caller.ensureActive()
             if (line.isBlank()) continue
+            // Unlike a malformed old line, an unknown accounting purpose must not be
+            // silently discarded or reinterpreted before the all-or-nothing import.
+            val parsed = runCatching { ReviewRecord.json.parseToJsonElement(line) }.getOrNull()
+            if (parsed is kotlinx.serialization.json.JsonObject && "purpose" in parsed) {
+                val purpose = parsed["purpose"]
+                require(purpose == kotlinx.serialization.json.JsonNull ||
+                    (purpose is kotlinx.serialization.json.JsonPrimitive && purpose.isString &&
+                        purpose.content == dev.ikna.domain.session.ReviewPurpose.OPTIONAL_HARD)) {
+                    "Unsupported review purpose"
+                }
+            }
             val rec = runCatching {
                 ReviewRecord.json.decodeFromString(ReviewRecord.serializer(), line)
             }.getOrNull()
@@ -65,6 +215,10 @@ class RestoreRepository(
                 skipped++
                 continue
             }
+            // Invalid activity cannot enter a new import or trigger pairing/reset
+            // preparation. Historical nonnegative durations stay lossless, even
+            // when longer than the current new-answer recording limit.
+            require(rec.durationMs >= 0L) { "Invalid review duration" }
             require(rec.gradingVersion == null || rec.gradingVersion == 1) {
                 "Unsupported derived grading version: ${rec.gradingVersion}"
             }
@@ -77,26 +231,36 @@ class RestoreRepository(
 
         if (records.isEmpty()) return RestoreResult(imported = 0, skipped = skipped, replayed = 0)
 
+        val prepared = preparation ?: prepareExternalRestore()
+        require(prepared.owner === this) { "Restore preparation belongs to another repository" }
+        caller.ensureActive()
         // Parse, validate and sort before locking the writer. History and every
         // derived write below share the same transaction, including key lookup.
-        val sorted = records.sortedBy { it.ts }
-        return db.inTransaction {
+        val normalized = dev.ikna.data.export.JournalIdentity.normalize(records)
+        val sorted = records.zip(normalized).map { (raw, stable) ->
+            stable.copy(id = raw.id, undoOf = raw.undoOf)
+        }.sortedWith(compareBy<ReviewRecord> { it.ts }.thenBy { it.eventId })
+        val result = db.inTransaction {
             caller.ensureActive()
             restoreValidated(sorted, skipped, caller).also { caller.ensureActive() }
         }
+        if (preparation == null) completeExternalRestore(prepared)
+        return result
     }
 
     private suspend fun restoreValidated(
         sorted: List<ReviewRecord>, initiallySkipped: Int, caller: CoroutineContext
     ): RestoreResult {
         var skipped = initiallySkipped
-        // Signature -> the id that answer has *here*. Seeded with what is
-        // already stored, so importing the same file twice is a no-op.
-        val known = HashMap<String, Long>()
-        for (k in reviewDao.keys()) {
-            caller.ensureActive()
-            known[k.signature] = k.id
+        val localRows = reviewDao.all()
+        val localStable = dev.ikna.data.export.JournalIdentity.normalize(localRows.map { ReviewRecord.of(it) })
+        val portable = localStable.associateBy { it.eventId!! }.toMutableMap()
+        for (r in sorted) {
+            val canonical = dev.ikna.data.export.JournalIdentity.canonical(r)
+            val previous = portable.putIfAbsent(r.eventId!!, canonical)
+            require(previous == null || previous == canonical) { "Conflicting event payload" }
         }
+        val known = localRows.zip(localStable).associate { it.second.eventId!! to it.first.id }.toMutableMap()
 
         // Id in the file -> id here. This is what makes `undoOf` survive.
         val remap = HashMap<Long, Long>()
@@ -108,7 +272,7 @@ class RestoreRepository(
         val answers = ArrayList<Pair<ReviewRecord, ReviewEntity>>()
         for (rec in sorted) {
             caller.ensureActive()
-            if (rec.undoOf != null) continue
+            if (rec.undoOf != null || rec.undoEventId != null) continue
             val existing = known[rec.signature]
             if (existing != null) {
                 // Already here. Still worth remembering, because a retraction
@@ -133,21 +297,26 @@ class RestoreRepository(
         val retractions = ArrayList<Pair<ReviewRecord, ReviewEntity>>()
         for (rec in sorted) {
             caller.ensureActive()
-            val target = rec.undoOf ?: continue
+            if (rec.undoOf == null && rec.undoEventId == null) continue
+            val target = rec.undoOf
             if (known.containsKey(rec.signature) || !stagedUndo.add(rec.signature)) {
                 skipped++
                 continue
             }
-            val here = remap[target]
+            val here = rec.undoEventId?.let { known[it] } ?: remap[target]
             if (here == null) {
                 skipped++
                 continue
             }
+            require(portable[rec.undoEventId]?.purpose == rec.purpose) { "Undo purpose differs from its answer" }
             retractions += rec to rec.toEntity(undoOf = here)
         }
         imported += insertRecords(retractions, known, remap, caller)
 
+        db.incrementalJournalDao().invalidate()
         val replayed = replayFromLogBody(caller)
+        if (db.historyBoundaryDao().current() != null) db.historyBoundaryDao().put(
+            dev.ikna.data.db.HistoryBoundaryEntity(afterLocalId = 0, token = java.util.UUID.randomUUID().toString()))
         return RestoreResult(imported = imported, skipped = skipped, replayed = replayed)
     }
 
@@ -195,24 +364,69 @@ class RestoreRepository(
         caller.ensureActive()
         return db.inTransaction {
             caller.ensureActive()
-            replayFromLogBody(caller).also { caller.ensureActive() }
+            val configuredBoundary = historyBoundary?.invoke()
+            val cutoff = db.historyBoundaryDao().current()?.afterLocalId ?: configuredBoundary
+            replayFromLogBody(caller, sync = cutoff != null,
+                afterLocalId = cutoff ?: 0L).also { caller.ensureActive() }
         }
     }
 
+    suspend fun replaySyncJournal(afterLocalId: Long): Int {
+        val caller = currentCoroutineContext()
+        return db.inTransaction { replayFromLogBody(caller, sync = true,
+            afterLocalId = db.historyBoundaryDao().current()?.afterLocalId ?: afterLocalId) }
+    }
+
     /** Runs only inside the owning transaction; Room's job is not the caller's. */
-    private suspend fun replayFromLogBody(caller: CoroutineContext): Int {
+    internal suspend fun replayFromLogBody(caller: CoroutineContext, sync: Boolean = false, afterLocalId: Long = 0L, journalStreamId: String? = null): Int {
         caller.ensureActive()
-        cardDao.clear()
+        val localCards = if (sync) cardDao.all().associateBy { it.key } else emptyMap()
+        val localDays = if (sync) statsDao.lastDays(Int.MAX_VALUE).associateBy { it.day } else emptyMap()
+        if (!sync) cardDao.clear()
         caller.ensureActive()
         statsDao.clear()
         caller.ensureActive()
-        planDao.clear()
+        if (!sync) planDao.clear()
         caller.ensureActive()
 
-        val answers = reviewDao.allAnswers()
+        val rawAnswers = reviewDao.answersAfterId(afterLocalId)
+        val identities = if (sync && journalStreamId != null) {
+            db.incrementalJournalDao().replayIdentities(journalStreamId, afterLocalId).associate { row ->
+                caller.ensureActive()
+                if (row.rawEventId != null && row.indexedEventId != null && row.rawEventId != row.indexedEventId)
+                    throw dev.ikna.data.export.JournalReconciliationRequiredException()
+                row.id to (row.indexedEventId ?: row.rawEventId
+                    ?: throw dev.ikna.data.export.JournalReconciliationRequiredException())
+            }
+        } else if (sync) reviewDao.afterId(afterLocalId).let { rows ->
+            rows.zip(dev.ikna.data.export.JournalIdentity.normalize(rows.map { ReviewRecord.of(it) }))
+                .associate { it.first.id to it.second.eventId!! }
+        } else emptyMap()
+        val answers = if (sync) rawAnswers.sortedWith(compareBy<ReviewEntity> { it.ts }.thenBy { identities[it.id] }) else rawAnswers
+        val replayScheduler = if (sync) Scheduler(dayStartHour = config.dayStartHour) else scheduler
         val boundary = DayBoundary(config.dayStartHour)
         val cards = LinkedHashMap<String, CardEntity>()
         val days = LinkedHashMap<String, DailyStatEntity>()
+        val seen = HashSet<String>()
+        if (sync) {
+            // A clock rollback can timestamp a later observation before its own
+            // predecessor. Select the least advanced known ORIGINAL pre-state,
+            // including retracted answers, rather than double-counting a later
+            // snapshot's reps. Missing legacy snapshots retain the historical
+            // zero baseline; a wholly partial known history retains its prior reps.
+            val originals = reviewDao.afterId(afterLocalId).filter { it.undoOf == null }
+                .groupBy { it.chunkId + ":" + it.level }
+            val baselineOrder = compareBy<ReviewEntity> { it.prevReps ?: 0 }
+                .thenBy { if (it.prevIsNew == true) 0 else 1 }
+                .thenBy { it.ts }.thenBy { identities[it.id] }
+            for ((key, history) in originals) {
+                val r = history.minWith(baselineOrder)
+                cards[key] = CardEntity(r.chunkId, r.level,
+                    r.prevStability ?: r.stabilityBefore, r.prevDifficulty ?: r.difficultyBefore,
+                    r.prevDueAt ?: r.ts, r.prevLastReviewAt, history.minOf { it.ts }, r.prevReps ?: 0,
+                    r.prevLapses ?: 0, localCards[key]?.inAmnesty ?: false, r.prevIsNew ?: true)
+            }
+        }
 
         for (r in answers) {
             caller.ensureActive()
@@ -230,20 +444,26 @@ class RestoreRepository(
                 inAmnesty = false,
                 isNew = r.prevIsNew ?: true
             )
-            val firstTime = !cards.containsKey(key)
-            cards[key] = scheduler.applyRecordedReview(card, r).card
+            val firstTime = if (sync) seen.add(key) else !cards.containsKey(key)
+            cards[key] = replayScheduler.applyRecordedReview(card, r).card.let { rebuilt ->
+                if (sync) {
+                    require(rebuilt.stability.isFinite() && rebuilt.difficulty.isFinite() &&
+                        rebuilt.dueAt >= 0 && rebuilt.reps >= 0 && rebuilt.lapses >= 0) { "Invalid replay state" }
+                    rebuilt.copy(inAmnesty = localCards[key]?.inAmnesty ?: false)
+                } else rebuilt
+            }
 
             // Same boundary as the live counters, or a restore would rebuild
             // stats that disagree with the app that wrote them.
             val day = boundary.key(r.ts)
             val stat = days[day] ?: DailyStatEntity(day, 0, 0, 0L, 1.0, false)
-            val done = stat.reviewsDone + 1
-            val correct = stat.correctCount + if (r.outcomeRating >= 3) 1 else 0
+            val done = Math.addExact(stat.reviewsDone, 1)
+            val correct = Math.addExact(stat.correctCount, if (r.outcomeRating >= 3) 1 else 0)
             days[day] = stat.copy(
                 reviewsDone = done,
                 correctCount = correct,
-                newIntroduced = stat.newIntroduced + if (firstTime) 1 else 0,
-                activeMs = stat.activeMs + r.durationMs,
+                newIntroduced = Math.addExact(stat.newIntroduced, if (firstTime && r.purpose == null) 1 else 0),
+                activeMs = Math.addExact(stat.activeMs, r.durationMs),
                 accuracy = correct.toDouble() / done,
                 // Deliberately false, and deliberately not guessed.
                 //
@@ -253,10 +473,20 @@ class RestoreRepository(
                 // would invent five clean days out of a restore and hand the
                 // user a larger daily target on their first evening back. The
                 // accelerator restarts instead, and earns its way up again.
-                planCompleted = false
+                planCompleted = if (sync) localDays[day]?.planCompleted ?: false else false
             )
         }
 
+        if (sync) {
+            // Introductions spend local governor budget before any review exists.
+            // Never refund those admissions merely because a journal arrived.
+            for ((day, old) in localDays) {
+                val rebuilt = days[day]
+                days[day] = if (rebuilt == null) old.copy(
+                    reviewsDone = 0, correctCount = 0, activeMs = 0, accuracy = 1.0)
+                else rebuilt.copy(newIntroduced = maxOf(rebuilt.newIntroduced, old.newIntroduced))
+            }
+        }
         cards.values.chunked(WRITE_BATCH).forEach {
             caller.ensureActive()
             cardDao.upsertAll(it)
@@ -277,12 +507,12 @@ class RestoreRepository(
         // here too, but "eventually" is whichever screen opens first, and the
         // deck list and the statistics screen both read cards. So the restored
         // database is made consistent here, once, before anything reads it.
-        cardDao.moveOverdueToAmnesty(
+        if (!sync) cardDao.moveOverdueToAmnesty(
             System.currentTimeMillis() - config.amnestyAfterDays * DAY_MS
         )
 
         caller.ensureActive()
-        components.rebuildFromReviews { caller.ensureActive() }
+        components.rebuildFromReviews(answers) { caller.ensureActive() }
         caller.ensureActive()
         return answers.size
     }

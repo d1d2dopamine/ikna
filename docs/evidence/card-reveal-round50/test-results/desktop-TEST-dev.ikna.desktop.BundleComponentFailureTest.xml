@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.BundleComponentFailureTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:08:26" hostname="3b7663fd5f9d" time="0.208">
+  <properties/>
+  <testcase name="settingsWriteFailureCannotReturnSuccessfulBundle" classname="dev.ikna.desktop.BundleComponentFailureTest" time="0.061"/>
+  <testcase name="deckWriteFailureCannotReturnSuccessfulBundle" classname="dev.ikna.desktop.BundleComponentFailureTest" time="0.019"/>
+  <testcase name="settingsWriteFailureCannotBecomeUnknownSingleFile" classname="dev.ikna.desktop.BundleComponentFailureTest" time="0.004"/>
+  <testcase name="validDeckAndFutureVersionSettingsStillRestore" classname="dev.ikna.desktop.BundleComponentFailureTest" time="0.103"/>
+  <testcase name="settingsCancellationEscapesWithoutBeingTurnedIntoSkip" classname="dev.ikna.desktop.BundleComponentFailureTest" time="0.005"/>
+  <testcase name="optionalBlankAndUndecodableSettingsRemainSkippable" classname="dev.ikna.desktop.BundleComponentFailureTest" time="0.008"/>
+  <testcase name="syntheticSettingsRemainRejectedWithoutChangingRealSettings" classname="dev.ikna.desktop.BundleComponentFailureTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

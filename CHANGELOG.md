@@ -2,6 +2,96 @@
 
 ## Unreleased
 
+### 0.12 application round 59 — open-session synchronization safety
+
+- Invalidate stale Android/Desktop presentation after committed sync and inspect
+  existing plans on foreground return without automatically admitting work.
+- Missing or replaced plans require explicit Continue. Preserve accepted writes,
+  suppress obsolete asynchronous publications and retain unchanged optional batches.
+- Notify only after meaningful committed changes, including donor content changes;
+  duplicate receipts do not interrupt unchanged sessions. See
+  [Round59](docs/ROUND-0.12-59.md) for verification scope and physical-device limits.
+
+### 0.12 application round 58 — local main-lesson completion boundary
+
+- After an ordinary Android answer commits, read global required-plan completion
+  and remove locally tracked answered repeat copies while retaining unanswered
+  planned/explicit extra cards. Preserve grading, FSRS and required credit.
+- Serialize advancement after durable writes and prevent superseded answer
+  callbacks from replacing a newer reload. Undo/restart keep persisted meaning.
+- Concurrent sync refresh of an already-open session remains a separate known
+  gap. See [Round58](docs/ROUND-0.12-58.md) for scope and actual verification.
+
+### 0.12 application round 57 — review duration integrity
+
+- Measure new answer durations with a monotonic clock and normalize ordinary and
+  optional records to the existing Android 0..120000ms bound on both platforms.
+- Reject negative JSONL durations before restore preparation; preserve valid
+  historical long records and reject daily active-time overflow atomically.
+- Existing immutable events are not repaired or rewritten. See
+  [Round57](docs/ROUND-0.12-57.md) for actual verification status and limitations.
+
+### 0.12 application round 56 — optional hard-card review
+
+- Add explicit finite hard-card batches after the global required lesson, using
+  normal grading and FSRS while preserving required completion/new-card credit.
+- Persist optional purpose through Undo, replay, backup and sync; migrate schema14
+  without changing old event bytes, and require purpose-aware wire envelope4.
+- Separate factual and goal-eligible display counts; isolate desktop deck-session
+  async state and optional Undo. See [Round56](docs/ROUND-0.12-56.md) for actual
+  verification status and [compatibility](docs/OPTIONAL-HARD-REVIEW-0.12.md).
+
+### 0.12 application round 55 — process interruption evidence
+
+- Add independent JVM peer tests that force termination before page commit and
+  after commit/before acknowledgement, then verify restart, exact Undo/history,
+  checkpoints, reference replay and no-op convergence.
+- Production behavior and schema remain unchanged from Round54. See
+  [Round55](docs/ROUND-0.12-55.md); process termination is not power-loss or
+  physical-device acceptance.
+
+### 0.12 application round 54 — incremental journal exchange
+
+- After explicit version-3 profile approval, exchange bounded event inventories
+  and missing payloads with transactional durable checkpoints and schema13.
+- Preserve portable identity, Undo dependencies, current history/content guards
+  and restart safety; migrate known schema12 adopted/recovery slots explicitly.
+- Distinguish current journal catch-up from profile consent and historical
+  transport success; retain actionable page errors across control-only traffic.
+- Align canonical page/wire byte accounting without increasing transfer caps.
+  Initial profile limits and whole-history replay costs remain. See
+  [incremental scope](docs/SYNC-INCREMENTAL-0.12.md) and
+  [Round54 evidence](docs/ROUND-0.12-54.md).
+
+### 0.12 application round 53 — sync resource preflight
+
+- Reject row/text-byte overflow before profile entity materialization without
+  changing the existing transfer limits or truncating learning history.
+- Read only active-history rows in SQL and apply the same bounded snapshot path
+  to automatic journal exchange; retain originating cancellation.
+- Surface a localized size error while retaining pairing, with real SQLite/TLS
+  regressions and finite before/after capacity evidence. See
+  [Round53](docs/ROUND-0.12-53.md); this does not implement paged transfer.
+
+### 0.12 application round 52 — profile consent and recovery
+
+- Add revision-bound mutual preview/approval before initial content/history merge,
+  with explicit content conflicts and paired-device status/revocation in Settings.
+- Add recoverable adoption into a separately verified database, a SQLite startup
+  selector, schema12 operation/origin metadata and explicit restart/recovery.
+- Add separately tested remote-storage encryption foundations; no real internet
+  backend is connected. See [profile scope](docs/SYNC-PROFILES-0.12.md).
+
+### 0.12 application round 51 — paired local journal sync
+
+- Add opt-in automatic foreground LAN exchange with pinned TLS and explicit
+  trusted-device pairing; keep settings and deck content local.
+- Add immutable review/undo identities, transactional deterministic merging,
+  and schema11 migration with database-resident reset boundaries.
+- Preserve reset/restore recovery and reject old-generation resurrection;
+  document limits, privacy and real-platform acceptance separately in
+  [ROUND-0.12-51.md](docs/ROUND-0.12-51.md) and [SYNC-0.12.md](docs/SYNC-0.12.md).
+
 ### 0.12 application round 11 fix 1 — CI test corrections
 
 - Correct DEV Browse blocker comparison and classic undo journal/count assertions.

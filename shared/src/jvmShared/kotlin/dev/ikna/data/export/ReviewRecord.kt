@@ -2,6 +2,8 @@ package dev.ikna.data.export
 
 import dev.ikna.data.db.ReviewEntity
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 
 /**
@@ -14,9 +16,11 @@ import kotlinx.serialization.json.Json
  * only thing in the app that cannot be regenerated.
  *
  * Every field except `chunkId`, `ts` and `rating` has a default, so a file from
- * an older version still reads, and unknown keys are ignored, so a file from a
- * newer one does too.
+ * an older version still reads. Unknown descriptive keys can be ignored, but
+ * unsupported purpose values fail closed. Backups containing optional_hard
+ * require a purpose-aware app: older importers may silently drop that meaning.
  */
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class ReviewRecord(
     /**
@@ -67,10 +71,16 @@ data class ReviewRecord(
     /** v8: immutable parameters actually used for this answer. */
     val fsrsParameters: String? = null,
     /** Reserved for test/lab files: restore must never install synthetic history. */
-    val synthetic: Boolean = false
+    val synthetic: Boolean = false,
+    val eventId: String? = null,
+    val undoEventId: String? = null,
+    /** Omit null even in strict profile JSON: historical hashes must not change. */
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val purpose: String? = null
 ) {
+    init { dev.ikna.domain.session.ReviewPurpose.requireKnown(purpose) }
+
     /** Identity of an answer, independent of which phone stored it. */
-    val signature: String get() = chunkId + ":" + level + ":" + ts
+    val signature: String get() = eventId ?: (chunkId + ":" + level + ":" + ts)
 
     /**
      * @param id the id to store here. Defaults to 0, which means "let SQLite
@@ -79,6 +89,9 @@ data class ReviewRecord(
      */
     fun toEntity(id: Long = 0L, undoOf: Long? = this.undoOf): ReviewEntity = ReviewEntity(
         id = id,
+        eventId = eventId,
+        purpose = purpose,
+        undoEventId = undoEventId,
         chunkId = chunkId,
         level = level,
         ts = ts,
@@ -115,6 +128,9 @@ data class ReviewRecord(
     companion object {
         fun of(r: ReviewEntity, synthetic: Boolean = false): ReviewRecord = ReviewRecord(
             id = r.id,
+            eventId = r.eventId,
+            purpose = r.purpose,
+            undoEventId = r.undoEventId,
             chunkId = r.chunkId,
             level = r.level,
             ts = r.ts,
@@ -154,8 +170,8 @@ data class ReviewRecord(
          *
          * `explicitNulls = false` keeps the file the size it was: the whole undo
          * trail is absent rather than null on ordinary answers, which is most
-         * lines. `ignoreUnknownKeys` lets an older build read a file written by
-         * a newer one instead of throwing the line away.
+         * lines. Unknown descriptive keys are tolerated; this does not promise
+         * backward compatibility for new semantic fields such as purpose.
          */
         val json: Json = Json {
             ignoreUnknownKeys = true

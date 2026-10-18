@@ -5,13 +5,17 @@ import dev.ikna.domain.governor.GovernorReason
 data class SessionUiState(
     val loading: Boolean = true,
     val loadFailed: Boolean = false,
+    /** Saved history invalidated this presentation; only explicit Continue may build a new plan. */
+    val sessionChanged: Boolean = false,
     val queue: List<SessionCard> = emptyList(),
     val index: Int = 0,
     val revealed: Boolean = false,
     /** Distinct questions still owed in this session. Falls only. */
     val remaining: Int = 0,
-    /** Answers recorded today across every deck. The daily minimum reads this. */
+    /** Factual answers today across every deck, including optional work. */
     val answeredToday: Int = 0,
+    /** Ordinary answers eligible for daily minimum/new-material accounting. */
+    val goalAnswersToday: Int = answeredToday,
     /**
      * Progress within this session: how many of its cards are done out of how
      * many it had. Separate from [answeredToday] because a Polish session should
@@ -57,29 +61,35 @@ data class SessionUiState(
      * when pressed is worse than a missing one.
      */
     val speechReady: Boolean = false,
-    val finished: Boolean = false
+    val finished: Boolean = false,
+    /** Explicit, finite practice; never part of the required daily plan. */
+    val optionalHardReview: Boolean = false,
+    val optionalHardAvailable: Boolean = false,
+    val optionalHardEmpty: Boolean = false
 ) {
     /** Hide any previous prompt immediately; retry always reads the saved plan. */
     fun beginLoad(): SessionUiState = copy(
-        loading = true, loadFailed = false, finished = false,
-        queue = emptyList(), revealed = false, undoVisible = false, canUndo = false
+        loading = true, loadFailed = false, sessionChanged = false, finished = false,
+        queue = emptyList(), revealed = false, undoVisible = false, canUndo = false,
+        optionalHardAvailable = false
     )
 
     /** A failed read or write cannot claim that a session was completed. */
     fun failedLoad(): SessionUiState = copy(
-        loading = false, loadFailed = true, finished = false,
-        queue = emptyList(), revealed = false, undoVisible = false, canUndo = false
+        loading = false, loadFailed = true, sessionChanged = false, finished = false,
+        queue = emptyList(), revealed = false, undoVisible = false, canUndo = false,
+        optionalHardAvailable = false
     )
 
-    val current: SessionCard? get() = if (loading || loadFailed) null else queue.getOrNull(index)
-    val minimumMet: Boolean get() = answeredToday >= dailyMinimum
+    val current: SessionCard? get() = if (loading || loadFailed || sessionChanged) null else queue.getOrNull(index)
+    val minimumMet: Boolean get() = goalAnswersToday >= dailyMinimum
 
     /** 0f..1f for the band at the top of the screen. */
     val progress: Float
         get() = if (sessionTotal <= 0) 0f else sessionDone.toFloat() / sessionTotal
 
     /** The next classic card, for preloading. */
-    val nextCard: SessionCard? get() = if (loading || loadFailed) null else queue.getOrNull(index + 1)
+    val nextCard: SessionCard? get() = if (loading || loadFailed || sessionChanged) null else queue.getOrNull(index + 1)
 
     /** The complete classic prompt is visible from the start. */
     val speakable: Boolean get() = current != null

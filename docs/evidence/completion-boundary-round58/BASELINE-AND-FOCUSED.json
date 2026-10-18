@@ -1,0 +1,67 @@
+{
+  "baseline_archive": "ikna-0.12-press-round-57-review-duration-safety-no-corpora.zip",
+  "baseline_archive_sha256": "00279f3fd40936dbc880f7d8262b3936c6a094fe8e406cd66b7f6bed301185a8",
+  "observed_baseline": "Real Room required1, retained AGAIN answers4, planCompleted=true; bounded source-guarded copy of Android queue expression still has1 repeat, rebuilt session has0. Expected-safe assertion fails0vs1. Per-deck/global distinction positive control passes. Android wiring contract fails absent completion gate. Not an actual Android ViewModel execution.",
+  "runs": {
+    "red": {
+      "exit_code": 1,
+      "sha256": {
+        "red-inputs-after.json": "8f10b97585a172db1a073f1fd1cfb1874444e5bb3db5877e59789616c80013c0",
+        "red-inputs-before.json": "5eafbd1e3babbd7aad4e11e3a6adec1d6731560ed95322541d5ba1c0e09ff720",
+        "red-xml/app/build/test-results/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionCompletionBoundaryTest.xml": "419a11bfb7457744dc7191aaffc2439202652caa464d0854436b450730288c6e",
+        "red-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.CompletionBoundaryIntegrationTest.xml": "36d1f0a14a533e65d0c4fdb727fe1486f18e91458131cfa49823780210fba2d9",
+        "red.log": "d709be62468b0b8e2e8e0c1eec33467bf3af8388869065a8568ee4c6dd815080"
+      }
+    },
+    "run1": {
+      "exit_code": 0,
+      "sha256": {
+        "run1-inputs-after.json": "00d32743029f5bf30960ead2c544d42462be92691497fdd543fff45116f44d4a",
+        "run1-inputs-before.json": "5999870ae26eadec30a3bee2ce7b79a2143f01c6c52d46306ad34eb64cc97a80",
+        "run1-xml/app/build/test-results/testDebugUnitTest/TEST-dev.ikna.domain.session.ClassicPlanTest.xml": "8e838d5440f24d4f2c39ee9242f5d8a3921de4203e9f3647058c2f3186c0daaa",
+        "run1-xml/app/build/test-results/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionCompletionBoundaryTest.xml": "5277e4f31f560adde99603aaa6e3bfda8fced0a759dd514f68390eb62e0ff2a0",
+        "run1-xml/app/build/test-results/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionErgonomicsTest.xml": "9f7494e4de447957d3bc5e51427454df9563798c02d19288bc3fc778a6f5721e",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.CompletionBoundaryIntegrationTest.xml": "71a4477b72beea21177ebc14409cb4df4d36fd4a32b14b9fba1305e808f3abdf",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.DesktopOptionalReviewContractTest.xml": "53ee88279407cb9f17318aec69b3cd22cf8b766051c13eefbddc72be83af155d",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.LearningWriteAtomicityTest.xml": "f6404c02a80575dac1d25a72fb40b1500d90b833c8836665f4823a8a0d522abb",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.OptionalHardReviewIntegrationTest.xml": "1a1462fbe27144c554d823b11b1e185a816a7db267fcface51a39d8fa593c4ef",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.ReviewDurationIntegrationTest.xml": "21c033b2c5662af9692d341754694c38461518bec14a7bd62606e590cb6224bf",
+        "run1-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.domain.session.ReviewDurationTest.xml": "eb9fbc7cefb023d024a30368b0dd2540a57dd550d6c5c59db64d3216dacdad79",
+        "run1-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.ui.session.CardLoadingTest.xml": "cc05f9057c47cfaa0ba60c914f3a2e4325fd6f6a487d028ed4996d39acd33b88",
+        "run1.log": "f0202c0a441a07659944f97748b92571628b5b6add4cf8844ea41f96e4e389af"
+      }
+    }
+  },
+  "red-summary.json": {
+    "suites": [
+      {
+        "name": "dev.ikna.ui.session.SessionCompletionBoundaryTest",
+        "tests": "1",
+        "failures": "1",
+        "stdout": "",
+        "failure": [
+          [
+            "ordinary answer checks durable global required completion before showing repeats",
+            "java.lang.AssertionError: Ordinary Android answers currently append AGAIN or first-contact repeats without a durable global required-plan completion check"
+          ]
+        ]
+      },
+      {
+        "name": "dev.ikna.desktop.CompletionBoundaryIntegrationTest",
+        "tests": "2",
+        "failures": "1",
+        "stdout": "COMPLETION_BASELINE required=1 retainedAnswers=4 planCompleted=true liveQueueRemaining=1 restartQueueRemaining=0",
+        "failure": [
+          [
+            "baseline automatic repeat trace outlives durable required completion",
+            "java.lang.AssertionError: Completed required work must not be followed by automatic repeats expected:<0> but was:<1>"
+          ]
+        ]
+      }
+    ],
+    "source_stable": true,
+    "aggregate_sha256": "f45bf208737aac4c4a9e59834319d320b4e5523ef68b47bf0fe167e32e385854",
+    "production_files_compared": 301,
+    "production_changed": []
+  }
+}

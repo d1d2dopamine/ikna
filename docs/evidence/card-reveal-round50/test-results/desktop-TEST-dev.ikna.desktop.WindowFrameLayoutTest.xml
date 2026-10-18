@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.WindowFrameLayoutTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:08:42" hostname="3b7663fd5f9d" time="0.029">
+  <properties/>
+  <testcase name="exceptionsAndZeroSize" classname="dev.ikna.desktop.WindowFrameLayoutTest" time="0.001"/>
+  <testcase name="steadyFramesAndScaleChanges" classname="dev.ikna.desktop.WindowFrameLayoutTest" time="0.001"/>
+  <testcase name="boundedTraceAndShutdown" classname="dev.ikna.desktop.WindowFrameLayoutTest" time="0.024"/>
+  <testcase name="recursiveRecordingIsNotCommitted" classname="dev.ikna.desktop.WindowFrameLayoutTest" time="0.001"/>
+  <testcase name="failedTraceDoesNotBreakRendering" classname="dev.ikna.desktop.WindowFrameLayoutTest" time="0.0"/>
+  <testcase name="firstResizedPicture" classname="dev.ikna.desktop.WindowFrameLayoutTest" time="0.0"/>
+  <testcase name="nativeInvalidationAndMinimizeReturn" classname="dev.ikna.desktop.WindowFrameLayoutTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,18 @@
+{
+  "baseline": "sealed Round55 unchanged source and compiled classes",
+  "command": "source ikna-toolchain/env.sh; CP=$(cat round55-sync/desktop/build/sync-process-test/runtime-classpath.txt); java -Xmx128m -XX:ActiveProcessorCount=1 --class-path \"$CP\" CaptureOldPurpose.java round56-optional-review/desktop/src/test/resources/optional-review",
+  "sha256": {
+    "shared/src/jvmShared/kotlin/dev/ikna/data/export/ReviewRecord.kt": "b4992cc0b40a582138b2b6e09369ef55bf005ce10487bf136ecda7b35f6f5b6e",
+    "shared/src/jvmShared/kotlin/dev/ikna/data/export/JournalIdentity.kt": "707958b2ba074405c71564b73ff49ef6333201afcf952240ccd566fad31f383b",
+    "shared/src/jvmShared/kotlin/dev/ikna/data/export/ProfileTransfer.kt": "aef445e9a6d52b1572204cdf29ed614d7577e7316b540a92ecec8bd0aa0f2f8e",
+    "desktop/build/sync-process-test/runtime-classpath.txt": "2ad7dbc3d00b53636eaea066a20834a74b488295c73dfad1214c817fe5f28496",
+    "shared/build/libs/shared-desktop.jar": "49de0e4c8b76918dcb76674eee9c0b85e9edaf2a97da14f4931c74257173d11f"
+  },
+  "capture_source_sha256": "5ffa583c3c69a242683f4802bfff2d346be20f5989c3ba0ec52618daddd99450",
+  "capture_log_sha256": "a2d9d60fdf52c28cba54bdf5f0e96d8004998258ffb0ffabdfc2ab7798e20998",
+  "fixtures_sha256": {
+    "desktop/src/test/resources/optional-review/normal-legacy-event-before-purpose.txt": "ea021b2e53e2977f7f82785fc69884783a859668eaf93b02b194cc47d89b50c3",
+    "desktop/src/test/resources/optional-review/normal-profile-before-purpose.json": "cf96d849a2ffd9eb0e1db6c3091092592c1d89b260e4d4c9e4fbf3b488568817",
+    "desktop/src/test/resources/optional-review/normal-record-before-purpose.json": "ae3ac76be6552cff697af8b24cbd6a2b85f60a4d88e8f6edcd8ea18c355e5231"
+  }
+}

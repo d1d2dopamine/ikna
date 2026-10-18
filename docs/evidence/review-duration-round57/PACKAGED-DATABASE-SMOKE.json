@@ -1,0 +1,25 @@
+{
+  "observed_at_utc": "2026-10-17T23:17:05.726112+00:00",
+  "database": "isolated packaged selftest ikna.db",
+  "user_version": 14,
+  "quick_check": "ok",
+  "row_counts": {
+    "reviews": 0,
+    "cards": 0,
+    "packs": 0,
+    "journal_stream": 0,
+    "journal_event_index": 0,
+    "journal_checkpoint": 0
+  },
+  "purpose_column": [
+    [
+      34,
+      "purpose",
+      "TEXT",
+      0,
+      null,
+      0
+    ]
+  ],
+  "database_sha256": "0ba8cbce9793a324a6d3048e2b21b1be8c6825f70598d470dc2b05974e45fc18"
+}

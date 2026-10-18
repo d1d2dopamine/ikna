@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.WindowBoundsTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:08:42" hostname="3b7663fd5f9d" time="0.0">
+  <properties/>
+  <testcase name="display above primary is supported" classname="dev.ikna.desktop.WindowBoundsTest" time="0.0"/>
+  <testcase name="tiny one pixel overlap does not count as recoverable" classname="dev.ikna.desktop.WindowBoundsTest" time="0.0"/>
+  <testcase name="window on a left hand display keeps valid negative coordinates" classname="dev.ikna.desktop.WindowBoundsTest" time="0.0"/>
+  <testcase name="window on primary display is recoverable" classname="dev.ikna.desktop.WindowBoundsTest" time="0.0"/>
+  <testcase name="partially offscreen window remains recoverable when title bar can be grabbed" classname="dev.ikna.desktop.WindowBoundsTest" time="0.0"/>
+  <testcase name="saved position on disconnected right display is not recoverable" classname="dev.ikna.desktop.WindowBoundsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

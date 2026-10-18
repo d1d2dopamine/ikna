@@ -85,16 +85,23 @@ kotlin {
             // module builds for the desktop.
             api("androidx.datastore:datastore-preferences-core:1.1.1")
 
+            // TLS certificate generation only; connections use platform JSSE with exact peer pins.
+            implementation("com.squareup.okhttp3:okhttp-tls:4.12.0")
+
             api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
             api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
         }
 
         androidMain.dependencies {
+            // Same isolated envelope API, with the vendor-supported Android artifact.
+            implementation("com.google.crypto.tink:tink-android:1.23.0")
             api("androidx.sqlite:sqlite-framework:2.5.2")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
         }
 
         desktopMain.dependencies {
+            // No remote adapter or app setup is activated by this primitive.
+            implementation("com.google.crypto.tink:tink:1.23.0")
             // SQLite compiled into the jar. Windows has none to borrow, and this
             // build enables FTS4, which the deck search needs.
             implementation("androidx.sqlite:sqlite-bundled:2.5.2")

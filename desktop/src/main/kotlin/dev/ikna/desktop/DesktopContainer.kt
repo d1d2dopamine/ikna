@@ -2,6 +2,7 @@ package dev.ikna.desktop
 
 import dev.ikna.data.repo.prepareFirstSession
 
+import kotlinx.coroutines.cancelAndJoin
 import dev.ikna.data.db.openIknaDatabase
 import dev.ikna.data.db.wipeAllData
 import dev.ikna.data.dev.DATA_PROFILE_FILE
@@ -56,7 +57,12 @@ class DesktopContainer(
 
     val config: GovernorConfig = GovernorConfig.load(ClasspathAssets)
 
-    internal val db = openIknaDatabase(File(home, databaseFileName(dataProfile)))
+    private val legacyDatabaseFile = File(home, databaseFileName(dataProfile))
+    val syncProfileSlots = dev.ikna.sync.ProfileSlotStore(home, legacyDatabaseFile)
+    private val selectedSyncProfile = if (isDeveloperMode) null else syncProfileSlots.selection()
+    private val activeDatabaseFile = selectedSyncProfile?.active ?: legacyDatabaseFile
+    val profileRestartGate = dev.ikna.sync.ProfileRestartGate()
+    internal val db = openIknaDatabase(activeDatabaseFile)
 
     val settings = SettingsStore(
         createSettingsDataStore(
@@ -76,7 +82,8 @@ class DesktopContainer(
     val componentRepository = ComponentRepository(
         componentDao = db.componentDao(),
         chunkDao = db.chunkDao(),
-        reviewDao = db.reviewDao()
+        reviewDao = db.reviewDao(),
+        db = db
     )
 
     private val scheduler = Scheduler(
@@ -99,6 +106,8 @@ class DesktopContainer(
         selector = ChunkSelector(),
         baseConfig = config
     )
+
+    val sessionChanges = dev.ikna.domain.session.CommittedSessionChanges()
 
     val studyStatsRepository = dev.ikna.data.repo.StudyStatsRepository(db, config.dayStartHour)
 
@@ -123,8 +132,68 @@ class DesktopContainer(
         planDao = db.planDao(),
         components = componentRepository,
         scheduler = scheduler,
-        config = config
+        config = config,
+        beforeExternalRestore = { deviceSync.beforeExternalRestore() },
+        afterExternalRestore = { generation -> deviceSync.afterExternalRestore(generation) }
     )
+
+    val deviceSync: dev.ikna.sync.DeviceSyncController by lazy {
+        dev.ikna.sync.DeviceSyncController(
+            File(home, "device-sync"), restoreRepository,
+            onMerged = { sessionChanges.notifyCommitted() }, available = !isDeveloperMode,
+            currentDatabaseSlot = syncProfileSlots.slotId(activeDatabaseFile),
+            canRecoverProfile = selectedSyncProfile?.recovery != null,
+            currentSlotOperationId = selectedSyncProfile?.operationId,
+            currentSlotOperationDigest = selectedSyncProfile?.operationDigest)
+    }
+
+    private val profileAdoption by lazy {
+        dev.ikna.sync.ProfileAdoptionService(
+            slots = syncProfileSlots,
+            liveRepository = restoreRepository,
+            openNewDatabase = { openIknaDatabase(it) },
+            createRestoreRepository = { dev.ikna.sync.profileRestoreRepository(it, config) },
+            withLiveWriteGuard = { block -> learningRepository.withJournalWriteLock(block) },
+            quiesceAndCloseLive = {
+                profileRestartGate.awaitUiQuiescence()
+                optimizerScope.coroutineContext[kotlinx.coroutines.Job]?.cancelAndJoin()
+                db.close()
+            },
+            prepareActivation = { candidate, opId, digest ->
+                deviceSync.prepareProfileActivation(syncProfileSlots.slotId(candidate), opId, digest)
+            },
+            prepareRecovery = { recoveryOperation ->
+                val recovered = checkNotNull(syncProfileSlots.selection().recovery)
+                deviceSync.prepareProfileRecovery(syncProfileSlots.slotId(recovered), recoveryOperation)
+            }
+        )
+    }
+
+    init {
+        deviceSync.isRestartRequired = { profileRestartGate.required.value }
+        deviceSync.recoveryHandler = {
+            try { profileAdoption.recover(java.util.UUID.randomUUID().toString()) }
+            finally { profileRestartGate.finish() }
+        }
+        deviceSync.adoptionHandler = { request ->
+            try {
+                profileAdoption.adopt(request.incoming, request.preview.localRevision, request.proposal.operationId,
+                    dev.ikna.sync.ProfileConsentProtocol.tupleDigest(request.proposal), request.afterLocalId, request.boundaryToken, request.journalAuthorization)
+            } finally { profileRestartGate.finish() }
+        }
+        learningRepository.syncHistoryBoundary = { deviceSync.undoBoundary() }
+        if (!isDeveloperMode) learningRepository.historyBoundaryToken = { deviceSync.boundaryToken() }
+        learningRepository.ensureHistoryWritable = { deviceSync.ensureHistoryWritable() }
+        restoreRepository.journalMergeGuard = { block -> learningRepository.withJournalWriteLock(block) }
+        restoreRepository.historyBoundary = { deviceSync.historyBoundary() }
+        componentRepository.historyBoundary = { deviceSync.historyBoundary() }
+    }
+
+    suspend fun resetProgress() {
+        val mutation = deviceSync.beforeHistoryChange()
+        val boundary = learningRepository.resetProgressWithBoundary()
+        deviceSync.afterProgressReset(boundary, mutation)
+    }
 
     val developerTools: dev.ikna.data.dev.DeveloperTools? by lazy {
         if (isDeveloperMode) dev.ikna.data.dev.DeveloperTools(dataProfile, learningRepository, settings) else null
@@ -206,12 +275,22 @@ class DesktopContainer(
      *
      * Deleting decks one by one deliberately preserves the append-only review
      * log, so it can never implement "erase everything". The shared KMP wipe
-     * DAO clears every entity table in one transaction; preferences are cleared
-     * after it so their first-run flag sends the window back to onboarding. The
+     * DAO clears learner data transactionally per database, preserving only slot
+     * provenance. Multiple retained databases are not one atomic wipe. Preferences
+     * are cleared after success so first-run returns to onboarding. The
      * caller keeps the operation off the UI thread.
      */
     suspend fun wipeAllData() {
-        db.wipeAllData()
+        val mutation = deviceSync.beforeHistoryChange()
+        optimizerScope.coroutineContext[kotlinx.coroutines.Job]?.cancelAndJoin()
+        learningRepository.withJournalWriteLock {
+            if (isDeveloperMode) db.wipeAllData()
+            else dev.ikna.sync.ProfileRetainedDataWiper(
+                syncProfileSlots, activeDatabaseFile, db,
+                openDatabase = { openIknaDatabase(it) }
+            ).wipeAllProfiles()
+        }
+        deviceSync.afterProgressReset(0, mutation)
         settings.clearAll()
     }
 
@@ -223,6 +302,7 @@ class DesktopContainer(
     /** Installs the decks shipped inside the application. Safe to call twice. */
     suspend fun install() {
         if (installed) return
+        if (!isDeveloperMode) deviceSync.initializeProfileSlot()
         if (isDeveloperMode) {
             val requested = scenarioRequests.current()
             if (requested != null) {

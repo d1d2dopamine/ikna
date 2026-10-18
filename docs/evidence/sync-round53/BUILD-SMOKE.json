@@ -1,0 +1,107 @@
+{
+  "observed_at_utc": "2026-10-17T21:13:04.676937+00:00",
+  "tests": {
+    "shared_desktop": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 20,
+      "skipped_cases": []
+    },
+    "desktop": {
+      "tests": 276,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 2,
+      "suites": 35,
+      "skipped_cases": [
+        {
+          "class": "dev.ikna.desktop.CardRevealPointerIntegrationTest",
+          "name": "secondaryMouseShortDragDoesNotRevealOrGrade[mouse=false]"
+        },
+        {
+          "class": "dev.ikna.desktop.CardRevealPointerIntegrationTest",
+          "name": "secondaryMouseLongDragDoesNotRevealOrGrade[mouse=false]"
+        }
+      ]
+    },
+    "shared_android_unit": {
+      "tests": 110,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 19,
+      "skipped_cases": []
+    },
+    "app_android_unit": {
+      "tests": 565,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 67,
+      "skipped_cases": []
+    }
+  },
+  "totals": {
+    "total_cases": 1068,
+    "passed": 1066,
+    "skipped": 2,
+    "failures": 0,
+    "errors": 0
+  },
+  "builds": {
+    "assembleDebug": "PASS",
+    "createDistributable": "PASS",
+    "apk": {
+      "path": "app/build/outputs/apk/debug/app-debug.apk",
+      "bytes": 68221353,
+      "sha256": "344fb60c444af7ad8d5fbef792cfea75bb0081f56ea5feb7bdfd2cafadef08a0",
+      "signature_verified": true,
+      "signature_scheme_v2": true,
+      "certificate_sha256": "7ab1a6528157f00c76d0b1e2aeab3bf844786ce4c253d3cbe3cd5e50f5adbd17"
+    },
+    "packaged_launcher": {
+      "path": "desktop/build/compose/binaries/main/app/Ikna/bin/Ikna",
+      "bytes": 21880,
+      "sha256": "b3d3030696eb10c223bed43a426fb8b9a9250960e982a02cfe153d05ecb947c2"
+    },
+    "application_jars": {
+      "desktop/build/compose/binaries/main/app/Ikna/lib/app/desktop-2455b2174463f949fec7db431a26914.jar": "f2a50d5dc4a01d1286c0954363a0a522da3f67497102359cc99d3a8896e57b69",
+      "desktop/build/compose/binaries/main/app/Ikna/lib/app/shared-desktop-a66fb3bab3b4962b186a5ad0a2969.jar": "4ca30ede734ab47b7fdbd77b3eed1d8a41a2fcf585172f7e1785a74eb1f980dc"
+    }
+  },
+  "packaged_linux_selftest": {
+    "exit_code": 0,
+    "LD_BIND_NOW": "1",
+    "isolated_home": "Fresh isolated temporary home; HOME/user.home/XDG caches and IKNA_SELFTEST_HOME redirected",
+    "output": "selftest: sun.misc.Unsafe present\nselftest: decks=0 cards=0 palette=ink\nselftest: ok\n"
+  },
+  "source_manifest": {
+    "path": "compile-inputs-before.json",
+    "sha256": "1c16665153f4dc177bffdb85096fb790c987211b9e674ba7c7f33943d0b2a7e3",
+    "observed_at_utc": "2026-10-17T21:13:04.605831+00:00",
+    "all_entries_verified_unchanged": true,
+    "file_count": 435,
+    "aggregate_sha256": "f2b94e13bfcf5fda6a88562ec523bfef2b96b49130227a97efbeec9ef6f72c8a",
+    "changed_files": []
+  },
+  "limitations": [
+    "Linux/JVM tests and headless packaged smoke do not establish physical Android/Windows pairing or GUI acceptance.",
+    "Zero decks/cards are expected for corpus-free source and do not verify bundled starter-deck import.",
+    "Full test total includes shared cases executed on desktop and Android local-JVM targets.",
+    "APK and packaged binary image are build checks, not publication or permission to ship artifacts."
+  ],
+  "logs": [
+    "round53-full-tests.log",
+    "round53-build-smoke.log",
+    "round53-apk-signature.log",
+    "round53-packaged-selftest.log"
+  ],
+  "logHashes": {
+    "round53-full-tests.log": "3571888748ed5f53abd955c87ddd6d4d626d70c192f1a309a44ab13180de3dbd",
+    "round53-build-smoke.log": "db636ecaa917fdd0f727f18d216c7d297fab1aaad0a94ace383891fce6d8b3ce",
+    "round53-apk-signature.log": "edcc90a98c177c592141672ab42f0eb0205300eb4c21ed33078fb140570c9dd8",
+    "round53-packaged-selftest.log": "689417140520e1a61d812c961a2779b702631d1ad39258e63cafb611478f01eb"
+  }
+}

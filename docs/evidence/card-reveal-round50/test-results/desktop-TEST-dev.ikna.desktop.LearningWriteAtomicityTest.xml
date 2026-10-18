@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.LearningWriteAtomicityTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:08:34" hostname="3b7663fd5f9d" time="0.39">
+  <properties/>
+  <testcase name="answer cancellation at every write including commit gate rolls back" classname="dev.ikna.desktop.LearningWriteAtomicityTest" time="0.098"/>
+  <testcase name="undo failure after every write rolls back and retry retracts once" classname="dev.ikna.desktop.LearningWriteAtomicityTest" time="0.064"/>
+  <testcase name="undo cancellation at every write including commit gate rolls back" classname="dev.ikna.desktop.LearningWriteAtomicityTest" time="0.077"/>
+  <testcase name="answer failure after every write rolls back and retry commits once" classname="dev.ikna.desktop.LearningWriteAtomicityTest" time="0.151"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

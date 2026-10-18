@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.domain.fsrs.SchedulerDueDayTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:08:43" hostname="3b7663fd5f9d" time="0.001">
+  <properties/>
+  <testcase name="a card answered late at night is waiting from the start of its day" classname="dev.ikna.domain.fsrs.SchedulerDueDayTest" time="0.001"/>
+  <testcase name="a chunk whose words are known starts on a day boundary" classname="dev.ikna.domain.fsrs.SchedulerDueDayTest" time="0.0"/>
+  <testcase name="a card answered in the afternoon is not moved later" classname="dev.ikna.domain.fsrs.SchedulerDueDayTest" time="0.0"/>
+  <testcase name="a first contact is still due immediately" classname="dev.ikna.domain.fsrs.SchedulerDueDayTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

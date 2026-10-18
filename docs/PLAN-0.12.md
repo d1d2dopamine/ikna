@@ -952,3 +952,219 @@ Pinned ICU74.2 replay preserves all six levels and exact selected assignments;
 actual admitted-card delta is zero. Full-pool impact/performance is unmeasured.
 Contexts-per-target is a maximum of3, not a universal minimum; Round36's strict
 three-context append-only witness retains its narrower historical meaning.
+
+## Round 50 — short-drag reveal regression
+
+2026-10-13: [Round50](ROUND-0.12-50.md) reproduces a consumed short horizontal
+gesture that cancelled tap without reaching the peek threshold. A release-only
+fallback reveals without grading; existing thresholds and cancellation paths
+remain intact. Real Compose pointer tests distinguish offscreen JVM coverage from
+Windows/Android device acceptance. Daily repetition policy is diagnosed but
+unchanged pending owner context. Windows minimization remains open; an optional
+read-only probe is included, not a native animation fix.
+
+## Round 51 — paired foreground journal synchronization
+
+2026-10-17 owner priority: finish automatic device synchronization before other
+Ikna work. Catalogue and unrelated UI work are deferred for this batch. Starting
+point is the supplied Round50 source, with its UI corrections retained.
+
+Scope: explicit trusted-device pairing, authenticated encrypted local-network
+transport, automatic exchange while applications are active, stable event IDs,
+deterministic idempotent journal union and event-targeted undo. Settings and
+content remain local. Reset and restore require durable boundaries, stale-operation
+protection and an explicit recoverable new-history flow. Never silently revive
+archived pre-reset answers. Nonsecret reset metadata travels with the database;
+private pairing credentials do not.
+
+Acceptance: real Room databases and actual TLS sockets, reordered/duplicate/offline
+histories, conflicts and missing content, cancellation/rollback, restart/migration,
+reset/restore and copied-database recovery tests. Android compilation is distinct
+from physical-device or Windows GUI acceptance. See [SYNC-0.12.md](SYNC-0.12.md)
+for setup and limitations; final executed checks belong in the Round51 report.
+Internet/background transport, large-journal pagination and OS-backed key storage
+remain outside this first local implementation. No external server is deployed.
+
+## Round 52 — initial profile agreement and recoverable adoption
+
+Owner-authorized continuation, 2026-10-17. Settings remain the opt-in entry point;
+show paired devices, session status and individual revocation. One learner profile
+has device copies; no ordinary multi-profile switcher is introduced.
+
+Initial pairing authorizes a bounded encrypted content preview, not automatic
+mutation. Both devices approve the exact revision-bound merge/adoption proposal.
+Preserve unique compatible deck content; names are not identity, same IDs with
+conflicting content fail closed. Durable operation receipts make retry idempotent.
+Adoption builds a verified separate database, keeps the original for explicit
+recovery, and requires restart. Settings/media remain local. SQLite selection
+journal and immutable nonsecret slot origin are distinct from revocable consent.
+The existing explicit erase-everything action must cover retained and orphan
+staged databases, with honest partial-failure reporting.
+
+Acceptance: real Room + authenticated socket integration, stale and reordered
+approval, duplicate/lost acknowledgments, adoption restart/recovery, conflicting
+content, reset boundaries, migration, retained-profile wipe and cancellation.
+Final executed evidence belongs in the Round52 report; source presence alone is
+not a pass. Physical Windows/Android pairing, OS device transfer and power-loss
+acceptance remain separate from Linux/JVM tests.
+
+Remote storage: bounded interface and established-library encryption are only
+foundations. No real provider is configured. Provider selection/access, platform
+key protection and backend concurrency/rollback verification remain open gates;
+LAN success must never be described as internet synchronization. See
+[SYNC-PROFILES-0.12.md](SYNC-PROFILES-0.12.md) and
+[REMOTE-SYNC-DESIGN.md](REMOTE-SYNC-DESIGN.md).
+
+
+## Round53 — bounded sync profile materialization (completed)
+
+Priority: preserve the existing local-first profile/consent semantics while
+rejecting profiles above the existing 4 MiB / 50,000-row-per-table limits before
+unbounded entity materialization. Add transactional row/text-byte preflight,
+active-history SQL reads, and actionable size errors. Do not truncate history,
+raise caps, weaken identity/approval rules, or change manual export limits.
+
+Acceptance: focused real SQLite resource/cancellation/boundary tests, unchanged
+profile/journal/protocol regressions, and bounded synthetic before/after capacity
+measurements against immutable Round52. A source reconstruction is not test
+evidence. The execution workspace was lost before the first Round53 JVM run;
+work resumed from the owner's freshly attached, hash-verified Round52 archive.
+
+Next sync stage: local full copies with bounded missing-event exchange, stable
+event identity, durable per-peer checkpoints and retry/reconnect tests. Network
+incrementality must not be confused with bounded replay cost. Internet routing
+and physical-device acceptance remain separate gates; no cloud account or
+external relay deployment is included. Main daily-goal policy remains unchanged
+in this resource stage; optional hard-card review is separately approved.
+
+Round53 result: 1,066 full-suite passes, two existing pointer skips, zero failures;
+standard Android APK and Linux distributable build/selftest passed. Six bounded
+capacity observations passed; no broad speedup or physical-device claim. See
+[ROUND-0.12-53.md](ROUND-0.12-53.md). Incremental transfer remains the next stage.
+
+## Round54 — local-first incremental journal exchange (completed local stage)
+
+Keep full local data copies and exact bilateral profile consent. After a newly
+approved version-3 bootstrap, exchange bounded event inventories and only missing
+payloads. Persist portable event identity/digest/undo mapping and contiguous
+per-peer checkpoints; commit additions, replay and checkpoint atomically before
+acknowledgement. Preserve retry/restart behavior, explicit content conflicts and
+history-generation boundaries. No cloud service, relay deployment or universal
+internet reachability is included.
+
+Schema 13 adds derived synchronization metadata with an explicit 12→13 migration;
+old completions do not silently become new consent. Initial bootstrap remains
+bounded by the existing profile limit. Post-consent content identity must be
+checked without loading/counting journal history, and again inside page commit.
+Legacy event identity is resolved once during bounded bootstrap, never renumbered
+per page. Unknown later legacy rows and oversized single events fail explicitly.
+
+Acceptance: duplicate/lost/reordered frames, concurrent offline additions, same-ID
+conflicts, undo dependencies across pages, cancellation/crash/restart checkpoints,
+reset/restore/adoption invalidation, content changes between preview and commit,
+old-peer incompatibility, schema migration and actual Room/TLS integration. A page
+size cap is not a guarantee of bounded replay memory or CPU; measure remaining
+whole-history replay cost honestly. UI must distinguish consent completion from
+journal catch-up. Stop and preserve evidence if a required invariant cannot be
+maintained; do not truncate, silently acknowledge or weaken identity checks.
+
+
+Round54 result: 1,134 passes, two existing skips, zero failures/errors; debug APK
+and Linux distributable/selftest passed. The 1,117-event same-JVM Room/TLS
+restart case converged within its original 60-second bound. Initial profile
+limits and full-history replay remain. See [ROUND-0.12-54.md](ROUND-0.12-54.md).
+
+
+## Next bounded sync acceptance — independent process interruption
+
+After Round54 is sealed, verify two separate JVM peers using real Room databases,
+controllers and pinned TLS. Use test-only seams to stop the receiver before a
+page transaction commits and after commit but before its acknowledgement. Kill
+only the fixture processes, restart both with networking paused, inspect durable
+rows/checkpoints, then reconnect. Keep the exact expected 277-event union,
+legacy identities, cross-page Undo references and derived state. Preserve fixed
+phase deadlines and a 60-second convergence budget; retain failing evidence.
+
+This closes an independent-process gap in same-JVM integration evidence. It is
+not physical Android/Windows, filesystem power-loss or internet-routing evidence.
+No production fault hook or external service is required. Stop once these two
+fault cases and subsequent no-op exchanges meet the stated criteria; do not
+turn the stage into an unbounded performance campaign.
+
+## Round55 — independent-process interruption (completed local stage)
+
+Execute the bounded next-stage acceptance above against sealed Round54 in a
+separate source copy. Test-only process harness and classpath support are allowed;
+production changes require an evidenced defect and regression. See
+[ROUND-0.12-55.md](ROUND-0.12-55.md). Preserve Round54 as the verified rollback
+source; database downgrade still requires a compatible backup.
+
+Round55 result: both abrupt-process cases passed; full desktop regression 297
+passes plus two existing skips, zero failures/errors. Production and schemas
+remain byte-identical to 54. Physical-device/power-loss/internet gates remain open.
+
+## Round56 — separate optional hard-card review (completed local stage)
+
+Owner decision, 2026-10-17: after the main lesson is complete, offer a separate
+voluntary hard-card review without another obligation. Reuse the existing
+learned-card/lapse criterion, ordinary grading and FSRS. Keep each requested
+batch finite and separate from daily-plan completion and earned-new credit.
+
+The accounting distinction must survive restart, Undo, replay, export/restore
+and sync. Preserve historical event bytes/identities; use explicit schema and
+wire compatibility rather than allowing older peers to reinterpret new purpose.
+See [OPTIONAL-HARD-REVIEW-0.12.md](OPTIONAL-HARD-REVIEW-0.12.md) and
+[ROUND-0.12-56.md](ROUND-0.12-56.md). Final result:1,172 passes, two existing skips, zero failures/errors; debug APK
+and packaged Linux selftest passed. Remaining physical and internet sync gates
+are unchanged.
+
+
+## Round57 — new-answer duration integrity (completed local stage)
+
+A reproduced backward wall-clock interval persisted a negative duration and
+negative active time; sync refused the event while manual restore accepted it.
+Use monotonic UI elapsed time and shared new-answer normalization to Android's
+existing 0..120000ms contract. Validate negative imported durations atomically,
+retain valid historical long values and immutable identities, and reject daily
+sum overflow without partial writes. Ordinary/optional answers, Undo, replay,
+goal accounting, restore/sync and platform wiring require regressions. Stop at
+that bounded correction; no historical rewrite or timestamp-causality promise.
+See [ROUND-0.12-57.md](ROUND-0.12-57.md) for verification status.
+
+
+Round57 result: 1,189 passes, two existing skips, zero failures/errors; Android
+APK build/signature and packaged Linux selftest passed. Existing invalid history
+is preserved, not repaired. Physical-device, internet-reachability and lifecycle
+acceptance remain open; this finite correction is complete.
+
+
+## Round58 — local completed lesson stops automatic repeats (completed local stage)
+
+The owner-approved completed-main-lesson contract requires further hard review to
+be voluntary. A real repository/source-guarded Android queue trace confirms that
+AGAIN repeats can remain after persisted global completion, while restart removes
+them. Stop only answered transient repeats after durable global required-prefix
+completion; do not use filtered-deck N/N or raw count, drop unanswered keys, or
+change FSRS. Preserve explicit extra work, optional batches, Undo and restart.
+See [ROUND-0.12-58.md](ROUND-0.12-58.md) for the finite acceptance/evidence boundary.
+
+
+Round58 result: 1,204 passed, two existing skips, zero failures/errors; APK build
+and signature plus Linux packaged selftest passed. Scope is locally tracked
+answered tails. Concurrent sync invalidation of an open session is explicitly
+separate Round59 work; no automatic admission or seamless refresh is claimed.
+
+
+## Round59 — open-session safety after committed sync (completed bounded stage)
+
+Android and Desktop can retain stale prompts after a remote commit. Keep the
+atomic plan-clear safety fence. Use nonblocking change notification and explicit
+foreground inspection, invalidate old presentation, then read existing plan and
+counts without admission. Missing/replaced plan requires explicit Continue;
+never automatically call buildSession from the notification. Preserve accepted
+in-flight answers and optional accounting, fence all obsolete async UI results,
+and keep unchanged optional batches on ordinary resume. No durable plan witness,
+new authorization revision or schema redesign. See
+[ROUND-0.12-59.md](ROUND-0.12-59.md) for finite verification and limitations.
+
+Round59 result: 1,239 passed, two existing skips, zero failures/errors; APK build/signature and packaged Linux selftest passed. Both platform source paths are wired; physical lifecycle acceptance remains open. Missing/replaced plans require explicit Continue, not automatic admission.

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.data.repo.FirstSessionPreparationTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:05:33" hostname="3b7663fd5f9d" time="0.005">
+  <properties/>
+  <testcase name="failedInstallDoesNotBuildPlanOrComplete[desktop]" classname="dev.ikna.data.repo.FirstSessionPreparationTest" time="0.001"/>
+  <testcase name="failedPlanCanRetryWithoutPrematureCompletion[desktop]" classname="dev.ikna.data.repo.FirstSessionPreparationTest" time="0.001"/>
+  <testcase name="cancellationDoesNotCompleteFirstRun[desktop]" classname="dev.ikna.data.repo.FirstSessionPreparationTest" time="0.001"/>
+  <testcase name="failedCommitRemainsVisibleToCaller[desktop]" classname="dev.ikna.data.repo.FirstSessionPreparationTest" time="0.001"/>
+  <testcase name="completionFollowsBothPrerequisites[desktop]" classname="dev.ikna.data.repo.FirstSessionPreparationTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.data.pack.BundledPackFailureTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:05:33" hostname="3b7663fd5f9d" time="0.052">
+  <properties/>
+  <testcase name="malformedContentDoesNotMarkPackInstalled[desktop]" classname="dev.ikna.data.pack.BundledPackFailureTest" time="0.035"/>
+  <testcase name="ordinaryAssetReadFailureIsNotMissingContent[desktop]" classname="dev.ikna.data.pack.BundledPackFailureTest" time="0.001"/>
+  <testcase name="cancellationPropagatesFromDatabaseInsteadOfCompleting[desktop]" classname="dev.ikna.data.pack.BundledPackFailureTest" time="0.009"/>
+  <testcase name="optionalMissingDeckRemainsNonfatal[desktop]" classname="dev.ikna.data.pack.BundledPackFailureTest" time="0.001"/>
+  <testcase name="databaseFailureCannotCompleteOnboardingAndRetryIsIdempotent[desktop]" classname="dev.ikna.data.pack.BundledPackFailureTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

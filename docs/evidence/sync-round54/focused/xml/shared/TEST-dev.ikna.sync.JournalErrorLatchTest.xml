@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.sync.JournalErrorLatchTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-17T21:51:43" hostname="d0d72dd907ef" time="0.003">
+  <properties/>
+  <testcase name="operation peer generation and stopped lifecycle clear old actionable failure[desktop]" classname="dev.ikna.sync.JournalErrorLatchTest" time="0.002"/>
+  <testcase name="ordinary network errors never become a sticky journal error[desktop]" classname="dev.ikna.sync.JournalErrorLatchTest" time="0.0"/>
+  <testcase name="control successes and transient errors preserve actionable failure until catchup[desktop]" classname="dev.ikna.sync.JournalErrorLatchTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

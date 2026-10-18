@@ -22,9 +22,10 @@ private val UNDO_HEIGHT = 48.dp
 private val EDGE = 20.dp
 
 @Composable
-fun IknaSessionTopBar(state: SessionUiState) {
-    val minimumJustMet = state.minimumMet && state.answeredToday == state.dailyMinimum
+fun IknaSessionTopBar(state: SessionUiState, onFinishOptional: (() -> Unit)? = null) {
+    val minimumJustMet = state.minimumMet && state.goalAnswersToday == state.dailyMinimum
     val text = when {
+        state.optionalHardReview -> S.t("sess.hard.active")
         state.index == 0 && !state.revealed && state.remaining > 0 -> startEstimate(state)
         minimumJustMet -> S.t("sess.003")
         else -> ""
@@ -48,7 +49,9 @@ fun IknaSessionTopBar(state: SessionUiState) {
                 .padding(start = 8.dp)
         )
 
-        if (state.deckTitle != null) {
+        if (state.optionalHardReview && onFinishOptional != null) {
+            IknaTextButton(label = S.t("sess.hard.finish"), onClick = onFinishOptional)
+        } else if (state.deckTitle != null) {
             Text(
                 text = state.deckTitle.uppercase(),
                 style = MaterialTheme.typography.labelSmall,
@@ -94,7 +97,8 @@ fun IknaTodayProgress(
 fun IknaSessionEmptyState(
     state: SessionUiState,
     animations: Boolean,
-    onExtra: () -> Unit
+    onExtra: () -> Unit,
+    onOptionalHard: (() -> Unit)? = null
 ) {
     IknaScrollableColumn(
         modifier = Modifier
@@ -123,6 +127,7 @@ fun IknaSessionEmptyState(
 
         Text(
             text = when {
+                state.optionalHardReview -> S.t("sess.hard.done")
                 state.reason == GovernorReason.PACK_EXHAUSTED -> S.t("sess.004")
                 state.answeredToday > 0 -> S.t("sess.005")
                 else -> S.t("sess.006")
@@ -151,6 +156,18 @@ fun IknaSessionEmptyState(
         }
 
         Spacer(Modifier.height(28.dp))
+
+        if (state.optionalHardEmpty) {
+            Text(S.t("sess.hard.empty"), style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+            Spacer(Modifier.height(Space.md))
+        }
+        if (state.optionalHardAvailable && onOptionalHard != null) {
+            IknaTextButton(label = S.t("sess.hard.start"), onClick = onOptionalHard)
+            Text(S.t("sess.hard.scope"), style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+            Spacer(Modifier.height(Space.md))
+        }
 
         if (state.noMoreExtra) {
             Text(
@@ -245,6 +262,7 @@ fun IknaSessionUndoBar(
 }
 
 private fun emptyExplanation(state: SessionUiState): String = when {
+    state.optionalHardReview -> S.t("sess.hard.done_scope")
     state.reason == GovernorReason.PACK_EXHAUSTED -> reasonText(state.reason)
     state.answeredToday > 0 -> S.t("sess.018")
     else -> reasonText(state.reason)
@@ -313,4 +331,16 @@ private fun startEstimate(state: SessionUiState): String {
 
 private fun cardWord(count: Int): String {
     return quantityWord(count.toLong(), "sess.039", "sess.040", "sess.041", "sess.042")
+}
+
+/** A changed/missing plan is neither completion nor an I/O failure. */
+@Composable
+fun IknaSessionChanged(onContinue: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = EDGE)) {
+        Text(S.t("sess.changed.message"), style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center)
+        Spacer(Modifier.height(Space.md))
+        IknaTextButton(label = S.t("sess.changed.continue"), onClick = onContinue)
+    }
 }

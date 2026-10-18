@@ -1,5 +1,6 @@
 package dev.ikna
 
+import kotlinx.coroutines.cancelAndJoin
 import dev.ikna.data.db.openIknaDatabase
 import dev.ikna.data.dev.DATA_PROFILE_FILE
 import dev.ikna.data.dev.DEVELOPER_SETTINGS_FILE
@@ -64,7 +65,15 @@ class AppContainer(
 
     val config: GovernorConfig = loadGovernorConfig(context)
 
-    private val db = openIknaDatabase(context, databaseFileName(dataProfile))
+    private val legacyDatabaseFile = appContext.getDatabasePath(databaseFileName(dataProfile))
+    private val profileDatabaseDirectory = File(appContext.filesDir, "sync-profiles").also {
+        check(it.isDirectory || it.mkdirs()) { "Profile database directory unavailable" }
+    }
+    val syncProfileSlots = dev.ikna.sync.ProfileSlotStore(profileDatabaseDirectory, legacyDatabaseFile)
+    private val selectedSyncProfile = if (isDeveloperMode) null else syncProfileSlots.selection()
+    private val activeDatabaseFile = selectedSyncProfile?.active ?: legacyDatabaseFile
+    val profileRestartGate = dev.ikna.sync.ProfileRestartGate()
+    private val db = openIknaDatabase(context, activeDatabaseFile.absolutePath)
 
     val settings = SettingsStore(
         context,
@@ -83,7 +92,8 @@ class AppContainer(
     private val componentRepository = ComponentRepository(
         componentDao = db.componentDao(),
         chunkDao = db.chunkDao(),
-        reviewDao = db.reviewDao()
+        reviewDao = db.reviewDao(),
+        db = db
     )
 
     // The day start hour is passed in so that intervals land on study days
@@ -125,8 +135,74 @@ class AppContainer(
         planDao = db.planDao(),
         components = componentRepository,
         scheduler = scheduler,
-        config = config
+        config = config,
+        beforeExternalRestore = { deviceSync.beforeExternalRestore() },
+        afterExternalRestore = { generation -> deviceSync.afterExternalRestore(generation) }
     )
+
+    val sessionChanges = dev.ikna.domain.session.CommittedSessionChanges()
+
+    val deviceSync: dev.ikna.sync.DeviceSyncController by lazy {
+        dev.ikna.sync.DeviceSyncController(
+            File(appContext.filesDir, "device-sync"), restoreRepository,
+            onMerged = { sessionChanges.notifyCommitted() }, available = !isDeveloperMode,
+            currentDatabaseSlot = syncProfileSlots.slotId(activeDatabaseFile),
+            canRecoverProfile = selectedSyncProfile?.recovery != null,
+            currentSlotOperationId = selectedSyncProfile?.operationId,
+            currentSlotOperationDigest = selectedSyncProfile?.operationDigest)
+    }
+
+    private val profileAdoption by lazy {
+        dev.ikna.sync.ProfileAdoptionService(
+            slots = syncProfileSlots,
+            liveRepository = restoreRepository,
+            openNewDatabase = { openIknaDatabase(appContext, it.absolutePath) },
+            createRestoreRepository = { dev.ikna.sync.profileRestoreRepository(it, config) },
+            withLiveWriteGuard = { block -> learningRepository.withJournalWriteLock(block) },
+            quiesceAndCloseLive = {
+                profileRestartGate.awaitUiQuiescence()
+                scope.coroutineContext[kotlinx.coroutines.Job]?.cancelAndJoin()
+                db.close()
+            },
+            prepareActivation = { candidate, opId, digest ->
+                deviceSync.prepareProfileActivation(syncProfileSlots.slotId(candidate), opId, digest)
+            },
+            prepareRecovery = { recoveryOperation ->
+                val recovered = checkNotNull(syncProfileSlots.selection().recovery)
+                deviceSync.prepareProfileRecovery(syncProfileSlots.slotId(recovered), recoveryOperation)
+            }
+        )
+    }
+
+    init {
+        deviceSync.adoptionPreflight = {
+            // Establish the dedicated database-only transfer directory durably before consent.
+            java.nio.channels.FileChannel.open(appContext.filesDir.toPath(), java.nio.file.StandardOpenOption.READ).use { it.force(true) }
+        }
+        deviceSync.isRestartRequired = { profileRestartGate.required.value }
+        deviceSync.recoveryHandler = {
+            try { profileAdoption.recover(java.util.UUID.randomUUID().toString()) }
+            finally { profileRestartGate.finish() }
+        }
+        deviceSync.adoptionHandler = { request ->
+            try {
+                profileAdoption.adopt(request.incoming, request.preview.localRevision, request.proposal.operationId,
+                    dev.ikna.sync.ProfileConsentProtocol.tupleDigest(request.proposal), request.afterLocalId, request.boundaryToken, request.journalAuthorization)
+            } finally { profileRestartGate.finish() }
+        }
+        learningRepository.syncHistoryBoundary = { deviceSync.undoBoundary() }
+        if (!isDeveloperMode) learningRepository.historyBoundaryToken = { deviceSync.boundaryToken() }
+        learningRepository.ensureHistoryWritable = { deviceSync.ensureHistoryWritable() }
+        restoreRepository.journalMergeGuard = { block -> learningRepository.withJournalWriteLock(block) }
+        restoreRepository.historyBoundary = { deviceSync.historyBoundary() }
+        componentRepository.historyBoundary = { deviceSync.historyBoundary() }
+    }
+
+    suspend fun resetProgress() {
+        val mutation = deviceSync.beforeHistoryChange()
+        val boundary = learningRepository.resetProgressWithBoundary()
+        deviceSync.afterProgressReset(boundary, mutation)
+    }
 
     val developerTools: dev.ikna.data.dev.DeveloperTools? by lazy {
         if (isDeveloperMode) dev.ikna.data.dev.DeveloperTools(dataProfile, learningRepository, settings) else null
@@ -180,13 +256,23 @@ class AppContainer(
     /**
      * Full wipe, as if the app had just been installed.
      *
-     * The shared KMP wipe DAO does it in one transaction, so a wipe cannot
-     * leave half a database behind. Keep it off the main thread.
+     * Each database is cleared transactionally; several retained databases are
+     * processed sequentially and failure may leave a partial overall wipe.
+     * Keep it off the main thread.
      * The caller is expected to clear settings and restart the process too:
      * singletons and in-memory session state outlive the tables otherwise.
      */
     suspend fun wipeDatabase() {
-        db.wipeAllData()
+        val mutation = deviceSync.beforeHistoryChange()
+        scope.coroutineContext[kotlinx.coroutines.Job]?.cancelAndJoin()
+        learningRepository.withJournalWriteLock {
+            if (isDeveloperMode) db.wipeAllData()
+            else dev.ikna.sync.ProfileRetainedDataWiper(
+                syncProfileSlots, activeDatabaseFile, db,
+                openDatabase = { openIknaDatabase(appContext, it.absolutePath) }
+            ).wipeAllProfiles()
+        }
+        deviceSync.afterProgressReset(0, mutation)
     }
 
     val jsonExporter = JsonExporter(context, db.reviewDao(), synthetic = isDeveloperMode)
@@ -298,6 +384,7 @@ class AppContainer(
                         developerSandbox?.seed(DeveloperScenario.MATURE_HISTORY)
                     }
                 }
+                if (!isDeveloperMode) deviceSync.initializeProfileSlot()
                 optimizer.initialize()
                 schedulerMigrator.runIfNeeded().also {
                     optimizer.startAutomatic(db.reviewDao().observeOptimizerChanges())

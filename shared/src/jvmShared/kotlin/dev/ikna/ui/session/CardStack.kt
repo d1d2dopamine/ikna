@@ -266,10 +266,12 @@ fun SwipeableCard(
             // long drag.
             // Vertical drags belong to the reading viewport, never a rating.
             .pointerInput(key, signals) {
+                var revealedByDrag = false
                 detectHorizontalDragGestures(
                     onDragStart = {
                         tracker.resetTracking()
                         armed.value = null
+                        revealedByDrag = false
                         gradable.value = revealedNow.value
                         if (gradable.value) signals.dragStarted()
                     },
@@ -287,7 +289,8 @@ fun SwipeableCard(
                                 }
                                 armed.value = candidate
                             }
-                        } else if (!revealedNow.value && abs(next) >= PEEK_TRAVEL) {
+                        } else if (!revealedByDrag && !revealedNow.value && abs(next) >= PEEK_TRAVEL) {
+                            revealedByDrag = true
                             revealNow.value(INPUT_SWIPE)
                         }
                     },
@@ -302,6 +305,16 @@ fun SwipeableCard(
                         }
                     },
                     onDragEnd = {
+                        // Compose has already consumed this horizontal gesture,
+                        // cancelling the inner click. A short pull below the peek
+                        // distance must still reveal on release, not do nothing.
+                        // Keep the start-of-gesture grade gate: this release can
+                        // never also answer the newly revealed card. Cancellation
+                        // deliberately has no corresponding fallback.
+                        if (!gradable.value && !revealedByDrag && !revealedNow.value) {
+                            revealedByDrag = true
+                            revealNow.value(INPUT_SWIPE)
+                        }
                         val velocity = tracker.calculateVelocity()
                         val rating =
                             if (gradable.value) decideRating(drag.value, 0f, velocity.x, line) else null

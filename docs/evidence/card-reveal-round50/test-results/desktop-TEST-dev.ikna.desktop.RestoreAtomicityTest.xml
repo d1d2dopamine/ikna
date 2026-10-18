@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.RestoreAtomicityTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:08:35" hostname="3b7663fd5f9d" time="7.675">
+  <properties/>
+  <testcase name="standalone replay cancellation at every stage preserves all prior tables" classname="dev.ikna.desktop.RestoreAtomicityTest" time="1.952"/>
+  <testcase name="concurrent restore serializes signature lookup and does not duplicate history" classname="dev.ikna.desktop.RestoreAtomicityTest" time="0.075"/>
+  <testcase name="restore cancellation at every stage rolls back durably and retry is idempotent" classname="dev.ikna.desktop.RestoreAtomicityTest" time="2.002"/>
+  <testcase name="restore failure at every stage rolls back durably and retry is idempotent" classname="dev.ikna.desktop.RestoreAtomicityTest" time="1.912"/>
+  <testcase name="invalid late record is rejected before any mutation and synthetic only is inert" classname="dev.ikna.desktop.RestoreAtomicityTest" time="0.044"/>
+  <testcase name="standalone replay failure at every stage preserves all prior tables" classname="dev.ikna.desktop.RestoreAtomicityTest" time="1.608"/>
+  <testcase name="nested Anki shaped transaction commits together and outer failure rolls everything back" classname="dev.ikna.desktop.RestoreAtomicityTest" time="0.082"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

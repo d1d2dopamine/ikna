@@ -1,0 +1,765 @@
+{
+  "format": 1,
+  "probe_source_sha256": "711e8ab586797c4f9f5a7334e98061a5f8b7bad940c0ac0ca30b9d71dc61c8ea",
+  "probe_class_sha256": "5f6319d07f18689a0182b6565d92c6fbe20eaefce6b646fce3811dab552f0aa0",
+  "scope": "Three fixed technical fixtures, fresh JVM and disposable database per revision/case. No provider, card corpus or physical-device measurement.",
+  "cpu_affinity": [
+    0
+  ],
+  "per_process_heap_limit_bytes": 805306368,
+  "per_case_timeout_seconds": 300,
+  "overall_timeout_seconds": 900,
+  "jvm_options": [
+    "-Xmx768m",
+    "-XX:ActiveProcessorCount=1",
+    "-Duser.timezone=UTC"
+  ],
+  "rss_method": "Linux os.wait4 direct taskset-exec Java child ru_maxrss in KiB; one fresh child per case",
+  "source_hashes": {
+    "baseline52": {
+      "shared/src/jvmShared/kotlin/dev/ikna/data/export/ProfileTransfer.kt": "631ef90d1ae462536b2b5c91bac043df5e934d9ae182c7f1f6c20dbaa35bc75e",
+      "shared/src/jvmShared/kotlin/dev/ikna/data/repo/ProfileTransferRepository.kt": "4ffa82c96a038176e878fc50f22d3c7e8fb30aa19829df8747306583351dc57e",
+      "shared/src/jvmShared/kotlin/dev/ikna/data/repo/RestoreRepository.kt": "cbd6f82a201defffae88d0db500e83c82b9808e6c10a1ebad70fbd378c3bd5e8",
+      "shared/src/jvmShared/kotlin/dev/ikna/data/db/Daos.kt": "798561bd66ca06b78b409a7a101a06e6742332f7de7e60e57a3d0a3dacd088e0",
+      "shared/build/libs/shared-desktop.jar": "65245ee399a93806c455af414d41eb8c443139168141472d1c3cb8fd349fa04e"
+    },
+    "candidate53": {
+      "shared/src/jvmShared/kotlin/dev/ikna/data/export/ProfileTransfer.kt": "aef445e9a6d52b1572204cdf29ed614d7577e7316b540a92ecec8bd0aa0f2f8e",
+      "shared/src/jvmShared/kotlin/dev/ikna/data/repo/ProfileTransferRepository.kt": "5e9f1623ab743930cc602a4b307ba506b3795ad5d48c8e98fc836954dad5f17a",
+      "shared/src/jvmShared/kotlin/dev/ikna/data/repo/RestoreRepository.kt": "7ab248d08049e0c50b82bcd7030a04b3f691296fe75086a1ef63a6ee991a31d9",
+      "shared/src/jvmShared/kotlin/dev/ikna/data/db/Daos.kt": "352e4684dad2c6552dd58b3463e227c425286cf98d38090449969b5172a21267",
+      "shared/build/libs/shared-desktop.jar": "4ca30ede734ab47b7fdbd77b3eed1d8a41a2fcf585172f7e1785a74eb1f980dc"
+    }
+  },
+  "runs": [
+    {
+      "case_uuid": "7b46cb84-ac57-4dce-b1bb-1bb44d2e0ba7",
+      "case": "medium",
+      "revision": "baseline52",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 4.007992368000487,
+      "cpu_affinity": [
+        0
+      ],
+      "measurement": {
+        "format": 1,
+        "case": "medium",
+        "revision_label": "baseline52",
+        "status": "passed",
+        "targets": 512,
+        "events": 2048,
+        "packs": 2,
+        "memberships": 1024,
+        "contexts": 512,
+        "tokens": 512,
+        "heap_max_bytes": 778502144,
+        "available_processors": 1,
+        "java_version": "17.0.20.1",
+        "os_name": "Linux",
+        "os_arch": "amd64",
+        "memory_note": "Heap before/after values are instantaneous observations, not peaks or allocations. Measure process maximum RSS externally; it includes JVM/native overhead.",
+        "timing_note": "One observation per operation in a fresh JVM; fixture construction and half-journal seeding warm the code. Shared-host measurements, not device latency or a statistical benchmark.",
+        "canonical_input_sha256": "321522415f9451f0887f68ab1152cb5827f99453067c86458bfddf005b852001",
+        "canonical_input_bytes": 1787826,
+        "byte_cap": 4194304,
+        "row_cap_per_table": 50000,
+        "operations": {
+          "encode": {
+            "elapsed_ns": 72209359,
+            "heap_used_before_bytes": 19027264,
+            "heap_used_after_bytes": 42071448,
+            "gc_collections": 0
+          },
+          "seed_existing_half_journal": {
+            "elapsed_ns": 624138889,
+            "heap_used_before_bytes": 43206320,
+            "heap_used_after_bytes": 19569400,
+            "gc_collections": 1
+          },
+          "preview": {
+            "elapsed_ns": 290572671,
+            "heap_used_before_bytes": 38780144,
+            "heap_used_after_bytes": 27822448,
+            "gc_collections": 2
+          },
+          "changed_merge": {
+            "elapsed_ns": 573481016,
+            "heap_used_before_bytes": 40292312,
+            "heap_used_after_bytes": 51882904,
+            "gc_collections": 3
+          },
+          "noop_preview": {
+            "elapsed_ns": 166932796,
+            "heap_used_before_bytes": 50720136,
+            "heap_used_after_bytes": 41570408,
+            "gc_collections": 2
+          },
+          "noop_merge": {
+            "elapsed_ns": 427602850,
+            "heap_used_before_bytes": 41877392,
+            "heap_used_after_bytes": 54983536,
+            "gc_collections": 3
+          },
+          "same_rows_cap_plus_one_rejection": {
+            "elapsed_ns": 35793324,
+            "heap_used_before_bytes": 41559552,
+            "heap_used_after_bytes": 40603128,
+            "gc_collections": 1
+          }
+        },
+        "changed_merge_result": {
+          "imported": 1024,
+          "skipped": 1024,
+          "replayed": 2048
+        },
+        "noop_merge_result": {
+          "imported": 0,
+          "skipped": 2048,
+          "replayed": 0
+        },
+        "cap_plus_one_rejected": true,
+        "exact_event_ids_preserved": true,
+        "one_memory_per_global_target": true,
+        "preview_read_only": true,
+        "noop_snapshot_cards_stats_unchanged": true,
+        "result_profile_identity": "5ee1fda34fbcd01cba32e351a7dfb684fdb0341b0fd74e10ed8139702ab53262"
+      },
+      "process_max_rss_kib": 168348,
+      "user_cpu_seconds": 3.785762,
+      "system_cpu_seconds": 0.110112
+    },
+    {
+      "case_uuid": "8b6a3a16-d084-40a5-ba77-303c0c0de957",
+      "case": "medium",
+      "revision": "candidate53",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 4.007717810000031,
+      "cpu_affinity": [
+        0
+      ],
+      "measurement": {
+        "format": 1,
+        "case": "medium",
+        "revision_label": "candidate53",
+        "status": "passed",
+        "targets": 512,
+        "events": 2048,
+        "packs": 2,
+        "memberships": 1024,
+        "contexts": 512,
+        "tokens": 512,
+        "heap_max_bytes": 778502144,
+        "available_processors": 1,
+        "java_version": "17.0.20.1",
+        "os_name": "Linux",
+        "os_arch": "amd64",
+        "memory_note": "Heap before/after values are instantaneous observations, not peaks or allocations. Measure process maximum RSS externally; it includes JVM/native overhead.",
+        "timing_note": "One observation per operation in a fresh JVM; fixture construction and half-journal seeding warm the code. Shared-host measurements, not device latency or a statistical benchmark.",
+        "canonical_input_sha256": "321522415f9451f0887f68ab1152cb5827f99453067c86458bfddf005b852001",
+        "canonical_input_bytes": 1787826,
+        "byte_cap": 4194304,
+        "row_cap_per_table": 50000,
+        "operations": {
+          "encode": {
+            "elapsed_ns": 65209088,
+            "heap_used_before_bytes": 18597128,
+            "heap_used_after_bytes": 42078592,
+            "gc_collections": 0
+          },
+          "seed_existing_half_journal": {
+            "elapsed_ns": 629101750,
+            "heap_used_before_bytes": 44141264,
+            "heap_used_after_bytes": 20640168,
+            "gc_collections": 1
+          },
+          "preview": {
+            "elapsed_ns": 256972938,
+            "heap_used_before_bytes": 41219288,
+            "heap_used_after_bytes": 30050784,
+            "gc_collections": 2
+          },
+          "changed_merge": {
+            "elapsed_ns": 560204084,
+            "heap_used_before_bytes": 42749640,
+            "heap_used_after_bytes": 52929144,
+            "gc_collections": 3
+          },
+          "noop_preview": {
+            "elapsed_ns": 164338029,
+            "heap_used_before_bytes": 53081296,
+            "heap_used_after_bytes": 44138320,
+            "gc_collections": 2
+          },
+          "noop_merge": {
+            "elapsed_ns": 402656235,
+            "heap_used_before_bytes": 44138320,
+            "heap_used_after_bytes": 57668416,
+            "gc_collections": 3
+          },
+          "same_rows_cap_plus_one_rejection": {
+            "elapsed_ns": 26292807,
+            "heap_used_before_bytes": 42024400,
+            "heap_used_after_bytes": 41104688,
+            "gc_collections": 1
+          }
+        },
+        "changed_merge_result": {
+          "imported": 1024,
+          "skipped": 1024,
+          "replayed": 2048
+        },
+        "noop_merge_result": {
+          "imported": 0,
+          "skipped": 2048,
+          "replayed": 0
+        },
+        "cap_plus_one_rejected": true,
+        "exact_event_ids_preserved": true,
+        "one_memory_per_global_target": true,
+        "preview_read_only": true,
+        "noop_snapshot_cards_stats_unchanged": true,
+        "result_profile_identity": "5ee1fda34fbcd01cba32e351a7dfb684fdb0341b0fd74e10ed8139702ab53262"
+      },
+      "process_max_rss_kib": 173352,
+      "user_cpu_seconds": 3.769505,
+      "system_cpu_seconds": 0.138952
+    },
+    {
+      "case_uuid": "4482fe90-a769-4996-b71c-7b479c9b51ad",
+      "case": "near-cap",
+      "revision": "baseline52",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 4.908064737999666,
+      "cpu_affinity": [
+        0
+      ],
+      "measurement": {
+        "format": 1,
+        "case": "near-cap",
+        "revision_label": "baseline52",
+        "status": "passed",
+        "targets": 2048,
+        "events": 2048,
+        "packs": 2,
+        "memberships": 4096,
+        "contexts": 2048,
+        "tokens": 2048,
+        "heap_max_bytes": 778502144,
+        "available_processors": 1,
+        "java_version": "17.0.20.1",
+        "os_name": "Linux",
+        "os_arch": "amd64",
+        "memory_note": "Heap before/after values are instantaneous observations, not peaks or allocations. Measure process maximum RSS externally; it includes JVM/native overhead.",
+        "timing_note": "One observation per operation in a fresh JVM; fixture construction and half-journal seeding warm the code. Shared-host measurements, not device latency or a statistical benchmark.",
+        "canonical_input_sha256": "a260c4dc55d10d138e01c58f1b9b4a547259e2afdbb5373d43bc334598e6baa2",
+        "canonical_input_bytes": 4128768,
+        "byte_cap": 4194304,
+        "row_cap_per_table": 50000,
+        "operations": {
+          "encode": {
+            "elapsed_ns": 67696818,
+            "heap_used_before_bytes": 24735304,
+            "heap_used_after_bytes": 56094800,
+            "gc_collections": 0
+          },
+          "seed_existing_half_journal": {
+            "elapsed_ns": 572692695,
+            "heap_used_before_bytes": 57043568,
+            "heap_used_after_bytes": 79001560,
+            "gc_collections": 0
+          },
+          "preview": {
+            "elapsed_ns": 412787450,
+            "heap_used_before_bytes": 70359848,
+            "heap_used_after_bytes": 70288712,
+            "gc_collections": 4
+          },
+          "changed_merge": {
+            "elapsed_ns": 800058699,
+            "heap_used_before_bytes": 70674712,
+            "heap_used_after_bytes": 89172464,
+            "gc_collections": 7
+          },
+          "noop_preview": {
+            "elapsed_ns": 274062351,
+            "heap_used_before_bytes": 86373496,
+            "heap_used_after_bytes": 109587848,
+            "gc_collections": 4
+          },
+          "noop_merge": {
+            "elapsed_ns": 539431305,
+            "heap_used_before_bytes": 109587848,
+            "heap_used_after_bytes": 76382552,
+            "gc_collections": 8
+          },
+          "same_rows_cap_plus_one_rejection": {
+            "elapsed_ns": 28681910,
+            "heap_used_before_bytes": 80777296,
+            "heap_used_after_bytes": 75756432,
+            "gc_collections": 1
+          }
+        },
+        "changed_merge_result": {
+          "imported": 1024,
+          "skipped": 1024,
+          "replayed": 2048
+        },
+        "noop_merge_result": {
+          "imported": 0,
+          "skipped": 2048,
+          "replayed": 0
+        },
+        "cap_plus_one_rejected": true,
+        "exact_event_ids_preserved": true,
+        "one_memory_per_global_target": true,
+        "preview_read_only": true,
+        "noop_snapshot_cards_stats_unchanged": true,
+        "result_profile_identity": "628195e85b6939d314c4f9ea10bb784dbb14b1c0404bbfeaaeda366ed87083df"
+      },
+      "process_max_rss_kib": 292588,
+      "user_cpu_seconds": 4.671402,
+      "system_cpu_seconds": 0.148002
+    },
+    {
+      "case_uuid": "5c02a38b-d3c3-4741-96e2-371763414197",
+      "case": "near-cap",
+      "revision": "candidate53",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 5.008612644000095,
+      "cpu_affinity": [
+        0
+      ],
+      "measurement": {
+        "format": 1,
+        "case": "near-cap",
+        "revision_label": "candidate53",
+        "status": "passed",
+        "targets": 2048,
+        "events": 2048,
+        "packs": 2,
+        "memberships": 4096,
+        "contexts": 2048,
+        "tokens": 2048,
+        "heap_max_bytes": 778502144,
+        "available_processors": 1,
+        "java_version": "17.0.20.1",
+        "os_name": "Linux",
+        "os_arch": "amd64",
+        "memory_note": "Heap before/after values are instantaneous observations, not peaks or allocations. Measure process maximum RSS externally; it includes JVM/native overhead.",
+        "timing_note": "One observation per operation in a fresh JVM; fixture construction and half-journal seeding warm the code. Shared-host measurements, not device latency or a statistical benchmark.",
+        "canonical_input_sha256": "a260c4dc55d10d138e01c58f1b9b4a547259e2afdbb5373d43bc334598e6baa2",
+        "canonical_input_bytes": 4128768,
+        "byte_cap": 4194304,
+        "row_cap_per_table": 50000,
+        "operations": {
+          "encode": {
+            "elapsed_ns": 59920646,
+            "heap_used_before_bytes": 24762856,
+            "heap_used_after_bytes": 56133952,
+            "gc_collections": 0
+          },
+          "seed_existing_half_journal": {
+            "elapsed_ns": 545633751,
+            "heap_used_before_bytes": 58028752,
+            "heap_used_after_bytes": 80839096,
+            "gc_collections": 0
+          },
+          "preview": {
+            "elapsed_ns": 403634756,
+            "heap_used_before_bytes": 72013552,
+            "heap_used_after_bytes": 71227200,
+            "gc_collections": 4
+          },
+          "changed_merge": {
+            "elapsed_ns": 766090779,
+            "heap_used_before_bytes": 71044856,
+            "heap_used_after_bytes": 91723328,
+            "gc_collections": 7
+          },
+          "noop_preview": {
+            "elapsed_ns": 305307482,
+            "heap_used_before_bytes": 89511360,
+            "heap_used_after_bytes": 112640824,
+            "gc_collections": 4
+          },
+          "noop_merge": {
+            "elapsed_ns": 596996154,
+            "heap_used_before_bytes": 112701080,
+            "heap_used_after_bytes": 84623928,
+            "gc_collections": 8
+          },
+          "same_rows_cap_plus_one_rejection": {
+            "elapsed_ns": 26787231,
+            "heap_used_before_bytes": 81582872,
+            "heap_used_after_bytes": 76641056,
+            "gc_collections": 1
+          }
+        },
+        "changed_merge_result": {
+          "imported": 1024,
+          "skipped": 1024,
+          "replayed": 2048
+        },
+        "noop_merge_result": {
+          "imported": 0,
+          "skipped": 2048,
+          "replayed": 0
+        },
+        "cap_plus_one_rejected": true,
+        "exact_event_ids_preserved": true,
+        "one_memory_per_global_target": true,
+        "preview_read_only": true,
+        "noop_snapshot_cards_stats_unchanged": true,
+        "result_profile_identity": "628195e85b6939d314c4f9ea10bb784dbb14b1c0404bbfeaaeda366ed87083df"
+      },
+      "process_max_rss_kib": 286292,
+      "user_cpu_seconds": 4.714506,
+      "system_cpu_seconds": 0.188823
+    },
+    {
+      "case_uuid": "2cbb6959-255c-4fa4-ab76-d8244803982c",
+      "case": "long-journal",
+      "revision": "baseline52",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 4.907614949001072,
+      "cpu_affinity": [
+        0
+      ],
+      "measurement": {
+        "format": 1,
+        "case": "long-journal",
+        "revision_label": "baseline52",
+        "status": "passed",
+        "targets": 128,
+        "events": 4096,
+        "packs": 2,
+        "memberships": 256,
+        "contexts": 128,
+        "tokens": 128,
+        "heap_max_bytes": 778502144,
+        "available_processors": 1,
+        "java_version": "17.0.20.1",
+        "os_name": "Linux",
+        "os_arch": "amd64",
+        "memory_note": "Heap before/after values are instantaneous observations, not peaks or allocations. Measure process maximum RSS externally; it includes JVM/native overhead.",
+        "timing_note": "One observation per operation in a fresh JVM; fixture construction and half-journal seeding warm the code. Shared-host measurements, not device latency or a statistical benchmark.",
+        "canonical_input_sha256": "a3b42f6cfae4ec1b21279491092b37abfdd18842e7618c9c88909c5535c9c738",
+        "canonical_input_bytes": 2848178,
+        "byte_cap": 4194304,
+        "row_cap_per_table": 50000,
+        "operations": {
+          "encode": {
+            "elapsed_ns": 114069031,
+            "heap_used_before_bytes": 24793808,
+            "heap_used_after_bytes": 25215288,
+            "gc_collections": 1
+          },
+          "seed_existing_half_journal": {
+            "elapsed_ns": 738881353,
+            "heap_used_before_bytes": 55418840,
+            "heap_used_after_bytes": 44771592,
+            "gc_collections": 1
+          },
+          "preview": {
+            "elapsed_ns": 285785570,
+            "heap_used_before_bytes": 33453304,
+            "heap_used_after_bytes": 32085608,
+            "gc_collections": 3
+          },
+          "changed_merge": {
+            "elapsed_ns": 844155579,
+            "heap_used_before_bytes": 60426264,
+            "heap_used_after_bytes": 66358976,
+            "gc_collections": 7
+          },
+          "noop_preview": {
+            "elapsed_ns": 277643396,
+            "heap_used_before_bytes": 77520320,
+            "heap_used_after_bytes": 63229952,
+            "gc_collections": 5
+          },
+          "noop_merge": {
+            "elapsed_ns": 600448279,
+            "heap_used_before_bytes": 63229952,
+            "heap_used_after_bytes": 55910624,
+            "gc_collections": 9
+          },
+          "same_rows_cap_plus_one_rejection": {
+            "elapsed_ns": 26851117,
+            "heap_used_before_bytes": 80575488,
+            "heap_used_after_bytes": 85828840,
+            "gc_collections": 1
+          }
+        },
+        "changed_merge_result": {
+          "imported": 2048,
+          "skipped": 2048,
+          "replayed": 4096
+        },
+        "noop_merge_result": {
+          "imported": 0,
+          "skipped": 4096,
+          "replayed": 0
+        },
+        "cap_plus_one_rejected": true,
+        "exact_event_ids_preserved": true,
+        "one_memory_per_global_target": true,
+        "preview_read_only": true,
+        "noop_snapshot_cards_stats_unchanged": true,
+        "result_profile_identity": "0c88f853e3e9483e56a46075db9eeb4cf6fb49eca276a448425f33426b020955"
+      },
+      "process_max_rss_kib": 194492,
+      "user_cpu_seconds": 4.757102,
+      "system_cpu_seconds": 0.09780499999999999
+    },
+    {
+      "case_uuid": "52dbd7da-c62a-45d7-a2d6-903ca6168e08",
+      "case": "long-journal",
+      "revision": "candidate53",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 5.1080879000001005,
+      "cpu_affinity": [
+        0
+      ],
+      "measurement": {
+        "format": 1,
+        "case": "long-journal",
+        "revision_label": "candidate53",
+        "status": "passed",
+        "targets": 128,
+        "events": 4096,
+        "packs": 2,
+        "memberships": 256,
+        "contexts": 128,
+        "tokens": 128,
+        "heap_max_bytes": 778502144,
+        "available_processors": 1,
+        "java_version": "17.0.20.1",
+        "os_name": "Linux",
+        "os_arch": "amd64",
+        "memory_note": "Heap before/after values are instantaneous observations, not peaks or allocations. Measure process maximum RSS externally; it includes JVM/native overhead.",
+        "timing_note": "One observation per operation in a fresh JVM; fixture construction and half-journal seeding warm the code. Shared-host measurements, not device latency or a statistical benchmark.",
+        "canonical_input_sha256": "a3b42f6cfae4ec1b21279491092b37abfdd18842e7618c9c88909c5535c9c738",
+        "canonical_input_bytes": 2848178,
+        "byte_cap": 4194304,
+        "row_cap_per_table": 50000,
+        "operations": {
+          "encode": {
+            "elapsed_ns": 113855941,
+            "heap_used_before_bytes": 25237328,
+            "heap_used_after_bytes": 25219352,
+            "gc_collections": 1
+          },
+          "seed_existing_half_journal": {
+            "elapsed_ns": 806635134,
+            "heap_used_before_bytes": 56292352,
+            "heap_used_after_bytes": 45817520,
+            "gc_collections": 1
+          },
+          "preview": {
+            "elapsed_ns": 324975928,
+            "heap_used_before_bytes": 34911024,
+            "heap_used_after_bytes": 32149016,
+            "gc_collections": 3
+          },
+          "changed_merge": {
+            "elapsed_ns": 799646550,
+            "heap_used_before_bytes": 60421448,
+            "heap_used_after_bytes": 65800232,
+            "gc_collections": 7
+          },
+          "noop_preview": {
+            "elapsed_ns": 271805759,
+            "heap_used_before_bytes": 69981216,
+            "heap_used_after_bytes": 55311312,
+            "gc_collections": 5
+          },
+          "noop_merge": {
+            "elapsed_ns": 527932129,
+            "heap_used_before_bytes": 55311312,
+            "heap_used_after_bytes": 79391880,
+            "gc_collections": 8
+          },
+          "same_rows_cap_plus_one_rejection": {
+            "elapsed_ns": 43494244,
+            "heap_used_before_bytes": 67645152,
+            "heap_used_after_bytes": 72677232,
+            "gc_collections": 1
+          }
+        },
+        "changed_merge_result": {
+          "imported": 2048,
+          "skipped": 2048,
+          "replayed": 4096
+        },
+        "noop_merge_result": {
+          "imported": 0,
+          "skipped": 4096,
+          "replayed": 0
+        },
+        "cap_plus_one_rejected": true,
+        "exact_event_ids_preserved": true,
+        "one_memory_per_global_target": true,
+        "preview_read_only": true,
+        "noop_snapshot_cards_stats_unchanged": true,
+        "result_profile_identity": "0c88f853e3e9483e56a46075db9eeb4cf6fb49eca276a448425f33426b020955"
+      },
+      "process_max_rss_kib": 188984,
+      "user_cpu_seconds": 4.923195,
+      "system_cpu_seconds": 0.09661399999999999
+    }
+  ],
+  "input_hashes_match_across_revisions": true,
+  "completed": true,
+  "report_date_utc": "2026-10-17",
+  "status": "six_matched_bounded_observations_passed",
+  "benchmark_scope": {
+    "fixture_source": "desktop/src/test/kotlin/dev/ikna/desktop/ProfileCapacityProbe.kt",
+    "default_test_suite_execution": false,
+    "case_count": 3,
+    "revision_count": 2,
+    "observations_per_operation_per_revision_case": 1,
+    "seed": "All content installed locally; first half of active events merged before timed preview/commit. Timed changed commit imports the other half and replays all active events.",
+    "target_memberships": "Two complete packs share every global target; one context and token per target. Tests assert exactly one level-0 card per global target.",
+    "near_cap_padding": "ASCII zero padding in one technical pack title makes exactly 4 MiB minus 64 KiB. No natural card text or source corpus is generated/read.",
+    "overflow_probe": "The same rows receive additional ASCII metadata padding to exactly 4 MiB plus one byte; encode must reject.",
+    "heap": "-Xmx768m is a JVM heap setting, not a process RSS ceiling. Recorded Runtime.maxMemory reflects usable heap under the selected JVM/GC.",
+    "rss": "Linux wait4 ru_maxrss for the direct taskset-exec Java child, in KiB; whole fresh process including fixture generation, seeding, verification, decode, and JVM/native overhead. It cannot be assigned to any one product operation.",
+    "warmup": "No dedicated warm-up iterations. Fixture canonical serialization occurs before timed encode; database half-journal seeding precedes timed preview/commit. One fresh process per observation, same phase order.",
+    "time": "Operation elapsed_ns uses System.nanoTime; process elapsed_seconds uses Python monotonic time. Shared-host single observations are not statistical distributions.",
+    "deadline_result": "All six processes finished in about 27.95 seconds combined; no timeout or resource failure."
+  },
+  "verification_summary": {
+    "runs_passed": 6,
+    "same_probe_bytecode_for_both_revisions": true,
+    "input_hashes_match": true,
+    "result_profile_identities_match": true,
+    "all_expected_table_cardinalities_verified": true,
+    "one_memory_per_global_target_across_two_deck_memberships": true,
+    "exact_distinct_event_ids_preserved": true,
+    "preview_read_only": true,
+    "duplicate_profile_commit_imported_zero_replayed_zero": true,
+    "duplicate_profile_commit_snapshot_cards_stats_unchanged": true,
+    "exact_cap_plus_one_rejected": true,
+    "original_baseline_source_entries_verified_unchanged_after_build": 1212,
+    "sealed_baseline_source_entries_verified_unchanged": 1212
+  },
+  "compact_results": [
+    {
+      "case": "medium",
+      "revision": "baseline52",
+      "targets": 512,
+      "active_events": 2048,
+      "snapshot_bytes": 1787826,
+      "headroom_bytes": 2406478,
+      "encode_ms": 72.209,
+      "preview_ms": 290.573,
+      "changed_merge_ms": 573.481,
+      "noop_merge_ms": 427.603,
+      "process_max_rss_mib": 164.402
+    },
+    {
+      "case": "medium",
+      "revision": "candidate53",
+      "targets": 512,
+      "active_events": 2048,
+      "snapshot_bytes": 1787826,
+      "headroom_bytes": 2406478,
+      "encode_ms": 65.209,
+      "preview_ms": 256.973,
+      "changed_merge_ms": 560.204,
+      "noop_merge_ms": 402.656,
+      "process_max_rss_mib": 169.289
+    },
+    {
+      "case": "near-cap",
+      "revision": "baseline52",
+      "targets": 2048,
+      "active_events": 2048,
+      "snapshot_bytes": 4128768,
+      "headroom_bytes": 65536,
+      "encode_ms": 67.697,
+      "preview_ms": 412.787,
+      "changed_merge_ms": 800.059,
+      "noop_merge_ms": 539.431,
+      "process_max_rss_mib": 285.73
+    },
+    {
+      "case": "near-cap",
+      "revision": "candidate53",
+      "targets": 2048,
+      "active_events": 2048,
+      "snapshot_bytes": 4128768,
+      "headroom_bytes": 65536,
+      "encode_ms": 59.921,
+      "preview_ms": 403.635,
+      "changed_merge_ms": 766.091,
+      "noop_merge_ms": 596.996,
+      "process_max_rss_mib": 279.582
+    },
+    {
+      "case": "long-journal",
+      "revision": "baseline52",
+      "targets": 128,
+      "active_events": 4096,
+      "snapshot_bytes": 2848178,
+      "headroom_bytes": 1346126,
+      "encode_ms": 114.069,
+      "preview_ms": 285.786,
+      "changed_merge_ms": 844.156,
+      "noop_merge_ms": 600.448,
+      "process_max_rss_mib": 189.934
+    },
+    {
+      "case": "long-journal",
+      "revision": "candidate53",
+      "targets": 128,
+      "active_events": 4096,
+      "snapshot_bytes": 2848178,
+      "headroom_bytes": 1346126,
+      "encode_ms": 113.856,
+      "preview_ms": 324.976,
+      "changed_merge_ms": 799.647,
+      "noop_merge_ms": 527.932,
+      "process_max_rss_mib": 184.555
+    }
+  ],
+  "capacity_findings": [
+    "Within this finite Linux/JVM experiment, Round53 accepted 512 targets/2048 events at 1787826 bytes, 2048 targets/2048 events at 4128768 bytes, and 128 targets/4096 events at 2848178 bytes. These are accepted test fixtures, not maximum supported learner-profile sizes.",
+    "The near-cap fixture has only 65536 bytes of encoded headroom, although each table is far below 50000 rows. Serialized field lengths and combined content/history determine the byte ceiling; table-row limits do not promise a 50000-row transferable profile.",
+    "Round53 operation times ranged 59.921-113.856 ms encode, 256.973-403.635 ms preview, 560.204-799.647 ms changed profile commit, and 402.656-596.996 ms duplicate profile commit. Near-cap no-op was slower than baseline in this observation; no speedup or non-regression bound is claimed.",
+    "Whole-process maximum RSS was 164.402-285.730 MiB across both revisions and 169.289-279.582 MiB for Round53. This is not a proof of bounded allocation for every input, nor a measurement of production-device memory.",
+    "Duplicate profile commits avoid replay but still spend hundreds of milliseconds validating/materializing the profile here. Keep profile operations off the UI thread with visible progress/cancellation; any caching or paging proposal must preserve exact content, revision, boundary and no-op guarantees.",
+    "Larger profiles still require an explicit protocol/storage design. Do not silently truncate journals, raise limits based on these three observations, or infer a physical-device throughput target."
+  ],
+  "limitations": [
+    "No Windows, Android physical device, power-loss, production learner data, network/TLS/encryption or provider measurement.",
+    "No new-deck content insertion timing: content was already installed; changed commits add half the events to an existing active journal.",
+    "Automatic journal-only transfer, adoption staging, receipt retries, archived-history capacity and million-row journals are outside this probe.",
+    "Near-cap ASCII pack-metadata padding is a technical boundary fixture, not a representative natural-language content distribution.",
+    "One observation per case/revision; order, JIT, GC, cache and shared-host scheduling can affect timings. No confidence interval, p95, statistical speedup or broad performance claim.",
+    "Instantaneous heap snapshots are neither peak allocations nor per-operation allocation measurements; whole-process maximum RSS includes the probe harness.",
+    "No corpus payloads, generated card text, raw fixtures or databases belong in the source package."
+  ],
+  "reproduction": {
+    "main_class": "dev.ikna.desktop.ProfileCapacityProbe",
+    "arguments": "medium|near-cap|long-journal REVISION_LABEL /external/metadata-output.json",
+    "build": "Compile candidate :desktop:testClasses once; build baseline :desktop:classes in a disposable source copy; use the identical compiled ProfileCapacityProbe classes before each revision production runtime classpath.",
+    "jvm_command_template": "taskset -c CPU java -Xmx768m -XX:ActiveProcessorCount=1 -Duser.timezone=UTC -Duser.home=WRITABLE_TEST_HOME -cp PROBE_CLASSES:REVISION_RUNTIME_CLASSPATH dev.ikna.desktop.ProfileCapacityProbe CASE REVISION OUTPUT_JSON",
+    "environment": "LD_BIND_NOW=1; XDG_CACHE_HOME set to a writable isolated cache; JDK Temurin17.0.20.1+1; Gradle8.10.2.",
+    "external_control": "Single process at a time; enforce 300-second case timeout and 900-second total timeout; collect direct-child Linux wait4 usage; retain metadata from any blocked/timed-out case instead of expanding the sweep."
+  },
+  "execution_artifact_hashes": {
+    "external_runner_sha256": "c3815eee657849fe356c2fd31554497577342a9ff93f68e78fd2ffb2280a7b2e",
+    "baseline_build_log_sha256": "90a79fe16d62910e9c4513a37f82c8ce682c62d18f1b889281d386f97be7c778",
+    "baseline_source_hash_manifest_sha256": "70fce1160ce889787c6a58eb24cea14fee237ac654bb5e33893de0acb305be0d",
+    "baseline_runtime_classpath_sha256": "75e64c2d1168c52ecfd122be96841ab48020766faba5183b2486e9d617016254",
+    "classpath_export_helper_sha256": "5996c612104e0cfe9b0c2b6ccb2ffb7fe8d8754c8dced4a5c62bec5684a12d66"
+  }
+}

@@ -1,0 +1,2174 @@
+{
+  "observed_at_utc": "2026-10-17T22:00:26.984351+00:00",
+  "tests": {
+    "shared_desktop": {
+      "tests": 140,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 23,
+      "suite_names": [
+        "dev.ikna.data.catalog.CatalogFilterNormalizationTest",
+        "dev.ikna.data.catalog.CatalogPlanRefreshTest",
+        "dev.ikna.data.dev.DeveloperBootstrapTest",
+        "dev.ikna.data.export.PreWipeBackupTest",
+        "dev.ikna.data.pack.BundledPackFailureTest",
+        "dev.ikna.data.repo.FirstSessionPreparationTest",
+        "dev.ikna.data.repo.StudyStatsTest",
+        "dev.ikna.sync.IncrementalJournalProtocolTest",
+        "dev.ikna.sync.JournalErrorLatchTest",
+        "dev.ikna.sync.PairedLanTransportTest",
+        "dev.ikna.sync.ProfileConsentProtocolTest",
+        "dev.ikna.sync.ProfileSlotStoreTest",
+        "dev.ikna.sync.remote.EncryptedRemoteEnvelopeTest",
+        "dev.ikna.sync.remote.RemoteBlobStoreTest",
+        "dev.ikna.ui.session.CardLoadingTest",
+        "dev.ikna.ui.settings.DeviceSyncErrorTest",
+        "dev.ikna.ui.settings.DeviceSyncStatusTest",
+        "dev.ikna.ui.stats.StatsDescriptionsTest",
+        "dev.ikna.ui.theme.PalettePreviewTest",
+        "dev.ikna.ui.theme.ReadingCatTest",
+        "dev.ikna.ui.theme.SignalFrameFeedbackTest",
+        "dev.ikna.ui.theme.SignalFrameHoverTest",
+        "dev.ikna.ui.theme.TransientNoticeTest"
+      ],
+      "skipped_cases": [],
+      "failed_cases": []
+    },
+    "desktop": {
+      "tests": 297,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 2,
+      "suites": 37,
+      "suite_names": [
+        "dev.ikna.desktop.AnkiRestoreAtomicityTest",
+        "dev.ikna.desktop.AtomicBackupFileTest",
+        "dev.ikna.desktop.BundleComponentFailureTest",
+        "dev.ikna.desktop.BundleRestoreFailureTest",
+        "dev.ikna.desktop.BundleWriteSafetyTest",
+        "dev.ikna.desktop.CardRevealPointerIntegrationTest",
+        "dev.ikna.desktop.CatalogImportIntegrationTest",
+        "dev.ikna.desktop.DesktopRestartTest",
+        "dev.ikna.desktop.DeveloperSandboxIntegrationTest",
+        "dev.ikna.desktop.DeviceProfileAdoptionIntegrationTest",
+        "dev.ikna.desktop.DeviceSyncControllerIntegrationTest",
+        "dev.ikna.desktop.FirstStudyRouteTest",
+        "dev.ikna.desktop.HotkeyRegressionTest",
+        "dev.ikna.desktop.IncrementalJournalRepositoryTest",
+        "dev.ikna.desktop.JournalSyncIntegrationTest",
+        "dev.ikna.desktop.LearningSimulationTest",
+        "dev.ikna.desktop.LearningWriteAtomicityTest",
+        "dev.ikna.desktop.PhoneBackupWriteSafetyTest",
+        "dev.ikna.desktop.PreWipeDeckBackupTest",
+        "dev.ikna.desktop.ProfileAdoptionIntegrationTest",
+        "dev.ikna.desktop.ProfileRetainedDataWiperIntegrationTest",
+        "dev.ikna.desktop.ProfileSlotMigrationIntegrationTest",
+        "dev.ikna.desktop.ProfileTransferIntegrationTest",
+        "dev.ikna.desktop.ProfileTransferResourceSafetyTest",
+        "dev.ikna.desktop.RestoreAtomicityTest",
+        "dev.ikna.desktop.StudyStatsRepositoryTest",
+        "dev.ikna.desktop.TitleBarClicksTest",
+        "dev.ikna.desktop.WindowBoundsEditsTest",
+        "dev.ikna.desktop.WindowBoundsTest",
+        "dev.ikna.desktop.WindowChromeRegressionTest",
+        "dev.ikna.desktop.WindowFrameLayoutTest",
+        "dev.ikna.desktop.WindowPlacementMemoryTest",
+        "dev.ikna.domain.fsrs.FsrsOptimizerTest",
+        "dev.ikna.domain.fsrs.FsrsTest",
+        "dev.ikna.domain.fsrs.SchedulerDueDayTest",
+        "dev.ikna.domain.grading.DerivedGradingTest",
+        "dev.ikna.domain.optimizer.LocalOptimizerTest"
+      ],
+      "skipped_cases": [
+        {
+          "class": "dev.ikna.desktop.CardRevealPointerIntegrationTest",
+          "name": "secondaryMouseShortDragDoesNotRevealOrGrade[mouse=false]"
+        },
+        {
+          "class": "dev.ikna.desktop.CardRevealPointerIntegrationTest",
+          "name": "secondaryMouseLongDragDoesNotRevealOrGrade[mouse=false]"
+        }
+      ],
+      "failed_cases": []
+    },
+    "shared_android_jvm": {
+      "tests": 133,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 22,
+      "suite_names": [
+        "dev.ikna.data.catalog.CatalogFilterNormalizationTest",
+        "dev.ikna.data.catalog.CatalogPlanRefreshTest",
+        "dev.ikna.data.dev.DeveloperBootstrapTest",
+        "dev.ikna.data.export.PreWipeBackupTest",
+        "dev.ikna.data.pack.BundledPackFailureTest",
+        "dev.ikna.data.repo.FirstSessionPreparationTest",
+        "dev.ikna.data.repo.StudyStatsTest",
+        "dev.ikna.sync.IncrementalJournalProtocolTest",
+        "dev.ikna.sync.JournalErrorLatchTest",
+        "dev.ikna.sync.PairedLanTransportTest",
+        "dev.ikna.sync.ProfileConsentProtocolTest",
+        "dev.ikna.sync.remote.EncryptedRemoteEnvelopeTest",
+        "dev.ikna.sync.remote.RemoteBlobStoreTest",
+        "dev.ikna.ui.session.CardLoadingTest",
+        "dev.ikna.ui.settings.DeviceSyncErrorTest",
+        "dev.ikna.ui.settings.DeviceSyncStatusTest",
+        "dev.ikna.ui.stats.StatsDescriptionsTest",
+        "dev.ikna.ui.theme.PalettePreviewTest",
+        "dev.ikna.ui.theme.ReadingCatTest",
+        "dev.ikna.ui.theme.SignalFrameFeedbackTest",
+        "dev.ikna.ui.theme.SignalFrameHoverTest",
+        "dev.ikna.ui.theme.TransientNoticeTest"
+      ],
+      "skipped_cases": [],
+      "failed_cases": []
+    },
+    "app_android_jvm": {
+      "tests": 566,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 67,
+      "suite_names": [
+        "dev.ikna.BrowsePolicyTest",
+        "dev.ikna.DeckMarkTest",
+        "dev.ikna.FontValidationTest",
+        "dev.ikna.GridTest",
+        "dev.ikna.LanguageResolverTest",
+        "dev.ikna.SettingsBackupTest",
+        "dev.ikna.StringsCatalogTest",
+        "dev.ikna.SwipeDecisionTest",
+        "dev.ikna.audio.VoiceModelTest",
+        "dev.ikna.audio.VoiceNumberTest",
+        "dev.ikna.audio.VoiceUnpackTest",
+        "dev.ikna.data.PackTitleTest",
+        "dev.ikna.data.anki.AnkiBridgeContractTest",
+        "dev.ikna.data.anki.AnkiClozeTest",
+        "dev.ikna.data.anki.AnkiProtoTest",
+        "dev.ikna.data.anki.AnkiTextTest",
+        "dev.ikna.data.anki.DeckLanguageTest",
+        "dev.ikna.data.catalog.CatalogCardSourceTest",
+        "dev.ikna.data.catalog.CatalogFilterTest",
+        "dev.ikna.data.catalog.CatalogPreviewTest",
+        "dev.ikna.data.catalog.CatalogV2ModelTest",
+        "dev.ikna.data.db.SchemaTest",
+        "dev.ikna.data.dev.DeveloperModeTest",
+        "dev.ikna.data.export.ExportDocumentApiTest",
+        "dev.ikna.data.export.ReviewRecordTest",
+        "dev.ikna.data.pack.CjkCatalogContractTest",
+        "dev.ikna.data.pack.SeedParserTest",
+        "dev.ikna.data.pack.TranslationTidyTest",
+        "dev.ikna.data.prefs.DeckLookTest",
+        "dev.ikna.data.prefs.DeckPhoneticsTest",
+        "dev.ikna.data.prefs.HotkeysTest",
+        "dev.ikna.data.prefs.SuppressedTest",
+        "dev.ikna.data.repo.LocalDeckSearchTest",
+        "dev.ikna.data.repo.SchedulerMigrationTest",
+        "dev.ikna.data.update.UpdateDownloadTest",
+        "dev.ikna.data.update.UpdateLogicTest",
+        "dev.ikna.domain.fsrs.FsrsOptimizerTest",
+        "dev.ikna.domain.fsrs.FsrsTest",
+        "dev.ikna.domain.fsrs.SchedulerDueDayTest",
+        "dev.ikna.domain.governor.ChunkSelectorTest",
+        "dev.ikna.domain.governor.CleanStreakTest",
+        "dev.ikna.domain.governor.DailyBudgetTest",
+        "dev.ikna.domain.governor.LoadGovernorTest",
+        "dev.ikna.domain.grading.DerivedGradingTest",
+        "dev.ikna.domain.optimizer.LocalOptimizerTest",
+        "dev.ikna.domain.phonetics.PhoneticsTest",
+        "dev.ikna.domain.phonetics.RespellTest",
+        "dev.ikna.domain.session.CardPresentationTest",
+        "dev.ikna.domain.session.CardTargetTest",
+        "dev.ikna.domain.session.ChunkShapeTest",
+        "dev.ikna.domain.session.ClassicPlanTest",
+        "dev.ikna.domain.session.ReviewSignalTrackerTest",
+        "dev.ikna.domain.time.DayBoundaryTest",
+        "dev.ikna.ui.decks.MobileDeckUiContractTest",
+        "dev.ikna.ui.decks.PromptFillTest",
+        "dev.ikna.ui.nav.FirstStudyRouteTest",
+        "dev.ikna.ui.nav.RouteContinuityTest",
+        "dev.ikna.ui.nav.SharedAxisTransitionTest",
+        "dev.ikna.ui.session.SessionErgonomicsTest",
+        "dev.ikna.ui.settings.DiagnosticsTest",
+        "dev.ikna.ui.settings.SettingsLazyLayoutTest",
+        "dev.ikna.ui.theme.ContrastTest",
+        "dev.ikna.ui.theme.ControlColorsTest",
+        "dev.ikna.ui.theme.LaunchWindowTest",
+        "dev.ikna.ui.theme.MotionPolishTest",
+        "dev.ikna.ui.theme.PaletteTest",
+        "dev.ikna.ui.theme.WordmarkTest"
+      ],
+      "skipped_cases": [],
+      "failed_cases": []
+    }
+  },
+  "failures": 0,
+  "errors": 0,
+  "skipped": 2,
+  "total_cases": 1136,
+  "passed": 1134,
+  "xml_sha256": {
+    "app_android_jvm/TEST-dev.ikna.BrowsePolicyTest.xml": "57a10db3dda2e2aebfcc44357abdfecfe26dd40d6ab0408c18edcd6565c125c7",
+    "app_android_jvm/TEST-dev.ikna.DeckMarkTest.xml": "0f2a4c824d92b67b98b122a876323b1254e796f8a78489b0e87a3eefb3e7758d",
+    "app_android_jvm/TEST-dev.ikna.FontValidationTest.xml": "ba83bca7422e23fe5db6ddecddc416f1fa8fac0e91a397158255cf3168f80c8c",
+    "app_android_jvm/TEST-dev.ikna.GridTest.xml": "f08f833f32cc19f40ee96c9b2a7d7f8d1d9146b75995cb91a5ace7a6e9b948c2",
+    "app_android_jvm/TEST-dev.ikna.LanguageResolverTest.xml": "5871b8733b47d2775ca96a395080342db199b14ab737559784542cf6e6e990a1",
+    "app_android_jvm/TEST-dev.ikna.SettingsBackupTest.xml": "24e9a7a626e31b8f1988e240af538e3085010c3a01b6e2bf1cc90c8dfacd44f4",
+    "app_android_jvm/TEST-dev.ikna.StringsCatalogTest.xml": "3afa11996a030b00736880cc794d38eb84c9b67a17190124e8f808a38787f225",
+    "app_android_jvm/TEST-dev.ikna.SwipeDecisionTest.xml": "56b495ccf8342382f84d46881f75212ae8cd055001bd31f650db92c834efaf84",
+    "app_android_jvm/TEST-dev.ikna.audio.VoiceModelTest.xml": "6cdb8e3ba569c8cd723ee59b5c6d83232aeb3c866adf1af74609ee41fb71e90b",
+    "app_android_jvm/TEST-dev.ikna.audio.VoiceNumberTest.xml": "7003438584ef73613b12b177d63715f39fd3b7d78124ec823dd0b340b1a6ac2b",
+    "app_android_jvm/TEST-dev.ikna.audio.VoiceUnpackTest.xml": "5747ee38c0a68677025e8d98bf932ccef08c1fb9997116974f2ee846ed0a29f8",
+    "app_android_jvm/TEST-dev.ikna.data.PackTitleTest.xml": "4e7340635a563500d58cdea1be72bd720fc9c0bc294eeb07cd6e2b9eabd63376",
+    "app_android_jvm/TEST-dev.ikna.data.anki.AnkiBridgeContractTest.xml": "1fb3a325413d6d4e7c082d2b26a0145e668b623bec26c3bc76997cd570c4108a",
+    "app_android_jvm/TEST-dev.ikna.data.anki.AnkiClozeTest.xml": "d6b679961db7bb31b111e29513a8d698931deb767c02bb2cdff08c26ee1b8469",
+    "app_android_jvm/TEST-dev.ikna.data.anki.AnkiProtoTest.xml": "8e0cd3f79b409adac5da0bac1ed998c163912b3f7573cebb4383b2e3fb924822",
+    "app_android_jvm/TEST-dev.ikna.data.anki.AnkiTextTest.xml": "2fd71af607e7cd5360c55f24829b9a953edc55cee8e820834ef336dd85f04881",
+    "app_android_jvm/TEST-dev.ikna.data.anki.DeckLanguageTest.xml": "ddd85500b490086fa16afef87a525639a2d1416d24e8237b2f5de58dcf0cce19",
+    "app_android_jvm/TEST-dev.ikna.data.catalog.CatalogCardSourceTest.xml": "361d3ccb299e9c823041309cb4ae3498ba432f1e92211f3b98978680b36af5b0",
+    "app_android_jvm/TEST-dev.ikna.data.catalog.CatalogFilterTest.xml": "2dcc33cd4198997b28cf1611d0ae7b6231c7b3f9cdc40c2d0269336d8e14def5",
+    "app_android_jvm/TEST-dev.ikna.data.catalog.CatalogPreviewTest.xml": "d857f6db5788341e9613b84e8a3d9c775d5182beced10682293f286f89a630bc",
+    "app_android_jvm/TEST-dev.ikna.data.catalog.CatalogV2ModelTest.xml": "738423bb588ce227fe8a20ba525969c8685d0049e1d1f74726c6ab2398453d7a",
+    "app_android_jvm/TEST-dev.ikna.data.db.SchemaTest.xml": "91fc6a05510ec6ab3ab542cf492d0ecc37d8859df898c27a61b124cf09e93435",
+    "app_android_jvm/TEST-dev.ikna.data.dev.DeveloperModeTest.xml": "a2c47d58f06824185474f5d4ab3eb526a6c235d151199a236ba72de0d477bfe6",
+    "app_android_jvm/TEST-dev.ikna.data.export.ExportDocumentApiTest.xml": "a460630d7a97f0aa3130dc896afba5f818c9e4b423e457ce98440f760b37b878",
+    "app_android_jvm/TEST-dev.ikna.data.export.ReviewRecordTest.xml": "63fb31c22146f1de9bf4a946de8e2a335032646f514123f2d12a68844b2be28c",
+    "app_android_jvm/TEST-dev.ikna.data.pack.CjkCatalogContractTest.xml": "611c3ff3b51a09e235be86a17ec01a46cae16aba69862f7c20341173cff59bcb",
+    "app_android_jvm/TEST-dev.ikna.data.pack.SeedParserTest.xml": "8800621d44c106fcb700563599830d5c1ca68e6d4da0379eaeb1fdeeb9f12695",
+    "app_android_jvm/TEST-dev.ikna.data.pack.TranslationTidyTest.xml": "57f0c5253c87ad018458f131446305bafd12b25f2fb30207086f3c8c5bc293bc",
+    "app_android_jvm/TEST-dev.ikna.data.prefs.DeckLookTest.xml": "14efc0e1d77740eb9568aa04455fb2591740d484aa9e00dafa080f2b77b2bebe",
+    "app_android_jvm/TEST-dev.ikna.data.prefs.DeckPhoneticsTest.xml": "972e79e0ad3a28363f022bbc4993c56259a9783593b6eaf98d6c0f2ea0701ff2",
+    "app_android_jvm/TEST-dev.ikna.data.prefs.HotkeysTest.xml": "996160313641e0ebde39188a6c16a6d9f55e90c2381df21a3f5ddd7823c02101",
+    "app_android_jvm/TEST-dev.ikna.data.prefs.SuppressedTest.xml": "427d44e5c625b8943061a1ce261f35ddc1dc0463c5052f67e6668864782ee8eb",
+    "app_android_jvm/TEST-dev.ikna.data.repo.LocalDeckSearchTest.xml": "a8a266899dafcdc1fa19cf5d75d1d61d2811c8f12ead70f45c2049d0cd212ea2",
+    "app_android_jvm/TEST-dev.ikna.data.repo.SchedulerMigrationTest.xml": "21483eece6e32284bd363777031c936b9284a568473f523b96b23cc87494c926",
+    "app_android_jvm/TEST-dev.ikna.data.update.UpdateDownloadTest.xml": "16d5c6ac4247857f6cb625e33a537363a69fc90e53fbf92cb2bd0403fc9c41e4",
+    "app_android_jvm/TEST-dev.ikna.data.update.UpdateLogicTest.xml": "b68e68538de259ae90c1f994af28fc6d16b6fed7944b5a3e0e69768366709a28",
+    "app_android_jvm/TEST-dev.ikna.domain.fsrs.FsrsOptimizerTest.xml": "ad016f1f05199c85f8fcd9ada87edc40003904c7c50d9893b457384c907f75dd",
+    "app_android_jvm/TEST-dev.ikna.domain.fsrs.FsrsTest.xml": "0b835737a4e3783cf204f27997b1958430b73a38ba1724102470937d761c2e85",
+    "app_android_jvm/TEST-dev.ikna.domain.fsrs.SchedulerDueDayTest.xml": "bb8eb9af9f970cfec6e83b057f3b8ee992f4f6a3da9632ad37649d55b0f88956",
+    "app_android_jvm/TEST-dev.ikna.domain.governor.ChunkSelectorTest.xml": "34e126bbf0489d833a6a4e732f948510468eefc6154c223499ea89e2f03621fd",
+    "app_android_jvm/TEST-dev.ikna.domain.governor.CleanStreakTest.xml": "6417af0c62c82c24cf223360f7974700006564d46a4886645ec47f80e4cc9673",
+    "app_android_jvm/TEST-dev.ikna.domain.governor.DailyBudgetTest.xml": "b12081fd0a24e2628396c9cc50eaf18ac4bdb5218f41e01d2fb3b1dcfedf266b",
+    "app_android_jvm/TEST-dev.ikna.domain.governor.LoadGovernorTest.xml": "7c9848c4f32ade942b331288f06b7ee3370419fa1c78507afa6fdab089fa10fc",
+    "app_android_jvm/TEST-dev.ikna.domain.grading.DerivedGradingTest.xml": "7563bc860859099f44558cb81c08a057a644d01624864291352f6e532f860cf2",
+    "app_android_jvm/TEST-dev.ikna.domain.optimizer.LocalOptimizerTest.xml": "4e2943fdb974157384f296ea53b24d1a86c939e9ab18b7fc84da1e622c114100",
+    "app_android_jvm/TEST-dev.ikna.domain.phonetics.PhoneticsTest.xml": "fa77273f42626da4a8dd14045137ea19d08ce823f7defd782cf8da0df988f857",
+    "app_android_jvm/TEST-dev.ikna.domain.phonetics.RespellTest.xml": "4cd4cb1d2550129ae452a3e727368156c98f2176c2d77cc758a53dfebd34857c",
+    "app_android_jvm/TEST-dev.ikna.domain.session.CardPresentationTest.xml": "703de5660c7b820416873924dfe7da6ae8fa83934cd95b1dd6efaca1264ae205",
+    "app_android_jvm/TEST-dev.ikna.domain.session.CardTargetTest.xml": "d3f4ffb92cb8e411f5de7577adea8cc4eb60934b2c7b7de5a2690148e32c8984",
+    "app_android_jvm/TEST-dev.ikna.domain.session.ChunkShapeTest.xml": "4f44426fbebfc2c540267bc2ca32e084ba99aa67d32a9969c7e40b8c2f6500b9",
+    "app_android_jvm/TEST-dev.ikna.domain.session.ClassicPlanTest.xml": "365633af7393987c3637bea377333d1f8b7aee0df0c16733d036c9fe22d29f3d",
+    "app_android_jvm/TEST-dev.ikna.domain.session.ReviewSignalTrackerTest.xml": "4f3854bca93c333a7ab40554df8a949ee9b07c85058c10b19789644970b3b7ef",
+    "app_android_jvm/TEST-dev.ikna.domain.time.DayBoundaryTest.xml": "31968c23d9412deffe883e45748577f8e998a24aea26d74f36ebf4b093b117d8",
+    "app_android_jvm/TEST-dev.ikna.ui.decks.MobileDeckUiContractTest.xml": "9c4c48cda3532dd162afe104d400e33c7ba49bc81105a4a8b36e2698651dbdc8",
+    "app_android_jvm/TEST-dev.ikna.ui.decks.PromptFillTest.xml": "46eeaefafad021a54b455158dc7f438c25319a7a5690c75a096eb7072d2353f3",
+    "app_android_jvm/TEST-dev.ikna.ui.nav.FirstStudyRouteTest.xml": "c1929c28dc7c702ffaa0412c1c21054caf8694a9b3e69a1b80cf492ac08073e4",
+    "app_android_jvm/TEST-dev.ikna.ui.nav.RouteContinuityTest.xml": "ab7ba85be0cd3517fe3a699aabff2fab33b46d522888caba9e1e4d9d0005fccf",
+    "app_android_jvm/TEST-dev.ikna.ui.nav.SharedAxisTransitionTest.xml": "1833d683c12998e90819c56e0b13d25cd8bc015d3eca1a56d99164e62c7fc0fa",
+    "app_android_jvm/TEST-dev.ikna.ui.session.SessionErgonomicsTest.xml": "cce8f48b4bcbf0b51af06ff06704d1254a899a8dad428b176cd9b3aaa882f894",
+    "app_android_jvm/TEST-dev.ikna.ui.settings.DiagnosticsTest.xml": "6380bf886b6a9e257ad690c973361ee26af31ece37eac5376e0ded51676afbe8",
+    "app_android_jvm/TEST-dev.ikna.ui.settings.SettingsLazyLayoutTest.xml": "65e2eef756ad8838d3b99070ccf7f78ccae37aa95309ac8bafb659c5e71a9ccb",
+    "app_android_jvm/TEST-dev.ikna.ui.theme.ContrastTest.xml": "a9af3f24174112f8b90edcfaf193d1d76e14ee05e72fc7bd959df055f73e53c9",
+    "app_android_jvm/TEST-dev.ikna.ui.theme.ControlColorsTest.xml": "eade397646a71d403c7f8b18d44ee56d84a925554bf7acda26b1fb62c1f1b39f",
+    "app_android_jvm/TEST-dev.ikna.ui.theme.LaunchWindowTest.xml": "a8f116ed24f243b4bcc29ed9eea9f206ac66d51c4817b8955df60ef44e54b681",
+    "app_android_jvm/TEST-dev.ikna.ui.theme.MotionPolishTest.xml": "881835366aa2926ec611a2640c49737391b281f813ab43c3baa1633dce419bdd",
+    "app_android_jvm/TEST-dev.ikna.ui.theme.PaletteTest.xml": "2b7f9700b2a20e7deb4038cc98383b8a4d2106476239c2d590bfebf0c30c105c",
+    "app_android_jvm/TEST-dev.ikna.ui.theme.WordmarkTest.xml": "d1218e2e67a83d3d10f59d14ffdc04112f98922f08eb0a2245714e626c49780b",
+    "desktop/TEST-dev.ikna.desktop.AnkiRestoreAtomicityTest.xml": "f698907e82332d9c59942919adf2f49f2a6a56e716d8ad971066359ba55e9610",
+    "desktop/TEST-dev.ikna.desktop.AtomicBackupFileTest.xml": "f351667a927b36ac6a0e344dbcc59bafa8a8be8232d10ff0569d05eb9d6bc666",
+    "desktop/TEST-dev.ikna.desktop.BundleComponentFailureTest.xml": "e2820c0058906273431b5ec8ade4100b0d7875f950fd04f3198eff60195a0455",
+    "desktop/TEST-dev.ikna.desktop.BundleRestoreFailureTest.xml": "75dfb4600c8f847bb5035faa1ad90fc10aa919d908e18ec8903b914e7d8d9fb2",
+    "desktop/TEST-dev.ikna.desktop.BundleWriteSafetyTest.xml": "53a668dd20d6bdd43a337020249b6be4a2877d2da8b422cd2509a0fc1f63d89f",
+    "desktop/TEST-dev.ikna.desktop.CardRevealPointerIntegrationTest.xml": "6d19dfb03c65fd69cb31bef29b0c4c80bfb25eb2c37a9d04518780fabb060675",
+    "desktop/TEST-dev.ikna.desktop.CatalogImportIntegrationTest.xml": "d351b7558b586850380157fc0daa014d88f16178a528c6748e0edadeda34926e",
+    "desktop/TEST-dev.ikna.desktop.DesktopRestartTest.xml": "62dbe4aebd32fe36f5ed7bc4128ff8856374cffb7ddc8ba2c053531e7da5fc2c",
+    "desktop/TEST-dev.ikna.desktop.DeveloperSandboxIntegrationTest.xml": "72c15fe9fccee97be81888933f09e85222c4996db6299dbf2ca5af2f5381051f",
+    "desktop/TEST-dev.ikna.desktop.DeviceProfileAdoptionIntegrationTest.xml": "ec13d7ee7735cacb0f98bf3ed32aa4e27c859bbf0bc90696d07fc1ac42308f5d",
+    "desktop/TEST-dev.ikna.desktop.DeviceSyncControllerIntegrationTest.xml": "b5f9274969d2ea1273e243163837e1f17981e1dbb2536b07b8c3632fd7c63701",
+    "desktop/TEST-dev.ikna.desktop.FirstStudyRouteTest.xml": "680f11d7f8dbaad0ee28faf0919d2f73514fb81c2e546f77f989106c83328bbd",
+    "desktop/TEST-dev.ikna.desktop.HotkeyRegressionTest.xml": "b963acf5e10b6f33fe17b64708e7828367393ce7cbae134ae5818a4ee5b73b87",
+    "desktop/TEST-dev.ikna.desktop.IncrementalJournalRepositoryTest.xml": "b4f99abaed7606256247da9b4ec4197a173d31170f3ee4230b84ec4c7813ffb3",
+    "desktop/TEST-dev.ikna.desktop.JournalSyncIntegrationTest.xml": "cc70cda23708c3be54e6d39f6c8341a63891fc85f266d1a74d8694ba727c7cf7",
+    "desktop/TEST-dev.ikna.desktop.LearningSimulationTest.xml": "461c7433a7cef0922700aaad38eb35f53020cf2865b430d2e81febc22ae163d7",
+    "desktop/TEST-dev.ikna.desktop.LearningWriteAtomicityTest.xml": "8df12a67679eb341748c76327607f7bffa4978dc79d5c92c6fd09ddb7f2bc95a",
+    "desktop/TEST-dev.ikna.desktop.PhoneBackupWriteSafetyTest.xml": "76046026f892594bc8796588fba571e61c5fcbd98a5d3fa2f2ec9e3eac02b79c",
+    "desktop/TEST-dev.ikna.desktop.PreWipeDeckBackupTest.xml": "d7f25adb458c04685b2d47b9334a07dbd32d967ed4166d511bb03776a00e3691",
+    "desktop/TEST-dev.ikna.desktop.ProfileAdoptionIntegrationTest.xml": "13dc3a0b86e638cfa82ca0079c9e26ecb17e3029c47234ecbbb7a10d3829e551",
+    "desktop/TEST-dev.ikna.desktop.ProfileRetainedDataWiperIntegrationTest.xml": "7f9f0960072d3ee68123d5b88d9c2c36550190733de75fe83d6ea118f905d3a0",
+    "desktop/TEST-dev.ikna.desktop.ProfileSlotMigrationIntegrationTest.xml": "625d6a9b6ba21d7d3801e044259d4574efd9d3afeb3eb2855c28abf751527f24",
+    "desktop/TEST-dev.ikna.desktop.ProfileTransferIntegrationTest.xml": "2170ec550c21334048e8b43b2b75b33cb606961e8a18538d964d221e674ded30",
+    "desktop/TEST-dev.ikna.desktop.ProfileTransferResourceSafetyTest.xml": "91a19d54e8559b8a757a751849e30ed25febfbb881c702548521072ecd626623",
+    "desktop/TEST-dev.ikna.desktop.RestoreAtomicityTest.xml": "2d1684dae8c8efe18b3e7b0ae1204a78e2743de80768feaa2f57594eb29076d7",
+    "desktop/TEST-dev.ikna.desktop.StudyStatsRepositoryTest.xml": "e041e7819ff465d94b85d49ac90bd30c401e130465d9ed2bcc5685a35ea65185",
+    "desktop/TEST-dev.ikna.desktop.TitleBarClicksTest.xml": "77a1b922857d669b7b12ecb557074dc3b7c72f32be2166f85f11df58e3c24276",
+    "desktop/TEST-dev.ikna.desktop.WindowBoundsEditsTest.xml": "a5c0b20598864c1d6b9933cbee5120ee2868c72f303dc980c07a234ecd9051dd",
+    "desktop/TEST-dev.ikna.desktop.WindowBoundsTest.xml": "64b558c9f6d73b1496940500eb1d016174687c14ecec8bcec58a6d87a74bf7c4",
+    "desktop/TEST-dev.ikna.desktop.WindowChromeRegressionTest.xml": "65e6a0d3c5940006e114954e551582e7820118b2c3fba88182223b4993740b33",
+    "desktop/TEST-dev.ikna.desktop.WindowFrameLayoutTest.xml": "3eac1bb839ba864ab214b9f5433da71d3579399c339e5d0d8608a85b7dd2a76e",
+    "desktop/TEST-dev.ikna.desktop.WindowPlacementMemoryTest.xml": "696af49162605e5e650a2555d6f6aa697fdbd59d6bb5c3874c7239b1a7bca424",
+    "desktop/TEST-dev.ikna.domain.fsrs.FsrsOptimizerTest.xml": "642e74e004767158880fc818c8e8cf6f2c29ffa1620cb3bc06c30587d33754ad",
+    "desktop/TEST-dev.ikna.domain.fsrs.FsrsTest.xml": "0151cec7b5a649273adee8d6bbf0980bb5a60d31374d321b754ddea8e3e37772",
+    "desktop/TEST-dev.ikna.domain.fsrs.SchedulerDueDayTest.xml": "200ae4aeb9ebf87090131d80a6421365b26ef984955adaf96385233108fed34d",
+    "desktop/TEST-dev.ikna.domain.grading.DerivedGradingTest.xml": "13eaa300b70ae1275f002ec81b77ee488af57283b8375c98aed38ceae1a0ecf0",
+    "desktop/TEST-dev.ikna.domain.optimizer.LocalOptimizerTest.xml": "8ae5897bba432085c64069d165ff4fd411e65babceda0b9f10cca2a865c054b9",
+    "shared_android_jvm/TEST-dev.ikna.data.catalog.CatalogFilterNormalizationTest.xml": "04039b79b2093e5c1fd20d3819d4a8e220dcf5a4f58a2e36aa0af10eb865c7a6",
+    "shared_android_jvm/TEST-dev.ikna.data.catalog.CatalogPlanRefreshTest.xml": "12528944f39664fdbde079aff86c0defb21645aeccb914c66f6e21aa0e128fdd",
+    "shared_android_jvm/TEST-dev.ikna.data.dev.DeveloperBootstrapTest.xml": "10ff4ee667a47a13e68db6e007a3257de380c87f2e91ba431540d75e48b714b5",
+    "shared_android_jvm/TEST-dev.ikna.data.export.PreWipeBackupTest.xml": "2a366014b25385b5d5b1f06eeca709ec7fe15a7f86ff52e2df5829ee817c60aa",
+    "shared_android_jvm/TEST-dev.ikna.data.pack.BundledPackFailureTest.xml": "3e07271ce6a1cf95480aaf98f772e6a81497bd092491dc8b03bd0f0a8ae3505a",
+    "shared_android_jvm/TEST-dev.ikna.data.repo.FirstSessionPreparationTest.xml": "037a7343cf89ac4650e1d6d3aa4ef7351c2d4ca4ebe926f52174d7289ddfe20b",
+    "shared_android_jvm/TEST-dev.ikna.data.repo.StudyStatsTest.xml": "ef8365676b9fdb685999f277089abe906a811272bf00ce2b7ff410f786bfcf0a",
+    "shared_android_jvm/TEST-dev.ikna.sync.IncrementalJournalProtocolTest.xml": "944c0c6302ba9d718e470116a473b1bed1c56484014fa2ce1b235d1d645f475d",
+    "shared_android_jvm/TEST-dev.ikna.sync.JournalErrorLatchTest.xml": "701fe338f3988d3c36771c95a8c6211c2d2cd4eeb397eb233fee8b37988fcb55",
+    "shared_android_jvm/TEST-dev.ikna.sync.PairedLanTransportTest.xml": "527e6f1389cae9435874496c7cc53a13bcace618cadb929559cd35c233471c12",
+    "shared_android_jvm/TEST-dev.ikna.sync.ProfileConsentProtocolTest.xml": "9b01b0ac671a59d449d0e8d41c7696a5daa02e7c317eaf76a758a1b17d8c1959",
+    "shared_android_jvm/TEST-dev.ikna.sync.remote.EncryptedRemoteEnvelopeTest.xml": "e9f4d1b4e9e3a0a4d820bd25e9f0231669605491b2c7f3ae24a6c850557b55c8",
+    "shared_android_jvm/TEST-dev.ikna.sync.remote.RemoteBlobStoreTest.xml": "1a5183c53f21cb5b3852bba0220ce41dbf73b9da717e5bdf65cb4c8f6d0510d6",
+    "shared_android_jvm/TEST-dev.ikna.ui.session.CardLoadingTest.xml": "2f4ff8342bad3849a3eb5f8ef1547b8731d9294e7d040c39a0e615d80d8779cb",
+    "shared_android_jvm/TEST-dev.ikna.ui.settings.DeviceSyncErrorTest.xml": "8eb381955cb2df34c8015ca2310154aa0ea601c59d68df8c1cc6d035e657111b",
+    "shared_android_jvm/TEST-dev.ikna.ui.settings.DeviceSyncStatusTest.xml": "0632844f530dd48b34085c1ad523dfa7004781925ba69123d3ef59b2616220a6",
+    "shared_android_jvm/TEST-dev.ikna.ui.stats.StatsDescriptionsTest.xml": "95aa2cdf9c559d0c84701a7f396fc01dd6692d113e50c543e61eb654e4d67985",
+    "shared_android_jvm/TEST-dev.ikna.ui.theme.PalettePreviewTest.xml": "1e587e76137aa001c9e5b474a91624e86ab9fb68b667ae46a9316d3af412c599",
+    "shared_android_jvm/TEST-dev.ikna.ui.theme.ReadingCatTest.xml": "34c86290ecd61406d7b227b9c262001d75b7f034b1d673aff54fd31fd1e6bd30",
+    "shared_android_jvm/TEST-dev.ikna.ui.theme.SignalFrameFeedbackTest.xml": "b7dbfc2a197e18a92528200d1f61cd7f6f2af95067a314d8f9b29211cd370cac",
+    "shared_android_jvm/TEST-dev.ikna.ui.theme.SignalFrameHoverTest.xml": "6f1f7f5d8b5ab016b5209c990a0dd98697436ce289b6294b8294f44e91689257",
+    "shared_android_jvm/TEST-dev.ikna.ui.theme.TransientNoticeTest.xml": "29a5d7a78d870009d232f9b16e01cfec9cee1d7de2049e8efd5cee45f2e492a3",
+    "shared_desktop/TEST-dev.ikna.data.catalog.CatalogFilterNormalizationTest.xml": "aff67fc2bd7f8cb6f5e1a33a2ef32045250dfafe98bcb19ce82549d8105735d6",
+    "shared_desktop/TEST-dev.ikna.data.catalog.CatalogPlanRefreshTest.xml": "69c0bc905a4571951c686dacb7c565c0893f8937847b12f29ee7f029a1538e11",
+    "shared_desktop/TEST-dev.ikna.data.dev.DeveloperBootstrapTest.xml": "81bb0ded545627194945a7b522e3225cc463c7d585a71eaf33d1570e6e2e0a2e",
+    "shared_desktop/TEST-dev.ikna.data.export.PreWipeBackupTest.xml": "3d85edb4cc2746c2a5485dc68f8568da42ce57b39de12df69d98038ed7036a43",
+    "shared_desktop/TEST-dev.ikna.data.pack.BundledPackFailureTest.xml": "bda4c8ef5f0264cbcbd0d66def48d699440a10a0bba1590fba57eaf8f373c242",
+    "shared_desktop/TEST-dev.ikna.data.repo.FirstSessionPreparationTest.xml": "a2835e491092e5451ac28e5d575a03c3a8829df395c1f16ac4a6e37d5bc8f3ed",
+    "shared_desktop/TEST-dev.ikna.data.repo.StudyStatsTest.xml": "4779aebfb698fa85639b2de90adcfc0c8b0720953f1319bf3ece1ba611a09ed7",
+    "shared_desktop/TEST-dev.ikna.sync.IncrementalJournalProtocolTest.xml": "2c55773f22eeee60ec1c5a56fb6c1372938ac0c6181733fc72725d120ba91ce4",
+    "shared_desktop/TEST-dev.ikna.sync.JournalErrorLatchTest.xml": "722ee0b1050049fe15c292d8b1b608cf4768f395ad3f9a37e1766577fadf3d55",
+    "shared_desktop/TEST-dev.ikna.sync.PairedLanTransportTest.xml": "8f41b059dc4033efa1e15b5abc005f79948c2a8720f88dd653d15d042fd25833",
+    "shared_desktop/TEST-dev.ikna.sync.ProfileConsentProtocolTest.xml": "6c40ee326dbbeac43c089184a2d57400757b890af98fe9c37ffe9cf7221b311a",
+    "shared_desktop/TEST-dev.ikna.sync.ProfileSlotStoreTest.xml": "40357440ad6efdeffb2616cc67d6505f1b62c989e5e36465517b8d8525e47803",
+    "shared_desktop/TEST-dev.ikna.sync.remote.EncryptedRemoteEnvelopeTest.xml": "7aa0267ba9dda5e7ccd1465929634295c1f547f11c6caea5cc319da9acf94f60",
+    "shared_desktop/TEST-dev.ikna.sync.remote.RemoteBlobStoreTest.xml": "2fcddbd350e7792f10b18725858e7628c4ee6992b326bb2e89f4d58bebd96f7a",
+    "shared_desktop/TEST-dev.ikna.ui.session.CardLoadingTest.xml": "8c1e8d174cc0905dc4c719467c65d616697cdd18e8c9aa650a0b2a750c3cd96e",
+    "shared_desktop/TEST-dev.ikna.ui.settings.DeviceSyncErrorTest.xml": "2b707f57c82ed73808deb208f139f8f7bf8f4d2aba05ceb6f181e5e919fdbbcb",
+    "shared_desktop/TEST-dev.ikna.ui.settings.DeviceSyncStatusTest.xml": "340878b10dc305753f110e90678a1a15ed3b9a690043f7a18ac15b7d3855155e",
+    "shared_desktop/TEST-dev.ikna.ui.stats.StatsDescriptionsTest.xml": "bfdd7ebf7cfb850054a09dfd76e88ac8f2743a5ea9dc13eee1c9d8bd48631dca",
+    "shared_desktop/TEST-dev.ikna.ui.theme.PalettePreviewTest.xml": "d65c42f24eb02547b5aff5d08eef9c9291c4722c2c7305e91c5234c17d87742f",
+    "shared_desktop/TEST-dev.ikna.ui.theme.ReadingCatTest.xml": "a70be081fc21d392342268c15ff72cca2226979320ad196576931494d44fff1a",
+    "shared_desktop/TEST-dev.ikna.ui.theme.SignalFrameFeedbackTest.xml": "7e846c11d37ca11f402ee8eae276f5275d5a885746c1907152fb49a03d5d180c",
+    "shared_desktop/TEST-dev.ikna.ui.theme.SignalFrameHoverTest.xml": "8eb3f2a6a42cad41e2b71f8c729a3eaf9bd3e8311bc37399d83f2341975a9333",
+    "shared_desktop/TEST-dev.ikna.ui.theme.TransientNoticeTest.xml": "09fbb00a4be58e32d6281483987b493d29addde2b29ef858ccf93ac189e166ed"
+  },
+  "sourceFiles": {
+    "app/build.gradle.kts": {
+      "bytes": 16087,
+      "sha256": "56975b829f789e402cc3a76fbdaaba751d55fa227fe229c1282a05073539b558"
+    },
+    "app/libs/sherpa-onnx-1.10.46.aar": {
+      "bytes": 36207890,
+      "sha256": "4008c4ec831ea9c34499eba9f633853ad2107ea70a19db7d6c3063e0af0f24cb"
+    },
+    "app/proguard-rules.pro": {
+      "bytes": 4653,
+      "sha256": "e8159dd23c1e084c5e88e39581ffe260dedca363ac01b79c4f6558d6a77c2489"
+    },
+    "app/schemas/dev.ikna.data.db.IknaDatabase/10.json": {
+      "bytes": 35423,
+      "sha256": "93a6c80de06b9f3af9dfd2d3cd27e27c7222550391685ad643fe2438c5eb5fa5"
+    },
+    "app/schemas/dev.ikna.data.db.IknaDatabase/11.json": {
+      "bytes": 35529,
+      "sha256": "afbd58b5ba61e3c1c7f9ffba33fc7d074ab586eed3118c0ad074517d7892d4c0"
+    },
+    "app/schemas/dev.ikna.data.db.IknaDatabase/12.json": {
+      "bytes": 38546,
+      "sha256": "0f323543ea1cadcecee69325014a22b44a7b28ed86ce8dedabfa3676c8faea88"
+    },
+    "app/schemas/dev.ikna.data.db.IknaDatabase/13.json": {
+      "bytes": 43935,
+      "sha256": "8261c0dca390b8a6fc160f3bcb3b5965e396b805d633cc14f053a26d11df3d0c"
+    },
+    "app/schemas/dev.ikna.data.db.IknaDatabase/3.json": {
+      "bytes": 23822,
+      "sha256": "b534e6b26799fb7590af720a0daafdc6fd1c893d599024458ae75ca55e69c5f4"
+    },
+    "app/schemas/dev.ikna.data.db.IknaDatabase/4.json": {
+      "bytes": 25931,
+      "sha256": "3b1ffb5330cff1275458636501dfeccbb3d70d0a99a430c8d9170dbc64c64922"
+    },
+    "app/schemas/dev.ikna.data.db.IknaDatabase/5.json": {
+      "bytes": 26278,
+      "sha256": "7bb138a04f6015efbc342bf26119b0d81b95191ac1d0b9b1e9bb4e073332decc"
+    },
+    "app/schemas/dev.ikna.data.db.IknaDatabase/6.json": {
+      "bytes": 27051,
+      "sha256": "c635370481012a1fed3d443de3473da44b4066d5fd6c6456414bd60995ce688d"
+    },
+    "app/schemas/dev.ikna.data.db.IknaDatabase/7.json": {
+      "bytes": 28233,
+      "sha256": "5315f08f5b451f02de27526a5a0cdb3bd390a16172967c097039556c86a8a180"
+    },
+    "app/schemas/dev.ikna.data.db.IknaDatabase/8.json": {
+      "bytes": 28429,
+      "sha256": "91ab686d01cc826d4c0ff2faf81c17445af4fb9f02efadb00f17375654bca981"
+    },
+    "app/schemas/dev.ikna.data.db.IknaDatabase/9.json": {
+      "bytes": 30355,
+      "sha256": "3adcdc510be4560de08f9dae52352364c97bdd3dc748947cbf65a5f1e92def7c"
+    },
+    "app/src/androidTest/java/dev/ikna/data/db/GradingRestoreTest.kt": {
+      "bytes": 6794,
+      "sha256": "9dd80d11d847d5b2f61f85b598810282f6eab656be541f73c67d02530265167b"
+    },
+    "app/src/androidTest/java/dev/ikna/data/db/MigrationTest.kt": {
+      "bytes": 33986,
+      "sha256": "e4e1057bf2853ad5e66d471fface46024f03949b76e00ae3aaf3815112fb289b"
+    },
+    "app/src/debug/java/dev/ikna/ui/debug/DebugHooks.kt": {
+      "bytes": 5141,
+      "sha256": "88317f715f6657e49230b19de9f3fe536c92f838fa889b607ce74b791f40a511"
+    },
+    "app/src/main/AndroidManifest.xml": {
+      "bytes": 8089,
+      "sha256": "8fe457dbb03dfcfcd42e2b3462c0cce8d3ff43b417b94f94534264284a9b5391"
+    },
+    "app/src/main/assets/governor.json": {
+      "bytes": 697,
+      "sha256": "ab127da24c2a86ac729004265a69481a127451f4d8ac68144b4ce5b5897dd3ef"
+    },
+    "app/src/main/assets/packs/manifest.json": {
+      "bytes": 270,
+      "sha256": "d83009ea97353f514c058e95f926229b54eaf0ed9944fe8ab14c9b66a61f86fa"
+    },
+    "app/src/main/assets/prompt/deck_prompt.txt": {
+      "bytes": 5220,
+      "sha256": "4313d957ac1a85d34cbc7fd453d807998adddb61456dfe97d54ee3f12a74cedf"
+    },
+    "app/src/main/assets/prompt/subject_prompt.txt": {
+      "bytes": 3950,
+      "sha256": "8ca332bf1e2d267a1801c7eaf0764dfa86041be620c0f4b74cd5f9bb31e575db"
+    },
+    "app/src/main/java/dev/ikna/AppContainer.kt": {
+      "bytes": 18018,
+      "sha256": "ec2bb66fd3eaae31a3d0379cde0e766368c513cf5baf36d4e2830fe9cf0cd3dc"
+    },
+    "app/src/main/java/dev/ikna/IknaApp.kt": {
+      "bytes": 1815,
+      "sha256": "b4b39a60dba46667c1a414393b282a71eab85deea0229a2187e4436c7cfc4339"
+    },
+    "app/src/main/java/dev/ikna/MainActivity.kt": {
+      "bytes": 5965,
+      "sha256": "85248f959bc490b14c0c39ab2dac38e7c1c5633f0331aa3fea6cacaf192121ff"
+    },
+    "app/src/main/java/dev/ikna/ProfileRestartActivity.kt": {
+      "bytes": 2495,
+      "sha256": "08d252752f388c7f04adc9b1bdec6596d99e90c5a325351ffafa5d077358d96b"
+    },
+    "app/src/main/java/dev/ikna/audio/NeuralSpeech.kt": {
+      "bytes": 4278,
+      "sha256": "09bf99d1f1e7adba4be73f3e11d43c6c75825e30355751fe7cab361fbd5e8d84"
+    },
+    "app/src/main/java/dev/ikna/audio/NeuralSpeechFactory.kt": {
+      "bytes": 616,
+      "sha256": "dfab2c34156101825bb229265943839d8fe481830e689c73daf082e0e20a3e63"
+    },
+    "app/src/main/java/dev/ikna/audio/SherpaSpeech.kt": {
+      "bytes": 13794,
+      "sha256": "30f3b9cf311d352a3a3b50a8c79660b85be04cceafb9b39dd4759c820e6b0941"
+    },
+    "app/src/main/java/dev/ikna/audio/Speaker.kt": {
+      "bytes": 20786,
+      "sha256": "8a7bf8f9a0480da84d52a00c63f14bcfdb82297f3b0d56143b8d2e078a311064"
+    },
+    "app/src/main/java/dev/ikna/audio/VoiceArchive.kt": {
+      "bytes": 8746,
+      "sha256": "424989baddb2aaaafdb76d86b747fd732366f6d007fb3556a2d2dc44c14db645"
+    },
+    "app/src/main/java/dev/ikna/audio/VoiceInstall.kt": {
+      "bytes": 1935,
+      "sha256": "31aaa2445e16c3e4700015615a626fc82f7fde5bbee52a02c3c3a90916bfed9e"
+    },
+    "app/src/main/java/dev/ikna/audio/VoiceInstaller.kt": {
+      "bytes": 3223,
+      "sha256": "2ceb090ad6f4764d727ee5116c6d96bc79b16114c9f32ae197e6099ced5c5ad0"
+    },
+    "app/src/main/java/dev/ikna/audio/VoiceModel.kt": {
+      "bytes": 7196,
+      "sha256": "94cf27dc737f6b789abcf65166554e099ee84361fc2bd651e543fcfa2f3bdd5b"
+    },
+    "app/src/main/java/dev/ikna/audio/VoiceModelStore.kt": {
+      "bytes": 28164,
+      "sha256": "aa990e36b717bb2e90009c66e7764b0558b3bcaded8a994ed589961c6b9ad714"
+    },
+    "app/src/main/java/dev/ikna/data/anki/AnkiCollection.kt": {
+      "bytes": 10176,
+      "sha256": "c9918c1fad0f8d1d03e798cd4a2d81fc7488cb6cd41990e8cc1cd0b26695454c"
+    },
+    "app/src/main/java/dev/ikna/data/anki/AnkiImportManager.kt": {
+      "bytes": 1841,
+      "sha256": "f769013204d2fe87e088efb00d052b8f634b3420a3f0b0e3aea476e99dfc796e"
+    },
+    "app/src/main/java/dev/ikna/data/anki/AnkiImporter.kt": {
+      "bytes": 30484,
+      "sha256": "4c9d4c1dd84e6ddc0830fee924e8c8b432c68d83f6e952a6d3e354082baa49eb"
+    },
+    "app/src/main/java/dev/ikna/data/anki/AnkiProto.kt": {
+      "bytes": 4013,
+      "sha256": "895c458f07fa1ada7e60305a6aed010450f4015ca9674d78690c499678d3699f"
+    },
+    "app/src/main/java/dev/ikna/data/anki/AnkiText.kt": {
+      "bytes": 15258,
+      "sha256": "c856e17dcc20a807c9026675663731ddc04240991b9033175f7b59b959f79607"
+    },
+    "app/src/main/java/dev/ikna/data/anki/DeckLanguage.kt": {
+      "bytes": 11123,
+      "sha256": "2fd1573e6ae86afea04bcf06995b5927df6c25a5f716b8585596e70227105297"
+    },
+    "app/src/main/java/dev/ikna/data/export/JsonExporter.kt": {
+      "bytes": 3876,
+      "sha256": "817d42d501e95ce9119ef2538a68ae268a42fc3bf7874c93838a0497f6bd5872"
+    },
+    "app/src/main/java/dev/ikna/data/update/UpdateDownload.kt": {
+      "bytes": 10895,
+      "sha256": "9d0cd8404fa3777fedf73dffa0edc41fc485ddc54fd17d677bc65d5a7880ce1b"
+    },
+    "app/src/main/java/dev/ikna/ui/catalog/CatalogScreen.kt": {
+      "bytes": 19469,
+      "sha256": "6962ff2bb7358cc6dd53535c34b2095d4ac7802d9ccb381153826c30fad99d8e"
+    },
+    "app/src/main/java/dev/ikna/ui/decks/AddDeckScreen.kt": {
+      "bytes": 28104,
+      "sha256": "a8c5929fb55214b1bff02a61ae7a116d67aa1dffeb3f0615a77368696661cc1d"
+    },
+    "app/src/main/java/dev/ikna/ui/decks/AnkiImportScreen.kt": {
+      "bytes": 7940,
+      "sha256": "8f8a351fa5fda3ab8d723c845ac945b95c34a11e010c9acccfc72aa7c6d134c6"
+    },
+    "app/src/main/java/dev/ikna/ui/decks/DeckScreen.kt": {
+      "bytes": 20448,
+      "sha256": "dab1889779305380256a94897ac86a5886a7bed25750ac66d4f32ac424693359"
+    },
+    "app/src/main/java/dev/ikna/ui/decks/DeckShare.kt": {
+      "bytes": 3391,
+      "sha256": "ad52f1a67e022d69e011cc0631f012e44ff525d6cf50ae522338166c16015814"
+    },
+    "app/src/main/java/dev/ikna/ui/decks/DecksScreen.kt": {
+      "bytes": 17363,
+      "sha256": "20e659901c786fabec2792ff084c33770a2c2d8836b4ea61daa0579e22564f6e"
+    },
+    "app/src/main/java/dev/ikna/ui/migration/SchedulerMigrationScreen.kt": {
+      "bytes": 2429,
+      "sha256": "dfb223c037ff6e8eb24bc4892d997f4a10e501a2065c18cf00013c94a09aebaa"
+    },
+    "app/src/main/java/dev/ikna/ui/nav/IknaNavHost.kt": {
+      "bytes": 14607,
+      "sha256": "ba7831306e485ccc028b4aa665a0d0d6997522c2bb6bdc8775fbedad09b3e102"
+    },
+    "app/src/main/java/dev/ikna/ui/onboarding/OnboardingScreen.kt": {
+      "bytes": 8974,
+      "sha256": "57ad28a4e970a1bfb109009baa668b48807a07cab1faa281df081d19c73b1b7d"
+    },
+    "app/src/main/java/dev/ikna/ui/search/DeckSearchScreen.kt": {
+      "bytes": 7781,
+      "sha256": "3ee5e0da0bd4523bc72dc8ec14e06976b953992568aaf73bb9b50b533197b0d8"
+    },
+    "app/src/main/java/dev/ikna/ui/session/BrowseScreen.kt": {
+      "bytes": 7032,
+      "sha256": "2580cb369739b9ae674a729caebef8c9bceb9dff0b917142e961545dd2826d85"
+    },
+    "app/src/main/java/dev/ikna/ui/session/BrowseViewModel.kt": {
+      "bytes": 2914,
+      "sha256": "0c64dc49f87488e7cd53fc8a42bbc1df170c13eee2c9646f2d503f3649218ab5"
+    },
+    "app/src/main/java/dev/ikna/ui/session/ReviewInterruptions.kt": {
+      "bytes": 2928,
+      "sha256": "b2f4c30917bfa926094b778890d0c7cfa91170192cbb58f3aa03f346f4600961"
+    },
+    "app/src/main/java/dev/ikna/ui/session/SessionScreen.kt": {
+      "bytes": 14773,
+      "sha256": "ab16e727ab5230bf72ae1105fc16006e3414bc2a9da4b94ad63a8cdebf7064a2"
+    },
+    "app/src/main/java/dev/ikna/ui/session/SessionViewModel.kt": {
+      "bytes": 21764,
+      "sha256": "aa5c50015a1842b97b5486bf5e5563d536456c8aeda80b1e21d2aa0e777cfad0"
+    },
+    "app/src/main/java/dev/ikna/ui/settings/Diagnostics.kt": {
+      "bytes": 2676,
+      "sha256": "2d57b9fb30030e649fd8b9e563af6d18bcb7efa7db4587730dac26aee52f25dd"
+    },
+    "app/src/main/java/dev/ikna/ui/settings/SettingsScreen.kt": {
+      "bytes": 74915,
+      "sha256": "3550c4c53ec73dff097eb927bdaf8a4e3c3a67754845a0bf969117dc7b2818bc"
+    },
+    "app/src/main/java/dev/ikna/ui/settings/VoiceScreen.kt": {
+      "bytes": 29793,
+      "sha256": "966a8936fe6e86da24194e49dd7c9c5648f1e46adf327b24d20fc379c694d145"
+    },
+    "app/src/main/java/dev/ikna/ui/stats/StatsScreen.kt": {
+      "bytes": 2908,
+      "sha256": "26a3223c9211bb0b44003fff52a257ac94706e0c30fc50094c2aa10c9ef8a979"
+    },
+    "app/src/main/java/dev/ikna/ui/update/UpdateDownloadUi.kt": {
+      "bytes": 10315,
+      "sha256": "66446a17fa26067678b03fe014868274d2e07de88d611e8a3665ec197fef8ccb"
+    },
+    "app/src/main/java/dev/ikna/ui/update/UpdateSheet.kt": {
+      "bytes": 9510,
+      "sha256": "73296f3a5a42a1ba99b8b2cf1da3c4f4fcb2b35505ce5c88e51c8433b79724b2"
+    },
+    "app/src/main/java/dev/ikna/widget/TodayWidget.kt": {
+      "bytes": 5453,
+      "sha256": "9c759605c7b49e23e9bdc6da90b13a3e2fcc1691cb962d55a8ecfa1a8b7bf760"
+    },
+    "app/src/main/java/dev/ikna/work/DailyPlanWorker.kt": {
+      "bytes": 1498,
+      "sha256": "9d74e65f362423d039ceb77f95048bdf05c204be0f4f80ce7741a397fa9eaa01"
+    },
+    "app/src/main/java/dev/ikna/work/ExportWorker.kt": {
+      "bytes": 857,
+      "sha256": "239f918551b1432b5273e31fe06622c2e3f26d76ff6010c94e3e29855a3e741a"
+    },
+    "app/src/main/java/dev/ikna/work/ReminderWorker.kt": {
+      "bytes": 4054,
+      "sha256": "268f6e393d0abc37bd3118000fdafd6562722bedc1e4195c5cfe963a41f8e4ed"
+    },
+    "app/src/main/java/dev/ikna/work/WorkScheduler.kt": {
+      "bytes": 3973,
+      "sha256": "e25121bde8c577c16176ef00f055e0094c41df97bd49adc56e155adcbf90650c"
+    },
+    "app/src/main/res/drawable/launch_screen.xml": {
+      "bytes": 959,
+      "sha256": "4cdc9c392f3305098973c116843e6f9491571b10622a02a35ef8905d5f10c090"
+    },
+    "app/src/main/res/drawable/widget_mark.xml": {
+      "bytes": 623,
+      "sha256": "ac19f6e55e7279ee13230e28ec474560b3775a2b1878e16436443444d9046bd1"
+    },
+    "app/src/main/res/drawable-nodpi/ic_launcher_background_art.png": {
+      "bytes": 104653,
+      "sha256": "27ffb51446d4ca98aae0c08fd04cf6db6ec6f3ff08a6c24075cad5776c43b2f9"
+    },
+    "app/src/main/res/drawable-nodpi/ic_launcher_wordmark.png": {
+      "bytes": 21705,
+      "sha256": "c5319f5dc30c4c17a217953b7eb0eab87e60d3d98bdcff085030f98efbe347cb"
+    },
+    "app/src/main/res/drawable-nodpi/ic_notification.png": {
+      "bytes": 2452,
+      "sha256": "89add2e2a1101c461cf7e1524e54f5c5e69a77f4e03db88998eff6806a576715"
+    },
+    "app/src/main/res/drawable-nodpi/ikna_pixel.png": {
+      "bytes": 232,
+      "sha256": "65a61f11fbbd2bab80c3c43ae6e92238d2537b093aa37205661f4b811748828d"
+    },
+    "app/src/main/res/drawable-nodpi/ikna_wordmark.png": {
+      "bytes": 131881,
+      "sha256": "9eef528590fcfa7e6e1b8b7bb879e492242d63aa754ff4ac2bc8db9149f7cb30"
+    },
+    "app/src/main/res/drawable-nodpi/ikna_wordmark_accent.png": {
+      "bytes": 15944,
+      "sha256": "e4a0ba0bc4fc450bb5d824740ace02bb7e956c6068e61cebc1e4172942d4c961"
+    },
+    "app/src/main/res/layout/widget_today.xml": {
+      "bytes": 3480,
+      "sha256": "33749cfc8aa78e3f7639fb4147977135f1887e32bf9b771f39f4512d71c8b10b"
+    },
+    "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml": {
+      "bytes": 527,
+      "sha256": "b61e0f8b050557c309bc6ddbbc2080f919201b6c48a3d331e18c2a6082da9f69"
+    },
+    "app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml": {
+      "bytes": 527,
+      "sha256": "b61e0f8b050557c309bc6ddbbc2080f919201b6c48a3d331e18c2a6082da9f69"
+    },
+    "app/src/main/res/mipmap-hdpi/ic_launcher.png": {
+      "bytes": 7716,
+      "sha256": "9bfe0a9a0bdda063ff15e7955c042a7938f5faf224ba44dec841bbcc029c6a29"
+    },
+    "app/src/main/res/mipmap-hdpi/ic_launcher_round.png": {
+      "bytes": 8279,
+      "sha256": "73aeb3d28b62f310d7e480cd086c0f05780caeb9848dcf8240e9ea521b3cc4ed"
+    },
+    "app/src/main/res/mipmap-mdpi/ic_launcher.png": {
+      "bytes": 3749,
+      "sha256": "ca2ffe0f4f92c678a53a2fc7edcddc92a97c81046bb4e8749ca8a0e0e1c9bd54"
+    },
+    "app/src/main/res/mipmap-mdpi/ic_launcher_round.png": {
+      "bytes": 4075,
+      "sha256": "788c94a61c2373a4ae12062ca550669be7ed20f0f28bc30a45ca424ea7088ddf"
+    },
+    "app/src/main/res/mipmap-xhdpi/ic_launcher.png": {
+      "bytes": 12710,
+      "sha256": "cfc7ccddb831bf57cc4c7b186a4ab837e668639ce7d85f05f846ecde450c785e"
+    },
+    "app/src/main/res/mipmap-xhdpi/ic_launcher_round.png": {
+      "bytes": 13462,
+      "sha256": "2d9dc2b4bf175c71594cf28f3cb600000a6188efaffbb43d5cc1b5e26567d00b"
+    },
+    "app/src/main/res/mipmap-xxhdpi/ic_launcher.png": {
+      "bytes": 24594,
+      "sha256": "1dcb3ed8e5ff970eeb6587a7f93d9c615dbf46ae8ad0cdb2f98b1370dccb655f"
+    },
+    "app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png": {
+      "bytes": 25912,
+      "sha256": "55f3052545fe50c89e02bc06254ebbba2c40839ad36fec70c4ec7c342b973560"
+    },
+    "app/src/main/res/mipmap-xxxhdpi/ic_launcher.png": {
+      "bytes": 39086,
+      "sha256": "37d511d337187e5c5c269d01d1590409b5702d8e80aad2330a9b53f4abf76b08"
+    },
+    "app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png": {
+      "bytes": 40957,
+      "sha256": "ea9e0c9257528c5b65009a7165542922904b2968dfa853c2baff697c382c2ceb"
+    },
+    "app/src/main/res/values/colors.xml": {
+      "bytes": 2015,
+      "sha256": "5dd4330b5c327c06ed22a6ca5301d0dc7468744114ccc527a85741b2bc57c4c2"
+    },
+    "app/src/main/res/values/strings.xml": {
+      "bytes": 644,
+      "sha256": "306bd138c319dd359b47d65c054a4ef54153e1743fed34cd6a7ea0ee0fa79848"
+    },
+    "app/src/main/res/values/themes.xml": {
+      "bytes": 1241,
+      "sha256": "9668ccde8c4c9a0683f4c5a4a41372a4e5dbea0ba2e8a8e77cee87d9ff5736ce"
+    },
+    "app/src/main/res/values-v31/themes.xml": {
+      "bytes": 648,
+      "sha256": "5dbe13514c84eebb676e44039defa4ace1df0b071acd07977da2629bd3bce6c0"
+    },
+    "app/src/main/res/xml/data_extraction_rules.xml": {
+      "bytes": 1596,
+      "sha256": "5f42d040dce6416b4105bd516ee425ff2a7e3caeeb19fda9a14a9924c125a9d0"
+    },
+    "app/src/main/res/xml/file_paths.xml": {
+      "bytes": 877,
+      "sha256": "0c796711848356dc705f096076b1a31d7a685b9fac82970c93f2954be626e76f"
+    },
+    "app/src/main/res/xml/locales_config.xml": {
+      "bytes": 1021,
+      "sha256": "594747c68c30c53b68fcad16cbe4c4f40ec73b1904a312e0dd79d0d9e78e88a9"
+    },
+    "app/src/main/res/xml/widget_today_info.xml": {
+      "bytes": 1065,
+      "sha256": "8fbd06aafa0a8ed0f8c191ccd22c0c9065a81084506e07578e971c9a8ebf4fda"
+    },
+    "app/src/release/java/dev/ikna/ui/debug/DebugHooks.kt": {
+      "bytes": 1409,
+      "sha256": "8917e365d3e7163ee1082ae1450ecf5d8fca059ce50f218c5547538cd1f27a8f"
+    },
+    "app/src/test/java/dev/ikna/BrowsePolicyTest.kt": {
+      "bytes": 8108,
+      "sha256": "9b80d902496bd010ce14ba39e0f6693a09f2899b46a48049db287095d289fbf2"
+    },
+    "app/src/test/java/dev/ikna/DeckMarkTest.kt": {
+      "bytes": 3061,
+      "sha256": "e2aa329d2158a7191216428d500f471f4a7403f93ba95b208e8c6b07b0e34c4a"
+    },
+    "app/src/test/java/dev/ikna/FontValidationTest.kt": {
+      "bytes": 3333,
+      "sha256": "4cab0c1a87cd2a9ae903c95ff3756a2af98e846f2e324b3b4421812a5d2e5801"
+    },
+    "app/src/test/java/dev/ikna/GridTest.kt": {
+      "bytes": 5452,
+      "sha256": "da6f8985884892902c291317aade4e86e139bc100a6df73690ec394fe5d53773"
+    },
+    "app/src/test/java/dev/ikna/SettingsBackupTest.kt": {
+      "bytes": 5611,
+      "sha256": "5fc596043f096edeff2bf6a8227d702daa8ad2f4d309478f00f5dc8865f01b82"
+    },
+    "app/src/test/java/dev/ikna/StringsCatalogTest.kt": {
+      "bytes": 6946,
+      "sha256": "35c485b3b238ed9646920dfad0f97c1fb6445376a10eb95b2a0df8377bf9dd89"
+    },
+    "app/src/test/java/dev/ikna/SwipeDecisionTest.kt": {
+      "bytes": 3020,
+      "sha256": "056dec920ab14e1d833f36b8590f2da0f18c3f0699b2de6064ec2e924389c9bf"
+    },
+    "app/src/test/java/dev/ikna/audio/VoiceModelTest.kt": {
+      "bytes": 7307,
+      "sha256": "a3435724552ffc5f53ac0a32a3ffb58210cf6ef8fe94638718dd0c22e52a1e76"
+    },
+    "app/src/test/java/dev/ikna/audio/VoiceNumberTest.kt": {
+      "bytes": 3072,
+      "sha256": "1af1e737aa6be47ec1d9003153f48a5269f841c5d0679837abb0ee63e51071d7"
+    },
+    "app/src/test/java/dev/ikna/audio/VoiceUnpackTest.kt": {
+      "bytes": 4243,
+      "sha256": "7534cdc1621092e225dc8b143fbebc83a3ba9e085ff4f16e13c4fcfef993a316"
+    },
+    "app/src/test/java/dev/ikna/data/PackTitleTest.kt": {
+      "bytes": 2373,
+      "sha256": "cd503a932b267d29da2f227df4dc65392a6fca660fb20c1333161001d30114a5"
+    },
+    "app/src/test/java/dev/ikna/data/anki/AnkiBridgeContractTest.kt": {
+      "bytes": 2063,
+      "sha256": "a7da1af5c73d0fa1847d148a3bb62729893aaf00c6561144247e070832e77dc0"
+    },
+    "app/src/test/java/dev/ikna/data/anki/AnkiClozeTest.kt": {
+      "bytes": 5648,
+      "sha256": "1adfef0a9163b55b55c0c92af0b14c5c90ce708f3cbecf6e85bcbb4ac0848312"
+    },
+    "app/src/test/java/dev/ikna/data/anki/AnkiProtoTest.kt": {
+      "bytes": 3607,
+      "sha256": "456a787e2b6434a4e0e62ded4fac02c6d76e0a5777bd93411e56cdbcb69c217b"
+    },
+    "app/src/test/java/dev/ikna/data/anki/AnkiTextTest.kt": {
+      "bytes": 2263,
+      "sha256": "72ce5617af0742105d6e68e7a52214b00a42addbec5018b8e76c8631552bb22d"
+    },
+    "app/src/test/java/dev/ikna/data/anki/DeckLanguageTest.kt": {
+      "bytes": 5076,
+      "sha256": "96d76d9f3535c9cff9259bb55e4e8580ab9b72431bb10db7ab0babf54b3d5cdb"
+    },
+    "app/src/test/java/dev/ikna/data/catalog/CatalogCardSourceTest.kt": {
+      "bytes": 2247,
+      "sha256": "d52b9ef6f494cf59a93785f33b455cafcdefada4cd2b7be2e37a79366ff6502c"
+    },
+    "app/src/test/java/dev/ikna/data/catalog/CatalogFilterTest.kt": {
+      "bytes": 7558,
+      "sha256": "aa998e67131ef07dc71520b185bb976bc166282080c70eb1f237f0bba22e3adb"
+    },
+    "app/src/test/java/dev/ikna/data/catalog/CatalogPreviewTest.kt": {
+      "bytes": 2484,
+      "sha256": "a65dd9f9b65177c47e32d65a0dda3bd0fe2ece80f56e804cb25f124a132a0615"
+    },
+    "app/src/test/java/dev/ikna/data/catalog/CatalogV2ModelTest.kt": {
+      "bytes": 4214,
+      "sha256": "846e1788532edc87d41d6e889b22058df4b804d9c1386606c0fdf4d3d5317750"
+    },
+    "app/src/test/java/dev/ikna/data/db/SchemaTest.kt": {
+      "bytes": 9757,
+      "sha256": "71db8ba8cfeaedc95036fbf71c37e637c33edfeded400509930ebcbaf4675d57"
+    },
+    "app/src/test/java/dev/ikna/data/dev/DeveloperModeTest.kt": {
+      "bytes": 3054,
+      "sha256": "9bab54913d24c76e372bcfc15c9a50d145ee7f57715ea1ac5e51dae40868884d"
+    },
+    "app/src/test/java/dev/ikna/data/export/ExportDocumentApiTest.kt": {
+      "bytes": 920,
+      "sha256": "7184ba8e3597f1da063f185e8f3fbd4e1d8a31fd3daa1998ace01f36944a2742"
+    },
+    "app/src/test/java/dev/ikna/data/export/ReviewRecordTest.kt": {
+      "bytes": 5369,
+      "sha256": "70b5a5a6c7231811bea7e2534245c00ac72b9ef72be3e2d577cd6da397ea4ab8"
+    },
+    "app/src/test/java/dev/ikna/data/pack/CjkCatalogContractTest.kt": {
+      "bytes": 1555,
+      "sha256": "bb212a81448bca3d566c26429e618a211a869110a29b098bab479b9931b4ae0a"
+    },
+    "app/src/test/java/dev/ikna/data/pack/SeedParserTest.kt": {
+      "bytes": 13623,
+      "sha256": "72c6a64fd92fb46dc20b5321e957a455f39953d1b495187f05a0571d2750160d"
+    },
+    "app/src/test/java/dev/ikna/data/pack/TranslationTidyTest.kt": {
+      "bytes": 5370,
+      "sha256": "96832c36b38808fb145bbaf249f50041b2569237997ce9d49afafa7df592ae8f"
+    },
+    "app/src/test/java/dev/ikna/data/prefs/DeckLookTest.kt": {
+      "bytes": 3879,
+      "sha256": "0ff7b3f30fb47d16f24012ac8d70d2c8c8d4af0241b35f1a2b5297c366e5bbe2"
+    },
+    "app/src/test/java/dev/ikna/data/prefs/DeckPhoneticsTest.kt": {
+      "bytes": 6350,
+      "sha256": "67d3beb5633f9a9cca6a286b98e38d8be11dd2c964a9d74bf5b2dd594e5b5713"
+    },
+    "app/src/test/java/dev/ikna/data/prefs/HotkeysTest.kt": {
+      "bytes": 3590,
+      "sha256": "65fe87ac5dce4e1d953762bc6489c5f88b14778f4b04b3b351dd6988714a378f"
+    },
+    "app/src/test/java/dev/ikna/data/prefs/SuppressedTest.kt": {
+      "bytes": 2010,
+      "sha256": "f16a6b72c4a2faf849408c18a428b74aee5de844b890a11bd9fd597c04454331"
+    },
+    "app/src/test/java/dev/ikna/data/repo/LocalDeckSearchTest.kt": {
+      "bytes": 771,
+      "sha256": "0cb36f3c4f802197e094661d6bd3f48ed5f14c7c68750a7a5ff4bd09c4239e95"
+    },
+    "app/src/test/java/dev/ikna/data/repo/SchedulerMigrationTest.kt": {
+      "bytes": 4641,
+      "sha256": "3226e0cfa91c7a75fbadd89989012a48b1f7ef5672373158e477ff99e08f77fc"
+    },
+    "app/src/test/java/dev/ikna/data/update/UpdateDownloadTest.kt": {
+      "bytes": 3223,
+      "sha256": "23790c91b5807317f60d809528a5008250cf104557c954a33ecf8ca8f5b433b8"
+    },
+    "app/src/test/java/dev/ikna/data/update/UpdateLogicTest.kt": {
+      "bytes": 3653,
+      "sha256": "70041ab1d7eb87fa694626a210b026e9913b6d684c9490100f40aeba50cd6082"
+    },
+    "app/src/test/java/dev/ikna/domain/fsrs/FsrsOptimizerTest.kt": {
+      "bytes": 8627,
+      "sha256": "a7a709764c18b78834cb248fd9926a251b19f6bf679492f043772f261c3e2664"
+    },
+    "app/src/test/java/dev/ikna/domain/fsrs/FsrsTest.kt": {
+      "bytes": 4700,
+      "sha256": "a98eb4cbc7501bb86acf0d573e03223707cbab39d065fb5a1cfa8c18ea8c5f05"
+    },
+    "app/src/test/java/dev/ikna/domain/fsrs/SchedulerDueDayTest.kt": {
+      "bytes": 4931,
+      "sha256": "f5c25f3953194e51ed34742a527ab115040eb50ff9ea989bea1f9b1087a5cc9b"
+    },
+    "app/src/test/java/dev/ikna/domain/governor/ChunkSelectorTest.kt": {
+      "bytes": 4166,
+      "sha256": "c038db933941a0ecca8c3d21b26a504fd8d6825f2937325d58f46437859535fd"
+    },
+    "app/src/test/java/dev/ikna/domain/governor/CleanStreakTest.kt": {
+      "bytes": 2392,
+      "sha256": "e96b89bb5ca8c1f5a54e9f0aec5c35282777586c85fe0b10c21e9542e33bb436"
+    },
+    "app/src/test/java/dev/ikna/domain/governor/DailyBudgetTest.kt": {
+      "bytes": 2426,
+      "sha256": "299a8a15fbb3021834ada74c98845e66796ea16b8272cc079f809160973ad437"
+    },
+    "app/src/test/java/dev/ikna/domain/governor/LoadGovernorTest.kt": {
+      "bytes": 12133,
+      "sha256": "ce9b7eb1f40b583008258921e63ecc1b16a28949308afd4900aecb09245b60a9"
+    },
+    "app/src/test/java/dev/ikna/domain/grading/DerivedGradingTest.kt": {
+      "bytes": 15850,
+      "sha256": "36855451952358064621adce0b77225a077ed100b95ff86fddda76cea9ad675a"
+    },
+    "app/src/test/java/dev/ikna/domain/optimizer/LocalOptimizerTest.kt": {
+      "bytes": 17106,
+      "sha256": "b9c09c32ba5298a1205c35adcfd931474a6ed9e29db444a2924c0caabb90d44e"
+    },
+    "app/src/test/java/dev/ikna/domain/phonetics/PhoneticsTest.kt": {
+      "bytes": 7960,
+      "sha256": "e70b25ad96a0eb1042263017470df6c83bce4517270debf809268856d77eb3c3"
+    },
+    "app/src/test/java/dev/ikna/domain/phonetics/RespellTest.kt": {
+      "bytes": 8090,
+      "sha256": "642dbd8360a66d5e01a37fc406a161db5328ca64965a2bc04cb9cf982a6791c3"
+    },
+    "app/src/test/java/dev/ikna/domain/session/CardPresentationTest.kt": {
+      "bytes": 2284,
+      "sha256": "e216bbde7acb9c83435e17aa397958257a4cc0191a0085810c2976bee3ef8d4e"
+    },
+    "app/src/test/java/dev/ikna/domain/session/CardTargetTest.kt": {
+      "bytes": 3070,
+      "sha256": "72f34355f3de1fd18e8c64e7d44e4b42da037ea34645e63cbacc3ed4066176ef"
+    },
+    "app/src/test/java/dev/ikna/domain/session/ChunkShapeTest.kt": {
+      "bytes": 3626,
+      "sha256": "b645f573ac36c41c58970c0f82f2f0f40d9515451fb7e157cc2389f40036a763"
+    },
+    "app/src/test/java/dev/ikna/domain/session/ClassicPlanTest.kt": {
+      "bytes": 1085,
+      "sha256": "d849d80b4511034fb4a7bb51d8ca531261c54e78a1a6b9caaec09c21c2a7df86"
+    },
+    "app/src/test/java/dev/ikna/domain/session/ReviewSignalTrackerTest.kt": {
+      "bytes": 9041,
+      "sha256": "c84cf7937bf06ffd88d0797ef965a7b284df05db1ef3a79a988934bb7b1c309a"
+    },
+    "app/src/test/java/dev/ikna/domain/time/DayBoundaryTest.kt": {
+      "bytes": 2131,
+      "sha256": "74995656f94c7f21d419bdecc95dee6b8d70d87ca2da88af51f3f653e6e07391"
+    },
+    "app/src/test/java/dev/ikna/ui/SettingsSourceContracts.java": {
+      "bytes": 12586,
+      "sha256": "2301758756acd129c32b3e2bf8f0c03f96ed19cb65ebecea450907031720278e"
+    },
+    "app/src/test/java/dev/ikna/ui/decks/MobileDeckUiContractTest.kt": {
+      "bytes": 3655,
+      "sha256": "a56bd7cfaccac0e3c769f1641f908617f2404c6916f8f25d1fa8afbea59cbbba"
+    },
+    "app/src/test/java/dev/ikna/ui/decks/PromptFillTest.kt": {
+      "bytes": 2609,
+      "sha256": "73b4c3566ac59de2dca5c7020ab804b94bce80d8dc8d2b6496bc278f6d88ff58"
+    },
+    "app/src/test/java/dev/ikna/ui/nav/FirstStudyRouteTest.kt": {
+      "bytes": 464,
+      "sha256": "73448374aebc4012c7f0867fa9fdaf33a7a71a32f8ead00a0650791ae787ad09"
+    },
+    "app/src/test/java/dev/ikna/ui/nav/RouteContinuityTest.kt": {
+      "bytes": 1840,
+      "sha256": "cc3e14fd6b73f12738b2cd459a66c1029dcb04250584b1886a2df3c79c2e2b31"
+    },
+    "app/src/test/java/dev/ikna/ui/nav/SharedAxisTransitionTest.kt": {
+      "bytes": 1448,
+      "sha256": "4c19182a8ed58e9722550c14ab0cb5a5f7f13bcc7d3b682fc0912922262ab7a3"
+    },
+    "app/src/test/java/dev/ikna/ui/session/SessionErgonomicsTest.kt": {
+      "bytes": 2480,
+      "sha256": "9a3a24fd0448efb954a7cd8e317167514378167d3a248c3eb29d7abfa75d0480"
+    },
+    "app/src/test/java/dev/ikna/ui/settings/DiagnosticsTest.kt": {
+      "bytes": 1162,
+      "sha256": "8a8b0f41c222ba4e4ed623ee4d6c43d30ee8e1f3e95eb32a08df69d9adaa6183"
+    },
+    "app/src/test/java/dev/ikna/ui/settings/SettingsLazyLayoutTest.kt": {
+      "bytes": 800,
+      "sha256": "79e808a0aaa878ba3758298fa1e937cd3ee60b36c7ec925276c70a0e6ce6f180"
+    },
+    "app/src/test/java/dev/ikna/ui/theme/ContrastTest.kt": {
+      "bytes": 3876,
+      "sha256": "ded4b04907e4576a8047102f49a4e952ce487aee5aa9fdba12c2be6499774e29"
+    },
+    "app/src/test/java/dev/ikna/ui/theme/ControlColorsTest.kt": {
+      "bytes": 5277,
+      "sha256": "9c68c7ae117269a83b0d3713c79c29d0ba65995355372a6401cc38d379336a56"
+    },
+    "app/src/test/java/dev/ikna/ui/theme/LaunchWindowTest.kt": {
+      "bytes": 1538,
+      "sha256": "2ae61be480a82c444a0c1d73b6ec185e93d61adc89155d7a7fcbdbe2372234e9"
+    },
+    "app/src/test/java/dev/ikna/ui/theme/MotionPolishTest.kt": {
+      "bytes": 787,
+      "sha256": "f3a7157d3293884f9ef749e9e66e50f4875601abb19159f340566e6f72fc6fe3"
+    },
+    "app/src/test/java/dev/ikna/ui/theme/PaletteTest.kt": {
+      "bytes": 8390,
+      "sha256": "72f10bad9b4f5005b86d7dd9c9084c1fcceff2827c46f94141ed5f521f216ac8"
+    },
+    "app/src/test/java/dev/ikna/ui/theme/WordmarkTest.kt": {
+      "bytes": 4395,
+      "sha256": "5d2c4ee9cb49b68f7d44b5a07f2d981d2cc658bcfd6d1df09418c62a4eeec692"
+    },
+    "build.gradle.kts": {
+      "bytes": 1449,
+      "sha256": "dc049566190289de81323754bb7d2007494c4034da80c60b3683f0c6055928b8"
+    },
+    "desktop/build.gradle.kts": {
+      "bytes": 7280,
+      "sha256": "8d15f3fe3618e107befb7d3fe9ca2d7e994ac3ce76296f85d77586fce9b67208"
+    },
+    "desktop/compose-desktop.pro": {
+      "bytes": 7775,
+      "sha256": "76fa3edc103434899c3ac78f89b6d60e78299bb429adfb02c321e690438aa689"
+    },
+    "desktop/icon.ico": {
+      "bytes": 99863,
+      "sha256": "145511a99a8e8259c9ca34b08dc21cd721e66140eaf5d868c1ff3349bbc802ec"
+    },
+    "desktop/src/main/java/dev/ikna/desktop/TitleBarClicks.java": {
+      "bytes": 1887,
+      "sha256": "0ea21b530b89614d7578d444593ba8e578ddfa9c6ffbb143150ecd385bf52c81"
+    },
+    "desktop/src/main/java/dev/ikna/desktop/WindowBoundsEdits.java": {
+      "bytes": 2630,
+      "sha256": "b0b61480d56c0c649190e1af70d274dde717d86013a86907c8170d65c338e909"
+    },
+    "desktop/src/main/java/dev/ikna/desktop/WindowFrameLayout.java": {
+      "bytes": 1956,
+      "sha256": "ce72c0c4aff4c7add2c86d96fe69c7536c9f50660acbf4802c1278b78dc95318"
+    },
+    "desktop/src/main/java/dev/ikna/desktop/WindowFrameTrace.java": {
+      "bytes": 3507,
+      "sha256": "5f156919a26abe345fd36bcc32a526718557a96a6f8e02b295d6861c06de8b76"
+    },
+    "desktop/src/main/java/dev/ikna/desktop/WindowsFramePacing.java": {
+      "bytes": 600,
+      "sha256": "99d75ee647e661e794a419fdc7b5e0fffef84b9ad0174801effd411862555890"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/AddDeckPane.kt": {
+      "bytes": 17754,
+      "sha256": "e3ff3c4e98cebf0d22f05df7a7e5fb269a85c59182317007d3f98ee2a68f48c9"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/AnkiPane.kt": {
+      "bytes": 7279,
+      "sha256": "cafaf5c9fcdb96ef3516d4d6c8ad1e7e6221a2c54039779d2a952f9df0b899dc"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/AtomicBackupFile.kt": {
+      "bytes": 1526,
+      "sha256": "5f79a43177583eb053dfd2610865ee906e45b2cb6f078d0d0c06e16d99313025"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/BackupPane.kt": {
+      "bytes": 9823,
+      "sha256": "d4af51d4b67a6acd9e22f4dcbcd9ba646a3d5585e65abd42530ea6aae7ec7f21"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/BrowsePane.kt": {
+      "bytes": 7614,
+      "sha256": "4f187a0c13600de640d23fd40e800a452083f73e72563b22d22c4fb0f0dfd511"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/CatalogPane.kt": {
+      "bytes": 17864,
+      "sha256": "c3ee66594f7ed3c2cdef71689a80be19dcaa5a3a64ae028d88b501cf551518f0"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/DeckPane.kt": {
+      "bytes": 12797,
+      "sha256": "19e9f6fcd462b87cfe8063890563a9df83b43b612a21a4661d5f07a7652ded30"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/DesktopContainer.kt": {
+      "bytes": 14137,
+      "sha256": "f79351ddfb8ca5f981564fdf6d33cf48e203b6be5d202477cb824f06304e1256"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/DesktopDrop.kt": {
+      "bytes": 1337,
+      "sha256": "4ea4975d056a468f8dbadc3b1b527fba4b447a69147d7c5d5c1d399c66ccdebe"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/DesktopRestart.kt": {
+      "bytes": 2493,
+      "sha256": "99d03151e52c029156e001348c8f891f494fb9f0b6570de0718bfccf1b53b838"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/HotkeyInput.kt": {
+      "bytes": 6086,
+      "sha256": "ff215a3526786a3f9749808c3adf58e3fabc5c10ba27e8748c94addec2d71cb3"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/HotkeySettings.kt": {
+      "bytes": 12391,
+      "sha256": "1f75095970846d21a4423ee77b2809b455a7363ff35bd155550600f1b62f91cc"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/IknaBundle.kt": {
+      "bytes": 14642,
+      "sha256": "014c0a59db2e54f6ba554b539b52eaa3b732f0ec0bbe05322c97a5e35a52343a"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/Main.kt": {
+      "bytes": 30073,
+      "sha256": "d1449f26b9668c20d072f00410ff244e817febc260b00c1dad1edfe730f06feb"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/OnboardingPane.kt": {
+      "bytes": 8444,
+      "sha256": "db99bcec6f61d5f6e2535b92b77df6005cee51922d7c74db5534c2846ef80d87"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/PaneChrome.kt": {
+      "bytes": 3125,
+      "sha256": "ab1ae90dfac5b213310be1e2feed4a7d0890fd3a1b9b3dc8c84443beec7a1c7e"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/PreWipeDeckBackup.kt": {
+      "bytes": 1638,
+      "sha256": "d921d512f86aabf70d49fe56d528b64f282897af3405fe71fa2c95a86195c93d"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/SearchPane.kt": {
+      "bytes": 4947,
+      "sha256": "69ac32d76eb26c0b0f67625e5d7f50bec5c556c9674727a0d9fba9452cadd30e"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/SessionPane.kt": {
+      "bytes": 21102,
+      "sha256": "05ca4f2ec0c8f29e3168fee99c1578149d0538adb872045f6d3b04d3808d5198"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/SettingsPane.kt": {
+      "bytes": 41435,
+      "sha256": "02de145a95cf988854ff82a6c8b359dceff3cb11ae36e0d630bfc59fd736aed5"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/Shell.kt": {
+      "bytes": 29397,
+      "sha256": "3f2ce42696db87f329d76316c5fe8be7b420911f9d775c1e402358bd083c7d3f"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/StatsPane.kt": {
+      "bytes": 1633,
+      "sha256": "996251bf53d485954c1672ce697968e142ed91f57424dfbe671e8317b80e1e45"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/Widgets.kt": {
+      "bytes": 7227,
+      "sha256": "255cfc88a88bb9e0ba92d498cc53cb5e04206c335382ac88591c04b489561649"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/WindowBounds.kt": {
+      "bytes": 2267,
+      "sha256": "11816f60f590c36c92baa97f716ee9126ea3a0cc67d88a2572ef9e5f84e7a683"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/WindowPlacementMemory.kt": {
+      "bytes": 1561,
+      "sha256": "afb82acd7baafc58418a93ab9a2c88e5b1616d572341171411f70b8984fb864f"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/WindowResizeOverlay.kt": {
+      "bytes": 4959,
+      "sha256": "26c1ac7d3f8bcb2c2e7b86cdb22dd8b6c95a3a38491822f275cbcf23966e99cf"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/WindowSurfaceSynchronization.kt": {
+      "bytes": 5390,
+      "sha256": "51df5a92468d3d1a8f689b371ee6d184279589713131e960cf14069f0c3dd5bd"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/WindowTitleBar.kt": {
+      "bytes": 8716,
+      "sha256": "4690dcdd76233aee1f8e017ce147f5e33437666ca2722bf362743b37a3a4305c"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/anki/AnkiPackage.kt": {
+      "bytes": 31259,
+      "sha256": "4fa9c2f93c5aa0b277a3e433a49fc3ca3313fc28b24acc2550dfade4379311bc"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/anki/AnkiProto.kt": {
+      "bytes": 4016,
+      "sha256": "a4c03eeb2f983b92a67abe68fae29d72678eb0198c9064bc56dc592b80ab28cd"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/anki/AnkiShape.kt": {
+      "bytes": 8165,
+      "sha256": "d513c582d0c00a405369cd3f91fb389b1169596e4ca9dada5a146fdcc47a277e"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/anki/AnkiSql.kt": {
+      "bytes": 2999,
+      "sha256": "f65bb6579728b1b3070397b3066d5e63a3027fca385bb3fb3604a42d41404845"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/anki/AnkiText.kt": {
+      "bytes": 15261,
+      "sha256": "3847d3615b1b11069a1868628f2c81b59e4cdbf8d2ad37ea69fd49df7f30e183"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/anki/DeckLanguage.kt": {
+      "bytes": 11126,
+      "sha256": "ca1cfde8ff88342238c383fb140edc3b59a6224884bab24510813f9d9249c164"
+    },
+    "desktop/src/main/kotlin/dev/ikna/desktop/grading/GradingLab.kt": {
+      "bytes": 1483,
+      "sha256": "640fc4c7dcf64ad1f00ee2652f1aaee21ac8b1277a495d37cfeb940f6d18f267"
+    },
+    "desktop/src/main/resources/icon.png": {
+      "bytes": 177092,
+      "sha256": "7d1cc40fa40b4bd72cbceb48ad291fafc8bc6ac8ca01d8d73da06d6fcb5ac1a2"
+    },
+    "desktop/src/main/resources/prompt/deck_prompt.txt": {
+      "bytes": 5220,
+      "sha256": "4313d957ac1a85d34cbc7fd453d807998adddb61456dfe97d54ee3f12a74cedf"
+    },
+    "desktop/src/main/resources/prompt/subject_prompt.txt": {
+      "bytes": 3950,
+      "sha256": "8ca332bf1e2d267a1801c7eaf0764dfa86041be620c0f4b74cd5f9bb31e575db"
+    },
+    "desktop/src/test/java/dev/ikna/desktop/TitleBarClicksChecks.java": {
+      "bytes": 3139,
+      "sha256": "a7a16c7a5889bfb2177a44540b499f6a2c796bbf3035e9a136b201ca3b0a119a"
+    },
+    "desktop/src/test/java/dev/ikna/desktop/WindowBoundsEditsChecks.java": {
+      "bytes": 6013,
+      "sha256": "e3b9883d8bf126ccc5936d889bc97acc7a22dc9a61554c7b420f3e2cab29ab9c"
+    },
+    "desktop/src/test/java/dev/ikna/desktop/WindowFrameLayoutChecks.java": {
+      "bytes": 8011,
+      "sha256": "f2b3be9b608522389f9ba67c2e79dc8bf38e916f5f334b6b5c293bd6c90d9158"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/AnkiRestoreAtomicityTest.kt": {
+      "bytes": 5138,
+      "sha256": "ef9798290fba1b95424f65b3a01965c7d27b0bddce39c6609f0821d8d392a5f4"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/AtomicBackupFileTest.kt": {
+      "bytes": 3423,
+      "sha256": "81c7883655696f6d6bc24ecfde54b597b25ad9c1125a6b6ac3e7208994594225"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/BundleComponentFailureTest.kt": {
+      "bytes": 6412,
+      "sha256": "e29655bc59fe7f943f2aada5f8e25b4d8a53cf8f352b8dcf88c3da0fdafac959"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/BundleRestoreFailureTest.kt": {
+      "bytes": 2085,
+      "sha256": "e15891ca3233309ca720e551dd20c50c262c95f9b9342a13966a1954b400899c"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/BundleWriteSafetyTest.kt": {
+      "bytes": 6538,
+      "sha256": "06c64666186121e2e4be594ad6c1de0f470dd823a089a59a2c18d1aa23176d1c"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/CardRevealPointerIntegrationTest.kt": {
+      "bytes": 11983,
+      "sha256": "adc7bb302b922464b43ce9c3bec528a1666724aabb24b6cf902c9e26e119d484"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/CatalogImportIntegrationTest.kt": {
+      "bytes": 8961,
+      "sha256": "be621903f91e1f91c4d87a9166aff66271dd02299b50ed12ff53e218fe3f2ff1"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/DesktopRestartTest.kt": {
+      "bytes": 1551,
+      "sha256": "64b7c470323184f24aecd79a1e3cbf91ec61eb5b2eefcde9295420055f4bd61c"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/DeveloperSandboxIntegrationTest.kt": {
+      "bytes": 15032,
+      "sha256": "cdb6babee9f31871f402a853aaa494e91a5efacd27ea2284481fbd67965dac39"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/DeviceProfileAdoptionIntegrationTest.kt": {
+      "bytes": 15129,
+      "sha256": "abe1416e046d425c7626582e32003974ff9fa69fd876aaefa8c584e6d85a1ac3"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/DeviceSyncControllerIntegrationTest.kt": {
+      "bytes": 36205,
+      "sha256": "7613b757a2ebde675eb0d72f85e7e0b65f7908c6d5225da01d8dc0f937cd0274"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/FirstStudyRouteTest.kt": {
+      "bytes": 984,
+      "sha256": "d9cb68e5c026754d12742a8b24f6041afc6da3b5a99697fb47a536d01c6f4ceb"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/HotkeyRegressionTest.kt": {
+      "bytes": 1759,
+      "sha256": "6e3ec251bd4f5ca756655a489a711b03d3464248015a3ccadf51c308cce83f5b"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/IncrementalJournalRepositoryTest.kt": {
+      "bytes": 22844,
+      "sha256": "548e0183b701d0d253109e9b076b7cda6afae8a34195bbcf94f306e28d19d55b"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/JournalSyncIntegrationTest.kt": {
+      "bytes": 20655,
+      "sha256": "89ea9a65d6dd99adf21a2a50aba875dfa0af1475c01193dff7618afe3f1dfab4"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/LearningSimulationTest.kt": {
+      "bytes": 13963,
+      "sha256": "82f53f9831c79b36c61b8e313c7411b07280aaa85dbae066cc757d5831bbf655"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/LearningWriteAtomicityTest.kt": {
+      "bytes": 10548,
+      "sha256": "6e0d40b846a86bb9c9471a9ce7119e9f1d77dec79d382a03a1e929f8966dd3f9"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/PhoneBackupWriteSafetyTest.kt": {
+      "bytes": 3807,
+      "sha256": "618379c2f15ef68c0267369fbd03a04d270aab782e41f361bb906bec4b735b26"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/PreWipeDeckBackupTest.kt": {
+      "bytes": 4004,
+      "sha256": "4b8131c08ada27d67bddb36636f5843e35c1e76f8401845492240af010f63599"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/ProfileAdoptionIntegrationTest.kt": {
+      "bytes": 6774,
+      "sha256": "a0cb921b19921280d35fd4efbb70b156b5504a7083b0de4069a140ab79205e98"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/ProfileCapacityProbe.kt": {
+      "bytes": 14547,
+      "sha256": "711e8ab586797c4f9f5a7334e98061a5f8b7bad940c0ac0ca30b9d71dc61c8ea"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/ProfileRetainedDataWiperIntegrationTest.kt": {
+      "bytes": 5931,
+      "sha256": "297180a83a8d251580b4254b9f93bbafd3d4fd22f1fad0f3d255050263936670"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/ProfileSlotMigrationIntegrationTest.kt": {
+      "bytes": 9913,
+      "sha256": "fb5c9d49cc15040243dd406416f1eda3631a2de1bfd324da96b05dcb05def9e5"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/ProfileTransferIntegrationTest.kt": {
+      "bytes": 18942,
+      "sha256": "f4ef19bfb3086c8309548fc72b7dea3763f88b5d513d4ec94cf396cfa3e946bc"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/ProfileTransferResourceSafetyTest.kt": {
+      "bytes": 17091,
+      "sha256": "9d19a5a93b8f5bb24adc753330f2e2ed5e800599d7929363e09302b6b1b17340"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/RestoreAtomicityTest.kt": {
+      "bytes": 12036,
+      "sha256": "65746f752f56660d3e35a2d4b8aa282ca98735ab40364e361559cf6beb48a8d0"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/StudyStatsRepositoryTest.kt": {
+      "bytes": 3220,
+      "sha256": "e06dc7ad9dfdc0c67f861154aa9277bb6893aaf4bafd319386c3f640dc028379"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/TitleBarClicksTest.kt": {
+      "bytes": 528,
+      "sha256": "a7092ec27553d9096851dfb293e690d19d04aad6288e18a98f6c472da9d3dfaa"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/WindowBoundsEditsTest.kt": {
+      "bytes": 613,
+      "sha256": "ae3b1f46fc1f152f7694b6b7c6613f1dccc7100640a0d2229e8f5922165ba741"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/WindowBoundsTest.kt": {
+      "bytes": 1762,
+      "sha256": "af7eb3748acce1068bc1f7845ae9c2a494263f7d41eee8571a2f183c866ef2e1"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/WindowChromeRegressionTest.kt": {
+      "bytes": 3425,
+      "sha256": "9160c6aeb1093c343c34421af09af58dc068ae1c975391c39bf19c08f6760450"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/WindowFrameLayoutTest.kt": {
+      "bytes": 781,
+      "sha256": "20a2690c2aa11c67023b6816b0d06e2d01eeebcaf954ad7da31c1871acef4019"
+    },
+    "desktop/src/test/kotlin/dev/ikna/desktop/WindowPlacementMemoryTest.kt": {
+      "bytes": 1799,
+      "sha256": "2c868a8c1a0e458afeed9184682fe989614a7f8f163532c3ec5e08eca254edc1"
+    },
+    "gradle.properties": {
+      "bytes": 1036,
+      "sha256": "f5329c70cb75b762610f68208adf0fc58ea6de4f9b9249c85f099fbf5fffc821"
+    },
+    "ikna.keystore": {
+      "bytes": 4340,
+      "sha256": "54af591741a8bf2154a11770c37d9082c84c4001fb12aa3f13b33715f67f6e4d"
+    },
+    "local.properties": {
+      "bytes": 67,
+      "sha256": "3e7640ee6dcf8aec53574eb2ceba011c9f062b29b00ef021d4105648c5d44ab5"
+    },
+    "settings.gradle.kts": {
+      "bytes": 515,
+      "sha256": "610bb6044f3b846e0d8c168711276e77244e10e39e08f5f37bcec72804ed8c68"
+    },
+    "shared/build.gradle.kts": {
+      "bytes": 6983,
+      "sha256": "3a5d785e70f9bc5676eeef77b5c389e22c2270883853dcd4ec9503ae9e3078ec"
+    },
+    "shared/src/androidMain/AndroidManifest.xml": {
+      "bytes": 466,
+      "sha256": "a6d6147f69429cc085b1c51af08a8f1180db0a06c3c41461ce7d022567b308e8"
+    },
+    "shared/src/androidMain/kotlin/dev/ikna/data/db/IknaDatabase.android.kt": {
+      "bytes": 806,
+      "sha256": "c861ae8cf282a65f563c83a352ff2302cd130528e3a436680d1f7e1c918fd80d"
+    },
+    "shared/src/androidMain/kotlin/dev/ikna/data/pack/PackLoader.android.kt": {
+      "bytes": 320,
+      "sha256": "09ee8d7e9f44be3f8b178401e9663725036ea20d28c635478fcc969286ffe9e3"
+    },
+    "shared/src/androidMain/kotlin/dev/ikna/data/prefs/SettingsStore.android.kt": {
+      "bytes": 565,
+      "sha256": "7e84c2c720c8254d28b7d3ba7f6f38a4a70483dbaa3b0d4d7f0921a4cac1a7f0"
+    },
+    "shared/src/androidMain/kotlin/dev/ikna/domain/governor/GovernorConfig.android.kt": {
+      "bytes": 212,
+      "sha256": "a6900f34abbb7b41efcec097c1b236dd5ff6ae493df37b43bbddd7afa2f6f9cb"
+    },
+    "shared/src/androidMain/kotlin/dev/ikna/platform/Assets.android.kt": {
+      "bytes": 265,
+      "sha256": "2f73af0ae1c4e2a2242864a9212e36a88237c457b3125440726e18b2020249da"
+    },
+    "shared/src/androidMain/kotlin/dev/ikna/ui/theme/PlatformTheme.android.kt": {
+      "bytes": 1920,
+      "sha256": "d7ed25b15f105ba4ca64693e5dfe853dea6f7bd32a7b8a6ffbdd10bf6ad86c95"
+    },
+    "shared/src/androidMain/res/drawable-nodpi/ikna_reading_cat.png": {
+      "bytes": 982279,
+      "sha256": "80ac42002e3ec5692cf417c83d07bc8f463001b0cab54e3f26cf6fcbef300131"
+    },
+    "shared/src/androidMain/res/drawable-nodpi/ikna_wordmark.png": {
+      "bytes": 126288,
+      "sha256": "9b0818463514f390f9fbc9b9f8816b3d31443022e491ef2b9d39ac0e0545d1d6"
+    },
+    "shared/src/androidMain/res/drawable-nodpi/ikna_wordmark_accent.png": {
+      "bytes": 15518,
+      "sha256": "6d7d0860f6fd10c8a49c299939d5580c57d6ddb0f0c6b980622e32529477a965"
+    },
+    "shared/src/androidMain/res/font/geologica_medium.ttf": {
+      "bytes": 138988,
+      "sha256": "267f4ea694d3b80059c0a5ad314320f0d221040fae38535ee72cd98dd9209eac"
+    },
+    "shared/src/androidMain/res/font/geologica_regular.ttf": {
+      "bytes": 138764,
+      "sha256": "94ca5fb8b0b4b4febabb48d445e4653edbed686f4d4f49815c6bbca2d70c3404"
+    },
+    "shared/src/androidMain/res/font/geologica_semibold.ttf": {
+      "bytes": 139080,
+      "sha256": "7d66189571d0752ab90d7315a5d6147eb2a87c42867903d4db68b97c57c95a4a"
+    },
+    "shared/src/androidMain/res/font/ibm_plex_mono_medium.ttf": {
+      "bytes": 136704,
+      "sha256": "a9b4c49bb299e05b5f6c481e7fb5e78943d2793249a0c8874ab574a2d1ea6755"
+    },
+    "shared/src/androidMain/res/font/ibm_plex_mono_semibold.ttf": {
+      "bytes": 140216,
+      "sha256": "d3c38e55c78f5b0f28009fddba4834ec503278936a5986032424c9bd2d23aa46"
+    },
+    "shared/src/commonMain/kotlin/dev/ikna/.gitkeep": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "shared/src/desktopMain/kotlin/dev/ikna/data/db/IknaDatabase.desktop.kt": {
+      "bytes": 648,
+      "sha256": "23f50a63e9c2470800488345b7742c2d6b4c07c3a6a0d65fed9b5f42e38273b9"
+    },
+    "shared/src/desktopMain/kotlin/dev/ikna/platform/Assets.desktop.kt": {
+      "bytes": 567,
+      "sha256": "d030a33b86826a57b2f43af682dfc1077d4bdb3f19f9bc0c0b2c982c2bf46d36"
+    },
+    "shared/src/desktopMain/kotlin/dev/ikna/ui/theme/PlatformTheme.desktop.kt": {
+      "bytes": 2979,
+      "sha256": "1e1f8dbc20bebaec3deb5701a4f587cc7f4336c573ca369d83d5fd69f82eb391"
+    },
+    "shared/src/desktopMain/resources/drawable/ikna_reading_cat.png": {
+      "bytes": 982279,
+      "sha256": "80ac42002e3ec5692cf417c83d07bc8f463001b0cab54e3f26cf6fcbef300131"
+    },
+    "shared/src/desktopMain/resources/drawable/ikna_wordmark.png": {
+      "bytes": 126288,
+      "sha256": "9b0818463514f390f9fbc9b9f8816b3d31443022e491ef2b9d39ac0e0545d1d6"
+    },
+    "shared/src/desktopMain/resources/drawable/ikna_wordmark_accent.png": {
+      "bytes": 15518,
+      "sha256": "6d7d0860f6fd10c8a49c299939d5580c57d6ddb0f0c6b980622e32529477a965"
+    },
+    "shared/src/desktopMain/resources/font/geologica_medium.ttf": {
+      "bytes": 138988,
+      "sha256": "267f4ea694d3b80059c0a5ad314320f0d221040fae38535ee72cd98dd9209eac"
+    },
+    "shared/src/desktopMain/resources/font/geologica_regular.ttf": {
+      "bytes": 138764,
+      "sha256": "94ca5fb8b0b4b4febabb48d445e4653edbed686f4d4f49815c6bbca2d70c3404"
+    },
+    "shared/src/desktopMain/resources/font/geologica_semibold.ttf": {
+      "bytes": 139080,
+      "sha256": "7d66189571d0752ab90d7315a5d6147eb2a87c42867903d4db68b97c57c95a4a"
+    },
+    "shared/src/desktopMain/resources/font/ibm_plex_mono_medium.ttf": {
+      "bytes": 136704,
+      "sha256": "a9b4c49bb299e05b5f6c481e7fb5e78943d2793249a0c8874ab574a2d1ea6755"
+    },
+    "shared/src/desktopMain/resources/font/ibm_plex_mono_semibold.ttf": {
+      "bytes": 140216,
+      "sha256": "d3c38e55c78f5b0f28009fddba4834ec503278936a5986032424c9bd2d23aa46"
+    },
+    "shared/src/desktopTest/kotlin/dev/ikna/sync/ProfileSlotStoreTest.kt": {
+      "bytes": 8296,
+      "sha256": "06c8c7e246a50850e43717f6b9630520093d2dffd1ff5a8967889245feed2a9b"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/catalog/CatalogCardSource.kt": {
+      "bytes": 2159,
+      "sha256": "f9b1852b942354a92c81d316b5622a3891351b317778c3edcc7c4df74718134a"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/catalog/CatalogFetch.kt": {
+      "bytes": 13424,
+      "sha256": "076c46bf5702e59c81794ba9757c2e6fc5040d1397400feef7046cf678ff30bd"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/catalog/CatalogFilter.kt": {
+      "bytes": 7747,
+      "sha256": "8931ca94aaef76d2b7557cff98e7b644b33be6f574861c8e7a6164d7a47ed7fe"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/catalog/CatalogImport.kt": {
+      "bytes": 1130,
+      "sha256": "d9439c9859a78b3a882ec05eb871f264468b279e120b8e1e6efc4881b0e177ec"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/catalog/CatalogModels.kt": {
+      "bytes": 6459,
+      "sha256": "143a728dfc68f35c23cee6f3b5514eaab27fbcd2f3bee8b02b18e5e92c60ee58"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/catalog/CatalogPlanRefresh.kt": {
+      "bytes": 367,
+      "sha256": "0533ef10f486790b7b69824626bcb342246101c939754583f0ab56c582d246f1"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/db/ChunkFtsIndex.kt": {
+      "bytes": 4114,
+      "sha256": "31fc3168869ac2910c0b3299389943d9cc6f602e1f54387f037e5f1c1d0d41a9"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/db/Daos.kt": {
+      "bytes": 38030,
+      "sha256": "21737a2c5a38fd878bbe14d3aef931be801c88ff414bb84f6763466009fbc9e8"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/db/Entities.kt": {
+      "bytes": 14882,
+      "sha256": "1122863b506a8ce2cbe1b2e308470620c7e7e084f66a45b0585326112e12ea1a"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/db/IknaDatabase.kt": {
+      "bytes": 4170,
+      "sha256": "ee7fad22eb0fcb9a26e37a83c4ff101b79bef965242b61d9f173a7fe30b41e2c"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/db/IknaDatabaseFactory.kt": {
+      "bytes": 4798,
+      "sha256": "70dcc40a82053b50ddb87e87608e2fd8c47df57c732ee563a4de00c9e546e679"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/db/Migrations.kt": {
+      "bytes": 15880,
+      "sha256": "b152f81672383610a1d146357b272190456f5033a4fbbe86e9b20a9b96a05e06"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/dev/DeveloperMode.kt": {
+      "bytes": 3361,
+      "sha256": "4c828de2388849263738c727027e2b29b5234f82ddfc9aacf8e3d359f3cde5af"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/dev/DeveloperSandboxSeeder.kt": {
+      "bytes": 14717,
+      "sha256": "ebf9ecab1536b279243efdad509ea1db4347fd6a728cae6614a5d596ad70a4aa"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/dev/DeveloperTools.kt": {
+      "bytes": 1366,
+      "sha256": "972fc1954294209286e822fbddd00ceb7089ee82e485e23040abcbd100657a0f"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/export/IncrementalJournal.kt": {
+      "bytes": 2298,
+      "sha256": "b8695bf0ef80de5f67396b454b878c8e8790f014d172af22356416237ad79919"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/export/JournalIdentity.kt": {
+      "bytes": 2394,
+      "sha256": "707958b2ba074405c71564b73ff49ef6333201afcf952240ccd566fad31f383b"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/export/JournalReconciliationRequiredException.kt": {
+      "bytes": 236,
+      "sha256": "87bf6973b046e741f958299a4e3d89a93d0fae57cc4a1877e8579799c92769e5"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/export/PreWipeBackup.kt": {
+      "bytes": 1477,
+      "sha256": "31071cc5d48a119d8b6af1fbeec1b9e120ae4b8e8123194de29084391eff6ff3"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/export/ProfileTransfer.kt": {
+      "bytes": 4150,
+      "sha256": "aef445e9a6d52b1572204cdf29ed614d7577e7316b540a92ecec8bd0aa0f2f8e"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/export/ReviewRecord.kt": {
+      "bytes": 6477,
+      "sha256": "b4992cc0b40a582138b2b6e09369ef55bf005ce10487bf136ecda7b35f6f5b6e"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/export/SettingsBackup.kt": {
+      "bytes": 10206,
+      "sha256": "808522adda1c938b338da757a3c025398741636aa5c7a022eccea492919cf1b5"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/pack/PackLoader.kt": {
+      "bytes": 13210,
+      "sha256": "d8ddf34d5fe676ea053bfd2d62aa285718dacbc1726a033c57579d96f9d77974"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/pack/PackModels.kt": {
+      "bytes": 2783,
+      "sha256": "94af0970fa07d1b94af6371f8fc935b0f7e118c8646a5111656afb28323a6945"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/pack/SeedParser.kt": {
+      "bytes": 28060,
+      "sha256": "6ce61f148516d2d1e29124b768dc5604d0f44438df0258335fcf6453b978a1e1"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/prefs/FontStore.kt": {
+      "bytes": 4583,
+      "sha256": "eaeadb0820111e896794a6786829935be1aa1c134f73fdf474401557f6223d2f"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/prefs/Hotkeys.kt": {
+      "bytes": 4220,
+      "sha256": "315f4ecfdf84afe87ef28785d1ee074d31e32b5240fa88fff8aacd2b8e83d4d8"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/prefs/SettingsDataStore.kt": {
+      "bytes": 771,
+      "sha256": "e7e9a3bda92581efba5ae2f74068716fe436439aad9995757e8c4184a05a2779"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/prefs/SettingsStore.kt": {
+      "bytes": 39739,
+      "sha256": "d5d15a190c26ee3e10cdacb79e647f2765c8efd7186582959f10b9565f5b0d61"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/ComponentRepository.kt": {
+      "bytes": 8039,
+      "sha256": "d7ba5007ea8381cd3e05efdc6478e23ffe8b950f1c6a84bcbedc9db8a1f59b29"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/DeckRepository.kt": {
+      "bytes": 14335,
+      "sha256": "473a9349045e15ef1800eebf2aa36b221e24445fec4686ea6d91d7db0ec7061f"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/FirstSessionPreparation.kt": {
+      "bytes": 695,
+      "sha256": "3783e3173be5a2f7d6bd9b87f4a355105e775f46806eda49120c9a3760f64ed1"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/GradingReplay.kt": {
+      "bytes": 2785,
+      "sha256": "79c80e6c7f7e64c0e2de353cf99d11147df652509b3dfacb551e779e2532233a"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/IncrementalJournalRepository.kt": {
+      "bytes": 33792,
+      "sha256": "b1516f29f4d4a59adb0b7a4c6fa4f6ed2cd74f39a60dadff12990b4618ec72de"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/LearningRepository.kt": {
+      "bytes": 78657,
+      "sha256": "533ce24523c512ffc68c8d87bd21076f6f90722cf4f928193fdb214018c2343f"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/LocalDeckSearch.kt": {
+      "bytes": 2220,
+      "sha256": "9aced2659367e01a2b15ddf03dcbfbd3c390f97258c11a3369f597c71b08ad4e"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/LocalOptimizer.kt": {
+      "bytes": 10609,
+      "sha256": "474774d7b524e990869725a77dd21cebb85a12cc2ce7ef51612691efef40412d"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/OptimizerInput.kt": {
+      "bytes": 1732,
+      "sha256": "75f8b8a6651ea962706d3675ccdf692a5c46f76b6568911d6da6c5d10b8a9ee8"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/ProfileTransferPreflight.kt": {
+      "bytes": 3531,
+      "sha256": "8efb684f208c3d197e869dd863bf15500aa222fc3518c0093ff186a43ba750af"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/ProfileTransferRepository.kt": {
+      "bytes": 21008,
+      "sha256": "d6ca911b19f56a5adfa22f9c5a8223a03ec23c8a973166075439c2d557f57130"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/RestoreRepository.kt": {
+      "bytes": 25891,
+      "sha256": "1e2a11d53ef7d25015d19464fe182a9d98e7f1c039437978ebfd5e65e0ef4939"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/SchedulerMigration.kt": {
+      "bytes": 5944,
+      "sha256": "ba3befa358a358166f727b8e5e16abcd1ac96f19e41a76d79ea0a7c497b22080"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/StatsDigest.kt": {
+      "bytes": 1815,
+      "sha256": "5c58d4d55e3affabe5e5db4d390dc7a40fb219d5e26b0aed14d989df01abad4a"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/StudyStats.kt": {
+      "bytes": 3826,
+      "sha256": "54a70524c441fa796548b3c38b8b6c2bc383d02abd594bfeb019a6c30ab6df6b"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/repo/StudyStatsRepository.kt": {
+      "bytes": 2637,
+      "sha256": "aa91a03d6b04e5c9a4d7b7e05539576da80dbd0f45c25d693f3ef65cfbbe583d"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/update/UpdateCheck.kt": {
+      "bytes": 6898,
+      "sha256": "3afbf336cfe629093fdd60be87c8c564970d3a699ab1f0baaf6e4f7da23e0a8f"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/data/update/UpdateLogic.kt": {
+      "bytes": 7913,
+      "sha256": "4bfeba006f29bb41b105fcc30c4b789737668bea34e63fe9ff1088d686600b8b"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/fsrs/Fsrs.kt": {
+      "bytes": 7086,
+      "sha256": "332a35c8b5d5adfd03648f14e47fa73b460b507e247e8fcf4041039e85766a47"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/fsrs/FsrsOptimizer.kt": {
+      "bytes": 16725,
+      "sha256": "6032e4954a121a386bb4a164e829c15a3c083a3c4afc1f9124c70086eb1ffd9e"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/fsrs/FsrsSnapshot.kt": {
+      "bytes": 1838,
+      "sha256": "435906fac4c4b9df34382793f3d3eaacd3a3d5684cdbc5c33803967104e6f517"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/fsrs/Scheduler.kt": {
+      "bytes": 7752,
+      "sha256": "affc54b1a3dddf2dcc13b8bafd58a280e889153e84d2721b408f4d96571b65a6"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/governor/ChunkSelector.kt": {
+      "bytes": 4355,
+      "sha256": "5ce8b27ddb8ea1996ad56229c5ffa16cf3f43970b2a9df6544d3236ee5b092a0"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/governor/CleanStreak.kt": {
+      "bytes": 2057,
+      "sha256": "12408c1fcc07a81925b1e44a2452ad3cf58993587521e8ea8cf135f45b6fd278"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/governor/GovernorConfig.kt": {
+      "bytes": 5362,
+      "sha256": "d21ca0a2cbf3017cedf0204997aa95262c06f853b53290092f83af96d83d3a36"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/governor/LoadGovernor.kt": {
+      "bytes": 14563,
+      "sha256": "b119ddae2829443203ea0a88716a3d692ce3b853df1d9d3bee11a46b9b428c5c"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/grading/DerivedGrading.kt": {
+      "bytes": 5703,
+      "sha256": "213322e8541cd01a3bdd844b858adbc42a897fff7f2c3c034e8ff61897642f14"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/grading/GradingEvaluation.kt": {
+      "bytes": 7224,
+      "sha256": "6f2601a7199ba264a2e6dfa7b63230cfe7e44548ef9ffebe06a2382df58b06df"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/optimizer/AutomaticLearningPolicy.kt": {
+      "bytes": 577,
+      "sha256": "259def6c0d85ffc0e857e56ec6679d9ae41bc2b00406ffa97501ad46a51233bf"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/optimizer/OptimizerState.kt": {
+      "bytes": 3098,
+      "sha256": "3f15674dcca652dae95bf88956aeb835a9f0aef7698190ef918faa228185b8ef"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/phonetics/Phonetics.kt": {
+      "bytes": 8286,
+      "sha256": "87e2a36d4f0a16b2d2bb701f4ef7bc92fbbbb56911b04c4649bccb09c4e3bd2b"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/phonetics/Respell.kt": {
+      "bytes": 19816,
+      "sha256": "25caf52f8fd5e6160289c28dd0e1b73b85e1929d08cdb2aac4e467cd6f76c1eb"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/session/BrowsePolicy.kt": {
+      "bytes": 8001,
+      "sha256": "940a7e005bc95d4f1c57e4e8ba3fbab244e519eec385aeed4753e3d87ccc5cb3"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/session/CardPresentation.kt": {
+      "bytes": 1968,
+      "sha256": "eddec7150bddb832d710c1ab4338bcd437a469736434bb8bb4e9e158e2a76c75"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/session/ChunkShape.kt": {
+      "bytes": 3615,
+      "sha256": "f8d72d60a7e9096076f743b1ad10a40154a6d127caf597e8120006810b38fb81"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/session/ClassicPlan.kt": {
+      "bytes": 711,
+      "sha256": "00b2b61530f30678d46efca950dbc3a262ee94ee79a7410f2736e2dec8e9a63a"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/session/ReviewSignals.kt": {
+      "bytes": 5711,
+      "sha256": "b7ca3181f35a16e52e62522036b5445c47af2c648bb6d25288c10049200805f2"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/session/SessionBuilder.kt": {
+      "bytes": 7427,
+      "sha256": "8e02a945e09efa217e4c5d7ed1b201b03452dcb5bb7e9566e72a73ff721525ef"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/domain/time/DayBoundary.kt": {
+      "bytes": 1953,
+      "sha256": "ad87eb5b2c5702b34a0fad870d55445a53e2fc88cd8f399063b184c1d298fc50"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/platform/Assets.kt": {
+      "bytes": 399,
+      "sha256": "ce63399e895d0154711965888d5658ead316e49df71ceca3074fdcc70b649074"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/DeviceSyncController.kt": {
+      "bytes": 34294,
+      "sha256": "f146bdacee091907c864b6b855763a9c58dd3be5bf960e712b5a2e4987620b14"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/IncrementalJournalProtocol.kt": {
+      "bytes": 12006,
+      "sha256": "cc89a124e1b58d42602f5751e4dfbaa348194d2c909a79ab5ff4776180b5b661"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/JournalErrorLatch.kt": {
+      "bytes": 858,
+      "sha256": "36ffc7c29a1834e947bd358f33ce6bd4b22a0c962702689de3b8b9ce2ed902b5"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/LanSyncSecurity.kt": {
+      "bytes": 6143,
+      "sha256": "1b3272733e9ee7567fe4655b0736bd61d837ae8f926572095f9b6fb55efe928e"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/PairedLanTransport.kt": {
+      "bytes": 22738,
+      "sha256": "bf17f4afff498b519808317d6ea31c3d667195e6dca027c31b1d778c5e6f5fc9"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/ProfileAdoptionBindings.kt": {
+      "bytes": 750,
+      "sha256": "efbb5ff66c2d273ff60e6596f2125abef550eb847232f8df59b931b144c2a671"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/ProfileAdoptionService.kt": {
+      "bytes": 10486,
+      "sha256": "800e2ca5d1e5890ddce9932d8fe3e56a60ac676d38ee622031f1682191a2fb2f"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/ProfileConsentProtocol.kt": {
+      "bytes": 21485,
+      "sha256": "b18b4e9fceb18c36ada965c548b4d40dc77298578084893f9725d8cb2c85c29b"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/ProfileRestartGate.kt": {
+      "bytes": 872,
+      "sha256": "11506a203a8a62686c9f6be6297945e5953d250f81dd1c5d7f814c883d3653fd"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/ProfileRetainedDataWiper.kt": {
+      "bytes": 3141,
+      "sha256": "c33a19b428b3f1e28d61817ac27840320a06df3beb448542e2c25e98fed84800"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/ProfileSlotStore.kt": {
+      "bytes": 13964,
+      "sha256": "88d52047db8047c0085949dc62c51f14c7fd8bb9fae7ebca6ddc71ba419ffeaf"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/UnsupportedSyncProtocolException.kt": {
+      "bytes": 217,
+      "sha256": "3f4b38267489149e00fc335b3d14e16b09d56132f7351a87daa5d128fac082d2"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/remote/EncryptedRemoteEnvelope.kt": {
+      "bytes": 4454,
+      "sha256": "711b11e9517d4b134516bce042e3c3c71a66fa895d32db8faa52559415de4520"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/remote/RemoteBlobStore.kt": {
+      "bytes": 1845,
+      "sha256": "1612c4da0f6fe918070b5e2c924f2c8bd50aac3bcc4bd8410cfeb858832a0337"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/catalog/CatalogRows.kt": {
+      "bytes": 8072,
+      "sha256": "7e78f5e508b7951fbaa10ac1b3a3abb2dc6e35c883facbe6a85a5fd29bda44ad"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/decks/DeckAppearance.kt": {
+      "bytes": 3877,
+      "sha256": "d80e0be7ac89b3e79d5e3c0ec5e42f8329504624931480dc558411ecd043990d"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/decks/DeckLangs.kt": {
+      "bytes": 2485,
+      "sha256": "888425645ebdbf72e033f25766078772e722f973d57c72391fc30c3bd901ddce"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/decks/DeckList.kt": {
+      "bytes": 13931,
+      "sha256": "84bb87f5575232648de1e60d799cf709a7ae59b4fe8a0640365860c90e4e0c1e"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/decks/DeckMark.kt": {
+      "bytes": 4484,
+      "sha256": "6fc082babe0a0271fe8208b3cff806eb6caef718e78c40f74dc20e68fccc5010"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/decks/DeckPrompt.kt": {
+      "bytes": 4531,
+      "sha256": "52c3251d5a22233b09c3f72ddf3d27b6fe8e082f7d725f2d624fb00507e91c23"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/decks/DeckSeal.kt": {
+      "bytes": 3895,
+      "sha256": "836a877f7c5fe2dfcc0646782c7aa9507ba446ff3ed6da70eec1411b657b22f6"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/decks/ImportDescription.kt": {
+      "bytes": 2306,
+      "sha256": "8302569aba0d5bf78fb9ce47300bbd6f80fb7825bffdb577f7cdecd6327616cf"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/decks/PromptControls.kt": {
+      "bytes": 1572,
+      "sha256": "ab071dde23d416713742fd4987df23721daaa43de1683fa276e0e2eab629197d"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/dev/DeveloperProfileControls.kt": {
+      "bytes": 4827,
+      "sha256": "5b8da8fe2eafd21507d1ff0df5ed33c14bcc1c1a53927654bd0b6346f25d54d5"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/dev/DeveloperToolsPanel.kt": {
+      "bytes": 6129,
+      "sha256": "2693d81475f34e1162d835866f071735835a2c83627a437ac36ce1262b144a59"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/nav/SignalTransition.kt": {
+      "bytes": 2713,
+      "sha256": "9265763c660fa8b54ca46484032354d95b47bbe02c60729aeca4409cea266124"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/onboarding/FirstStudyDestination.kt": {
+      "bytes": 170,
+      "sha256": "b9dd9cc88eade3a69c6039b3a85db38780dd2a7a21e24366ec0967cca3a9de80"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/onboarding/OnboardingTitle.kt": {
+      "bytes": 2236,
+      "sha256": "05b83876cbc86a504cceb5b092836afb36c38a01abc3e01202cb49e9ff04e783"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/search/SearchResult.kt": {
+      "bytes": 2039,
+      "sha256": "589576f4637fd31b552f01d929673747a71aa992322125e6cbcf47f855763c6c"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/session/BrowseCard.kt": {
+      "bytes": 5812,
+      "sha256": "d066eb1eb1a5b4352a6004f32b9c56663cd1beb6c9db1991478efd9a2af5ca6e"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/session/BrowseChrome.kt": {
+      "bytes": 2079,
+      "sha256": "2a178ad1663d1e38b49b14cc1788b698c2ef8d7a6b16fa02756006a5fd36a260"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/session/BrowseNotice.kt": {
+      "bytes": 1545,
+      "sha256": "179ff3a945313f2ce1978a9b0605aab1abe8a40200b97ca1a67cb480fc4db155"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/session/BrowseVisibility.kt": {
+      "bytes": 1349,
+      "sha256": "dac58bdd0655e0e59970eccdc2dcc8f48e4e1aabc185644978860e6ab97f3c1c"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/session/CardLoadFailure.kt": {
+      "bytes": 1179,
+      "sha256": "abb9f164c32753402287f235d607f4e03f461575eb4161cf21596af2196bcf3c"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/session/CardLoading.kt": {
+      "bytes": 868,
+      "sha256": "76ae132dbd5a4d1c862d9eb1600afc4c51eea6017b044e77dbaabd7665bdff09"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/session/CardStack.kt": {
+      "bytes": 30626,
+      "sha256": "ccd851cb0f283da13eca6ccc3cd5aa17b7d478143520c056b26c6b8e76bc8a5c"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/session/SessionChrome.kt": {
+      "bytes": 11915,
+      "sha256": "3897adc1e582cb62e0242ba926f6d95417438dc182231f828315ac4921253d22"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/session/SessionUiState.kt": {
+      "bytes": 3737,
+      "sha256": "5a9a3897e74a7e5dd61f641d22e315e8689ea68abb0db9cdd546e060e8c4501b"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/session/SwipeDecision.kt": {
+      "bytes": 3965,
+      "sha256": "e4e5b31b90fb675781cfabc3b0e56004131e9f35ef6f957217ae32f6d68e18da"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/settings/DeviceSyncPanel.kt": {
+      "bytes": 11143,
+      "sha256": "0cac1e158499751d6d6e29a1bf3d965480d9fb8ea025702748447bd192b0e921"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/settings/DeviceSyncSettings.kt": {
+      "bytes": 3956,
+      "sha256": "81489bfd460d3ca01bffe9e11ee1a53f293ff70524bf6dd834ca9712839f31f1"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/settings/PaletteTiles.kt": {
+      "bytes": 7764,
+      "sha256": "9fc0682017b9769b0c7bb378101a9a62b51d0844ff94343226cab8e056c46217"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/settings/ProfileConsentPanel.kt": {
+      "bytes": 4320,
+      "sha256": "05b85a3787455221742f0019c314a917c267bc6c8d3d8bb79a4c9ceb2ab0f71f"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/settings/ProfileRecoveryPanel.kt": {
+      "bytes": 1092,
+      "sha256": "52f6bd5f93be6529efa850527202f734282eeb9d26476ddbf8787f2e90d04036"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/settings/ProfileRestartScreen.kt": {
+      "bytes": 1352,
+      "sha256": "8d6ef5f814a305eff2dbfb7911cb9323d86831f9b97f7f39f48fbd9355e98fe6"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/settings/SettingsChrome.kt": {
+      "bytes": 9038,
+      "sha256": "9f58724214bc3aa5f4a857c016942c068d7950aa2dbfa97c21d9788392751c53"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/stats/StatsContent.kt": {
+      "bytes": 17390,
+      "sha256": "cc4571dc1f42e42e869bca90b69973af54a4d14889ff391a6584847eefce4207"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/stats/StatsDescriptions.kt": {
+      "bytes": 1623,
+      "sha256": "419f97c0de4e82571b8e98e85bfe14999c1d0282a8231e0c96ae7bed1b09a60c"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/stats/StudyStatsContent.kt": {
+      "bytes": 6091,
+      "sha256": "3572dec40a85da13558c9a10be41831f1781e547b98c5406f2989e7eb9bbe8cb"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/text/QuantityText.kt": {
+      "bytes": 598,
+      "sha256": "0dcaf2fddd33e84b1efad5d624be5714a86751a90aec7eaaecf0480cf60864a1"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/text/Strings.kt": {
+      "bytes": 2072,
+      "sha256": "bd0945ce42b8fc7d1e78782844f257bf7df58ae408426aa8a7688afbc6896359"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsDe.kt": {
+      "bytes": 55450,
+      "sha256": "6996c768020f519481edb4bb955966f27940384fe601117ab8603bc6d8b784b4"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsEn.kt": {
+      "bytes": 68866,
+      "sha256": "502d43124f1cee1b308530fb4b483a44f9f016d043e7f7e2bafefa69a233bfc6"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsEs.kt": {
+      "bytes": 56434,
+      "sha256": "8058e48f58da94b22da4baaa69acc614d2ce917dd0a82669b816e3dad17e22fd"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsFr.kt": {
+      "bytes": 56789,
+      "sha256": "74b9650cc899e9e72dfbf2c437c41690b542d6fbc33d519290ecfdd510221554"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsPl.kt": {
+      "bytes": 71012,
+      "sha256": "376b71e6d54fddbe70fc8b000332e908648088bb4423177171520d7f63187fce"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsPt.kt": {
+      "bytes": 57894,
+      "sha256": "77537461b59d247f7d83a00fe240b417a3314f9974443f57783861696d53dbc8"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsRu.kt": {
+      "bytes": 79264,
+      "sha256": "db401c8deb992f62f25ec5830bcc0b769ccbff45968e3b40c15612354aefcf99"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/text/UiLanguages.kt": {
+      "bytes": 1134,
+      "sha256": "2226fc8f7710fb273a219b3a8b293e886364b1c7898a0151e1e2d970f7b61fcc"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/Contrast.kt": {
+      "bytes": 2494,
+      "sha256": "306c1e460b9338d6f221071014cf77d2f0356162a2767efb5d9c4d13b2917f4b"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/ControlColors.kt": {
+      "bytes": 3882,
+      "sha256": "22fb62ef8a3a27ff519bc56bf6a983c04c25a130093dd6c790e3103c1c425bc8"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/DeckTints.kt": {
+      "bytes": 1765,
+      "sha256": "503384ff9cf335c0390c4099cd1ae85359de002d47ee295da1bac54c66940727"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/DeveloperBadge.kt": {
+      "bytes": 902,
+      "sha256": "4ae9103b209bf8d736cfae97075f5f385788c2912adb876b62429f25ada8f04f"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/ElementInspector.kt": {
+      "bytes": 5372,
+      "sha256": "551ba1245cfc99e6314f4e35e20652e684427d272ac19ad19e3c95b63b43ab54"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/Flat.kt": {
+      "bytes": 38243,
+      "sha256": "26e56823fd7af9d9341735380891e43893d8f50348741bdb51b8e8d2087a22d0"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/MemoryLattice.kt": {
+      "bytes": 9948,
+      "sha256": "f4e3a665ccfcf57f8ce2b3a122c10985683d3aee07a6e14cc85498cd47ffa614"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/Metrics.kt": {
+      "bytes": 6752,
+      "sha256": "72820dca353377c66fd8ba4a63fc948bda71098d8d63e813ab0edcd96a733478"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/PlatformTheme.kt": {
+      "bytes": 1109,
+      "sha256": "f8968b62721918fbd34d251cb8740db7bb9ce37d44c3bc2a7d6ca3ee5af66198"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/ReadingCat.kt": {
+      "bytes": 1692,
+      "sha256": "8343f3feff8c46e93a02e6c7dc06e9e81744d21f4165eedaeda5565a40a0d974"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/ScrollableColumn.kt": {
+      "bytes": 1782,
+      "sha256": "6e26751afbc36b2e6fbd077acde907bc9bf50cd4cf48aadafaf94646f5f6f7c2"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/SignalFrame.kt": {
+      "bytes": 21160,
+      "sha256": "ce01efc07598b7ae2af7bec9c311173f9e3b11d73f38fccf874494b13e5d1cb1"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/SignalFrameFeedback.kt": {
+      "bytes": 863,
+      "sha256": "1960327fed508ff8e8e4bdd360525c318c902ba98dd46a5eb8a2a253530d1239"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/SignalFrameGeometry.kt": {
+      "bytes": 3212,
+      "sha256": "17b2ad50df063a4542f512efd278d6d3bded636af54d56c04bee6ae612479d34"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/Spark.kt": {
+      "bytes": 2672,
+      "sha256": "db550b8cfc0f59cfb6e259f12668c77ce935c72be0895259dfa6189849dcc0ce"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/Theme.kt": {
+      "bytes": 29664,
+      "sha256": "571b4dfd9c775948a70329131599cde47e40b65461aee0f294ed88bc30f282a3"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/TransientNotice.kt": {
+      "bytes": 3189,
+      "sha256": "b0cd3ea0c4900868c84d7feb7aee581dd98d90aa8621679d258440acc9066998"
+    },
+    "shared/src/jvmShared/kotlin/dev/ikna/ui/theme/Wordmark.kt": {
+      "bytes": 2808,
+      "sha256": "135542995bd554fda5f137432d0d9c182a502a6ffe548a1e72d091dea31a9362"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/data/catalog/CatalogFilterNormalizationTest.kt": {
+      "bytes": 3940,
+      "sha256": "4e37e497912522889678a720effb3d0b6012c44fb9a1e07eba828062346c063c"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/data/catalog/CatalogPlanRefreshTest.kt": {
+      "bytes": 800,
+      "sha256": "2d830ab4e9258e32339f5eb10a071294dcbd3d30e7e4f17a9fd1de6d4f9b6394"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/data/dev/DeveloperBootstrapTest.kt": {
+      "bytes": 2687,
+      "sha256": "48d5a07826d08634a5db3a5467b5b4b642c1842ed28aa2b141101d78063de318"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/data/export/PreWipeBackupTest.kt": {
+      "bytes": 3480,
+      "sha256": "be6e307b3beca05a766ceb8f56f438a4e3612ffd7d538acc4dcee49c513214ef"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/data/pack/BundledPackFailureTest.kt": {
+      "bytes": 5243,
+      "sha256": "03bbfb07d6315997165bc5ad15a01648b54e4d63e820ab46b6799073d1512ff1"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/data/repo/FirstSessionPreparationTest.kt": {
+      "bytes": 2648,
+      "sha256": "15534a385e05d42ab8780bf505e51b56c1d29226c968d0e9763268514ac15dff"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/data/repo/StudyStatsTest.kt": {
+      "bytes": 3847,
+      "sha256": "57f637bfa652a53e028d578a4f2d3de4da9d45070a7e23c213cbaf7b592758ba"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/sync/FakeJournalStore.kt": {
+      "bytes": 5876,
+      "sha256": "f18fb1fab789dc83b8be486f1be31265273bb8730521dd7fff65d45572d91f41"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/sync/IncrementalJournalProtocolTest.kt": {
+      "bytes": 11610,
+      "sha256": "e2a5c8f10d9514ae8375dcf0b47b212fc659cfe3c473471af30c621f1e74850b"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/sync/JournalErrorLatchTest.kt": {
+      "bytes": 1553,
+      "sha256": "f8348f3a22e6c549187ef5564ac38721065de3b07e6973d68269d76da158ef86"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/sync/PairedLanTransportTest.kt": {
+      "bytes": 19517,
+      "sha256": "7ca9c6ed4fe2e2439ae788ab1680ab75f11556c68532897a9a58a305625d09d6"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/sync/ProfileConsentProtocolTest.kt": {
+      "bytes": 23201,
+      "sha256": "46dc27ff87c7855a282008a54d3e580e471305e6f9c183bf6f98b8122a5523f6"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/sync/remote/EncryptedRemoteEnvelopeTest.kt": {
+      "bytes": 4186,
+      "sha256": "83c8d3f25dc41dca90f566a7b7cfff29f4186835c775e9d04526d584999a87c1"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/sync/remote/InMemoryRemoteBlobStore.kt": {
+      "bytes": 1997,
+      "sha256": "975f00d25af3862ce8482c65a140beea9579a44dfffe17a3f92be5f02d677588"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/sync/remote/RemoteBlobStoreTest.kt": {
+      "bytes": 3408,
+      "sha256": "8ab6584dfbd461a70499ffcdf74bf9827ba1c46b1fcc5d2113cf2a0a40bfb081"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/ui/session/CardLoadingTest.kt": {
+      "bytes": 5185,
+      "sha256": "2f87aa33f0d8ed26b54e007ee4b2801eb1a212b1481d3344306c0038f298f12e"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/ui/settings/DeviceSyncErrorTest.kt": {
+      "bytes": 908,
+      "sha256": "dd5daa1337e1bf22e10532b12923dc3e2a6e92df38c9787854ee266ca7884145"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/ui/settings/DeviceSyncStatusTest.kt": {
+      "bytes": 1501,
+      "sha256": "fb94161f681d7399cfccc3caa4f0268e243d2a0f61fa2f52f2e9712ea6f5baad"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/ui/stats/StatsDescriptionsTest.kt": {
+      "bytes": 2458,
+      "sha256": "e91a3ba4c593385e21d47ef4a622be6cacc2a8564888c73a80b5942ddd5c5ba5"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/ui/theme/PalettePreviewTest.kt": {
+      "bytes": 1375,
+      "sha256": "7bb661a0eb6c6be40c98825df4a0306613dc30ebba2d220aa3a6bd355cf2ee2b"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/ui/theme/ReadingCatTest.kt": {
+      "bytes": 1452,
+      "sha256": "942e5c5cd56a968210ebbfac30cedd6513a6d3f40408ccec914ac1ae36b33c20"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/ui/theme/SignalFrameFeedbackTest.kt": {
+      "bytes": 3816,
+      "sha256": "a94df85507e01188addcb13442a6c2630ed9105c9518f549c39794af93d2274a"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/ui/theme/SignalFrameHoverTest.kt": {
+      "bytes": 4069,
+      "sha256": "e88062841eef5497dcfc1b820b219778191d404b5242ec19017e30a9a1a853af"
+    },
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/ui/theme/TransientNoticeTest.kt": {
+      "bytes": 1640,
+      "sha256": "b9c88a059071b6efcd2a8dc58de7be24e307f2bcbdcceb0a1813a765a937e34a"
+    }
+  },
+  "evidence_scope": "Final Linux/JVM XML retained separately; hashes bind suite names, statuses and tested source. Physical platforms not verified."
+}

@@ -60,6 +60,8 @@ class DeveloperSandboxSeeder(
         now: Long = System.currentTimeMillis()
     ): DeveloperSandboxSummary {
         db.wipeAllData()
+        // A seeded DEV scenario is fresh synthetic history, never a paired learner reset.
+        db.wipeDao().clearHistoryBoundary()
         settings.clearAll()
         settings.setOnboardingDone(true)
         settings.setReminder(false, 20, 0)

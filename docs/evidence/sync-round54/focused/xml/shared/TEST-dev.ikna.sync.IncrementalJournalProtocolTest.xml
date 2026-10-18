@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.sync.IncrementalJournalProtocolTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-17T21:51:41" hostname="d0d72dd907ef" time="1.216">
+  <properties/>
+  <testcase name="near limit repository page uses identical wire null encoding[desktop]" classname="dev.ikna.sync.IncrementalJournalProtocolTest" time="1.076"/>
+  <testcase name="bidirectional pages exchange only missing payload and terminate echoes[desktop]" classname="dev.ikna.sync.IncrementalJournalProtocolTest" time="0.086"/>
+  <testcase name="receiver restart after request and lost acknowledgement resumes durably[desktop]" classname="dev.ikna.sync.IncrementalJournalProtocolTest" time="0.011"/>
+  <testcase name="undo dependency can cross a page and remains explicit[desktop]" classname="dev.ikna.sync.IncrementalJournalProtocolTest" time="0.004"/>
+  <testcase name="inbound commit cannot report caught up before new local echo is acknowledged[desktop]" classname="dev.ikna.sync.IncrementalJournalProtocolTest" time="0.003"/>
+  <testcase name="wrong scope version oversized frame and forged resume cursor fail closed[desktop]" classname="dev.ikna.sync.IncrementalJournalProtocolTest" time="0.008"/>
+  <testcase name="lost durable stream proof clears prior caught up claim and never rebuilds[desktop]" classname="dev.ikna.sync.IncrementalJournalProtocolTest" time="0.001"/>
+  <testcase name="unindexed committed tail prevents caught up[desktop]" classname="dev.ikna.sync.IncrementalJournalProtocolTest" time="0.003"/>
+  <testcase name="same event ID with different payload fails without acknowledgement[desktop]" classname="dev.ikna.sync.IncrementalJournalProtocolTest" time="0.001"/>
+  <testcase name="sender restart and reordered duplicate inventory preserve checkpoint[desktop]" classname="dev.ikna.sync.IncrementalJournalProtocolTest" time="0.016"/>
+  <testcase name="failed apply never advances durable checkpoint or reports caught up[desktop]" classname="dev.ikna.sync.IncrementalJournalProtocolTest" time="0.002"/>
+  <testcase name="source restart may replace pending inventory with newer fixed high water[desktop]" classname="dev.ikna.sync.IncrementalJournalProtocolTest" time="0.003"/>
+  <system-out><![CDATA[Synthetic page sizing: entries=57, repositoryBytes=256678, oldExplicitNullFrameBytes=280642, canonicalFrameBytes=257172
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

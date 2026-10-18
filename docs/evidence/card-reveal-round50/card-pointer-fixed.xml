@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.CardRevealPointerIntegrationTest" tests="28" skipped="2" failures="0" errors="0" timestamp="2026-10-13T10:04:47" hostname="3b7663fd5f9d" time="5.609">
+  <properties/>
+  <testcase name="frontTapRevealsExactlyOnceWithoutGrading[mouse=true]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="1.08"/>
+  <testcase name="frontLongDragOnlyRevealsAndNextGestureCanGrade[mouse=true]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.3"/>
+  <testcase name="cancelledLongFrontDragMayRevealButNeverGrades[mouse=true]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.239"/>
+  <testcase name="frontReleaseOutsideCardOnlyReveals[mouse=true]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.248"/>
+  <testcase name="frontSubSlopJitterRevealsExactlyOnceWithoutGrading[mouse=true]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.258"/>
+  <testcase name="frontShortLeftDragRevealsOnReleaseWithoutGrading[mouse=true]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.216"/>
+  <testcase name="secondaryMouseShortDragDoesNotRevealOrGrade[mouse=true]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.092"/>
+  <testcase name="batchedFrontDragEventsRevealOnlyOnceAndNeverGrade[mouse=true]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.256"/>
+  <testcase name="frontShortHorizontalDragRevealsOnReleaseWithoutGrading[mouse=true]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.201"/>
+  <testcase name="secondaryMouseLongDragDoesNotRevealOrGrade[mouse=true]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.08"/>
+  <testcase name="pressOutsideThenReleaseInsideDoesNotRevealOrGrade[mouse=true]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.059"/>
+  <testcase name="recognizedShortDragReleasingOutsideRevealsWithoutGrading[mouse=true]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.175"/>
+  <testcase name="cancelledShortHorizontalDragDoesNotRevealOrGrade[mouse=true]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.245"/>
+  <testcase name="verticalMovementPreservesPlatformBehaviorWithoutGrading[mouse=true]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.214"/>
+  <testcase name="frontTapRevealsExactlyOnceWithoutGrading[mouse=false]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.166"/>
+  <testcase name="frontLongDragOnlyRevealsAndNextGestureCanGrade[mouse=false]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.164"/>
+  <testcase name="cancelledLongFrontDragMayRevealButNeverGrades[mouse=false]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.172"/>
+  <testcase name="frontReleaseOutsideCardOnlyReveals[mouse=false]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.156"/>
+  <testcase name="frontSubSlopJitterRevealsExactlyOnceWithoutGrading[mouse=false]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.159"/>
+  <testcase name="frontShortLeftDragRevealsOnReleaseWithoutGrading[mouse=false]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.164"/>
+  <testcase name="secondaryMouseShortDragDoesNotRevealOrGrade[mouse=false]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.002">
+    <skipped/>
+  </testcase>
+  <testcase name="batchedFrontDragEventsRevealOnlyOnceAndNeverGrade[mouse=false]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.213"/>
+  <testcase name="frontShortHorizontalDragRevealsOnReleaseWithoutGrading[mouse=false]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.166"/>
+  <testcase name="secondaryMouseLongDragDoesNotRevealOrGrade[mouse=false]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.001">
+    <skipped/>
+  </testcase>
+  <testcase name="pressOutsideThenReleaseInsideDoesNotRevealOrGrade[mouse=false]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.055"/>
+  <testcase name="recognizedShortDragReleasingOutsideRevealsWithoutGrading[mouse=false]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.173"/>
+  <testcase name="cancelledShortHorizontalDragDoesNotRevealOrGrade[mouse=false]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.162"/>
+  <testcase name="verticalMovementPreservesPlatformBehaviorWithoutGrading[mouse=false]" classname="dev.ikna.desktop.CardRevealPointerIntegrationTest" time="0.184"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

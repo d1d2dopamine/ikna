@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.data.repo.StudyStatsTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:05:33" hostname="3b7663fd5f9d" time="0.014">
+  <properties/>
+  <testcase name="orderingIsDeterministicWhenAnswerTimesMatch[desktop]" classname="dev.ikna.data.repo.StudyStatsTest" time="0.004"/>
+  <testcase name="boundsAndRetractionsAndInvalidRatingsAreNotAnswers[desktop]" classname="dev.ikna.data.repo.StudyStatsTest" time="0.0"/>
+  <testcase name="studyDaysUseLocalFourAmIncludingDstAndBeforeBoundary[desktop]" classname="dev.ikna.data.repo.StudyStatsTest" time="0.009"/>
+  <testcase name="countsTargetsByIdentityAndKeepsUnknownSeparate[desktop]" classname="dev.ikna.data.repo.StudyStatsTest" time="0.0"/>
+  <testcase name="attentionNeedsRepeatedMissesAndLatestReviewMiss[desktop]" classname="dev.ikna.data.repo.StudyStatsTest" time="0.0"/>
+  <testcase name="recoveryRequiresTwoLaterRecallAnswersAfterLatestMiss[desktop]" classname="dev.ikna.data.repo.StudyStatsTest" time="0.001"/>
+  <testcase name="anUnknownStatusMissInterruptsTheRecoverySequence[desktop]" classname="dev.ikna.data.repo.StudyStatsTest" time="0.0"/>
+  <testcase name="firstContactsUnknownAndOtherQuestionLevelsCannotCreateRecovery[desktop]" classname="dev.ikna.data.repo.StudyStatsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -34,6 +34,15 @@ class MainActivity : ComponentActivity() {
         const val EXTRA_START_SESSION = "dev.ikna.START_SESSION"
     }
 
+    override fun onStart() {
+        super.onStart()
+        (application as IknaApp).container.deviceSync.requestForeground(true)
+    }
+    override fun onStop() {
+        (application as IknaApp).container.deviceSync.requestForeground(false)
+        super.onStop()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // The launcher window wears Theme.Ikna.Launch, which paints the app mark
         // instead of flashing a black rectangle on the way in. Hand the window
@@ -52,6 +61,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settings by container.settings.flow.collectAsState(initial = IknaSettings())
             val schedulerMigration by container.schedulerMigration.collectAsState()
+            val profileRestart by container.profileRestartGate.required.collectAsState()
             // The phone's own light/dark switch resolves the active lighting
             // here (Settings uses the same signal for previews). Which palette the app
             // wears is the user's choice and does not change at sunset.
@@ -91,7 +101,12 @@ class MainActivity : ComponentActivity() {
                 motionEnabled = settings.animations,
                 appearanceVariant = settings.appearanceVariant
             ) {
-                when (schedulerMigration) {
+                if (profileRestart) {
+                    dev.ikna.ui.settings.ProfileRestartScreen(container.profileRestartGate) {
+                        finishAndRemoveTask()
+                        android.os.Process.killProcess(android.os.Process.myPid())
+                    }
+                } else when (schedulerMigration) {
                     is SchedulerMigrationState.Ready -> IknaNavHost(
                         container = container,
                         settings = settings,

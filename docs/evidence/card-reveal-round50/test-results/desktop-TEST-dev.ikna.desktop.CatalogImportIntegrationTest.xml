@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.CatalogImportIntegrationTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:08:32" hostname="3b7663fd5f9d" time="0.112">
+  <properties/>
+  <testcase name="failed reimport restores previously installed content and metadata" classname="dev.ikna.desktop.CatalogImportIntegrationTest" time="0.021"/>
+  <testcase name="reimport keeps one target and membership and preserves metadata choices" classname="dev.ikna.desktop.CatalogImportIntegrationTest" time="0.007"/>
+  <testcase name="screen coroutine cancellation after each write stage rolls back" classname="dev.ikna.desktop.CatalogImportIntegrationTest" time="0.024"/>
+  <testcase name="failure after each write stage rolls back content and metadata" classname="dev.ikna.desktop.CatalogImportIntegrationTest" time="0.043"/>
+  <testcase name="empty or malformed catalogue import does not create or replace metadata" classname="dev.ikna.desktop.CatalogImportIntegrationTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.ui.stats.StatsDescriptionsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:05:33" hostname="3b7663fd5f9d" time="0.015">
+  <properties/>
+  <testcase name="forecastStartsAtOneAndKeepsZeros[desktop]" classname="dev.ikna.ui.stats.StatsDescriptionsTest" time="0.003"/>
+  <testcase name="hoursSummarizeOnlyTheRepositoryVerdictAndKeepZeroDistinctFromMissing[desktop]" classname="dev.ikna.ui.stats.StatsDescriptionsTest" time="0.001"/>
+  <testcase name="allSevenLocalesResolveEveryChartPlaceholder[desktop]" classname="dev.ikna.ui.stats.StatsDescriptionsTest" time="0.011"/>
+  <testcase name="activitySummarizesThePeriodWithoutReadingEveryCell[desktop]" classname="dev.ikna.ui.stats.StatsDescriptionsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.domain.fsrs.FsrsTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:08:43" hostname="3b7663fd5f9d" time="0.001">
+  <properties/>
+  <testcase name="stability is still the day on which recall reaches ninety percent" classname="dev.ikna.domain.fsrs.FsrsTest" time="0.0"/>
+  <testcase name="an interval is never shorter than a day" classname="dev.ikna.domain.fsrs.FsrsTest" time="0.0"/>
+  <testcase name="the official FSRS 6 parameter set is complete" classname="dev.ikna.domain.fsrs.FsrsTest" time="0.001"/>
+  <testcase name="retrievability decays with time" classname="dev.ikna.domain.fsrs.FsrsTest" time="0.0"/>
+  <testcase name="a memory just reviewed is fully retrievable" classname="dev.ikna.domain.fsrs.FsrsTest" time="0.0"/>
+  <testcase name="answering a new card schedules it into the future" classname="dev.ikna.domain.fsrs.FsrsTest" time="0.0"/>
+  <testcase name="initial difficulty stays inside the model range" classname="dev.ikna.domain.fsrs.FsrsTest" time="0.0"/>
+  <testcase name="same day answers use the FSRS 6 short term model" classname="dev.ikna.domain.fsrs.FsrsTest" time="0.0"/>
+  <testcase name="a successful recall never weakens a memory" classname="dev.ikna.domain.fsrs.FsrsTest" time="0.0"/>
+  <testcase name="a lapse never strengthens a memory" classname="dev.ikna.domain.fsrs.FsrsTest" time="0.0"/>
+  <testcase name="official FSRS 6 reference vector matches" classname="dev.ikna.domain.fsrs.FsrsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

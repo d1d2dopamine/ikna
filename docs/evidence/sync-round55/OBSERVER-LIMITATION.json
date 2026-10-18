@@ -1,0 +1,11 @@
+{
+  "observed_at_utc": "2026-10-17T22:22:25.011207+00:00",
+  "sample_period_seconds": 0.25,
+  "observed_pids": {},
+  "maximum_simultaneous_observed_children": 0,
+  "children_remaining_in_last_sample": [],
+  "elapsed_seconds": 70.096,
+  "scope": "Best-effort process observations during run3; assertions and bounded cleanup belong to the test.",
+  "valid_for_resource_peak_claim": false,
+  "limitation": "No child samples were captured by this separate observer. This is not evidence that no children ran, nor an independent proof of peak process count; use the test-owned Process handles and cleanup assertions."
+}

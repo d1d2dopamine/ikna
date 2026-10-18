@@ -1,0 +1,34 @@
+{
+  "baseline_round": 54,
+  "candidate_round": 55,
+  "production_and_schema_byte_identical": true,
+  "changes": [
+    {
+      "path": "desktop/build.gradle.kts",
+      "baseline": {
+        "bytes": 7280,
+        "sha256": "8d15f3fe3618e107befb7d3fe9ca2d7e994ac3ce76296f85d77586fce9b67208"
+      },
+      "candidate": {
+        "bytes": 7767,
+        "sha256": "a1f7d0d0f4500f159cf8cb6b4729c8ddc4d8e9c35ba559a00b02cb500aa215d9"
+      }
+    },
+    {
+      "path": "desktop/src/test/kotlin/dev/ikna/desktop/DeviceSyncProcessIntegrationTest.kt",
+      "baseline": null,
+      "candidate": {
+        "bytes": 15086,
+        "sha256": "35b49382c3e470f8f0344909373fe7c47e27a8675fcae007351d30ef4582cee0"
+      }
+    },
+    {
+      "path": "desktop/src/test/kotlin/dev/ikna/desktop/SyncProcessPeer.kt",
+      "baseline": null,
+      "candidate": {
+        "bytes": 12375,
+        "sha256": "c36e471e28bcab4aa072eb5eff38a4efbb501deb5def47d3a4c941a1ecea1496"
+      }
+    }
+  ]
+}

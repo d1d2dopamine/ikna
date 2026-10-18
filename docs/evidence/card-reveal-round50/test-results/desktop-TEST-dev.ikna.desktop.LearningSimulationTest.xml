@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.LearningSimulationTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:08:33" hostname="3b7663fd5f9d" time="1.697">
+  <properties/>
+  <testcase name="a fourteen day gap puts the returning learner into return mode" classname="dev.ikna.desktop.LearningSimulationTest" time="0.065"/>
+  <testcase name="ten day runs are deterministic for the same seed" classname="dev.ikna.desktop.LearningSimulationTest" time="0.459"/>
+  <testcase name="30 day diligent learner keeps every daily plan inside the governors limits" classname="dev.ikna.desktop.LearningSimulationTest" time="0.537"/>
+  <testcase name="late night plans hand out reviews but no new material" classname="dev.ikna.desktop.LearningSimulationTest" time="0.032"/>
+  <testcase name="30 day struggling learner stays inside the hard limits and keeps the log append-only" classname="dev.ikna.desktop.LearningSimulationTest" time="0.604"/>
+  <system-out><![CDATA[return day: reason=SAFETY_VALVE planned=3 capacity=10 new=1
+=== diligent 30 days
+d01 planned= 13 capacity= 13 new=0 reason=POST_SKIP_WARMUP pending= 13 answered= 13 again=0
+d02 planned= 10 capacity= 13 new=0 reason=NO_HEADROOM      pending= 10 answered= 10 again=0
+d03 planned=  4 capacity= 13 new=1 reason=OK               pending=  4 answered=  4 again=0
+d04 planned=  7 capacity= 13 new=1 reason=OK               pending=  7 answered=  7 again=0
+d05 planned=  7 capacity= 13 new=1 reason=OK               pending=  7 answered=  7 again=0
+d06 planned=  8 capacity= 13 new=2 reason=OK               pending=  8 answered=  8 again=0
+d07 planned=  5 capacity= 13 new=2 reason=OK               pending=  5 answered=  5 again=0
+d08 planned=  4 capacity= 12 new=2 reason=OK               pending=  4 answered=  4 again=0
+d09 planned=  6 capacity= 12 new=2 reason=OK               pending=  6 answered=  6 again=0
+d10 planned=  5 capacity= 12 new=2 reason=OK               pending=  5 answered=  5 again=0
+d11 planned=  5 capacity= 12 new=2 reason=OK               pending=  5 answered=  5 again=0
+d12 planned=  5 capacity= 12 new=2 reason=OK               pending=  5 answered=  5 again=0
+d13 planned=  6 capacity= 12 new=2 reason=OK               pending=  6 answered=  6 again=0
+d14 planned=  4 capacity= 12 new=1 reason=OK               pending=  4 answered=  4 again=0
+d15 planned=  4 capacity= 12 new=1 reason=OK               pending=  4 answered=  4 again=0
+d16 planned=  9 capacity= 12 new=1 reason=OK               pending=  9 answered=  9 again=0
+d17 planned= 10 capacity= 12 new=0 reason=NO_HEADROOM      pending= 10 answered= 10 again=0
+d18 planned=  4 capacity= 12 new=2 reason=OK               pending=  4 answered=  4 again=0
+d19 planned=  4 capacity= 12 new=2 reason=OK               pending=  4 answered=  4 again=0
+d20 planned=  8 capacity= 12 new=1 reason=OK               pending=  8 answered=  8 again=0
+d21 planned=  5 capacity= 12 new=2 reason=OK               pending=  5 answered=  5 again=0
+d22 planned=  4 capacity= 12 new=2 reason=OK               pending=  4 answered=  4 again=0
+d23 planned=  2 capacity= 12 new=1 reason=OK               pending=  2 answered=  2 again=0
+d24 planned=  1 capacity= 12 new=1 reason=OK               pending=  1 answered=  1 again=0
+d25 planned=  6 capacity= 12 new=1 reason=OK               pending=  6 answered=  6 again=0
+d26 planned=  7 capacity= 12 new=1 reason=OK               pending=  7 answered=  7 again=0
+d27 planned=  1 capacity= 12 new=2 reason=OK               pending=  1 answered=  1 again=0
+d28 planned=  4 capacity= 12 new=2 reason=OK               pending=  4 answered=  4 again=0
+d29 planned=  2 capacity= 12 new=2 reason=OK               pending=  2 answered=  2 again=0
+d30 planned=  4 capacity= 12 new=2 reason=OK               pending=  4 answered=  4 again=0
+seeded=48 answered=164 reviewsTotal=212
+night plan: reason=POST_SKIP_WARMUP planned=13 new=0
+=== struggling 30 days
+d01 planned= 13 capacity= 13 new=0 reason=POST_SKIP_WARMUP pending= 13 answered= 13 again=7
+d02 planned= 13 capacity= 13 new=0 reason=NO_HEADROOM      pending= 13 answered= 13 again=5
+d03 planned= 13 capacity= 13 new=0 reason=LOW_ACCURACY     pending= 13 answered= 13 again=6
+d04 planned= 13 capacity= 13 new=0 reason=LOW_ACCURACY     pending= 13 answered= 13 again=4
+d05 planned= 14 capacity= 14 new=0 reason=LOW_ACCURACY     pending= 14 answered= 14 again=0
+d06 planned= 14 capacity= 14 new=0 reason=LOW_ACCURACY     pending= 14 answered= 14 again=6
+d07 planned= 12 capacity= 14 new=1 reason=SAFETY_VALVE     pending= 12 answered= 12 again=10
+d08 planned= 11 capacity= 14 new=0 reason=LOW_ACCURACY     pending= 11 answered= 11 again=3
+d09 planned= 11 capacity= 14 new=0 reason=LOW_ACCURACY     pending= 11 answered= 11 again=6
+d10 planned= 10 capacity= 13 new=0 reason=LOW_ACCURACY     pending= 10 answered= 10 again=7
+d11 planned= 10 capacity= 13 new=0 reason=LOW_ACCURACY     pending= 10 answered= 10 again=1
+d12 planned= 10 capacity= 13 new=0 reason=LOW_ACCURACY     pending= 10 answered= 10 again=3
+d13 planned= 10 capacity= 13 new=0 reason=LOW_ACCURACY     pending= 10 answered= 10 again=6
+d14 planned= 10 capacity= 13 new=0 reason=LOW_ACCURACY     pending= 10 answered= 10 again=3
+d15 planned= 10 capacity= 13 new=1 reason=SAFETY_VALVE     pending= 10 answered= 10 again=6
+d16 planned= 10 capacity= 12 new=0 reason=LOW_ACCURACY     pending= 10 answered= 10 again=2
+d17 planned= 10 capacity= 12 new=0 reason=LOW_ACCURACY     pending= 10 answered= 10 again=2
+d18 planned= 10 capacity= 12 new=0 reason=LOW_ACCURACY     pending= 10 answered= 10 again=4
+d19 planned= 10 capacity= 12 new=0 reason=LOW_ACCURACY     pending= 10 answered= 10 again=6
+d20 planned= 10 capacity= 12 new=0 reason=LOW_ACCURACY     pending= 10 answered= 10 again=4
+d21 planned= 10 capacity= 12 new=0 reason=LOW_ACCURACY     pending= 10 answered= 10 again=4
+d22 planned= 10 capacity= 12 new=0 reason=LOW_ACCURACY     pending= 10 answered= 10 again=2
+d23 planned= 10 capacity= 12 new=1 reason=SAFETY_VALVE     pending= 10 answered= 10 again=3
+d24 planned= 12 capacity= 12 new=0 reason=LOW_ACCURACY     pending= 12 answered= 12 again=7
+d25 planned= 10 capacity= 12 new=0 reason=LOW_ACCURACY     pending= 10 answered= 10 again=4
+d26 planned= 10 capacity= 12 new=0 reason=LOW_ACCURACY     pending= 10 answered= 10 again=5
+d27 planned= 10 capacity= 12 new=0 reason=LOW_ACCURACY     pending= 10 answered= 10 again=4
+d28 planned= 12 capacity= 12 new=0 reason=LOW_ACCURACY     pending= 12 answered= 12 again=4
+d29 planned= 11 capacity= 12 new=0 reason=LOW_ACCURACY     pending= 11 answered= 11 again=3
+d30 planned= 10 capacity= 12 new=0 reason=LOW_ACCURACY     pending= 10 answered= 10 again=3
+seeded=48 answered=329 reviewsTotal=377
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

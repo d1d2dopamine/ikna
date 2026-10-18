@@ -1,0 +1,42 @@
+{
+  "observedAtUtc": "2026-10-17T22:03:16.983957+00:00",
+  "schemaVersion": 13,
+  "checks": {
+    "check_text": {
+      "passed": true,
+      "cases": null,
+      "scriptSha256": "3a043f1ea569ef4e036a89c6cc0aca9ed47616ec33d9930a09b02b693154ba70",
+      "outputSha256": "c6d1e22191d661fd48bf5da9ef683e5bf838f82aad3539d014e8734a5adfd9fb",
+      "output": "Repository text is valid UTF-8/NFC; 1064 text files and 7 localization tables passed.\n"
+    },
+    "check_localization": {
+      "passed": true,
+      "cases": null,
+      "scriptSha256": "60ed1e9f16b58cc99e5033523c880481678e04c68d2ae7d3d72afc7746ae86aa",
+      "outputSha256": "1f1d8844d3b9f59b399bf08b4ca420b9a71c7e4783e27a72b515fa49dcf20502",
+      "output": "Language registry OK: 7 languages, 852 keys each; English fallback, tokens, labels and selectors agree.\n"
+    },
+    "check_android_ci": {
+      "passed": true,
+      "cases": null,
+      "scriptSha256": "bfcc3c04e4302a698200a6b2770e9daf6d625865fc666a5310547aa584ddda05",
+      "outputSha256": "f40bc709895a7cda3be422cf76c055198d1a04f8649703438f5a2d9924aa0c5a",
+      "output": "DEX-safe Kotlin identifier check passed: 201 Android-bound files; JVM-only tests excluded.\n"
+    },
+    "check_design_parity": {
+      "passed": true,
+      "cases": 43,
+      "scriptSha256": "a4e6fca11d0198113a51b750d0bac03ed82e841e8f25060c4d77a770bc317868",
+      "outputSha256": "8a6e538c14378fb5499ac70ca4a7ff8ce4e4dd5838218723fc5b0a6266345bb4",
+      "output": "Ran 43 tests in 0.201s\n\nOK"
+    },
+    "check_classic_cards": {
+      "passed": true,
+      "cases": 5,
+      "scriptSha256": "d61c6c7c917c37e162f5838cdca86a12ea2e6d86b23513dd069031bd577d6248",
+      "outputSha256": "6b6bfd6ab475a8f49961005466a8860566bc185455a7acd90278dc257134f6f3",
+      "output": "Ran 5 tests in 0.006s\n\nOK"
+    }
+  },
+  "parityUpdate": "Two wipe checks updated from schema12/14 mutable tables to schema13/17; exact table equality, real SQLite deletion and integrity assertions retained. Earlier failure log retained."
+}

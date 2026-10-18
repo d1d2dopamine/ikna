@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.sync.ProfileConsentProtocolTest" tests="24" skipped="0" failures="0" errors="0" timestamp="2026-10-17T21:51:43" hostname="d0d72dd907ef" time="0.43">
+  <properties/>
+  <testcase name="stale local revision does not rebase approved proposal[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.028"/>
+  <testcase name="recipient restart completion supplies lost adoption approval but never local consent[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.008"/>
+  <testcase name="expiry clears consent and replay cannot apply[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.005"/>
+  <testcase name="revocation clears consent and authenticated peer identity is checked[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.002"/>
+  <testcase name="content invalidation survives restart before peer receives it[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.012"/>
+  <testcase name="trust and proposal alone never mutate and both approvals are required[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.006"/>
+  <testcase name="delayed discovery without proposal cannot erase completed consent[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.008"/>
+  <testcase name="adoption completion with lost approval cannot rebase changed donor revision[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.003"/>
+  <testcase name="delayed same proposal without receipt cannot erase completed consent[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.006"/>
+  <testcase name="new content invalidates completion and fresh bilateral preview can merge again[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.011"/>
+  <testcase name="enclosing consent wire preserves near limit incremental page encoding[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.28"/>
+  <testcase name="lost final receipt retry cannot duplicate application[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.004"/>
+  <testcase name="adoption receipt content mismatch never publishes completed checkpoint[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.004"/>
+  <testcase name="bare completion cannot restore cached caught up after a new local answer[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.007"/>
+  <testcase name="durable remote adoption completion cannot invent missing local approval[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.002"/>
+  <testcase name="foreground pause clears pending approval[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.001"/>
+  <testcase name="post consent journal proof failure removes caught up state without new mutation[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.007"/>
+  <testcase name="legacy payload and over limit payload fail closed[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.004"/>
+  <testcase name="adoption proposal stays explicit and unsupported storage never falls back to merge[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.002"/>
+  <testcase name="version two peer is explicit incompatibility and old completion needs fresh approval[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.004"/>
+  <testcase name="completion validation failure clears current catch up before incremental actor is entered[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.007"/>
+  <testcase name="old invalidation cannot erase a newer completed operation[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.005"/>
+  <testcase name="completed receipt restarts require matching peer before automatic journal[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.006"/>
+  <testcase name="durable cancellation wins crash before completion file deletion[desktop]" classname="dev.ikna.sync.ProfileConsentProtocolTest" time="0.003"/>
+  <system-out><![CDATA[Synthetic actual outer wire sizing: outerBytes=258006, frameBytes=257226, entries=57
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

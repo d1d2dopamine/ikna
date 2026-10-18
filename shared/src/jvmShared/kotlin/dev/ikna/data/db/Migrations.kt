@@ -260,6 +260,41 @@ object IknaMigrations {
         }
     }
 
+    /** Adds identity without modifying any historical observation. */
+    private val MIGRATION_10_11 = object : Migration(10, 11) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("CREATE TABLE IF NOT EXISTS history_boundary (id INTEGER NOT NULL PRIMARY KEY, afterLocalId INTEGER NOT NULL, token TEXT NOT NULL)")
+            connection.execSQL("ALTER TABLE reviews ADD COLUMN eventId TEXT")
+            connection.execSQL("ALTER TABLE reviews ADD COLUMN undoEventId TEXT")
+            connection.execSQL("CREATE UNIQUE INDEX index_reviews_eventId ON reviews(eventId)")
+        }
+    }
+
+    private val MIGRATION_11_12 = object : Migration(11, 12) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("CREATE TABLE IF NOT EXISTS profile_origin (id INTEGER NOT NULL PRIMARY KEY, opId TEXT NOT NULL, operationDigest TEXT NOT NULL)")
+            connection.execSQL("CREATE TABLE IF NOT EXISTS profile_sync_operations (opId TEXT NOT NULL PRIMARY KEY, operationDigest TEXT NOT NULL, localRevision TEXT NOT NULL, incomingRevision TEXT NOT NULL, boundaryIdentity TEXT NOT NULL, resultingRevision TEXT NOT NULL, resultingProfileIdentity TEXT NOT NULL, resultingContentIdentity TEXT NOT NULL, mode TEXT NOT NULL)")
+        }
+    }
+
+    /** Add only derived structures; old receipts never become new protocol consent. */
+    private val MIGRATION_12_13 = object : Migration(12, 13) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("CREATE TABLE IF NOT EXISTS journal_stream (id INTEGER NOT NULL PRIMARY KEY, authorizationDigest TEXT NOT NULL, bindingJson TEXT NOT NULL, scanThrough INTEGER NOT NULL, sequence INTEGER NOT NULL, prefix TEXT NOT NULL, eventCount INTEGER NOT NULL, durationMs INTEGER NOT NULL)")
+            connection.execSQL("CREATE TABLE IF NOT EXISTS journal_event_index (streamId TEXT NOT NULL, sequence INTEGER NOT NULL, eventId TEXT NOT NULL, payloadDigest TEXT NOT NULL, undoEventId TEXT, reviewId INTEGER NOT NULL, prefix TEXT NOT NULL, PRIMARY KEY(streamId, sequence))")
+            connection.execSQL("CREATE UNIQUE INDEX index_journal_event_index_streamId_eventId ON journal_event_index(streamId, eventId)")
+            connection.execSQL("CREATE UNIQUE INDEX index_journal_event_index_streamId_reviewId ON journal_event_index(streamId, reviewId)")
+            connection.execSQL("CREATE TABLE IF NOT EXISTS journal_checkpoint (sourceDevice TEXT NOT NULL PRIMARY KEY, bindingJson TEXT NOT NULL, sequence INTEGER NOT NULL, prefix TEXT NOT NULL)")
+        }
+    }
+
+    /** Append-only addition. Null preserves old canonical identities and stream proofs. */
+    private val MIGRATION_13_14 = object : Migration(13, 14) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("ALTER TABLE reviews ADD COLUMN purpose TEXT")
+        }
+    }
+
     val ALL: Array<Migration> =
         arrayOf(
             MIGRATION_1_2,
@@ -270,6 +305,10 @@ object IknaMigrations {
             MIGRATION_6_7,
             MIGRATION_7_8,
             MIGRATION_8_9,
-            MIGRATION_9_10
+            MIGRATION_9_10,
+            MIGRATION_10_11,
+            MIGRATION_11_12,
+            MIGRATION_12_13,
+            MIGRATION_13_14
         )
 }

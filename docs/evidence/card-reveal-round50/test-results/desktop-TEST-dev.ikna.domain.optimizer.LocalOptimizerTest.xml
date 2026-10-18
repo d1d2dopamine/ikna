@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.domain.optimizer.LocalOptimizerTest" tests="22" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:08:43" hostname="3b7663fd5f9d" time="0.139">
+  <properties/>
+  <testcase name="automaticPolicyAppliesOnlyAcceptedResultsAndHonoursMonthlyLimit" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.048"/>
+  <testcase name="cooldown and rejected refit preserve the applied result" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.013"/>
+  <testcase name="new accepted candidate does not silently replace the active model" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.009"/>
+  <testcase name="automaticEligibilityIsQuietAndInsufficientHistoryKeepsDefaults" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.009"/>
+  <testcase name="automaticActivationCannotReviveAProfileAfterReset" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.005"/>
+  <testcase name="sample adapter filters retractions future suppression and duplicates not keyboard" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.001"/>
+  <testcase name="parameter and export round trips reject unsafe snapshots" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.0"/>
+  <testcase name="dynamic scheduler reads only one model per answer and legacy replay uses defaults" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.001"/>
+  <testcase name="restart reloads applied weights without fitting or replacing retention policy" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.007"/>
+  <testcase name="automaticFailuresBackOffInsteadOfFittingAfterEveryAnswer" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.004"/>
+  <testcase name="corrupt data is rejected before activation" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.001"/>
+  <testcase name="automaticRefusalNeverReplacesTheCurrentModel" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.004"/>
+  <testcase name="cancel coalesces duplicate requests and reset cannot resurrect a running fit" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.007"/>
+  <testcase name="default startup never fits and accepted result requires explicit application" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.005"/>
+  <testcase name="settings backup cannot activate local fitting" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.005"/>
+  <testcase name="future outcomes cannot influence training loss" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.0"/>
+  <testcase name="changed history and computation errors cannot publish an invalid candidate" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.005"/>
+  <testcase name="storage failure does not prevent immediate runtime defaults" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.004"/>
+  <testcase name="mixed default fitted and disabled history replays independently of current model" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.003"/>
+  <testcase name="estimator replay agrees with the production bounded memory transition" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.0"/>
+  <testcase name="too few answers have no NaN in storage and do not block eligibility checks" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.006"/>
+  <testcase name="automaticObserverIsIdempotentAndOwnedByApplicationScope" classname="dev.ikna.domain.optimizer.LocalOptimizerTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

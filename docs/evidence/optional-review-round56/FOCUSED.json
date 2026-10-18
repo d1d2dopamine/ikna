@@ -1,0 +1,183 @@
+{
+  "shared": {
+    "totals": {
+      "tests": 58,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time": 2.077
+    },
+    "suites": [
+      {
+        "name": "dev.ikna.sync.IncrementalJournalProtocolTest",
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "time": 1.404
+      },
+      {
+        "name": "dev.ikna.sync.ProfileSlotStoreTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "time": 0.081
+      },
+      {
+        "name": "dev.ikna.sync.ProfileConsentProtocolTest",
+        "tests": 28,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "time": 0.57
+      },
+      {
+        "name": "dev.ikna.ui.session.CardLoadingTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "time": 0.022
+      }
+    ]
+  },
+  "desktop": {
+    "totals": {
+      "tests": 74,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time": 3.643
+    },
+    "suites": [
+      {
+        "name": "dev.ikna.desktop.LearningWriteAtomicityTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "time": 0.334
+      },
+      {
+        "name": "dev.ikna.desktop.JournalSyncIntegrationTest",
+        "tests": 18,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "time": 0.229
+      },
+      {
+        "name": "dev.ikna.desktop.ProfileSlotMigrationIntegrationTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "time": 0.134
+      },
+      {
+        "name": "dev.ikna.desktop.ProfileTransferIntegrationTest",
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "time": 0.245
+      },
+      {
+        "name": "dev.ikna.desktop.IncrementalJournalRepositoryTest",
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "time": 2.105
+      },
+      {
+        "name": "dev.ikna.desktop.DesktopOptionalReviewContractTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "time": 0.009
+      },
+      {
+        "name": "dev.ikna.desktop.OptionalHardReviewIntegrationTest",
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "time": 0.587
+      }
+    ]
+  },
+  "app": {
+    "totals": {
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time": 0.079
+    },
+    "suites": [
+      {
+        "name": "dev.ikna.ui.session.SessionErgonomicsTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "time": 0.006
+      },
+      {
+        "name": "dev.ikna.data.db.SchemaTest",
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "time": 0.073
+      }
+    ]
+  },
+  "limitations": "Shared58 unchanged cached results from run1; desktop74 and app17 executed in run2. Two Desktop files changed afterward; final full suite verifies them.",
+  "runs": {
+    "1": {
+      "exit_code": 1,
+      "sha256": {
+        "run1-inputs-after.json": "d906a675024db71c33d29de7bc5c87c290dbf4c7d3952871ecad0d0eebb434bb",
+        "run1-inputs-before.json": "b64f229ec344539fc24cc289dbfdf979884eaac5f65c265c17655b1f5088b7c4",
+        "run1-xml/desktop/desktop/build/test-results/test/TEST-dev.ikna.desktop.DesktopOptionalReviewContractTest.xml": "ab4e2a972ad7f4a9219019f75ec847d4c1c9d295e0d7310a1ee3a4d342566ce6",
+        "run1-xml/desktop/desktop/build/test-results/test/TEST-dev.ikna.desktop.IncrementalJournalRepositoryTest.xml": "e338f9fa79afb5f8b2b0f9df066a2d0297507897a0724f9f50d94665d43f8907",
+        "run1-xml/desktop/desktop/build/test-results/test/TEST-dev.ikna.desktop.JournalSyncIntegrationTest.xml": "f05f4e66a651b012468144a1731dee82821aa0a702dcb3087e0a4933318eabe1",
+        "run1-xml/desktop/desktop/build/test-results/test/TEST-dev.ikna.desktop.LearningWriteAtomicityTest.xml": "f3349f7ffe018fc7fdb037b66139940468ac5f027dab2c75c61f334cd3b70c0d",
+        "run1-xml/desktop/desktop/build/test-results/test/TEST-dev.ikna.desktop.OptionalHardReviewIntegrationTest.xml": "9dd35e7e2b49a7f58eb8a85d1d84095354b7a0b2594053ceb23c89c4265d406d",
+        "run1-xml/desktop/desktop/build/test-results/test/TEST-dev.ikna.desktop.ProfileSlotMigrationIntegrationTest.xml": "f06bafbdee80f662af8d0f351164b1289dcc66a2af36aae63cfd155b331cfca2",
+        "run1-xml/desktop/desktop/build/test-results/test/TEST-dev.ikna.desktop.ProfileTransferIntegrationTest.xml": "ad33995374048d3a59585df6f709b46979f71f4183a8a28cca8fe501e9d844c6",
+        "run1-xml/shared/shared/build/test-results/desktopTest/TEST-dev.ikna.sync.IncrementalJournalProtocolTest.xml": "7ee1904ed9b04902d0f1692234cd3846a0ee3f1705e86cc5e24d833778e0875e",
+        "run1-xml/shared/shared/build/test-results/desktopTest/TEST-dev.ikna.sync.ProfileConsentProtocolTest.xml": "c08ab3c15f0da83068f753e468acf3d77daba36de8f9b6a608cfc5084bb44228",
+        "run1-xml/shared/shared/build/test-results/desktopTest/TEST-dev.ikna.sync.ProfileSlotStoreTest.xml": "a635b6305f529186dcdea972dcf79436893448149330162718a42d1b0db0474d",
+        "run1-xml/shared/shared/build/test-results/desktopTest/TEST-dev.ikna.ui.session.CardLoadingTest.xml": "9e679a2924e65cec87fe458cf2e3d075d9b23530e238e97f70f1653364204ae0",
+        "run1.log": "6fa5e2bd4e0759b87098fea506ee3c9eb9c17f593efede67fddd3628c6547b46"
+      }
+    },
+    "2": {
+      "exit_code": 0,
+      "sha256": {
+        "run2-inputs-after.json": "e56efa168b024b788dc3697ed2f250a59c56916322b404f6810d5f6e91091009",
+        "run2-inputs-before.json": "e68d064adef46d2d6dac023ea5f7cc00822df46b700d49fb322769d0cb052600",
+        "run2-xml/app/app/build/test-results/testDebugUnitTest/TEST-dev.ikna.data.db.SchemaTest.xml": "bddde6e7271a0662048b9198bcf80d8137ae39835fe14687505e35f9a20e6a0c",
+        "run2-xml/app/app/build/test-results/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionErgonomicsTest.xml": "b0b67958c54895d4da84b0c7bcd941cf7b12052e456904c580e149c6f767ff4d",
+        "run2-xml/desktop/desktop/build/test-results/test/TEST-dev.ikna.desktop.DesktopOptionalReviewContractTest.xml": "0d8218acbca752c24f65891ad8c92cd861af599ec2f1c8a48bc22088493f2a6e",
+        "run2-xml/desktop/desktop/build/test-results/test/TEST-dev.ikna.desktop.IncrementalJournalRepositoryTest.xml": "a9ec1d22407df82ff95d0132000705a68fa5d368fdf22ad7c39f3662fc44bb05",
+        "run2-xml/desktop/desktop/build/test-results/test/TEST-dev.ikna.desktop.JournalSyncIntegrationTest.xml": "e16273f5a95e9e62a91b0911f56e8806037d9d72d6a8889388f8721de0df314f",
+        "run2-xml/desktop/desktop/build/test-results/test/TEST-dev.ikna.desktop.LearningWriteAtomicityTest.xml": "9a944b060aec442a1f6746ddb12dbd5ecdb777bd7d5bcfcbe477c08951951199",
+        "run2-xml/desktop/desktop/build/test-results/test/TEST-dev.ikna.desktop.OptionalHardReviewIntegrationTest.xml": "f9a9b291253d80a121d066ceb63d0c280f0394738438ada247fea1954d60286d",
+        "run2-xml/desktop/desktop/build/test-results/test/TEST-dev.ikna.desktop.ProfileSlotMigrationIntegrationTest.xml": "a27eccb9111999fae6d2d952e0e14cbcee30d9d83667cd3ed02a7201346c20f1",
+        "run2-xml/desktop/desktop/build/test-results/test/TEST-dev.ikna.desktop.ProfileTransferIntegrationTest.xml": "270e7c5c4b4ac1cefe173e4864511ef865b5436e6cb122d492cd9ca40ac51475",
+        "run2-xml/shared/shared/build/test-results/desktopTest/TEST-dev.ikna.sync.IncrementalJournalProtocolTest.xml": "7ee1904ed9b04902d0f1692234cd3846a0ee3f1705e86cc5e24d833778e0875e",
+        "run2-xml/shared/shared/build/test-results/desktopTest/TEST-dev.ikna.sync.ProfileConsentProtocolTest.xml": "c08ab3c15f0da83068f753e468acf3d77daba36de8f9b6a608cfc5084bb44228",
+        "run2-xml/shared/shared/build/test-results/desktopTest/TEST-dev.ikna.sync.ProfileSlotStoreTest.xml": "a635b6305f529186dcdea972dcf79436893448149330162718a42d1b0db0474d",
+        "run2-xml/shared/shared/build/test-results/desktopTest/TEST-dev.ikna.ui.session.CardLoadingTest.xml": "9e679a2924e65cec87fe458cf2e3d075d9b23530e238e97f70f1653364204ae0",
+        "run2.log": "edfd69db9048244b5165016e8632818614d7b3cee7f027fdd43e02ce67271ade"
+      }
+    }
+  },
+  "run1_failure": "Positive ordinary-earned-credit fixture lacked chunk_tokens. Added only technical token metadata; retained no-credit and positive normal-credit assertions."
+}

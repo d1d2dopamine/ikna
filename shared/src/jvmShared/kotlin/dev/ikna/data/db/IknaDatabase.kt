@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 
-const val IKNA_DATABASE_VERSION = 10
+const val IKNA_DATABASE_VERSION = 14
 
 @Database(
     entities = [
@@ -20,7 +20,13 @@ const val IKNA_DATABASE_VERSION = 10
         ComponentEntity::class,
         DailyStatEntity::class,
         GovernorLogEntity::class,
-        DailyPlanEntity::class
+        DailyPlanEntity::class,
+        HistoryBoundaryEntity::class,
+        ProfileSyncOperationEntity::class,
+        ProfileOriginEntity::class,
+        JournalStreamEntity::class,
+        JournalEventIndexEntity::class,
+        JournalCheckpointEntity::class
     ],
     // v2: undo snapshots on `reviews`, deck switches on `packs`, `daily_plan`.
     // v3: `daily_stats.correctCount`, so the day's accuracy is a count rather
@@ -36,9 +42,13 @@ const val IKNA_DATABASE_VERSION = 10
     //     not reviews and never enter FSRS, accuracy or governor statistics.
     // v10: deck/target membership is many-to-many and natural source contexts
     //      are stored beside the target instead of becoming extra FSRS cards.
+    // v11: portable event/undo identities; legacy observations remain unchanged.
+    // v12: atomic profile receipts and immutable adopted-slot provenance.
+    // v13: consent-bound incremental journal index and checkpoints.
+    // v14: nullable immutable review purpose; existing observations stay unchanged.
     // Kept as a literal because SchemaTest deliberately reads this source line:
     // changing it must force a migration and a committed Room schema.
-    version = 10,
+    version = 14,
     // KSP writes the schema history into app/schemas (see the ksp block in
     // shared/build.gradle.kts -- it stays under app/ so that the workflow step
     // that uploads it and the one that checks it is committed do not move).
@@ -50,6 +60,7 @@ const val IKNA_DATABASE_VERSION = 10
 )
 @ConstructedBy(IknaDatabaseConstructor::class)
 abstract class IknaDatabase : RoomDatabase() {
+    abstract fun incrementalJournalDao(): IncrementalJournalDao
     abstract fun chunkDao(): ChunkDao
     abstract fun cardDao(): CardDao
     abstract fun reviewDao(): ReviewDao
@@ -59,6 +70,9 @@ abstract class IknaDatabase : RoomDatabase() {
     abstract fun governorDao(): GovernorDao
     abstract fun planDao(): PlanDao
     abstract fun wipeDao(): WipeDao
+    abstract fun profileOriginDao(): ProfileOriginDao
+    abstract fun profileSyncOperationDao(): ProfileSyncOperationDao
+    abstract fun historyBoundaryDao(): HistoryBoundaryDao
 }
 
 /**

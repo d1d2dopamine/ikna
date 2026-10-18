@@ -140,4 +140,34 @@ class CardLoadingTest {
         }
         assertSame(card, ready.copy(loadFailed = false).current)
     }
+    @Test
+    fun optionalBatchProgressIsSeparateFromFactualDailyCount() {
+        val state = SessionUiState(loading = false, optionalHardReview = true,
+            answeredToday = 42, sessionDone = 1, sessionTotal = 5, remaining = 4)
+        assertEquals(0.2f, state.progress)
+        assertEquals(42, state.answeredToday)
+        assertEquals(1f, state.copy(sessionDone = 5, finished = true).progress)
+    }
+
+    @Test
+    fun optionalOfferIsHiddenDuringReadOrFailure() {
+        val state = SessionUiState(loading = false, optionalHardAvailable = true,
+            optionalHardReview = true, answeredToday = 42, sessionDone = 2, sessionTotal = 5)
+        for (blocked in listOf(state.beginLoad(), state.failedLoad())) {
+            assertFalse(blocked.optionalHardAvailable)
+            assertFalse(blocked.finished)
+            assertNull(blocked.current)
+            assertEquals(42, blocked.answeredToday)
+        }
+    }
+
+    @Test
+    fun factualOptionalAnswersCannotClaimDailyMinimum() {
+        val state = SessionUiState(loading = false, answeredToday = 42,
+            goalAnswersToday = 0, dailyMinimum = 1)
+        assertFalse(state.minimumMet)
+        assertTrue(state.copy(goalAnswersToday = 1).minimumMet)
+        assertEquals(42, state.answeredToday)
+    }
+
 }

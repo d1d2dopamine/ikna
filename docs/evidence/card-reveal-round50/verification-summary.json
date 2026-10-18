@@ -1,0 +1,40 @@
+{
+  "sourceRound": 49,
+  "round": 50,
+  "sourceArchiveSha256": "3f626954b41d0dc3b5bd22d796bb1ded4f951729a67dcf03fdfd79d97baca7af",
+  "productionBaselineCardStackSha256": "68f3249675ea69b3df14e720bdfc0841505f6eb8b1dfd2cddfc08d6eff6bce3f",
+  "productionFixedCardStackSha256": "ccd851cb0f283da13eca6ccc3cd5aa17b7d478143520c056b26c6b8e76bc8a5c",
+  "cleanBaselinePointer": {
+    "tests": 28,
+    "passed": 20,
+    "failed": 6,
+    "skipped": 2
+  },
+  "expandedFixedPointer": {
+    "tests": 32,
+    "passed": 30,
+    "failed": 0,
+    "skipped": 2
+  },
+  "finalDesktop": {
+    "tests": 208,
+    "passed": 206,
+    "failed": 0,
+    "skipped": 2
+  },
+  "sharedDesktop": {
+    "tests": 69,
+    "passed": 69,
+    "failed": 0,
+    "skipped": 0,
+    "finalExpandedTask": "UP-TO-DATE; unchanged shared production since first full successful run"
+  },
+  "scope": "Real Compose1.8.2 offscreen pointer integration on Linux; injected touch is not Android-device evidence",
+  "notRun": [
+    "Android assembly/device test",
+    "Windows runtime/minimize probe",
+    "animated gesture-overlap and rapid successive gestures"
+  ],
+  "dailyPolicyChanged": false,
+  "windowsAnimationFixed": false
+}

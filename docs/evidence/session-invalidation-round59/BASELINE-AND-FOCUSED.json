@@ -1,0 +1,388 @@
+{
+  "baseline_archive": "ikna-0.12-press-round-58-main-lesson-completion-no-corpora.zip",
+  "baseline_archive_sha256": "e9e09b9050ca217fb605855671ef9c50341f6d2febd3d68376c3d78e8bd5af4c",
+  "observed_baseline": "Unchanged Round58: actual Room merge imported one answer and cleared the plan; a captured open queue still contained three cards including the remotely answered target. Two expected failing Android source-wiring contracts and preserved Desktop empty-callback/load-key evidence. No actual lifecycle/UI execution.",
+  "runs": {
+    "red": {
+      "exit_code": 1,
+      "sha256": {
+        "red-inputs-after.json": "a008edc468374b6a7eab81560d753add961c391ab14cea8e971486f8b87a63b1",
+        "red-inputs-before.json": "73cf6ea1c14ef7bc3f23df2696430f7424378c53692fe83d11a5ba46f47b98d6",
+        "red-xml/app/build/test-results/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionInvalidationContractTest.xml": "76b409ecce36562bfdf0f2518a1257467efda684e68f884c7738e1a98f106cef",
+        "red-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.SessionInspectionIntegrationTest.xml": "09582e749dc50943126a7d4ae2d9c2892bb7b631b0c695472e5fc26af0a0dd81",
+        "red.log": "5bd054f3ee3667dcb8d204efd99953e6bf0fc3523c5bb04195c036eeeab1c15e"
+      }
+    },
+    "run1": {
+      "exit_code": 0,
+      "sha256": {
+        "run1-inputs-after.json": "8ca05d9a4d35b4d416f60f99b3283d8973d22daaf4918623235f8302b7b84493",
+        "run1-inputs-before.json": "c78fd2a3b91856bb633ddf6cc33b61158fd940ba52f04c4c233af077698e399e",
+        "run1-xml/app/build/test-results/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionCompletionBoundaryTest.xml": "3afce08b60830a2fcd0a683188dd1fd2d87e7a9c5886a5468efa43ffb79b67d1",
+        "run1-xml/app/build/test-results/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionErgonomicsTest.xml": "c761872cca04a24b77194800f4416a7e0bafa422115a34bac5e337db41f253cc",
+        "run1-xml/app/build/test-results/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionInvalidationContractTest.xml": "7efad4501d10deb6333e2722467ba0b0d0a109adfde5e834996642f55d8b0c01",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.CompletionBoundaryIntegrationTest.xml": "308c4ed16109225542a10de4154ea3cfe264ba370bf6f8de332b9e63d28f603a",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.DesktopOptionalReviewContractTest.xml": "4aec0be9f384ef85355c604744985bed5f15c3c19085697df005795552d17579",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.DesktopSessionInvalidationContractTest.xml": "5f3ebb0dce9cf8dca53ada2e970bc1a6ca2c017bbe68cdfe4b35b6586abf366b",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.DeviceProfileAdoptionIntegrationTest.xml": "a84292783e645898229aab7506bb60cd53ea591559da581c3999968d1cfa7ae8",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.DeviceSyncControllerIntegrationTest.xml": "18254eb1060e1a32684c57b09c0ca03251ad8cfcfbcc7e896f6606a4c67d97c5",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.IncrementalJournalRepositoryTest.xml": "1e80e05bcdfec9a85a9b1aa44d488ef3c1275980778974a6a2558b01b21ce4ef",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.JournalSyncIntegrationTest.xml": "996e52f6d1a0130e78d43ed933727b2b5fd3cac3c8955aecab1d3565acc386fe",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.LearningWriteAtomicityTest.xml": "94ffdaba056db4bdbbea1dc2206fcf5caead246e4e3c1d91041b634c0ca9d17b",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.OptionalHardReviewIntegrationTest.xml": "045df61d290b1f1089601ed882716264cf92a236ec0cc43b8f2a4354522e9c65",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.SessionInspectionIntegrationTest.xml": "fd923ea69a58a4e672e0ee4e4c9dedfc6c03c9e59c607fac9c2084aeece465f8",
+        "run1-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.domain.session.CommittedSessionChangesTest.xml": "a1771d164770248f9ccc7cbf932a6ea9b068f2f86671dc6692b3f93bba28ec0d",
+        "run1-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.sync.PairedLanTransportTest.xml": "bee4dfcc253a1d3800e788decd3f5a2e3abe72a4cbc073dbe8f16400b35e74e0",
+        "run1-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.ui.session.CardLoadingTest.xml": "adf548cdc6778210e28e82587eae6d3bca760329b3047c40c67ea3de4a636a6e",
+        "run1.log": "7d71389522362ace1fdb009845be269f6a80fb0c1da3a932cabb18d13ff43b65"
+      }
+    }
+  },
+  "red-summary.json": {
+    "inputs_stable": true,
+    "aggregate_sha256": "1824ef812e16373b51e83390109734c4a5e5abe1113bde7da7cf45ecb09396ec",
+    "production_unchanged_from_58": true,
+    "evidence": "One passing actual Room merge/captured-plan/source-noop witness; two expected failing Android source wiring contracts. No actual Android lifecycle runtime.",
+    "suites": [
+      {
+        "name": "dev.ikna.ui.session.SessionInvalidationContractTest",
+        "tests": "2",
+        "skipped": "0",
+        "failures": "2",
+        "errors": "0",
+        "timestamp": "2026-10-17T23:39:15",
+        "hostname": "d0d72dd907ef",
+        "time": "0.06",
+        "path": "red-xml/app/build/test-results/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionInvalidationContractTest.xml",
+        "sha256": "76b409ecce36562bfdf0f2518a1257467efda684e68f884c7738e1a98f106cef"
+      },
+      {
+        "name": "dev.ikna.desktop.SessionInspectionIntegrationTest",
+        "tests": "1",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-10-17T23:38:52",
+        "hostname": "d0d72dd907ef",
+        "time": "0.294",
+        "path": "red-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.SessionInspectionIntegrationTest.xml",
+        "sha256": "09582e749dc50943126a7d4ae2d9c2892bb7b631b0c695472e5fc26af0a0dd81"
+      }
+    ],
+    "changed_production_paths": []
+  },
+  "run1-summary.json": {
+    "run": "1",
+    "suites": [
+      {
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.ui.session.SessionCompletionBoundaryTest",
+        "timestamp": "2026-10-17T23:52:56",
+        "path": "run1-xml/app/build/test-results/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionCompletionBoundaryTest.xml",
+        "sha256": "3afce08b60830a2fcd0a683188dd1fd2d87e7a9c5886a5468efa43ffb79b67d1",
+        "failed_cases": []
+      },
+      {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.ui.session.SessionErgonomicsTest",
+        "timestamp": "2026-10-17T23:52:56",
+        "path": "run1-xml/app/build/test-results/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionErgonomicsTest.xml",
+        "sha256": "c761872cca04a24b77194800f4416a7e0bafa422115a34bac5e337db41f253cc",
+        "failed_cases": []
+      },
+      {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.ui.session.SessionInvalidationContractTest",
+        "timestamp": "2026-10-17T23:52:56",
+        "path": "run1-xml/app/build/test-results/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionInvalidationContractTest.xml",
+        "sha256": "7efad4501d10deb6333e2722467ba0b0d0a109adfde5e834996642f55d8b0c01",
+        "failed_cases": []
+      },
+      {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.CompletionBoundaryIntegrationTest",
+        "timestamp": "2026-10-17T23:50:30",
+        "path": "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.CompletionBoundaryIntegrationTest.xml",
+        "sha256": "308c4ed16109225542a10de4154ea3cfe264ba370bf6f8de332b9e63d28f603a",
+        "failed_cases": []
+      },
+      {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.DesktopOptionalReviewContractTest",
+        "timestamp": "2026-10-17T23:50:30",
+        "path": "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.DesktopOptionalReviewContractTest.xml",
+        "sha256": "4aec0be9f384ef85355c604744985bed5f15c3c19085697df005795552d17579",
+        "failed_cases": []
+      },
+      {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.DesktopSessionInvalidationContractTest",
+        "timestamp": "2026-10-17T23:50:30",
+        "path": "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.DesktopSessionInvalidationContractTest.xml",
+        "sha256": "5f3ebb0dce9cf8dca53ada2e970bc1a6ca2c017bbe68cdfe4b35b6586abf366b",
+        "failed_cases": []
+      },
+      {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.DeviceProfileAdoptionIntegrationTest",
+        "timestamp": "2026-10-17T23:50:30",
+        "path": "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.DeviceProfileAdoptionIntegrationTest.xml",
+        "sha256": "a84292783e645898229aab7506bb60cd53ea591559da581c3999968d1cfa7ae8",
+        "failed_cases": []
+      },
+      {
+        "tests": 18,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.DeviceSyncControllerIntegrationTest",
+        "timestamp": "2026-10-17T23:50:35",
+        "path": "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.DeviceSyncControllerIntegrationTest.xml",
+        "sha256": "18254eb1060e1a32684c57b09c0ca03251ad8cfcfbcc7e896f6606a4c67d97c5",
+        "failed_cases": []
+      },
+      {
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.IncrementalJournalRepositoryTest",
+        "timestamp": "2026-10-17T23:51:23",
+        "path": "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.IncrementalJournalRepositoryTest.xml",
+        "sha256": "1e80e05bcdfec9a85a9b1aa44d488ef3c1275980778974a6a2558b01b21ce4ef",
+        "failed_cases": []
+      },
+      {
+        "tests": 18,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.JournalSyncIntegrationTest",
+        "timestamp": "2026-10-17T23:51:24",
+        "path": "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.JournalSyncIntegrationTest.xml",
+        "sha256": "996e52f6d1a0130e78d43ed933727b2b5fd3cac3c8955aecab1d3565acc386fe",
+        "failed_cases": []
+      },
+      {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.LearningWriteAtomicityTest",
+        "timestamp": "2026-10-17T23:51:25",
+        "path": "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.LearningWriteAtomicityTest.xml",
+        "sha256": "94ffdaba056db4bdbbea1dc2206fcf5caead246e4e3c1d91041b634c0ca9d17b",
+        "failed_cases": []
+      },
+      {
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.OptionalHardReviewIntegrationTest",
+        "timestamp": "2026-10-17T23:51:25",
+        "path": "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.OptionalHardReviewIntegrationTest.xml",
+        "sha256": "045df61d290b1f1089601ed882716264cf92a236ec0cc43b8f2a4354522e9c65",
+        "failed_cases": []
+      },
+      {
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.SessionInspectionIntegrationTest",
+        "timestamp": "2026-10-17T23:51:25",
+        "path": "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.SessionInspectionIntegrationTest.xml",
+        "sha256": "fd923ea69a58a4e672e0ee4e4c9dedfc6c03c9e59c607fac9c2084aeece465f8",
+        "failed_cases": []
+      },
+      {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.domain.session.CommittedSessionChangesTest",
+        "timestamp": "2026-10-17T23:49:28",
+        "path": "run1-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.domain.session.CommittedSessionChangesTest.xml",
+        "sha256": "a1771d164770248f9ccc7cbf932a6ea9b068f2f86671dc6692b3f93bba28ec0d",
+        "failed_cases": []
+      },
+      {
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.sync.PairedLanTransportTest",
+        "timestamp": "2026-10-17T23:49:28",
+        "path": "run1-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.sync.PairedLanTransportTest.xml",
+        "sha256": "bee4dfcc253a1d3800e788decd3f5a2e3abe72a4cbc073dbe8f16400b35e74e0",
+        "failed_cases": []
+      },
+      {
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.ui.session.CardLoadingTest",
+        "timestamp": "2026-10-17T23:49:40",
+        "path": "run1-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.ui.session.CardLoadingTest.xml",
+        "sha256": "adf548cdc6778210e28e82587eae6d3bca760329b3047c40c67ea3de4a636a6e",
+        "failed_cases": []
+      }
+    ],
+    "total_cases": 146,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "inputs_stable": true,
+    "aggregate_sha256": "9e4a1a4164d0ef2f5420c128e2d189963f85e030170b2c8fd8db3c0c41245894",
+    "source_file_count": 473,
+    "passed": 146
+  },
+  "production-diff.json": {
+    "baseline_production_files": 302,
+    "candidate_production_files": 304,
+    "changed_production": [
+      {
+        "path": "app/src/main/java/dev/ikna/AppContainer.kt",
+        "before": "ec2bb66fd3eaae31a3d0379cde0e766368c513cf5baf36d4e2830fe9cf0cd3dc",
+        "after": "9e5a7bc8483e0e546e5c40b87fb6e8c5890cce6e3169c2fc956c7826d253c2f6"
+      },
+      {
+        "path": "app/src/main/java/dev/ikna/ui/session/SessionScreen.kt",
+        "before": "44d784b0f8481766f037c04562982a6385006d32c0e779a71f208649cb1fe1f6",
+        "after": "f856520a49f2d1cb4f9d9dd96f4e3720ce2016372cbe8fe7399cfce802b40bf1"
+      },
+      {
+        "path": "app/src/main/java/dev/ikna/ui/session/SessionViewModel.kt",
+        "before": "bc341a0a83b146734c073ea388a40235c6f8cff94b78fc0134788e80b716db8b",
+        "after": "f7d60bcb6d37ceb23755b92b06832247fc1c0febd983a48777f9671367a116de"
+      },
+      {
+        "path": "desktop/src/main/kotlin/dev/ikna/desktop/DesktopContainer.kt",
+        "before": "f79351ddfb8ca5f981564fdf6d33cf48e203b6be5d202477cb824f06304e1256",
+        "after": "0e95003d2301cdf529dff1b0e31bb6b74b1b07f0b003176f1ad004f621e6ca2c"
+      },
+      {
+        "path": "desktop/src/main/kotlin/dev/ikna/desktop/SessionPane.kt",
+        "before": "29f84e8d6c800488206263ffcbfb565bc21f7a8235d89fecd7d2472eb36cd9e3",
+        "after": "4b884910befa04edaa28d1c40fd23a7bf27cf2cce4c0985f3ecf01f4df41b8e3"
+      },
+      {
+        "path": "shared/src/jvmShared/kotlin/dev/ikna/data/db/Daos.kt",
+        "before": "7945cb5e368acfd6a7ee77721c598d98a01ca587769049f5b5cf0e7fcf1c9d16",
+        "after": "95eb398e31efb20f3e9c0405476ec449845f6a1aac8ce19ea94c52e1f3d956ee"
+      },
+      {
+        "path": "shared/src/jvmShared/kotlin/dev/ikna/data/repo/LearningRepository.kt",
+        "before": "73e44b8ad73992e0ff901119fd936f6833248ad634c9ed0404e2a2a366c9a3bc",
+        "after": "bf7bfb004272163c89a0d997f6bee509af589f2652621e669e7473f459f347f4"
+      },
+      {
+        "path": "shared/src/jvmShared/kotlin/dev/ikna/domain/session/CommittedSessionChanges.kt",
+        "before": null,
+        "after": "900cb8a6886b0c3f25d2831ca25e7d48ea8e3baa69f9702e7746e04369c828cb"
+      },
+      {
+        "path": "shared/src/jvmShared/kotlin/dev/ikna/domain/session/CommittedSessionSnapshot.kt",
+        "before": null,
+        "after": "79bcb71547031678dcb6430594afe281560490ebd933d4dc316b17109214c6df"
+      },
+      {
+        "path": "shared/src/jvmShared/kotlin/dev/ikna/sync/DeviceSyncController.kt",
+        "before": "f146bdacee091907c864b6b855763a9c58dd3be5bf960e712b5a2e4987620b14",
+        "after": "2bd356334f652b3cd71953a6126a19a1b3cff460650b73b7d7159a62f0b163e0"
+      },
+      {
+        "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/session/SessionChrome.kt",
+        "before": "42d3c3a01b403fff52e36d7bcbb3845e9e0818086c23da57319f625f198ba131",
+        "after": "8b5a4e9c116463a91d1c0153873aff919c34bd3c3e922593b334dd8e896eee4b"
+      },
+      {
+        "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/session/SessionUiState.kt",
+        "before": "ef69f129574e85812ebcfc5ceace090544087894d9f95e9230459099d26c67e4",
+        "after": "aa7eddc9b3c606d0d648e08b9f63181f834bbb378d2b61de837242a540f29160"
+      },
+      {
+        "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsDe.kt",
+        "before": "54c91c3f36264a7e38d605e4af50680154cc0ee5a3723fd884b5e31aa055e9e5",
+        "after": "b35a000b69aee1a88b72e97eefcc916e76755fc89f20ec8a4bde692910e84a0f"
+      },
+      {
+        "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsEn.kt",
+        "before": "ba5d8b3baf107f7c75593a135174b042d2552b0d4463d9f063f8b87bc073f973",
+        "after": "d2f8c2891b2a3b653d7d8976bf862857544b5741423abbb63e2e724e0da53d43"
+      },
+      {
+        "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsEs.kt",
+        "before": "5ee341e1f28b522023e8ea82beef318b84954ea0e8eb2f0007bd25bc220b6dd3",
+        "after": "bfaacd41ea5f7cef447ad9b7dcd4690eb617beac4546febdcd4c8627671f0807"
+      },
+      {
+        "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsFr.kt",
+        "before": "72b3ccde72922c96540f591d45b46db740fd427d513077c26fc95ec1f1eab67b",
+        "after": "e516345518048aa5cc41550ef36590916299934b9357b0c48db91a43eceb303f"
+      },
+      {
+        "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsPl.kt",
+        "before": "938f87a9a0ef1f64fd8103b94c0422c54c55f9f22c96df2030df1f5eb814e206",
+        "after": "ad524f266dd39845f05298b0323ad910db782881990f7bf3238ec062b1bf0db5"
+      },
+      {
+        "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsPt.kt",
+        "before": "8256c6a8416ef92d98ed8e5fe435825b1d569682357186e914686ea55a44ae7d",
+        "after": "225964ee68a23ca64583f95665b4fed71458306ff875c0ea915cf94456c82722"
+      },
+      {
+        "path": "shared/src/jvmShared/kotlin/dev/ikna/ui/text/StringsRu.kt",
+        "before": "ab1aeb0d946be8e267061509ec10b0ff91b7c6bf87fd7827aae924a71c5d60f8",
+        "after": "eee17a6743d3e4c1034aa1861332d488cfc88e2c570b5ef4dfc6b764ecf8cedc"
+      }
+    ],
+    "schema_files": 12,
+    "schema_bytes_unchanged": true
+  },
+  "desktop-baseline-source.json": [
+    {
+      "path": "desktop/src/main/kotlin/dev/ikna/desktop/DesktopContainer.kt",
+      "sha256": "f79351ddfb8ca5f981564fdf6d33cf48e203b6be5d202477cb824f06304e1256",
+      "empty_callback": true,
+      "onMerged_lines": [
+        "141: onMerged = {}, available = !isDeveloperMode,"
+      ]
+    },
+    {
+      "path": "desktop/src/main/kotlin/dev/ikna/desktop/SessionPane.kt",
+      "sha256": "29f84e8d6c800488206263ffcbfb565bc21f7a8235d89fecd7d2472eb36cd9e3",
+      "empty_callback": false,
+      "onMerged_lines": []
+    },
+    {
+      "path": "desktop/src/main/kotlin/dev/ikna/desktop/Shell.kt",
+      "sha256": "3f2ce42696db87f329d76316c5fe8be7b420911f9d775c1e402358bd083c7d3f",
+      "empty_callback": false,
+      "onMerged_lines": []
+    }
+  ]
+}

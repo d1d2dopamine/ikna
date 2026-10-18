@@ -1,0 +1,14 @@
+{
+  "text": {
+    "passed": true,
+    "files": 1034,
+    "localizationTables": 7
+  },
+  "localization": {
+    "passed": true,
+    "languages": 7,
+    "keysEach": 849
+  },
+  "schemaVersion": 12,
+  "scope": "Text checks executed after final documentation edits; source build/test inputs separately hash-bound."
+}

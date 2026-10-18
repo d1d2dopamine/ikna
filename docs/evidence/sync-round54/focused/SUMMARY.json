@@ -1,0 +1,51 @@
+{
+  "exit_code": 0,
+  "tests": 71,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "source_files": 402,
+  "source_changed": false,
+  "suites": [
+    {
+      "name": "dev.ikna.sync.IncrementalJournalProtocolTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "seconds": 1.216
+    },
+    {
+      "name": "dev.ikna.sync.ProfileConsentProtocolTest",
+      "tests": 24,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "seconds": 0.43
+    },
+    {
+      "name": "dev.ikna.sync.JournalErrorLatchTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "seconds": 0.003
+    },
+    {
+      "name": "dev.ikna.desktop.DeviceSyncControllerIntegrationTest",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "seconds": 48.536
+    },
+    {
+      "name": "dev.ikna.desktop.IncrementalJournalRepositoryTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "seconds": 1.522
+    }
+  ]
+}

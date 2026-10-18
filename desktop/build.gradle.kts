@@ -28,6 +28,8 @@ kotlin {
 dependencies {
     implementation(project(":shared"))
     testImplementation("junit:junit:4.13.2")
+    // Offscreen Compose pointer integration tests; not shipped in the app.
+    testImplementation("org.jetbrains.compose.ui:ui-test-desktop:1.8.2")
     implementation(compose.desktop.currentOs)
     implementation("androidx.sqlite:sqlite-bundled:2.5.2")
     // Anki writes its newest collections compressed. The phone reads them
@@ -145,5 +147,25 @@ tasks.register<JavaExec>("gradingLab") {
     doFirst {
         require(input.isPresent) { "Pass -Pgrading.input=path/to/log.jsonl" }
         args(input.get(), output.get())
+    }
+}
+
+// Match the Linux AppRun linker contract before Compose/Skiko native loading.
+// The Compose fixture opens bundled SQLite first, just like Main.kt startup.
+tasks.withType<Test>().configureEach {
+    if (System.getProperty("os.name").startsWith("Linux", ignoreCase = true)) {
+        environment("LD_BIND_NOW", "1")
+    }
+}
+
+// Test-only child JVMs need the actual runtime classpath, not Gradle's worker bootstrap jar.
+tasks.named<Test>("test") {
+    val childClasspath = layout.buildDirectory.file("sync-process-test/runtime-classpath.txt")
+    systemProperty("ikna.test.runtimeClasspathFile", childClasspath.get().asFile.absolutePath)
+    doFirst {
+        childClasspath.get().asFile.apply {
+            parentFile.mkdirs()
+            writeText(sourceSets["test"].runtimeClasspath.asPath)
+        }
     }
 }

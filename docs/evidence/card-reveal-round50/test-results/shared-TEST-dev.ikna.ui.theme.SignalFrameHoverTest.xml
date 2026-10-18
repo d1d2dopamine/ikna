@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.ui.theme.SignalFrameHoverTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:05:33" hostname="3b7663fd5f9d" time="0.029">
+  <properties/>
+  <testcase name="detachAndReattachDoNotLeaveAnInvisibleHoverOwner[desktop]" classname="dev.ikna.ui.theme.SignalFrameHoverTest" time="0.001"/>
+  <testcase name="scrollingAHoveredTargetOutOfItsClippedBoundsRevokesOwnership[desktop]" classname="dev.ikna.ui.theme.SignalFrameHoverTest" time="0.0"/>
+  <testcase name="smallestNestedTargetOwnsHoverThenReturnsItToTheRow[desktop]" classname="dev.ikna.ui.theme.SignalFrameHoverTest" time="0.0"/>
+  <testcase name="equalAreaTieUsesTheLatestEntryAndEmptyBoundsNeverOwnHover[desktop]" classname="dev.ikna.ui.theme.SignalFrameHoverTest" time="0.0"/>
+  <testcase name="moveRestoresHoverAfterInputCancellationWithoutANewEnter[desktop]" classname="dev.ikna.ui.theme.SignalFrameHoverTest" time="0.0"/>
+  <testcase name="removingTheNestedTargetRestoresTheParentAndLastExitClearsHover[desktop]" classname="dev.ikna.ui.theme.SignalFrameHoverTest" time="0.0"/>
+  <testcase name="lostExitFromSmallTargetCannotSuppressAnUnrelatedButton[desktop]" classname="dev.ikna.ui.theme.SignalFrameHoverTest" time="0.0"/>
+  <testcase name="changingDrawingPlacementKeepsInputOwnershipUntilTheFrameIsDisposed[desktop]" classname="dev.ikna.ui.theme.SignalFrameHoverTest" time="0.028"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

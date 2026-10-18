@@ -9,12 +9,20 @@ import dev.ikna.data.prefs.SettingsStore
 import dev.ikna.data.repo.LearningRepository
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.grading.INPUT_SWIPE
+import dev.ikna.domain.session.ReviewDuration
 import dev.ikna.domain.session.SessionCard
+import dev.ikna.domain.session.OptionalHardBatch
+import dev.ikna.domain.session.SessionObservation
+import dev.ikna.domain.session.SessionPresentationGate
+import dev.ikna.domain.session.SessionObservationPolicy
+import dev.ikna.domain.session.SessionPlanChange
+import kotlinx.coroutines.channels.Channel
 import dev.ikna.domain.session.ReviewSignals
 import dev.ikna.domain.session.ReviewSignalTracker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -37,7 +45,8 @@ class SessionViewModel(
     private val repo: LearningRepository,
     private val settings: SettingsStore,
     private val speaker: Speaker,
-    private val deckId: String? = null
+    private val deckId: String? = null,
+    private val sessionChanges: StateFlow<Long> = MutableStateFlow(0L)
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SessionUiState())
@@ -48,14 +57,15 @@ class SessionViewModel(
     private val answeredKeys = HashSet<String>()
 
     /**
-     * Chunks that already had their extra pass. A brand new chunk is asked twice
-     * a few minutes apart on the day it appears: that second pass is where most
-     * of the encoding actually happens, it costs one card, and it never touches
-     * the day's counter.
+     * First-contact prompts already offered a transient second pass. These
+     * repeats stop at the global required-plan boundary; further hard review is
+     * explicit and optional. They never create another required question.
      */
     private val drilled = HashSet<String>()
 
-    private var shownAt = 0L
+    private var optionalBatch: OptionalHardBatch? = null
+
+    private var shownNanos = 0L
 
     var reviewSignals = ReviewSignalTracker()
         private set
@@ -87,6 +97,11 @@ class SessionViewModel(
      * Undo feedback has no timer; it stays available until dismissed or replaced
      * by a later action.
      */
+    private val presentation = SessionPresentationGate<SessionObservation>()
+    private val presentationVersion: Long get() = presentation.generation
+    private val refreshRequests = Channel<Unit>(Channel.CONFLATED)
+    private var refreshRequired = false
+    private var observedCommitGeneration = sessionChanges.value
     private val work = Mutex()
     private val loadGate = CardLoadGate()
 
@@ -97,11 +112,115 @@ class SessionViewModel(
      */
     private var doneAtLoad = 0
 
-    private fun serially(block: suspend () -> Unit) {
+    private fun publishState(version: Long, value: SessionUiState): Boolean {
+        if (!presentation.isCurrent(version)) return false
+        _state.value = value
+        return true
+    }
+
+    // Accessed only while work is held; every suspended action publication checks
+    // both its generation and the expected local plan mutation before showing a card.
+    private var actionChange: SessionPlanChange = SessionPlanChange.Stable
+    private var actionBaseline: SessionObservation? = null
+    private var actionReloaded = false
+
+    private suspend fun rememberOwnAction(version: Long): Boolean {
+        if (version != presentationVersion) return false
+        val fresh = repo.inspectSession(deckId)
+        if (version != presentationVersion) return false
+        val baseline = if (actionReloaded) presentation.observation else actionBaseline
+        if (!SessionObservationPolicy.compatible(baseline, fresh.observation, actionChange)) {
+            requestCommittedRefresh()
+            return false
+        }
+        return presentation.remember(version, fresh.observation)
+    }
+
+    private suspend fun publishActionState(version: Long, value: SessionUiState): Boolean {
+        if (!rememberOwnAction(version)) return false
+        return publishState(version, value)
+    }
+
+    private fun serially(
+        change: SessionPlanChange = SessionPlanChange.Stable,
+        reloaded: Boolean = false,
+        block: suspend (Long) -> Unit
+    ) {
+        val version = presentationVersion
         viewModelScope.launch {
             work.withLock {
-                cardLoadResult { block() }.onFailure {
-                    _state.value = _state.value.failedLoad()
+                actionBaseline = presentation.observation
+                actionChange = change
+                actionReloaded = reloaded
+                cardLoadResult {
+                    block(version)
+                    rememberOwnAction(version)
+                }.onFailure {
+                    if (version != presentationVersion) return@onFailure
+                    optionalBatch?.let { batch -> runCatching { repo.cancelOptionalHardReview(batch) } }
+                    if (version != presentationVersion) return@onFailure
+                    optionalBatch = null
+                    _state.value = _state.value.failedLoad().copy(optionalHardReview = false, optionalHardAvailable = false)
+                }
+            }
+        }
+    }
+
+    private fun requestCommittedRefresh() {
+        presentation.invalidate()
+        refreshRequired = true
+        _state.value = _state.value.beginLoad().copy(optionalHardReview = false)
+        refreshRequests.trySend(Unit)
+    }
+
+    /** A real lifecycle resume probes saved state without admitting any new plan. */
+    fun checkSessionOnResume() { refreshRequests.trySend(Unit) }
+
+    private fun changedState(version: Long) = publishState(version,
+        _state.value.failedLoad().copy(loadFailed = false, sessionChanged = true,
+            optionalHardReview = false, optionalHardAvailable = false))
+
+    private suspend fun refreshFromHistory() = work.withLock {
+        val version = presentationVersion
+        val forced = refreshRequired
+        var failureVersion = version
+        cardLoadResult {
+            val snapshot = repo.inspectSession(deckId)
+            if (version != presentationVersion) return@cardLoadResult
+            if (!forced && !presentation.changed(snapshot.observation)) return@cardLoadResult
+            val previous = presentation.observation
+            val refreshVersion = if (forced) version else presentation.invalidate()
+            failureVersion = refreshVersion
+            _state.value = _state.value.beginLoad().copy(optionalHardReview = false)
+            optionalBatch?.let { repo.cancelOptionalHardReview(it) }
+            if (refreshVersion != presentationVersion) return@cardLoadResult
+            optionalBatch = null
+            val plan = snapshot.plan
+            if (plan == null || !SessionObservationPolicy.compatible(previous, snapshot.observation, SessionPlanChange.Stable)) {
+                changedState(refreshVersion)
+            } else {
+                planned = plan.cards
+                answeredKeys.clear()
+                doneAtLoad = plan.sessionDone
+                publishState(refreshVersion, _state.value.copy(loading = false, loadFailed = false, sessionChanged = false,
+                    queue = plan.cards, index = 0, remaining = plan.cards.size, revealed = false,
+                    answeredToday = snapshot.answeredToday, goalAnswersToday = snapshot.goalAnswersToday,
+                    sessionDone = plan.sessionDone, sessionTotal = plan.sessionTotal, deckTitle = plan.deckTitle,
+                    reason = plan.reason, nextDueAt = plan.nextDueAt, finished = plan.cards.isEmpty(),
+                    canUndo = false, undoVisible = false, optionalHardReview = false,
+                    optionalHardAvailable = snapshot.optionalHardAvailable, optionalHardEmpty = false))
+                shownNanos = System.nanoTime(); onCardShown()
+            }
+            presentation.remember(refreshVersion, snapshot.observation)
+            refreshRequired = false
+        }.onFailure {
+            // No successful read means no stale card may remain answerable.
+            if (failureVersion == presentationVersion) {
+                optionalBatch?.let { batch -> runCatching { repo.cancelOptionalHardReview(batch) } }
+                if (failureVersion == presentationVersion) {
+                    optionalBatch = null
+                    _state.value = _state.value.failedLoad().copy(optionalHardReview = false)
+                    refreshRequired = false
                 }
             }
         }
@@ -109,6 +228,15 @@ class SessionViewModel(
 
     init {
         load()
+        viewModelScope.launch {
+            sessionChanges.collect { generation ->
+                if (generation != observedCommitGeneration) {
+                    observedCommitGeneration = generation
+                    requestCommittedRefresh()
+                }
+            }
+        }
+        viewModelScope.launch { for (request in refreshRequests) refreshFromHistory() }
         warmUpSpeech()
     }
 
@@ -169,6 +297,7 @@ class SessionViewModel(
      * makes the card wait.
      */
     private fun onCardShown() {
+        val version = presentationVersion
         reviewSignals = ReviewSignalTracker()
         viewModelScope.launch {
             cardLoadResult {
@@ -184,6 +313,7 @@ class SessionViewModel(
                 // not speak showed a mark that did nothing when pressed.
                 val lang = card.chunk.lang
                 val ready = canSpeak(lang)
+                if (version != presentationVersion) return@cardLoadResult
                 if (ready != _state.value.speechReady) {
                     _state.value = _state.value.copy(speechReady = ready)
                 }
@@ -199,7 +329,7 @@ class SessionViewModel(
                 // a moment, and sound that arrives over the next card is worse than
                 // no sound at all.
                 val speaks = prefs.autoSpeakEvery || card.isFirstContact
-                if (speaks && _state.value.current?.card?.key == key) {
+                if (version == presentationVersion && speaks && _state.value.current?.card?.key == key) {
                     speaker.speakIfReady(spokenText(card), lang)
                 }
 
@@ -236,12 +366,20 @@ class SessionViewModel(
         speaker.stop()
     }
 
-    fun load() {
+    fun load(optionalHardEmpty: Boolean = false) {
         if (!loadGate.tryStart()) return
+        presentation.invalidate()
         _state.value = _state.value.beginLoad()
-        serially {
+        serially(reloaded = true) { version ->
             try {
-                val plan = repo.buildSession(deckId)
+                optionalBatch?.let { repo.cancelOptionalHardReview(it) }
+                optionalBatch = null
+                val loaded = repo.buildSession(deckId) // Explicit entry/Continue is the only admission path here.
+                val snapshot = repo.inspectSession(deckId)
+                // Forced Sandbox practice is an explicit developer-only build result,
+                // never manufactured by the automatic committed-history observer.
+                val plan = (if (loaded.forcedByDeveloper) loaded else snapshot.plan) ?: run { changedState(version); return@serially }
+                if (!presentation.remember(version, snapshot.observation)) return@serially
                 planned = plan.cards
                 answeredKeys.clear()
                 doneAtLoad = plan.sessionDone
@@ -255,13 +393,14 @@ class SessionViewModel(
                 val measured = repo.medianAnswerMs()
                 if (measured != null) settings.setAnswerMs(measured.toInt())
                 val remembered = prefs.answerMs.takeIf { it > 0 }?.toLong()
-                _state.value = SessionUiState(
+                if (!publishActionState(version, SessionUiState(
                     loading = false,
                     queue = plan.cards,
                     index = 0,
                     revealed = false,
                     remaining = plan.cards.size,
                     answeredToday = plan.answeredToday,
+                    goalAnswersToday = plan.goalAnswersToday,
                     sessionDone = plan.sessionDone,
                     sessionTotal = plan.sessionTotal,
                     deckTitle = plan.deckTitle,
@@ -272,9 +411,11 @@ class SessionViewModel(
                     canUndo = plan.answeredToday > 0,
                     showRevealHint = hintsShown < HINT_LIMIT,
                     swipeFluent = swipesDone >= SWIPE_FLUENCY,
-                    finished = plan.cards.isEmpty()
-                )
-                shownAt = System.currentTimeMillis()
+                    finished = plan.cards.isEmpty(),
+                    optionalHardAvailable = plan.cards.isEmpty() && repo.optionalHardAvailable(deckId),
+                    optionalHardEmpty = optionalHardEmpty
+                ))) return@serially
+                shownNanos = System.nanoTime()
                 onCardShown()
             } finally { loadGate.finish() }
         }
@@ -319,6 +460,23 @@ class SessionViewModel(
     fun markWrong(reportCopied: Boolean = false) {
         val s = _state.value
         val card = s.current ?: return
+        if (optionalBatch != null) {
+            _state.value = s.copy(loading = true)
+            serially(change = SessionPlanChange.RemoveTarget(card.chunk.id)) { version ->
+                repo.markWrong(card)
+                val queue = s.queue.filterNot { it.chunk.id == card.chunk.id }
+                val index = (s.index - s.queue.take(s.index).count { it.chunk.id == card.chunk.id }).coerceIn(0, queue.size)
+                if (!publishActionState(version, s.copy(loading = false, queue = queue, index = index,
+                    revealed = false, remaining = queue.size - index,
+                    sessionTotal = (s.sessionTotal - s.queue.drop(s.index).count { it.chunk.id == card.chunk.id }).coerceAtLeast(s.sessionDone),
+                    undoVisible = false, canUndo = false,
+                    wrongMarked = true, wrongSourceId = card.sourceId, wrongReportCopied = reportCopied,
+                    finished = index >= queue.size,
+                    optionalHardAvailable = index >= queue.size && repo.optionalHardAvailable(deckId)))) return@serially
+                shownNanos = System.nanoTime(); onCardShown()
+            }
+            return
+        }
         val chunkId = card.chunk.id
 
         val queue = s.queue.filterNot { it.chunk.id == chunkId }
@@ -347,10 +505,14 @@ class SessionViewModel(
             wrongReportCopied = reportCopied,
             finished = index >= queue.size
         )
-        shownAt = System.currentTimeMillis()
+        shownNanos = System.nanoTime()
         onCardShown()
 
-        serially { repo.markWrong(card) }
+        serially(change = SessionPlanChange.RemoveTarget(card.chunk.id)) { version ->
+            repo.markWrong(card)
+            if (_state.value.finished && optionalBatch == null)
+                if (!publishActionState(version, _state.value.copy(optionalHardAvailable = repo.optionalHardAvailable(deckId)))) return@serially
+        }
     }
 
     fun rate(
@@ -361,53 +523,70 @@ class SessionViewModel(
         val s = _state.value
         val card = s.current ?: return
         val now = System.currentTimeMillis()
-        val duration = (now - shownAt).coerceIn(0L, 120_000L)
+        val duration = ReviewDuration.elapsedMillis(shownNanos, System.nanoTime())
 
         if (viaSwipe && swipesDone < SWIPE_FLUENCY) {
             swipesDone++
             viewModelScope.launch { settings.bumpSwipe() }
         }
 
-        answeredKeys += card.card.key
+        optionalBatch?.let { batch ->
+            _state.value = s.copy(loading = true)
+            serially { version ->
+                repo.answerOptionalHard(batch, card, rating, duration, now, signals)
+                val next = s.index + 1
+                if (!publishActionState(version, s.copy(loading = false, index = next, revealed = false,
+                    remaining = (s.queue.size - next).coerceAtLeast(0),
+                    sessionDone = (s.sessionDone + 1).coerceAtMost(s.sessionTotal),
+                    answeredToday = repo.answeredToday(now),
+                    goalAnswersToday = repo.goalAnswersToday(now),
+                    canUndo = true, undoVisible = true, undoFailed = false,
+                    wrongMarked = false, wrongSourceId = null, wrongReportCopied = false,
+                    finished = next >= s.queue.size,
+                    optionalHardAvailable = next >= s.queue.size && repo.optionalHardAvailable(deckId)))) return@serially
+                shownNanos = System.nanoTime(); onCardShown()
+            }
+            return
+        }
 
-        // "Again" comes back at the end of this session, in memory only. It is
-        // not a new obligation, so it does not touch the counter.
-        //
-        // A first contact comes back once for the same reason: a single pass on
-        // the day a chunk appears is the weakest point of any spaced system, and
-        // a second pass minutes later is nearly free.
-        val secondPass = card.isFirstContact && card.card.key !in drilled
-        if (secondPass) drilled += card.card.key
-        val queue = if (rating == Rating.AGAIN || secondPass) s.queue + card else s.queue
-        val nextIndex = s.index + 1
-
-        _state.value = s.copy(
-            queue = queue,
-            index = nextIndex,
-            revealed = false,
-            remaining = planned.count { it.card.key !in answeredKeys },
-            answeredToday = s.answeredToday + 1,
-            // Distinct questions of this session that are done, never "answers
-            // given". A card rated "again" and a first contact both come back in
-            // the same session, and counting those as progress used to fill the
-            // band ahead of the work: a session of ten questions could show ten
-            // out of ten with three of them still to come.
-            sessionDone = (doneAtLoad + planned.count { it.card.key in answeredKeys })
-                .coerceAtMost(s.sessionTotal),
-            canUndo = true,
-            undoVisible = true,
-            undoFailed = false,
-            wrongMarked = false,
-            wrongSourceId = null,
-            wrongReportCopied = false,
-            showRevealHint = hintsShown < HINT_LIMIT,
-            extraAdded = 0,
-            finished = nextIndex >= queue.size
-        )
-        shownAt = now
-        onCardShown()
-
-        serially { repo.answer(card, rating, duration, now, signals) }
+        val version = presentationVersion
+        _state.value = s.copy(loading = true)
+        serially(change = SessionPlanChange.AppendExtras) { version ->
+            // The global boundary is observed only after this answer is durable.
+            // No optimistic next prompt can receive another answer meanwhile.
+            repo.answer(card, rating, duration, now, signals)
+            val requiredComplete = repo.requiredPlanComplete(now)
+            if (version != presentationVersion) return@serially
+            answeredKeys += card.card.key
+            val secondPass = card.isFirstContact && card.card.key !in drilled
+            if (secondPass) drilled += card.card.key
+            val step = MainLessonQueue.afterAnswer(s.queue, s.index,
+                repeatCurrent = rating == Rating.AGAIN || secondPass,
+                answeredKeys = answeredKeys, requiredComplete = requiredComplete,
+                key = { it.card.key })
+            val optionalAvailable = step.finished && repo.optionalHardAvailable(deckId)
+            // load() may have queued a newer presentation during either read.
+            // Its reload will reflect this committed answer without re-answering it.
+            if (version != presentationVersion) return@serially
+            if (!publishActionState(version, s.copy(
+                loading = false,
+                queue = step.queue,
+                index = step.index,
+                revealed = false,
+                remaining = planned.count { it.card.key !in answeredKeys },
+                answeredToday = s.answeredToday + 1,
+                goalAnswersToday = s.goalAnswersToday + 1,
+                sessionDone = (doneAtLoad + planned.count { it.card.key in answeredKeys })
+                    .coerceAtMost(s.sessionTotal),
+                canUndo = true, undoVisible = true, undoFailed = false,
+                wrongMarked = false, wrongSourceId = null, wrongReportCopied = false,
+                showRevealHint = hintsShown < HINT_LIMIT,
+                extraAdded = 0, finished = step.finished,
+                optionalHardAvailable = optionalAvailable
+            ))) return@serially
+            shownNanos = System.nanoTime()
+            onCardShown()
+        }
     }
 
     /**
@@ -416,12 +595,29 @@ class SessionViewModel(
      * has to be reversible without thinking.
      */
     fun undo() {
-        if (_state.value.loading || _state.value.loadFailed) return
+        if (_state.value.loading || _state.value.loadFailed || _state.value.sessionChanged) return
         _state.value = _state.value.copy(loading = true)
-        serially {
+        serially { version ->
+            optionalBatch?.let { batch ->
+                val restored = repo.undoOptionalHard(batch)
+                if (restored == null) {
+                    if (!publishActionState(version, _state.value.copy(loading = false, undoVisible = false, canUndo = false, undoFailed = true))) return@serially
+                    return@serially
+                }
+                val s = _state.value
+                val tail = s.queue.drop(s.index).filterNot { it.card.key == restored.card.key }
+                if (!publishActionState(version, s.copy(loading = false, queue = listOf(restored) + tail, index = 0,
+                    remaining = tail.size + 1, revealed = false, finished = false,
+                    sessionDone = (s.sessionDone - 1).coerceAtLeast(0), optionalHardAvailable = false,
+                    answeredToday = repo.answeredToday(),
+                    goalAnswersToday = repo.goalAnswersToday(),
+                    undoVisible = false, canUndo = false, undoFailed = false))) return@serially
+                shownNanos = System.nanoTime(); onCardShown()
+                return@serially
+            }
             val key = repo.undoLast()
             if (key == null) {
-                _state.value = _state.value.copy(loading = false, undoVisible = false, canUndo = false, undoFailed = true)
+                if (!publishActionState(version, _state.value.copy(loading = false, undoVisible = false, canUndo = false, undoFailed = true))) return@serially
                 return@serially
             }
 
@@ -430,7 +626,7 @@ class SessionViewModel(
             answeredKeys.clear()
             doneAtLoad = plan.sessionDone
             val ordered = plan.cards.sortedBy { if (it.card.key == key) 0 else 1 }
-            _state.value = _state.value.copy(
+            if (!publishActionState(version, _state.value.copy(
                 loading = false,
                 loadFailed = false,
                 queue = ordered,
@@ -438,6 +634,7 @@ class SessionViewModel(
                 revealed = false,
                 remaining = ordered.size,
                 answeredToday = plan.answeredToday,
+                goalAnswersToday = plan.goalAnswersToday,
                 sessionDone = plan.sessionDone,
                 sessionTotal = plan.sessionTotal,
                 reason = plan.reason,
@@ -446,9 +643,10 @@ class SessionViewModel(
                 undoFailed = false,
                 canUndo = plan.answeredToday > 0,
                 extraAdded = 0,
-                finished = ordered.isEmpty()
-            )
-            shownAt = System.currentTimeMillis()
+                finished = ordered.isEmpty(),
+                optionalHardAvailable = ordered.isEmpty() && repo.optionalHardAvailable(deckId)
+            ))) return@serially
+            shownNanos = System.nanoTime()
             onCardShown()
         }
     }
@@ -458,24 +656,29 @@ class SessionViewModel(
     }
 
     /**
-     * "Ещё немного": five more cards that are already due, from this session's
-     * deck when it has one. Never new ones, so a good mood today cannot buy a
-     * heavier queue tomorrow.
+     * Existing extra review: due, amnesty, then future established cards,
+     * filtered to this session's deck. This is separate from optional hard review.
      */
     fun addExtra() {
-        if (_state.value.loading || _state.value.loadFailed) return
+        if (_state.value.loading || _state.value.loadFailed || _state.value.sessionChanged) return
         _state.value = _state.value.copy(loading = true)
-        serially {
+        serially(change = SessionPlanChange.AppendExtras) { version ->
+            val leavingOptional = optionalBatch != null
+            optionalBatch?.let { repo.cancelOptionalHardReview(it) }
+            optionalBatch = null
+            if (!publishActionState(version, _state.value.copy(optionalHardReview = false, optionalHardEmpty = false, optionalHardAvailable = false))) return@serially
             val added = repo.addExtra(EXTRA_BATCH, deckId)
-            if (added == 0) {
-                _state.value = _state.value.copy(loading = false, noMoreExtra = true, finished = _state.value.index >= _state.value.queue.size)
+            if (added == 0 && !leavingOptional) {
+                if (!publishActionState(version, _state.value.copy(loading = false, noMoreExtra = true,
+                    finished = _state.value.index >= _state.value.queue.size,
+                    optionalHardAvailable = repo.optionalHardAvailable(deckId)))) return@serially
                 return@serially
             }
             val plan = repo.buildSession(deckId)
             planned = plan.cards
             answeredKeys.clear()
             doneAtLoad = plan.sessionDone
-            _state.value = _state.value.copy(
+            if (!publishActionState(version, _state.value.copy(
                 loading = false,
                 loadFailed = false,
                 queue = plan.cards,
@@ -483,16 +686,52 @@ class SessionViewModel(
                 revealed = false,
                 remaining = plan.cards.size,
                 answeredToday = plan.answeredToday,
+                goalAnswersToday = plan.goalAnswersToday,
                 sessionDone = plan.sessionDone,
                 sessionTotal = plan.sessionTotal,
                 nextDueAt = plan.nextDueAt,
                 extraAdded = added,
-                noMoreExtra = false,
+                noMoreExtra = added == 0,
                 undoVisible = false,
-                finished = plan.cards.isEmpty()
-            )
-            shownAt = System.currentTimeMillis()
+                finished = plan.cards.isEmpty(),
+                optionalHardAvailable = plan.cards.isEmpty() && repo.optionalHardAvailable(deckId)
+            ))) return@serially
+            shownNanos = System.nanoTime()
             onCardShown()
+        }
+    }
+
+    fun startOptionalHardReview() {
+        val s = _state.value
+        if (s.loading || s.loadFailed || s.sessionChanged || !s.finished || !s.optionalHardAvailable) return
+        _state.value = s.copy(loading = true, optionalHardAvailable = false)
+        serially { version ->
+            optionalBatch?.let { repo.cancelOptionalHardReview(it) }
+            optionalBatch = null
+            val batch = repo.startOptionalHardReview(deckId)
+            if (batch == null) {
+                if (!publishActionState(version, _state.value.copy(optionalHardReview = false))) return@serially
+                load(optionalHardEmpty = true)
+                return@serially
+            }
+            optionalBatch = batch
+            if (!publishActionState(version, s.copy(loading = false, queue = batch.cards, index = 0, revealed = false,
+                remaining = batch.cards.size, finished = batch.cards.isEmpty(),
+                sessionDone = 0, sessionTotal = batch.cards.size,
+                optionalHardReview = true, optionalHardAvailable = false, optionalHardEmpty = false,
+                undoVisible = false, canUndo = false, undoFailed = false, noMoreExtra = false))) return@serially
+            shownNanos = System.nanoTime(); onCardShown()
+        }
+    }
+
+    fun finishOptionalHardReview() {
+        if (_state.value.loading || optionalBatch == null) return
+        _state.value = _state.value.copy(loading = true)
+        serially { version ->
+            optionalBatch?.let { repo.cancelOptionalHardReview(it) }
+            optionalBatch = null
+            if (!publishActionState(version, _state.value.copy(optionalHardReview = false))) return@serially
+            load()
         }
     }
 
@@ -511,12 +750,13 @@ class SessionViewModel(
             repo: LearningRepository,
             settings: SettingsStore,
             speaker: Speaker,
-            deckId: String? = null
+            deckId: String? = null,
+            sessionChanges: StateFlow<Long> = MutableStateFlow(0L)
         ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                    SessionViewModel(repo, settings, speaker, deckId) as T
+                    SessionViewModel(repo, settings, speaker, deckId, sessionChanges) as T
             }
     }
 }

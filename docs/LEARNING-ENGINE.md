@@ -116,6 +116,22 @@ is an internal, versioned refinement and must remain bounded.
 Context novelty may become another input to research and replay, but it must not
 silently change the grade without an explicit, documented policy version.
 
+## Recorded answer duration
+
+New ordinary and optional answers record a bounded activity duration of
+0..120000ms, shared by Android and desktop. The UI measures elapsed time with
+one process monotonic clock; the repository validates the bound again before
+writing the event and daily active-time total. Event wall timestamps and the
+separate grading-latency signal keep their existing meanings. This does not
+claim pause/background-time exclusion.
+
+Round57 aligns future desktop intervals with Android's existing two-minute
+per-card ceiling. Replay and restore retain valid nonnegative historical values,
+including longer values; imported negative durations fail before restore
+preparation. Existing invalid immutable rows are not silently repaired. Daily
+sum overflow fails transactionally instead of wrapping. See
+[Round57 evidence](ROUND-0.12-57.md).
+
 ## Feedback Policy
 
 Feedback Policy exists to stop motivation experiments from leaking into unrelated UI

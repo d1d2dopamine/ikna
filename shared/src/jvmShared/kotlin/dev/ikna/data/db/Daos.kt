@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.SkipQueryVerification
+import androidx.room.Transaction
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
@@ -16,6 +17,16 @@ private const val NOT_RETRACTED =
 
 @Dao
 interface ChunkDao {
+    // Full profile reads include legacy/orphaned retained content, not only visible decks.
+    @Query("SELECT * FROM chunks ORDER BY id")
+    suspend fun allChunks(): List<ChunkEntity>
+    @Query("SELECT * FROM chunk_tokens ORDER BY chunkId, position")
+    suspend fun allTokens(): List<ChunkTokenEntity>
+    @Query("SELECT * FROM pack_chunks ORDER BY packId, chunkId")
+    suspend fun allMemberships(): List<PackChunkEntity>
+    @Query("SELECT * FROM chunk_contexts ORDER BY packId, chunkId, contextId, meaningId")
+    suspend fun allContexts(): List<ChunkContextEntity>
+
     @Upsert suspend fun upsertChunks(chunks: List<ChunkEntity>)
     @Upsert suspend fun upsertTokens(tokens: List<ChunkTokenEntity>)
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -84,6 +95,18 @@ interface ChunkDao {
 
     @Query("DELETE FROM packs WHERE id = :id")
     suspend fun deletePack(id: String)
+
+    /** Keep deletion indivisible with journal merge and its content validation/replay. */
+    @Transaction
+    suspend fun deletePackPreservingSharedHistory(packId: String) {
+        rehomeChunksForPack(packId)
+        deleteCardsExclusiveToPack(packId)
+        deleteTokensExclusiveToPack(packId)
+        deleteChunksExclusiveToPack(packId)
+        deleteContextsForPack(packId)
+        deletePackChunkLinks(packId)
+        deletePack(packId)
+    }
 
     @Query("SELECT * FROM pack_chunks WHERE packId = :packId ORDER BY freqRank ASC, chunkId ASC")
     suspend fun packChunks(packId: String): List<PackChunkEntity>
@@ -302,6 +325,20 @@ interface CardDao {
     )
     suspend fun leeches(minLapses: Int, limit: Int): List<CardEntity>
 
+    /** Learned classic targets only; scope/suppression precede the stable finite limit. */
+    @Query("SELECT * FROM cards WHERE level = 0 AND isNew = 0 AND lapses >= :minLapses " +
+        "AND chunkId NOT IN (:excluded) AND EXISTS (SELECT 1 FROM chunks c WHERE c.id = cards.chunkId) " +
+        "AND EXISTS (SELECT 1 FROM pack_chunks pc JOIN packs p ON p.id = pc.packId " +
+        "WHERE pc.chunkId = cards.chunkId AND (:packId IS NULL OR pc.packId = :packId)) " +
+        "ORDER BY lapses DESC, dueAt ASC, chunkId ASC LIMIT :limit")
+    suspend fun optionalHardCards(packId: String?, excluded: List<String>, minLapses: Int, limit: Int): List<CardEntity>
+
+    @Query("SELECT EXISTS(SELECT 1 FROM cards WHERE chunkId = :chunkId AND level = 0 " +
+        "AND isNew = 0 AND lapses >= :minLapses AND EXISTS " +
+        "(SELECT 1 FROM pack_chunks pc JOIN packs p ON p.id = pc.packId " +
+        "WHERE pc.chunkId = cards.chunkId AND (:packId IS NULL OR pc.packId = :packId)))")
+    suspend fun optionalHardEligible(chunkId: String, packId: String?, minLapses: Int): Boolean
+
     @Query(
         "SELECT * FROM cards WHERE level = 0 AND inAmnesty = 0 AND dueAt <= :until " +
             "ORDER BY dueAt ASC LIMIT :limit"
@@ -435,6 +472,11 @@ interface CardDao {
 
 @Dao
 interface ReviewDao {
+    @Query("SELECT * FROM reviews WHERE id = :id")
+    suspend fun byId(id: Long): ReviewEntity?
+    @Query("SELECT * FROM reviews WHERE eventId = :eventId AND id > :afterLocalId")
+    suspend fun activeByEventId(eventId: String, afterLocalId: Long): ReviewEntity?
+
     /** Invalidated by append/undo/import/reset; no timing data or settings UI needed. */
     @Query("SELECT COUNT(*) FROM reviews")
     fun observeOptimizerChanges(): Flow<Long>
@@ -458,14 +500,30 @@ interface ReviewDao {
     suspend fun insertAll(reviews: List<ReviewEntity>): List<Long>
 
     /** Raw log, retractions included. Used by the exporter only. */
-    @Query("SELECT * FROM reviews ORDER BY ts ASC")
+    @Query("SELECT * FROM reviews ORDER BY ts ASC, COALESCE(eventId, printf('%020d', id)) ASC")
     suspend fun all(): List<ReviewEntity>
 
+    /** Active raw journal only, with identical ordering and undo rows to [all]. */
+    @Query("SELECT * FROM reviews WHERE id > :afterLocalId ORDER BY ts ASC, COALESCE(eventId, printf('%020d', id)) ASC")
+    suspend fun afterId(afterLocalId: Long): List<ReviewEntity>
+
+    @Query("SELECT COALESCE(MAX(id), 0) FROM reviews")
+    suspend fun maxId(): Long
+
+    /** Scalar observation for session refresh; includes append-only Undo rows. */
+    @Query("SELECT COUNT(*) FROM reviews")
+    suspend fun rawCount(): Long
+
+    /** Keep the global retraction predicate; only move the local cutoff into SQL. */
+    @Query("SELECT * FROM reviews WHERE id > :afterLocalId AND " + NOT_RETRACTED +
+        " ORDER BY ts ASC, COALESCE(eventId, printf('%020d', id)) ASC")
+    suspend fun answersAfterId(afterLocalId: Long): List<ReviewEntity>
+
     /** Real answers, newest first. Retracted ones are gone. */
-    @Query("SELECT * FROM reviews WHERE " + NOT_RETRACTED + " ORDER BY ts DESC LIMIT :limit")
+    @Query("SELECT * FROM reviews WHERE " + NOT_RETRACTED + " ORDER BY ts DESC, COALESCE(eventId, printf('%020d', id)) DESC LIMIT :limit")
     suspend fun recent(limit: Int): List<ReviewEntity>
 
-    @Query("SELECT * FROM reviews WHERE " + NOT_RETRACTED + " ORDER BY ts ASC")
+    @Query("SELECT * FROM reviews WHERE " + NOT_RETRACTED + " ORDER BY ts ASC, COALESCE(eventId, printf('%020d', id)) ASC")
     suspend fun allAnswers(): List<ReviewEntity>
 
     /**
@@ -476,7 +534,7 @@ interface ReviewDao {
      * that a day here starts at 04:00 and that the phone has a timezone; Kotlin
      * already knows both.
      */
-    @Query("SELECT * FROM reviews WHERE ts >= :from AND " + NOT_RETRACTED + " ORDER BY ts ASC")
+    @Query("SELECT * FROM reviews WHERE ts >= :from AND " + NOT_RETRACTED + " ORDER BY ts ASC, COALESCE(eventId, printf('%020d', id)) ASC")
     suspend fun since(from: Long): List<ReviewEntity>
 
     @Query("SELECT COUNT(*) FROM reviews WHERE ts >= :from AND " + NOT_RETRACTED)
@@ -494,7 +552,7 @@ interface ReviewDao {
 
     /** Statistics uses one bounded, chronological, undo-aware journal snapshot. */
     @Query("SELECT * FROM reviews WHERE ts BETWEEN :from AND :until AND " + NOT_RETRACTED +
-        " AND rating BETWEEN 1 AND 4 ORDER BY ts ASC, id ASC")
+        " AND rating BETWEEN 1 AND 4 ORDER BY ts ASC, COALESCE(eventId, printf('%020d', id)) ASC")
     suspend fun studyAnswersBetween(from: Long, until: Long): List<ReviewEntity>
 
     /** First retained answer, not an inferred date of learning or first exposure. */
@@ -510,24 +568,29 @@ interface ReviewDao {
      */
     @Query(
         "SELECT DISTINCT chunkId || ':' || level FROM reviews " +
-            "WHERE ts >= :from AND " + NOT_RETRACTED
+            "WHERE ts >= :from AND purpose IS NULL AND " + NOT_RETRACTED
     )
     suspend fun answeredKeysSince(from: Long): List<String>
 
-    @Query("SELECT * FROM reviews WHERE " + NOT_RETRACTED + " ORDER BY ts DESC LIMIT 1")
+    /** Factual totals retain optional answers; admission/completion credit subtracts them. */
+    @Query("SELECT COUNT(*) FROM reviews WHERE id > :afterLocalId AND ts >= :from AND ts < :until " +
+        "AND purpose = 'optional_hard' AND " + NOT_RETRACTED)
+    suspend fun optionalHardCountBetween(from: Long, until: Long, afterLocalId: Long): Int
+
+    @Query("SELECT * FROM reviews WHERE " + NOT_RETRACTED + " ORDER BY ts DESC, COALESCE(eventId, printf('%020d', id)) DESC LIMIT 1")
     suspend fun lastAnswer(): ReviewEntity?
 
     /** Recent answer times, newest first: turns "12 left" into "~3 min". */
     @Query(
         "SELECT durationMs FROM reviews WHERE " + NOT_RETRACTED +
-            " AND durationMs > 0 ORDER BY ts DESC LIMIT :limit"
+            " AND durationMs > 0 ORDER BY ts DESC, COALESCE(eventId, printf('%020d', id)) DESC LIMIT :limit"
     )
     suspend fun recentDurations(limit: Int): List<Long>
 
     /** All input modes, newest valid answers in one bounded SQLite snapshot. */
     @Query("SELECT * FROM reviews WHERE " + NOT_RETRACTED +
         " AND rating BETWEEN 1 AND 4 AND ts BETWEEN 1 AND :beforeTs" +
-        " ORDER BY ts DESC, id DESC LIMIT :limit")
+        " ORDER BY ts DESC, COALESCE(eventId, printf('%020d', id)) DESC LIMIT :limit")
     suspend fun optimizerHistory(limit: Int, beforeTs: Long): List<ReviewEntity>
 
     /** Latest usable timings for one native input modality, excluding undo. */
@@ -539,7 +602,7 @@ interface ReviewDao {
             " AND ((:inputMethod = 'swipe' AND swipeVelocityX IS NOT NULL)" +
             " OR (:inputMethod = 'keyboard' AND swipeVelocityX IS NULL))" +
             " AND presentationLength BETWEEN 1 AND 4000 AND level BETWEEN 0 AND 2" +
-            " ORDER BY ts DESC, id DESC LIMIT :limit"
+            " ORDER BY ts DESC, COALESCE(eventId, printf('%020d', id)) DESC LIMIT :limit"
     )
     suspend fun recentGradingTimings(inputMethod: String, peekSemantics: String, limit: Int, beforeTs: Long): List<ReviewEntity>
 
@@ -554,7 +617,7 @@ interface ReviewDao {
      * has, and this database's id so a retraction that arrives in the same file
      * can be attached to it.
      */
-    @Query("SELECT id, (chunkId || ':' || level || ':' || ts) AS signature FROM reviews")
+    @Query("SELECT id, COALESCE(eventId, chunkId || ':' || level || ':' || ts) AS signature FROM reviews")
     suspend fun keys(): List<ReviewKey>
 
     @Query("SELECT * FROM reviews WHERE chunkId = :chunkId AND " + NOT_RETRACTED + " ORDER BY ts DESC")
@@ -563,7 +626,7 @@ interface ReviewDao {
     /** GOOD/EASY days only: failures and same-day drills do not make a card familiar. */
     @Query(
         "SELECT chunkId, ts FROM reviews WHERE chunkId IN (:chunkIds) " +
-            "AND rating >= 3 AND " + NOT_RETRACTED + " ORDER BY ts ASC"
+            "AND rating >= 3 AND " + NOT_RETRACTED + " ORDER BY ts ASC, COALESCE(eventId, printf('%020d', id)) ASC"
     )
     suspend fun successfulReviewTimesForChunks(chunkIds: List<String>): List<ChunkReviewTime>
 }
@@ -699,6 +762,12 @@ interface PlanDao {
  */
 @Dao
 interface WipeDao {
+    @Query("DELETE FROM profile_sync_operations")
+    suspend fun clearProfileSyncOperations()
+
+    @Query("DELETE FROM history_boundary")
+    suspend fun clearHistoryBoundary()
+
     @Query("DELETE FROM browse_exposures")
     suspend fun clearBrowseExposures()
 
@@ -736,4 +805,59 @@ interface WipeDao {
 
     @Query("DELETE FROM packs")
     suspend fun clearPacks()
+}
+
+@Dao
+interface HistoryBoundaryDao {
+    @Query("SELECT * FROM history_boundary WHERE id = 1")
+    suspend fun current(): HistoryBoundaryEntity?
+    @Upsert suspend fun put(boundary: HistoryBoundaryEntity)
+}
+
+@Dao
+interface ProfileSyncOperationDao {
+    @Query("SELECT * FROM profile_sync_operations WHERE opId = :opId")
+    suspend fun find(opId: String): ProfileSyncOperationEntity?
+    @Insert
+    suspend fun insert(operation: ProfileSyncOperationEntity)
+}
+
+/** Insert-only: a database slot's provenance never changes after its creation. */
+@Dao
+interface ProfileOriginDao {
+    @Query("SELECT * FROM profile_origin WHERE id = 1")
+    suspend fun current(): ProfileOriginEntity?
+    @Insert
+    suspend fun insert(origin: ProfileOriginEntity)
+}
+
+data class JournalReplayIdentity(val id: Long, val rawEventId: String?, val indexedEventId: String?)
+
+@Dao
+interface IncrementalJournalDao {
+    /** Replay remains full-history; the canonical identity is frozen, never re-derived. */
+    @Query("SELECT r.id, r.eventId AS rawEventId, i.eventId AS indexedEventId FROM reviews r LEFT JOIN journal_event_index i ON i.reviewId = r.id AND i.streamId = :streamId WHERE r.id > :cutoff")
+    suspend fun replayIdentities(streamId: String, cutoff: Long): List<JournalReplayIdentity>
+
+    @Query("SELECT * FROM journal_stream WHERE id = 1")
+    suspend fun stream(): JournalStreamEntity?
+    @Upsert suspend fun putStream(value: JournalStreamEntity)
+    @Insert suspend fun insertIndex(value: JournalEventIndexEntity)
+    @Query("SELECT * FROM journal_event_index WHERE streamId = :streamId AND sequence = :sequence")
+    suspend fun at(streamId: String, sequence: Long): JournalEventIndexEntity?
+    @Query("SELECT * FROM journal_event_index WHERE streamId = :streamId AND eventId = :eventId")
+    suspend fun event(streamId: String, eventId: String): JournalEventIndexEntity?
+    @Query("SELECT * FROM journal_event_index WHERE streamId = :streamId AND reviewId = :reviewId")
+    suspend fun raw(streamId: String, reviewId: Long): JournalEventIndexEntity?
+    @Query("SELECT * FROM journal_event_index WHERE streamId = :streamId AND sequence > :after AND sequence <= :highWater ORDER BY sequence LIMIT :limit")
+    suspend fun page(streamId: String, after: Long, highWater: Long, limit: Int): List<JournalEventIndexEntity>
+    @Query("SELECT * FROM journal_checkpoint WHERE sourceDevice = :sourceDevice")
+    suspend fun checkpoint(sourceDevice: String): JournalCheckpointEntity?
+    @Upsert suspend fun putCheckpoint(value: JournalCheckpointEntity)
+    @Query("DELETE FROM journal_checkpoint") suspend fun clearCheckpoints()
+    @Query("DELETE FROM journal_event_index") suspend fun clearIndex()
+    @Query("DELETE FROM journal_stream") suspend fun clearStreams()
+    @Transaction suspend fun invalidate() {
+        clearCheckpoints(); clearIndex(); clearStreams()
+    }
 }

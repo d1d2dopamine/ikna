@@ -23,10 +23,10 @@
         listed, straight into the app's own cache with a band and a percentage
         in front of it. Still nothing sent, still nothing read from the phone.
 
-        It can be switched off in Settings, and switched off it opens no socket
-        at all.
-
-        The review log still never leaves the phone. See docs/UPDATES.md.
+        Update checks can be switched off independently. Optional paired LAN sync
+        uses this permission for authenticated encrypted journal exchange while
+        the app is active, after explicit enablement and pairing. See PRIVACY.md
+        and docs/SYNC-0.12.md.
     -->
     <uses-permission android:name="android.permission.INTERNET" />
 

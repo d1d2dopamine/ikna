@@ -1,0 +1,66 @@
+{
+  "observed_at_utc": "2026-10-17T22:52:32.116290+00:00",
+  "checks": [
+    {
+      "command": [
+        "python",
+        "tools/check_localization.py"
+      ],
+      "exit_code": 0,
+      "source_sha256": "60ed1e9f16b58cc99e5033523c880481678e04c68d2ae7d3d72afc7746ae86aa",
+      "log_sha256": "08d7f9b540509c92521b9a02ba99624c62bc0ee932a228b34dfb6b41aeb9fa7f",
+      "output": "Language registry OK: 7 languages, 859 keys each; English fallback, tokens, labels and selectors agree.\n",
+      "evidence_path": "round56-static/check_localization.py.log"
+    },
+    {
+      "command": [
+        "python",
+        "tools/check_classic_cards.py"
+      ],
+      "exit_code": 0,
+      "source_sha256": "d61c6c7c917c37e162f5838cdca86a12ea2e6d86b23513dd069031bd577d6248",
+      "log_sha256": "4a96ba6b631271f9a0de7f1b15010b86a00bc2f1a4cb246944123b3342f8a531",
+      "output": "test_amnesty_does_not_rewrite_archived_schedules (__main__.ClassicDaoTests.test_amnesty_does_not_rewrite_archived_schedules) ... ok\ntest_archive_reads_still_preserve_all_levels (__main__.ClassicDaoTests.test_archive_reads_still_preserve_all_levels) ... ok\ntest_due_backlog_forecast_and_next_due_ignore_retired_modes (__main__.ClassicDaoTests.test_due_backlog_forecast_and_next_due_ignore_retired_modes) ... ok\ntest_queue_and_leeches_only_return_classic_rows (__main__.ClassicDaoTests.test_queue_and_leeches_only_return_classic_rows) ... ok\ntest_undo_restores_valid_answer_count_while_journal_grows (__main__.ClassicDaoTests.test_undo_restores_valid_answer_count_while_journal_grows) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.005s\n\nOK\n",
+      "evidence_path": "round56-static/check_classic_cards.py.log"
+    },
+    {
+      "command": [
+        "python",
+        "tools/check_design_parity.py"
+      ],
+      "exit_code": 0,
+      "source_sha256": "3a16a69204ffb94fd459acaf075bda5d9b4c538b61e297768d96deb92d349c8d",
+      "log_sha256": "6b2bd509044fa805ac0fa4f419ba3958a88207f73c18841f0d047a1d1d478825",
+      "output": "test_all_locales_have_overwrite_confirmation (__main__.DesignContracts.test_all_locales_have_overwrite_confirmation) ... ok\ntest_automatic_policy_starts_in_both_containers (__main__.DesignContracts.test_automatic_policy_starts_in_both_containers) ... ok\ntest_automatic_worker_has_quiet_period_and_backoff (__main__.DesignContracts.test_automatic_worker_has_quiet_period_and_backoff) ... ok\ntest_browse_control_stays_visible_and_explains_why (__main__.DesignContracts.test_browse_control_stays_visible_and_explains_why) ... ok\ntest_browse_credit_is_cumulative_global_and_honest (__main__.DesignContracts.test_browse_credit_is_cumulative_global_and_honest) ... ok\ntest_browse_is_vertical_feed_not_a_swipe_session (__main__.DesignContracts.test_browse_is_vertical_feed_not_a_swipe_session) ... ok\ntest_button_appearance_has_one_implementation (__main__.DesignContracts.test_button_appearance_has_one_implementation) ... ok\ntest_ci_keeps_real_build_and_migration_gates (__main__.DesignContracts.test_ci_keeps_real_build_and_migration_gates) ... ok\ntest_compose_typography_references_have_imports (__main__.DesignContracts.test_compose_typography_references_have_imports) ... ok\ntest_deck_marks_and_phonetics_are_real (__main__.DesignContracts.test_deck_marks_and_phonetics_are_real) ... ok\ntest_desktop_developer_restart_callback_reaches_settings_pane (__main__.DesignContracts.test_desktop_developer_restart_callback_reaches_settings_pane) ... ok\ntest_desktop_first_launch_uses_the_mobile_onboarding_contract (__main__.DesignContracts.test_desktop_first_launch_uses_the_mobile_onboarding_contract) ... ok\ntest_desktop_geometry_is_not_a_phone_window (__main__.DesignContracts.test_desktop_geometry_is_not_a_phone_window) ... ok\ntest_desktop_hotkeys_are_captured_not_typed (__main__.DesignContracts.test_desktop_hotkeys_are_captured_not_typed) ... ok\ntest_desktop_pane_titles_share_one_style (__main__.DesignContracts.test_desktop_pane_titles_share_one_style) ... ok\ntest_desktop_wipe_clears_the_whole_database_and_returns_to_first_run (__main__.DesignContracts.test_desktop_wipe_clears_the_whole_database_and_returns_to_first_run) ... ok\ntest_developer_mode_uses_shared_optional_product_override (__main__.DesignContracts.test_developer_mode_uses_shared_optional_product_override) ... ok\ntest_developer_profile_changes_require_confirmation_and_a_new_process (__main__.DesignContracts.test_developer_profile_changes_require_confirmation_and_a_new_process) ... ok\ntest_developer_reseed_is_startup_only_and_empty_stays_empty (__main__.DesignContracts.test_developer_reseed_is_startup_only_and_empty_stays_empty) ... ok\ntest_developer_tools_use_actual_routes_and_read_only_inspection (__main__.DesignContracts.test_developer_tools_use_actual_routes_and_read_only_inspection) ... ok\ntest_generation_and_fingerprint_guards_remain (__main__.DesignContracts.test_generation_and_fingerprint_guards_remain) ... ok\ntest_interface_language_registry_drives_both_targets (__main__.DesignContracts.test_interface_language_registry_drives_both_targets) ... ok\ntest_junit_settings_contracts_use_the_same_executable_preflight (__main__.DesignContracts.test_junit_settings_contracts_use_the_same_executable_preflight) ... ok\ntest_mobile_add_deck_is_clean_and_deck_rows_keep_proportions (__main__.DesignContracts.test_mobile_add_deck_is_clean_and_deck_rows_keep_proportions) ... ok\ntest_model_controls_are_not_exposed (__main__.DesignContracts.test_model_controls_are_not_exposed) ... ok\ntest_model_path_and_paste_cost_are_bounded (__main__.DesignContracts.test_model_path_and_paste_cost_are_bounded) ... ok\ntest_palette_grid_shares_lighting_and_accessible_selection_on_both_platforms (__main__.DesignContracts.test_palette_grid_shares_lighting_and_accessible_selection_on_both_platforms) ... ok\ntest_progress_counts_session_and_deck_and_preserves_subpercent (__main__.DesignContracts.test_progress_counts_session_and_deck_and_preserves_subpercent) ... ok\ntest_reading_cat_header_and_desktop_inspector (__main__.DesignContracts.test_reading_cat_header_and_desktop_inspector) ... ok\ntest_reading_cat_keeps_the_selected_artwork_and_uses_downscale_filtering (__main__.DesignContracts.test_reading_cat_keeps_the_selected_artwork_and_uses_downscale_filtering) ... ok\ntest_rounded_variant_is_a_first_class_variant (__main__.DesignContracts.test_rounded_variant_is_a_first_class_variant) ... ok\ntest_same_stats_renderer_and_empty_states (__main__.DesignContracts.test_same_stats_renderer_and_empty_states) ... ok\ntest_session_uses_shared_quiet_chrome (__main__.DesignContracts.test_session_uses_shared_quiet_chrome) ... ok\ntest_settings_navigation_and_section_order (__main__.DesignContracts.test_settings_navigation_and_section_order) ... ok\ntest_shared_ui_has_no_android_or_desktop_host_dependency (__main__.DesignContracts.test_shared_ui_has_no_android_or_desktop_host_dependency) ... ok\ntest_signal_frame_uses_shared_clock_and_nested_ownership (__main__.DesignContracts.test_signal_frame_uses_shared_clock_and_nested_ownership) ... ok\ntest_source_aware_search_and_catalog_are_shared (__main__.DesignContracts.test_source_aware_search_and_catalog_are_shared) ... ok\ntest_stats_history_uses_global_targets_and_best_hour_waits_for_evidence (__main__.DesignContracts.test_stats_history_uses_global_targets_and_best_hour_waits_for_evidence) ... ok\ntest_today_count_is_unique_and_first_batch_does_not_multiply (__main__.DesignContracts.test_today_count_is_unique_and_first_batch_does_not_multiply) ... ok\ntest_undo_feedback_has_no_expiring_ui_timer (__main__.DesignContracts.test_undo_feedback_has_no_expiring_ui_timer) ... ok\ntest_window_controls_are_named_in_all_locales (__main__.DesignContracts.test_window_controls_are_named_in_all_locales) ... ok\ntest_windows_title_bar_is_themed_and_other_frames_stay_native (__main__.DesignContracts.test_windows_title_bar_is_themed_and_other_frames_stay_native) ... ok\ntest_wipe_queries_clear_mutable_tables_and_preserve_slot_origin (__main__.DesignContracts.test_wipe_queries_clear_mutable_tables_and_preserve_slot_origin) ... ok\n\n----------------------------------------------------------------------\nRan 43 tests in 0.189s\n\nOK\n",
+      "evidence_path": "round56-static/check_design_parity.py.log"
+    },
+    {
+      "command": [
+        "python",
+        "tools/check_text.py"
+      ],
+      "exit_code": 0,
+      "source_sha256": "3a043f1ea569ef4e036a89c6cc0aca9ed47616ec33d9930a09b02b693154ba70",
+      "log_sha256": "29641a9a1636493a94f1863f474caf60ba3ad655089336caf31c5440719f3890",
+      "output": "Repository text is valid UTF-8/NFC; 1082 text files and 7 localization tables passed.\n",
+      "evidence_path": "round56-static/check_text.py.log"
+    },
+    {
+      "command": [
+        "python",
+        "tools/check_small_viewports.py"
+      ],
+      "exit_code": 0,
+      "source_sha256": "e83a62e93341e9bb0653bf9a56ef1f71b1c810662c90f80ead72f4c005d73ea5",
+      "log_sha256": "feabb4add9e2ca3374e538560634d1ec97dc4f4ce89aab12f3d726e36ea9b2f6",
+      "output": "....\n----------------------------------------------------------------------\nRan 4 tests in 0.001s\n\nOK\n",
+      "evidence_path": "round56-static/check_small_viewports.py.log"
+    }
+  ],
+  "all_passed": true,
+  "final_document_text_check": {
+    "output": "Repository text is valid UTF-8/NFC; 1090 text files and 7 localization tables passed.\n",
+    "exit_code": 0,
+    "log_sha256": "128349b009ef65a388df145a816c49563af93f39b7903ae089e4242441913171"
+  }
+}

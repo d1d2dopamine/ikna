@@ -103,13 +103,17 @@ class AnkiImporter(
         // cannot recover this originating caller from inside the transaction.
         val caller = currentCoroutineContext()
         caller.ensureActive()
-        return db.inTransaction {
+        val preparation = if (parsed.reviews.isNotEmpty()) restore.prepareExternalRestore() else null
+        val result = db.inTransaction {
             caller.ensureActive()
-            commitBody(parsed) { caller.ensureActive() }.also { caller.ensureActive() }
+            commitBody(parsed, preparation) { caller.ensureActive() }.also { caller.ensureActive() }
         }
+        if (preparation != null) restore.completeExternalRestore(preparation)
+        return result
     }
 
-    private suspend fun commitBody(parsed: ParsedPackage, checkActive: () -> Unit): AnkiImportResult {
+    private suspend fun commitBody(parsed: ParsedPackage,
+        preparation: RestoreRepository.ExternalRestorePreparation?, checkActive: () -> Unit): AnkiImportResult {
         var installed = 0
         for (deck in parsed.decks) {
             checkActive()
@@ -139,7 +143,7 @@ class AnkiImporter(
                     append('\n')
                 }
             }
-            restore.restoreFromJsonl(text)
+            restore.restoreFromJsonl(text, preparation)
         } else {
             // Content changed even when a package has no scheduling history.
             // Make tomorrow's plan see it instead of keeping today's stale one.

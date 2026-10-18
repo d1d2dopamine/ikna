@@ -6,6 +6,9 @@ import androidx.room.useWriterConnection
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteDriver
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import java.io.File
 
 /** The driver each platform opens the file with. */
 expect fun iknaSqliteDriver(): SQLiteDriver
@@ -46,15 +49,21 @@ suspend fun <R> IknaDatabase.inTransaction(block: suspend () -> R): R =
     useWriterConnection { transactor -> transactor.immediateTransaction { block() } }
 
 /**
- * Clears every entity table in one transaction on both Android and Desktop.
+ * Clears learner/content/operational data in one transaction on both platforms.
+ * Immutable profile_origin is deliberately retained: it identifies the physical slot,
+ * never grants consent and cannot restore wiped progress.
  *
  * Room's generated Android database exposes clearAllTables(), but its KMP
  * desktop base type does not. This explicit DAO is therefore also the schema
- * checklist: adding an entity requires adding its delete here and to the
- * source contract that compares the two sets.
+ * checklist: every new entity needs an explicit wipe or preservation policy
+ * in the source contract that compares the two sets.
  */
 suspend fun IknaDatabase.wipeAllData() = inTransaction {
     val wipe = wipeDao()
+    wipe.clearProfileSyncOperations()
+    incrementalJournalDao().invalidate()
+    wipe.clearHistoryBoundary()
+    historyBoundaryDao().put(HistoryBoundaryEntity(afterLocalId = 0, token = java.util.UUID.randomUUID().toString()))
     wipe.clearBrowseExposures()
     wipe.clearReviews()
     wipe.clearCards()
@@ -67,4 +76,38 @@ suspend fun IknaDatabase.wipeAllData() = inTransaction {
     wipe.clearChunkTokens()
     wipe.clearChunks()
     wipe.clearPacks()
+}
+
+/** Only the creator of a new adopted slot records provenance. Repeating the exact
+ * operation is harmless; replacing it is forbidden, including after full wipe. */
+suspend fun IknaDatabase.recordProfileOrigin(opId: String, operationDigest: String) = inTransaction {
+    require(opId.matches(Regex("[A-Za-z0-9:_-]{1,128}")) && operationDigest.matches(Regex("[a-f0-9]{64}"))) {
+        "Invalid profile origin"
+    }
+    val desired = ProfileOriginEntity(opId = opId, operationDigest = operationDigest)
+    val current = profileOriginDao().current()
+    require(current == null || current == desired) { "Profile origin cannot be replaced" }
+    if (current == null) profileOriginDao().insert(desired)
+}
+
+/** Wipe an explicitly selected, CLOSED retained database with the same policy as
+ * the live database. Caller owns slot validation and exclusion of other writers.
+ * No file deletion, path discovery, profile switching or implicit database creation. */
+suspend fun wipeRetainedProfileDatabase(
+    file: File,
+    expectedOrigin: ProfileOriginEntity?,
+    openDatabase: (File) -> IknaDatabase
+) {
+    require(file.isFile) { "Retained profile database does not exist" }
+    val caller = currentCoroutineContext()
+    caller.ensureActive()
+    val database = openDatabase(file)
+    try {
+        database.inTransaction {
+            caller.ensureActive()
+            require(database.profileOriginDao().current() == expectedOrigin) { "Retained profile origin mismatch" }
+            database.wipeAllData()
+            caller.ensureActive()
+        }
+    } finally { database.close() }
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.ui.theme.PalettePreviewTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:05:33" hostname="3b7663fd5f9d" time="0.026">
+  <properties/>
+  <testcase name="everyAuthoredPreviewMatchesItsSelectedLightingDespiteDarkLuminance[desktop]" classname="dev.ikna.ui.theme.PalettePreviewTest" time="0.026"/>
+  <testcase name="customPreviewRetainsItsBrightnessFallback[desktop]" classname="dev.ikna.ui.theme.PalettePreviewTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

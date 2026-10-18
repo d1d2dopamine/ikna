@@ -49,6 +49,11 @@ import dev.ikna.domain.session.SessionBuilder
 import dev.ikna.domain.session.ReviewSignals
 import dev.ikna.domain.session.SessionCard
 import dev.ikna.domain.session.SessionPlan
+import dev.ikna.domain.session.CommittedSessionSnapshot
+import dev.ikna.domain.session.SessionObservation
+import dev.ikna.domain.session.OptionalHardBatch
+import dev.ikna.domain.session.ReviewPurpose
+import dev.ikna.domain.session.ReviewDuration
 import dev.ikna.domain.time.DayBoundary
 import java.time.Instant
 import java.time.LocalDate
@@ -76,6 +81,20 @@ class LearningRepository(
     private val selector: ChunkSelector,
     private val baseConfig: GovernorConfig
 ) {
+
+    /** Non-null cutoff enables append-and-replay undo, excluding archived reset history. */
+    var syncHistoryBoundary: (() -> Long?)? = null
+    var ensureHistoryWritable: (() -> Unit)? = null
+    var historyBoundaryToken: (() -> String?)? = null
+
+    private suspend fun checkHistoryWritable() {
+        ensureHistoryWritable?.invoke()
+        if (historyBoundaryToken != null) {
+            require(db.historyBoundaryDao().current()?.token == historyBoundaryToken?.invoke()) {
+                "Transferred history requires an explicit progress reset before learning"
+            }
+        }
+    }
 
     /** Null/unwired means OFF. Read at the answer, not from a stale UI mirror. */
     @Volatile var derivedGradingEnabled: (suspend () -> Boolean)? = null
@@ -208,7 +227,7 @@ class LearningRepository(
      * grows is [addExtra], which the user triggers on purpose.
      */
     suspend fun ensureDailyPlan(now: Long = System.currentTimeMillis()): DailyPlanEntity =
-        writeLock.withLock { ensureDailyPlanLocked(now) }
+        writeLock.withLock { checkHistoryWritable(); ensureDailyPlanLocked(now) }
 
     private suspend fun ensureDailyPlanLocked(now: Long): DailyPlanEntity {
         val day = dayKey(now)
@@ -711,6 +730,173 @@ class LearningRepository(
 
     // ---- session ----------------------------------------------------------
 
+    private data class OptionalHardState(
+        val batch: OptionalHardBatch,
+        val dayStart: Long,
+        val boundary: dev.ikna.data.db.HistoryBoundaryEntity?,
+        val configuredCutoff: Long?,
+        val configuredToken: String?,
+        val committed: MutableList<Pair<String, Long>> = mutableListOf()
+    )
+    private var optionalHardState: OptionalHardState? = null
+
+    /**
+     * Read the existing global required prefix, independently of this screen's
+     * deck/count and transient repeats. Never creates a plan or admits work.
+     * Missing plan is unknown/false; an existing empty required prefix is done.
+     * Explicit extras and optional-purpose answers do not move this boundary.
+     */
+    suspend fun requiredPlanComplete(now: Long = System.currentTimeMillis()): Boolean = writeLock.withLock {
+        val caller = currentCoroutineContext()
+        caller.ensureActive()
+        db.inTransaction {
+            val plan = planDao.plan(dayKey(now))?.classicOnly() ?: return@inTransaction false
+            BrowsePolicy.requiredComplete(requiredIds(plan),
+                reviewDao.answeredKeysSince(startOfDay(now)).toSet())
+        }.also { caller.ensureActive() }
+    }
+
+    /**
+     * Refresh an already-open presentation from one committed view. Unlike
+     * buildSession this never creates/replaces a plan, spends allowance, or
+     * picks developer extras. A sync-invalidated plan remains missing until
+     * the learner explicitly continues. Accepted in-flight answers are unchanged.
+     */
+    suspend fun inspectSession(
+        deckId: String? = null,
+        now: Long = System.currentTimeMillis()
+    ): CommittedSessionSnapshot = writeLock.withLock {
+        val caller = currentCoroutineContext()
+        caller.ensureActive()
+        db.inTransaction {
+            val day = dayKey(now)
+            val start = startOfDay(now)
+            val stored = planDao.plan(day)
+            val observation = SessionObservation(day, start, reviewDao.maxId(), reviewDao.rawCount(),
+                stored, db.historyBoundaryDao().current(), syncHistoryBoundary?.invoke(), historyBoundaryToken?.invoke())
+            val answered = reviewDao.answeredKeysSince(start).toSet()
+            val factual = statsDao.day(day)?.reviewsDone ?: 0
+            val goal = admissionReviewsDone(factual, now)
+            val active = stored?.classicOnly()
+            val required = active?.let(::requiredIds)
+            val complete = required != null && BrowsePolicy.requiredComplete(required, answered)
+            val plan = active?.let {
+                val hidden = suppressedNow()
+                val all = builder().materialize(it.ids).filterNot { card -> card.chunk.id in hidden }
+                val targets = deckId?.let { id -> chunkDao.packChunks(id).mapTo(HashSet()) { membership -> membership.chunkId } }
+                val scope = if (targets == null) all else all.filter { card -> card.chunk.id in targets }
+                val pending = scope.filterNot { card -> card.card.key in answered }
+                val storedReason = runCatching { GovernorReason.valueOf(it.reason) }.getOrDefault(GovernorReason.OK)
+                SessionPlan(cards = pending, plannedTotal = it.plannedTotal, answeredToday = factual,
+                    reason = if (pending.isEmpty() && untouchedIn(deckId) == 0) GovernorReason.PACK_EXHAUSTED else storedReason,
+                    nextDueAt = cardDao.nextDueAt(now), deckId = deckId,
+                    deckTitle = deckId?.let { id -> chunkDao.pack(id)?.title ?: id },
+                    sessionTotal = scope.size, sessionDone = scope.size - pending.size,
+                    goalAnswersToday = goal)
+            }
+            val optional = complete && !required.isNullOrEmpty() && optionalHardCandidates(deckId, 1).isNotEmpty()
+            caller.ensureActive()
+            CommittedSessionSnapshot(observation, plan, answered, complete, factual, goal, optional)
+        }.also { caller.ensureActive() }
+    }
+
+    /** Read-only gate: viewing this affordance never creates a plan or spends allowance. */
+    suspend fun optionalHardAvailable(deckId: String? = null, now: Long = System.currentTimeMillis()): Boolean =
+        writeLock.withLock {
+            db.inTransaction {
+                optionalHardComplete(now) && optionalHardCandidates(deckId, 1).isNotEmpty()
+            }
+        }
+
+    /** Explicit entry replaces an abandoned ephemeral batch, never the daily plan. */
+    suspend fun startOptionalHardReview(deckId: String? = null, now: Long = System.currentTimeMillis()): OptionalHardBatch? =
+        writeLock.withLock {
+            checkHistoryWritable()
+            val caller = currentCoroutineContext()
+            caller.ensureActive()
+            val state = db.inTransaction {
+                checkHistoryWritable()
+                if (!optionalHardComplete(now)) return@inTransaction null
+                val cards = builder().materialize(optionalHardCandidates(deckId, 5).map { it.key })
+                if (cards.isEmpty()) return@inTransaction null
+                OptionalHardState(OptionalHardBatch(java.util.UUID.randomUUID().toString(), dayKey(now), deckId, cards),
+                    startOfDay(now), db.historyBoundaryDao().current(), syncHistoryBoundary?.invoke(), historyBoundaryToken?.invoke())
+                    .also { caller.ensureActive() }
+            }
+            optionalHardState = state
+            state?.batch
+        }
+
+    suspend fun cancelOptionalHardReview(batch: OptionalHardBatch) = writeLock.withLock {
+        if (optionalHardState?.batch?.token == batch.token) optionalHardState = null
+    }
+
+    suspend fun answerOptionalHard(
+        batch: OptionalHardBatch, card: SessionCard, rating: Rating, durationMs: Long, now: Long,
+        signals: ReviewSignals = ReviewSignals()
+    ) = writeLock.withLock {
+        val caller = currentCoroutineContext()
+        caller.ensureActive()
+        val state = requireOptionalHardState(batch)
+        val key = card.card.key
+        check(state.committed.none { it.first == key }) { "Optional review already answered" }
+        val id = db.inTransaction {
+            val fresh = validateOptionalHard(state, key, now)
+            answerLocked(fresh, rating, durationMs, now, signals, ReviewPurpose.OPTIONAL_HARD)
+                .also { caller.ensureActive() }
+        }
+        // Do not mutate the ephemeral token until every database write has committed.
+        state.committed += key to id
+    }
+
+    /** Only this batch's latest retained answer may be undone; no ordinary queue rebuild. */
+    suspend fun undoOptionalHard(batch: OptionalHardBatch, now: Long = System.currentTimeMillis()): SessionCard? =
+        writeLock.withLock {
+            val state = requireOptionalHardState(batch)
+            val previous = state.committed.lastOrNull() ?: return@withLock null
+            val caller = currentCoroutineContext()
+            caller.ensureActive()
+            val restored = db.inTransaction {
+                validateOptionalHard(state, previous.first, now)
+                val key = undoLastLocked(now, expectedId = previous.second) ?: return@inTransaction null
+                builder().materialize(listOf(key)).singleOrNull().also { caller.ensureActive() }
+            }
+            if (restored != null) state.committed.removeAt(state.committed.lastIndex)
+            restored
+        }
+
+    private fun requireOptionalHardState(batch: OptionalHardBatch): OptionalHardState =
+        checkNotNull(optionalHardState?.takeIf { it.batch == batch }) { "Optional review batch is no longer valid" }
+
+    private suspend fun optionalHardComplete(now: Long): Boolean {
+        val plan = planDao.plan(dayKey(now))?.classicOnly() ?: return false
+        val required = requiredIds(plan)
+        return required.isNotEmpty() && BrowsePolicy.requiredComplete(required,
+            reviewDao.answeredKeysSince(startOfDay(now)).toSet())
+    }
+
+    private suspend fun optionalHardCandidates(deckId: String?, limit: Int): List<CardEntity> =
+        cardDao.optionalHardCards(deckId, suppressedNow().toList().ifEmpty { listOf("") }, LEECH_MIN_LAPSES, limit)
+
+    private suspend fun validateOptionalHard(state: OptionalHardState, key: String, now: Long): SessionCard {
+        checkHistoryWritable()
+        check(state.batch.day == dayKey(now) && state.dayStart == startOfDay(now) &&
+            state.boundary == db.historyBoundaryDao().current() &&
+            state.configuredCutoff == syncHistoryBoundary?.invoke() &&
+            state.configuredToken == historyBoundaryToken?.invoke() && optionalHardComplete(now)) {
+            "Optional review batch is no longer valid"
+        }
+        val original = state.batch.cards.singleOrNull { it.card.key == key }
+        check(original != null && original.chunk.id !in suppressedNow() &&
+            cardDao.optionalHardEligible(original.chunk.id, state.batch.deckId, LEECH_MIN_LAPSES)) {
+            "Optional review target is no longer eligible"
+        }
+        val fresh = builder().materialize(listOf(key)).singleOrNull()
+        check(fresh != null && fresh.chunk == original.chunk) { "Optional review target changed" }
+        return fresh
+    }
+
+
     /**
      * Today's plan minus everything already answered today. Rebuilding this
      * after a rotation, a tab switch or a process death yields exactly the same
@@ -770,7 +956,8 @@ class LearningRepository(
             deckTitle = deckId?.let { id -> chunkDao.pack(id)?.title ?: id },
             sessionTotal = if (forced) forcedCards.size else scope.size,
             sessionDone = if (forced) 0 else scope.size - pending.size,
-            forcedByDeveloper = forced
+            forcedByDeveloper = forced,
+            goalAnswersToday = goalAnswersToday(now)
         )
     }
 
@@ -875,6 +1062,7 @@ class LearningRepository(
         deckId: String,
         now: Long = System.currentTimeMillis()
     ): BrowsePlan = writeLock.withLock {
+        checkHistoryWritable()
         val title = chunkDao.pack(deckId)?.title ?: deckId
         val plan = ensureDailyPlanLocked(now)
         val gate = browseGate(plan, now)
@@ -890,6 +1078,7 @@ class LearningRepository(
         deckId: String? = null,
         now: Long = System.currentTimeMillis()
     ): Boolean = writeLock.withLock {
+        checkHistoryWritable()
         val plan = ensureDailyPlanLocked(now)
         browseRoom(plan, now) > 0 && insertBrowseExposure(card, deckId, now)
     }
@@ -1042,7 +1231,7 @@ class LearningRepository(
         count: Int = 5,
         deckId: String? = null,
         now: Long = System.currentTimeMillis()
-    ): Int = writeLock.withLock { addExtraLocked(count, deckId, now) }
+    ): Int = writeLock.withLock { checkHistoryWritable(); addExtraLocked(count, deckId, now) }
 
     /**
      * Held under [writeLock] from the first read of the plan to the write that
@@ -1110,7 +1299,7 @@ class LearningRepository(
      * again with its schedule intact.
      */
     suspend fun markWrong(sessionCard: SessionCard, now: Long = System.currentTimeMillis()) =
-        writeLock.withLock { markWrongLocked(sessionCard, now) }
+        writeLock.withLock { checkHistoryWritable(); markWrongLocked(sessionCard, now) }
 
     private suspend fun markWrongLocked(sessionCard: SessionCard, now: Long) {
         val chunkId = sessionCard.chunk.id
@@ -1164,6 +1353,7 @@ class LearningRepository(
         now: Long,
         signals: ReviewSignals = ReviewSignals()
     ) = writeLock.withLock {
+        checkHistoryWritable()
         val callerContext = currentCoroutineContext()
         callerContext.ensureActive()
         db.inTransaction {
@@ -1179,8 +1369,12 @@ class LearningRepository(
         rating: Rating,
         durationMs: Long,
         now: Long,
-        signals: ReviewSignals
-    ) {
+        signals: ReviewSignals,
+        purpose: String? = null
+    ): Long {
+        // Normalize only newly recorded activity, independently of grading latency
+        // and the event timestamp. Both ordinary and optional answers enter here.
+        val recordedDurationMs = ReviewDuration.normalize(durationMs)
         // Read the row instead of trusting the copy the UI holds: a card that
         // was rated "again" earlier in the same session is shown again from an
         // in-memory copy, and that copy is stale.
@@ -1211,8 +1405,9 @@ class LearningRepository(
         else answerScheduler.apply(before, rating, now)
         cardDao.upsert(result.card)
 
-        reviewDao.insert(
+        val reviewId = reviewDao.insert(
             ReviewEntity(
+                purpose = purpose,
                 chunkId = sessionCard.chunk.id,
                 level = sessionCard.level.value,
                 ts = now,
@@ -1229,7 +1424,7 @@ class LearningRepository(
                 stabilityAfter = result.after.stability,
                 difficultyBefore = result.before.difficulty,
                 difficultyAfter = result.after.difficulty,
-                durationMs = durationMs,
+                durationMs = recordedDurationMs,
                 wasAmnesty = sessionCard.fromAmnesty,
                 latencyMs = signals.latencyMs,
                 swipeVelocityX = signals.swipeVelocityX,
@@ -1250,11 +1445,12 @@ class LearningRepository(
 
         components.recordAnswer(sessionCard.chunk.id, rating.value, now)
 
-        bumpDailyStat(now, rating, durationMs)
+        bumpDailyStat(now, rating, recordedDurationMs)
 
         // Work past the day's obligation buys new material now rather than
         // tomorrow. See [earnNewIfDue].
-        earnNewIfDue(now)
+        if (purpose == null) earnNewIfDue(now)
+        return reviewId
     }
 
     /**
@@ -1290,7 +1486,7 @@ class LearningRepository(
         val stat = statsDao.day(day) ?: return
         val obligation = (plan.plannedTotal - plan.extraRequested)
             .coerceAtLeast(config.dailyMinimumCards)
-        val beyond = stat.reviewsDone - obligation
+        val beyond = admissionReviewsDone(stat.reviewsDone, now) - obligation
         if (beyond <= 0) return
 
         val gov = governor()
@@ -1327,6 +1523,7 @@ class LearningRepository(
      */
     suspend fun undoLast(now: Long = System.currentTimeMillis()): String? =
         writeLock.withLock {
+            checkHistoryWritable()
             val callerContext = currentCoroutineContext()
             callerContext.ensureActive()
             db.inTransaction {
@@ -1336,8 +1533,26 @@ class LearningRepository(
             }
         }
 
-    private suspend fun undoLastLocked(now: Long): String? {
+    private suspend fun undoLastLocked(now: Long, expectedId: Long? = null): String? {
+        val configuredBoundary = syncHistoryBoundary?.invoke()
+        (db.historyBoundaryDao().current()?.afterLocalId ?: configuredBoundary)?.let { cutoff ->
+            val rows = reviewDao.all().filter { it.id > cutoff }
+            val stable = dev.ikna.data.export.JournalIdentity.normalize(rows.map { dev.ikna.data.export.ReviewRecord.of(it) })
+            val byId = rows.zip(stable).associate { it.first.id to it.second.eventId!! }
+            val last = reviewDao.allAnswers().filter { it.id > cutoff }
+                .maxWithOrNull(compareBy<ReviewEntity> { it.ts }.thenBy { byId[it.id] }) ?: return null
+            if (expectedId != null && last.id != expectedId) return null
+            reviewDao.insert(ReviewEntity(purpose = last.purpose, chunkId = last.chunkId, level = last.level, ts = now,
+                rating = 0, elapsedDays = 0.0, stabilityBefore = last.stabilityAfter,
+                stabilityAfter = last.stabilityBefore, difficultyBefore = last.difficultyAfter,
+                difficultyAfter = last.difficultyBefore, durationMs = 0, wasAmnesty = last.wasAmnesty,
+                undoOf = last.id, undoEventId = byId.getValue(last.id)))
+            RestoreRepository(db, cardDao, reviewDao, statsDao, planDao, components, scheduler, baseConfig)
+                .replaySyncJournal(cutoff)
+            return last.chunkId + ":" + last.level
+        }
         val last = reviewDao.lastAnswer() ?: return null
+        if (expectedId != null && last.id != expectedId) return null
         val stability = last.prevStability ?: return null
         val difficulty = last.prevDifficulty ?: return null
         val dueAt = last.prevDueAt ?: return null
@@ -1384,6 +1599,7 @@ class LearningRepository(
 
         reviewDao.insert(
             ReviewEntity(
+                purpose = last.purpose,
                 chunkId = last.chunkId,
                 level = last.level,
                 ts = now,
@@ -1395,7 +1611,8 @@ class LearningRepository(
                 difficultyAfter = last.difficultyBefore,
                 durationMs = 0L,
                 wasAmnesty = last.wasAmnesty,
-                undoOf = last.id
+                undoOf = last.id,
+                undoEventId = last.eventId
             )
         )
 
@@ -1412,7 +1629,7 @@ class LearningRepository(
             prev.copy(
                 reviewsDone = done,
                 correctCount = correct,
-                activeMs = prev.activeMs + durationMs,
+                activeMs = Math.addExact(prev.activeMs, durationMs),
                 accuracy = correct.toDouble() / done,
                 planCompleted = planCompleted(day, done, now)
             )
@@ -1454,10 +1671,18 @@ class LearningRepository(
      */
     private suspend fun planCompleted(day: String, done: Int, ts: Long): Boolean {
         val plan = planDao.plan(day)?.classicOnly()
-            ?: return done >= config.dailyMinimumCards
+            ?: return admissionReviewsDone(done, ts) >= config.dailyMinimumCards
         val required = requiredIds(plan)
         val answered = reviewDao.answeredKeysSince(startOfDay(ts)).toSet()
         return BrowsePolicy.requiredComplete(required, answered)
+    }
+
+    /** Keep historical/cached normal totals unchanged; optional credit is derived from the journal. */
+    private suspend fun admissionReviewsDone(factualDone: Int, ts: Long): Int {
+        val until = boundary.date(ts).plusDays(1).atStartOfDay(ZoneId.systemDefault())
+            .plusHours(config.dayStartHour.toLong()).toInstant().toEpochMilli()
+        val cutoff = db.historyBoundaryDao().current()?.afterLocalId ?: syncHistoryBoundary?.invoke() ?: 0L
+        return (factualDone - reviewDao.optionalHardCountBetween(startOfDay(ts), until, cutoff)).coerceAtLeast(0)
     }
 
     private fun startOfDay(ts: Long): Long = boundary.startOfDay(ts)
@@ -1498,13 +1723,27 @@ class LearningRepository(
      * one thing in this database that cannot be regenerated, so "start over"
      * means forgetting the schedule, not the history.
      */
-    suspend fun resetProgress() = writeLock.withLock {
-        cardDao.clear()
-        components.clearAll()
-        statsDao.clear()
-        planDao.clear()
-        browseDao.clear()
+    suspend fun resetProgress() { resetProgressWithBoundary() }
+
+    /** Capture a new sync generation boundary atomically with the local reset. */
+    suspend fun resetProgressWithBoundary(): Long = writeLock.withLock {
+        val caller = currentCoroutineContext()
+        val boundary = db.inTransaction {
+            caller.ensureActive()
+            val lastId = reviewDao.maxId()
+            cardDao.clear()
+            components.clearAll()
+            statsDao.clear()
+            planDao.clear()
+            browseDao.clear()
+            db.incrementalJournalDao().invalidate()
+            db.historyBoundaryDao().put(dev.ikna.data.db.HistoryBoundaryEntity(
+                afterLocalId = lastId, token = java.util.UUID.randomUUID().toString()))
+            caller.ensureActive()
+            lastId
+        }
         clearBrowseCredits?.invoke()
+        boundary
     }
 
     /**
@@ -1520,6 +1759,9 @@ class LearningRepository(
      * land between a plan being picked and being stored, and the plan that
      * survived was the one for the deck set that no longer existed.
      */
+    /** External journal writes share the plan-build lock; never enter from a Room transaction. */
+    suspend fun <T> withJournalWriteLock(block: suspend () -> T): T = writeLock.withLock { block() }
+
     suspend fun invalidatePlan() = writeLock.withLock { planDao.clear() }
 
     // ---- stats ------------------------------------------------------------
@@ -1537,6 +1779,11 @@ class LearningRepository(
 
     suspend fun forecast(days: Int, now: Long = System.currentTimeMillis()): List<Int> =
         (1..days).map { d -> cardDao.dueBetween(now + (d - 1) * DAY_MS, now + d * DAY_MS) }
+
+    /** Read-only presentation count, excluding optional work from minimum completion. */
+    suspend fun goalAnswersToday(now: Long = System.currentTimeMillis()): Int = writeLock.withLock {
+        db.inTransaction { admissionReviewsDone(statsDao.day(dayKey(now))?.reviewsDone ?: 0, now) }
+    }
 
     suspend fun answeredToday(now: Long = System.currentTimeMillis()): Int =
         statsDao.day(dayKey(now))?.reviewsDone ?: 0

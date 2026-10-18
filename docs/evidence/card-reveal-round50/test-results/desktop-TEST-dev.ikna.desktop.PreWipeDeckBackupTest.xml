@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.PreWipeDeckBackupTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:08:35" hostname="3b7663fd5f9d" time="0.011">
+  <properties/>
+  <testcase name="duplicateNamesAndEmptyDecksAreSavedBeforeWipe" classname="dev.ikna.desktop.PreWipeDeckBackupTest" time="0.002"/>
+  <testcase name="emptyInventoryIsValid" classname="dev.ikna.desktop.PreWipeDeckBackupTest" time="0.002"/>
+  <testcase name="cancellationBlocksWipeWithoutWrapping" classname="dev.ikna.desktop.PreWipeDeckBackupTest" time="0.001"/>
+  <testcase name="inventoryReadFailureBlocksWipe" classname="dev.ikna.desktop.PreWipeDeckBackupTest" time="0.001"/>
+  <testcase name="blockedExportDirectoryBlocksWipeAndRetryCanSucceed" classname="dev.ikna.desktop.PreWipeDeckBackupTest" time="0.001"/>
+  <testcase name="failureAfterOneDeckKeepsAllDataAndRetryDoesNotOverwrite" classname="dev.ikna.desktop.PreWipeDeckBackupTest" time="0.002"/>
+  <testcase name="wipeFailureIsNotMislabelledAsBackupFailure" classname="dev.ikna.desktop.PreWipeDeckBackupTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

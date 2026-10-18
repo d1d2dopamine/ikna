@@ -1,0 +1,14 @@
+{
+  "check_text": {
+    "passed": true,
+    "output": "Repository text is valid UTF-8/NFC; 1072 text files and 7 localization tables passed.\n",
+    "outputSha256": "162e659b7e024efb3080b6fec1171094fd26885e2095a43756566c1e71e148be",
+    "scriptSha256": "3a043f1ea569ef4e036a89c6cc0aca9ed47616ec33d9930a09b02b693154ba70"
+  },
+  "check_localization": {
+    "passed": true,
+    "output": "Language registry OK: 7 languages, 852 keys each; English fallback, tokens, labels and selectors agree.\n",
+    "outputSha256": "1f1d8844d3b9f59b399bf08b4ca420b9a71c7e4783e27a72b515fa49dcf20502",
+    "scriptSha256": "60ed1e9f16b58cc99e5033523c880481678e04c68d2ae7d3d72afc7746ae86aa"
+  }
+}

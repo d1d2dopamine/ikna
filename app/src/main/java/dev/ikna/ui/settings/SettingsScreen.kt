@@ -889,6 +889,10 @@ fun SettingsScreen(
                         S.t("set.052"),
                         S.t("set.053")
                     ) {
+                        if (!container.isDeveloperMode) {
+                            DeviceSyncSettings(container.deviceSync)
+                            Spacer(Modifier.height(16.dp))
+                        }
                         IknaSettingsToggleRow(
                             title = S.t("set.054"),
                             subtitle = S.t("set.055"),
@@ -1240,14 +1244,20 @@ fun SettingsScreen(
     if (confirmReset) {
         IknaDialog(
             title = S.t("set.078"),
-            body = S.t("set.079"),
+            body = S.t("set.079") + "\n\n" + S.t("sync.reset_warning"),
             confirmLabel = S.t("set.080"),
             confirmColor = MaterialTheme.colorScheme.onSurfaceVariant,
             onConfirm = {
                 confirmReset = false
                 scope.launch {
-                    withContext(Dispatchers.IO) { container.learningRepository.resetProgress() }
-                    message = S.t("set.081")
+                    try {
+                        withContext(Dispatchers.IO) { container.resetProgress() }
+                        message = S.t("set.081")
+                    } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                        throw cancelled
+                    } catch (_: Exception) {
+                        message = S.t("sync.reset_failed")
+                    }
                 }
             },
             dismissLabel = S.t("set.082"),

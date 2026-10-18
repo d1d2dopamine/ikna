@@ -395,6 +395,10 @@ fun SettingsPane(
             }
             item(key = "data", contentType = "settings-section") {
                 IknaSettingsSection(S.t("set.052"), null) {
+                    if (!container.isDeveloperMode) {
+                        DeviceSyncSettings(container.deviceSync)
+                        Spacer(Modifier.height(16.dp))
+                    }
                     Spacer(Modifier.height(8.dp))
                     Text(
                         text = S.t("set.053"),
@@ -592,7 +596,7 @@ fun SettingsPane(
                             )
                             Spacer(Modifier.height(6.dp))
                             Text(
-                                text = S.t("set.079"),
+                                text = S.t("set.079") + "\n\n" + S.t("sync.reset_warning"),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = palette.muted
                             )
@@ -600,10 +604,15 @@ fun SettingsPane(
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 IknaButton(label = S.t("set.080"), palette = palette, filled = true) {
                                     scope.launch {
-                                        runCatching { container.learningRepository.resetProgress() }
-                                            .onFailure { error -> logLine("reset failed: " + error) }
+                                        try {
+                                            container.resetProgress()
+                                            dataNote = S.t("set.081")
+                                        } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                                            throw cancelled
+                                        } catch (_: Exception) {
+                                            dataNote = S.t("sync.reset_failed")
+                                        }
                                         resetAsking = false
-                                        dataNote = S.t("set.081")
                                     }
                                 }
                                 IknaButton(label = S.t("set.082"), palette = palette) { resetAsking = false }

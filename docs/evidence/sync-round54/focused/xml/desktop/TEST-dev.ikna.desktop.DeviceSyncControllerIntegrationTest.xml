@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-10-17T21:52:37" hostname="d0d72dd907ef" time="48.536">
+  <properties/>
+  <testcase name="restart discards pending approval and requires a fresh bilateral operation" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="2.963"/>
+  <testcase name="copied reset database without pairing configuration cannot expose archived history" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="0.074"/>
+  <testcase name="approved profile pairing automatically converges and repeated polls are noops" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="2.693"/>
+  <testcase name="answer after preview invalidates approval without importing the other profile" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="1.03"/>
+  <testcase name="stop during incoming Room replay rolls back before returning" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="6.68"/>
+  <testcase name="manual restore revokes peers and blocks restart until an explicit progress reset" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="1.066"/>
+  <testcase name="revoking a pending approval clears consent and cannot commit later" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="1.049"/>
+  <testcase name="older fresh generation with answers cannot adopt a newer epoch after revoke" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="2.966"/>
+  <testcase name="same target identity with changed text rejects entire profile without mutation" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="0.43"/>
+  <testcase name="foreground pause offline writes and process restart reconnect automatically" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="2.467"/>
+  <testcase name="approved history beyond bootstrap cap converges in bounded pages after restart" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="16.073"/>
+  <testcase name="stale restore completion cannot clear a newer pending reset" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="0.02"/>
+  <testcase name="concurrent enable cannot reopen a restore blocked installation" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="0.026"/>
+  <testcase name="pair and one approval cannot mutate either profile then unique decks and history merge" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="1.338"/>
+  <testcase name="new deck after completed consent blocks automatic history until a fresh review" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="2.098"/>
+  <testcase name="reset marker persists cutoff archives old history and new generation rejects old peers" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="3.662"/>
+  <testcase name="restart between persisted reset marker and reset completion stays fail closed" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="1.889"/>
+  <testcase name="oversized single event stays visible and never advances peer history" classname="dev.ikna.desktop.DeviceSyncControllerIntegrationTest" time="2.009"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

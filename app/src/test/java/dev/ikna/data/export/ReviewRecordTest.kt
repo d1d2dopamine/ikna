@@ -47,8 +47,10 @@ class ReviewRecordTest {
 
     @Test
     fun `a row survives the trip through the file`() {
-        val original = ReviewRecord.of(entity())
-        assertEquals(original, roundTrip(entity()))
+        val row = entity()
+        val original = ReviewRecord.of(row)
+        assertEquals(original, roundTrip(row))
+        assertTrue(row.eventId != entity().eventId)
     }
 
     /**

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.domain.grading.DerivedGradingTest" tests="25" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:08:43" hostname="3b7663fd5f9d" time="0.048">
+  <properties/>
+  <testcase name="flat timing window is not evidence" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="fifty prior observations are required and current answer cannot train itself" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="hard ceiling and personal median reject only the stopwatch" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="keyboard timing is calibrated while accessibility and invalid context are not" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.001"/>
+  <testcase name="empty log reports no evidence" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.001"/>
+  <testcase name="unknown peek cannot lengthen an interval" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="binary input maps to conservative verified grades" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.001"/>
+  <testcase name="level requires its own population instead of multiplying another level" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="slow outliers cannot turn good into easy" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="actual due times and stability stay within thirty percent including boundaries" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.004"/>
+  <testcase name="latency is normalized by length with level stratification" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="undo rows are not predictions or calibration samples" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.009"/>
+  <testcase name="derived hard is success for governor but manual hard keeps its old meaning" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="disabled is binary regardless of clear signals" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="persisted rings restore independently for swipe and keyboard" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="live versioned decisions survive JSONL replay exactly with flag switches" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.011"/>
+  <testcase name="unknown timing and focus loss fall back even with a peek" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="mixed real and synthetic data are rejected" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="synthetic evaluation is finite paired and cannot authorize rollout" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.017"/>
+  <testcase name="mandatory reveal supports easy only after card maturity" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="manual hard and easy are never reinterpreted" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="ring evicts oldest and never grows past two hundred" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="unknown schedule versions cannot silently replay differently" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="experiment defaults off" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <testcase name="legacy and explicit grades replay as before" classname="dev.ikna.domain.grading.DerivedGradingTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -26,11 +26,38 @@ import java.io.File
  * on disk agrees with the migration that is supposed to produce it, and that
  * every version step has a migration at all.
  */
-private const val DB_VERSION = 10
+private const val DB_VERSION = 14
 
 private const val SCHEMA_DIR = "schemas/dev.ikna.data.db.IknaDatabase"
 
 class SchemaTest {
+    @Test fun `schema fourteen adds nullable purpose without rewriting historical rows or streams`() {
+        val old = schema(13)!!.readText()
+        val current = schema(14)!!.readText()
+        assertFalse(old.contains("\"columnName\": \"purpose\""))
+        assertTrue(current.contains("\"columnName\": \"purpose\""))
+        val migration = source("shared/src/jvmShared/kotlin/dev/ikna/data/db/Migrations.kt")!!.readText()
+            .substringAfter("private val MIGRATION_13_14").substringBefore("val ALL")
+        assertTrue(migration.contains("ALTER TABLE reviews ADD COLUMN purpose TEXT"))
+        for (forbidden in listOf("UPDATE", "DELETE", "INSERT", "DROP")) assertFalse(migration.contains(forbidden))
+    }
+
+
+    @Test
+    fun `schema thirteen adds only derived journal structures without manufacturing consent`() {
+        val previous = schema(12)!!.readText()
+        val current = schema(13)!!.readText()
+        for (table in listOf("journal_stream", "journal_event_index", "journal_checkpoint")) {
+            assertFalse(previous.contains(table))
+            assertTrue(current.contains(table))
+        }
+        val migration = source("shared/src/jvmShared/kotlin/dev/ikna/data/db/Migrations.kt")!!.readText()
+            .substringAfter("private val MIGRATION_12_13").substringBefore("private val MIGRATION_13_14")
+        assertFalse(migration.contains("INSERT"))
+        assertFalse(migration.contains("UPDATE"))
+        assertFalse(migration.contains("DELETE"))
+        assertFalse(migration.contains("ALTER TABLE reviews"))
+    }
 
 	@Test
 	fun `the schema of the current version is on disk`() {

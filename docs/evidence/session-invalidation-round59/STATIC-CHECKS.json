@@ -1,0 +1,56 @@
+{
+  "observed_at_utc": "2026-10-17T23:59:51.247878+00:00",
+  "checks": [
+    {
+      "command": [
+        "python",
+        "tools/check_localization.py"
+      ],
+      "exit_code": 0,
+      "source_sha256": "60ed1e9f16b58cc99e5033523c880481678e04c68d2ae7d3d72afc7746ae86aa",
+      "log": "check_localization.py.log",
+      "log_sha256": "1dc424c60001bc954a0c84c8c51919d457b545b7cafda2f2a7bfbecaf3b82431"
+    },
+    {
+      "command": [
+        "python",
+        "tools/check_classic_cards.py"
+      ],
+      "exit_code": 0,
+      "source_sha256": "d61c6c7c917c37e162f5838cdca86a12ea2e6d86b23513dd069031bd577d6248",
+      "log": "check_classic_cards.py.log",
+      "log_sha256": "4a96ba6b631271f9a0de7f1b15010b86a00bc2f1a4cb246944123b3342f8a531"
+    },
+    {
+      "command": [
+        "python",
+        "tools/check_design_parity.py"
+      ],
+      "exit_code": 0,
+      "source_sha256": "3a16a69204ffb94fd459acaf075bda5d9b4c538b61e297768d96deb92d349c8d",
+      "log": "check_design_parity.py.log",
+      "log_sha256": "ceef225f7c3592c9d91657480124325d03932f68cb9e91579e933effb50acaf0"
+    },
+    {
+      "command": [
+        "python",
+        "tools/check_text.py"
+      ],
+      "exit_code": 0,
+      "source_sha256": "3a043f1ea569ef4e036a89c6cc0aca9ed47616ec33d9930a09b02b693154ba70",
+      "log": "check_text.py.log",
+      "log_sha256": "9cd40b0e0a88bec6de90db45cf020ad1c0c2234cf4b6ca775e53166acd76c7d9"
+    },
+    {
+      "command": [
+        "python",
+        "tools/check_small_viewports.py"
+      ],
+      "exit_code": 0,
+      "source_sha256": "e83a62e93341e9bb0653bf9a56ef1f71b1c810662c90f80ead72f4c005d73ea5",
+      "log": "check_small_viewports.py.log",
+      "log_sha256": "feabb4add9e2ca3374e538560634d1ec97dc4f4ce89aab12f3d726e36ea9b2f6"
+    }
+  ],
+  "all_passed": true
+}

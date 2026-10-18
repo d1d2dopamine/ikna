@@ -1,5 +1,8 @@
 package dev.ikna.desktop
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.DisposableEffect
@@ -537,6 +540,13 @@ fun main(args: Array<String>) {
             state = windowState,
             onKeyEvent = { event -> handleWindowKey(event, ui, toggleFullscreen) }
         ) {
+            androidx.compose.runtime.LaunchedEffect(container) {
+                container.deviceSync.setForeground(true)
+                try { kotlinx.coroutines.awaitCancellation() }
+                finally { kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable) {
+                    container.deviceSync.setForeground(false)
+                } }
+            }
             DisposableEffect(window) {
                 val surfaceSynchronization = if (customTitleBar) {
                     installWindowSurfaceSynchronization(
@@ -579,7 +589,10 @@ fun main(args: Array<String>) {
             Box(Modifier.fillMaxSize().onSizeChanged { size ->
                 frameLayout.observeComposeSize(size.width, size.height)
             }) {
-                IknaDesktopApp(
+                val profileRestart by container.profileRestartGate.required.collectAsState()
+                if (profileRestart) {
+                    dev.ikna.ui.settings.ProfileRestartScreen(container.profileRestartGate, onClose = closeWindow)
+                } else IknaDesktopApp(
                     container = container,
                     ui = ui,
                     onRestartRequested = {

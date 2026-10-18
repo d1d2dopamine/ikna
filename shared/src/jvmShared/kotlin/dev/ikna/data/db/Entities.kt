@@ -4,12 +4,14 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 // ---------------------------------------------------------------------------
 // Content (replaceable, comes from packs)
 // ---------------------------------------------------------------------------
 
 @Entity(tableName = "chunks", indices = [Index("freqRank"), Index("packId")])
+@Serializable
 data class ChunkEntity(
     @PrimaryKey val id: String,
     val packId: String,
@@ -62,6 +64,7 @@ data class ChunkSearchRow(
     primaryKeys = ["packId", "chunkId"],
     indices = [Index("chunkId")]
 )
+@Serializable
 data class PackChunkEntity(
     val packId: String,
     val chunkId: String,
@@ -76,6 +79,7 @@ data class PackChunkEntity(
     primaryKeys = ["packId", "chunkId", "contextId", "meaningId"],
     indices = [Index("chunkId"), Index("packId")]
 )
+@Serializable
 data class ChunkContextEntity(
     val packId: String,
     val chunkId: String,
@@ -92,6 +96,7 @@ data class ChunkContextEntity(
 )
 
 @Entity(tableName = "chunk_tokens", primaryKeys = ["chunkId", "position"], indices = [Index("lemma", "pos")])
+@Serializable
 data class ChunkTokenEntity(
     val chunkId: String,
     val position: Int,
@@ -104,6 +109,7 @@ data class ChunkTokenEntity(
 )
 
 @Entity(tableName = "packs")
+@Serializable
 data class PackEntity(
     @PrimaryKey val id: String,
     val version: Int,
@@ -150,7 +156,7 @@ data class CardEntity(
 
 // APPEND ONLY. Source of truth for everything else in the database.
 // Migrations may add columns. Migrations may never rewrite or delete rows.
-@Entity(tableName = "reviews", indices = [Index("ts"), Index("chunkId"), Index("undoOf")])
+@Entity(tableName = "reviews", indices = [Index("ts"), Index("chunkId"), Index("undoOf"), Index(value = ["eventId"], unique = true)])
 data class ReviewEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val chunkId: String,
@@ -199,8 +205,15 @@ data class ReviewEntity(
     val inputMethod: String? = null,
     val peekSemantics: String? = null,
     /** v8: exact parameters for portable replay. */
-    val fsrsParameters: String? = null
-)
+    val fsrsParameters: String? = null,
+    /** Portable journal identity. NULL only for pre-sync legacy history. */
+    val eventId: String? = java.util.UUID.randomUUID().toString(),
+    val undoEventId: String? = null,
+    /** v14: null keeps ordinary history semantics; optional work earns no admission credit. */
+    val purpose: String? = null
+) {
+    init { dev.ikna.domain.session.ReviewPurpose.requireKnown(purpose) }
+}
 
 // ---------------------------------------------------------------------------
 // Optional reading. Separate from reviews because seeing the answer is not an
@@ -330,3 +343,62 @@ data class DailyPlanEntity(
     val ids: List<String>
         get() = if (plannedIds.isEmpty()) emptyList() else plannedIds.split(",")
 }
+
+/** Non-secret reset lineage travels with the DB, unlike device pairing credentials. */
+@Entity(tableName = "history_boundary")
+data class HistoryBoundaryEntity(
+    @PrimaryKey val id: Int = 1,
+    val afterLocalId: Long,
+    val token: String
+)
+
+/** Durable receipt, committed atomically with one approved profile merge. */
+@Entity(tableName = "profile_sync_operations")
+data class ProfileSyncOperationEntity(
+    @PrimaryKey val opId: String,
+    val operationDigest: String,
+    val localRevision: String,
+    val incomingRevision: String,
+    val boundaryIdentity: String,
+    val resultingRevision: String,
+    val resultingProfileIdentity: String,
+    val resultingContentIdentity: String,
+    val mode: String
+)
+
+/** Immutable nonsecret provenance for an adopted database slot, retained even by full wipe.
+ * This is not consent, a completion receipt, learner state or a history generation. */
+@Entity(tableName = "profile_origin")
+data class ProfileOriginEntity(
+    @PrimaryKey val id: Int = 1,
+    val opId: String,
+    val operationDigest: String
+) {
+    init { require(id == 1) { "Profile origin is a singleton" } }
+}
+
+/** Derived, consent-scoped journal stream. Migration never populates this table. */
+@Entity(tableName = "journal_stream")
+data class JournalStreamEntity(
+    @PrimaryKey val id: Int = 1,
+    val authorizationDigest: String, val bindingJson: String,
+    val scanThrough: Long, val sequence: Long, val prefix: String,
+    val eventCount: Long, val durationMs: Long
+)
+
+/** Stable source sequence to canonical payload and immutable local raw row mapping. */
+@Entity(tableName = "journal_event_index", primaryKeys = ["streamId", "sequence"],
+    indices = [Index(value = ["streamId", "eventId"], unique = true),
+        Index(value = ["streamId", "reviewId"], unique = true)])
+data class JournalEventIndexEntity(
+    val streamId: String, val sequence: Long, val eventId: String,
+    val payloadDigest: String, val undoEventId: String?,
+    val reviewId: Long, val prefix: String
+)
+
+/** Receiver progress is durable in the same transaction as append and replay. */
+@Entity(tableName = "journal_checkpoint")
+data class JournalCheckpointEntity(
+    @PrimaryKey val sourceDevice: String,
+    val bindingJson: String, val sequence: Long, val prefix: String
+)

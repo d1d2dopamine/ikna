@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.DeveloperSandboxIntegrationTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:08:32" hostname="3b7663fd5f9d" time="0.398">
+  <properties/>
+  <testcase name="empty scenario remains empty after installation and cannot alter the real profile" classname="dev.ikna.desktop.DeveloperSandboxIntegrationTest" time="0.023"/>
+  <testcase name="classic answer keeps scheduling and delayed undo without creating another mode" classname="dev.ikna.desktop.DeveloperSandboxIntegrationTest" time="0.089"/>
+  <testcase name="developer profile forces browse past late night and unfinished-plan gates" classname="dev.ikna.desktop.DeveloperSandboxIntegrationTest" time="0.039"/>
+  <testcase name="product limits switch restores real browse gates and can be turned off again" classname="dev.ikna.desktop.DeveloperSandboxIntegrationTest" time="0.052"/>
+  <testcase name="developer seed uses its own real room database and creates mature history" classname="dev.ikna.desktop.DeveloperSandboxIntegrationTest" time="0.027"/>
+  <testcase name="diagnostics refresh cannot create a plan or change history and preferences" classname="dev.ikna.desktop.DeveloperSandboxIntegrationTest" time="0.053"/>
+  <testcase name="browse ready scenario passes the production browse policy without an override" classname="dev.ikna.desktop.DeveloperSandboxIntegrationTest" time="0.033"/>
+  <testcase name="DEV can reopen scheduled cards without changing a completed daily obligation" classname="dev.ikna.desktop.DeveloperSandboxIntegrationTest" time="0.046"/>
+  <testcase name="retired modes survive storage but not materialization or daily plans" classname="dev.ikna.desktop.DeveloperSandboxIntegrationTest" time="0.036"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

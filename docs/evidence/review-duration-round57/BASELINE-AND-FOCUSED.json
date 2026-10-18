@@ -1,0 +1,209 @@
+{
+  "baseline_archive": "ikna-0.12-press-round-56-optional-hard-review-no-corpora.zip",
+  "baseline_archive_sha256": "103240a40a36c73b7a6913f564db7de02fbf66f688a7dbf02a6d37c7d36f91d4",
+  "baseline_production_comparison": {
+    "baseline": "round56-optional-review",
+    "candidate": "round57-review-duration",
+    "production_files_compared": 300,
+    "changed": []
+  },
+  "observed_baseline": "Synthetic wall-clock elapsed -5000 persisted review.durationMs=-5000 and daily activeMs=-5000. Journal merge rejected it; manual JSONL restore accepted it and rebuilt negative activeMs. Expected-safe assertion failed: expected0 actual-5000.",
+  "runs": {
+    "red": {
+      "exit_code": 1,
+      "sha256": {
+        "red-inputs-after.json": "abc9e7607ad90dfb7cdb92b6e0e6bcfeb6250626f66dba093fe56e000d51207b",
+        "red-inputs-before.json": "540566a5b76d810af8a378a6a4546d50d75c287df804be0262ca7278b59e62eb",
+        "red-xml/TEST-dev.ikna.desktop.ReviewDurationIntegrationTest.xml": "454f596e59c7557abfdd674c3398a2fa0ebb55d5680078fd7e9376d36f60ad30",
+        "red.log": "514296041303cc2009714c8506a8b73092a5f64a95c05fdd714b04c282737b3a"
+      }
+    },
+    "run1": {
+      "exit_code": 1,
+      "sha256": {
+        "run1-inputs-after.json": "baa71b3c67a05e6b14d4c60cdaae0b43aebdf47565742bed4b84dca65d0c509a",
+        "run1-inputs-before.json": "fa7e2193e801384d079eff85f3e4ed0767b42c4a06ecf7f84629999247d10aef",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.DesktopOptionalReviewContractTest.xml": "94b4b5ab0772d5d1b94dabf16e5ca9a9c23d7f03ca57cd6df038b4b40ae6d5b3",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.IncrementalJournalRepositoryTest.xml": "d0c95dda555e7ace4934d969140b6d130a8ec27c44ad9b89843f1c8844148b2b",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.JournalSyncIntegrationTest.xml": "65f44f71b0d564707589de36c2bb55568588ea3027d0906569f6676d41b26e44",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.LearningWriteAtomicityTest.xml": "569b58ea0d82b5250d52750008933d93b083ce2786ee68ee9224a377a9c2b0b1",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.OptionalHardReviewIntegrationTest.xml": "72b6048ee23bf89d5b171a6a5aa41b13ea13399141d3ce8b525dc205881aba33",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.ProfileTransferIntegrationTest.xml": "109c662d21c9aee3a3754194dc3d9f949a40da34af56f4a32eaeeb83b95b39bb",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.RestoreAtomicityTest.xml": "0647299402a03085660d74d4976a0768edebcde19901e2e2dd5e26fea0c8fb7f",
+        "run1-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.ReviewDurationIntegrationTest.xml": "2d0ca762a776ec42cbfb3d9740ed4f5c57c7f112e68b238cc8050fdb9813fd99",
+        "run1-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.domain.session.ReviewDurationTest.xml": "9a172d14038f1cc6fdddf25e5a115a0f5c21b06c8e8580c7a9206bd9103c55d0",
+        "run1-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.sync.IncrementalJournalProtocolTest.xml": "fa0084fb2ca897a5f9bade339a731af96b56678fcf0b650627f95ed64b4cf23a",
+        "run1-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.sync.ProfileConsentProtocolTest.xml": "2a48787120167d8dc451d06a6b3bd7f1d6c7db258fa425a2178577634b7c6443",
+        "run1.log": "8b5a8b798c5ef4ddedf70382e622ff53a6cf6b4b8e05959c053c82f837cd8625"
+      }
+    },
+    "run2": {
+      "exit_code": 0,
+      "sha256": {
+        "run2-inputs-after.json": "f66ca7164eb7b0b93dc7eb0f07ff44183a7df939d64146dea0aaabe9b4431208",
+        "run2-inputs-before.json": "17c20d32063dd87ca4efca5340ffc97fbb4d3c831039bc71c64fbeaf4a4db87f",
+        "run2-xml/app/build/test-results/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionErgonomicsTest.xml": "83c118375226ab445c1f303bad1802f72882424f7aee19e95a9a4f00f9f8d054",
+        "run2-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.DesktopOptionalReviewContractTest.xml": "dee3f305c254409780875e2ab1357ea57d044e6e3a9296eebac1f83a31768a30",
+        "run2-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.IncrementalJournalRepositoryTest.xml": "6dca8c2aa32700aedf3b39252ad1414b09230e93778964a99876ffb3a2279175",
+        "run2-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.JournalSyncIntegrationTest.xml": "948eb45ccd18ccebc5dd9f607036f574ce3c0fa14917cd30c2ac32526773cfc4",
+        "run2-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.LearningWriteAtomicityTest.xml": "1ebad37f4f8bb0b03aacb398a215d017651da07e8d3cc52cb9a79c10506e25b3",
+        "run2-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.OptionalHardReviewIntegrationTest.xml": "3dce00a038f22015d531466446c6191741e286036ea2b1cbefb2581e47f8e0f2",
+        "run2-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.ProfileTransferIntegrationTest.xml": "f8a6f1a87d5806daeb21d38a63fa962e3999bc513518729a62951e9ee9d83663",
+        "run2-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.RestoreAtomicityTest.xml": "cc1802a2a8009e1d5c59158ee44d984f2b282e40b643f038769988abbe926e4d",
+        "run2-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.ReviewDurationIntegrationTest.xml": "e0dc7496135307d06a12445c92c288ee93baddc36159a106638af5fcce1b8988",
+        "run2-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.domain.session.ReviewDurationTest.xml": "9a172d14038f1cc6fdddf25e5a115a0f5c21b06c8e8580c7a9206bd9103c55d0",
+        "run2-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.sync.IncrementalJournalProtocolTest.xml": "fa0084fb2ca897a5f9bade339a731af96b56678fcf0b650627f95ed64b4cf23a",
+        "run2-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.sync.ProfileConsentProtocolTest.xml": "2a48787120167d8dc451d06a6b3bd7f1d6c7db258fa425a2178577634b7c6443",
+        "run2.log": "463ff2b3281f87741b009a043cfedc097fb31a8da7bc1c1fa124b93725128ff0"
+      }
+    }
+  },
+  "final_focused_summary": {
+    "run": "2",
+    "suites": [
+      {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.ui.session.SessionErgonomicsTest",
+        "timestamp": "2026-10-17T23:12:59",
+        "path": "run2-xml/app/build/test-results/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionErgonomicsTest.xml",
+        "sha256": "83c118375226ab445c1f303bad1802f72882424f7aee19e95a9a4f00f9f8d054",
+        "failed_cases": []
+      },
+      {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.DesktopOptionalReviewContractTest",
+        "timestamp": "2026-10-17T23:11:07",
+        "path": "run2-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.DesktopOptionalReviewContractTest.xml",
+        "sha256": "dee3f305c254409780875e2ab1357ea57d044e6e3a9296eebac1f83a31768a30",
+        "failed_cases": []
+      },
+      {
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.IncrementalJournalRepositoryTest",
+        "timestamp": "2026-10-17T23:11:07",
+        "path": "run2-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.IncrementalJournalRepositoryTest.xml",
+        "sha256": "6dca8c2aa32700aedf3b39252ad1414b09230e93778964a99876ffb3a2279175",
+        "failed_cases": []
+      },
+      {
+        "tests": 18,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.JournalSyncIntegrationTest",
+        "timestamp": "2026-10-17T23:11:08",
+        "path": "run2-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.JournalSyncIntegrationTest.xml",
+        "sha256": "948eb45ccd18ccebc5dd9f607036f574ce3c0fa14917cd30c2ac32526773cfc4",
+        "failed_cases": []
+      },
+      {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.LearningWriteAtomicityTest",
+        "timestamp": "2026-10-17T23:11:09",
+        "path": "run2-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.LearningWriteAtomicityTest.xml",
+        "sha256": "1ebad37f4f8bb0b03aacb398a215d017651da07e8d3cc52cb9a79c10506e25b3",
+        "failed_cases": []
+      },
+      {
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.OptionalHardReviewIntegrationTest",
+        "timestamp": "2026-10-17T23:11:09",
+        "path": "run2-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.OptionalHardReviewIntegrationTest.xml",
+        "sha256": "3dce00a038f22015d531466446c6191741e286036ea2b1cbefb2581e47f8e0f2",
+        "failed_cases": []
+      },
+      {
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.ProfileTransferIntegrationTest",
+        "timestamp": "2026-10-17T23:11:09",
+        "path": "run2-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.ProfileTransferIntegrationTest.xml",
+        "sha256": "f8a6f1a87d5806daeb21d38a63fa962e3999bc513518729a62951e9ee9d83663",
+        "failed_cases": []
+      },
+      {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.RestoreAtomicityTest",
+        "timestamp": "2026-10-17T23:11:09",
+        "path": "run2-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.RestoreAtomicityTest.xml",
+        "sha256": "cc1802a2a8009e1d5c59158ee44d984f2b282e40b643f038769988abbe926e4d",
+        "failed_cases": []
+      },
+      {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.desktop.ReviewDurationIntegrationTest",
+        "timestamp": "2026-10-17T23:11:06",
+        "path": "run2-xml/desktop/build/test-results/test/TEST-dev.ikna.desktop.ReviewDurationIntegrationTest.xml",
+        "sha256": "e0dc7496135307d06a12445c92c288ee93baddc36159a106638af5fcce1b8988",
+        "failed_cases": []
+      },
+      {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.domain.session.ReviewDurationTest",
+        "timestamp": "2026-10-17T23:08:23",
+        "path": "run2-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.domain.session.ReviewDurationTest.xml",
+        "sha256": "9a172d14038f1cc6fdddf25e5a115a0f5c21b06c8e8580c7a9206bd9103c55d0",
+        "failed_cases": []
+      },
+      {
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.sync.IncrementalJournalProtocolTest",
+        "timestamp": "2026-10-17T23:08:23",
+        "path": "run2-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.sync.IncrementalJournalProtocolTest.xml",
+        "sha256": "fa0084fb2ca897a5f9bade339a731af96b56678fcf0b650627f95ed64b4cf23a",
+        "failed_cases": []
+      },
+      {
+        "tests": 28,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "dev.ikna.sync.ProfileConsentProtocolTest",
+        "timestamp": "2026-10-17T23:08:24",
+        "path": "run2-xml/shared/build/test-results/desktopTest/TEST-dev.ikna.sync.ProfileConsentProtocolTest.xml",
+        "sha256": "2a48787120167d8dc451d06a6b3bd7f1d6c7db258fa425a2178577634b7c6443",
+        "failed_cases": []
+      }
+    ],
+    "total_cases": 133,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "inputs_stable": true,
+    "aggregate_sha256": "562bf26edb75e23e9f8eb913e97d24b6f224cd83a0c1d55a055e1f08570ebd19",
+    "source_file_count": 464,
+    "passed": 133
+  },
+  "execution_note": "Shared44 passed in run1 and was up-to-date in run2; desktop86 and app3 executed in run2. Full suite separately verifies the final source.",
+  "frozen_red_test_sha256": "ca55f69fe45de53d95e0fc8243bde9be777ec5796a66276baa95e0b8ddee9d46",
+  "run1_failure": "Two new fixture failures: scheduler day-boundary mismatch and impossible learned historical FSRS pre-state. Corrected fixture inputs only; retained exact duration/derived-state assertions. Original failed evidence retained."
+}

@@ -1,0 +1,41 @@
+{
+  "scope": "Static project checks; no physical device evidence",
+  "checks": [
+    {
+      "command": "python tools/check_text.py",
+      "outcome": "passed",
+      "textFiles": 1026,
+      "note": "Final source/doc check before build-evidence metadata and archive manifest generation"
+    },
+    {
+      "command": "python tools/check_localization.py",
+      "outcome": "passed",
+      "languages": 7,
+      "keysPerLanguage": 848
+    },
+    {
+      "command": "python tools/check_design_parity.py",
+      "outcome": "passed",
+      "tests": 43
+    },
+    {
+      "command": "python tools/check_classic_cards.py",
+      "outcome": "passed",
+      "tests": 5
+    },
+    {
+      "command": "python tools/check_android_ci.py --self-test",
+      "outcome": "passed",
+      "tests": 10
+    },
+    {
+      "command": "python tools/check_android_ci.py",
+      "outcome": "passed"
+    }
+  ],
+  "logHashes": {
+    "static-preflight.log": "774ace0e2b3c0b551bc84b744ddd86ced5c27dcff59f71c0eb8a4a2d9a094b1a",
+    "design-parity-final.log": "53ae3950fbc347bfc0bf80cbb2c86f5e124b3575b3ec06a60bc9f9e332b36b86",
+    "round52-origin-schema.log": "3d59825a031a80b7c8d4bac4dce6230f1090a77ffc24ca1ce9c4cf1574de172f"
+  }
+}

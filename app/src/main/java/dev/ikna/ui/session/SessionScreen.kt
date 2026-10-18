@@ -20,6 +20,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -88,13 +92,15 @@ fun SessionScreen(
             container.learningRepository,
             container.settings,
             container.speaker,
-            deckId
+            deckId,
+            container.sessionChanges.generation
         )
     )
     val state by vm.state.collectAsState()
     val settings by container.settings.flow.collectAsState(initial = IknaSettings())
 
     val card = state.current
+    LaunchedEffect(card?.card?.key) { if (card == null) reportCard = null }
     ObserveReviewInterruptions(vm.reviewSignals)
 
     // A review is one of the few places where no touch for a minute can mean
@@ -103,6 +109,16 @@ fun SessionScreen(
     // screen, and not after this destination leaves composition. View-level
     // keepScreenOn needs no permission and Android ignores it in the background.
     val view = LocalView.current
+    DisposableEffect(view, vm) {
+        val owner = view.findViewTreeLifecycleOwner()
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) vm.checkSessionOnResume()
+        }
+        owner?.lifecycle?.addObserver(observer)
+        if (owner?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.RESUMED) == true)
+            vm.checkSessionOnResume()
+        onDispose { owner?.lifecycle?.removeObserver(observer) }
+    }
     val keepScreenAwake = card != null && !state.loading && !state.finished
     DisposableEffect(view, keepScreenAwake) {
         val previous = view.keepScreenOn
@@ -111,8 +127,8 @@ fun SessionScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        if (!state.loading && !state.loadFailed) {
-            IknaSessionTopBar(state = state)
+        if (!state.loading && !state.loadFailed && !state.sessionChanged) {
+            IknaSessionTopBar(state = state, onFinishOptional = vm::finishOptionalHardReview)
             IknaTodayProgress(state = state)
         }
 
@@ -128,6 +144,8 @@ fun SessionScreen(
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+                state.sessionChanged -> IknaSessionChanged(onContinue = { vm.load() })
 
                 state.loadFailed -> IknaCardLoadFailure(onRetry = { vm.load() })
 
@@ -194,7 +212,8 @@ fun SessionScreen(
                 else -> IknaSessionEmptyState(
                     state = state,
                     animations = settings.animations,
-                    onExtra = vm::addExtra
+                    onExtra = vm::addExtra,
+                    onOptionalHard = vm::startOptionalHardReview
                 )
             }
         }

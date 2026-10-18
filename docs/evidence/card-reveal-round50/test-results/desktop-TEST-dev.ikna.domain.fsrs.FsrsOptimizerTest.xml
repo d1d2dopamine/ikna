@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.domain.fsrs.FsrsOptimizerTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:08:42" hostname="3b7663fd5f9d" time="0.358">
+  <properties/>
+  <testcase name="there is one bound per parameter and every default is inside it" classname="dev.ikna.domain.fsrs.FsrsOptimizerTest" time="0.001"/>
+  <testcase name="the same log gives the same answer twice" classname="dev.ikna.domain.fsrs.FsrsOptimizerTest" time="0.238"/>
+  <testcase name="a fit is either inside its bounds and better, or not returned at all" classname="dev.ikna.domain.fsrs.FsrsOptimizerTest" time="0.115"/>
+  <testcase name="answers less than a day apart are replayed but not scored" classname="dev.ikna.domain.fsrs.FsrsOptimizerTest" time="0.001"/>
+  <testcase name="the loss prefers the model the log was generated with" classname="dev.ikna.domain.fsrs.FsrsOptimizerTest" time="0.003"/>
+  <testcase name="a short log is refused rather than fitted" classname="dev.ikna.domain.fsrs.FsrsOptimizerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

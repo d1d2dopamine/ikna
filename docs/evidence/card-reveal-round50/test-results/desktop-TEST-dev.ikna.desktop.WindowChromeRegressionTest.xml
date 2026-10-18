@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ikna.desktop.WindowChromeRegressionTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-13T10:08:42" hostname="3b7663fd5f9d" time="0.003">
+  <properties/>
+  <testcase name="resize overlay writes one bounds update and checks native placement" classname="dev.ikna.desktop.WindowChromeRegressionTest" time="0.001"/>
+  <testcase name="offscreen recovery runs once on the native window path" classname="dev.ikna.desktop.WindowChromeRegressionTest" time="0.0"/>
+  <testcase name="native resizable style stays stable across placement changes" classname="dev.ikna.desktop.WindowChromeRegressionTest" time="0.001"/>
+  <testcase name="window resize does not relaunch an effect for every bounds event" classname="dev.ikna.desktop.WindowChromeRegressionTest" time="0.0"/>
+  <testcase name="saved window geometry uses floating bounds" classname="dev.ikna.desktop.WindowChromeRegressionTest" time="0.0"/>
+  <testcase name="maximized custom title bar is not draggable" classname="dev.ikna.desktop.WindowChromeRegressionTest" time="0.0"/>
+  <testcase name="restore bounds come from native resize acknowledgement" classname="dev.ikna.desktop.WindowChromeRegressionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
