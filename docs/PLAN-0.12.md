@@ -1190,3 +1190,14 @@ delivered Round60. The narrow release-rule correction and regression evidence
 are recorded in [Round61](ROUND-0.12-61-ru.md). No catalogue, application behaviour
 or publication change is included. Actual Windows installer acceptance remains
 a hosted/platform gate; an isolated shrink/runtime smoke is not that gate.
+
+
+## Round 62 — Windows private sync file permissions
+
+The owner's packaged Windows selftest fails in the POSIX fallback before private
+configuration is saved. Replace that fallback with an individual-owner ACL and
+exact readback, preserving failure on unsupported or unverifiable permissions.
+Protect reads as well as writes; never take ownership of existing foreign/group
+owned state in the Windows ACL branch. Keep the strict packaged selftest and installer artifact checks.
+Native Windows provider regressions are wired before packaging. Local Linux
+provider/double tests cannot close that Windows gate. See ROUND-0.12-62-ru.md.

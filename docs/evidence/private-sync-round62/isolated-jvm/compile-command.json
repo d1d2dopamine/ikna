@@ -1,0 +1,19 @@
+[
+  "/workspace/scratch/8105054a3211/ikna-toolchain-oct18/jdk-17.0.20.1+1/bin/java",
+  "-Xmx768m",
+  "-cp",
+  "/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/kotlin-compiler-embeddable-2.2.20.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/kotlin-script-runtime-2.2.20.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/kotlin-reflect-1.6.10.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/kotlin-daemon-embeddable-2.2.20.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/kotlinx-coroutines-core-jvm-1.8.0.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/kotlin-stdlib-2.2.20.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/annotations-26.0.1.jar",
+  "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler",
+  "-no-stdlib",
+  "-no-reflect",
+  "-jvm-target",
+  "17",
+  "-classpath",
+  "/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/kotlin-test-2.2.20.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/kotlin-test-junit-2.2.20.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/kotlin-stdlib-2.2.20.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/annotations-26.0.1.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/okhttp-tls-4.12.0.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/okhttp-4.12.0.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/okio-jvm-3.6.0.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/junit-4.13.2.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/hamcrest-core-1.3.jar",
+  "-d",
+  "/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/classes",
+  "/workspace/scratch/8105054a3211/ikna-current/round62-windows-private-acl/shared/src/jvmShared/kotlin/dev/ikna/sync/PrivateSyncFiles.kt",
+  "/workspace/scratch/8105054a3211/ikna-current/round62-windows-private-acl/shared/src/jvmShared/kotlin/dev/ikna/sync/LanSyncSecurity.kt",
+  "/workspace/scratch/8105054a3211/ikna-current/round62-windows-private-acl/shared/src/jvmSharedTest/kotlin/dev/ikna/sync/PrivateSyncFilesTest.kt",
+  "/workspace/scratch/8105054a3211/ikna-current/round62-windows-private-acl/shared/src/desktopTest/kotlin/dev/ikna/sync/PrivateSyncFilesWindowsTest.kt"
+]

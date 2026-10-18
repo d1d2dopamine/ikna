@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### 0.12 application round 62 — Windows private sync storage
+
+- Replace unsupported Windows owner-only File permission toggles with verified
+  NIO ACL handling; retain exact POSIX modes on supported systems.
+- Protect private directories and existing state before reads, create restricted
+  temporary files before writing, and retain atomic replacement and fail-closed
+  checks. Reject symbolic links and Windows reparse-point leaves.
+- Add isolated permission regressions and a native Windows CI gate before the
+  existing packaged selftest. See [Round62](docs/ROUND-0.12-62-ru.md) for evidence
+  and the remaining hosted Windows acceptance requirement.
+
 ### 0.12 application round 61 — desktop release dependency warnings
 
 - Bound optional OkHttp platform and unused Tink provider/downloader warnings to

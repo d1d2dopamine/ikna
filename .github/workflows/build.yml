@@ -183,6 +183,9 @@ jobs:
         shell: bash
         run: bash tools/catalog/fetch-bundled-pack.sh
 
+      - name: Windows private sync storage regression
+        run: gradle --no-daemon --stacktrace :shared:desktopTest --tests "dev.ikna.sync.PrivateSyncFilesWindowsTest"
+
       # createReleaseDistributable produces the runnable application folder --
       # Ikna.exe plus a trimmed Java runtime. It needs no WiX, so this is the
       # step that must succeed.

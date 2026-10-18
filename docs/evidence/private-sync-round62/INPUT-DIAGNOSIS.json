@@ -1,0 +1,15 @@
+{
+  "baselineRound": 61,
+  "reportedPlatform": "Windows packaged executable",
+  "reportedTimestamp": "2026-10-18 14:57:34",
+  "reportedFailure": "IllegalStateException Check failed at LanSyncSecurity.privatePermissions(LanSyncSecurity.kt:85), writePrivate:56, DeviceSyncController.save:117/load:108/initializeProfileSlot:331",
+  "evidenceType": "user-supplied stack summary forwarded by parent; no local Windows reproduction",
+  "sourceFile": "shared/src/jvmShared/kotlin/dev/ikna/sync/LanSyncSecurity.kt",
+  "sourceSha256": "1b3272733e9ee7567fe4655b0736bd61d837ae8f926572095f9b6fb55efe928e",
+  "diagnosis": "Unsupported POSIX permission operation falls back to File.setReadable(false,false), whose boolean failure aborts private state initialization on the reported Windows filesystem. Missing NSIS artifact is downstream, not a path diagnosis.",
+  "references": [
+    "https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/attribute/AclFileAttributeView.html",
+    "https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/File.html#setReadable(boolean,boolean)",
+    "https://raw.githubusercontent.com/openjdk/jdk17u/master/src/java.base/windows/classes/sun/nio/fs/WindowsAclFileAttributeView.java"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "scope": "Four isolated compiled inputs plus statically reviewed callers and Windows CI wiring; not a complete application compile",
+  "files": {
+    ".github/workflows/build.yml": "de272b1856997da151b119e6ca33509a0c1dd654d246cb7d29ffdb9c83df4c1d",
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/DeviceSyncController.kt": "4d0c7bf4851817766b135d09bd4c069cae16af0c98fb546a52262ba810253689",
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/PairedLanTransport.kt": "7f01ee5edc28996e69aa790ad3da0c501792a6c4d07077f6053c6b7280288894",
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/PrivateSyncFiles.kt": "308f96c30d7ab05fe91928c22402a29e8fad0990c3081590dbb2bea6b4e74d35",
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/LanSyncSecurity.kt": "7a48146dd7e5644aa2338e4db9c5d26eb19af69d5f943c0163016fe48acdcef1",
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/sync/PrivateSyncFilesTest.kt": "3190e8f8bce96f9b7d5b3732189244a326df0919bb454a5bbdcebf819a5a88fe",
+    "shared/src/desktopTest/kotlin/dev/ikna/sync/PrivateSyncFilesWindowsTest.kt": "d9c8f5ded2695311f235546389e15008c0619d9afbfbf09dbb157514bbad664a"
+  }
+}

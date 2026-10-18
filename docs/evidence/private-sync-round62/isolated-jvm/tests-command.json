@@ -1,0 +1,8 @@
+[
+  "/workspace/scratch/8105054a3211/ikna-toolchain-oct18/jdk-17.0.20.1+1/bin/java",
+  "-cp",
+  "/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/classes:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/kotlin-test-2.2.20.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/kotlin-test-junit-2.2.20.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/kotlin-stdlib-2.2.20.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/annotations-26.0.1.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/okhttp-tls-4.12.0.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/okhttp-4.12.0.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/okio-jvm-3.6.0.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/junit-4.13.2.jar:/workspace/scratch/8105054a3211/ikna-private-acl-r62/repro/deps/hamcrest-core-1.3.jar",
+  "TestEvidence",
+  "dev.ikna.sync.PrivateSyncFilesTest",
+  "dev.ikna.sync.PrivateSyncFilesWindowsTest"
+]

@@ -97,7 +97,7 @@ class PairedLanTransport(
         val saved = File(privateDirectory, "peers.json")
         if (saved.exists()) {
             require(saved.length() <= 32_768) { "Invalid pairing state" }
-            val state = json.decodeFromString<Saved>(saved.readText())
+            val state = json.decodeFromString<Saved>(LanSyncSecurity.readPrivate(saved, 32_768))
             require(state.version == 1 && (state.binding == binding || state.peers.isEmpty()) && state.peers.size <= MAX_PEERS) { "Pairing history changed" }
             state.peers.forEach(::validatePeer)
             require(state.peers.map { it.id }.distinct().size == state.peers.size)
@@ -117,7 +117,7 @@ class PairedLanTransport(
         val portFile = File(privateDirectory, "listen-port")
         val desiredPort = if (port == 0 && portFile.exists()) {
             require(portFile.length() <= 5)
-            portFile.readText().toInt().also { require(it in 1..65535) }
+            LanSyncSecurity.readPrivate(portFile, 5).toInt().also { require(it in 1..65535) }
         } else port
         try {
             server.bind(InetSocketAddress(desiredPort), 4)

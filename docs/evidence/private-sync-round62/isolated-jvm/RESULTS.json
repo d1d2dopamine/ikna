@@ -1,0 +1,37 @@
+{
+  "scope": "Isolated actual PrivateSyncFiles/LanSyncSecurity sources; not a full Gradle/application build",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "java": "openjdk version \"17.0.20.1\" 2026-08-18 LTS\nOpenJDK Runtime Environment Microsoft-14940695 (build 17.0.20.1+1-LTS)\nOpenJDK 64-Bit Server VM Microsoft-14940695 (build 17.0.20.1+1-LTS, mixed mode, sharing)\n",
+  "kotlin_compiler": "2.2.20",
+  "counts": {
+    "reported_tests": 21,
+    "passed_tests": 18,
+    "failed_tests": 0,
+    "ignored_tests": 0,
+    "assumption_skipped_tests": 3,
+    "duration_ms": 257,
+    "skipped": [
+      "native Windows junction is rejected without changing destination ACL(dev.ikna.sync.PrivateSyncFilesWindowsTest)",
+      "native Windows ACL secures inherited directory and atomic replacement(dev.ikna.sync.PrivateSyncFilesWindowsTest)",
+      "native Windows identity survives reload under verified ACL(dev.ikna.sync.PrivateSyncFilesWindowsTest)"
+    ],
+    "failures": []
+  },
+  "source_sha256": {
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/PrivateSyncFiles.kt": "308f96c30d7ab05fe91928c22402a29e8fad0990c3081590dbb2bea6b4e74d35",
+    "shared/src/jvmShared/kotlin/dev/ikna/sync/LanSyncSecurity.kt": "7a48146dd7e5644aa2338e4db9c5d26eb19af69d5f943c0163016fe48acdcef1",
+    "shared/src/jvmSharedTest/kotlin/dev/ikna/sync/PrivateSyncFilesTest.kt": "3190e8f8bce96f9b7d5b3732189244a326df0919bb454a5bbdcebf819a5a88fe",
+    "shared/src/desktopTest/kotlin/dev/ikna/sync/PrivateSyncFilesWindowsTest.kt": "d9c8f5ded2695311f235546389e15008c0619d9afbfbf09dbb157514bbad664a"
+  },
+  "runner_sha256": {
+    "run_isolated.py": "dd1251016fea22bf36ff4886101bbf19a35cf885774be0fa5c337db2656505f8",
+    "dependencies.json": "dcf87489b905597cca1a930ae759850e566bfacdd4b1453fb2e786ef59e200bf",
+    "TestEvidence.java": "e56af4fd2e4a344e028294872942c0c6a85732c4151b1d060d1cd9191fbc1b6e"
+  },
+  "evidence_sha256": {
+    "compile-command.json": "6569b21e7de96cde8b3acf7dfa8bc4b74ec377b14d905552620351eff44fe309",
+    "compile-runner-command.json": "c9ec544776082b774bc5c1689ed4025921648536097d964d40f54d3184829b84",
+    "java-version-command.json": "8a37aec37b11f40e6b2e61665281aad9332e26abe5f541a5da76c8accfb5ed7e",
+    "tests-command.json": "43a207bad5b7b14184c0c7d5b7aec5c6c5e07be9c8253632f97fdc15d7b7fff1"
+  }
+}

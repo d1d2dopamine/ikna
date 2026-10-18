@@ -99,10 +99,10 @@ class DeviceSyncController(
     @Synchronized private fun load() {
         if (loaded) return
         check(available) { "unavailable" }
-        check(directory.isDirectory || directory.mkdirs())
+        LanSyncSecurity.privateDirectory(directory)
         configuration = if (file.exists()) {
             require(file.length() <= 16_384) { "invalid-state" }
-            json.decodeFromString<Configuration>(file.readText()).also {
+            json.decodeFromString<Configuration>(LanSyncSecurity.readPrivate(file, 16_384)).also {
                 require(it.version == 1 && it.afterLocalId >= 0) { "invalid-state" }
             }
         } else Configuration(databaseSlot = currentDatabaseSlot).also { save(it) }
@@ -113,7 +113,7 @@ class DeviceSyncController(
         publish()
     }
     @Synchronized private fun save(value: Configuration) {
-        check(directory.isDirectory || directory.mkdirs())
+        LanSyncSecurity.privateDirectory(directory)
         LanSyncSecurity.writePrivate(file, json.encodeToString(value))
         configuration = value
     }
@@ -284,11 +284,11 @@ class DeviceSyncController(
             }
         }, savedCompletion = if (completionFile.exists()) {
             require(completionFile.length() <= 16_384) { "invalid-profile-state" }
-            json.decodeFromString<ProfileConsentProtocol.Completion>(completionFile.readText())
+            json.decodeFromString<ProfileConsentProtocol.Completion>(LanSyncSecurity.readPrivate(completionFile, 16_384))
         } else null,
         savedInvalidation = if (invalidationFile.exists()) {
             require(invalidationFile.length() <= 128) { "invalid-profile-state" }
-            invalidationFile.readText().also { require(it.matches(Regex("[A-Za-z0-9:_-]{1,128}"))) }
+            LanSyncSecurity.readPrivate(invalidationFile, 128).also { require(it.matches(Regex("[A-Za-z0-9:_-]{1,128}"))) }
         } else null,
     ).also { protocol = it }
 

@@ -3,9 +3,6 @@ package dev.ikna.sync
 import okhttp3.tls.HeldCertificate
 import java.io.File
 import java.net.InetAddress
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
-import java.nio.file.attribute.PosixFilePermission
 import java.security.KeyStore
 import java.security.MessageDigest
 import java.security.SecureRandom
@@ -20,6 +17,12 @@ import javax.net.ssl.X509TrustManager
 
 /** Only place for private pairing material. Never include this directory in backup/export. */
 internal object LanSyncSecurity {
+    private val privateFiles = PrivateSyncFiles()
+
+    fun privateDirectory(directory: File) = privateFiles.directory(directory)
+
+    fun readPrivate(file: File, maxBytes: Long): String = privateFiles.read(file, maxBytes)
+
     fun secret(): String = ByteArray(32).also(SecureRandom()::nextBytes).let {
         Base64.getUrlEncoder().withoutPadding().encodeToString(it)
     }
@@ -36,12 +39,10 @@ internal object LanSyncSecurity {
         .digest(cert.encoded).joinToString("") { "%02x".format(it) }
 
     fun identity(directory: File): HeldCertificate {
-        require(directory.isDirectory || directory.mkdirs())
-        privatePermissions(directory, true)
+        privateDirectory(directory)
         val file = File(directory, "identity.pem")
         if (file.exists()) {
-            require(file.length() <= 8192)
-            return HeldCertificate.decode(file.readText())
+            return HeldCertificate.decode(readPrivate(file, 8192))
         }
         val identity = HeldCertificate.Builder().commonName("ikna paired device")
             .duration(3650, TimeUnit.DAYS).ecdsa256().build()
@@ -49,43 +50,7 @@ internal object LanSyncSecurity {
         return identity
     }
 
-    fun writePrivate(file: File, value: String) {
-        val parent = requireNotNull(file.parentFile) { "Private state requires an explicit directory" }
-        val temp = File.createTempFile(".ikna-", ".tmp", parent)
-        try {
-            privatePermissions(temp, false)
-            java.io.FileOutputStream(temp).use {
-                it.write(value.toByteArray())
-                it.flush()
-                it.fd.sync()
-            }
-            // Fail closed if atomic replacement is unavailable; never remove the old state first.
-            Files.move(temp.toPath(), file.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
-            privatePermissions(file, false)
-            // Directory fsync is not supported by every JVM/OS filesystem provider (notably Windows).
-            // File data is synced above; do not claim a universal power-loss durability guarantee.
-            try {
-                java.nio.channels.FileChannel.open(parent.toPath(), java.nio.file.StandardOpenOption.READ)
-                    .use { it.force(true) }
-            } catch (_: java.io.IOException) {
-                // The atomic file is retained; inherited directory durability remains platform-specific.
-            } catch (_: UnsupportedOperationException) {
-                // Same limitation for providers without directory channels.
-            }
-        } finally { temp.delete() }
-    }
-
-    private fun privatePermissions(file: File, directory: Boolean) {
-        try {
-            val permissions = mutableSetOf(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE)
-            if (directory) permissions += PosixFilePermission.OWNER_EXECUTE
-            Files.setPosixFilePermissions(file.toPath(), permissions)
-        } catch (_: UnsupportedOperationException) {
-            // Android's app-private home and Windows' inherited user-home ACL remain the boundary.
-            check(file.setReadable(false, false) && file.setReadable(true, true))
-            check(file.setWritable(false, false) && file.setWritable(true, true))
-        }
-    }
+    fun writePrivate(file: File, value: String) = privateFiles.write(file, value)
 
     fun context(identity: HeldCertificate, pin: X509Certificate? = null): SSLContext {
         val store = KeyStore.getInstance(KeyStore.getDefaultType()).apply {
