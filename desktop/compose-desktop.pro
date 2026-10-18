@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-# ProGuard rules for the Windows release build.
+# ProGuard rules for the Windows and Linux release builds.
 #
 # createReleaseDistributable does not simply package the jars: Compose
 # Multiplatform runs ProGuard over them first, and ProGuard stops the build on
@@ -49,6 +49,49 @@
 # switched off, and only for okio.
 # ---------------------------------------------------------------------------
 -dontwarn okio.**
+
+# ---------------------------------------------------------------------------
+# Optional paths in the pinned OkHttp 4.12.0 and Tink 1.23.0 jars.
+#
+# okhttp-tls provides HeldCertificate for LAN pairing; the transport itself uses
+# platform JSSE. Android adapters and optional Conscrypt/BouncyCastle/OpenJSSE
+# providers are not desktop requirements. Upstream okhttp3.pro allows the whole
+# platform package; keep this list narrower, at the referencing classes seen in
+# the Windows/Linux release logs. The ordinary JDK platform is not suppressed.
+#
+# Tink declares Google HTTP Client and Conscrypt optional in its Maven POM.
+# KeysDownloader and X-Wing HPKE are unused: EncryptedRemoteEnvelope registers
+# AEAD and accepts only XChaCha20Poly1305 keysets. Do not add those optional
+# runtimes merely to satisfy analysis of unused classes.
+#
+# These are referencing-class rules, not missing-library package rules. A new
+# app reference to any missing dependency must still fail. Re-audit these paths
+# when changing versions or introducing another crypto/HTTP use. No global
+# ignorewarnings, Android stubs, broad okhttp3.** or com.google.crypto.tink.**.
+# Sources (pinned versions):
+# https://github.com/square/okhttp/blob/parent-4.12.0/okhttp/src/main/resources/META-INF/proguard/okhttp3.pro
+# https://github.com/tink-crypto/tink-java/blob/v1.23.0/maven/tink-java.pom.xml
+# ---------------------------------------------------------------------------
+-dontwarn okhttp3.internal.platform.Android10Platform
+-dontwarn okhttp3.internal.platform.AndroidPlatform
+-dontwarn okhttp3.internal.platform.BouncyCastlePlatform
+-dontwarn okhttp3.internal.platform.ConscryptPlatform
+-dontwarn okhttp3.internal.platform.ConscryptPlatform$Companion
+-dontwarn okhttp3.internal.platform.ConscryptPlatform$DisabledHostnameVerifier
+-dontwarn okhttp3.internal.platform.OpenJSSEPlatform
+-dontwarn okhttp3.internal.platform.android.Android10SocketAdapter
+-dontwarn okhttp3.internal.platform.android.Android10SocketAdapter$Companion
+-dontwarn okhttp3.internal.platform.android.AndroidCertificateChainCleaner
+-dontwarn okhttp3.internal.platform.android.AndroidCertificateChainCleaner$Companion
+-dontwarn okhttp3.internal.platform.android.AndroidLog
+-dontwarn okhttp3.internal.platform.android.BouncyCastleSocketAdapter
+-dontwarn okhttp3.internal.platform.android.BouncyCastleSocketAdapter$Companion$factory$1
+-dontwarn okhttp3.internal.platform.android.ConscryptSocketAdapter
+-dontwarn okhttp3.internal.platform.android.ConscryptSocketAdapter$Companion$factory$1
+-dontwarn com.google.crypto.tink.util.KeysDownloader
+-dontwarn com.google.crypto.tink.util.KeysDownloader$Builder
+-dontwarn com.google.crypto.tink.hybrid.internal.XWingHpkeConscryptEncrypt
+-dontwarn com.google.crypto.tink.hybrid.internal.XWingHpkeConscryptDecrypt
 
 # ---------------------------------------------------------------------------
 # A stack trace that can be read.

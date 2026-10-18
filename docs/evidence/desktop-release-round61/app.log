@@ -1,0 +1,78 @@
+ProGuard, version 7.7.0
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: duplicate definition of resource file [META-INF/MANIFEST.MF]
+Note: there were 9 duplicate class definitions.
+      (https://www.guardsquare.com/proguard/manual/troubleshooting#duplicateclass)
+Note: the configuration refers to the unknown class 'dev.ikna.desktop.MainKt'
+Note: the configuration refers to the unknown class 'dev.ikna.desktop.AwtCrashHandler'
+Note: the configuration refers to the unknown class 'dev.ikna.buildcheck.ReleaseDependencySmoke'
+Note: the configuration refers to the unknown class 'okhttp3.internal.platform.RequiredNewPlatform'
+Warning: dev.ikna.buildcheck.MissingDependency: can't find referenced class org.conscrypt.HpkeSuite
+Warning: dev.ikna.buildcheck.MissingDependency: can't find referenced class org.conscrypt.HpkeSuite
+Note: com.google.crypto.tink.config.internal.TinkFipsUtil: can't find dynamically referenced class org.conscrypt.Conscrypt
+Note: com.google.crypto.tink.internal.ConscryptUtil: can't find dynamically referenced class org.conscrypt.Conscrypt
+Note: com.google.protobuf.Android: can't find dynamically referenced class libcore.io.Memory
+Note: com.google.protobuf.Android: can't find dynamically referenced class org.robolectric.Robolectric
+Note: okhttp3.internal.platform.android.CloseGuard$Companion: can't find dynamically referenced class dalvik.system.CloseGuard
+Note: com.google.crypto.tink.config.internal.TinkFipsUtil accesses a method 'isBoringSslFIPSBuild()' dynamically
+Note: com.google.crypto.tink.internal.ConscryptUtil accesses a method 'newProvider()' dynamically
+Note: com.google.gson.internal.ConstructorConstructor accesses a declared constructor '<init>()' dynamically
+Note: com.google.gson.internal.UnsafeAllocator accesses a method 'allocateInstance(java.lang.Class)' dynamically
+Note: com.google.gson.internal.reflect.ReflectionHelper$RecordSupportedHelper accesses a method 'getType()' dynamically
+Note: com.google.protobuf.DescriptorMessageInfoFactory accesses a declared method 'getDefaultInstance()' dynamically
+Note: com.google.protobuf.ExtensionSchemas accesses a declared constructor '<init>()' dynamically
+Note: com.google.protobuf.Internal accesses a method 'getDefaultInstance()' dynamically
+Note: com.google.protobuf.ListFieldSchemas accesses a declared constructor '<init>()' dynamically
+Note: com.google.protobuf.MapFieldSchemas accesses a declared constructor '<init>()' dynamically
+Note: com.google.protobuf.NewInstanceSchemas accesses a declared constructor '<init>()' dynamically
+Note: com.google.protobuf.SchemaUtil accesses a constructor '<init>()' dynamically
+Note: com.google.protobuf.UnsafeUtil$JvmMemoryAccessor accesses a method 'getByte(java.lang.Object,long)' dynamically
+Note: com.google.protobuf.UnsafeUtil$JvmMemoryAccessor accesses a method 'putByte(java.lang.Object,long,byte)' dynamically
+Note: com.google.protobuf.UnsafeUtil$JvmMemoryAccessor accesses a method 'getBoolean(java.lang.Object,long)' dynamically
+Note: com.google.protobuf.UnsafeUtil$JvmMemoryAccessor accesses a method 'putBoolean(java.lang.Object,long,boolean)' dynamically
+Note: com.google.protobuf.UnsafeUtil$JvmMemoryAccessor accesses a method 'getFloat(java.lang.Object,long)' dynamically
+Note: com.google.protobuf.UnsafeUtil$JvmMemoryAccessor accesses a method 'putFloat(java.lang.Object,long,float)' dynamically
+Note: com.google.protobuf.UnsafeUtil$JvmMemoryAccessor accesses a method 'getDouble(java.lang.Object,long)' dynamically
+Note: com.google.protobuf.UnsafeUtil$JvmMemoryAccessor accesses a method 'putDouble(java.lang.Object,long,double)' dynamically
+Note: com.google.protobuf.UnsafeUtil$JvmMemoryAccessor accesses a method 'getByte(long)' dynamically
+Note: com.google.protobuf.UnsafeUtil$JvmMemoryAccessor accesses a method 'putByte(long,byte)' dynamically
+Note: com.google.protobuf.UnsafeUtil$JvmMemoryAccessor accesses a method 'getInt(long)' dynamically
+Note: com.google.protobuf.UnsafeUtil$JvmMemoryAccessor accesses a method 'putInt(long,int)' dynamically
+Note: com.google.protobuf.UnsafeUtil$JvmMemoryAccessor accesses a method 'getLong(long)' dynamically
+Note: com.google.protobuf.UnsafeUtil$JvmMemoryAccessor accesses a method 'putLong(long,long)' dynamically
+Note: com.google.protobuf.UnsafeUtil$JvmMemoryAccessor accesses a method 'copyMemory(long,long,long)' dynamically
+Note: com.google.protobuf.UnsafeUtil$JvmMemoryAccessor accesses a method 'copyMemory(java.lang.Object,long,java.lang.Object,long,long)' dynamically
+Note: com.google.protobuf.UnsafeUtil$MemoryAccessor accesses a method 'objectFieldOffset(java.lang.reflect.Field)' dynamically
+Note: com.google.protobuf.UnsafeUtil$MemoryAccessor accesses a method 'arrayBaseOffset(java.lang.Class)' dynamically
+Note: com.google.protobuf.UnsafeUtil$MemoryAccessor accesses a method 'arrayIndexScale(java.lang.Class)' dynamically
+Note: com.google.protobuf.UnsafeUtil$MemoryAccessor accesses a method 'getInt(java.lang.Object,long)' dynamically
+Note: com.google.protobuf.UnsafeUtil$MemoryAccessor accesses a method 'putInt(java.lang.Object,long,int)' dynamically
+Note: com.google.protobuf.UnsafeUtil$MemoryAccessor accesses a method 'getLong(java.lang.Object,long)' dynamically
+Note: com.google.protobuf.UnsafeUtil$MemoryAccessor accesses a method 'putLong(java.lang.Object,long,long)' dynamically
+Note: com.google.protobuf.UnsafeUtil$MemoryAccessor accesses a method 'getObject(java.lang.Object,long)' dynamically
+Note: com.google.protobuf.UnsafeUtil$MemoryAccessor accesses a method 'putObject(java.lang.Object,long,java.lang.Object)' dynamically
+Note: com.google.protobuf.UnsafeUtil$MemoryAccessor accesses a method 'objectFieldOffset(java.lang.reflect.Field)' dynamically
+Note: com.google.protobuf.UnsafeUtil$MemoryAccessor accesses a method 'getLong(java.lang.Object,long)' dynamically
+Note: okhttp3.internal.platform.android.AndroidSocketAdapter accesses a method 'getAlpnSelectedProtocol()' dynamically
+Note: okhttp3.internal.platform.android.CloseGuard$Companion accesses a method 'get()' dynamically
+Note: okhttp3.internal.platform.android.CloseGuard$Companion accesses a method 'warnIfOpen()' dynamically
+Note: the configuration explicitly specifies 'sun.misc.Unsafe' to keep library class 'sun.misc.Unsafe'
+Warning: there were 2 unresolved references to classes or interfaces.
+         You may need to add missing library jars or update their versions.
+         If your code works fine without the missing classes, you can suppress
+         the warnings with '-dontwarn' options.
+         (https://www.guardsquare.com/proguard/manual/troubleshooting#unresolvedclass)
+Unexpected error
+java.io.IOException: Please correct the above warnings first.
+	at proguard.Initializer.execute(Initializer.java:526) ~[proguard-base-7.7.0.jar:7.7.0]
+	at proguard.pass.PassRunner.run(PassRunner.java:24) ~[proguard-base-7.7.0.jar:7.7.0]
+	at proguard.ProGuard.initialize(ProGuard.java:359) ~[proguard-base-7.7.0.jar:7.7.0]
+	at proguard.ProGuard.execute(ProGuard.java:142) ~[proguard-base-7.7.0.jar:7.7.0]
+	at proguard.ProGuard.main(ProGuard.java:649) [proguard-base-7.7.0.jar:7.7.0]

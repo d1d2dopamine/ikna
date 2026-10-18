@@ -1,0 +1,30 @@
+{
+  "runId": 39135025333,
+  "commit": "620cfc770200db8ccf97342873c06cee96877aca",
+  "files": [
+    {
+      "path": "desktop/compose-desktop.pro",
+      "remoteSha256": "76fa3edc103434899c3ac78f89b6d60e78299bb429adfb02c321e690438aa689",
+      "delivered60Sha256": "76fa3edc103434899c3ac78f89b6d60e78299bb429adfb02c321e690438aa689",
+      "identical": true
+    },
+    {
+      "path": "desktop/build.gradle.kts",
+      "remoteSha256": "a1f7d0d0f4500f159cf8cb6b4729c8ddc4d8e9c35ba559a00b02cb500aa215d9",
+      "delivered60Sha256": "a1f7d0d0f4500f159cf8cb6b4729c8ddc4d8e9c35ba559a00b02cb500aa215d9",
+      "identical": true
+    },
+    {
+      "path": "shared/build.gradle.kts",
+      "remoteSha256": "3a5d785e70f9bc5676eeef77b5c389e22c2270883853dcd4ec9503ae9e3078ec",
+      "delivered60Sha256": "3a5d785e70f9bc5676eeef77b5c389e22c2270883853dcd4ec9503ae9e3078ec",
+      "identical": true
+    },
+    {
+      "path": ".github/workflows/build.yml",
+      "remoteSha256": "0702265709c6033a5e58e101ba26e5dc384ae70bc363b6738a47fb5eadb75916",
+      "delivered60Sha256": "0702265709c6033a5e58e101ba26e5dc384ae70bc363b6738a47fb5eadb75916",
+      "identical": true
+    }
+  ]
+}

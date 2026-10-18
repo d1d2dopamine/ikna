@@ -1,0 +1,160 @@
+{
+  "scope": "Isolated pinned library fixture; not an Ikna Gradle/installer build or Windows runtime evidence",
+  "java": "Microsoft OpenJDK 17.0.20.1",
+  "proguard": "7.7.0",
+  "compose_defaults": "1.8.2",
+  "baseline": {
+    "exit": "failed as expected",
+    "unresolved_references": 136,
+    "distinct_pairs": 44,
+    "missing_classes": 28,
+    "owners": 20
+  },
+  "fixed": {
+    "exit": "success",
+    "unresolved_references": 0,
+    "runtime": [
+      "PASS: shrunk HeldCertificate PEM and pinned JSSE loopback TLS",
+      "PASS: shrunk XChaCha20Poly1305 keyset, round trip and tamper rejection"
+    ]
+  },
+  "negative": {
+    "app": {
+      "exit": "failed as expected",
+      "unresolved": [
+        [
+          "dev.ikna.buildcheck.MissingDependency",
+          "org.conscrypt.HpkeSuite"
+        ],
+        [
+          "dev.ikna.buildcheck.MissingDependency",
+          "org.conscrypt.HpkeSuite"
+        ]
+      ]
+    },
+    "new-platform": {
+      "exit": "failed as expected",
+      "unresolved": [
+        [
+          "okhttp3.internal.platform.RequiredNewPlatform",
+          "org.conscrypt.HpkeSuite"
+        ],
+        [
+          "okhttp3.internal.platform.RequiredNewPlatform",
+          "org.conscrypt.HpkeSuite"
+        ]
+      ]
+    }
+  },
+  "defaults_source": {
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/compose/compose-gradle-plugin/1.8.2/compose-gradle-plugin-1.8.2.jar",
+    "sha256": "507e34ac0401697f4ece12d02bb82e75e509dc7479735ebef1156de78a0bc318"
+  },
+  "sources": [
+    {
+      "coordinate": "com.guardsquare:proguard-base:7.7.0",
+      "url": "https://repo.maven.apache.org/maven2/com/guardsquare/proguard-base/7.7.0/proguard-base-7.7.0.jar",
+      "sha256": "42dff9da534825a5e694752358e02b7b8d5da939be9b9d07f9987448492e6e79",
+      "size": 872778
+    },
+    {
+      "coordinate": "com.guardsquare:proguard-core:9.1.10",
+      "url": "https://repo.maven.apache.org/maven2/com/guardsquare/proguard-core/9.1.10/proguard-core-9.1.10.jar",
+      "sha256": "e6ff572124e0af2b23d2433c5b72557f1f905e680cb61979342cb915ee938198",
+      "size": 1914350
+    },
+    {
+      "coordinate": "org.jetbrains.kotlin:kotlin-metadata-jvm:2.1.0",
+      "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-metadata-jvm/2.1.0/kotlin-metadata-jvm-2.1.0.jar",
+      "sha256": "b8d3a92574ba1dfc49bdf205256d1ede0664148cb150ab62faa872b5e1bb4632",
+      "size": 980330
+    },
+    {
+      "coordinate": "org.jetbrains.kotlin:kotlin-stdlib:2.2.20",
+      "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/2.2.20/kotlin-stdlib-2.2.20.jar",
+      "sha256": "8836ccffd3585fadda9901244b20d42901d2f3cd581058d8434e2ffabcf3a3e7",
+      "size": 1761444
+    },
+    {
+      "coordinate": "com.google.code.gson:gson:2.13.2",
+      "url": "https://repo.maven.apache.org/maven2/com/google/code/gson/gson/2.13.2/gson-2.13.2.jar",
+      "sha256": "dd0ce1b55a3ed2080cb70f9c655850cda86c206862310009dcb5e5c95265a5e0",
+      "size": 289901
+    },
+    {
+      "coordinate": "org.apache.logging.log4j:log4j-core:2.24.2",
+      "url": "https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-core/2.24.2/log4j-core-2.24.2.jar",
+      "sha256": "7a7b90db866c86a1093b3fde758ca28398ebb2a533da0d79a30cc0a78506b9df",
+      "size": 1914998
+    },
+    {
+      "coordinate": "org.apache.logging.log4j:log4j-api:2.24.2",
+      "url": "https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-api/2.24.2/log4j-api-2.24.2.jar",
+      "sha256": "0ca3ecbd4c315bdd5f2ef6af127712df718c78334cce5bf6fb7b4aa17fdab126",
+      "size": 348229
+    },
+    {
+      "coordinate": "org.json:json:20231013",
+      "url": "https://repo.maven.apache.org/maven2/org/json/json/20231013/json-20231013.jar",
+      "sha256": "0f18192df289114e17aa1a0d0a7f8372cc9f5c7e4f7e39adcf8906fe714fa7d3",
+      "size": 74702
+    },
+    {
+      "coordinate": "org.jetbrains:annotations:26.0.1",
+      "url": "https://repo.maven.apache.org/maven2/org/jetbrains/annotations/26.0.1/annotations-26.0.1.jar",
+      "sha256": "2037be378980d3ba9333e97955f3b2cde392aa124d04ca73ce2eee6657199297",
+      "size": 31170
+    },
+    {
+      "coordinate": "com.google.errorprone:error_prone_annotations:2.41.0",
+      "url": "https://repo.maven.apache.org/maven2/com/google/errorprone/error_prone_annotations/2.41.0/error_prone_annotations-2.41.0.jar",
+      "sha256": "a56e782b5b50811ac204073a355a21d915a2107fce13ec711331ad036f660fcc",
+      "size": 20389
+    },
+    {
+      "coordinate": "com.google.crypto.tink:tink:1.23.0",
+      "url": "https://repo.maven.apache.org/maven2/com/google/crypto/tink/tink/1.23.0/tink-1.23.0.jar",
+      "sha256": "5bcdc8798ce106f5145acb4a0e993c5e5861337b1e75ca88ceb6ab9da10fa512",
+      "size": 2775464
+    },
+    {
+      "coordinate": "com.squareup.okhttp3:okhttp-tls:4.12.0",
+      "url": "https://repo.maven.apache.org/maven2/com/squareup/okhttp3/okhttp-tls/4.12.0/okhttp-tls-4.12.0.jar",
+      "sha256": "969896cca029c2bb436cbdf7dc325de0f27e5629e246f3920c9b6c2f6be63af4",
+      "size": 148235
+    },
+    {
+      "coordinate": "com.squareup.okhttp3:okhttp:4.12.0",
+      "url": "https://repo.maven.apache.org/maven2/com/squareup/okhttp3/okhttp/4.12.0/okhttp-4.12.0.jar",
+      "sha256": "b1050081b14bb7a3a7e55a4d3ef01b5dcfabc453b4573a4fc019767191d5f4e0",
+      "size": 789531
+    },
+    {
+      "coordinate": "com.squareup.okio:okio-jvm:3.6.0",
+      "url": "https://repo.maven.apache.org/maven2/com/squareup/okio/okio-jvm/3.6.0/okio-jvm-3.6.0.jar",
+      "sha256": "67543f0736fc422ae927ed0e504b98bc5e269fda0d3500579337cb713da28412",
+      "size": 359580
+    },
+    {
+      "coordinate": "com.google.code.findbugs:jsr305:3.0.2",
+      "url": "https://repo.maven.apache.org/maven2/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar",
+      "sha256": "766ad2a0783f2687962c8ad74ceecc38a28b9f72a2d085ee438b7813e928d0c7",
+      "size": 19936
+    },
+    {
+      "coordinate": "com.google.protobuf:protobuf-java:4.33.6",
+      "url": "https://repo.maven.apache.org/maven2/com/google/protobuf/protobuf-java/4.33.6/protobuf-java-4.33.6.jar",
+      "sha256": "c24b2464ecfe9ac1d44e3a8fe281fca09e6ad2ca73dbd689dd7d6d719df987b5",
+      "size": 1886534
+    }
+  ],
+  "evidence": {
+    "unshrunk.log": "4d97f3b1046df6d7bec01ac929e9ff398355a91836643514c75481b80093da3b",
+    "new-platform.log": "df7cd20ed76f70345389a2f85672772c4be66f32793f696f39b2d79e2aedda68",
+    "fixed.log": "1368ea457f5ab526a058b03a8dd4b8673e8a1bb504be02481a8c170e9abe4b63",
+    "compile.log": "c42ad460f99ba3f30aa5b4ba31160f8af78ee508510289b68cda5864403f2a39",
+    "app.log": "731fd2afe5411305726212c9c055b2af0c96f56867fe3135ab9ba0096fc66ee9",
+    "shrunk.log": "4d97f3b1046df6d7bec01ac929e9ff398355a91836643514c75481b80093da3b",
+    "baseline.log": "8b1a7b9eae5da87e1c36132c3e9d481584d6b2a6f6ba4866b8a2fadb9d546f9e"
+  }
+}

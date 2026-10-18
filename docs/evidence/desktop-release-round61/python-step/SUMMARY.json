@@ -1,0 +1,93 @@
+[
+  {
+    "command": "python3 tools/check_text.py",
+    "exit": 0,
+    "seconds": 6.32455812599801,
+    "log": "01.log",
+    "sha256": "971b2ca690a59192412e3217aac5b4f39b387dd578de0b0ae856ea0b1d54a25c"
+  },
+  {
+    "command": "python3 tools/check_localization.py",
+    "exit": 0,
+    "seconds": 0.07441307900080574,
+    "log": "02.log",
+    "sha256": "1dc424c60001bc954a0c84c8c51919d457b545b7cafda2f2a7bfbecaf3b82431"
+  },
+  {
+    "command": "python3 tools/grading/generate_synthetic.py --check",
+    "exit": 0,
+    "seconds": 0.0843265830008022,
+    "log": "03.log",
+    "sha256": "783edafd153e94940a9abfec07fb795f2b62ae82f278e619837119ae91eeb248"
+  },
+  {
+    "command": "python3 tools/check_grading.py",
+    "exit": 0,
+    "seconds": 0.1313645899972471,
+    "log": "04.log",
+    "sha256": "a9f1397f6e759d2a17db0ecf14a8d1c3a1190c25e9836e91e60c00b0ee135fd6"
+  },
+  {
+    "command": "python3 tools/grading/check_full.py",
+    "exit": 0,
+    "seconds": 0.12577729199983878,
+    "log": "05.log",
+    "sha256": "820b975284f6c3a4a2a4d63d53de646f5202d8e53c96083208346e069dfcea14"
+  },
+  {
+    "command": "python3 tools/check_optimizer.py",
+    "exit": 0,
+    "seconds": 0.09874790200046846,
+    "log": "06.log",
+    "sha256": "c0cdab60f8af57fac46b5c71c499a754c8863608b94f5caad4a6900b98aa0e71"
+  },
+  {
+    "command": "python3 tools/check_design_parity.py",
+    "exit": 0,
+    "seconds": 0.28255796499797725,
+    "log": "07.log",
+    "sha256": "6a8749fa2fdbef78a707d0b702e048a5a1694328cf83d4cafe5cc4bf2e26eea9"
+  },
+  {
+    "command": "python3 tools/check_palettes.py",
+    "exit": 0,
+    "seconds": 0.132439721000992,
+    "log": "08.log",
+    "sha256": "20f564ec8b21c2dbe60fd80a7e233908511cf97bac9bc34da557091515746ff2"
+  },
+  {
+    "command": "python3 tools/check_nsis.py",
+    "exit": 0,
+    "seconds": 0.027456389001599746,
+    "log": "09.log",
+    "sha256": "10705ffb90544f6380d7e906e9ef5267334352bfce0266b66fde388b3dc7d020"
+  },
+  {
+    "command": "python3 tools/test_desktop_proguard.py",
+    "exit": 0,
+    "seconds": 0.09530862699830323,
+    "log": "10.log",
+    "sha256": "19db905bb7b4d76ff038b9f7c7e6270ad1584513ddf52316061dad3be5b061dc"
+  },
+  {
+    "command": "python3 tools/make_palette_preview.py --check",
+    "exit": 0,
+    "seconds": 0.10463313199943514,
+    "log": "11.log",
+    "sha256": "9d4dba877413e52bbea6af84fe913a26518989ca61944c47efe3b2cfa36bb1fc"
+  },
+  {
+    "command": "python3 tools/check_android_ci.py --self-test",
+    "exit": 0,
+    "seconds": 0.5744273160016746,
+    "log": "12.log",
+    "sha256": "09226d2a954f9402f78b2c93337236ef800308e140e1d8189a2a851726a3ad6b"
+  },
+  {
+    "command": "python3 tools/check_android_ci.py",
+    "exit": 0,
+    "seconds": 0.6367502749999403,
+    "log": "13.log",
+    "sha256": "52dbccab0a5443cc982251e7012d270db7780035fe81402bcb6f4f5f9334269e"
+  }
+]

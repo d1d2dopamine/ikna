@@ -1,0 +1,2 @@
+PASS: shrunk HeldCertificate PEM and pinned JSSE loopback TLS
+PASS: shrunk XChaCha20Poly1305 keyset, round trip and tamper rejection

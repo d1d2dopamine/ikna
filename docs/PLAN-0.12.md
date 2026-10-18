@@ -1180,3 +1180,13 @@ All twelve commands of the workflow Python step pass locally. All 471 packaged
 app/shared/desktop files remain byte-identical to Round59. No new Gradle,
 physical-device or GitHub run success is claimed. Catalogue readiness research
 is separate and does not alter packs or admission. See ROUND-0.12-60-ru.md.
+
+
+## Round 61 — desktop release ProGuard boundary
+
+The supplied Windows/Linux logs expose the same optional-dependency warning
+failure before installer construction. Relevant committed build files match
+delivered Round60. The narrow release-rule correction and regression evidence
+are recorded in [Round61](ROUND-0.12-61-ru.md). No catalogue, application behaviour
+or publication change is included. Actual Windows installer acceptance remains
+a hosted/platform gate; an isolated shrink/runtime smoke is not that gate.

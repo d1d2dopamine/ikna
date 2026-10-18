@@ -1,0 +1,11 @@
+{
+  "sourceFiles": {
+    "desktop/compose-desktop.pro": "043f9c90c831b5f7b72c9490306d9da62b51014670feba1986f909df846a3c31",
+    "tools/test_desktop_proguard.py": "e3c13f0437c023afd17b52b74ad033271c0282cd3f70ad1236f159b65f38a056",
+    "tools/proguard/ReleaseDependencySmoke.java": "6538cf17131a1bd6f0617f1ffec3f5387bcaedf98e1800aa2d64b8a9b183c565",
+    ".github/workflows/grading.yml": "38c0fe039dab68c6a5b719f3998e13e8c86a5644da06c3c828f94fb807d42a90"
+  },
+  "integrationInvocation": "python3 tools/test_desktop_proguard.py --java-home <verified-jdk17> --dependencies <pinned-jars-directory> --proguard-classpath \"<pinned-jars-directory>/*\" --compose-plugin <compose-gradle-plugin-1.8.2.jar> --output <new-evidence-directory>",
+  "scope": "isolated dependency fixture, not complete application Gradle build or Windows acceptance",
+  "extraStress": "An additional already-started obfuscation-enabled experiment passed; not production configuration, not used as release acceptance."
+}

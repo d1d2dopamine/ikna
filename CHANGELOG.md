@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### 0.12 application round 61 — desktop release dependency warnings
+
+- Bound optional OkHttp platform and unused Tink provider/downloader warnings to
+  twenty exact referring classes; retain shrinking and rejection of unexpected
+  missing dependencies. Installer artifact failure remains strict.
+- Add a CI warning-boundary check and an optional real ProGuard dependency smoke
+  harness. See [Round61](docs/ROUND-0.12-61-ru.md) for executed evidence and the
+  distinction from a Windows installer or complete project build.
+
 ### 0.12 application round 60 — CI checker compatibility
 
 - Repair stale tracker-key, current-query-schema and migration-range assertions
