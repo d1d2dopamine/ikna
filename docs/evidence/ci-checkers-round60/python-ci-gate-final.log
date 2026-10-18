@@ -1,0 +1,165 @@
+$ python3 tools/check_text.py
+Repository text is valid UTF-8/NFC; 1126 text files and 7 localization tables passed.
+EXIT 0
+
+$ python3 tools/check_localization.py
+Language registry OK: 7 languages, 861 keys each; English fallback, tokens, labels and selectors agree.
+EXIT 0
+
+$ python3 tools/grading/generate_synthetic.py --check
+synthetic-verified.jsonl: 1206 explicitly synthetic rows; seed 73021; reproducible
+synthetic-immature.jsonl: 1206 explicitly synthetic rows; seed 73021; reproducible
+synthetic-noise.jsonl: 1206 explicitly synthetic rows; seed 73021; reproducible
+EXIT 0
+
+$ python3 tools/check_grading.py
+test_android_interruption_observers_are_registered_and_removed (__main__.GradingChecks.test_android_interruption_observers_are_registered_and_removed) ... ok
+test_desktop_keyboard_guard_rejects_missing_keys_and_unsafe_routing (__main__.GradingChecks.test_desktop_keyboard_guard_rejects_missing_keys_and_unsafe_routing) ... ok
+test_desktop_keyboard_uses_its_own_automatic_grading_path (__main__.GradingChecks.test_desktop_keyboard_uses_its_own_automatic_grading_path) ... ok
+test_migrated_and_fresh_schemas_agree_for_every_table_and_index (__main__.GradingChecks.test_migrated_and_fresh_schemas_agree_for_every_table_and_index) ... ok
+test_migration_only_adds_the_four_nullable_columns (__main__.GradingChecks.test_migration_only_adds_the_four_nullable_columns) ... ok
+test_migration_preserves_every_old_value_and_undo (__main__.GradingChecks.test_migration_preserves_every_old_value_and_undo) ... ok
+test_nullable_defaults_and_export_mappings_are_complete (__main__.GradingChecks.test_nullable_defaults_and_export_mappings_are_complete) ... ok
+test_observations_are_frozen_before_throw_animation (__main__.GradingChecks.test_observations_are_frozen_before_throw_animation) ... ok
+test_only_reviews_change_in_schema_six (__main__.GradingChecks.test_only_reviews_change_in_schema_six) ... ok
+test_room_identity_matches_all_schema_versions (__main__.GradingChecks.test_room_identity_matches_all_schema_versions) ... ok
+test_signal_math_never_enters_scheduler (__main__.GradingChecks.test_signal_math_never_enters_scheduler) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.022s
+
+OK
+EXIT 0
+
+$ python3 tools/grading/check_full.py
+test_both_previous_versions_migrate_to_identical_fresh_schema (__main__.FullGradingChecks.test_both_previous_versions_migrate_to_identical_fresh_schema) ... ok
+test_ci_runs_production_kotlin_and_real_android_migrations (__main__.FullGradingChecks.test_ci_runs_production_kotlin_and_real_android_migrations) ... ok
+test_context_export_mappings_are_complete (__main__.FullGradingChecks.test_context_export_mappings_are_complete) ... ok
+test_input_accounting_guard_rejects_raw_duration_and_derived_rating (__main__.FullGradingChecks.test_input_accounting_guard_rejects_raw_duration_and_derived_rating) ... ok
+test_legacy_preference_cannot_override_automatic_policy (__main__.FullGradingChecks.test_legacy_preference_cannot_override_automatic_policy) ... ok
+test_live_restore_and_undo_use_input_outcome_not_derived_hard_as_failure (__main__.FullGradingChecks.test_live_restore_and_undo_use_input_outcome_not_derived_hard_as_failure) ... ok
+test_persisted_window_filters_undo_future_manual_and_discarded_rows (__main__.FullGradingChecks.test_persisted_window_filters_undo_future_manual_and_discarded_rows) ... ok
+test_schema_seven_identity_and_additive_shape (__main__.FullGradingChecks.test_schema_seven_identity_and_additive_shape) ... ok
+test_synthetic_fixtures_are_explicit_and_do_not_ship_as_app_assets (__main__.FullGradingChecks.test_synthetic_fixtures_are_explicit_and_do_not_ship_as_app_assets) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.084s
+
+OK
+EXIT 0
+
+$ python3 tools/check_optimizer.py
+test_answer_snapshot_precedes_writes (__main__.OptimizerChecks.test_answer_snapshot_precedes_writes) ... ok
+test_background_worker_does_not_activate_or_reschedule (__main__.OptimizerChecks.test_background_worker_does_not_activate_or_reschedule) ... ok
+test_both_platforms_use_automatic_policy_and_provider (__main__.OptimizerChecks.test_both_platforms_use_automatic_policy_and_provider) ... ok
+test_estimator_uses_shared_cap_and_original_outcome (__main__.OptimizerChecks.test_estimator_uses_shared_cap_and_original_outcome) ... ok
+test_migration_preserves_every_old_value (__main__.OptimizerChecks.test_migration_preserves_every_old_value) ... ok
+test_query_keeps_keyboard_not_undo_or_future (__main__.OptimizerChecks.test_query_keeps_keyboard_not_undo_or_future) ... ok
+test_restore_validates_and_replays_each_model (__main__.OptimizerChecks.test_restore_validates_and_replays_each_model) ... ok
+test_schema_is_one_nullable_addition (__main__.OptimizerChecks.test_schema_is_one_nullable_addition) ... ok
+test_version_and_ci_test_targets (__main__.OptimizerChecks.test_version_and_ci_test_targets) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.014s
+
+OK
+EXIT 0
+
+$ python3 tools/check_design_parity.py
+test_all_locales_have_overwrite_confirmation (__main__.DesignContracts.test_all_locales_have_overwrite_confirmation) ... ok
+test_automatic_policy_starts_in_both_containers (__main__.DesignContracts.test_automatic_policy_starts_in_both_containers) ... ok
+test_automatic_worker_has_quiet_period_and_backoff (__main__.DesignContracts.test_automatic_worker_has_quiet_period_and_backoff) ... ok
+test_browse_control_stays_visible_and_explains_why (__main__.DesignContracts.test_browse_control_stays_visible_and_explains_why) ... ok
+test_browse_credit_is_cumulative_global_and_honest (__main__.DesignContracts.test_browse_credit_is_cumulative_global_and_honest) ... ok
+test_browse_is_vertical_feed_not_a_swipe_session (__main__.DesignContracts.test_browse_is_vertical_feed_not_a_swipe_session) ... ok
+test_button_appearance_has_one_implementation (__main__.DesignContracts.test_button_appearance_has_one_implementation) ... ok
+test_ci_keeps_real_build_and_migration_gates (__main__.DesignContracts.test_ci_keeps_real_build_and_migration_gates) ... ok
+test_compose_typography_references_have_imports (__main__.DesignContracts.test_compose_typography_references_have_imports) ... ok
+test_deck_marks_and_phonetics_are_real (__main__.DesignContracts.test_deck_marks_and_phonetics_are_real) ... ok
+test_desktop_developer_restart_callback_reaches_settings_pane (__main__.DesignContracts.test_desktop_developer_restart_callback_reaches_settings_pane) ... ok
+test_desktop_first_launch_uses_the_mobile_onboarding_contract (__main__.DesignContracts.test_desktop_first_launch_uses_the_mobile_onboarding_contract) ... ok
+test_desktop_geometry_is_not_a_phone_window (__main__.DesignContracts.test_desktop_geometry_is_not_a_phone_window) ... ok
+test_desktop_hotkeys_are_captured_not_typed (__main__.DesignContracts.test_desktop_hotkeys_are_captured_not_typed) ... ok
+test_desktop_pane_titles_share_one_style (__main__.DesignContracts.test_desktop_pane_titles_share_one_style) ... ok
+test_desktop_wipe_clears_the_whole_database_and_returns_to_first_run (__main__.DesignContracts.test_desktop_wipe_clears_the_whole_database_and_returns_to_first_run) ... ok
+test_developer_mode_uses_shared_optional_product_override (__main__.DesignContracts.test_developer_mode_uses_shared_optional_product_override) ... ok
+test_developer_profile_changes_require_confirmation_and_a_new_process (__main__.DesignContracts.test_developer_profile_changes_require_confirmation_and_a_new_process) ... ok
+test_developer_reseed_is_startup_only_and_empty_stays_empty (__main__.DesignContracts.test_developer_reseed_is_startup_only_and_empty_stays_empty) ... ok
+test_developer_tools_use_actual_routes_and_read_only_inspection (__main__.DesignContracts.test_developer_tools_use_actual_routes_and_read_only_inspection) ... ok
+test_generation_and_fingerprint_guards_remain (__main__.DesignContracts.test_generation_and_fingerprint_guards_remain) ... ok
+test_interface_language_registry_drives_both_targets (__main__.DesignContracts.test_interface_language_registry_drives_both_targets) ... ok
+test_junit_settings_contracts_use_the_same_executable_preflight (__main__.DesignContracts.test_junit_settings_contracts_use_the_same_executable_preflight) ... ok
+test_mobile_add_deck_is_clean_and_deck_rows_keep_proportions (__main__.DesignContracts.test_mobile_add_deck_is_clean_and_deck_rows_keep_proportions) ... ok
+test_model_controls_are_not_exposed (__main__.DesignContracts.test_model_controls_are_not_exposed) ... ok
+test_model_path_and_paste_cost_are_bounded (__main__.DesignContracts.test_model_path_and_paste_cost_are_bounded) ... ok
+test_palette_grid_shares_lighting_and_accessible_selection_on_both_platforms (__main__.DesignContracts.test_palette_grid_shares_lighting_and_accessible_selection_on_both_platforms) ... ok
+test_progress_counts_session_and_deck_and_preserves_subpercent (__main__.DesignContracts.test_progress_counts_session_and_deck_and_preserves_subpercent) ... ok
+test_reading_cat_header_and_desktop_inspector (__main__.DesignContracts.test_reading_cat_header_and_desktop_inspector) ... ok
+test_reading_cat_keeps_the_selected_artwork_and_uses_downscale_filtering (__main__.DesignContracts.test_reading_cat_keeps_the_selected_artwork_and_uses_downscale_filtering) ... ok
+test_rounded_variant_is_a_first_class_variant (__main__.DesignContracts.test_rounded_variant_is_a_first_class_variant) ... ok
+test_same_stats_renderer_and_empty_states (__main__.DesignContracts.test_same_stats_renderer_and_empty_states) ... ok
+test_session_uses_shared_quiet_chrome (__main__.DesignContracts.test_session_uses_shared_quiet_chrome) ... ok
+test_settings_navigation_and_section_order (__main__.DesignContracts.test_settings_navigation_and_section_order) ... ok
+test_shared_ui_has_no_android_or_desktop_host_dependency (__main__.DesignContracts.test_shared_ui_has_no_android_or_desktop_host_dependency) ... ok
+test_signal_frame_uses_shared_clock_and_nested_ownership (__main__.DesignContracts.test_signal_frame_uses_shared_clock_and_nested_ownership) ... ok
+test_source_aware_search_and_catalog_are_shared (__main__.DesignContracts.test_source_aware_search_and_catalog_are_shared) ... ok
+test_stats_history_uses_global_targets_and_best_hour_waits_for_evidence (__main__.DesignContracts.test_stats_history_uses_global_targets_and_best_hour_waits_for_evidence) ... ok
+test_today_count_is_unique_and_first_batch_does_not_multiply (__main__.DesignContracts.test_today_count_is_unique_and_first_batch_does_not_multiply) ... ok
+test_undo_feedback_has_no_expiring_ui_timer (__main__.DesignContracts.test_undo_feedback_has_no_expiring_ui_timer) ... ok
+test_window_controls_are_named_in_all_locales (__main__.DesignContracts.test_window_controls_are_named_in_all_locales) ... ok
+test_windows_title_bar_is_themed_and_other_frames_stay_native (__main__.DesignContracts.test_windows_title_bar_is_themed_and_other_frames_stay_native) ... ok
+test_wipe_queries_clear_mutable_tables_and_preserve_slot_origin (__main__.DesignContracts.test_wipe_queries_clear_mutable_tables_and_preserve_slot_origin) ... ok
+
+----------------------------------------------------------------------
+Ran 43 tests in 0.243s
+
+OK
+EXIT 0
+
+$ python3 tools/check_palettes.py
+test_authored_text_and_light_panels_remain_readable (__main__.PaletteContracts.test_authored_text_and_light_panels_remain_readable) ... ok
+test_boundaries_and_thumbs_are_distinct_without_white_fills (__main__.PaletteContracts.test_boundaries_and_thumbs_are_distinct_without_white_fills) ... ok
+test_danger_is_readable_and_warm_accents_keep_ink (__main__.PaletteContracts.test_danger_is_readable_and_warm_accents_keep_ink) ... ok
+test_every_enabled_label_survives_all_control_states (__main__.PaletteContracts.test_every_enabled_label_survives_all_control_states) ... ok
+test_grey_accents_keep_the_palette_identity (__main__.PaletteContracts.test_grey_accents_keep_the_palette_identity) ... ok
+test_grey_lighting_is_grey_and_a_step_lighter (__main__.PaletteContracts.test_grey_lighting_is_grey_and_a_step_lighter) ... ok
+test_one_provider_drives_both_platforms_and_windows_bar (__main__.PaletteContracts.test_one_provider_drives_both_platforms_and_windows_bar) ... ok
+test_shared_controls_no_longer_invert_the_text_ink (__main__.PaletteContracts.test_shared_controls_no_longer_invert_the_text_ink) ... ok
+test_valid_custom_pairs_keep_their_original_label_and_readability (__main__.PaletteContracts.test_valid_custom_pairs_keep_their_original_label_and_readability) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.056s
+
+OK
+EXIT 0
+
+$ python3 tools/check_nsis.py
+NSIS contract OK: UTF-8 text, default Desktop shortcut, /S, safe upgrades, clean uninstall, opt-in purge, branded assets and no MSI
+EXIT 0
+
+$ python3 tools/make_palette_preview.py --check
+Palette preview agrees with all 24 production palette combinations.
+EXIT 0
+
+$ python3 tools/check_android_ci.py --self-test
+test_accepts_normal_methods_and_quoted_keywords (__main__.AndroidCiChecks.test_accepts_normal_methods_and_quoted_keywords) ... ok
+test_android_scope_does_not_reject_legal_jvm_test_names (__main__.AndroidCiChecks.test_android_scope_does_not_reject_legal_jvm_test_names) ... ok
+test_ci_builds_test_apk_before_emulator_and_retains_failure_logs (__main__.AndroidCiChecks.test_ci_builds_test_apk_before_emulator_and_retains_failure_logs) ... ok
+test_ignores_comments_raw_strings_and_escaped_literals (__main__.AndroidCiChecks.test_ignores_comments_raw_strings_and_escaped_literals) ... ok
+test_logging_wrapper_preserves_gradle_exit_status_and_arguments (__main__.AndroidCiChecks.test_logging_wrapper_preserves_gradle_exit_status_and_arguments) ... ok
+test_logging_wrapper_reports_skip_when_bash_is_absent (__main__.AndroidCiChecks.test_logging_wrapper_reports_skip_when_bash_is_absent) ... ok
+test_no_version_bump_or_min_sdk_workaround_and_updated_actions (__main__.AndroidCiChecks.test_no_version_bump_or_min_sdk_workaround_and_updated_actions) ... ok
+test_project_names_are_safe_and_all_device_tests_remain_enabled (__main__.AndroidCiChecks.test_project_names_are_safe_and_all_device_tests_remain_enabled) ... ok
+test_rejects_original_error_and_other_unsafe_quoted_identifiers (__main__.AndroidCiChecks.test_rejects_original_error_and_other_unsafe_quoted_identifiers) ... ok
+test_reports_source_line_after_comments (__main__.AndroidCiChecks.test_reports_source_line_after_comments) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.494s
+
+OK
+EXIT 0
+
+$ python3 tools/check_android_ci.py
+DEX-safe Kotlin identifier check passed: 206 Android-bound files; JVM-only tests excluded.
+EXIT 0
+

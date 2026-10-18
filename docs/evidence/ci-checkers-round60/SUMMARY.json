@@ -1,0 +1,29 @@
+{
+  "baseline_archive_sha256": "49e5ae7832b04055603fc9a67702433a55bdc202b3c5f8baf4d95604734ac6e4",
+  "source_sha256": {
+    "tools/check_grading.py": "fda20243090b46a9caa740160fbe01a2dd6c70c620e084216e0fcb00567e29d4",
+    "tools/grading/check_full.py": "2666f1a3a099e837e9124dc030e5b5e79b9d02212615cbf8423e994d63863033",
+    "tools/check_optimizer.py": "26a8a6fa79b4bc8e4826bf91d0383c840e7d2b76a61e3ab7eb5b4875457813a4",
+    ".github/workflows/grading.yml": "a2e48c6b410dc5349c128b41fb998ee0c298b19cfa0fb63284dc724486d46f93"
+  },
+  "executed_scope": "Exact12command Python step from grading.yml, not whole hosted workflow or Gradle builds",
+  "application_source_unchanged": {
+    "baseline_sha256": "49e5ae7832b04055603fc9a67702433a55bdc202b3c5f8baf4d95604734ac6e4",
+    "files_checked": 471,
+    "changed": []
+  },
+  "evidence_sha256": {
+    "check-full-final.log": "95fdcb09e2d5af7a0d1203df63f93d0dde752856b0cd79190bf69745f8bef58d",
+    "check-optimizer-baseline.log": "35fb06604dfa656a4146cbd0b514c79baaf72dbc10deeffe5afe18570f0b6376",
+    "app-source-unchanged.json": "332cf282cf96dbe033a1b9fe6eacad1d41465b87cc22195df6874b7d240f92cf",
+    "check-grading-final.log": "a9f1397f6e759d2a17db0ecf14a8d1c3a1190c25e9836e91e60c00b0ee135fd6",
+    "check_optimizer.patch": "471e07cea32a26e62d9da3949d103dd9265c2ea0246473a43d6986df33720221",
+    "check_full.patch": "aa8d7c361818f73accfd2c64547cd4174eb7d4d9038becfe2a12dde6059947f2",
+    "check-grading-baseline.log": "c8c11e100c0f4c733e9e95edadcfbe42d0527fe9e11785898f60fd7a539a44e5",
+    "repair-report.md": "e02ab1229f6e58e197058f838b8aeccef5515f9287dfae5986eae548e7d1f0ee",
+    "check_grading.patch": "4d49b207cd1ab2d4dce8643efb62fc1b5afc463c9259b19864e28d962b282e78",
+    "check-optimizer-final.log": "c0cdab60f8af57fac46b5c71c499a754c8863608b94f5caad4a6900b98aa0e71",
+    "python-ci-gate-final.log": "77b12bcc6113ad3b8cc20a8faf04af4b929303d1a6c0b0ea5737aac4dfc756ae",
+    "check-full-baseline.log": "892ac49131a14bd8f0d2fc4466d1d683de07a244d8ca87c663c6bb5787183504"
+  }
+}

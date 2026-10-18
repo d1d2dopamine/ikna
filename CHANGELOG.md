@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### 0.12 application round 60 — CI checker compatibility
+
+- Repair stale tracker-key, current-query-schema and migration-range assertions
+  in three Python checkers; preserve application source and historical invariants.
+- Run the exact twelve-command Python validation step successfully, without
+  claiming a new complete GitHub/Gradle/device run.
+
 ### 0.12 application round 59 — open-session synchronization safety
 
 - Invalidate stale Android/Desktop presentation after committed sync and inspect

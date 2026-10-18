@@ -1,0 +1,83 @@
+--- a/tools/grading/check_full.py
++++ b/tools/grading/check_full.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Standard-library structural and real-SQLite checks for schema 7 and CI wiring.
++"""Standard-library structural and real-SQLite checks for schema 7 migrations, live DAO and CI wiring.
+ 
+ These complement, not replace, Kotlin/JUnit and Android execution in grading.yml.
+ """
+@@ -12,7 +12,7 @@
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+ sys.path.insert(0, str(ROOT / "tools"))
+-from check_grading import schema, identity_hash, create_database, seed_old_reviews, migration_sql
++from check_grading import schema, identity_hash, create_database, seed_old_reviews, migration_sql, current_schema_version
+ 
+ SHARED = ROOT / "shared/src/jvmShared/kotlin/dev/ikna"
+ FIELDS = {"inputRating": "INTEGER", "gradingVersion": "INTEGER", "gradingReason": "TEXT",
+@@ -82,7 +82,7 @@
+         expression = source[start:method]
+         fragments = re.findall(r'"([^"\n]*)"', expression)
+         sql = fragments[0] + "rating > 0 AND id NOT IN (SELECT undoOf FROM reviews WHERE undoOf IS NOT NULL)" + ''.join(fragments[1:])
+-        db = create_database(7)
++        db = create_database(current_schema_version())
+         for i in range(1, 221):
+             db.execute("""INSERT INTO reviews (id,chunkId,level,ts,rating,elapsedDays,stabilityBefore,
+                 stabilityAfter,difficultyBefore,difficultyAfter,durationMs,wasAmnesty,inputRating,
+@@ -114,18 +114,52 @@
+         self.assertEqual(60, len(keyboard_rows))
+         self.assertTrue(all(row['inputMethod'] == 'keyboard' and row['swipeVelocityX'] is None
+                             for row in keyboard_rows))
++        # Equal timestamps use portable identity, with a deterministic legacy
++        # local-ID fallback; deliberately oppose insertion/local-ID order.
++        for row_id, event_id in ((700, "z-event"), (701, "a-event"), (702, None)):
++            db.execute("""INSERT INTO reviews (id,chunkId,level,ts,rating,elapsedDays,stabilityBefore,
++                stabilityAfter,difficultyBefore,difficultyAfter,durationMs,wasAmnesty,inputRating,
++                inputMethod,peekSemantics,peeked,latencyMs,swipeVelocityX,presentationLength,eventId)
++                VALUES (?, 'keys', 0, 1000, 3, 0, 1, 1, 5, 5, 3000, 0, 3, 'keyboard',
++                'required_reveal_verified_v2', 1, 2000, NULL, 25, ?)""", (row_id, event_id))
++        tied = db.execute(sql, dict(inputMethod='keyboard', peekSemantics='required_reveal_verified_v2',
++                                   limit=3, beforeTs=1000)).fetchall()
++        self.assertEqual([700, 701, 702], [row['id'] for row in tied])
+         db.close()
++
++    def assert_normalized_input_accounting(self, source):
++        answer = source.split("private suspend fun answerLocked(", 1)[1].split("bumpDailyStat(", 1)
++        self.assertIn("val recordedDurationMs = ReviewDuration.normalize(durationMs)", answer[0])
++        self.assertIn("durationMs = recordedDurationMs", answer[0])
++        self.assertTrue(answer[1].startswith("now, rating, recordedDurationMs)"))
++
++    def test_input_accounting_guard_rejects_raw_duration_and_derived_rating(self):
++        source = (SHARED / "data/repo/LearningRepository.kt").read_text()
++        self.assert_normalized_input_accounting(source)
++        for old, new in (
++            ("ReviewDuration.normalize(durationMs)", "durationMs"),
++            ("durationMs = recordedDurationMs", "durationMs = durationMs"),
++            ("bumpDailyStat(now, rating, recordedDurationMs)", "bumpDailyStat(now, rating, durationMs)"),
++            ("bumpDailyStat(now, rating, recordedDurationMs)", "bumpDailyStat(now, decision.rating, recordedDurationMs)"),
++        ):
++            with self.subTest(mutation=old):
++                self.assertIn(old, source)
++                with self.assertRaises(AssertionError):
++                    self.assert_normalized_input_accounting(source.replace(old, new, 1))
+ 
+     def test_live_restore_and_undo_use_input_outcome_not_derived_hard_as_failure(self):
+         live = (SHARED / "data/repo/LearningRepository.kt").read_text()
+         self.assertIn("recent.count { it.outcomeRating >= 3 }", live)
+         self.assertIn("if (review.outcomeRating >= 3)", live)
+         self.assertIn("components.recordAnswer(sessionCard.chunk.id, rating.value, now)", live)
+-        self.assertIn("bumpDailyStat(now, rating, durationMs)", live)
++        self.assert_normalized_input_accounting(live)
+         for name in ("RestoreRepository", "ComponentRepository"):
+             self.assertIn("if (r.outcomeRating >= 3)", (SHARED / f"data/repo/{name}.kt").read_text())
+-        for name in ("RestoreRepository", "SchedulerMigration"):
+-            self.assertIn("scheduler.applyRecordedReview", (SHARED / f"data/repo/{name}.kt").read_text())
++        restore = (SHARED / "data/repo/RestoreRepository.kt").read_text()
++        self.assertIn("val replayScheduler = if (sync) Scheduler(dayStartHour = config.dayStartHour) else scheduler", restore)
++        self.assertIn("replayScheduler.applyRecordedReview(card, r)", restore)
++        self.assertIn("scheduler.applyRecordedReview(card, answer)",
++                      (SHARED / "data/repo/SchedulerMigration.kt").read_text())
+ 
+     def test_legacy_preference_cannot_override_automatic_policy(self):
+         settings = (SHARED / "data/prefs/SettingsStore.kt").read_text()

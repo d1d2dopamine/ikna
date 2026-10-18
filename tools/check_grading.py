@@ -33,6 +33,13 @@ def schema(version):
     return json.loads((SCHEMAS / f"{version}.json").read_text())["database"]
 
 
+def current_schema_version():
+    # Live DAO checks use the committed schema selected by the production DB.
+    # Historical migration checks keep their explicit source/target versions.
+    source = (SHARED / "data/db/IknaDatabase.kt").read_text()
+    return int(re.search(r"^\s*version\s*=\s*(\d+)\s*,", source, re.MULTILINE).group(1))
+
+
 def identity_hash(db):
     def flag(v):
         return str(v).lower()
@@ -72,7 +79,7 @@ def create_database(version):
     for entity in schema(version)["entities"]:
         name = entity["tableName"]
         db.execute(entity["createSql"].replace("${TABLE_NAME}", name))
-        for index in entity["indices"]:
+        for index in entity.get("indices", []):
             db.execute(index["createSql"].replace("${TABLE_NAME}", name))
     return db
 
@@ -194,6 +201,85 @@ class GradingChecks(unittest.TestCase):
         for cleanup in ("removeObserver", "removeOnWindowFocusChangeListener", "unregisterReceiver"):
             self.assertIn(cleanup, source)
 
+    def assert_desktop_keyboard_contract(self, source):
+        # Round59 hides current during read-only inspection. Keep the tracker
+        # tied to the queued card so an unchanged inspection does not replace it.
+        # Scope this check to reviewSignals, not an unrelated remember call.
+        declaration = re.search(
+            r"val\s+reviewSignals\s*=\s*remember\(([^{}]*?)\)\s*\{\s*ReviewSignalTracker\(\)",
+            source, re.DOTALL,
+        )
+        self.assertIsNotNone(declaration, "reviewSignals must own a remembered tracker")
+        keys = {re.sub(r"\s+", "", key) for key in declaration.group(1).split(",")}
+        for key in ("deckId", "reload", "index", "cards.getOrNull(index)?.card?.key", "loading"):
+            self.assertIn(key, keys, f"reviewSignals missing identity/loading key: {key}")
+        compact = re.sub(r"\s+", " ", source)
+        self.assertIn(
+            "val current = if (loading || loadFailed || invalidated || sessionChanged || inspecting) "
+            "null else cards.getOrNull(index)", compact,
+        )
+        self.assertIn(
+            "fun acceptsInput(): Boolean = !sessionChanged && !inspecting && "
+            "container.sessionChanges.generation.value == observedGeneration", compact,
+        )
+        request = compact.split("val requestKeyboardSwipe:", 1)[1].split("val undo:", 1)[0]
+        self.assertIn(
+            "if (current != null && !loading && !saving && acceptsInput() && programmaticSwipe == null)",
+            request,
+        )
+        self.assertIn("programmaticSwipe = ProgrammaticSwipe(programmaticSwipeToken, rating)", request)
+        keyboard = compact.split(".onPreviewKeyEvent { event ->", 1)[1].split(".focusable()", 1)[0]
+        self.assertIn("loading || loadFailed || saving || !acceptsInput() || reportCard != null", keyboard)
+        for action, rating in (("MISS", "AGAIN"), ("KNOW", "GOOD")):
+            self.assertIn(
+                f"HotkeyAction.{action} -> if (current != null) {{ if (revealed) requestKeyboardSwipe(Rating.{rating})",
+                keyboard,
+            )
+        for wiring in ("onRate = gradeWithSignals", "signals = reviewSignals",
+                       "programmaticSwipe = programmaticSwipe"):
+            self.assertIn(wiring, compact.split("SwipeableCard(", 1)[1])
+
+    def test_desktop_keyboard_guard_rejects_missing_keys_and_unsafe_routing(self):
+        source = (ROOT / "desktop/src/main/kotlin/dev/ikna/desktop/SessionPane.kt").read_text()
+        self.assert_desktop_keyboard_contract(source)
+        declaration = re.search(r"val reviewSignals = remember\((.*?)\) \{", source).group(0)
+        for key in ("deckId", "reload", "index", "cards.getOrNull(index)?.card?.key", "loading"):
+            with self.subTest(missing_tracker_key=key):
+                keys = declaration.removeprefix("val reviewSignals = remember(").removesuffix(") {").split(", ")
+                keys.remove(key)
+                changed = "val reviewSignals = remember(" + ", ".join(keys) + ") {"
+                with self.assertRaises(AssertionError):
+                    self.assert_desktop_keyboard_contract(source.replace(declaration, changed, 1))
+        for old, new in (
+            ("ReviewSignalTracker()", "OtherSignalTracker()"),
+            ("ReviewSignalTracker()", ""),
+            ("val reviewSignals = remember(", "val unrelatedSignals = remember("),
+            ("cards.getOrNull(index)?.card?.key, loading", "current?.card?.key, loading"),
+            ("loading || loadFailed || invalidated", "loadFailed || invalidated"),
+            (" || invalidated || sessionChanged || inspecting", " || sessionChanged || inspecting"),
+            (" || sessionChanged || inspecting", " || inspecting"),
+            (" || inspecting) null", ") null"),
+            ("!sessionChanged && !inspecting &&", "!sessionChanged &&"),
+            ("container.sessionChanges.generation.value == observedGeneration", "true"),
+            ("saving || !acceptsInput() || reportCard", "saving || reportCard"),
+            ("acceptsInput() && programmaticSwipe == null", "programmaticSwipe == null"),
+            ("ProgrammaticSwipe(programmaticSwipeToken, rating)", "ProgrammaticSwipe(programmaticSwipeToken, Rating.GOOD)"),
+            ("if (revealed) requestKeyboardSwipe(Rating.AGAIN)", "if (revealed) requestKeyboardSwipe(Rating.GOOD)"),
+            ("if (revealed) requestKeyboardSwipe(Rating.GOOD)", "if (revealed) gradeWithSignals(Rating.GOOD, ReviewSignals())"),
+            ("if (revealed) requestKeyboardSwipe(Rating.GOOD)", "requestKeyboardSwipe(Rating.GOOD)"),
+            ("onRate = gradeWithSignals", "onRate = anotherHandler"),
+            ("signals = reviewSignals", "signals = ReviewSignalTracker()"),
+            ("programmaticSwipe = programmaticSwipe,", "programmaticSwipe = null,"),
+        ):
+            with self.subTest(mutation=old):
+                self.assertIn(old, source)
+                with self.assertRaises(AssertionError):
+                    self.assert_desktop_keyboard_contract(source.replace(old, new, 1))
+        # An unrelated remembered tracker must not satisfy a broken real binding.
+        decoy = source.replace("val reviewSignals = remember(", "val unrelatedSignals = remember(", 1)
+        with self.assertRaises(AssertionError):
+            self.assert_desktop_keyboard_contract(decoy + "\nval reviewSignals = ReviewSignalTracker()")
+
     def test_desktop_keyboard_uses_its_own_automatic_grading_path(self):
         source = (ROOT / "desktop/src/main/kotlin/dev/ikna/desktop/SessionPane.kt").read_text()
         card = (SHARED / "ui/session/CardStack.kt").read_text()
@@ -225,7 +311,7 @@ class GradingChecks(unittest.TestCase):
         self.assertIn("inputRating = 3", dao)
         self.assertIn("peeked = 1", dao)
         self.assertIn("required_reveal_verified_v2", grading)
-        self.assertIn("remember(deckId, reload, index, current?.card?.key, loading)", source)
+        self.assert_desktop_keyboard_contract(source)
         self.assertLess(source.index(".onPreviewKeyEvent { event ->"), source.index(".focusable()"))
 
 

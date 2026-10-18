@@ -1168,3 +1168,15 @@ new authorization revision or schema redesign. See
 [ROUND-0.12-59.md](ROUND-0.12-59.md) for finite verification and limitations.
 
 Round59 result: 1,239 passed, two existing skips, zero failures/errors; APK build/signature and packaged Linux selftest passed. Both platform source paths are wired; physical lifecycle acceptance remains open. Missing/replaced plans require explicit Continue, not automatic admission.
+
+## Round60 — repair stale Python CI contracts (2026-10-18)
+
+The owner-supplied CI log reproduced a stale tracker-key assertion. Running the
+same complete Python step exposed stale current-schema and migration-boundary
+assumptions in two other checkers. Repair only tools/check_grading.py,
+tools/grading/check_full.py and tools/check_optimizer.py, retaining historical
+migration checks and adding negative mutation/current-query ordering coverage.
+All twelve commands of the workflow Python step pass locally. All 471 packaged
+app/shared/desktop files remain byte-identical to Round59. No new Gradle,
+physical-device or GitHub run success is claimed. Catalogue readiness research
+is separate and does not alter packs or admission. See ROUND-0.12-60-ru.md.

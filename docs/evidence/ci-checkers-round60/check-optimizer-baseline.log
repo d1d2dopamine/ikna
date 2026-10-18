@@ -1,0 +1,51 @@
+test_answer_snapshot_precedes_writes (__main__.OptimizerChecks.test_answer_snapshot_precedes_writes) ... ok
+test_background_worker_does_not_activate_or_reschedule (__main__.OptimizerChecks.test_background_worker_does_not_activate_or_reschedule) ... ok
+test_both_platforms_use_automatic_policy_and_provider (__main__.OptimizerChecks.test_both_platforms_use_automatic_policy_and_provider) ... ok
+test_estimator_uses_shared_cap_and_original_outcome (__main__.OptimizerChecks.test_estimator_uses_shared_cap_and_original_outcome) ... ok
+test_migration_preserves_every_old_value (__main__.OptimizerChecks.test_migration_preserves_every_old_value) ... FAIL
+test_query_keeps_keyboard_not_undo_or_future (__main__.OptimizerChecks.test_query_keeps_keyboard_not_undo_or_future) ... ERROR
+test_restore_validates_and_replays_each_model (__main__.OptimizerChecks.test_restore_validates_and_replays_each_model) ... ok
+test_schema_is_one_nullable_addition (__main__.OptimizerChecks.test_schema_is_one_nullable_addition) ... FAIL
+test_version_and_ci_test_targets (__main__.OptimizerChecks.test_version_and_ci_test_targets) ... ok
+
+======================================================================
+ERROR: test_query_keeps_keyboard_not_undo_or_future (__main__.OptimizerChecks.test_query_keeps_keyboard_not_undo_or_future)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/8105054a3211/ikna-current/round60-ci-catalogue/tools/check_optimizer.py", line 41, in test_query_keeps_keyboard_not_undo_or_future
+    self.assertEqual([101,100],[r[0] for r in db.execute(sql,dict(beforeTs=101,limit=20000))]);db.close()
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: eventId
+
+======================================================================
+FAIL: test_migration_preserves_every_old_value (__main__.OptimizerChecks.test_migration_preserves_every_old_value)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/8105054a3211/ikna-current/round60-ci-catalogue/tools/check_optimizer.py", line 32, in test_migration_preserves_every_old_value
+    self.assertEqual(fresh.execute(query).fetchall(),db.execute(query).fetchall())
+AssertionError: Lists differ: [(0, [1346 chars]e, 0)] != [(0, [1346 chars]e, 0), (32, 'eventId', 'TEXT', 0, None, 0), (3[70 chars], 0)]
+
+Second list contains 3 additional elements.
+First extra element 32:
+(32, 'eventId', 'TEXT', 0, None, 0)
+
+Diff is 1720 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_schema_is_one_nullable_addition (__main__.OptimizerChecks.test_schema_is_one_nullable_addition)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/8105054a3211/ikna-current/round60-ci-catalogue/tools/check_optimizer.py", line 15, in test_schema_is_one_nullable_addition
+    self.assertEqual(['ALTER TABLE reviews ADD COLUMN fsrsParameters TEXT'],migration())
+AssertionError: Lists differ: ['ALT[43 chars]TEXT'] != ['ALT[43 chars]TEXT', 'CREATE TABLE IF NOT EXISTS history_bou[1688 chars]EXT']
+
+Second list contains 12 additional elements.
+First extra element 1:
+'CREATE TABLE IF NOT EXISTS history_boundary (id INTEGER NOT NULL PRIMARY KEY, afterLocalId INTEGER NOT NULL, token TEXT NOT NULL)'
+
+Diff is 2095 characters long. Set self.maxDiff to None to see it.
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.012s
+
+FAILED (failures=2, errors=1)

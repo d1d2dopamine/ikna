@@ -2,11 +2,11 @@
 """Structural and real-SQLite checks, not a substitute for Kotlin/device CI."""
 from pathlib import Path
 import re,unittest
-from check_grading import schema,identity_hash,create_database,seed_old_reviews
+from check_grading import schema,identity_hash,create_database,seed_old_reviews,current_schema_version
 ROOT=Path(__file__).resolve().parents[1]
 S=ROOT/'shared/src/jvmShared/kotlin/dev/ikna'
 def migration():
- text=(S/'data/db/Migrations.kt').read_text().split('private val MIGRATION_7_8 =',1)[1].split('val ALL:',1)[0]
+ text=(S/'data/db/Migrations.kt').read_text().split('private val MIGRATION_7_8 =',1)[1].split('private val MIGRATION_8_9',1)[0].split('val ALL:',1)[0]
  return re.findall(r'connection\.execSQL\("([^"]+)"\)',text)
 class OptimizerChecks(unittest.TestCase):
  def test_schema_is_one_nullable_addition(self):
@@ -35,10 +35,15 @@ class OptimizerChecks(unittest.TestCase):
   text=(S/'data/db/Daos.kt').read_text();end=text.index('suspend fun optimizerHistory');begin=text.rfind('@Query(',0,end)
   parts=re.findall(r'"([^"\n]*)"',text[begin:end])
   sql=parts[0]+'rating > 0 AND id NOT IN (SELECT undoOf FROM reviews WHERE undoOf IS NOT NULL)'+''.join(parts[1:])
-  db=create_database(8);seed_old_reviews(db)
+  db=create_database(current_schema_version());seed_old_reviews(db)
   for i in (100,101,102):
    db.execute("INSERT INTO reviews(id,chunkId,level,ts,rating,elapsedDays,stabilityBefore,stabilityAfter,difficultyBefore,difficultyAfter,durationMs,wasAmnesty,inputMethod) VALUES (?,'one',0,?,3,0,1,2,5,5,2000,0,'keyboard')",(i,i))
-  self.assertEqual([101,100],[r[0] for r in db.execute(sql,dict(beforeTs=101,limit=20000))]);db.close()
+  self.assertEqual([101,100],[r[0] for r in db.execute(sql,dict(beforeTs=101,limit=20000))])
+  # Current SQL orders equal timestamps by portable identity, then legacy ID.
+  db.execute("UPDATE reviews SET ts=100, eventId='z-event' WHERE id=100")
+  db.execute("UPDATE reviews SET ts=100, eventId='a-event' WHERE id=101")
+  db.execute("UPDATE reviews SET ts=100 WHERE id=102")
+  self.assertEqual([100,101,102],[r[0] for r in db.execute(sql,dict(beforeTs=100,limit=20000))]);db.close()
  def test_answer_snapshot_precedes_writes(self):
   text=(S/'data/repo/LearningRepository.kt').read_text();text=text[text.index('val answerScheduler = scheduler.snapshot()'):]
   self.assertLess(text.index('FsrsSnapshotCodec.encode'),text.index('cardDao.upsert'))
