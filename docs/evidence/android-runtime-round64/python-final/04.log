@@ -1,0 +1,16 @@
+test_android_interruption_observers_are_registered_and_removed (__main__.GradingChecks.test_android_interruption_observers_are_registered_and_removed) ... ok
+test_desktop_keyboard_guard_rejects_missing_keys_and_unsafe_routing (__main__.GradingChecks.test_desktop_keyboard_guard_rejects_missing_keys_and_unsafe_routing) ... ok
+test_desktop_keyboard_uses_its_own_automatic_grading_path (__main__.GradingChecks.test_desktop_keyboard_uses_its_own_automatic_grading_path) ... ok
+test_migrated_and_fresh_schemas_agree_for_every_table_and_index (__main__.GradingChecks.test_migrated_and_fresh_schemas_agree_for_every_table_and_index) ... ok
+test_migration_only_adds_the_four_nullable_columns (__main__.GradingChecks.test_migration_only_adds_the_four_nullable_columns) ... ok
+test_migration_preserves_every_old_value_and_undo (__main__.GradingChecks.test_migration_preserves_every_old_value_and_undo) ... ok
+test_nullable_defaults_and_export_mappings_are_complete (__main__.GradingChecks.test_nullable_defaults_and_export_mappings_are_complete) ... ok
+test_observations_are_frozen_before_throw_animation (__main__.GradingChecks.test_observations_are_frozen_before_throw_animation) ... ok
+test_only_reviews_change_in_schema_six (__main__.GradingChecks.test_only_reviews_change_in_schema_six) ... ok
+test_room_identity_matches_all_schema_versions (__main__.GradingChecks.test_room_identity_matches_all_schema_versions) ... ok
+test_signal_math_never_enters_scheduler (__main__.GradingChecks.test_signal_math_never_enters_scheduler) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.025s
+
+OK

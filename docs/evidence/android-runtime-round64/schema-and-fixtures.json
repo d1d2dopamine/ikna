@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 14,
+  "schemaIdentityHash": "f78f04e461bf0a24950f53aa8a15c04a",
+  "candidateSchemaSha256": "efaa130662a9084eb05f399c9190840ceed67fbc30a6159d5156282c4a59e25d",
+  "baselineSchemaSha256": "efaa130662a9084eb05f399c9190840ceed67fbc30a6159d5156282c4a59e25d",
+  "fixtureSha256": {
+    "AndroidDriverTransactionRegressionTest.kt": "3b806c05b03428fd4166492c100c508227148bf73d1bac6c4057817aa9278c41",
+    "SessionDatabaseFlowsTest.kt": "1d3f429b375510c68d734c042d2ed00cb98525b136bc813386ff46ade931093b"
+  },
+  "fixtureMethods": 8,
+  "schemaEdit": "none; generated schema bytes unchanged"
+}

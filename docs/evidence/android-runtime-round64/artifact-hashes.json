@@ -1,0 +1,18 @@
+{
+  "baselineApp": {
+    "sha256": "9f910ef92f0b9e0e32eaa882a8bf56fdd7408fcc549dbf530d699f63c0f0a279",
+    "bytes": 68904028
+  },
+  "baselineTests": {
+    "sha256": "1e3b18c05193b08297aa885b27dcc3eab065de1a2e19c7eab8bd9fcf9ae47c1a",
+    "bytes": 1114942
+  },
+  "candidateApp": {
+    "sha256": "5e018f81e34eeddba0ad3915617b1d55e2f0f803a7422fd14a554efd54fbe696",
+    "bytes": 68936796
+  },
+  "candidateTests": {
+    "sha256": "ad8c1c7d95cdf72497829d8cc6ee05dd55cf99cfdb7cb0d55c62cfcbc36932ca",
+    "bytes": 1114942
+  }
+}

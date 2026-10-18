@@ -1,0 +1,15 @@
+{
+  "sourceArchive": "Round62",
+  "scope": "Compiled Android/JVM input metadata plus final CI/checker source hashes; actual Android runtime unverified",
+  "files": {
+    "shared/build.gradle.kts": "ac3fa907bf13122bd2531b341aa38136b16e39bcc12f26bf11cbaf55bfa60c6b",
+    ".github/workflows/grading.yml": "35323009f82a8280f216830e8db1a43811f9556401c2a94d378ab67fc47097a3",
+    "tools/ci/run-android-tests.sh": "a381c60299639261c7d74fb57cdf22d6693e972812d7ef6a5a802c48af9c49f8",
+    "tools/test_android_runtime_ci.py": "a089b1e0aad700454c6de358d79ba0b6b066a16a2121999c23ee34100c4769fe",
+    "tools/check_android_ci.py": "eb83f3070ffe23bbf25ee52c23f2fe1118a2eed5ea7e4a277ac12069127994b8",
+    "tools/check_design_parity.py": "10f13bfde49f47de11c8e7c441f6ec66d64db05af832abb17f529b47682e8888",
+    "tools/grading/check_full.py": "ae88427a67eb0e44c1e334265daf361183c3997cc30e6065eda70c01a9b262b6",
+    "app/src/androidTest/java/dev/ikna/data/db/AndroidDriverTransactionRegressionTest.kt": "3b806c05b03428fd4166492c100c508227148bf73d1bac6c4057817aa9278c41",
+    "app/src/androidTest/java/dev/ikna/data/db/SessionDatabaseFlowsTest.kt": "1d3f429b375510c68d734c042d2ed00cb98525b136bc813386ff46ade931093b"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "dateUtc": "2026-10-18",
+  "artifactSources": [
+    "https://dl.google.com/dl/android/maven2/com/android/application/com.android.application.gradle.plugin/8.6.1/com.android.application.gradle.plugin-8.6.1.pom",
+    "https://dl.google.com/dl/android/maven2/androidx/room/room-runtime-android/2.8.5/room-runtime-android-2.8.5.aar",
+    "https://dl.google.com/dl/android/maven2/androidx/room/room-runtime/2.8.5/room-runtime-2.8.5.pom",
+    "https://dl.google.com/dl/android/maven2/androidx/room/room-runtime-android/2.8.5/room-runtime-android-2.8.5.pom",
+    "https://dl.google.com/dl/android/maven2/androidx/sqlite/sqlite-android/2.6.2/sqlite-android-2.6.2.aar",
+    "https://dl.google.com/dl/android/maven2/androidx/sqlite/sqlite-framework-android/2.6.2/sqlite-framework-android-2.6.2.aar",
+    "https://dl.google.com/dl/android/maven2/androidx/sqlite/sqlite-bundled-android/2.6.2/sqlite-bundled-android-2.6.2.aar"
+  ],
+  "sdkRepository": "https://dl.google.com/android/repository/repository2-3.xml",
+  "aospImageRepository": "https://dl.google.com/android/repository/sys-img/android/sys-img2-3.xml",
+  "commandLineTools19": {
+    "url": "https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip",
+    "sha1VerifiedFromOfficialMetadata": "5fdcc763663eefb86a5b8879697aa6088b041e70"
+  },
+  "installedWithOfficialSdkManager": [
+    "platforms;android-35",
+    "build-tools;34.0.0",
+    "platform-tools",
+    "emulator",
+    "system-images;android-35;default;x86_64"
+  ],
+  "sdkLicense": {
+    "identifier": "android-sdk-license",
+    "date": "January 16, 2019",
+    "url": "https://developer.android.com/studio/terms",
+    "acceptance": "Previously authorized terms accepted through official sdkmanager prompt; no fabricated license files"
+  },
+  "recovery": "Gradle uses the execution environment's per-command proxy and existing system Java CA trust store. Android user home and SDK home redirected to isolated writable directories. No TLS verification bypass or trust-store modification.",
+  "emulator": {
+    "hardwareAcceleration": false,
+    "reason": "/dev/kvm absent",
+    "cpuCores": 2,
+    "memoryMb": 2048,
+    "display": "480x854",
+    "bootDeadlineSeconds": 600,
+    "googlePlay": false
+  },
+  "latestCliAttempt": "Official latest CLI archive checksum verified, but its new Android CLI auto-loader failed connectivity. Used official version19 Java sdkmanager instead. No source changes.",
+  "sherpaRuntime": {
+    "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/v1.10.46/sherpa-onnx-1.10.46.aar",
+    "sha256": "4008c4ec831ea9c34499eba9f633853ad2107ea70a19db7d6c3063e0af0f24cb",
+    "version": "1.10.46",
+    "validated": "ZIP integrity; project pinned version; copied identical runtime to old/new ignored app/libs"
+  },
+  "starterPack": {
+    "url": "https://github.com/d1d2dopamine/ikna/releases/download/catalog/en-ru-beginner.jsonl",
+    "bytes": 1196978,
+    "sha256": "70a84018057208aae631ce00f16b4c1d7be009660a9b75fee39dfa167530f8f7",
+    "cards": 1435,
+    "cardsWithIpa": 1424,
+    "validation": "Existing fetch-bundled-pack.sh verify mode unchanged; all shape and source checks passed"
+  }
+}

@@ -56,6 +56,7 @@ jobs:
           python3 tools/check_nsis.py
           python3 tools/test_desktop_proguard.py
           python3 tools/make_palette_preview.py --check
+          python3 tools/test_android_runtime_ci.py
           python3 tools/check_android_ci.py --self-test
           python3 tools/check_android_ci.py
       - name: Settings source contracts (Java 8 API compatibility and JUnit assertions)
@@ -127,6 +128,7 @@ jobs:
         run: |
           mkdir -p ci-logs
           printf '%s\n' 'Migration validation: minSdk 29; emulator API 35; x86_64; Gradle 8.10.2.' > ci-logs/migrations-context.txt
+          python3 tools/test_android_runtime_ci.py
           python3 tools/check_android_ci.py --self-test
           python3 tools/check_android_ci.py
       - name: Android SDK
@@ -162,7 +164,7 @@ jobs:
           arch: x86_64
           target: google_apis
           disable-animations: true
-          script: bash tools/ci/run-gradle.sh ci-logs/android-connected-tests.log :app:connectedDebugAndroidTest -Pikna.abi=emulator
+          script: bash tools/ci/run-android-tests.sh
       - name: Instrumented migration report
         if: always()
         uses: actions/upload-artifact@v6

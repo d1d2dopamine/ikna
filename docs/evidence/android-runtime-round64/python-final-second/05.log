@@ -1,0 +1,14 @@
+test_both_previous_versions_migrate_to_identical_fresh_schema (__main__.FullGradingChecks.test_both_previous_versions_migrate_to_identical_fresh_schema) ... ok
+test_ci_runs_production_kotlin_and_real_android_migrations (__main__.FullGradingChecks.test_ci_runs_production_kotlin_and_real_android_migrations) ... ok
+test_context_export_mappings_are_complete (__main__.FullGradingChecks.test_context_export_mappings_are_complete) ... ok
+test_input_accounting_guard_rejects_raw_duration_and_derived_rating (__main__.FullGradingChecks.test_input_accounting_guard_rejects_raw_duration_and_derived_rating) ... ok
+test_legacy_preference_cannot_override_automatic_policy (__main__.FullGradingChecks.test_legacy_preference_cannot_override_automatic_policy) ... ok
+test_live_restore_and_undo_use_input_outcome_not_derived_hard_as_failure (__main__.FullGradingChecks.test_live_restore_and_undo_use_input_outcome_not_derived_hard_as_failure) ... ok
+test_persisted_window_filters_undo_future_manual_and_discarded_rows (__main__.FullGradingChecks.test_persisted_window_filters_undo_future_manual_and_discarded_rows) ... ok
+test_schema_seven_identity_and_additive_shape (__main__.FullGradingChecks.test_schema_seven_identity_and_additive_shape) ... ok
+test_synthetic_fixtures_are_explicit_and_do_not_ship_as_app_assets (__main__.FullGradingChecks.test_synthetic_fixtures_are_explicit_and_do_not_ship_as_app_assets) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.044s
+
+OK

@@ -1,0 +1,1502 @@
+{
+  "totals": {
+    "tests": 1280,
+    "failures": 30,
+    "errors": 0,
+    "skipped": 5
+  },
+  "xmlFiles": {
+    "app/testDebugUnitTest/TEST-dev.ikna.BrowsePolicyTest.xml": {
+      "sha256": "aee348b7ebc142c2a04d072fc2a9d29fc6456182890b6ee13fe0d1f9ff7ca1cc",
+      "suite": "dev.ikna.BrowsePolicyTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.DeckMarkTest.xml": {
+      "sha256": "4b45692fd1263a82e228cb59f59f5fa4fde4c882375328803c079c3ac9140316",
+      "suite": "dev.ikna.DeckMarkTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.FontValidationTest.xml": {
+      "sha256": "72096a68184a49329ce93cda6f9d397b60e11e428378e2ec0c9db4a4d0896edf",
+      "suite": "dev.ikna.FontValidationTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.GridTest.xml": {
+      "sha256": "99d36bee6c1e2702a9dd895f243c12d155aabf094c7edb658a3b350846a473dd",
+      "suite": "dev.ikna.GridTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.LanguageResolverTest.xml": {
+      "sha256": "ff3cb107b254f83db370adbe0dde6c0169f78793064755a7dfb322677a4c2b05",
+      "suite": "dev.ikna.LanguageResolverTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.SettingsBackupTest.xml": {
+      "sha256": "32aee7f04ad74298a691f54cc76fbec8e518e0664fd1928030a43385e12dc604",
+      "suite": "dev.ikna.SettingsBackupTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.StringsCatalogTest.xml": {
+      "sha256": "c65b3c15b7d62ae00ec81f3809d4726888c9627164f26e13b1d3a538dbbfd860",
+      "suite": "dev.ikna.StringsCatalogTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.SwipeDecisionTest.xml": {
+      "sha256": "6a4cbe2fc7035493ece78d1f3dcede8a18151b5783942d9622246dfed2c8237d",
+      "suite": "dev.ikna.SwipeDecisionTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.audio.VoiceModelTest.xml": {
+      "sha256": "389e6635ce2de490a336efd821b1e55e1d80de89c77eed6ba9c65e9d591744ef",
+      "suite": "dev.ikna.audio.VoiceModelTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.audio.VoiceNumberTest.xml": {
+      "sha256": "10971121bcb4bcb4cd682a6e6537304691b44ce24abb6d0ad5d0b1ccba25e5f3",
+      "suite": "dev.ikna.audio.VoiceNumberTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.audio.VoiceUnpackTest.xml": {
+      "sha256": "a91a3420236e756a818e97c6b8d06c31ebdaa3bfb1c5409c7bf71bc37e5cf59d",
+      "suite": "dev.ikna.audio.VoiceUnpackTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.PackTitleTest.xml": {
+      "sha256": "2daa89cb0de53e7706d5f83195a4dbd2aff09630b3beb3f53358206ceef21991",
+      "suite": "dev.ikna.data.PackTitleTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.anki.AnkiBridgeContractTest.xml": {
+      "sha256": "8ffac003a76cfe9284712fab517c4efff40b1819834d3d736e53b62cc618811f",
+      "suite": "dev.ikna.data.anki.AnkiBridgeContractTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.anki.AnkiClozeTest.xml": {
+      "sha256": "7e42038c5ede3fdd6537f26f9170970dea51f29bc91aac8dcdae0cfa5b2567ef",
+      "suite": "dev.ikna.data.anki.AnkiClozeTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.anki.AnkiProtoTest.xml": {
+      "sha256": "5e9af9c9e9720b97da954440eda6017513c8f63c80e850808f55a9362df594a2",
+      "suite": "dev.ikna.data.anki.AnkiProtoTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.anki.AnkiTextTest.xml": {
+      "sha256": "47cef9a1c470a786608eb245d231aa439038d9fe93c071f70a31afc13f638432",
+      "suite": "dev.ikna.data.anki.AnkiTextTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.anki.DeckLanguageTest.xml": {
+      "sha256": "672b6e065eeded2ae2ad7d233688b70fa067d50a3f94d039a09f6d7289fc58db",
+      "suite": "dev.ikna.data.anki.DeckLanguageTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.catalog.CatalogCardSourceTest.xml": {
+      "sha256": "4dd81177157c75a3fe9d171072aaf9c07d726bb33be9fd386dea5a5ba6374939",
+      "suite": "dev.ikna.data.catalog.CatalogCardSourceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.catalog.CatalogFilterTest.xml": {
+      "sha256": "17042cc42fc88e90f10cc0c9d9919e5b68ebdc326857f766555a56dc160afb40",
+      "suite": "dev.ikna.data.catalog.CatalogFilterTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.catalog.CatalogPreviewTest.xml": {
+      "sha256": "d61a0013ac4311b6cf4cfd9a60219755e1785f7ea966687ea7625814328f400e",
+      "suite": "dev.ikna.data.catalog.CatalogPreviewTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.catalog.CatalogV2ModelTest.xml": {
+      "sha256": "cc8780cd30f33e07a5639fd03f75e91c080555914fa83a808a22a5a4cd4d520b",
+      "suite": "dev.ikna.data.catalog.CatalogV2ModelTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.db.SchemaTest.xml": {
+      "sha256": "ee93345599f64c34fdc1491141eebf4847f46aaa6e8bd5b7c13e09fd4a7d3faa",
+      "suite": "dev.ikna.data.db.SchemaTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.dev.DeveloperModeTest.xml": {
+      "sha256": "12c147a1fa3c121853491983ed2fa08dd58e2fcffbeb0454b35e09d5dacc672f",
+      "suite": "dev.ikna.data.dev.DeveloperModeTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.export.ExportDocumentApiTest.xml": {
+      "sha256": "3ec4b01b5e3725a5989655061366af3df6cf183e77b93b7a40cb767bd04a3249",
+      "suite": "dev.ikna.data.export.ExportDocumentApiTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.export.ReviewRecordTest.xml": {
+      "sha256": "f9eceb8f3ea3fde77a2edb96b5a774562bbb63ef9325a254157088da6a55672e",
+      "suite": "dev.ikna.data.export.ReviewRecordTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.pack.CjkCatalogContractTest.xml": {
+      "sha256": "bf453b25da619eb3bf8c51cdd0727186cbc4c820ad8b4f5ed554edc27485d35b",
+      "suite": "dev.ikna.data.pack.CjkCatalogContractTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.pack.SeedParserTest.xml": {
+      "sha256": "7f1946e4980a51982128d23388a5701f87999769ce808ab06d8b0612bcfa300a",
+      "suite": "dev.ikna.data.pack.SeedParserTest",
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.pack.TranslationTidyTest.xml": {
+      "sha256": "e0d5464373e81b439629d0ed8fb65fd25b3a0704019f1c7827c0667f38619bc1",
+      "suite": "dev.ikna.data.pack.TranslationTidyTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.prefs.DeckLookTest.xml": {
+      "sha256": "70e2d437d3b23a45a6bb70bf1d27eaad1c58f9cd8b81e4b89004c38cf0b9d4bd",
+      "suite": "dev.ikna.data.prefs.DeckLookTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.prefs.DeckPhoneticsTest.xml": {
+      "sha256": "af6ffad82b3206009c715b249ef46e83a328f3828b44770f7bbc911726cd5386",
+      "suite": "dev.ikna.data.prefs.DeckPhoneticsTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.prefs.HotkeysTest.xml": {
+      "sha256": "34df06ce8cbe48b54d05e6a9e1007eb719ecbeecc2405fcf9a7c16b4df2b8672",
+      "suite": "dev.ikna.data.prefs.HotkeysTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.prefs.SuppressedTest.xml": {
+      "sha256": "5c624b770269b14dca90d3cc0ec7351bb1e8b3920e703a9d76af34161b46dea0",
+      "suite": "dev.ikna.data.prefs.SuppressedTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.repo.LocalDeckSearchTest.xml": {
+      "sha256": "16868aac9af2782c30f1d1dc2838f2d3319bd03fe248dd293fa9db45f3f7bea0",
+      "suite": "dev.ikna.data.repo.LocalDeckSearchTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.repo.SchedulerMigrationTest.xml": {
+      "sha256": "a74ba2d0dd434784902bf700657f63b90e1aa5aca81b0cf2d97a9e842e820c3b",
+      "suite": "dev.ikna.data.repo.SchedulerMigrationTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.update.UpdateDownloadTest.xml": {
+      "sha256": "58ccab19599accb92ad0e8cb75a4f5a3f06db14af14d336763988ededd629ade",
+      "suite": "dev.ikna.data.update.UpdateDownloadTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.data.update.UpdateLogicTest.xml": {
+      "sha256": "9618ca113241f203da67895ed3fca7acfe0ec0e39ed2bafe0e94cddc5c0835e9",
+      "suite": "dev.ikna.data.update.UpdateLogicTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.fsrs.FsrsOptimizerTest.xml": {
+      "sha256": "86d3b1a0bda3206296b583048a6f25762d58f734864763713a2b3a000108ef52",
+      "suite": "dev.ikna.domain.fsrs.FsrsOptimizerTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.fsrs.FsrsTest.xml": {
+      "sha256": "db46d6bd5ea6eab95b251feb7492aea40f1b5f9a59d58ff40d46ea0822a87ff9",
+      "suite": "dev.ikna.domain.fsrs.FsrsTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.fsrs.SchedulerDueDayTest.xml": {
+      "sha256": "c13ed35b5d9f89bcce6b5f28875f537bdc7bc6543b2e254eb034e3360b1ba098",
+      "suite": "dev.ikna.domain.fsrs.SchedulerDueDayTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.governor.ChunkSelectorTest.xml": {
+      "sha256": "9553ca31d4fe503cce86e7e8f95775d5e269bf7e814e756cbf1fa7b391af3a9c",
+      "suite": "dev.ikna.domain.governor.ChunkSelectorTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.governor.CleanStreakTest.xml": {
+      "sha256": "16a4c50720ce0a4ae497ac0aa7997005288eee2d116d2ca9a218d30a0077c4ca",
+      "suite": "dev.ikna.domain.governor.CleanStreakTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.governor.DailyBudgetTest.xml": {
+      "sha256": "cbbece19e34c26cb082a25c52d20b6fde543a39ad38a7da5f5fbb75f35fcfc38",
+      "suite": "dev.ikna.domain.governor.DailyBudgetTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.governor.LoadGovernorTest.xml": {
+      "sha256": "907139da6a9cc02455e170dad1cfc8fbfb4ec8575ddcd2ea2393e176a2dc65db",
+      "suite": "dev.ikna.domain.governor.LoadGovernorTest",
+      "tests": 25,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.grading.DerivedGradingTest.xml": {
+      "sha256": "b83b862b4464a3ff835ba8f9c6d68f29d9bc1e7c16fa5de52aaa87d3b7fde2f7",
+      "suite": "dev.ikna.domain.grading.DerivedGradingTest",
+      "tests": 25,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.optimizer.LocalOptimizerTest.xml": {
+      "sha256": "43d9bb09c9e6836962f816189e78ad0905c3433e753ac7590909073212939c4b",
+      "suite": "dev.ikna.domain.optimizer.LocalOptimizerTest",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.phonetics.PhoneticsTest.xml": {
+      "sha256": "8a75952c9c9abe13965657d8b35a640963d16af1d67ae099387e005156f2a7ac",
+      "suite": "dev.ikna.domain.phonetics.PhoneticsTest",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.phonetics.RespellTest.xml": {
+      "sha256": "bff5c3b6a03d5831796adb9d74c2a8d4183023097ea4b86acce7629e055448f4",
+      "suite": "dev.ikna.domain.phonetics.RespellTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.session.CardPresentationTest.xml": {
+      "sha256": "4e78d04c6a3a6240e005d2d026277623cb1e41a1cf6108ae2d7a20aa5fc62773",
+      "suite": "dev.ikna.domain.session.CardPresentationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.session.CardTargetTest.xml": {
+      "sha256": "73d199104b9542e253e2ccb416e963a4172048656d6c3b9ca82ecfaced35b281",
+      "suite": "dev.ikna.domain.session.CardTargetTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.session.ChunkShapeTest.xml": {
+      "sha256": "48a01f2384f5cf99506bbbf0868a14041502bdbb1fb2e1b11b676b1ca962d40c",
+      "suite": "dev.ikna.domain.session.ChunkShapeTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.session.ClassicPlanTest.xml": {
+      "sha256": "a059ec9577a8e478b6a59d488d7d838535af6fc7d2c1643aaf32356d74b783b5",
+      "suite": "dev.ikna.domain.session.ClassicPlanTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.session.ReviewSignalTrackerTest.xml": {
+      "sha256": "0f2d617a727256dc3fd4d61e7a8d8de756f8fded3e805b019c11d430f5b00184",
+      "suite": "dev.ikna.domain.session.ReviewSignalTrackerTest",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.domain.time.DayBoundaryTest.xml": {
+      "sha256": "b3686d8a3f377ad55ff564ca00d76a6e8c6349f2c504956225df50fbded457e1",
+      "suite": "dev.ikna.domain.time.DayBoundaryTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.ui.decks.MobileDeckUiContractTest.xml": {
+      "sha256": "ead6dc459db2e0769580d6db9d0557396415157693ed0881a0614b542e14c622",
+      "suite": "dev.ikna.ui.decks.MobileDeckUiContractTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.ui.decks.PromptFillTest.xml": {
+      "sha256": "630cc228eca60cab7ab34a2f5e5f3b721a5c72a1dd077f88e3b521125461f690",
+      "suite": "dev.ikna.ui.decks.PromptFillTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.ui.nav.FirstStudyRouteTest.xml": {
+      "sha256": "89fc2f454ec5c042e6af668e30c5543289be9d6298ed60de90ff9b989fe8ccac",
+      "suite": "dev.ikna.ui.nav.FirstStudyRouteTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.ui.nav.RouteContinuityTest.xml": {
+      "sha256": "cf0d67e0568ce91f78f4643b83a5f6c01c56ad696d317d7281a1a7e8772bb288",
+      "suite": "dev.ikna.ui.nav.RouteContinuityTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.ui.nav.SharedAxisTransitionTest.xml": {
+      "sha256": "68c1bee258de6080a3906b860ece514def092226437f54f95bf2694bc0862c7d",
+      "suite": "dev.ikna.ui.nav.SharedAxisTransitionTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionCompletionBoundaryTest.xml": {
+      "sha256": "8e1b3cea72439d62a7e456026e16685d03387473dffd60b64d3cfbf5019e0a59",
+      "suite": "dev.ikna.ui.session.SessionCompletionBoundaryTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionErgonomicsTest.xml": {
+      "sha256": "ce39d52f1707b1debd81f12605ffed4eeaa7445e18c1c979bc1050c860ded8de",
+      "suite": "dev.ikna.ui.session.SessionErgonomicsTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.ui.session.SessionInvalidationContractTest.xml": {
+      "sha256": "f1cb7d5a6e5787991eb4b0fb96a87201612336f20dfbf302ff0297f57e98cb91",
+      "suite": "dev.ikna.ui.session.SessionInvalidationContractTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.ui.settings.DiagnosticsTest.xml": {
+      "sha256": "1aa8c6acb6062e3a659d09d8642e7027af1aed197d317e000f79f4344a79a469",
+      "suite": "dev.ikna.ui.settings.DiagnosticsTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.ui.settings.SettingsLazyLayoutTest.xml": {
+      "sha256": "ea15a9a0f89b17859422d25c48e163741e3091688a09448df3defdb2665bd826",
+      "suite": "dev.ikna.ui.settings.SettingsLazyLayoutTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.ui.theme.ContrastTest.xml": {
+      "sha256": "de6aa64011a46e4ddd8dca80c6f0f7ca898a2452a3129a7ddbe61a8226692c4c",
+      "suite": "dev.ikna.ui.theme.ContrastTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.ui.theme.ControlColorsTest.xml": {
+      "sha256": "bd912a5364c6bbe12655b50af735101d13da2ba48d34a82410e4d06223ac5349",
+      "suite": "dev.ikna.ui.theme.ControlColorsTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.ui.theme.LaunchWindowTest.xml": {
+      "sha256": "38a1749dd9cedbf0d62c79175afa912c2b9b3774b58b3841a2a913fddde6743d",
+      "suite": "dev.ikna.ui.theme.LaunchWindowTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.ui.theme.MotionPolishTest.xml": {
+      "sha256": "a5ab1317e3d4db05caadcc03bc15997002b8a09cfd548ba9d0e84579ffe2200a",
+      "suite": "dev.ikna.ui.theme.MotionPolishTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.ui.theme.PaletteTest.xml": {
+      "sha256": "fe2199d3099018aa39f70977a091eb9ffd6187a2436fd538fc2d7b0d0a524111",
+      "suite": "dev.ikna.ui.theme.PaletteTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "app/testDebugUnitTest/TEST-dev.ikna.ui.theme.WordmarkTest.xml": {
+      "sha256": "3fcb0b04414b61aa35486c03ef51253515d45fb5e328234c07e0a66e8812c0da",
+      "suite": "dev.ikna.ui.theme.WordmarkTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.AnkiRestoreAtomicityTest.xml": {
+      "sha256": "6769e487e810b80381b5cbfffdd1fee98af6b37f86da84f4a5f747288ea1bccf",
+      "suite": "dev.ikna.desktop.AnkiRestoreAtomicityTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.AtomicBackupFileTest.xml": {
+      "sha256": "f56db2d32463a58ba1f988e47839520e1adc2cc4b8abb9e852dc0e12c9c907d4",
+      "suite": "dev.ikna.desktop.AtomicBackupFileTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.BundleComponentFailureTest.xml": {
+      "sha256": "95b7d8a2b1965cbbdcc471821557d3684addec22762893d213c969effefe23fe",
+      "suite": "dev.ikna.desktop.BundleComponentFailureTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.BundleRestoreFailureTest.xml": {
+      "sha256": "8dda53948317f7158be57b5a73257b49a7e99769e33d8c2d7e7c8d60d684bcfa",
+      "suite": "dev.ikna.desktop.BundleRestoreFailureTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.BundleWriteSafetyTest.xml": {
+      "sha256": "162320191650ae025bfd99e08819416ecd58534245f9d6de423c25fce088d1bf",
+      "suite": "dev.ikna.desktop.BundleWriteSafetyTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.CardRevealPointerIntegrationTest.xml": {
+      "sha256": "594f4e6938184e996028752e5dbba618b1cd33ad315d82ce75d41cfecba12d32",
+      "suite": "dev.ikna.desktop.CardRevealPointerIntegrationTest",
+      "tests": 32,
+      "failures": 30,
+      "errors": 0,
+      "skipped": 2,
+      "skippedCases": [
+        "secondaryMouseShortDragDoesNotRevealOrGrade[mouse=false]",
+        "secondaryMouseLongDragDoesNotRevealOrGrade[mouse=false]"
+      ]
+    },
+    "desktop/TEST-dev.ikna.desktop.CatalogImportIntegrationTest.xml": {
+      "sha256": "65cc62cdc6fcd376aa1f8c9bc36d4050670f8f5f434e089be1959a308071f296",
+      "suite": "dev.ikna.desktop.CatalogImportIntegrationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.CompletionBoundaryIntegrationTest.xml": {
+      "sha256": "7660de287964227d93d64fe4d4d683ea78def0f2bf0dace0c9b8ef02e615d5aa",
+      "suite": "dev.ikna.desktop.CompletionBoundaryIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.DesktopOptionalReviewContractTest.xml": {
+      "sha256": "483bd79e657bcf600021cfd8ca1b674b97ca00f01bd33030b23f300594ca14f0",
+      "suite": "dev.ikna.desktop.DesktopOptionalReviewContractTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.DesktopRestartTest.xml": {
+      "sha256": "05ff785e1bcf0422adc7b2421eaea23472ae861480a447fb25a93177d590c933",
+      "suite": "dev.ikna.desktop.DesktopRestartTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.DesktopSessionInvalidationContractTest.xml": {
+      "sha256": "41c734434258711a7a9c62210d2b1816474199ad3fbd214776552ea9d3f867ae",
+      "suite": "dev.ikna.desktop.DesktopSessionInvalidationContractTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.DeveloperSandboxIntegrationTest.xml": {
+      "sha256": "5f819e6ed111a45e481ca7040e2341e7b04a67c5ae184e4414a97556b031097b",
+      "suite": "dev.ikna.desktop.DeveloperSandboxIntegrationTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.DeviceProfileAdoptionIntegrationTest.xml": {
+      "sha256": "5ece135e923a9065b5478638d3ac4a87f846dbc6937c4aab3af139644fd8b6bd",
+      "suite": "dev.ikna.desktop.DeviceProfileAdoptionIntegrationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.DeviceSyncControllerIntegrationTest.xml": {
+      "sha256": "ebef300dae2a21ca9808632b418adee506c1a92520c408996057f744107fbf48",
+      "suite": "dev.ikna.desktop.DeviceSyncControllerIntegrationTest",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.DeviceSyncProcessIntegrationTest.xml": {
+      "sha256": "71aa1f8e0550bc9477e79bc84e86c8620ccb4bd0439aef24fd5fb21952665d81",
+      "suite": "dev.ikna.desktop.DeviceSyncProcessIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.FirstStudyRouteTest.xml": {
+      "sha256": "8cb231772410c9e552bb22490eb00995c252eeee1bb6e581c3803e338c96bbf5",
+      "suite": "dev.ikna.desktop.FirstStudyRouteTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.HotkeyRegressionTest.xml": {
+      "sha256": "f68cda813ed712ff4b8b4a61eaf4c94b1135d2ff7ee678d1f6fd51c2b9f264e5",
+      "suite": "dev.ikna.desktop.HotkeyRegressionTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.IncrementalJournalRepositoryTest.xml": {
+      "sha256": "a6a3f78c5b3f8e9758fc32a063f0b786fb0f6f778ff2ae1f21d9aa693bd29be8",
+      "suite": "dev.ikna.desktop.IncrementalJournalRepositoryTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.JournalSyncIntegrationTest.xml": {
+      "sha256": "c8dcfdf88c525411ea6653f4b4189a57f78a4c7a6795a33a485c2e92e3bd2471",
+      "suite": "dev.ikna.desktop.JournalSyncIntegrationTest",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.LearningSimulationTest.xml": {
+      "sha256": "a12ad2ddd36fc256df8c8fbd123916c3a5d61bd0c7776ae5e6549fa7ca5a3441",
+      "suite": "dev.ikna.desktop.LearningSimulationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.LearningWriteAtomicityTest.xml": {
+      "sha256": "73562a962da1293314a52cc4836ceb15c114c0623e077d368fcf5ce04fb8c099",
+      "suite": "dev.ikna.desktop.LearningWriteAtomicityTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.OptionalHardReviewIntegrationTest.xml": {
+      "sha256": "35c9d046c046832e0ad93a70f416dc8e876d1d508109c0ee0153ee53c7503afa",
+      "suite": "dev.ikna.desktop.OptionalHardReviewIntegrationTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.PhoneBackupWriteSafetyTest.xml": {
+      "sha256": "3ab410388d4383505c69253e75b379b9e6a3363b105f73af3e46d7825d8ef65b",
+      "suite": "dev.ikna.desktop.PhoneBackupWriteSafetyTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.PreWipeDeckBackupTest.xml": {
+      "sha256": "37c5cfc43ca3552c21542a28e70438f8b409215ec6390bb7dc026563760436ed",
+      "suite": "dev.ikna.desktop.PreWipeDeckBackupTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.ProfileAdoptionIntegrationTest.xml": {
+      "sha256": "5d120d31acbad1b7f66af5ba44a788723fcaf8d1aac592124fbe1482db57fd59",
+      "suite": "dev.ikna.desktop.ProfileAdoptionIntegrationTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.ProfileRetainedDataWiperIntegrationTest.xml": {
+      "sha256": "984a0861870989ce27b8f3937137a81c49f90ce7536239552ab7025173ed2a4b",
+      "suite": "dev.ikna.desktop.ProfileRetainedDataWiperIntegrationTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.ProfileSlotMigrationIntegrationTest.xml": {
+      "sha256": "74bf78aec5229e370a0e816402cddf8722151ab0a2fc6d78a837f6f1eb9cda7c",
+      "suite": "dev.ikna.desktop.ProfileSlotMigrationIntegrationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.ProfileTransferIntegrationTest.xml": {
+      "sha256": "7351d9dec1007cab6a2476931aa25f45a982b77fd68e06a972ca3afb4f189e97",
+      "suite": "dev.ikna.desktop.ProfileTransferIntegrationTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.ProfileTransferResourceSafetyTest.xml": {
+      "sha256": "5a137c2565f40bb081830cc48975ce079ab2cc0baf54696b5c82d9dcfbb62df6",
+      "suite": "dev.ikna.desktop.ProfileTransferResourceSafetyTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.RestoreAtomicityTest.xml": {
+      "sha256": "ff7d5906af3d72bc3c704078556512ac9011b30298096cb1d5ece08f781e36ba",
+      "suite": "dev.ikna.desktop.RestoreAtomicityTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.ReviewDurationIntegrationTest.xml": {
+      "sha256": "9be22d5a91994947d3c07ddc4c40e190a446ce2acde5c9d50d3af4d863feb8f2",
+      "suite": "dev.ikna.desktop.ReviewDurationIntegrationTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.SessionInspectionIntegrationTest.xml": {
+      "sha256": "f573756522b4eaf5dde0db78657dc391874d895e7b4196abdaead7e4af6e0ea6",
+      "suite": "dev.ikna.desktop.SessionInspectionIntegrationTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.StudyStatsRepositoryTest.xml": {
+      "sha256": "920865ebdb099ea40533ff1e7fde1be7449a03fdc54db0b561fc6c3afc2150cd",
+      "suite": "dev.ikna.desktop.StudyStatsRepositoryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.TitleBarClicksTest.xml": {
+      "sha256": "ce24c23272dd360651e1ea645dff30117447e893efb836142b63c73f76f9a92d",
+      "suite": "dev.ikna.desktop.TitleBarClicksTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.WindowBoundsEditsTest.xml": {
+      "sha256": "da61bff2e98bf2c6ce4b19571a620f215c929bce82d7384ca692bda20d47ad28",
+      "suite": "dev.ikna.desktop.WindowBoundsEditsTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.WindowBoundsTest.xml": {
+      "sha256": "b2b29806feab75a1b249bc1b5a5df44e5bab745281c4d69b7d46d81737726c31",
+      "suite": "dev.ikna.desktop.WindowBoundsTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.WindowChromeRegressionTest.xml": {
+      "sha256": "1813af1ba0ccb1b7dd9a462f09826185cc10693a932d2518cf0db9fb6e17d332",
+      "suite": "dev.ikna.desktop.WindowChromeRegressionTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.WindowFrameLayoutTest.xml": {
+      "sha256": "b3e6333a6b694c7a30f85262f704e3cb093267f27e722e15b0d7a00483ae52db",
+      "suite": "dev.ikna.desktop.WindowFrameLayoutTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.desktop.WindowPlacementMemoryTest.xml": {
+      "sha256": "309b5cf45e6262d9bf6409be3dce818ba34f5450d27e631851b8259acd6822e3",
+      "suite": "dev.ikna.desktop.WindowPlacementMemoryTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.domain.fsrs.FsrsOptimizerTest.xml": {
+      "sha256": "76089fd53400629eda4a7638aaa78acf8e3ca0bdc0a38311537b4a43165b4e2f",
+      "suite": "dev.ikna.domain.fsrs.FsrsOptimizerTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.domain.fsrs.FsrsTest.xml": {
+      "sha256": "c4290126d8e3f063053f45d79fc55e2bfb3161a735a8caa11e57c2137a47e6a1",
+      "suite": "dev.ikna.domain.fsrs.FsrsTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.domain.fsrs.SchedulerDueDayTest.xml": {
+      "sha256": "4c760c8aa227f2eac365a91e3d6db246278f7c710fa20d11951409af05b74996",
+      "suite": "dev.ikna.domain.fsrs.SchedulerDueDayTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.domain.grading.DerivedGradingTest.xml": {
+      "sha256": "b33571b867746fb430cef90042ba488c711cdedda6d1748b4ea265a28ab1269e",
+      "suite": "dev.ikna.domain.grading.DerivedGradingTest",
+      "tests": 25,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "desktop/TEST-dev.ikna.domain.optimizer.LocalOptimizerTest.xml": {
+      "sha256": "d03412510d1811ffba17e9a7729a202e5e52a2faca6476ce872e9b662f9512b7",
+      "suite": "dev.ikna.domain.optimizer.LocalOptimizerTest",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.data.catalog.CatalogFilterNormalizationTest.xml": {
+      "sha256": "8f930523278b279da7a8df7e993b7c9801863eaadfb9dadc7e7b85e0d6ecfb27",
+      "suite": "dev.ikna.data.catalog.CatalogFilterNormalizationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.data.catalog.CatalogPlanRefreshTest.xml": {
+      "sha256": "0fcacd062bc1bae852bfbda187202cdd10a82ac5492e309210395e5de5814931",
+      "suite": "dev.ikna.data.catalog.CatalogPlanRefreshTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.data.dev.DeveloperBootstrapTest.xml": {
+      "sha256": "adf4a3d5f6bc01b3afbe0864c71930e5c17fd7c5faed823bed8f0ceeea7a17df",
+      "suite": "dev.ikna.data.dev.DeveloperBootstrapTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.data.export.PreWipeBackupTest.xml": {
+      "sha256": "52c67b475d5a6afbc755b5a21ff3b9ada18b16b57b42613569623a02d526fe01",
+      "suite": "dev.ikna.data.export.PreWipeBackupTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.data.pack.BundledPackFailureTest.xml": {
+      "sha256": "4bd8edd14e4394ba375541efa67490e71200df3219165ed729f898b0156fcf64",
+      "suite": "dev.ikna.data.pack.BundledPackFailureTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.data.repo.FirstSessionPreparationTest.xml": {
+      "sha256": "9b51e42b17b0ccb4adafb5ceaa9e9c1497db6a3884c0b42e4a9710fbe0f50be8",
+      "suite": "dev.ikna.data.repo.FirstSessionPreparationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.data.repo.StudyStatsTest.xml": {
+      "sha256": "06b25e1095f2cfb60a3ebf9b8bc13087bc696a5986d416c762b12326f678e2a3",
+      "suite": "dev.ikna.data.repo.StudyStatsTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.domain.session.CommittedSessionChangesTest.xml": {
+      "sha256": "448da15ef49d273e75e046cf83f19d65be282c791528b6545a54b7745de7d1b0",
+      "suite": "dev.ikna.domain.session.CommittedSessionChangesTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.domain.session.ReviewDurationTest.xml": {
+      "sha256": "16c2ba31f914ffb19a8369dacac1018ac394ac84f911ff3c6af6de5772631a8c",
+      "suite": "dev.ikna.domain.session.ReviewDurationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.sync.IncrementalJournalProtocolTest.xml": {
+      "sha256": "6a62fda38d9e018184a824791f3863e60177e13128b22bbb2d8d970d4fce5478",
+      "suite": "dev.ikna.sync.IncrementalJournalProtocolTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.sync.JournalErrorLatchTest.xml": {
+      "sha256": "cfb74fccca869db985252d5664a0cf396e81f056120da4aaf55f3690da88e296",
+      "suite": "dev.ikna.sync.JournalErrorLatchTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.sync.PairedLanTransportTest.xml": {
+      "sha256": "c205953777c5d001ce84319d12ef71a4284e2f6c703237ee49b046308a7d4736",
+      "suite": "dev.ikna.sync.PairedLanTransportTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.sync.PrivateSyncFilesTest.xml": {
+      "sha256": "86b0c960bb396b849cc649965df7017f6d4f8c5a3ba83a8c3000e12df83e7c49",
+      "suite": "dev.ikna.sync.PrivateSyncFilesTest",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.sync.PrivateSyncFilesWindowsTest.xml": {
+      "sha256": "d6dcad540efe3f0ee23950fdfa7f47223b374d5f7f1a3830a6991221ccd1aa68",
+      "suite": "dev.ikna.sync.PrivateSyncFilesWindowsTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 3,
+      "skippedCases": [
+        "native Windows junction is rejected without changing destination ACL[desktop]",
+        "native Windows ACL secures inherited directory and atomic replacement[desktop]",
+        "native Windows identity survives reload under verified ACL[desktop]"
+      ]
+    },
+    "shared/desktopTest/TEST-dev.ikna.sync.ProfileConsentProtocolTest.xml": {
+      "sha256": "458610bab348817ef59eac46477a7289c29bb8bcd59e98b56aa8718984e77fb2",
+      "suite": "dev.ikna.sync.ProfileConsentProtocolTest",
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.sync.ProfileSlotStoreTest.xml": {
+      "sha256": "c00e449d8b99f33d9e8ebf92aea6f8d420b8ed0d73f3335fa72264093a91e45e",
+      "suite": "dev.ikna.sync.ProfileSlotStoreTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.sync.remote.EncryptedRemoteEnvelopeTest.xml": {
+      "sha256": "5b731d98502e9b519c4b3a3a56023b601e3c58f25513b458a8593b5467b4fabf",
+      "suite": "dev.ikna.sync.remote.EncryptedRemoteEnvelopeTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.sync.remote.RemoteBlobStoreTest.xml": {
+      "sha256": "576811ae155964ab973441b45370b819eb245d4704f7a284f5bc22469b52d573",
+      "suite": "dev.ikna.sync.remote.RemoteBlobStoreTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.ui.session.CardLoadingTest.xml": {
+      "sha256": "71ff279e9b2a797fe5a2328e1f18eecbe9ce8e6d6779da6325c1341e9b5a9739",
+      "suite": "dev.ikna.ui.session.CardLoadingTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.ui.settings.DeviceSyncErrorTest.xml": {
+      "sha256": "316b4de3a19726a7f529b444e565d86c65ee208a0abc57cd5fadbecc522b24c2",
+      "suite": "dev.ikna.ui.settings.DeviceSyncErrorTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.ui.settings.DeviceSyncStatusTest.xml": {
+      "sha256": "13e7b62ba929b09089bd62dddfda0b5e74b6a1489aa163fa8434510639cf352b",
+      "suite": "dev.ikna.ui.settings.DeviceSyncStatusTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.ui.stats.StatsDescriptionsTest.xml": {
+      "sha256": "7637fd1b53329df26c111009ec820a8b8700b0098218fd0ab3a9eb0eb18661a0",
+      "suite": "dev.ikna.ui.stats.StatsDescriptionsTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.ui.theme.PalettePreviewTest.xml": {
+      "sha256": "a0a78cadff15f34d76dacdaa7c82eefa63ef2444c38d40370b7c761656370925",
+      "suite": "dev.ikna.ui.theme.PalettePreviewTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.ui.theme.ReadingCatTest.xml": {
+      "sha256": "3c24cf53573907297fa72d3ce05b57f1b94d18fe05afc04bf1fafec1b9db442e",
+      "suite": "dev.ikna.ui.theme.ReadingCatTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.ui.theme.SignalFrameFeedbackTest.xml": {
+      "sha256": "f08271e6044cd011e21ada9f534fe62f07b436247f02474217f4a59f22e134d3",
+      "suite": "dev.ikna.ui.theme.SignalFrameFeedbackTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.ui.theme.SignalFrameHoverTest.xml": {
+      "sha256": "bbecbe259aa60f0a25278c0383b6ace0d93176af191780fe6075ce74780d40c7",
+      "suite": "dev.ikna.ui.theme.SignalFrameHoverTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/desktopTest/TEST-dev.ikna.ui.theme.TransientNoticeTest.xml": {
+      "sha256": "5928290120584cffd505de394ed0165153be5bcb306694d670108050c082d4e3",
+      "suite": "dev.ikna.ui.theme.TransientNoticeTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.data.catalog.CatalogFilterNormalizationTest.xml": {
+      "sha256": "611c486147f04602961e39d2c7c20ff6828b3284ac851097bfbef65ac9fd1f26",
+      "suite": "dev.ikna.data.catalog.CatalogFilterNormalizationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.data.catalog.CatalogPlanRefreshTest.xml": {
+      "sha256": "99585f414c1ee0de92c4612ae9393c9afa2b36a761937a35472960889b313b70",
+      "suite": "dev.ikna.data.catalog.CatalogPlanRefreshTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.data.dev.DeveloperBootstrapTest.xml": {
+      "sha256": "20d62180dd793a7c5c796ec9ef4e7b4b288b1da8eafe2d65f16da8f2f8450fba",
+      "suite": "dev.ikna.data.dev.DeveloperBootstrapTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.data.export.PreWipeBackupTest.xml": {
+      "sha256": "426298ced0fe067b32b905ecee63e8764d031acdcd690781a19433b3367851d3",
+      "suite": "dev.ikna.data.export.PreWipeBackupTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.data.pack.BundledPackFailureTest.xml": {
+      "sha256": "440bacaa371e3088d4ecafa922c368640209010356f3db1df1e187c2608d5f17",
+      "suite": "dev.ikna.data.pack.BundledPackFailureTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.data.repo.FirstSessionPreparationTest.xml": {
+      "sha256": "7e8f25519b75758eda32ec719840cdb30637a44aa14a980285621b6f3fdce7cf",
+      "suite": "dev.ikna.data.repo.FirstSessionPreparationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.data.repo.StudyStatsTest.xml": {
+      "sha256": "2a714926500025aa85b997075df740fbeade7661b064167278a1c7266ed4482c",
+      "suite": "dev.ikna.data.repo.StudyStatsTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.domain.session.CommittedSessionChangesTest.xml": {
+      "sha256": "38889f14c5b7c53ad97f6a80bd79808247b409d867e445c6f80a7750faa3916a",
+      "suite": "dev.ikna.domain.session.CommittedSessionChangesTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.domain.session.ReviewDurationTest.xml": {
+      "sha256": "3b417c0786e9b933a6f147018ad04674875b4ca8dc877975dde30368ea7ffd06",
+      "suite": "dev.ikna.domain.session.ReviewDurationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.sync.IncrementalJournalProtocolTest.xml": {
+      "sha256": "75847ee5cc878cf4c28c520d4e283bfefbd6cd901963422e7ec705284b2ebc64",
+      "suite": "dev.ikna.sync.IncrementalJournalProtocolTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.sync.JournalErrorLatchTest.xml": {
+      "sha256": "58067e31d1e46b3d3a91c4569887cef6445a8aa4c2910c9294bbd11795dd4960",
+      "suite": "dev.ikna.sync.JournalErrorLatchTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.sync.PairedLanTransportTest.xml": {
+      "sha256": "a8248f6fd92910d536e19a578d50d459a22b70ed08ff6f3daefa0baaffb3aa3d",
+      "suite": "dev.ikna.sync.PairedLanTransportTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.sync.PrivateSyncFilesTest.xml": {
+      "sha256": "dac9e6b51ff524cf2d407dd1895b0630a3d3f233ef436c910497fd106e2342d7",
+      "suite": "dev.ikna.sync.PrivateSyncFilesTest",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.sync.ProfileConsentProtocolTest.xml": {
+      "sha256": "d50d1cd811356b48558f9b04eef614bb6a18ab81a5d16b153d7cd19fabd1123d",
+      "suite": "dev.ikna.sync.ProfileConsentProtocolTest",
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.sync.remote.EncryptedRemoteEnvelopeTest.xml": {
+      "sha256": "b5af1ff465575b4fc89a1f3b48a14e7999363f4beea5885856d61d85d8c21d29",
+      "suite": "dev.ikna.sync.remote.EncryptedRemoteEnvelopeTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.sync.remote.RemoteBlobStoreTest.xml": {
+      "sha256": "640218b1f65fe5f842c3bf0c5a60a4c907e924912ca51727808af3266189bc3a",
+      "suite": "dev.ikna.sync.remote.RemoteBlobStoreTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.ui.session.CardLoadingTest.xml": {
+      "sha256": "a4bee1f76f3c0f1b6741046ec3fa702923cbc1c8468c182a268dd58a9f687be4",
+      "suite": "dev.ikna.ui.session.CardLoadingTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.ui.settings.DeviceSyncErrorTest.xml": {
+      "sha256": "f629cfcbebc923857f9b575ead81f3f947d391f21fc7d8810e05d2b5725d30e2",
+      "suite": "dev.ikna.ui.settings.DeviceSyncErrorTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.ui.settings.DeviceSyncStatusTest.xml": {
+      "sha256": "6084d2d613828822f7fc8a8d55654ea01e1985f2184309b8713620f907008d81",
+      "suite": "dev.ikna.ui.settings.DeviceSyncStatusTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.ui.stats.StatsDescriptionsTest.xml": {
+      "sha256": "322cef7e7807f03b84f4af33d6b733bd752a7d7d5b8a8ce80c64daae9991b73b",
+      "suite": "dev.ikna.ui.stats.StatsDescriptionsTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.ui.theme.PalettePreviewTest.xml": {
+      "sha256": "87226a9ebedb7f920ab157e351b4b313fe49b555945b8f5ab3236f1e56a21536",
+      "suite": "dev.ikna.ui.theme.PalettePreviewTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.ui.theme.ReadingCatTest.xml": {
+      "sha256": "80b49d44aab1861804f705c368a075d3f5323e1647c54c67adf6c8b4b513d121",
+      "suite": "dev.ikna.ui.theme.ReadingCatTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.ui.theme.SignalFrameFeedbackTest.xml": {
+      "sha256": "e05286b4cf1e2c2cc6da096172ba14b2d592cf6c2ac4fa557be426200659e589",
+      "suite": "dev.ikna.ui.theme.SignalFrameFeedbackTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.ui.theme.SignalFrameHoverTest.xml": {
+      "sha256": "67a929a2c5131bf99facf082c820f1a2d3153d977c86040e8cade57bb8dd3d3b",
+      "suite": "dev.ikna.ui.theme.SignalFrameHoverTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    },
+    "shared/testDebugUnitTest/TEST-dev.ikna.ui.theme.TransientNoticeTest.xml": {
+      "sha256": "c1c323e378c2c7b72220249d8d915e29d0c6a6e1af99475ade1dcad93f6e0540",
+      "suite": "dev.ikna.ui.theme.TransientNoticeTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skippedCases": []
+    }
+  }
+}

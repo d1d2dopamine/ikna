@@ -1,0 +1,41 @@
+{
+  "baselineFocusedJvm": {
+    "command": "gradle --no-daemon --max-workers=2 --console=plain :desktop:test --tests '*SessionInspectionIntegrationTest' --tests '*StudyStats*'",
+    "status": "success",
+    "tests": 10,
+    "failed": 0,
+    "skipped": 0
+  },
+  "baselineAndroid": {
+    "command": "gradle --no-daemon --max-workers=2 --console=plain :app:assembleDebug :app:assembleDebugAndroidTest",
+    "status": "success after fetching project-pinned Sherpa runtime and starter asset"
+  },
+  "candidateAndroid": {
+    "command": "gradle --no-daemon --max-workers=2 --console=plain :app:assembleDebug :app:assembleDebugAndroidTest",
+    "status": "success"
+  },
+  "finalEightTestApks": {
+    "command": "gradle --no-daemon --max-workers=2 --console=plain :app:assembleDebugAndroidTest",
+    "baseline": "success",
+    "candidate": "success"
+  },
+  "candidateFullJvm": {
+    "command": "gradle --no-daemon --max-workers=2 --console=plain --no-parallel --continue :shared:desktopTest :shared:testDebugUnitTest :desktop:test :app:testDebugUnitTest",
+    "status": "failed:30 Skiko initialization errors, retained separately"
+  },
+  "desktopRetry": {
+    "command": "JAVA_TOOL_OPTIONS=-Dskiko.data.path=<isolated-writable-cache> gradle --no-daemon --max-workers=2 --console=plain --no-parallel :desktop:test",
+    "status": "success;348 tests,0 failures,0 errors,2 skips"
+  },
+  "environmentRecovery": "Used per-command proxy, existing system Java truststore, isolated writable Android HOME/SDK directories; no TLS bypass, no project source changes.",
+  "finalJvmAcceptance": {
+    "status": "all four JVM suites passed across original run and complete desktop retry",
+    "totals": {
+      "tests": 1280,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 5
+    },
+    "firstFailurePreserved": true
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "status": "bootDeadlineExceeded",
+  "startedUtc": "2026-10-18T16:57:57Z",
+  "endedUtc": "2026-10-18T17:08:00Z",
+  "exitCode": 3,
+  "bootBudgetSeconds": 600,
+  "resources": {
+    "cpuCores": 2,
+    "memoryMiB": 2048,
+    "display": "480x854",
+    "hardwareAcceleration": false,
+    "image": "AOSP API35 x86_64"
+  },
+  "apkInstalls": 0,
+  "instrumentationTestsExecuted": 0,
+  "uiScreenshots": 0,
+  "acceptance": "NOT established",
+  "runnerProvenance": "Runner was edited after this attempt ended to wrap individual adb boot probes with timeout5. Current runner bytes/hash do not identify the exact executed runner. The actual attempt reached its deadline and exited3.",
+  "firstAttempt": "Earlier launch aborted on inherited read-only XDG runtime path; isolated writable XDG path repaired before this attempt.",
+  "rawEvidence": "Raw emulator/run logs retained externally; not included because they contain environment/auth-related metadata."
+}

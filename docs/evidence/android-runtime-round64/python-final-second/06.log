@@ -1,0 +1,14 @@
+test_answer_snapshot_precedes_writes (__main__.OptimizerChecks.test_answer_snapshot_precedes_writes) ... ok
+test_background_worker_does_not_activate_or_reschedule (__main__.OptimizerChecks.test_background_worker_does_not_activate_or_reschedule) ... ok
+test_both_platforms_use_automatic_policy_and_provider (__main__.OptimizerChecks.test_both_platforms_use_automatic_policy_and_provider) ... ok
+test_estimator_uses_shared_cap_and_original_outcome (__main__.OptimizerChecks.test_estimator_uses_shared_cap_and_original_outcome) ... ok
+test_migration_preserves_every_old_value (__main__.OptimizerChecks.test_migration_preserves_every_old_value) ... ok
+test_query_keeps_keyboard_not_undo_or_future (__main__.OptimizerChecks.test_query_keeps_keyboard_not_undo_or_future) ... ok
+test_restore_validates_and_replays_each_model (__main__.OptimizerChecks.test_restore_validates_and_replays_each_model) ... ok
+test_schema_is_one_nullable_addition (__main__.OptimizerChecks.test_schema_is_one_nullable_addition) ... ok
+test_version_and_ci_test_targets (__main__.OptimizerChecks.test_version_and_ci_test_targets) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.013s
+
+OK

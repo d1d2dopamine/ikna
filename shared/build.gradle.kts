@@ -70,15 +70,12 @@ kotlin {
             // pull in.
             api(compose.animation)
 
-            // Room 2.7.2, deliberately neither 2.8 nor 3.0.
-            //
-            // 2.7 is the first stable Room that can generate a database for a
-            // target that is not Android, which is the whole reason this module
-            // exists. 2.8 is built against compileSdk 36, which AGP 8.6.1
-            // cannot compile against; 3.0 removes the compatibility surface
-            // this project has already stopped using but changes more besides.
-            api("androidx.room:room-runtime:2.7.2")
-            api("androidx.sqlite:sqlite:2.5.2")
+            // Room 2.8.5 includes the AndroidSQLiteDriver suspending-transaction
+            // deadlock fix (b/415006268). Runtime and both KSP compilers stay aligned.
+            // Published Room/SQLite AAR metadata requires compileSdk 34 / AGP 8.1.1;
+            // this project uses 35 / 8.6.1. No database schema or history rewrite.
+            api("androidx.room:room-runtime:2.8.5")
+            api("androidx.sqlite:sqlite:2.6.2")
 
             // The -core artifact, not -preferences: the Android one carries the
             // Context delegate this code no longer uses, and only the core
@@ -95,7 +92,7 @@ kotlin {
         androidMain.dependencies {
             // Same isolated envelope API, with the vendor-supported Android artifact.
             implementation("com.google.crypto.tink:tink-android:1.23.0")
-            api("androidx.sqlite:sqlite-framework:2.5.2")
+            api("androidx.sqlite:sqlite-framework:2.6.2")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
         }
 
@@ -104,7 +101,7 @@ kotlin {
             implementation("com.google.crypto.tink:tink:1.23.0")
             // SQLite compiled into the jar. Windows has none to borrow, and this
             // build enables FTS4, which the deck search needs.
-            implementation("androidx.sqlite:sqlite-bundled:2.5.2")
+            implementation("androidx.sqlite:sqlite-bundled:2.6.2")
             implementation(compose.desktop.currentOs)
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
         }
@@ -117,8 +114,8 @@ kotlin {
 // then fails much later, complaining that the generated database class is
 // missing.
 dependencies {
-    add("kspAndroid", "androidx.room:room-compiler:2.7.2")
-    add("kspDesktop", "androidx.room:room-compiler:2.7.2")
+    add("kspAndroid", "androidx.room:room-compiler:2.8.5")
+    add("kspDesktop", "androidx.room:room-compiler:2.8.5")
 }
 
 ksp {

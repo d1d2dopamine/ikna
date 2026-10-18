@@ -1,0 +1,17 @@
+{
+  "identical": false,
+  "fileCountBefore": 493,
+  "fileCountAfter": 493,
+  "changedPaths": [
+    "CHANGELOG.md"
+  ],
+  "excluded": [
+    "build outputs",
+    ".gradle",
+    ".git",
+    "ignored app/libs payload",
+    "pinned starter pack payload"
+  ],
+  "compiledInputsUnchanged": true,
+  "explanation": "Only CHANGELOG.md changed during execution; all app/shared/desktop source, fixtures, schema and build scripts remained byte-identical."
+}

@@ -171,8 +171,12 @@ class FullGradingChecks(unittest.TestCase):
 
     def test_ci_runs_production_kotlin_and_real_android_migrations(self):
         workflow = (ROOT / ".github/workflows/grading.yml").read_text()
-        for token in (":desktop:test", ":app:testReleaseUnitTest", ":desktop:gradingLab", ":app:connectedDebugAndroidTest", "-Pikna.abi=emulator", "check_reports.py"):
+        for token in (":desktop:test", ":app:testReleaseUnitTest", ":desktop:gradingLab", "script: bash tools/ci/run-android-tests.sh", "-Pikna.abi=emulator", "check_reports.py"):
             self.assertIn(token, workflow)
+        wrapper = (ROOT / "tools/ci/run-android-tests.sh").read_text()
+        for token in (":app:connectedDebugAndroidTest", "-Pikna.abi=emulator",
+                      "--kill-after=30s 900s bash tools/ci/run-gradle.sh", 'exit "$code"'):
+            self.assertIn(token, wrapper)
         for file in ("build.yml", "release.yml"):
             text = (ROOT / ".github/workflows" / file).read_text()
             self.assertIn("uses: ./.github/workflows/grading.yml", text)

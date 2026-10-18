@@ -1201,3 +1201,26 @@ Protect reads as well as writes; never take ownership of existing foreign/group
 owned state in the Windows ACL branch. Keep the strict packaged selftest and installer artifact checks.
 Native Windows provider regressions are wired before packaging. Local Linux
 provider/double tests cannot close that Windows gate. See ROUND-0.12-62-ru.md.
+
+## Round64: Android runtime regression candidate (2026-10-18)
+
+Owner testing of Round62 reports a pending session, pending statistics and an
+unresponsive sync toggle. Release preparation from Round63 is paused; this
+candidate does not establish release readiness. Screenshots show loading states,
+not proof of deleted learning history.
+
+Room2.7.2 + AndroidSQLiteDriver uses the upstream-affected suspending transaction
+path (b/415006268). The controlled candidate pins Room runtime/compiler2.8.5 and
+SQLite2.6.2 together, retaining the driver, schema14 and existing data. Exact
+Android provider regression tests and a bounded existing instrumentation CI lane
+cover thread-hop read/write/rollback plus session/statistics/sync flows.
+
+Local software-emulator boot exceeded its600-second bound before any APK was
+installed. Actual Android test execution and owner retest remain required;
+compilation and desktop/JVM tests cannot replace them. Desktop sync-entry
+visibility remains separately unresolved pending the actual Settings/Data and
+profile context. No data reset or destructive recovery is prescribed.
+
+See [Round64 report](ROUND-0.12-64-ru.md) for executed checks, reproduction limits,
+CI steps and the explicit release NO-GO gates. Catalogue and Round63 version/
+publication changes are not included in this repair candidate.

@@ -2413,3 +2413,12 @@ going to contain is in this version, so there is one release note rather than tw
 
 First working builds: FSRS-4.5 scheduling, the load governor, chunk packs, the
 append-only review log, and the weekly export.
+
+### Round64 candidate: Android suspending transactions
+
+- Align Room runtime/compiler2.8.5 and SQLite2.6.2 to include the upstream
+  AndroidSQLiteDriver suspension/thread-confinement fix, retaining schema14.
+- Add actual-provider transaction and session/statistics/sync regression cases.
+- Bound the existing Android instrumentation process and retain capped logcat
+  diagnostics on failure. Actual Android execution/owner acceptance remains open;
+  this candidate is not a release approval.

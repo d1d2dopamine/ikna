@@ -1,0 +1,38 @@
+{
+  "room-runtime-android.aar": {
+    "sha256": "ab6f951f6e7b63ed419eaf740b34dbe51560532f78289fd9c5dadabf46401dba",
+    "bytes": 572156,
+    "aarMetadata": "aarFormatVersion=1.0\naarMetadataVersion=1.0\nminCompileSdk=34\nminCompileSdkExtension=0\nminAndroidGradlePluginVersion=8.1.1\ncoreLibraryDesugaringEnabled=false\n",
+    "group": "androidx.room",
+    "artifact": "room-runtime-android",
+    "version": "2.8.5",
+    "officialMavenUrl": "https://dl.google.com/dl/android/maven2/androidx/room/room-runtime-android/2.8.5/room-runtime-android-2.8.5.aar"
+  },
+  "sqlite-android.aar": {
+    "sha256": "514f8de4f7bdba2fa8d748d2b22fdcdfb623bd3770a667bf0adc0ad259f03ed2",
+    "bytes": 38190,
+    "aarMetadata": "aarFormatVersion=1.0\naarMetadataVersion=1.0\nminCompileSdk=34\nminCompileSdkExtension=0\nminAndroidGradlePluginVersion=8.1.1\ncoreLibraryDesugaringEnabled=false\n",
+    "group": "androidx.sqlite",
+    "artifact": "sqlite-android",
+    "version": "2.6.2",
+    "officialMavenUrl": "https://dl.google.com/dl/android/maven2/androidx/sqlite/sqlite-android/2.6.2/sqlite-android-2.6.2.aar"
+  },
+  "sqlite-bundled-android.aar": {
+    "sha256": "156a1fb3a89a18620c5aacc57b340897e5a5d7efed202eda7b0972ddc551a9df",
+    "bytes": 2537459,
+    "aarMetadata": "aarFormatVersion=1.0\naarMetadataVersion=1.0\nminCompileSdk=34\nminCompileSdkExtension=0\nminAndroidGradlePluginVersion=8.1.1\ncoreLibraryDesugaringEnabled=false\n",
+    "group": "androidx.sqlite",
+    "artifact": "sqlite-bundled-android",
+    "version": "2.6.2",
+    "officialMavenUrl": "https://dl.google.com/dl/android/maven2/androidx/sqlite/sqlite-bundled-android/2.6.2/sqlite-bundled-android-2.6.2.aar"
+  },
+  "sqlite-framework-android.aar": {
+    "sha256": "b19125c7fff34222e0f380361fc179ab214e4d82e1a50b0c068ca26c851a6231",
+    "bytes": 60894,
+    "aarMetadata": "aarFormatVersion=1.0\naarMetadataVersion=1.0\nminCompileSdk=34\nminCompileSdkExtension=0\nminAndroidGradlePluginVersion=8.1.1\ncoreLibraryDesugaringEnabled=false\n",
+    "group": "androidx.sqlite",
+    "artifact": "sqlite-framework-android",
+    "version": "2.6.2",
+    "officialMavenUrl": "https://dl.google.com/dl/android/maven2/androidx/sqlite/sqlite-framework-android/2.6.2/sqlite-framework-android-2.6.2.aar"
+  }
+}

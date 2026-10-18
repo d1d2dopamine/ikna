@@ -143,10 +143,14 @@ class AndroidCiChecks(unittest.TestCase):
     def test_ci_builds_test_apk_before_emulator_and_retains_failure_logs(self):
         source = (ROOT / ".github/workflows/grading.yml").read_text()
         self.assertLess(source.index(":app:assembleDebugAndroidTest"), source.index("reactivecircus/android-emulator-runner@v2"))
-        for token in ("check_android_ci.py --self-test", "check_android_ci.py", "cache-read-only: true", "ci-logs/", "app/build/outputs/androidTest-results/", ":app:connectedDebugAndroidTest", "if: always()"):
+        for token in ("check_android_ci.py --self-test", "check_android_ci.py", "cache-read-only: true", "ci-logs/", "app/build/outputs/androidTest-results/", "script: bash tools/ci/run-android-tests.sh", "if: always()"):
             self.assertIn(token, source)
         self.assertNotIn("continue-on-error:", source)
         self.assertNotIn("if-no-files-found: ignore", source)
+        wrapper = (ROOT / "tools/ci/run-android-tests.sh").read_text()
+        self.assertIn(":app:connectedDebugAndroidTest", wrapper)
+        self.assertIn("--kill-after=30s 900s bash tools/ci/run-gradle.sh", wrapper)
+        self.assertIn('exit "$code"', wrapper)
 
     def test_logging_wrapper_preserves_gradle_exit_status_and_arguments(self):
         bash = shutil.which("bash")

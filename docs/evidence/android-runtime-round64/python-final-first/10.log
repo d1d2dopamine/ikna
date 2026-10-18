@@ -1,0 +1,8 @@
+test_fixture_tracks_the_pinned_dependencies (__main__.WarningBoundary.test_fixture_tracks_the_pinned_dependencies) ... ok
+test_only_reviewed_owner_exceptions_are_added (__main__.WarningBoundary.test_only_reviewed_owner_exceptions_are_added) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+OK
+Static boundary checks only; actual ProGuard/runtime verification not requested.

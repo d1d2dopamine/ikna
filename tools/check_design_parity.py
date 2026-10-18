@@ -574,8 +574,11 @@ class DesignContracts(unittest.TestCase):
 
     def test_ci_keeps_real_build_and_migration_gates(self):
         source = read(ROOT, '.github/workflows/grading.yml')
-        for required in ['tools/check_localization.py', 'tools/check_design_parity.py', ':desktop:test', ':app:testReleaseUnitTest', ':app:assembleDebugAndroidTest', ':app:connectedDebugAndroidTest']:
+        for required in ['tools/check_localization.py', 'tools/check_design_parity.py', ':desktop:test', ':app:testReleaseUnitTest', ':app:assembleDebugAndroidTest', 'script: bash tools/ci/run-android-tests.sh']:
             self.assertIn(required, source)
+        wrapper = read(ROOT, 'tools/ci/run-android-tests.sh')
+        for required in [':app:connectedDebugAndroidTest', '-Pikna.abi=emulator', 'timeout --signal=TERM --kill-after=30s 900s', 'exit "$code"']:
+            self.assertIn(required, wrapper)
         source = read(ROOT, 'app/src/test/java/dev/ikna/domain/optimizer/LocalOptimizerTest.kt')
         for test in ['automaticPolicyAppliesOnlyAcceptedResultsAndHonoursMonthlyLimit', 'automaticEligibilityIsQuietAndInsufficientHistoryKeepsDefaults', 'automaticActivationCannotReviveAProfileAfterReset', 'automaticFailuresBackOffInsteadOfFittingAfterEveryAnswer']:
             self.assertIn(test, source)
