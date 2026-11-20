@@ -51,7 +51,7 @@ class HomeDockLayoutTest {
                 if (width == 0.dp) continue
                 val deck = onNodeWithText("English from context").getUnclippedBoundsInRoot()
                 val dock = onNodeWithContentDescription(S.t("a11y.011")).getUnclippedBoundsInRoot()
-                assertTrue(deck.height > 0.dp)
+                assertTrue(deck.bottom > deck.top)
                 assertTrue(deck.bottom < dock.top)
                 assertTrue(viewport.bottom - dock.bottom < 40.dp)
             }
