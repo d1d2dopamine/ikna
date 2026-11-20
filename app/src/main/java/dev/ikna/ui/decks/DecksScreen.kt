@@ -40,7 +40,7 @@ import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaReadingCat
 import dev.ikna.ui.theme.IknaLatticePlaceholder
-import dev.ikna.ui.theme.IknaMemoryField
+import dev.ikna.ui.theme.IknaHomeBackdrop
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Space
 import dev.ikna.data.repo.TodayStudySummary
@@ -139,13 +139,7 @@ fun DecksScreen(
     // for a thing they watched happen is noise.
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Only the unused field carries the lattice. Content remains on plain
-        // paper, and the bottom bar paints its own background above it. The field
-        // belongs to the Home destination itself, so Shared Axis fades and moves it
-        // with the deck interface instead of removing it at the start of navigation.
-        // Every pushed route and the NavHost paint an opaque clipped surface, so the
-        // field cannot survive after Home's exit or leak into Settings.
-        IknaMemoryField(seed = 0x1A4B_7C2D, modifier = Modifier.fillMaxSize())
+        IknaHomeBackdrop()
 
         Column(modifier = Modifier.fillMaxSize()) {
         // The title and static reading cat. Navigation marks that used to

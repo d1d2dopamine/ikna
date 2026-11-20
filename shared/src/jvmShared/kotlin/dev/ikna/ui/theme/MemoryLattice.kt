@@ -1,88 +1,33 @@
 package dev.ikna.ui.theme
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
-import kotlin.math.PI
-import kotlin.math.floor
-import kotlin.math.sin
 
-/*
- * Empty space with a fine digital grain.
- *
- * This is not one route and never resolves into a snake. Hundreds of independent
- * square dots and very short orthogonal strokes form a quiet field, inspired by
- * plotter and terminal noise. The marks are deterministic, faint and concentrated
- * where the home screen is genuinely unused. The learning card never uses this
- * component: silence around a phrase is functional and stays completely clean.
- */
-
-/** A dense, low-contrast, deterministic pixel grain for unused screen regions. */
+/** A quiet, opaque tonal field drawn within the deck destination. */
 @Composable
-fun IknaMemoryField(
-    seed: Int,
-    modifier: Modifier = Modifier
-) {
-    val ink = MaterialTheme.colorScheme.onSurfaceVariant
-    Canvas(modifier = modifier.fillMaxSize()) {
-        val pitch = 7.dp.toPx()
-        val dot = 1.25.dp.toPx()
-        val jitter = 0.45.dp.toPx()
-        val columns = (size.width / pitch).toInt().coerceAtLeast(1)
-        val rows = (size.height / pitch).toInt().coerceAtLeast(1)
-        val firstRow = (rows * 0.24f).toInt().coerceAtMost(rows - 1)
-        var state = seed xor 0x4B1D5A77
-
-        for (row in firstRow until rows) {
-            for (column in 0 until columns) {
-                state = fieldStep(state + row * 131 + column * 53)
-                val gate = state ushr 28
-                if (gate >= 8) continue
-
-                val kind = (state ushr 4) and 15
-                val markWidth = when (kind) {
-                    0, 1 -> dot * 3f
-                    2, 3, 4 -> dot * 2f
-                    else -> dot
-                }
-                val markHeight = when (kind) {
-                    5 -> dot * 3f
-                    6, 7 -> dot * 2f
-                    else -> dot
-                }
-                val alpha = when ((state ushr 24) and 3) {
-                    0 -> 0.130f
-                    1 -> 0.095f
-                    else -> 0.065f
-                }
-                val x = (
-                    column * pitch + ((state ushr 8) and 3) * jitter
-                ).coerceIn(0f, (size.width - markWidth).coerceAtLeast(0f))
-                val y = (
-                    row * pitch + ((state ushr 10) and 3) * jitter
-                ).coerceIn(0f, (size.height - markHeight).coerceAtLeast(0f))
-
-                drawRect(
-                    color = ink.copy(alpha = alpha),
-                    topLeft = Offset(x, y),
-                    size = Size(markWidth, markHeight)
-                )
-            }
-        }
-    }
+fun IknaHomeBackdrop(modifier: Modifier = Modifier) {
+    val colors = MaterialTheme.colorScheme
+    Box(
+        modifier.fillMaxSize().background(
+            Brush.verticalGradient(
+                0f to lerp(colors.background, colors.surface, 0.48f),
+                0.55f to colors.background,
+                1f to lerp(colors.background, colors.surfaceVariant, 0.16f)
+            )
+        )
+    )
 }
 
 /** A compact unfinished lattice used instead of a dash or a blank chart. */
@@ -110,146 +55,6 @@ fun IknaLatticePlaceholder(modifier: Modifier = Modifier) {
                     color = ink.copy(alpha = if (row == 1) 0.20f else 0.11f),
                     topLeft = Offset(left + column * (cell + gap), row * rowStep),
                     size = Size(cell, cell)
-                )
-            }
-        }
-    }
-}
-
-/** A tiny integer generator: deterministic on every Android and JVM version. */
-private fun fieldStep(value: Int): Int {
-    var x = value
-    x = x xor (x shl 13)
-    x = x xor (x ushr 17)
-    x = x xor (x shl 5)
-    return x
-}
-
-/**
- * The same field, breathing.
- *
- * Desktop strips use stronger marks because a strip this thin disappears at
- * the MemoryField values. Over it a handful of marks per strip dissolve while
- * others appear, one deterministic cycle long: the population stays constant
- * and the picture is identical on every launch. [protectedStartDp] and
- * [protectedEndDp] clear the edges where the strip's own controls live.
- * With the app's Animations switch off no transition runs and the strip is the
- * static field.
- */
-private const val LATTICE_CYCLE_MS = 36_000
-private const val LATTICE_LIVE_SLOTS = 10
-private const val LATTICE_SLOT_WINDOW = 0.2f
-
-@Composable
-fun IknaMemoryAmbientStrip(
-    seed: Int,
-    modifier: Modifier = Modifier,
-    protectedStartDp: Float = 0f,
-    protectedEndDp: Float = 0f
-) {
-    val ink = MaterialTheme.colorScheme.onSurfaceVariant
-    val motionEnabled = LocalIknaMotionEnabled.current
-    val phase = if (motionEnabled) {
-        rememberInfiniteTransition(label = "memory-lattice").animateFloat(
-            initialValue = 0f,
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(tween(LATTICE_CYCLE_MS, easing = LinearEasing)),
-            label = "memory-lattice-phase"
-        ).value
-    } else {
-        0f
-    }
-    Canvas(modifier = modifier.fillMaxSize()) {
-        val startPx = protectedStartDp.dp.toPx()
-        val endPx = protectedEndDp.dp.toPx()
-        // A thin desktop strip needs stronger marks than the Home field.
-        val pitch = 7.dp.toPx()
-        val dot = 1.35.dp.toPx()
-        val jitter = 0.45.dp.toPx()
-        val columns = (size.width / pitch).toInt().coerceAtLeast(1)
-        val rows = (size.height / pitch).toInt().coerceAtLeast(1)
-        val freeWidth = size.width - startPx - endPx
-        fun outside(x: Float, width: Float): Boolean =
-            x < startPx || x + width > size.width - endPx
-
-        var state = seed xor 0x4B1D5A77
-        for (row in 0 until rows) {
-            for (column in 0 until columns) {
-                state = fieldStep(state + row * 131 + column * 53)
-                val gate = state ushr 28
-                if (gate >= 8) continue
-
-                val kind = (state ushr 4) and 15
-                val markWidth = when (kind) {
-                    0, 1 -> dot * 3f
-                    2, 3, 4 -> dot * 2f
-                    else -> dot
-                }
-                val markHeight = when (kind) {
-                    5 -> dot * 3f
-                    6, 7 -> dot * 2f
-                    else -> dot
-                }
-                val alpha = when ((state ushr 24) and 3) {
-                    0 -> 0.18f
-                    1 -> 0.13f
-                    else -> 0.085f
-                }
-                val x = (
-                    column * pitch + ((state ushr 8) and 3) * jitter
-                    ).coerceIn(0f, (size.width - markWidth).coerceAtLeast(0f))
-                val y = (
-                    row * pitch + ((state ushr 10) and 3) * jitter
-                    ).coerceIn(0f, (size.height - markHeight).coerceAtLeast(0f))
-                if (outside(x, markWidth)) continue
-
-                drawRect(
-                    color = ink.copy(alpha = alpha),
-                    topLeft = Offset(x, y),
-                    size = Size(markWidth, markHeight)
-                )
-            }
-        }
-
-        if (motionEnabled && freeWidth > pitch && size.height > pitch) {
-            for (slot in 0 until LATTICE_LIVE_SLOTS) {
-                val slotOffset = (
-                    (fieldStep(seed + slot * 7919).toLong() and 0x7FFFFFFFL) % 1000L
-                    ) / 1000f
-                val local = phase - slotOffset
-                val born = local - floor(local)
-                val generation = (local - born).toInt()
-                if (born >= LATTICE_SLOT_WINDOW) continue
-
-                val t = born / LATTICE_SLOT_WINDOW
-                var markState = fieldStep(seed + slot * 7919 + generation * 104_729)
-                val column = ((markState ushr 8) % columns)
-                val row = ((markState ushr 14) % rows)
-                markState = fieldStep(markState + row * 131 + column * 53)
-                val markWidth = when ((markState ushr 4) and 15) {
-                    0, 1 -> dot * 3f
-                    2, 3, 4 -> dot * 2f
-                    else -> dot
-                }
-                val markHeight = when ((markState ushr 5) and 15) {
-                    5 -> dot * 3f
-                    6, 7 -> dot * 2f
-                    else -> dot
-                }
-                val x = column * pitch + ((markState ushr 8) and 3) * jitter
-                val y = row * pitch + ((markState ushr 10) and 3) * jitter
-                if (outside(x, markWidth) || y + markHeight > size.height) continue
-
-                val base = when ((markState ushr 24) and 3) {
-                    0 -> 0.18f
-                    1 -> 0.13f
-                    else -> 0.085f
-                }
-                val envelope = sin(PI * t).toFloat()
-                drawRect(
-                    color = ink.copy(alpha = base * envelope),
-                    topLeft = Offset(x, y),
-                    size = Size(markWidth, markHeight)
                 )
             }
         }

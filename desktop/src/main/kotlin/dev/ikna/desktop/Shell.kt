@@ -56,7 +56,7 @@ import dev.ikna.ui.theme.IknaReadingCat
 import dev.ikna.ui.theme.IknaDeveloperBadge
 import dev.ikna.ui.theme.IknaElementInspector
 import dev.ikna.ui.theme.IknaLatticePlaceholder
-import dev.ikna.ui.theme.IknaMemoryField
+import dev.ikna.ui.theme.IknaHomeBackdrop
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaPanel
 import dev.ikna.ui.theme.IknaTheme
@@ -358,7 +358,7 @@ private fun DecksColumn(
 ) {
 
     Box(Modifier.fillMaxSize().iknaInspect("DecksColumn")) {
-        IknaMemoryField(seed = 0x1A4B_7C2D, modifier = Modifier.fillMaxSize())
+        IknaHomeBackdrop()
 
         Column(Modifier.fillMaxSize()) {
             Row(
