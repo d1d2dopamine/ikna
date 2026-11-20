@@ -209,6 +209,9 @@ fun IknaDesktopApp(
     ) {
         IknaElementInspector(enabled = settings.elementInspector) {
             BoxWithConstraints(Modifier.fillMaxSize()) {
+                val deckHeadingVisible = if (maxWidth >= 900.dp) {
+                    ui.pane != Pane.SESSION || !ui.studyDecksCollapsed
+                } else ui.listOpen
                 Column(
                     Modifier
                         .fillMaxSize()
@@ -217,9 +220,6 @@ fun IknaDesktopApp(
                 ) {
                     // Keep the draggable strip and window controls during welcome,
                     // but do not repeat ikna in its top-left corner.
-                    val deckHeadingVisible = if (maxWidth >= 900.dp) {
-                        ui.pane != Pane.SESSION || !ui.studyDecksCollapsed
-                    } else ui.listOpen
                     titleBar(palette, ready && settings.onboardingDone && !firstRunVisible && !deckHeadingVisible)
                 Box(Modifier.weight(1f).fillMaxWidth()) {
                     if (startupFailed && storedSettings != null) {
