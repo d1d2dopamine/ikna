@@ -7,7 +7,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ikna.data.prefs.HotkeyBindings
 import dev.ikna.data.prefs.IknaSettings
@@ -360,14 +361,9 @@ private fun DesktopShell(
                     animationSpec = if (settings.animations) tween(240) else snap(),
                     label = "deck-sidebar"
                 )
-                Box(Modifier.width(sidebarWidth).fillMaxHeight()
-                    .clipToBounds().background(MaterialTheme.colorScheme.surface)) {
-                    if (sidebarWidth > 0.dp) {
-                        Box(Modifier.wrapContentSize(Alignment.TopStart, unbounded = true).width(listWidth).fillMaxHeight()) {
-                            DecksColumn(settings, palette, ui, decks, remaining, todaySummary, deckListState,
-                                offeredUpdate, skipUpdate, showWordmark = expanded)
-                        }
-                    }
+                DesktopDeckSidebarViewport(sidebarWidth, listWidth) {
+                    DecksColumn(settings, palette, ui, decks, remaining, todaySummary, deckListState,
+                        offeredUpdate, skipUpdate, showWordmark = expanded)
                 }
                 Box(Modifier.weight(1f).fillMaxHeight()) {
                     PaneContent(container, settings, palette, ui, decks, wide = true, onRestartRequested = onRestartRequested)
@@ -378,6 +374,23 @@ private fun DesktopShell(
                 offeredUpdate, skipUpdate)
         } else {
             PaneContent(container, settings, palette, ui, decks, wide = false, onRestartRequested = onRestartRequested)
+        }
+    }
+}
+
+@Composable
+internal fun DesktopDeckSidebarViewport(
+    visibleWidth: Dp,
+    contentWidth: Dp,
+    content: @Composable () -> Unit
+) {
+    Box(Modifier.width(visibleWidth).fillMaxHeight().clipToBounds()) {
+        if (visibleWidth > 0.dp) {
+            // Clip the fixed-width list while it slides. Keep height bounded so
+            // the weighted deck list reserves the space above the bottom dock.
+            Box(Modifier.wrapContentWidth(Alignment.Start, unbounded = true).width(contentWidth).fillMaxHeight()) {
+                content()
+            }
         }
     }
 }
