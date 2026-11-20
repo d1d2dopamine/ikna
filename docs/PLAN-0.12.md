@@ -140,6 +140,56 @@ the rule that revealing a card cannot also grade it, and verify that long
 sentences can still be read or scrolled at narrow widths. Use the prototype in
 the Rust study flow after checking it on both Android and desktop.
 
+### Desktop layout, card clarity and statistics follow-up
+
+Owner feedback after trying the current desktop build, 2026-11-21. Implement
+these in separate changes so each interaction can be reviewed on its own.
+
+1. **Animate the deck sidebar.** When the desktop sidebar is collapsed or
+   reopened, animate its width and let the card pane resize with it. Keep the
+   current card, reveal state, keyboard focus and deck scroll position through
+   the transition. Reversing mid-animation should continue from the current
+   width. Snap to the final layout when animations are disabled.
+2. **Show one Ikna wordmark.** The screenshots show one in the desktop title
+   bar and another beside «Колоды». Keep the deck heading as the owner of the
+   wordmark while that heading is visible. When the sidebar is hidden, use the
+   title bar where available. Moving the dock to the top should still move the
+   branded deck heading to the bottom, with a single wordmark on screen.
+3. **Add two deck-screen appearance presets.** Try a light paper-like surface
+   and a darker surface with a restrained tonal gradient, both using the current
+   palette for accents. Preview them with actual deck marks, long names and the
+   dock. Apply the choice to the deck screen and check text contrast and focus
+   on desktop and Android.
+4. **Name the state of the card.** Replace the ambiguous «Узнать» label with
+   «Новая карточка» on first exposure and «Повторение» once the learner has seen
+   it. Derive the label from recorded exposure or review state, including a
+   card shown again during the same session. Keep «Показать ответ» as the
+   separate action.
+5. **Give button grading the swipe transition.** Clicking either grade should
+   send the card in the same direction as the corresponding swipe, using the
+   same staged transition to the next card with a calm speed for button input.
+   Keep input telemetry separate and verify that reveal and grade remain
+   independent, rapid input cannot record two answers, and reduced motion works.
+6. **Make statistics answer useful questions.** Prioritize what was studied,
+   how recall changed, which cards were repeatedly missed and when the next
+   reviews are due. Derive summaries from the retained review journal. Label
+   estimates and show when there is too little data, particularly for recall.
+7. **Export statistics from one expandable action.** «Скачать статистику»
+   opens compact choices attached to the button for period and format, then
+   offers Save. Periods are all available history, 7 days and 30 days. Start
+   with CSV for spreadsheets and JSON for structured export. Include review
+   records and the corresponding summaries for the selected period. Define day
+   boundaries consistently with the app and check that undone answers and
+   Developer Sandbox data follow the existing journal and profile rules.
+   Make the control reusable with one, two or three independent choice groups,
+   including keyboard navigation, dismissal and accessible labels.
+8. **Determine the language from the deck.** Remove the manual language selector
+   from deck settings once imports supply reliable language metadata. Prefer
+   the catalogue or import metadata, then detect the language from several
+   source-side examples for decks without it. Represent mixed or uncertain
+   results explicitly. Preserve existing deck data and check that transcription
+   and speech use the detected language correctly.
+
 ## Current batch and next checkpoint
 
 Round 01 implements pointer-lifetime/bounds arbitration for Signal Frame, shared
