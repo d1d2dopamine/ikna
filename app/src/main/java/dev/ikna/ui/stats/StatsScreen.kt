@@ -1,6 +1,16 @@
 package dev.ikna.ui.stats
 
 import dev.ikna.ui.text.S
+import android.app.Activity
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import dev.ikna.data.repo.StatsExportFormat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +45,34 @@ private val EDGE = 20.dp
 
 @Composable
 fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var pending by remember { mutableStateOf<Pair<Int?, StatsExportFormat>?>(null) }
+    var exporting by remember { mutableStateOf(false) }
+    var exportFailed by remember { mutableStateOf(false) }
+    val save = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val request = pending
+        pending = null
+        val uri = result.data?.data
+        if (result.resultCode == Activity.RESULT_OK && uri != null && request != null) {
+            exporting = true
+            scope.launch {
+                try {
+                    val content = container.studyStatsRepository.export(request.first, request.second)
+                    withContext(Dispatchers.IO) {
+                        checkNotNull(context.contentResolver.openOutputStream(uri)).bufferedWriter(Charsets.UTF_8)
+                            .use { it.write(content) }
+                    }
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (_: Exception) {
+                    exportFailed = true
+                } finally {
+                    exporting = false
+                }
+            }
+        }
+    }
     var snapshot by remember { mutableStateOf<StudyStats?>(null) }
     var failed by remember { mutableStateOf(false) }
     var reload by remember { mutableStateOf(0) }
@@ -64,6 +102,16 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
                 color = MaterialTheme.colorScheme.onBackground
             )
 
+            IknaStatsExportAction(enabled = snapshot != null && pending == null && !exporting) { days, format ->
+                exportFailed = false
+                pending = days to format
+                save.launch(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = format.mimeType
+                    putExtra(Intent.EXTRA_TITLE, "ikna-statistics.${format.extension}")
+                })
+            }
+            if (exportFailed) Text(S.t("share.003"))
             Spacer(Modifier.height(32.dp))
             when {
                 failed -> IknaStatsLoadFailure { reload++ }

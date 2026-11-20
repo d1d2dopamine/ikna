@@ -11,6 +11,25 @@ import java.time.ZoneId
 
 /** A single read-only snapshot; no tracking, settings, schedule or history writes. */
 class StudyStatsRepository(private val db: IknaDatabase, private val dayStartHour: Int = 4) {
+    suspend fun export(days: Int?, format: StatsExportFormat, now: Long = System.currentTimeMillis(),
+        zone: ZoneId = ZoneId.systemDefault()): String = withContext(Dispatchers.IO) {
+        require(days == null || days == 7 || days == 30)
+        val from = days?.let { studyWindowStart(now, it, zone, dayStartHour) } ?: 0L
+        val report = db.useReaderConnection { connection ->
+            connection.deferredTransaction {
+                val rows = db.reviewDao().studyAnswersBetween(from, now)
+                val evidence = studyEvidence(rows, from, now)
+                StatsExportReport(
+                    days?.let { exportTime(from) }, exportTime(now), zone.id, dayStartHour,
+                    evidence.targets, db.reviewDao().firstRecordedTargetCount(from, now),
+                    evidence.answers, evidence.repeats, evidence.recalled, evidence.unclassified,
+                    rows.map { StatsExportAnswer(exportTime(it.ts), it.chunkId, it.level, it.rating) }
+                )
+            }
+        }
+        report.render(format)
+    }
+
     suspend fun load(now: Long = System.currentTimeMillis(), zone: ZoneId = ZoneId.systemDefault()): StudyStats =
         withContext(Dispatchers.IO) {
             val caller = currentCoroutineContext()
@@ -38,7 +57,7 @@ class StudyStatsRepository(private val db: IknaDatabase, private val dayStartHou
                             facts.repeats, facts.recalled, facts.unclassified,
                             targets(facts.recovered), targets(facts.attention))
                     }
-                    StudyStats(period(7), period(30), zone.id, dayStartHour)
+                    StudyStats(period(7), period(30), zone.id, dayStartHour, db.cardDao().nextDueAt(now))
                 }
             }
             caller.ensureActive()

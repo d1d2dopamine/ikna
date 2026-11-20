@@ -109,7 +109,7 @@ val STRINGS_RU: Map<String, String> = mapOf(
     "stats.a11y.small_sample" to "Мало наблюдений.",
     "stats.a11y.forecast_day" to "Следующие {days} дней, начиная с завтра. Повторения по расписанию: {reviews}.",
     "stats.a11y.no_data" to "Пока нет данных.",
-    "stats.001" to "Статистика",
+    "stats.export" to "Скачать статистику", "stats.period" to "Период", "stats.format" to "Формат", "stats.all" to "Вся история", "stats.save" to "Сохранить", "stats.next" to "Следующее повторение", "stats.recall_sample" to "Пока мало повторений, чтобы судить о запоминании.", "stats.001" to "Статистика",
 	"stats.002" to "ПОСЛЕДНИЕ 30 ДНЕЙ",
 	"stats.003" to "Каждая метка — день с занятием, справа сегодня. Пропуск ничего не обнуляет и не обрывает: цепочки здесь нет, ломать нечего.",
 	"stats.004" to "ИСТОРИЯ",

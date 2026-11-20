@@ -109,7 +109,7 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "stats.a11y.small_sample" to "Muestra pequeña.",
     "stats.a11y.forecast_day" to "Próximos {days} días, desde mañana. Repasos programados: {reviews}.",
     "stats.a11y.no_data" to "Aún no hay datos.",
-    "stats.001" to "Estadísticas",
+    "stats.export" to "Descargar estadísticas", "stats.period" to "Período", "stats.format" to "Formato", "stats.all" to "Todo el historial", "stats.save" to "Guardar", "stats.next" to "Próximo repaso", "stats.recall_sample" to "Hay pocos repasos para evaluar la memoria.", "stats.001" to "Estadísticas",
     "stats.002" to "ÚLTIMOS 30 DÍAS",
     "stats.003" to "Cada marca es un día con una sesión; hoy está a la derecha. Saltarse un día no pone nada a cero ni rompe nada: aquí no hay rachas.",
     "stats.004" to "HISTORIAL",

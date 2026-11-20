@@ -26,6 +26,12 @@ fun IknaStudyStatsContent(snapshot: StudyStats) {
     var showExplanation by remember { mutableStateOf(false) }
     val period = if (days == 7) snapshot.week else snapshot.month
     Column(Modifier.fillMaxWidth()) {
+        snapshot.nextDueAt?.let { next ->
+            val formatter = DateTimeFormatter.ofPattern("d MMM, HH:mm", Locale.forLanguageTag(S.lang))
+            Text(S.t("stats.next") + " " + formatter.format(Instant.ofEpochMilli(next).atZone(ZoneId.of(snapshot.zone))),
+                style = MaterialTheme.typography.bodyMedium)
+            Spacer(Modifier.height(Space.md))
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
             IknaChip(label = S.t("study.001"), selected = days == 7, onClick = { days = 7 })
             IknaChip(label = S.t("study.002"), selected = days == 30, onClick = { days = 30 })
@@ -38,6 +44,11 @@ fun IknaStudyStatsContent(snapshot: StudyStats) {
         StudyMetric(S.t("study.003"), period.targets)
         StudyMetric(S.t("study.004"), period.firstRecordedTargets)
         StudyMetric(S.t("study.005"), period.repeatAnswers)
+        Text(
+            if (period.repeatAnswers >= 5) studyText("study.007", "recalled" to period.recalledRepeatAnswers, "total" to period.repeatAnswers)
+            else S.t("stats.recall_sample"),
+            style = MaterialTheme.typography.bodySmall
+        )
         Spacer(Modifier.height(Space.sm))
         Text(studyText("study.006", "count" to period.answers),
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -54,8 +65,6 @@ fun IknaStudyStatsContent(snapshot: StudyStats) {
             Spacer(Modifier.height(Space.sm))
             Text(S.t("study.009"), style = MaterialTheme.typography.bodySmall)
             Spacer(Modifier.height(Space.sm))
-            Text(studyText("study.007", "recalled" to period.recalledRepeatAnswers, "total" to period.repeatAnswers),
-                style = MaterialTheme.typography.bodySmall)
             if (period.unclassifiedAnswers > 0) {
                 Spacer(Modifier.height(Space.sm))
                 Text(studyText("study.022", "count" to period.unclassifiedAnswers), style = MaterialTheme.typography.bodySmall)

@@ -126,7 +126,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "stats.a11y.small_sample" to "Mała próba.",
     "stats.a11y.forecast_day" to "Następne {days} dni, od jutra. Zaplanowane powtórki: {reviews}.",
     "stats.a11y.no_data" to "Brak danych.",
-    "stats.001" to "Statystyka",
+    "stats.export" to "Pobierz statystyki", "stats.period" to "Okres", "stats.format" to "Format", "stats.all" to "Cała historia", "stats.save" to "Zapisz", "stats.next" to "Następna powtórka", "stats.recall_sample" to "Za mało powtórek, by ocenić zapamiętanie.", "stats.001" to "Statystyka",
 	// ПОСЛЕДНИЕ 30 ДНЕЙ
 	"stats.002" to "OSTATNIE 30 DNI",
 	// Каждая метка — день с занятием, справа сегодня. Пропуск ничего не обнуляет и не обрывает:

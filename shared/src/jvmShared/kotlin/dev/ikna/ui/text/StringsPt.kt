@@ -110,7 +110,7 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "stats.a11y.small_sample" to "Amostra pequena.",
     "stats.a11y.forecast_day" to "Próximos {days} dias, a partir de amanhã. Revisões programadas: {reviews}.",
     "stats.a11y.no_data" to "Ainda não há dados.",
-    "stats.001" to "Estatísticas",
+    "stats.export" to "Baixar estatísticas", "stats.period" to "Período", "stats.format" to "Formato", "stats.all" to "Todo o histórico", "stats.save" to "Salvar", "stats.next" to "Próxima revisão", "stats.recall_sample" to "Ainda há poucas revisões para avaliar a memória.", "stats.001" to "Estatísticas",
     "stats.002" to "ÚLTIMOS 30 DIAS",
     "stats.003" to "Cada marca é um dia com uma sessão; hoje fica à direita. Pular não zera nem interrompe nada: não há sequência aqui, portanto não há nada para quebrar.",
     "stats.004" to "HISTÓRICO",

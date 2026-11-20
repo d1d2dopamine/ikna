@@ -126,7 +126,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "stats.a11y.small_sample" to "Small sample.",
     "stats.a11y.forecast_day" to "Next {days} days, starting tomorrow. Scheduled reviews: {reviews}.",
     "stats.a11y.no_data" to "No data yet.",
-    "stats.001" to "Statistics",
+    "stats.export" to "Download statistics", "stats.period" to "Period", "stats.format" to "Format", "stats.all" to "All history", "stats.save" to "Save", "stats.next" to "Next review", "stats.recall_sample" to "Too few repeat answers to summarize recall.", "stats.001" to "Statistics",
 	// ПОСЛЕДНИЕ 30 ДНЕЙ
 	"stats.002" to "LAST 30 DAYS",
 	// Каждая метка — день с занятием, справа сегодня. Пропуск ничего не обнуляет и не обрывает:

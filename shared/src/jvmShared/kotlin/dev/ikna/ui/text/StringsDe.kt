@@ -101,7 +101,7 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "stats.a11y.small_sample" to "Kleine Stichprobe.",
     "stats.a11y.forecast_day" to "Die nächsten {days} Tage, ab morgen. Geplante Wiederholungen: {reviews}.",
     "stats.a11y.no_data" to "Noch keine Daten.",
-    "stats.001" to "Statistik", "stats.002" to "LETZTE 30 TAGE",
+    "stats.export" to "Statistik herunterladen", "stats.period" to "Zeitraum", "stats.format" to "Format", "stats.all" to "Gesamter Verlauf", "stats.save" to "Speichern", "stats.next" to "Nächste Wiederholung", "stats.recall_sample" to "Zu wenige Wiederholungen für eine Auswertung.", "stats.001" to "Statistik", "stats.002" to "LETZTE 30 TAGE",
     "stats.003" to "Jede Markierung ist ein Lerntag, heute steht rechts. Ein ausgelassener Tag setzt nichts zurück: Hier gibt es keine Serie, die brechen kann.",
     "stats.004" to "VERLAUF", "stats.005" to "PHRASEN IM STUDIUM",
     "stats.006" to "ANTWORTEN · 30 TAGE",

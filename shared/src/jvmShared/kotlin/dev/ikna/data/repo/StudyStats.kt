@@ -9,7 +9,8 @@ data class StudyStats(
     val week: StudyPeriod,
     val month: StudyPeriod,
     val zone: String,
-    val dayStartHour: Int
+    val dayStartHour: Int,
+    val nextDueAt: Long? = null
 )
 
 data class StudyPeriod(
