@@ -284,7 +284,7 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "deck.001" to "No se pudo leer ni una línea",
     "deck.002" to "Fragmentos añadidos: ",
     "deck.003" to ", omitidos ",
-    "deck.004" to "Mazos",
+    "deck.panel_show" to "Mostrar mazos", "deck.panel_hide" to "Ocultar mazos", "deck.004" to "Mazos",
     "deck.005" to "Aún no hay mazos. El signo más de abajo contiene el prompt para la IA y un lugar donde pegarlo.",
     "deck.006" to "leyendo el archivo…",
     "today.start" to "Empezar a estudiar", "today.resume" to "Continuar estudiando", "today.deck_change_failed" to "No se pudo cambiar el mazo. Inténtalo de nuevo.", "today.reviews" to "Hoy solo hay repasos.", "deck.007" to "HOY",

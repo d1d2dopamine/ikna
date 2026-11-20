@@ -174,7 +174,7 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "dbg.007" to "HEUTIGEN PLAN NEU AUFBAUEN", "dbg.008" to "Heutiger Plan neu aufgebaut", "dbg.009" to "Reglerentscheidungen nach Tag",
     "dbg.010" to " neu=", "dbg.011" to " fällig=", "dbg.012" to " Prognose3T=", "dbg.013" to " Rückstand=", "dbg.014" to " Genauigkeit=", "dbg.015" to " Spielraum=",
     "deck.001" to "Keine einzige Zeile konnte gelesen werden", "deck.002" to "Chunks hinzugefügt: ", "deck.003" to ", übersprungen ",
-    "deck.004" to "Decks", "deck.005" to "Noch keine Decks. Das Plus unten enthält den KI-Prompt und einen Platz zum Einfügen.",
+    "deck.panel_show" to "Stapel anzeigen", "deck.panel_hide" to "Stapel ausblenden", "deck.004" to "Decks", "deck.005" to "Noch keine Decks. Das Plus unten enthält den KI-Prompt und einen Platz zum Einfügen.",
     "deck.006" to "Datei wird gelesen…", "today.start" to "Lernen starten", "today.resume" to "Weiterlernen", "today.deck_change_failed" to "Der Stapel konnte nicht geändert werden. Versuche es erneut.", "today.reviews" to "Heute nur Wiederholungen.", "deck.007" to "HEUTE", "deck.008" to "nichts wartet", "deck.009" to "heute ", "deck.010" to "heute nichts",
     "deck.014" to "Karten", "deck.015" to "Karte", "deck.016" to "Karten", "deck.017" to "Karten", "deck.018" to " · <1 Min.", "deck.019" to " Min.",
     "add.001" to "Neues Deck", "add.002" to "Ein Deck ist Klartext. Eine Zeile ist eine Karte: Wendung, Beispielsatz und Übersetzung, getrennt durch |.",

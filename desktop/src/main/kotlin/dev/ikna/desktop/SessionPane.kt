@@ -105,12 +105,14 @@ fun SessionPane(
     onChanged: () -> Unit,
     onBack: () -> Unit = {},
     /** False in the wide window, where the session pane is the app's home and back has nowhere to go. */
-    showBack: Boolean = true
+    showBack: Boolean = true,
+    decksCollapsed: Boolean = false,
+    onToggleDecks: (() -> Unit)? = null
 ) {
     // A deck switch disposes the whole session, including its asynchronous work.
     // An old answer must never advance a newly selected deck's queue.
     key(deckId) {
-        SessionPaneContent(container, settings, palette, deckId, onChanged, onBack, showBack)
+        SessionPaneContent(container, settings, palette, deckId, onChanged, onBack, showBack, decksCollapsed, onToggleDecks)
     }
 }
 
@@ -122,7 +124,9 @@ private fun SessionPaneContent(
     deckId: String?,
     onChanged: () -> Unit,
     onBack: () -> Unit,
-    showBack: Boolean
+    showBack: Boolean,
+    decksCollapsed: Boolean,
+    onToggleDecks: (() -> Unit)?
 ) {
     val scope = rememberCoroutineScope()
     val committedGeneration by container.sessionChanges.generation.collectAsState()
@@ -666,6 +670,13 @@ private fun SessionPaneContent(
             // where it can actually do something (narrow layout, list hidden).
             if (showBack) {
                 IknaIconButton(IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
+            }
+            if (onToggleDecks != null) {
+                IknaIconButton(
+                    glyph = IknaGlyph.DECK_PANEL,
+                    onClick = onToggleDecks,
+                    label = S.t(if (decksCollapsed) "deck.panel_show" else "deck.panel_hide")
+                )
             }
             Spacer(Modifier.weight(1f))
             if (current != null && revealed && !saving) {

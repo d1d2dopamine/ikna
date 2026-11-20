@@ -285,7 +285,7 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "deck.001" to "Não foi possível ler nenhuma linha",
     "deck.002" to "Blocos adicionados: ",
     "deck.003" to ", ignorados ",
-    "deck.004" to "Baralhos",
+    "deck.panel_show" to "Mostrar baralhos", "deck.panel_hide" to "Ocultar baralhos", "deck.004" to "Baralhos",
     "deck.005" to "Ainda não há baralhos. O botão de mais na parte inferior contém o prompt para IA e um espaço para colar.",
     "deck.006" to "lendo o arquivo…",
     "today.start" to "Começar a estudar", "today.resume" to "Continuar estudando", "today.deck_change_failed" to "Não foi possível alterar o baralho. Tente novamente.", "today.reviews" to "Hoje, só revisões.", "deck.007" to "HOJE",

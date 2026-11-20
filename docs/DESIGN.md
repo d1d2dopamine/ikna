@@ -49,10 +49,10 @@ It is not a pixel-art skin. The same grammar works at different scales: language
 seals identify decks, segmented tracks show progress, activity cells show time and
 unfinished lattices say that a chart or search does not have enough material yet.
 
-Every language owns a deterministic mirrored 7×7 seal. A deck adds four brighter
-cells from its stable id, so two English decks belong to one family without
-becoming identical. A protected 5×5 window around the monogram contains no pattern
-at all, keeping the two letters sharp. No flag or cultural stereotype is used.
+Every deck has a deterministic mirrored 9×9 seal derived from its ID and
+installation time. Top and bottom pairs echo in the inner rim, side groups form
+short runs, and four brighter cells accent existing marks. The centre 5×5 field
+stays clear for the monogram.
 
 Navigation uses Material Shared Axis X at a deliberately restrained scale. A
 forward destination enters from the right while the old route gives way by 14 dp;
@@ -139,6 +139,10 @@ statistics states retain a compact unfinished structure instead of looking
 unloaded, and texture is never painted on the learning card.
 
 ## A session
+
+In a wide desktop window, the panel button toggles the deck list without leaving
+the current session. The reading surface fills the available width when the
+deck list is collapsed.
 
 Today offers one primary action to start or resume the shared plan. The home
 count and widget count unique scheduled questions. A duration appears when

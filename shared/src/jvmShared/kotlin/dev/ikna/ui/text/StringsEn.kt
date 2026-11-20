@@ -469,7 +469,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// , пропущено
 	"deck.003" to ", skipped ",
 	// Колоды
-	"deck.004" to "Decks",
+	"deck.panel_show" to "Show decks", "deck.panel_hide" to "Hide decks", "deck.004" to "Decks",
 	// Пока ни одной колоды. Плюс сверху добавит файл .jsonl.
 	"deck.005" to "No decks yet. The plus at the bottom has the AI prompt and a place to paste.",
 	// читаю файл…

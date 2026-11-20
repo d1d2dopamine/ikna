@@ -33,72 +33,70 @@ fun monogramOf(lang: String, title: String): String {
     }
 }
 
-/** The fixed side of every deck seal. Seven stays legible inside 52dp. */
-const val DECK_SEAL_SIDE = 7
+/** The 9×9 field leaves space for a second rim around the monogram. */
+const val DECK_SEAL_SIDE = 9
 
 /** The 5×5 centre is paper reserved for the two letters. */
 fun isDeckSealLetterZone(index: Int): Boolean {
     if (index !in 0 until DECK_SEAL_SIDE * DECK_SEAL_SIDE) return false
     val row = index / DECK_SEAL_SIDE
     val column = index % DECK_SEAL_SIDE
-    return row in 1..5 && column in 1..5
+    return row in 2..6 && column in 2..6
 }
 
 /**
- * Decorative cells derived from this deck and this local installation time.
- * Integer-only generation keeps the result identical on every JVM architecture.
+ * Build a frame from mirrored pairs. Top and bottom have distinct rhythms,
+ * while the sides form continuous runs instead of scattering isolated pixels.
  */
 fun deckSealCells(deckId: String, installedAt: Long): Set<Int> {
-    val seed = sealKey(deckId, installedAt, "pattern")
+    val seed = sealHash(sealKey(deckId, installedAt, "pattern"))
     val cells = linkedSetOf<Int>()
-    var state = sealHash(seed)
-    for (row in 0 until DECK_SEAL_SIDE) {
-        for (column in 0 until DECK_SEAL_SIDE / 2) {
-            state = sealStep(state + row * 37 + column * 101)
-            if ((state ushr 29) < 3) {
-                cells += row * DECK_SEAL_SIDE + column
-                cells += row * DECK_SEAL_SIDE + (DECK_SEAL_SIDE - 1 - column)
-            }
-        }
-        state = sealStep(state xor (row * 0x45D9F3B))
-        if ((state and 1) != 0) cells += row * DECK_SEAL_SIDE + DECK_SEAL_SIDE / 2
+
+    fun pair(row: Int, column: Int) {
+        cells += row * DECK_SEAL_SIDE + column
+        cells += row * DECK_SEAL_SIDE + DECK_SEAL_SIDE - 1 - column
     }
 
-    val anchor = (sealHash(seed) ushr 1) % DECK_SEAL_SIDE
-    cells += anchor
-    cells += DECK_SEAL_SIDE - 1 - anchor
-    cells += (DECK_SEAL_SIDE - 1) * DECK_SEAL_SIDE + anchor
-    cells += (DECK_SEAL_SIDE - 1) * DECK_SEAL_SIDE + (DECK_SEAL_SIDE - 1 - anchor)
-    cells.removeAll(::isDeckSealLetterZone)
-
-    if (cells.size < 12) {
-        outer@ for (row in 0 until DECK_SEAL_SIDE) {
-            for (column in 0 until DECK_SEAL_SIDE / 2) {
-                val left = row * DECK_SEAL_SIDE + column
-                val right = row * DECK_SEAL_SIDE + DECK_SEAL_SIDE - 1 - column
-                if (isDeckSealLetterZone(left)) continue
-                cells += left
-                cells += right
-                if (cells.size >= 12) break@outer
-            }
+    val last = DECK_SEAL_SIDE - 1
+    val pairedColumns = 0 until DECK_SEAL_SIDE / 2
+    fun edge(row: Int, innerRow: Int, rhythm: Int) {
+        val gap = (rhythm ushr 1) % 5
+        for (column in pairedColumns) {
+            if (column != gap) pair(row, column)
         }
+        if ((rhythm and 1) == 0) pair(row, DECK_SEAL_SIDE / 2)
+        val echo = (rhythm ushr 5) % pairedColumns.count()
+        pair(innerRow, echo)
+        if ((rhythm and 0x80) != 0) pair(innerRow, (echo + 1) % pairedColumns.count())
+    }
+
+    edge(0, 1, seed)
+    edge(last, last - 1, sealStep(seed xor 0x24C17))
+    val sides = sealStep(seed xor 0x6C3D9)
+    val length = 2 + (sides and 1)
+    val first = 2 + (sides ushr 3) % (last - 2 - length)
+    for (row in first until first + length) pair(row, 0)
+
+    if ((sides and 4) != 0) {
+        val accentRow = if (first > 2) 2 else last - 2
+        pair(accentRow, 0)
     }
     return cells
 }
 
-/** Four brighter cells from the same installation seed, using another stream. */
+/** Two mirrored accents follow existing marks and keep the monogram clear. */
 fun deckSealHighlights(deckId: String, installedAt: Long): Set<Int> {
-    val allowed = (0 until DECK_SEAL_SIDE * DECK_SEAL_SIDE)
-        .filterNot(::isDeckSealLetterZone)
-    val cells = linkedSetOf<Int>()
-    var state = sealHash(sealKey(deckId, installedAt, "highlight"))
-    var attempts = 0
-    while (cells.size < 4 && attempts < 32) {
-        state = sealStep(state + attempts * 17)
-        cells += allowed[(state ushr 1) % allowed.size]
-        attempts++
+    val cells = deckSealCells(deckId, installedAt)
+    val seed = sealHash(sealKey(deckId, installedAt, "highlight"))
+    val lastRow = DECK_SEAL_SIDE - 1
+    return buildSet {
+        for (row in listOf(0, lastRow)) {
+            val choices = (0 until DECK_SEAL_SIDE / 2).filter { row * DECK_SEAL_SIDE + it in cells }
+            val column = choices[(sealStep(seed xor (row + 1) * 0x42D) ushr 1) % choices.size]
+            add(row * DECK_SEAL_SIDE + column)
+            add(row * DECK_SEAL_SIDE + DECK_SEAL_SIDE - 1 - column)
+        }
     }
-    return cells
 }
 
 private fun sealKey(deckId: String, installedAt: Long, stream: String): String =

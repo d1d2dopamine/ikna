@@ -42,8 +42,6 @@ class DeckMarkTest {
         val id = "catalog-en-ru-beginner"
         assertNotEquals(deckSealCells(id, 1_700_000_000_123L),
             deckSealCells(id, 1_700_000_100_987L))
-        assertNotEquals(deckSealHighlights(id, 1_700_000_000_123L),
-            deckSealHighlights(id, 1_700_000_100_987L))
     }
 
     @Test fun `decks installed together still differ by stable id`() {
@@ -54,7 +52,7 @@ class DeckMarkTest {
     @Test fun `seeded seal stays mirrored and leaves letters clean`() {
         listOf(1L, 17L, 1_700_000_000_123L, Long.MAX_VALUE).forEach { seed ->
             val seal = deckSealCells("deck-$seed", seed)
-            assertTrue(seal.size in 12..32)
+            assertTrue(seal.size in 20..34)
             assertTrue(seal.none(::isDeckSealLetterZone))
             seal.forEach { index ->
                 assertTrue(index in 0 until DECK_SEAL_SIDE * DECK_SEAL_SIDE)
@@ -66,6 +64,7 @@ class DeckMarkTest {
             val highlights = deckSealHighlights("deck-$seed", seed)
             assertEquals(4, highlights.size)
             assertTrue(highlights.none(::isDeckSealLetterZone))
+            assertTrue(seal.containsAll(highlights))
         }
     }
 }

@@ -92,7 +92,7 @@ import kotlin.math.floor
  * clip-art, and a pulled-in icon font would bring Material's rounded geometry
  * back through the side door.
  */
-enum class IknaGlyph { SPARK, BROWSE, BARS, SLIDERS, GEAR, PLUS, BACK, SOUND, DOTS, SEARCH }
+enum class IknaGlyph { SPARK, BROWSE, BARS, SLIDERS, GEAR, PLUS, BACK, SOUND, DOTS, SEARCH, DECK_PANEL }
 
 @Composable
 fun IknaGlyphIcon(
@@ -244,6 +244,16 @@ fun IknaGlyphIcon(
                     strokeWidth = s * 0.13f,
                     cap = lineCap
                 )
+            }
+            IknaGlyph.DECK_PANEL -> {
+                val inset = s * 0.12f
+                val width = s * 0.76f
+                val height = s * 0.62f
+                val top = (s - height) / 2f
+                drawRoundRect(color, Offset(inset, top), Size(width, height), markCorner,
+                    style = Stroke(width = s * 0.09f))
+                drawLine(color, Offset(s * 0.36f, top), Offset(s * 0.36f, top + height),
+                    strokeWidth = s * 0.09f)
             }
             // Back out of a screen.
             IknaGlyph.BACK -> {

@@ -86,9 +86,10 @@ class DesktopUi {
 
     /**
      * Whether the deck screen is showing in a window too narrow to keep it
-     * beside the content. In a wide window the list is simply always there.
+     * beside the content. Wide windows use a separate study-panel preference.
      */
     var listOpen by mutableStateOf(false)
+    var studyDecksCollapsed by mutableStateOf(false)
     var reload by mutableStateOf(0)
 
     fun show(target: Pane) {
@@ -138,6 +139,7 @@ class DesktopUi {
         browseDeck = null
         showShortcuts = false
         listOpen = false
+        studyDecksCollapsed = false
         reload += 1
     }
 }
@@ -316,8 +318,10 @@ private fun DesktopShell(
                 // The panes separate by surface tone, not by a line: the deck
                 // column wears the panel tone, the content keeps the window
                 // background (docs/ai-audits.md 7.4, variant 1).
-                Box(Modifier.width(listWidth).fillMaxHeight().background(MaterialTheme.colorScheme.surface)) {
-                    DecksColumn(settings, palette, ui, decks, remaining, todaySummary, deckListState)
+                if (ui.pane != Pane.SESSION || !ui.studyDecksCollapsed) {
+                    Box(Modifier.width(listWidth).fillMaxHeight().background(MaterialTheme.colorScheme.surface)) {
+                        DecksColumn(settings, palette, ui, decks, remaining, todaySummary, deckListState)
+                    }
                 }
                 Box(Modifier.weight(1f).fillMaxHeight()) {
                     PaneContent(container, settings, palette, ui, decks, wide = true, onRestartRequested = onRestartRequested)
@@ -455,7 +459,9 @@ private fun PaneContent(
                 onBack = back,
                 // In a wide window the session is the app's home: back has
                 // nowhere to take the learner, so the button stays hidden.
-                showBack = !wide
+                showBack = !wide,
+                decksCollapsed = ui.studyDecksCollapsed,
+                onToggleDecks = if (wide) ({ ui.studyDecksCollapsed = !ui.studyDecksCollapsed }) else null
             )
 
             Pane.BROWSE -> {
