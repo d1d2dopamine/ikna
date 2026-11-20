@@ -224,6 +224,28 @@ these in separate changes so each interaction can be reviewed on its own.
    contribution to historical statistics. Show hidden cards in deck details
    and let the learner restore one with its existing history intact.
 
+### AI import follow-up and feedback
+
+- After confirming an AI import, show the number of cards added and explain
+  that new material enters through the daily plan. Preserve any open lesson.
+- Keep each import batch identifiable and allow the learner to hide it
+  reversibly. Preserve history for edits that keep the same target and meaning.
+  Treat a different expression or meaning as a new card.
+- Add an icon button named `Support & Social` to the home dock on Android and
+  desktop. It should follow the dock when the user moves it to the top.
+  Open a dedicated screen so the feedback request stays out of the study flow.
+- Place the owner's lightly edited feedback text at the top. Ask people who
+  like Ikna to star the official repository. Invite ideas, bug reports and
+  missing features through Issues or email, and explain that feedback helps
+  prioritize fixes and improvements.
+- Below the text, give each destination its own icon and accessible label.
+  Include [the official repository](https://github.com/d1d2dopamine/ikna),
+  [the new issue form](https://github.com/d1d2dopamine/ikna/issues/new/choose),
+  the project email `d1d2dopamine@gmail.com`, and
+  [the author's GitHub profile](https://github.com/d1d2dopamine).
+  Add X/Twitter once the owner supplies the profile URL. The owner's original
+  draft and the final icon treatment are pending.
+
 ## Current batch and next checkpoint
 
 Round 01 implements pointer-lifetime/bounds arbitration for Signal Frame, shared
