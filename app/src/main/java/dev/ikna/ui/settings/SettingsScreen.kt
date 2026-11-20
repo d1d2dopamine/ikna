@@ -509,14 +509,13 @@ fun SettingsScreen(
                             checked = settings.homeDockAtTop,
                             onCheckedChange = { scope.launch { container.settings.setHomeDockAtTop(it) } }
                         )
-                        Text(S.t("deck.screen_style"))
-                        dev.ikna.data.prefs.DeckScreenStyle.entries.forEach { style ->
-                            IknaChip(
-                                label = S.t("deck.screen_" + style.name.lowercase(java.util.Locale.ROOT)),
-                                selected = settings.deckScreenStyle == style,
-                                onClick = { scope.launch { container.settings.setDeckScreenStyle(style) } }
-                            )
-                        }
+                        Spacer(Modifier.height(16.dp))
+                        dev.ikna.ui.decks.IknaDeckAppearanceSettings(
+                            style = settings.deckScreenStyle,
+                            background = settings.deckBackground,
+                            onStyle = { style -> scope.launch { container.settings.setDeckScreenStyle(style) } },
+                            onBackground = { background -> scope.launch { container.settings.setDeckBackground(background) } }
+                        )
                     }
                 }
 

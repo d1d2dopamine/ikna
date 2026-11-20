@@ -30,7 +30,7 @@ class RouteContinuityTest {
         val decks = source("dev/ikna/ui/decks/DecksScreen.kt")
         val nav = source("dev/ikna/ui/nav/IknaNavHost.kt")
         val settings = source("dev/ikna/ui/settings/SettingsScreen.kt")
-        assertTrue(decks.contains("IknaHomeBackdrop()"))
+        assertTrue(decks.contains("IknaHomeBackdrop(settings.deckBackground)"))
         assertFalse(decks.contains("IknaMemoryField"))
         assertFalse(nav.contains("currentBackStackEntryAsState()"))
         assertFalse(nav.contains("IknaHomeBackdrop("))

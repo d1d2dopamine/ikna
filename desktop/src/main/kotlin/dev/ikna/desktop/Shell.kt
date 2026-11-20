@@ -412,7 +412,7 @@ private fun DecksColumn(
 
     dev.ikna.ui.theme.IknaDeckSurface(settings.deckScreenStyle) {
         Box(Modifier.fillMaxSize().iknaInspect("DecksColumn")) {
-            IknaHomeBackdrop()
+            IknaHomeBackdrop(settings.deckBackground)
 
             val activeDestination = when (ui.pane) {
                 Pane.STATS -> HomeDestination.STATS

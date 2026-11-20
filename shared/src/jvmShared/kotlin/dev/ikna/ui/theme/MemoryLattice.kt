@@ -14,20 +14,84 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
+import dev.ikna.data.prefs.DeckBackground
 
-/** A quiet, opaque tonal field drawn within the deck destination. */
 @Composable
-fun IknaHomeBackdrop(modifier: Modifier = Modifier) {
+fun IknaHomeBackdrop(background: DeckBackground, modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
-    Box(
-        modifier.fillMaxSize().background(
-            Brush.verticalGradient(
-                0f to lerp(colors.background, colors.surface, 0.48f),
-                0.55f to colors.background,
-                1f to lerp(colors.background, colors.surfaceVariant, 0.16f)
+    val fill = modifier.fillMaxSize()
+    when (background) {
+        DeckBackground.CLASSIC -> {
+            Box(fill.background(colors.background)) {
+                IknaMemoryField(seed = 0x1A4B_7C2D)
+            }
+        }
+        DeckBackground.TONAL -> Box(
+            fill.background(
+                Brush.verticalGradient(
+                    0f to lerp(colors.background, colors.surface, 0.48f),
+                    0.55f to colors.background,
+                    1f to lerp(colors.background, colors.surfaceVariant, 0.16f)
+                )
             )
         )
-    )
+        DeckBackground.SOLID -> Box(fill.background(colors.background))
+    }
+}
+
+/** A dense, low-contrast, deterministic pixel grain for unused screen regions. */
+@Composable
+private fun IknaMemoryField(
+    seed: Int,
+    modifier: Modifier = Modifier
+) {
+    val ink = MaterialTheme.colorScheme.onSurfaceVariant
+    Canvas(modifier = modifier.fillMaxSize()) {
+        val pitch = 7.dp.toPx()
+        val dot = 1.25.dp.toPx()
+        val jitter = 0.45.dp.toPx()
+        val columns = (size.width / pitch).toInt().coerceAtLeast(1)
+        val rows = (size.height / pitch).toInt().coerceAtLeast(1)
+        val firstRow = (rows * 0.24f).toInt().coerceAtMost(rows - 1)
+        var state = seed xor 0x4B1D5A77
+
+        for (row in firstRow until rows) {
+            for (column in 0 until columns) {
+                state = fieldStep(state + row * 131 + column * 53)
+                val gate = state ushr 28
+                if (gate >= 8) continue
+
+                val kind = (state ushr 4) and 15
+                val markWidth = when (kind) {
+                    0, 1 -> dot * 3f
+                    2, 3, 4 -> dot * 2f
+                    else -> dot
+                }
+                val markHeight = when (kind) {
+                    5 -> dot * 3f
+                    6, 7 -> dot * 2f
+                    else -> dot
+                }
+                val alpha = when ((state ushr 24) and 3) {
+                    0 -> 0.130f
+                    1 -> 0.095f
+                    else -> 0.065f
+                }
+                val x = (
+                    column * pitch + ((state ushr 8) and 3) * jitter
+                ).coerceIn(0f, (size.width - markWidth).coerceAtLeast(0f))
+                val y = (
+                    row * pitch + ((state ushr 10) and 3) * jitter
+                ).coerceIn(0f, (size.height - markHeight).coerceAtLeast(0f))
+
+                drawRect(
+                    color = ink.copy(alpha = alpha),
+                    topLeft = Offset(x, y),
+                    size = Size(markWidth, markHeight)
+                )
+            }
+        }
+    }
 }
 
 /** A compact unfinished lattice used instead of a dash or a blank chart. */
@@ -59,4 +123,13 @@ fun IknaLatticePlaceholder(modifier: Modifier = Modifier) {
             }
         }
     }
+}
+
+/** A tiny integer generator: deterministic on every Android and JVM version. */
+private fun fieldStep(value: Int): Int {
+    var x = value
+    x = x xor (x shl 13)
+    x = x xor (x ushr 17)
+    x = x xor (x shl 5)
+    return x
 }

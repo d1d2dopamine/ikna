@@ -102,6 +102,7 @@ private const val DEFAULT_CUSTOM_MUTED = 0xFF78859C
 private const val DEFAULT_CUSTOM_ACCENT = 0xFFFF7A5C
 
 enum class DeckScreenStyle { CURRENT, PAPER, DUSK }
+enum class DeckBackground { CLASSIC, TONAL, SOLID }
 
 data class IknaSettings(
     val theme: ThemeMode = ThemeMode.DARK,
@@ -203,6 +204,7 @@ data class IknaSettings(
     val leftHanded: Boolean = false,
     val homeDockAtTop: Boolean = false,
     val deckScreenStyle: DeckScreenStyle = DeckScreenStyle.CURRENT,
+    val deckBackground: DeckBackground = DeckBackground.CLASSIC,
     /**
      * How each deck's square looks: a label and a colour, stored as
      * "packId=label|tint" pairs joined by semicolons.
@@ -344,6 +346,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val leftHanded = booleanPreferencesKey("leftHanded")
         val homeDockAtTop = booleanPreferencesKey("homeDockAtTop")
         val deckScreenStyle = stringPreferencesKey("deckScreenStyle")
+        val deckBackground = stringPreferencesKey("deckBackground")
         val deckLooks = stringPreferencesKey("deckLooks")
         val deckPhonetics = stringPreferencesKey("deckPhonetics")
         val suppressed = stringPreferencesKey("suppressed")
@@ -419,6 +422,8 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             deckScreenStyle = p[Keys.deckScreenStyle]?.let { name ->
                 DeckScreenStyle.entries.firstOrNull { it.name == name }
             } ?: defaults.deckScreenStyle,
+            deckBackground = DeckBackground.entries.firstOrNull { it.name == p[Keys.deckBackground] }
+                ?: defaults.deckBackground,
             deckLooks = p[Keys.deckLooks] ?: defaults.deckLooks,
             deckPhonetics = p[Keys.deckPhonetics] ?: defaults.deckPhonetics,
             suppressed = p[Keys.suppressed] ?: defaults.suppressed,
@@ -500,6 +505,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
     suspend fun setLeftHanded(on: Boolean) = put { it[Keys.leftHanded] = on }
     suspend fun setHomeDockAtTop(on: Boolean) = put { it[Keys.homeDockAtTop] = on }
     suspend fun setDeckScreenStyle(style: DeckScreenStyle) = put { it[Keys.deckScreenStyle] = style.name }
+    suspend fun setDeckBackground(background: DeckBackground) = put { it[Keys.deckBackground] = background.name }
 
     /** Every deck's look at once. Used by a restore. */
     suspend fun setDeckLooks(value: String) = put { it[Keys.deckLooks] = value }

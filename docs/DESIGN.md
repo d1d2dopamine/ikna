@@ -122,9 +122,10 @@ DrawScope: scroll viewports, animated pane clips and tight rows must never cut o
 one side of the signal. INNER frames remain local. Motion, stroke, dash rhythm and
 shared phase are the same in both placements.
 
-Home uses a smooth tonal field derived from the chosen palette. Window chrome
-and secondary action bars use solid surfaces. Home keeps the pixel marks on the
-navigation icons and the deck seals. The navigation dock is a compact, raised
+Home offers the classic pixel field, a smooth tonal gradient and a solid
+background. The setting is independent of the deck-screen palette in
+Appearance. The classic field is the default and stays inside the deck list.
+Window chrome and secondary action bars use solid surfaces. The navigation dock is a compact, raised
 shelf with a tinted tile for the current desktop destination. The option in
 Appearance moves it to the top and moves the deck heading, wordmark and cat to
 the bottom. Native window controls stay in the window frame. The reading cat

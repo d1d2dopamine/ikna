@@ -128,7 +128,7 @@ fun DecksScreen(
     dev.ikna.ui.theme.IknaDeckSurface(settings.deckScreenStyle) {
         Box(modifier = Modifier.fillMaxSize()) {
             val muted = MaterialTheme.colorScheme.onSurfaceVariant
-            IknaHomeBackdrop()
+            IknaHomeBackdrop(settings.deckBackground)
 
             IknaHomeChrome(
                 dockAtTop = settings.homeDockAtTop,

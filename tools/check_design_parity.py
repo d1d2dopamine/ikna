@@ -625,7 +625,10 @@ class DesignContracts(unittest.TestCase):
             self.assertIn('IknaHomeChrome(', home)
             self.assertNotIn('IknaDeckHeaderPaint', home)
         self.assertIn('Brush.verticalGradient(', lattice)
-        self.assertNotIn('fun IknaMemoryField(', lattice)
+        self.assertIn('DeckBackground.CLASSIC', lattice)
+        self.assertIn('DeckBackground.SOLID', lattice)
+        for home in (android_home, desktop_shell):
+            self.assertIn('IknaHomeBackdrop(settings.deckBackground)', home)
         self.assertNotIn('IknaMemoryAmbientStrip', controls + read(DESKTOP, 'WindowTitleBar.kt'))
         cat = read(SHARED, 'ui/theme/ReadingCat.kt')
         self.assertIn('contentDescription = null', cat)

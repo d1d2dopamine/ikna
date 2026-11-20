@@ -92,6 +92,7 @@ data class SettingsSnapshot(
     val leftHanded: Boolean = false,
     val homeDockAtTop: Boolean? = null,
     val deckScreenStyle: String? = null,
+    val deckBackground: String? = null,
     // Deck icons and colours. They name decks by id, so a restore onto an install
     // without those decks simply carries a line nothing reads -- which is right:
     // importing the deck again gives it its square back.
@@ -143,6 +144,7 @@ object SettingsBackup {
         leftHanded = settings.leftHanded,
         homeDockAtTop = settings.homeDockAtTop,
         deckScreenStyle = settings.deckScreenStyle.name,
+        deckBackground = settings.deckBackground.name,
         deckLooks = settings.deckLooks,
         deckPhonetics = settings.deckPhonetics,
         suppressed = settings.suppressed,
@@ -222,6 +224,8 @@ object SettingsBackup {
         snapshot.homeDockAtTop?.let { store.setHomeDockAtTop(it) }
         dev.ikna.data.prefs.DeckScreenStyle.entries.firstOrNull { it.name == snapshot.deckScreenStyle }
             ?.let { store.setDeckScreenStyle(it) }
+        dev.ikna.data.prefs.DeckBackground.entries.firstOrNull { it.name == snapshot.deckBackground }
+            ?.let { store.setDeckBackground(it) }
         store.setDeckLooks(snapshot.deckLooks)
         store.setDeckPhonetics(snapshot.deckPhonetics)
         store.setSuppressed(snapshot.suppressed)
