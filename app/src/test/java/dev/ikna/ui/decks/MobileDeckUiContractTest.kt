@@ -34,30 +34,44 @@ class MobileDeckUiContractTest {
         assertTrue(android.contains("IknaDeckRow("))
         assertFalse(android.contains("private fun DeckRow("))
         assertFalse(android.contains("private fun DeckMark("))
-        for (required in listOf(
-            "private val DECK_ROW_HEIGHT = 52.dp",
-            "private val DECK_MARK_SIZE = 52.dp",
-            "private val DECK_INFO_HEIGHT = 48.dp",
-            "private val DECK_PROGRESS_HEIGHT = 14.dp",
-            ".heightIn(min = DECK_ROW_HEIGHT)\n            .hoverable(interaction)\n            .clipToBounds()\n            .iknaSignalFrame(\n                interaction,\n                cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp),\n                placement = SignalFramePlacement.Outer\n            )\n            .clickable(interactionSource = interaction, indication = null, onClick = onOpen)",
-            "Column(modifier = Modifier.weight(1f))",
-            "modifier = Modifier.heightIn(min = DECK_INFO_HEIGHT)",
-            "verticalArrangement = Arrangement.SpaceBetween",
-            "Spacer(Modifier.height(Space.xs))\n                IknaDeckProgress(",
-            "modifier = Modifier.heightIn(min = DECK_PROGRESS_HEIGHT)"
-        )) assertTrue(required, shared.contains(required))
+        assertTrue(shared.contains("private val DECK_MARK_SIZE = 52.dp"))
+        assertTrue(shared.contains(".size(DECK_MARK_SIZE)"))
+        assertTrue(shared.contains("private val DECK_PROGRESS_HEIGHT = 14.dp"))
 
         val row = shared.substringAfter("fun IknaDeckRow(")
             .substringBefore("/** Makes the long-term bar")
+        for (required in listOf(
+            ".hoverable(interaction)",
+            ".clipToBounds()",
+            "cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp)",
+            "placement = SignalFramePlacement.Outer",
+            ".clickable(interactionSource = interaction, indication = null, onClick = onOpen)",
+            "Row(verticalAlignment = Alignment.CenterVertically)",
+            "modifier = Modifier.weight(1f)",
+            "verticalArrangement = Arrangement.SpaceBetween",
+            "Spacer(Modifier.height(Space.xs))",
+            ".padding(start = DECK_MARK_SIZE + Space.md)",
+            ".heightIn(min = DECK_PROGRESS_HEIGHT)"
+        )) assertTrue(required, row.contains(required))
+
+        val progressStart = row.indexOf("if (deck.isActive) {")
+        assertTrue("Expected a separate progress block for active decks", progressStart >= 0)
+        val header = row.substring(0, progressStart)
+        val progress = row.substring(progressStart)
+        assertTrue(header.contains("IknaDeckMark("))
+        assertTrue(header.contains("IknaToggle("))
+        assertFalse(header.contains("IknaDeckProgress("))
+        assertTrue(progress.contains("IknaDeckProgress("))
+
         // The visual mark stays compact; text and 48dp actions must not be clipped
-        // back into a fixed-height information row at larger font scales.
-        assertFalse(row.contains(".height(DECK_ROW_HEIGHT)"))
-        assertFalse(row.contains(".height(DECK_INFO_HEIGHT)"))
-        assertFalse(row.contains(".fillMaxHeight()"))
-        assertTrue(row.split("size = 48.dp,").size == 3)
-        assertFalse(row.contains("68.dp"))
-        assertTrue(row.contains("style = MaterialTheme.typography.labelSmall"))
-        assertTrue(row.split("overflow = TextOverflow.Ellipsis").size >= 2)
+        // by a fixed-height header at larger font scales.
+        assertFalse(header.contains(".height("))
+        assertFalse(header.contains(".requiredHeight("))
+        assertFalse(header.contains(".fillMaxHeight("))
+        assertTrue(header.split("size = 48.dp,").size == 3)
+        assertFalse(header.contains("68.dp"))
+        assertTrue(header.contains("style = MaterialTheme.typography.labelSmall"))
+        assertTrue(header.split("overflow = TextOverflow.Ellipsis").size >= 2)
     }
 
     private fun androidSource(name: String): String = source(
