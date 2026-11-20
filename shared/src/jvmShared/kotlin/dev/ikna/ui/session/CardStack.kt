@@ -4,7 +4,6 @@ import dev.ikna.ui.text.S
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
@@ -141,8 +140,6 @@ fun SwipeableCard(
     val flying = remember(key) { mutableStateOf(false) }
     val usesAnimatedOffset = remember(key) { mutableStateOf(false) }
     val shift: () -> Float = { if (usesAnimatedOffset.value) offsetX.value else drag.value }
-    val directExit = remember(key) { Animatable(0f) }
-    val directGrade = remember(key) { mutableStateOf<Rating?>(null) }
     // 0 while the card is still arriving, 1 once it has taken its place.
     val arrival = remember(key) { Animatable(if (animations) 0f else 1f) }
     val armed = remember(key) { mutableStateOf<Rating?>(null) }
@@ -181,24 +178,30 @@ fun SwipeableCard(
 
     val line = if (threshold > 0f) threshold else SWIPE_THRESHOLD
     val progress: () -> Float = {
-        if (directGrade.value != null) 0f else when (throwing.value) {
+        when (throwing.value) {
             Rating.AGAIN -> -1f
             Rating.GOOD -> 1f
             else -> if (gradable.value) (shift() / line).coerceIn(-1f, 1f) else 0f
         }
     }
-    val ready: () -> Boolean = { directGrade.value == null && (armed.value != null || throwing.value != null) }
+    val ready: () -> Boolean = { armed.value != null || throwing.value != null }
 
     suspend fun completeDirectGrade(rating: Rating, observation: ReviewSignals) {
-        directGrade.value = rating
+        throwing.value = rating
         try {
-            if (animations) directExit.animateTo(1f, tween(215, easing = FastOutSlowInEasing))
+            if (animations) {
+                offsetX.snapTo(drag.value)
+                usesAnimatedOffset.value = true
+                throwOut(offsetX, rating, Velocity.Zero)
+            }
             if (currentKey.value == key) {
                 rateNow.value(rating, observation)
                 if (animations) withFrameNanos { }
             }
         } finally {
-            directGrade.value = null
+            drag.value = 0f
+            usesAnimatedOffset.value = false
+            throwing.value = null
             flying.value = false
         }
     }
@@ -216,7 +219,6 @@ fun SwipeableCard(
             flying.value = true
             signals.keyboardStarted()
             completeDirectGrade(command.rating, signals.snapshot(inputMethod = INPUT_KEYBOARD))
-            directExit.snapTo(0f)
         }
         programmaticHandledNow.value(command.token)
     }
@@ -228,7 +230,6 @@ fun SwipeableCard(
         val observation = signals.snapshot(inputMethod = INPUT_BUTTON)
         scope.launch {
             completeDirectGrade(rating, observation)
-            directExit.snapTo(0f)
         }
     }
 
@@ -374,12 +375,11 @@ fun SwipeableCard(
                 }
         ) {
             SwipeGlow(progress, ready, animations)
-            if (hasNextCard && animations && (throwing.value != null || directGrade.value != null || saving)) {
+            if (hasNextCard && animations && (throwing.value != null || saving)) {
                 IknaCardBacking(
                     Modifier.matchParentSize().graphicsLayer {
                         val leaving = when {
                             saving -> 1f
-                            directGrade.value != null -> directExit.value
                             else -> (abs(shift()) / size.width.coerceAtLeast(1f)).coerceIn(0f, 1f)
                         }
                         scaleX = 0.96f + 0.04f * leaving
@@ -395,13 +395,11 @@ fun SwipeableCard(
                     .graphicsLayer {
                         val landed = arrival.value.coerceIn(0f, 1f)
                         val travelled = shift()
-                        val exiting = if (directGrade.value != null) directExit.value else 0f
-                        val direction = if (directGrade.value == Rating.AGAIN) -1f else 1f
-                        translationX = travelled + direction * exiting * 14.dp.toPx()
+                        translationX = travelled
                         val lift = abs(progress())
                         translationY = if (animations) ((1f - landed) * 5f - 4f * lift).dp.toPx() else 0f
                         rotationZ = if (animations) (travelled / ROTATION_DIVISOR).coerceIn(-6f, 6f) else 0f
-                        alpha = if (saving && animations) 0f else landed * (1f - exiting)
+                        alpha = if (saving && animations) 0f else landed
                     }
             ) {
                 content()

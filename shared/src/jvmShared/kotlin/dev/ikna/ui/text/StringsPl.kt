@@ -593,7 +593,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"add.073" to "Droga opcjonalna: poproś model o talię. To, co wróci, trzeba przejrzeć okiem.",
 	"add.074" to "SPOSÓB Z MODELEM",
 	// тап в любом месте
-	"card.reveal" to "Pokaż odpowiedź", "card.002" to "dotknij gdziekolwiek",
+	"card.new" to "Nowa fiszka", "card.review" to "Powtórka", "card.reveal" to "Pokaż odpowiedź", "card.002" to "dotknij gdziekolwiek",
 	// ← НЕ ЗНАЮ
 	"card.003" to "← NIE ZNAM",
 	// ЗНАЮ →

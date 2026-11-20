@@ -10,7 +10,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import dev.ikna.domain.grading.INPUT_SWIPE
-import dev.ikna.domain.session.Ask
 import dev.ikna.ui.text.S
 
 import androidx.compose.foundation.layout.Box
@@ -171,7 +170,7 @@ fun SessionScreen(
                     onRate = { rating, signals -> vm.rate(rating, viaSwipe = signals.inputMethod == INPUT_SWIPE, signals = signals) }
                 ) {
                     ChunkCard(
-                        label = askLabel(card.ask, card.chunk.lang == NO_LANG),
+                        label = S.t(if (card.isFirstContact && state.queue.take(state.index).none { it.card.key == card.card.key }) "card.new" else "card.review"),
                         language = card.chunk.lang.takeUnless { it == NO_LANG },
                         deck = sessionDecks[card.chunk.packId],
                         look = settings.lookFor(card.chunk.packId),
@@ -345,9 +344,6 @@ private fun copyReport(context: Context, report: String): Boolean = runCatching 
 /**
  * The existing classic label differs for a subject deck and a language deck.
  */
-private fun askLabel(ask: Ask, subject: Boolean): String = when (ask) {
-    Ask.RECOGNISE -> if (subject) S.t("sess.046") else S.t("sess.015")
-}
 
 /**
  * The end of a deck outranks the end of a day.

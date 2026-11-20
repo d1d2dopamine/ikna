@@ -213,7 +213,7 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "add.070" to "Zeilenumbrüche gingen beim Einfügen verloren und diese Zeile konnte nicht rekonstruiert werden. Nutze „Aus Zwischenablage einfügen“; Tastaturen kürzen große Texte.",
     "add.071" to "Der Text war länger als das Limit und wurde gekürzt. Teile das Deck in zwei Teile.", "add.072" to "Wenn es kein fertiges Deck gibt",
     "add.073" to "Der optionale Weg: ein Modell um ein Deck bitten. Was zurückkommt, muss man durchsehen.", "add.074" to "MODELL-METHODE",
-    "card.reveal" to "Antwort anzeigen", "card.002" to "irgendwo tippen", "card.003" to "← WEISS ICH NICHT", "card.004" to "WEISS ICH →",
+    "card.new" to "Neue Karte", "card.review" to "Wiederholung", "card.reveal" to "Antwort anzeigen", "card.002" to "irgendwo tippen", "card.003" to "← WEISS ICH NICHT", "card.004" to "WEISS ICH →",
     "sess.001" to "einen Moment…", "sess.003" to "MINIMUM ERLEDIGT", "sess.004" to "Deck beendet", "sess.005" to "Das war alles für heute",
     "sess.006" to "Heute keine Karten", "sess.007" to "Nichts mehr zu wiederholen; der Rest ist noch nicht fällig", "sess.008" to "ERNEUT PRÜFEN",
     "finish.introduced.1" to "Du hast alle Wendungen dieses Stapels gesehen. Sie kommen nach Plan wieder.",

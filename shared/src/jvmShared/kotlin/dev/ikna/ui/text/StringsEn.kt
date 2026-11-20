@@ -593,7 +593,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"add.073" to "The optional way: ask a model to write a deck. What comes back has to be read by eye.",
 	"add.074" to "THE MODEL WAY",
 	// тап в любом месте
-	"card.reveal" to "Show answer", "card.002" to "tap anywhere",
+	"card.new" to "New card", "card.review" to "Review", "card.reveal" to "Show answer", "card.002" to "tap anywhere",
 	// ← НЕ ЗНАЮ
 	"card.003" to "← DON'T KNOW",
 	// ЗНАЮ →

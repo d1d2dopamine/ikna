@@ -68,7 +68,6 @@ import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.grading.INPUT_KEYBOARD
 import dev.ikna.domain.grading.INPUT_SWIPE
 import dev.ikna.domain.phonetics.Phonetics
-import dev.ikna.domain.session.Ask
 import dev.ikna.domain.session.OptionalHardBatch
 import dev.ikna.domain.session.SessionPlan
 import dev.ikna.domain.session.ReviewSignalTracker
@@ -593,7 +592,6 @@ private fun SessionPaneContent(
                 )
             } else {
                 val mode = settings.phoneticsFor(current.chunk.packId)
-                val subject = current.chunk.lang == NO_LANG
                 val cardWidthPx = with(LocalDensity.current) { maxWidth.toPx() }
                 // The gesture is a share of the card. The phone's 140 pixels were
                 // measured against a screen that IS the card. A mouse needs a
@@ -625,7 +623,7 @@ private fun SessionPaneContent(
                         threshold = swipeLine
                     ) {
                         ChunkCard(
-                            label = askLabel(current.ask, subject),
+                            label = S.t(if (current.isFirstContact && cards.take(index).none { it.card.key == current.card.key }) "card.new" else "card.review"),
                             language = current.chunk.lang.takeUnless { it == NO_LANG },
                             deck = sessionDecks[current.chunk.packId],
                             look = settings.lookFor(current.chunk.packId),
@@ -707,6 +705,3 @@ private fun SessionPaneContent(
 }
 
 /** What the card is asking, in the phone's own words. */
-private fun askLabel(ask: Ask, subject: Boolean): String = when (ask) {
-    Ask.RECOGNISE -> if (subject) S.t("sess.046") else S.t("sess.015")
-}

@@ -229,7 +229,7 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "add.069" to "et autres lignes : ", "add.070" to "les sauts de ligne ont disparu et cette ligne n’a pas pu être reconstruite. Utilisez « Coller depuis le presse-papiers » : le clavier tronque les gros collages",
     "add.071" to "Le texte dépassait la limite et a été tronqué. Divisez le paquet en deux.", "add.072" to "S’il n’existe aucun paquet prêt",
     "add.073" to "La voie facultative : demander un paquet à un modèle. Ce qui revient doit être relu.",
-    "add.074" to "MÉTHODE AVEC MODÈLE", "card.reveal" to "Afficher la réponse", "card.002" to "touchez n’importe où", "card.003" to "← JE NE SAIS PAS", "card.004" to "JE SAIS →",
+    "add.074" to "MÉTHODE AVEC MODÈLE", "card.new" to "Nouvelle carte", "card.review" to "Révision", "card.reveal" to "Afficher la réponse", "card.002" to "touchez n’importe où", "card.003" to "← JE NE SAIS PAS", "card.004" to "JE SAIS →",
     "sess.001" to "un instant…", "sess.003" to "MINIMUM ATTEINT", "sess.004" to "Paquet terminé", "sess.005" to "C’est tout pour aujourd’hui",
     "sess.006" to "Aucune carte aujourd’hui", "sess.007" to "Plus rien à réviser ; le reste n’est pas encore dû", "sess.008" to "REVÉRIFIER",
     "finish.introduced.1" to "Tu as vu toutes les expressions de ce paquet. Elles reviendront selon le calendrier.",
