@@ -185,6 +185,7 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "add.014" to "Aus Text hinzufügen", "add.015" to "Datei wählen", "add.016" to "WENDUNG | SATZ DAMIT | ÜBERSETZUNG",
     "add.017" to "lesen…", "add.018" to "Die Datei ist für ein Deck zu groß", "add.019" to "Datei konnte nicht gelesen werden", "add.020" to "Füge zuerst Text ein",
     "add.021" to "Karten hinzugefügt: ", "add.022" to ", Zeilen übersprungen: ", "add.023" to "Zeile ", "add.024" to " — ", "add.025" to "Keine Zeile war verwendbar", "add.026" to "Fertig",
+    "add.ai_scheduled" to "Neue Karten erscheinen in deinem Tagesplan.",
     "add.027" to "sich gewöhnen an|Es dauert, sich an den Lärm zu gewöhnen.|vertraut werden\\naufpassen auf|Kannst du auf meine Tasche aufpassen?|im Auge behalten",
     "add.028" to "Beispiel eingefügt", "add.029" to "Leeren", "add.030" to "Mein Deck", "add.031" to "die Zeile hat nicht drei Teile",
     "add.032" to "ein Feld ist leer", "add.033" to "die Wendung fehlt im Satz", "add.034" to "die Zeile ist zu lang", "add.035" to "diese Wendung wurde bereits verwendet",

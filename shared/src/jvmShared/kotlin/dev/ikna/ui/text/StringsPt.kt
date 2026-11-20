@@ -324,6 +324,7 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "add.024" to " — ",
     "add.025" to "Nenhuma linha pôde ser usada",
     "add.026" to "Concluído",
+    "add.ai_scheduled" to "Os novos cartões aparecerão no seu plano diário.",
     "add.027" to "get used to|It takes a while to get used to the noise.|acostumar-se\nkeep an eye on|Can you keep an eye on my bag?|ficar de olho",
     "add.028" to "Exemplo colado",
     "add.029" to "Limpar",

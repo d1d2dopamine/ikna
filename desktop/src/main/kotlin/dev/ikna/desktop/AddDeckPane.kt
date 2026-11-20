@@ -131,7 +131,9 @@ fun AddDeckPane(
                         lang = if (subject) NO_LANG else lang,
                         inferLanguage = !subject
                     )
-                    container.learningRepository.invalidatePlan()
+                    if (report.installed > 0 && !report.stagedAiImport) {
+                        container.learningRepository.invalidatePlan()
+                    }
                     report
                 }
             }

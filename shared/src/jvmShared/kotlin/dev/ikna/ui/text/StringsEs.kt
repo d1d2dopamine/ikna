@@ -323,6 +323,7 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "add.024" to " — ",
     "add.025" to "No se pudo usar ninguna línea",
     "add.026" to "Hecho",
+    "add.ai_scheduled" to "Las tarjetas nuevas aparecerán en tu plan diario.",
     "add.027" to "acostumbrarse a|Se tarda un tiempo en acostumbrarse al ruido.|habituarse\\nvigilar|¿Puedes vigilar mi bolso?|mantener a la vista",
     "add.028" to "Ejemplo pegado",
     "add.029" to "Borrar",

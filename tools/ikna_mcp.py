@@ -56,6 +56,8 @@ def main() -> None:
         """After asking for missing brief details, show this sample to the learner and request approval."""
         if not all(field.strip() for field in (topic, level, style, deck)):
             raise ValueError("Provide topic, level, style and the target deck")
+        if len(deck.strip()) > 200 or any(ch in deck for ch in "\r\n\0"):
+            raise ValueError("Use a deck title of up to 200 characters on one line")
         if not 1 <= count <= MAX_CARDS or not min(3, count) <= len(cards) <= min(5, count):
             raise ValueError("Use a sample of 3–5 cards, or the full sample for a smaller batch")
         sample = pack_text(cards)
@@ -80,7 +82,7 @@ def main() -> None:
         with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=folder, delete=False) as handle:
             temporary = Path(handle.name)
             try:
-                handle.write(content)
+                handle.write(f"# Ikna MCP v1: {deck}\n{content}")
             except BaseException:
                 handle.close()
                 temporary.unlink(missing_ok=True)

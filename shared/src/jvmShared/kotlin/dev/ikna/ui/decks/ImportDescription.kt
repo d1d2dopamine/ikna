@@ -12,7 +12,8 @@ fun describe(report: DeckImport): String {
 			S.t("add.024") + reason(problem.problem)
 	}
 	val head = S.t("add.021") + report.installed
-	val flagged = flagged(report)
+	val scheduled = if (report.stagedAiImport) "\n" + S.t("add.ai_scheduled") else ""
+	val flagged = scheduled + flagged(report)
 	if (report.skipped == 0) return head + flagged
 	val problem = report.firstProblem
 		?: return head + S.t("add.022") + report.skipped + flagged

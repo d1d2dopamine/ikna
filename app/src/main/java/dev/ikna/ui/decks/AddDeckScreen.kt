@@ -155,7 +155,7 @@ fun AddDeckScreen(
 		}
 		// A deck added now is wanted now, not tomorrow: the day was already planned
 		// before this deck existed, so the plan is dropped and rebuilt.
-		if (report != null && report.installed > 0) {
+		if (report != null && report.installed > 0 && !report.stagedAiImport) {
 			container.learningRepository.invalidatePlan()
 		}
 		busy = false

@@ -6,6 +6,7 @@ import dev.ikna.ui.decks.IknaDeckActions
 import dev.ikna.ui.decks.IknaDeckAppearance
 import dev.ikna.ui.decks.IknaDeckProgress
 import dev.ikna.ui.decks.LangChips
+import dev.ikna.ui.decks.describe
 import dev.ikna.data.prefs.lookFor
 import dev.ikna.domain.phonetics.Phonetics
 import dev.ikna.ui.theme.IknaChip
@@ -128,14 +129,16 @@ fun DeckPane(
                         fallbackTitle = current.title,
                         appendTo = current.id
                     )
-                    container.learningRepository.invalidatePlan()
+                    if (report.installed > 0 && !report.stagedAiImport) {
+                        container.learningRepository.invalidatePlan()
+                    }
                     report
                 }
             }
             adding = false
             outcome
                 .onSuccess { report ->
-                    note = S.t("add.026") + " \u00b7 " + report.installed.toString()
+                    note = describe(report)
                     reload += 1
                     onChanged()
                 }

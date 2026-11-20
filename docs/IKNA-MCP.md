@@ -15,7 +15,9 @@ The server uses standard input and output. It presents a 3–5 card preview and
 prepares at most 1,000 approved cards in Ikna's plain-text format. The result
 shows the intended deck and local file path. Open the file from Add Deck or the
 intended deck's append action in Ikna. The application remains the owner of the
-learner database. Batch history, reversible whole-batch hiding and direct
-application-side MCP imports are later stages.
+learner database. Ikna checks the staged batch size and, when appending, the
+chosen deck's title. It reports the number of cards added and keeps the
+current daily plan in place. Batch history, reversible whole-batch hiding and
+direct application-side MCP imports are later stages.
 
 See [the Ikna skill](../skills/ikna/SKILL.md) for the authoring workflow.

@@ -39,7 +39,8 @@ data class DeckImport(
      * [dev.ikna.data.pack.SeedWarning].
      */
     val flagged: Int = 0,
-    val firstWarning: SeedLineWarning? = null
+    val firstWarning: SeedLineWarning? = null,
+    val stagedAiImport: Boolean = false
 )
 
 data class DeckSummary(
@@ -248,15 +249,24 @@ class DeckRepository(
         // became five decks with the same name, and nothing in the app could
         // put them back together.
         val into = appendTo?.let { chunkDao.pack(it) }
+        val header = "# Ikna MCP v1: "
+        val firstLine = text.lineSequence().first()
+        val stagedAiImport = firstLine.startsWith(header)
+        val stagedTitle = if (stagedAiImport) firstLine.removePrefix(header).trim() else null
+        if (stagedTitle != null) {
+            require(stagedTitle.isNotEmpty() && stagedTitle.length <= 200)
+            require(appendTo == null || into?.title == stagedTitle)
+            require(text.lineSequence().drop(1).filter { it.isNotBlank() }.take(1001).count() <= 1000)
+        }
         val stem = fileName.substringBeforeLast('.')
         val packId = into?.id ?: packIdFor(stem)
         // A deck being added to keeps its own name and its own language. The
         // name of the file a second portion happened to arrive in is not a
         // reason to rename a deck somebody is halfway through.
-        val title = into?.title ?: stem.ifEmpty { fallbackTitle }
+        val title = into?.title ?: stagedTitle ?: stem.ifEmpty { fallbackTitle }
         val deckLang = into?.lang ?: lang
 
-        if (SeedFormat.looksLikeJsonl(text)) {
+        if (!stagedAiImport && SeedFormat.looksLikeJsonl(text)) {
             val result = packLoader.importJsonl(packId, title, deckLang, text)
             return DeckImport(packId, result.installed, result.skipped, null)
         }
@@ -295,7 +305,8 @@ class DeckRepository(
             skipped = skipped,
             firstProblem = parse.problems.firstOrNull(),
             flagged = flagged.size,
-            firstWarning = flagged.firstOrNull()
+            firstWarning = flagged.firstOrNull(),
+            stagedAiImport = stagedAiImport
         )
     }
 

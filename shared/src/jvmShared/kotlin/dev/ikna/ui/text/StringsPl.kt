@@ -521,6 +521,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"add.024" to " — ",
 	"add.025" to "Żadna linia się nie nadała",
 	"add.026" to "Gotowe",
+    "add.ai_scheduled" to "Nowe fiszki pojawią się w Twoim planie dnia.",
 	"add.027" to "get used to|It takes a while to get used to the noise.|przyzwyczaić się\nkeep an eye on|Can you keep an eye on my bag?|przypilnować",
 	"add.028" to "Przykład wklejony",
 	"add.029" to "Wyczyść",

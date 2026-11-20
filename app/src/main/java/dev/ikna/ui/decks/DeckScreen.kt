@@ -133,7 +133,7 @@ fun DeckScreen(
             adding = false
             if (report != null && report.installed > 0) {
                 // The day was planned before these cards existed.
-                container.learningRepository.invalidatePlan()
+                if (!report.stagedAiImport) container.learningRepository.invalidatePlan()
                 reload()
             }
             note = if (report == null) S.t("add.019") else describe(report)

@@ -323,6 +323,7 @@ val STRINGS_RU: Map<String, String> = mapOf(
 	"add.024" to " — ",
 	"add.025" to "Ни одна строка не подошла",
 	"add.026" to "Готово",
+	"add.ai_scheduled" to "Новые карточки появятся в ежедневном плане.",
 	"add.027" to "get used to|It takes a while to get used to the noise.|привыкнуть\nkeep an eye on|Can you keep an eye on my bag?|присмотреть за",
 	"add.028" to "Пример вставлен",
 	"add.029" to "Очистить",

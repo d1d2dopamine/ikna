@@ -197,6 +197,7 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "add.018" to "Fichier trop volumineux pour un paquet", "add.019" to "Impossible de lire le fichier",
     "add.020" to "Collez d’abord le texte", "add.021" to "Cartes ajoutées : ", "add.022" to ", lignes ignorées : ",
     "add.023" to "Ligne ", "add.024" to " — ", "add.025" to "Aucune ligne utilisable", "add.026" to "Terminé",
+    "add.ai_scheduled" to "Les nouvelles cartes apparaîtront dans ton programme quotidien.",
     "add.027" to "s’habituer à|Il faut du temps pour s’habituer au bruit.|s’accoutumer\\nsurveiller|Peux-tu surveiller mon sac ?|garder à l’œil",
     "add.028" to "Exemple collé", "add.029" to "Effacer", "add.030" to "Mon paquet",
     "add.031" to "la ligne n’a pas trois parties", "add.032" to "un champ est vide", "add.033" to "l’expression n’est pas dans la phrase",
