@@ -79,7 +79,7 @@ waits until the speech section is actually visible.
 Home data and its LazyColumn state belong to the navigation graph rather than one
 composition of the Home destination. Back therefore starts from the same populated
 list and scroll position. The NavHost is a painted, clipped viewport; Settings owns
-an opaque background; and Home's decorative grain exists only while Home is the
+an opaque background; and Home's tonal backdrop exists only while Home is the
 foreground route, so route layers cannot visually leak into each other.
 
 Control motion is deliberately local: 160 ms for switches, chips and enabled
@@ -122,14 +122,13 @@ DrawScope: scroll viewports, animated pane clips and tight rows must never cut o
 one side of the signal. INNER frames remain local. Motion, stroke, dash rhythm and
 shared phase are the same in both placements.
 
-Empty space is divided deliberately. The card keeps a completely silent field
-because the phrase is the only object to read. Unused home space may carry a dense
-but faint grain made from hundreds of disconnected dots and very short orthogonal
-strokes. It never joins into a route or snake. Desktop window strips retain a few marks that dissolve while others appear on
-one deterministic slow cycle, fully static when animations are off. Android's
-bottom navigation bar stays plain. The deck header on both platforms uses a static
-reading cat in its own 48 dp slot beside the title, replacing the falling pixel
-paint. Its transparent artwork maps contours to ink, the book to accent and light
+Home uses a smooth tonal field derived from the chosen palette. Window chrome
+and secondary action bars use solid surfaces. Home keeps the pixel marks on the
+navigation icons and the deck seals. The navigation dock is a compact, raised
+shelf with a tinted tile for the current desktop destination. The option in
+Appearance moves it to the top and moves the deck heading, wordmark and cat to
+the bottom. Native window controls stay in the window frame. The reading cat
+keeps its 48 dp slot beside the title. Its transparent artwork maps contours to ink, the book to accent and light
 interiors to the current background; it has no hit target or accessibility label.
 Keep the selected 1254 px artwork intact. Its small slot uses mipmap-aware Medium
 filtering on desktop and the native mipmap hint plus filtered painting on Android;

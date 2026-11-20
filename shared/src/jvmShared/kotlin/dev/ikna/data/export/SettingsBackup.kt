@@ -90,6 +90,7 @@ data class SettingsSnapshot(
     // controls of whoever restores it.
     val showWordmark: Boolean = true,
     val leftHanded: Boolean = false,
+    val homeDockAtTop: Boolean? = null,
     // Deck icons and colours. They name decks by id, so a restore onto an install
     // without those decks simply carries a line nothing reads -- which is right:
     // importing the deck again gives it its square back.
@@ -139,6 +140,7 @@ object SettingsBackup {
         appearanceVariant = settings.appearanceVariant.name,
         showWordmark = settings.showWordmark,
         leftHanded = settings.leftHanded,
+        homeDockAtTop = settings.homeDockAtTop,
         deckLooks = settings.deckLooks,
         deckPhonetics = settings.deckPhonetics,
         suppressed = settings.suppressed,
@@ -215,6 +217,7 @@ object SettingsBackup {
         )
         store.setShowWordmark(snapshot.showWordmark)
         store.setLeftHanded(snapshot.leftHanded)
+        snapshot.homeDockAtTop?.let { store.setHomeDockAtTop(it) }
         store.setDeckLooks(snapshot.deckLooks)
         store.setDeckPhonetics(snapshot.deckPhonetics)
         store.setSuppressed(snapshot.suppressed)

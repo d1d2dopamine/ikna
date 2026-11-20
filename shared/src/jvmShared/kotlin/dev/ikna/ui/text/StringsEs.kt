@@ -522,7 +522,7 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "look.003" to "Color del cuadrado",
     "look.004" to "Uno o dos caracteres. Si se deja vacío, el cuadrado los calcula solo.",
     "bar.001" to "La marca ikna",
-    "bar.003" to "Para la mano izquierda",
+    "bar.dock_top" to "Navegación arriba", "bar.003" to "Para la mano izquierda",
     "upd.001" to "ACTUALIZACIÓN DISPONIBLE",
     "upd.002" to "Tamaño: ",
     "upd.003" to "MB",

@@ -48,8 +48,8 @@ class DesignContracts(unittest.TestCase):
                      'palette.background', 'collectIsFocusedAsState']:
             self.assertIn(text, bar)
         self.assertNotIn('.consume(', bar)
-        self.assertIn('titleBar(palette, settings.onboardingDone)', shell)
-        self.assertLess(shell.index('IknaTheme('), shell.index('titleBar(palette, settings.onboardingDone)'))
+        self.assertIn('titleBar(palette, settings.onboardingDone && !settings.homeDockAtTop)', shell)
+        self.assertLess(shell.index('IknaTheme('), shell.index('titleBar(palette, settings.onboardingDone && !settings.homeDockAtTop)'))
         self.assertLess(main.index('runBlocking {\n        runCatching { container.install()'),
                         main.index('    application {'))
 
@@ -131,7 +131,9 @@ class DesignContracts(unittest.TestCase):
         self.assertNotIn('settings.showWordmark', shell + mobile_decks)
         # Shell keeps one temporary loading wordmark; the desktop home footer has none.
         self.assertEqual(1, shell.count('IknaWordmark('))
-        self.assertEqual(2, mobile_decks.count('IknaWordmark(modifier = Modifier.padding('))
+        home_chrome = read(SHARED, 'ui/decks/HomeChrome.kt')
+        self.assertIn('IknaWordmark(height = 16.dp)', home_chrome)
+        self.assertIn('dockAtTop = settings.homeDockAtTop', shell + mobile_decks)
 
     def test_desktop_hotkeys_are_captured_not_typed(self):
         settings = read(DESKTOP, 'SettingsPane.kt')
@@ -618,8 +620,9 @@ class DesignContracts(unittest.TestCase):
         desktop_settings = read(DESKTOP, 'SettingsPane.kt')
 
         self.assertNotIn('fun IknaDeckHeaderPaint(', lattice)
+        self.assertIn('IknaReadingCat()', read(SHARED, 'ui/decks/HomeChrome.kt'))
         for home in (android_home, desktop_shell):
-            self.assertIn('IknaReadingCat()', home)
+            self.assertIn('IknaHomeChrome(', home)
             self.assertNotIn('IknaDeckHeaderPaint', home)
         self.assertIn('Brush.verticalGradient(', lattice)
         self.assertNotIn('fun IknaMemoryField(', lattice)
@@ -737,10 +740,8 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('cornerRadius = iknaFrameRadius(rounded = 12.dp, angular = 8.dp)', palettes)
         self.assertIn('.hoverable(tileInteraction)', palettes)
         self.assertIn('selected: Boolean = false', controls)
-        self.assertIn('selected = searchSelected', desktop_shell)
-        self.assertIn('selected = settingsSelected', desktop_shell)
-        self.assertIn('selected = statsSelected', desktop_shell)
-        self.assertIn('selected = addSelected', desktop_shell)
+        self.assertIn('selected = activeDestination', desktop_shell)
+        self.assertIn('selected = active', read(SHARED, 'ui/decks/HomeChrome.kt'))
 
     def test_palette_grid_shares_lighting_and_accessible_selection_on_both_platforms(self):
         android = read(ANDROID, 'ui/settings/SettingsScreen.kt')

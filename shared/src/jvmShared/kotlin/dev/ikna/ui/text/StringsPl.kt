@@ -825,7 +825,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"bar.001" to "Znak ikna",
 	// Слева в нижнем баре. Выключите — место уйдёт кнопкам
 	// Под левую руку
-	"bar.003" to "Pod lewą rękę",
+	"bar.dock_top" to "Nawigacja u góry", "bar.003" to "Pod lewą rękę",
 	// Нижний бар зеркалится: плюс уходит в левый угол, остальные кнопки — вправо
 
 	// The update window and the update section in settings.

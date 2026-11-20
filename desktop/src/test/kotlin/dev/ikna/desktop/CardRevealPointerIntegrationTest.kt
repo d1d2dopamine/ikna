@@ -75,7 +75,7 @@ class CardRevealPointerIntegrationTest(private val mouse: Boolean) {
                 SwipeableCard(
                     key = "button-card",
                     revealed = revealed.value,
-                    animations = false,
+                    animations = mouse,
                     haptics = false,
                     onReveal = { revealed.value = true },
                     onRate = { rating, _ -> grades += rating },
@@ -87,7 +87,7 @@ class CardRevealPointerIntegrationTest(private val mouse: Boolean) {
                         answer = "A revealed answer",
                         hint = null,
                         revealed = revealed.value,
-                        animations = false,
+                        animations = mouse,
                         onTap = { revealed.value = true },
                         tapEnabled = !revealed.value,
                         modifier = Modifier.fillMaxSize()

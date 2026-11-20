@@ -503,6 +503,12 @@ fun SettingsScreen(
                             checked = settings.leftHanded,
                             onCheckedChange = { scope.launch { container.settings.setLeftHanded(it) } }
                         )
+                        IknaSettingsToggleRow(
+                            title = S.t("bar.dock_top"),
+                            subtitle = null,
+                            checked = settings.homeDockAtTop,
+                            onCheckedChange = { scope.launch { container.settings.setHomeDockAtTop(it) } }
+                        )
                     }
                 }
 

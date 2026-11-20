@@ -24,24 +24,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import dev.ikna.AppContainer
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.lookFor
 import dev.ikna.data.repo.DeckSummary
-import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
-import dev.ikna.ui.theme.IknaBottomBar
-import dev.ikna.ui.theme.IknaGlyph
-import dev.ikna.ui.theme.IknaIconButton
-import dev.ikna.ui.theme.IknaReadingCat
 import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaHomeBackdrop
-import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Space
 import dev.ikna.data.repo.TodayStudySummary
 import dev.ikna.widget.TodayWidget
@@ -134,155 +125,62 @@ fun DecksScreen(
         )
     }
 
-    // Only ever says that something did not work. A share that worked is
-    // announced by the share sheet itself, and a line congratulating the user
-    // for a thing they watched happen is noise.
-
     Box(modifier = Modifier.fillMaxSize()) {
         IknaHomeBackdrop()
 
-        Column(modifier = Modifier.fillMaxSize()) {
-        // The title and static reading cat. Navigation marks that used to
-        // share this row now live in the bar at the bottom of the screen: a phone
-        // is held low in one hand, and the top of the screen is the one place a
-        // thumb cannot go without regripping the device.
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(BarHeight)
-                .padding(start = Edge, end = Space.sm),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = S.t("deck.004"),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            IknaReadingCat()
-        }
-
-        Column(modifier = Modifier.padding(horizontal = Edge)) {
-            Spacer(Modifier.height(Space.md))
-            IknaTodayBlock(
-                summary = state.todaySummary,
-                perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
-                onClick = { onOpenSession(null) }
-            )
-            Spacer(Modifier.height(Space.xl))
-        }
-
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = Edge),
-            verticalArrangement = Arrangement.spacedBy(Space.lg)
-        ) {
-            items(decks, key = { it.id }) { deck ->
-                IknaDeckRow(
-                    deck = deck,
-                    look = settings.lookFor(deck.id),
-                    dueToday = today[deck.id] ?: 0,
-                    onOpen = { onOpenDeck(deck.id) }
-                )
+        IknaHomeChrome(
+            dockAtTop = settings.homeDockAtTop,
+            leftHanded = settings.leftHanded,
+            onNavigate = { destination ->
+                when (destination) {
+                    HomeDestination.STATS -> onOpenStats()
+                    HomeDestination.SETTINGS -> onOpenSettings()
+                    HomeDestination.SEARCH -> onOpenSearch()
+                    HomeDestination.ADD -> onAddDeck()
+                }
             }
-            if (decks.isEmpty()) {
-                item {
-                    Column {
-                        Text(
-                            text = S.t("deck.005"),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = muted
-                        )
-                        Spacer(Modifier.height(Space.lg))
-                        IknaLatticePlaceholder()
+        ) {
+            Column(modifier = Modifier.padding(horizontal = Edge)) {
+                Spacer(Modifier.height(Space.md))
+                IknaTodayBlock(
+                    summary = state.todaySummary,
+                    perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
+                    onClick = { onOpenSession(null) }
+                )
+                Spacer(Modifier.height(Space.xl))
+            }
+
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = Edge),
+                verticalArrangement = Arrangement.spacedBy(Space.lg)
+            ) {
+                items(decks, key = { it.id }) { deck ->
+                    IknaDeckRow(
+                        deck = deck,
+                        look = settings.lookFor(deck.id),
+                        dueToday = today[deck.id] ?: 0,
+                        onOpen = { onOpenDeck(deck.id) }
+                    )
+                }
+                if (decks.isEmpty()) {
+                    item {
+                        Column {
+                            Text(
+                                text = S.t("deck.005"),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = muted
+                            )
+                            Spacer(Modifier.height(Space.lg))
+                            IknaLatticePlaceholder()
+                        }
                     }
                 }
             }
-        }
 
-        Spacer(Modifier.height(Space.md))
-
-        // Everything that is not learning, as marks rather than as a slab of
-        // words, in the corner the hand already rests in. Adding a deck is the
-        // rarest action in the app and used to be a full-width button.
-        IknaBottomBar {
-            // The name of the thing, on the screen it opens on, in the corner the
-            // hand is already in. Everywhere else the app is deliberately anonymous
-            // — no header, no title bar, no logo over the cards — and that is worth
-            // keeping, but it left the product without a single place where it says
-            // what it is. One line of it here is enough.
-            //
-            // Not pressable. A logo that navigates is a logo pressed by accident,
-            // and this one sits 12dp from the way into Progress and Settings. The
-            // start padding is what lines the letters up with the glyphs beside
-            // them: those are 20dp marks centred in 44dp targets, so their ink
-            // begins 12dp inside the row and the wordmark has to begin there too.
-            //
-            // The square over the i is drawn in the accent, so the mark belongs to
-            // whichever palette is on rather than to the one it was drawn in.
-            //
-            // The wordmark stays visible because Android has no window title bar.
-            // The whole row can still be mirrored for a left hand: the
-            // marks are the only controls on this screen, a phone is held in
-            // one hand, and until now every one of them sat on the far side of
-            // it for half the people holding it. Mirrored, the rarest action
-            // takes the corner the thumb rests in and the two everyday ones
-            // stay together at the other end, which is the same layout read in
-            // the other direction rather than a second design to maintain.
-            if (settings.leftHanded) {
-                IknaIconButton(
-                    glyph = IknaGlyph.PLUS,
-                    onClick = onAddDeck,
-                    label = S.t("a11y.004")
-                )
-                IknaIconButton(
-                    glyph = IknaGlyph.SEARCH,
-                    onClick = onOpenSearch,
-                    label = S.t("a11y.011")
-                )
-                Spacer(Modifier.weight(1f))
-                IknaIconButton(
-                    glyph = IknaGlyph.GEAR,
-                    onClick = onOpenSettings,
-                    label = S.t("a11y.002")
-                )
-                IknaIconButton(
-                    glyph = IknaGlyph.BARS,
-                    onClick = onOpenStats,
-                    label = S.t("a11y.003")
-                )
-                IknaWordmark(modifier = Modifier.padding(end = Space.md))
-            } else {
-                IknaWordmark(modifier = Modifier.padding(start = Space.md))
-                IknaIconButton(
-                    glyph = IknaGlyph.BARS,
-                    onClick = onOpenStats,
-                    label = S.t("a11y.003")
-                )
-                IknaIconButton(
-                    glyph = IknaGlyph.GEAR,
-                    onClick = onOpenSettings,
-                    label = S.t("a11y.002")
-                )
-                Spacer(Modifier.weight(1f))
-                IknaIconButton(
-                    glyph = IknaGlyph.SEARCH,
-                    onClick = onOpenSearch,
-                    label = S.t("a11y.011")
-                )
-                IknaIconButton(
-                    glyph = IknaGlyph.PLUS,
-                    onClick = onAddDeck,
-                    label = S.t("a11y.004")
-                )
-            }
         }
-        }
-
     }
 }
 

@@ -247,6 +247,10 @@ fun SettingsPane(
                     ToggleRow(S.t("bar.003"), settings.leftHanded, palette) {
                         save { container.settings.setLeftHanded(it) }
                     }
+                    Spacer(Modifier.height(12.dp))
+                    ToggleRow(S.t("bar.dock_top"), settings.homeDockAtTop, palette) {
+                        save { container.settings.setHomeDockAtTop(it) }
+                    }
                 }
             }
             item(key = "language", contentType = "settings-section") {

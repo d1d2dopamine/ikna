@@ -31,10 +31,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ikna.data.prefs.HotkeyBindings
 import dev.ikna.data.prefs.IknaSettings
@@ -43,16 +41,13 @@ import dev.ikna.data.repo.DeckSummary
 import dev.ikna.ui.decks.IknaDeckRow
 import dev.ikna.data.repo.TodayStudySummary
 import dev.ikna.ui.decks.IknaTodayBlock
+import dev.ikna.ui.decks.IknaHomeChrome
+import dev.ikna.ui.decks.HomeDestination
 import dev.ikna.ui.nav.sharedAxisEnter
 import dev.ikna.ui.nav.sharedAxisExit
 import dev.ikna.ui.onboarding.FirstStudyDestination
 import dev.ikna.ui.text.S
-import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
-import dev.ikna.ui.theme.IknaBottomBar
-import dev.ikna.ui.theme.IknaGlyph
-import dev.ikna.ui.theme.IknaIconButton
-import dev.ikna.ui.theme.IknaReadingCat
 import dev.ikna.ui.theme.IknaDeveloperBadge
 import dev.ikna.ui.theme.IknaElementInspector
 import dev.ikna.ui.theme.IknaLatticePlaceholder
@@ -215,7 +210,7 @@ fun IknaDesktopApp(
             ) {
                 // Keep the draggable strip and window controls during welcome,
                 // but do not repeat ikna in its top-left corner.
-                titleBar(palette, settings.onboardingDone)
+                titleBar(palette, settings.onboardingDone && !settings.homeDockAtTop)
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 if (startupFailed && storedSettings != null) {
                     Column(
@@ -322,32 +317,23 @@ private fun DesktopShell(
                 // column wears the panel tone, the content keeps the window
                 // background (docs/ai-audits.md 7.4, variant 1).
                 Box(Modifier.width(listWidth).fillMaxHeight().background(MaterialTheme.colorScheme.surface)) {
-                    DecksColumn(container, settings, palette, ui, decks, remaining, todaySummary, deckListState)
+                    DecksColumn(settings, palette, ui, decks, remaining, todaySummary, deckListState)
                 }
                 Box(Modifier.weight(1f).fillMaxHeight()) {
                     PaneContent(container, settings, palette, ui, decks, wide = true, onRestartRequested = onRestartRequested)
                 }
             }
         } else if (ui.listOpen) {
-            DecksColumn(container, settings, palette, ui, decks, remaining, todaySummary, deckListState)
+            DecksColumn(settings, palette, ui, decks, remaining, todaySummary, deckListState)
         } else {
             PaneContent(container, settings, palette, ui, decks, wide = false, onRestartRequested = onRestartRequested)
         }
     }
 }
 
-/**
- * The phone's deck screen, whole.
- *
- * Same pixel field behind it, same title, same figure for the day, same rows
- * with the same squares, percentages and segmented bars, and the same bottom
- * controls for statistics, settings, search and adding a deck. The only
- * thing the window changes is that this screen no longer has to go away for
- * something else to be shown.
- */
+/** The shared home layout persists beside the active pane in a wide window. */
 @Composable
 private fun DecksColumn(
-    container: DesktopContainer,
     settings: IknaSettings,
     palette: IknaPalette,
     ui: DesktopUi,
@@ -360,26 +346,26 @@ private fun DecksColumn(
     Box(Modifier.fillMaxSize().iknaInspect("DecksColumn")) {
         IknaHomeBackdrop()
 
-        Column(Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(BarHeight)
-                    .padding(start = Edge, end = Space.sm)
-                    .iknaInspect("DecksColumn / Header"),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = S.t("deck.004"),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                IknaReadingCat()
+        val activeDestination = when (ui.pane) {
+            Pane.STATS -> HomeDestination.STATS
+            Pane.SETTINGS, Pane.BACKUP -> HomeDestination.SETTINGS
+            Pane.SEARCH -> HomeDestination.SEARCH
+            Pane.ADD, Pane.CATALOG, Pane.ANKI -> HomeDestination.ADD
+            else -> null
+        }
+        IknaHomeChrome(
+            dockAtTop = settings.homeDockAtTop,
+            leftHanded = settings.leftHanded,
+            selected = activeDestination,
+            onNavigate = { destination ->
+                ui.show(when (destination) {
+                    HomeDestination.STATS -> Pane.STATS
+                    HomeDestination.SETTINGS -> Pane.SETTINGS
+                    HomeDestination.SEARCH -> Pane.SEARCH
+                    HomeDestination.ADD -> Pane.ADD
+                })
             }
-
+        ) {
             Column(Modifier.padding(horizontal = Edge)) {
                 Spacer(Modifier.height(Space.md))
                 IknaTodayBlock(todaySummary, settings.answerMs.takeIf { it > 0 }?.toLong()) {
@@ -417,70 +403,7 @@ private fun DecksColumn(
                 item { Spacer(Modifier.height(Space.lg)) }
             }
 
-            Spacer(Modifier.height(Space.md))
-
-            val addSelected = ui.pane == Pane.ADD || ui.pane == Pane.CATALOG || ui.pane == Pane.ANKI
-            val searchSelected = ui.pane == Pane.SEARCH
-            val settingsSelected = ui.pane == Pane.SETTINGS || ui.pane == Pane.BACKUP
-            val statsSelected = ui.pane == Pane.STATS
-
-            IknaBottomBar {
-                if (settings.leftHanded) {
-                    IknaIconButton(
-                        glyph = IknaGlyph.PLUS,
-                        onClick = { ui.show(Pane.ADD) },
-                        selected = addSelected,
-                        label = S.t("a11y.004")
-                    )
-                    IknaIconButton(
-                        glyph = IknaGlyph.SEARCH,
-                        onClick = { ui.show(Pane.SEARCH) },
-                        selected = searchSelected,
-                        label = S.t("a11y.011")
-                    )
-                    Spacer(Modifier.weight(1f))
-                    IknaIconButton(
-                        glyph = IknaGlyph.GEAR,
-                        onClick = { ui.show(Pane.SETTINGS) },
-                        selected = settingsSelected,
-                        label = S.t("a11y.002")
-                    )
-                    IknaIconButton(
-                        glyph = IknaGlyph.BARS,
-                        onClick = { ui.show(Pane.STATS) },
-                        selected = statsSelected,
-                        label = S.t("a11y.003")
-                    )
-                } else {
-                    IknaIconButton(
-                        glyph = IknaGlyph.BARS,
-                        onClick = { ui.show(Pane.STATS) },
-                        selected = statsSelected,
-                        label = S.t("a11y.003")
-                    )
-                    IknaIconButton(
-                        glyph = IknaGlyph.GEAR,
-                        onClick = { ui.show(Pane.SETTINGS) },
-                        selected = settingsSelected,
-                        label = S.t("a11y.002")
-                    )
-                    Spacer(Modifier.weight(1f))
-                    IknaIconButton(
-                        glyph = IknaGlyph.SEARCH,
-                        onClick = { ui.show(Pane.SEARCH) },
-                        selected = searchSelected,
-                        label = S.t("a11y.011")
-                    )
-                    IknaIconButton(
-                        glyph = IknaGlyph.PLUS,
-                        onClick = { ui.show(Pane.ADD) },
-                        selected = addSelected,
-                        label = S.t("a11y.004")
-                    )
-                }
-            }
         }
-
     }
 }
 
