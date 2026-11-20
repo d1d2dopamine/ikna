@@ -48,8 +48,8 @@ class DesignContracts(unittest.TestCase):
                      'palette.background', 'collectIsFocusedAsState']:
             self.assertIn(text, bar)
         self.assertNotIn('.consume(', bar)
-        self.assertIn('titleBar(palette, settings.onboardingDone && !settings.homeDockAtTop)', shell)
-        self.assertLess(shell.index('IknaTheme('), shell.index('titleBar(palette, settings.onboardingDone && !settings.homeDockAtTop)'))
+        self.assertIn('titleBar(palette, ready && settings.onboardingDone && !firstRunVisible && !deckHeadingVisible)', shell)
+        self.assertLess(shell.index('IknaTheme('), shell.index('titleBar(palette, ready && settings.onboardingDone && !firstRunVisible && !deckHeadingVisible)'))
         self.assertLess(main.index('runBlocking {\n        runCatching { container.install()'),
                         main.index('    application {'))
 

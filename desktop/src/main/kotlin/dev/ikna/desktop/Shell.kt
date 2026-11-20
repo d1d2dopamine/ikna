@@ -4,6 +4,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.LazyListState
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -204,60 +208,65 @@ fun IknaDesktopApp(
         appearanceVariant = settings.appearanceVariant
     ) {
         IknaElementInspector(enabled = settings.elementInspector) {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .background(palette.background)
-                    .iknaInspect("IknaDesktopApp")
-            ) {
-                // Keep the draggable strip and window controls during welcome,
-                // but do not repeat ikna in its top-left corner.
-                titleBar(palette, settings.onboardingDone && !settings.homeDockAtTop)
-            Box(Modifier.weight(1f).fillMaxWidth()) {
-                if (startupFailed && storedSettings != null) {
-                    Column(
-                        Modifier.fillMaxSize().padding(Space.lg),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(S.t("load.004"), style = MaterialTheme.typography.bodyMedium)
-                        Spacer(Modifier.height(Space.md))
-                        IknaTextButton(S.t("load.002"), onClick = { installAttempt++ })
+            BoxWithConstraints(Modifier.fillMaxSize()) {
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .background(palette.background)
+                        .iknaInspect("IknaDesktopApp")
+                ) {
+                    // Keep the draggable strip and window controls during welcome,
+                    // but do not repeat ikna in its top-left corner.
+                    val deckHeadingVisible = if (maxWidth >= 900.dp) {
+                        ui.pane != Pane.SESSION || !ui.studyDecksCollapsed
+                    } else ui.listOpen
+                    titleBar(palette, ready && settings.onboardingDone && !firstRunVisible && !deckHeadingVisible)
+                Box(Modifier.weight(1f).fillMaxWidth()) {
+                    if (startupFailed && storedSettings != null) {
+                        Column(
+                            Modifier.fillMaxSize().padding(Space.lg),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(S.t("load.004"), style = MaterialTheme.typography.bodyMedium)
+                            Spacer(Modifier.height(Space.md))
+                            IknaTextButton(S.t("load.002"), onClick = { installAttempt++ })
+                        }
+                    } else if (!ready || storedSettings == null) {
+                        Column(
+                            Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            IknaWordmark(height = 22.dp, ink = palette.ink, dot = palette.accent)
+                            Spacer(Modifier.height(Space.lg))
+                            Box(Modifier.width(220.dp)) { IknaLatticePlaceholder() }
+                        }
+                    } else if (!settings.onboardingDone || firstRunVisible) {
+                        DesktopOnboardingPane(container) { destination ->
+                            ui.completeFirstRun(destination)
+                            firstRunVisible = false
+                        }
+                    } else {
+                        DesktopShell(container, settings, palette, ui, onRestartRequested)
                     }
-                } else if (!ready || storedSettings == null) {
-                    Column(
-                        Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        IknaWordmark(height = 22.dp, ink = palette.ink, dot = palette.accent)
-                        Spacer(Modifier.height(Space.lg))
-                        Box(Modifier.width(220.dp)) { IknaLatticePlaceholder() }
-                    }
-                } else if (!settings.onboardingDone || firstRunVisible) {
-                    DesktopOnboardingPane(container) { destination ->
-                        ui.completeFirstRun(destination)
-                        firstRunVisible = false
-                    }
-                } else {
-                    DesktopShell(container, settings, palette, ui, onRestartRequested)
-                }
 
-                if (ui.showShortcuts) {
-                    ShortcutsOverlay(palette, settings) { ui.showShortcuts = false }
+                    if (ui.showShortcuts) {
+                        ShortcutsOverlay(palette, settings) { ui.showShortcuts = false }
+                    }
+                    if (container.isDeveloperMode) {
+                        IknaDeveloperBadge(
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .padding(top = 4.dp)
+                        )
+                    }
                 }
-                if (container.isDeveloperMode) {
-                    IknaDeveloperBadge(
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .padding(top = 4.dp)
-                    )
-                }
-            }
             }
         }
     }
 }
+    }
 
 /**
  * The window.
@@ -318,9 +327,18 @@ private fun DesktopShell(
                 // The panes separate by surface tone, not by a line: the deck
                 // column wears the panel tone, the content keeps the window
                 // background (docs/ai-audits.md 7.4, variant 1).
-                if (ui.pane != Pane.SESSION || !ui.studyDecksCollapsed) {
-                    Box(Modifier.width(listWidth).fillMaxHeight().background(MaterialTheme.colorScheme.surface)) {
-                        DecksColumn(settings, palette, ui, decks, remaining, todaySummary, deckListState)
+                val expanded = ui.pane != Pane.SESSION || !ui.studyDecksCollapsed
+                val sidebarWidth by animateDpAsState(
+                    targetValue = if (expanded) listWidth else 0.dp,
+                    animationSpec = if (settings.animations) tween(240) else snap(),
+                    label = "deck-sidebar"
+                )
+                Box(Modifier.width(sidebarWidth).fillMaxHeight()
+                    .clipToBounds().background(MaterialTheme.colorScheme.surface)) {
+                    if (sidebarWidth > 0.dp) {
+                        Box(Modifier.wrapContentSize(Alignment.TopStart, unbounded = true).width(listWidth).fillMaxHeight()) {
+                            DecksColumn(settings, palette, ui, decks, remaining, todaySummary, deckListState, showWordmark = expanded)
+                        }
                     }
                 }
                 Box(Modifier.weight(1f).fillMaxHeight()) {
@@ -344,7 +362,8 @@ private fun DecksColumn(
     decks: List<DeckSummary>,
     remaining: Map<String, Int>,
     todaySummary: TodayStudySummary,
-    listState: LazyListState
+    listState: LazyListState,
+    showWordmark: Boolean = true
 ) {
 
     Box(Modifier.fillMaxSize().iknaInspect("DecksColumn")) {
@@ -361,6 +380,7 @@ private fun DecksColumn(
             dockAtTop = settings.homeDockAtTop,
             leftHanded = settings.leftHanded,
             selected = activeDestination,
+            showWordmark = showWordmark,
             onNavigate = { destination ->
                 ui.show(when (destination) {
                     HomeDestination.STATS -> Pane.STATS

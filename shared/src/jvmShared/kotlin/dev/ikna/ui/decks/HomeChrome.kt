@@ -46,18 +46,19 @@ fun IknaHomeChrome(
     dockAtTop: Boolean,
     leftHanded: Boolean,
     selected: HomeDestination? = null,
+    showWordmark: Boolean = true,
     onNavigate: (HomeDestination) -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(Modifier.fillMaxSize()) {
-        if (dockAtTop) HomeDock(leftHanded, selected, onNavigate) else HomeHeading()
+        if (dockAtTop) HomeDock(leftHanded, selected, onNavigate) else HomeHeading(showWordmark)
         content()
-        if (dockAtTop) HomeHeading() else HomeDock(leftHanded, selected, onNavigate)
+        if (dockAtTop) HomeHeading(showWordmark) else HomeDock(leftHanded, selected, onNavigate)
     }
 }
 
 @Composable
-private fun HomeHeading() {
+private fun HomeHeading(showWordmark: Boolean) {
     Row(
         modifier = Modifier.fillMaxWidth()
             .heightIn(min = BarHeight)
@@ -66,7 +67,7 @@ private fun HomeHeading() {
         horizontalArrangement = Arrangement.spacedBy(Space.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IknaWordmark(height = 16.dp)
+        if (showWordmark) IknaWordmark(height = 16.dp)
         Text(
             text = S.t("deck.004"),
             style = MaterialTheme.typography.titleLarge,
