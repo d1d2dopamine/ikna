@@ -24,7 +24,9 @@ For every proposed card:
   verify them.
 
 Use at most 1,000 cards in one import operation. Before writing, confirm the
-exact destination deck and the number of cards. Use only Ikna tools advertised
-by the connected session. When there is no connected import tool, provide the
-plain-text pack for import through Ikna's deck screen. Report counts returned
-by Ikna after an import.
+exact destination deck and the number of cards. If the Ikna MCP server is
+connected, use `preview_cards` for the sample and `prepare_import` after the
+learner confirms it. Give the learner the returned path and target deck so
+they can open the file in Ikna. Report the prepared count separately from
+the number Ikna actually imports. Without the server, provide a plain-text
+pack for the same deck import screen.
