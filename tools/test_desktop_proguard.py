@@ -39,6 +39,27 @@ EXISTING_WARNINGS = {
     'androidx.datastore.preferences.protobuf.**', 'sun.misc.**', 'androidx.datastore.**',
     'kotlinx.coroutines.**', 'com.github.luben.zstd.**',
 }
+DETECTOR_OWNERS = {
+    'com.google.common.hash.ChecksumHashFunction$ChecksumMethodHandles',
+    'com.google.common.hash.Hashing$Crc32cMethodHandles',
+    'com.google.common.hash.LittleEndianByteArray$VarHandleLittleEndianBytes$1',
+    'com.google.common.util.concurrent.AbstractFutureState$VarHandleAtomicHelper',
+    'net.arnx.jsonic.web.Container',
+    'net.arnx.jsonic.web.ExternalContext',
+    'net.arnx.jsonic.web.GatewayFilter',
+    'net.arnx.jsonic.web.GatewayFilter$GZIPResponse',
+    'net.arnx.jsonic.web.GatewayFilter$GZIPResponse$1',
+    'net.arnx.jsonic.web.RESTServlet',
+    'net.arnx.jsonic.web.RESTServlet$RouteMapping',
+    'net.arnx.jsonic.web.RPCServlet',
+    'net.arnx.jsonic.web.RPCServlet$RouteMapping',
+    'net.arnx.jsonic.web.WebServiceServlet',
+    'net.arnx.jsonic.web.WebServiceServlet$Route',
+    'net.arnx.jsonic.web.WebServiceServlet$RouteMapping',
+    'net.arnx.jsonic.web.extension.GuiceContainer',
+    'net.arnx.jsonic.web.extension.S2Container',
+    'net.arnx.jsonic.web.extension.SpringContainer',
+}
 # This isolated fixture follows the pinned production libraries, not ProGuard's
 # own tool classpath. It does not include optional HTTP/native TLS dependencies.
 DEPENDENCIES = (
@@ -59,10 +80,10 @@ class WarningBoundary(unittest.TestCase):
     def test_only_reviewed_owner_exceptions_are_added(self):
         lines = active_lines(RULES.read_text())
         warnings = {line.split(None, 1)[1] for line in lines if line.startswith('-dontwarn ')}
-        self.assertEqual(EXISTING_WARNINGS | OPTIONAL_OWNERS, warnings)
+        self.assertEqual(EXISTING_WARNINGS | OPTIONAL_OWNERS | DETECTOR_OWNERS, warnings)
         self.assertNotIn('-dontwarn', lines)
         self.assertFalse(any(line.startswith(('-ignorewarnings', '-dontshrink')) for line in lines))
-        self.assertTrue(all('*' not in owner for owner in OPTIONAL_OWNERS))
+        self.assertTrue(all('*' not in owner for owner in OPTIONAL_OWNERS | DETECTOR_OWNERS))
 
     def test_fixture_tracks_the_pinned_dependencies(self):
         build = (ROOT / 'shared/build.gradle.kts').read_text()

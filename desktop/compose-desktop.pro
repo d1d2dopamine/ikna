@@ -93,6 +93,31 @@
 -dontwarn com.google.crypto.tink.hybrid.internal.XWingHpkeConscryptEncrypt
 -dontwarn com.google.crypto.tink.hybrid.internal.XWingHpkeConscryptDecrypt
 
+# The bundled language detector uses JSONIC to read static language profiles.
+# Its servlet bridges are unreachable in Ikna. Guava's signature-polymorphic
+# calls resolve on JDK 17 even though ProGuard reports the concrete signatures.
+-dontwarn com.google.common.hash.ChecksumHashFunction$ChecksumMethodHandles
+-dontwarn com.google.common.hash.Hashing$Crc32cMethodHandles
+-dontwarn com.google.common.hash.LittleEndianByteArray$VarHandleLittleEndianBytes$1
+-dontwarn com.google.common.util.concurrent.AbstractFutureState$VarHandleAtomicHelper
+-dontwarn net.arnx.jsonic.web.Container
+-dontwarn net.arnx.jsonic.web.ExternalContext
+-dontwarn net.arnx.jsonic.web.GatewayFilter
+-dontwarn net.arnx.jsonic.web.GatewayFilter$GZIPResponse
+-dontwarn net.arnx.jsonic.web.GatewayFilter$GZIPResponse$1
+-dontwarn net.arnx.jsonic.web.RESTServlet
+-dontwarn net.arnx.jsonic.web.RESTServlet$RouteMapping
+-dontwarn net.arnx.jsonic.web.RPCServlet
+-dontwarn net.arnx.jsonic.web.RPCServlet$RouteMapping
+-dontwarn net.arnx.jsonic.web.WebServiceServlet
+-dontwarn net.arnx.jsonic.web.WebServiceServlet$Route
+-dontwarn net.arnx.jsonic.web.WebServiceServlet$RouteMapping
+-dontwarn net.arnx.jsonic.web.extension.GuiceContainer
+-dontwarn net.arnx.jsonic.web.extension.S2Container
+-dontwarn net.arnx.jsonic.web.extension.SpringContainer
+# JSONIC populates this DTO by its JavaBean property names.
+-keep class com.optimaize.langdetect.cybozu.util.LangProfile { *; }
+
 # ---------------------------------------------------------------------------
 # A stack trace that can be read.
 #

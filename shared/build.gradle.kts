@@ -101,6 +101,8 @@ kotlin {
         }
 
         desktopMain.dependencies {
+            // The detector uses SLF4J for diagnostics. There is no desktop logging backend.
+            runtimeOnly("org.slf4j:slf4j-nop:1.7.36")
             // No remote adapter or app setup is activated by this primitive.
             implementation("com.google.crypto.tink:tink:1.23.0")
             // SQLite compiled into the jar. Windows has none to borrow, and this
