@@ -56,6 +56,7 @@ import dev.ikna.ui.update.UpdateGate
  * argument cannot be absent and "" is not a legal path segment.
  */
 object Routes {
+    const val SUPPORT = "support"
     const val ONBOARDING = "onboarding"
     const val HOME = "home"
     const val SESSION = "session/{deck}"
@@ -205,7 +206,8 @@ fun IknaNavHost(
                     onOpenStats = { forward(Routes.STATS) },
                     onOpenSettings = { forward(Routes.SETTINGS) },
                     onOpenSearch = { forward(Routes.SEARCH) },
-                    onAddDeck = { forward(Routes.ADD_DECK) }
+                    onAddDeck = { forward(Routes.ADD_DECK) },
+                    onOpenSupport = { forward(Routes.SUPPORT) }
                 )
             }
 
@@ -221,6 +223,10 @@ fun IknaNavHost(
             // system file browser opening straight out of the plus, which meant
             // the app never got to say what a deck file is — and there is no
             // room in a file browser to say it.
+            composable(Routes.SUPPORT) {
+                dev.ikna.ui.decks.IknaSupportScreen(onBack = { back() })
+            }
+
             composable(Routes.ADD_DECK) {
                 AddDeckScreen(
                     container = container,

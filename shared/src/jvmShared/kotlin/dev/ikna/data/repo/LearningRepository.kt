@@ -991,6 +991,7 @@ class LearningRepository(
         return TodayStudySummary(
             remaining = pending.map { it.card.key }.distinct().size,
             started = materialized.any { it.card.key in answered },
+            returning = plan.reason == GovernorReason.RETURN_MODE.name,
             reviewOnly = pending.isNotEmpty() && pending.none { it.isFirstContact },
             reviewOnlyReason = if (plan.allowedNew == 0) {
                 runCatching { GovernorReason.valueOf(plan.reason) }.getOrNull()
@@ -1934,6 +1935,7 @@ class LearningRepository(
 data class TodayStudySummary(
     val remaining: Int = 0,
     val started: Boolean = false,
+    val returning: Boolean = false,
     val reviewOnly: Boolean = false,
     val reviewOnlyReason: GovernorReason? = null
 )

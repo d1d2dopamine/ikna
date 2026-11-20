@@ -71,7 +71,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /** Which screen the content area is showing. */
-enum class Pane { SESSION, BROWSE, DECK, STATS, SETTINGS, ADD, CATALOG, SEARCH, ANKI, BACKUP }
+enum class Pane { SESSION, BROWSE, DECK, STATS, SETTINGS, ADD, CATALOG, SEARCH, ANKI, BACKUP, SUPPORT }
 
 /**
  * The state the window agrees on with its key handler.
@@ -373,6 +373,7 @@ private fun DecksColumn(
             Pane.STATS -> HomeDestination.STATS
             Pane.SETTINGS, Pane.BACKUP -> HomeDestination.SETTINGS
             Pane.SEARCH -> HomeDestination.SEARCH
+            Pane.SUPPORT -> HomeDestination.SUPPORT
             Pane.ADD, Pane.CATALOG, Pane.ANKI -> HomeDestination.ADD
             else -> null
         }
@@ -387,6 +388,7 @@ private fun DecksColumn(
                     HomeDestination.SETTINGS -> Pane.SETTINGS
                     HomeDestination.SEARCH -> Pane.SEARCH
                     HomeDestination.ADD -> Pane.ADD
+                    HomeDestination.SUPPORT -> Pane.SUPPORT
                 })
             }
         ) {
@@ -572,6 +574,8 @@ private fun PaneContent(
             // Back goes to settings rather than the deck list, because
             // that is where this screen is reached from. A dropped file
             // lands here too, and settings is still the nearest place.
+            Pane.SUPPORT -> dev.ikna.ui.decks.IknaSupportScreen(onBack = back)
+
             Pane.BACKUP -> BackupPane(
                 container = container,
                 palette = palette,

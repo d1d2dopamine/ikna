@@ -92,7 +92,7 @@ import kotlin.math.floor
  * clip-art, and a pulled-in icon font would bring Material's rounded geometry
  * back through the side door.
  */
-enum class IknaGlyph { SPARK, BROWSE, BARS, SLIDERS, GEAR, PLUS, BACK, SOUND, DOTS, SEARCH, DECK_PANEL }
+enum class IknaGlyph { SPARK, BROWSE, BARS, SLIDERS, GEAR, PLUS, BACK, SOUND, DOTS, SEARCH, DECK_PANEL, SUPPORT }
 
 @Composable
 fun IknaGlyphIcon(
@@ -244,6 +244,22 @@ fun IknaGlyphIcon(
                     strokeWidth = s * 0.13f,
                     cap = lineCap
                 )
+            }
+            IknaGlyph.SUPPORT -> {
+                val bubble = Path().apply {
+                    moveTo(s * 0.12f, s * 0.16f)
+                    lineTo(s * 0.88f, s * 0.16f)
+                    lineTo(s * 0.88f, s * 0.68f)
+                    lineTo(s * 0.44f, s * 0.68f)
+                    lineTo(s * 0.24f, s * 0.86f)
+                    lineTo(s * 0.24f, s * 0.68f)
+                    lineTo(s * 0.12f, s * 0.68f)
+                    close()
+                }
+                drawPath(bubble, color, style = Stroke(width = s * 0.09f))
+                for (position in listOf(0.33f, 0.50f, 0.67f)) {
+                    drawCircle(color, s * 0.045f, Offset(s * position, s * 0.42f))
+                }
             }
             IknaGlyph.DECK_PANEL -> {
                 val inset = s * 0.12f

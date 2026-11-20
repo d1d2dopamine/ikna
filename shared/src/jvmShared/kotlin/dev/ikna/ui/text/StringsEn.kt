@@ -469,13 +469,13 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// , пропущено
 	"deck.003" to ", skipped ",
 	// Колоды
-	"deck.panel_show" to "Show decks", "deck.panel_hide" to "Hide decks", "deck.004" to "Decks",
+	"deck.panel_show" to "Show decks", "deck.panel_hide" to "Hide decks", "support.title" to "Support & Social", "support.body" to "If you like Ikna, star the official repository on GitHub. Have an idea, found a bug, or noticed something missing? Open an issue or send an email. Your feedback helps shape what gets fixed and built next.", "deck.004" to "Decks",
 	// Пока ни одной колоды. Плюс сверху добавит файл .jsonl.
 	"deck.005" to "No decks yet. The plus at the bottom has the AI prompt and a place to paste.",
 	// читаю файл…
 	"deck.006" to "reading the file…",
 	// СЕГОДНЯ
-	"today.start" to "Start studying", "today.resume" to "Continue studying", "today.deck_change_failed" to "Could not update the deck. Try again.", "today.reviews" to "Only reviews today.", "deck.007" to "TODAY",
+	"today.return" to "You can pick up where you left off.", "today.start" to "Start studying", "today.resume" to "Continue studying", "today.deck_change_failed" to "Could not update the deck. Try again.", "today.reviews" to "Only reviews today.", "deck.007" to "TODAY",
 	// ничего не ждёт
 	"deck.008" to "nothing waiting",
 	// сегодня

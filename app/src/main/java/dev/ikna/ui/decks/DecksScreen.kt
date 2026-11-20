@@ -97,7 +97,8 @@ fun DecksScreen(
     onOpenStats: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenSearch: () -> Unit,
-    onAddDeck: () -> Unit
+    onAddDeck: () -> Unit,
+    onOpenSupport: () -> Unit
 ) {
     val context = LocalContext.current
     val decks = state.decks
@@ -137,6 +138,7 @@ fun DecksScreen(
                     HomeDestination.SETTINGS -> onOpenSettings()
                     HomeDestination.SEARCH -> onOpenSearch()
                     HomeDestination.ADD -> onAddDeck()
+                    HomeDestination.SUPPORT -> onOpenSupport()
                 }
             }
         ) {

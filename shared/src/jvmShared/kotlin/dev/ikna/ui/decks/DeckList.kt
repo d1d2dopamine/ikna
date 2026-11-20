@@ -72,9 +72,12 @@ fun IknaTodayBlock(summary: TodayStudySummary, perCardMs: Long?, onClick: () -> 
             style = MaterialTheme.typography.titleMedium,
             color = palette.onSurface
         )
+        if (summary.returning && total > 0) {
+            Text(S.t("today.return"), style = MaterialTheme.typography.bodyMedium)
+        }
         if (summary.reviewOnly) {
             val reason = when (val reason = summary.reviewOnlyReason) {
-                null, GovernorReason.OK, GovernorReason.FIRST_RUN, GovernorReason.SAFETY_VALVE ->
+                null, GovernorReason.OK, GovernorReason.FIRST_RUN, GovernorReason.SAFETY_VALVE, GovernorReason.RETURN_MODE ->
                     S.t("today.reviews")
                 else -> reasonText(reason)
             }
@@ -82,7 +85,7 @@ fun IknaTodayBlock(summary: TodayStudySummary, perCardMs: Long?, onClick: () -> 
         }
         if (total > 0) {
             IknaWideButton(
-                label = S.t(if (summary.started) "today.resume" else "today.start"),
+                label = S.t(if (summary.started || summary.returning) "today.resume" else "today.start"),
                 onClick = onClick,
                 filled = true,
                 height = 48.dp
