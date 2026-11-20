@@ -6,10 +6,13 @@ surface.
 
 ## What it looks like
 
-A card, thrown. Answering is a gesture, not a row of buttons: throw the card away
-from you when you knew it, towards you when you did not, and the direction is the
-answer. Tapping it turns it over. Everything else — the estimate, the deck name,
-the speak mark — lives in a thin row above, never on the card itself.
+A study card carries its language and highlighted phrase on a tinted reading
+surface. Revealing inserts the answer below without moving the question. The
+action row exposes reveal and the two grades for touch and keyboard use.
+During a horizontal drag, a soft glow and one label identify the selected
+direction. The glow becomes stronger at the rating threshold, where the
+optional haptic fires. An uncommitted drag returns to rest. The gesture that
+reveals an answer cannot also grade it.
 
 No screenshots, on purpose: a still frame is a poor description of an app whose
 whole answer mechanism is a movement, and a recording of a swipe looks like a

@@ -154,16 +154,14 @@ fun SessionScreen(
                     revealed = state.revealed,
                     animations = settings.animations,
                     haptics = settings.haptics,
-                    // The two words stay on screen until the movement is learned,
-                    // then leave it. Read once per session, so nothing appears or
-                    // disappears under a thumb that is already moving.
-                    railsAtRest = !state.swipeFluent,
+                    hasNextCard = state.index + 1 < state.queue.size,
                     onReveal = vm::reveal,
                     signals = vm.reviewSignals,
-                    onRate = { rating, signals -> vm.rate(rating, viaSwipe = true, signals = signals) }
-                ) { progress ->
+                    onRate = { rating, signals -> vm.rate(rating, viaSwipe = signals.inputMethod == INPUT_SWIPE, signals = signals) }
+                ) {
                     ChunkCard(
                         label = askLabel(card.ask, card.chunk.lang == NO_LANG),
+                        language = card.chunk.lang.takeUnless { it == NO_LANG },
                         prompt = card.prompt,
                         answer = card.answer,
                         // Which part of the sentence the card is actually
@@ -198,11 +196,6 @@ fun SessionScreen(
                             { openTatoeba(context, id) }
                         },
                         revealed = state.revealed,
-                        // The one line that says how to turn a card over. It was
-                        // computed for every session and then never drawn, so the
-                        // first card of a first session explained nothing at all.
-                        showTapHint = state.showRevealHint,
-                        progress = progress,
                         onTap = { vm.reveal(INPUT_SWIPE) },
                         tapEnabled = !state.revealed,
                         modifier = Modifier.fillMaxSize()

@@ -157,7 +157,6 @@ private fun SessionPaneContent(
     var optionalCards by remember(deckId) { mutableStateOf<List<SessionCard>>(emptyList()) }
     var optionalAvailable by remember(deckId) { mutableStateOf(false) }
     var optionalEmpty by remember(deckId) { mutableStateOf(false) }
-    val swipeFluent = remember(deckId, reload) { settings.swipesDone >= 12 }
     // Keep the same quiet Undo strip through a pause, until a later action or dismissal.
 
     suspend fun rememberActionObservation(generation: Long, change: SessionPlanChange = SessionPlanChange.Stable): Boolean {
@@ -591,18 +590,6 @@ val keysHint = if (current == null) null else S.t("pc.025")
             } else {
                 val mode = settings.phoneticsFor(current.chunk.packId)
                 val subject = current.chunk.lang == NO_LANG
-                // The card IS the pane, the way the card IS the screen on the
-                // phone.
-                //
-                // Two wrong answers came before this one: a 760dp box in the
-                // middle of a window, and then a portrait box with an outline.
-                // Both of them made the card a small object floating in empty
-                // space, which is not what a card is here -- it is the surface
-                // you drag, so it takes the whole area it lives in. The two
-                // words that appear at the sides sit at the edges of that area,
-                // and the area is clipped, so the card slides and leaves inside
-                // the pane instead of crossing over the deck list or the window
-                // frame.
                 val cardWidthPx = with(LocalDensity.current) { maxWidth.toPx() }
                 // The gesture is a share of the card. The phone's 140 pixels were
                 // measured against a screen that IS the card. A mouse needs a
@@ -617,9 +604,7 @@ val keysHint = if (current == null) null else S.t("pc.025")
                         revealed = revealed,
                         animations = settings.animations,
                         haptics = settings.haptics,
-                        // The same learned, quiet rails as Android. Pointer distance
-                        // remains proportional to the actual desktop pane.
-                        railsAtRest = !swipeFluent,
+                        hasNextCard = index + 1 < cards.size,
                         onReveal = reveal,
                         onRate = gradeWithSignals,
                         signals = reviewSignals,
@@ -628,9 +613,10 @@ val keysHint = if (current == null) null else S.t("pc.025")
                             if (programmaticSwipe?.token == token) programmaticSwipe = null
                         },
                         threshold = swipeLine
-                    ) { progress ->
+                    ) {
                         ChunkCard(
                             label = askLabel(current.ask, subject),
+                            language = current.chunk.lang.takeUnless { it == NO_LANG },
                             prompt = current.prompt,
                             answer = current.answer,
                             promptTarget = current.promptTarget,
@@ -649,8 +635,6 @@ val keysHint = if (current == null) null else S.t("pc.025")
                             sourceLabel = current.sourceId?.let { S.t("src.001") + "Tatoeba #" + it },
                             onSource = current.sourceId?.let { id -> { tatoebaSentenceUrl(id)?.let(::openInBrowser); Unit } },
                             revealed = revealed,
-                            showTapHint = !revealed && index == 0,
-                            progress = progress,
                             onTap = { reveal(INPUT_SWIPE) },
                             tapEnabled = !revealed,
                             modifier = Modifier.fillMaxSize()

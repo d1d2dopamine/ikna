@@ -153,7 +153,6 @@ class CardRevealPointerIntegrationTest(private val mouse: Boolean) {
                             revealed = revealed.value,
                             animations = false,
                             haptics = false,
-                            railsAtRest = false,
                             onReveal = { input ->
                                 reveals += input
                                 signals.reveal(input)
@@ -161,15 +160,14 @@ class CardRevealPointerIntegrationTest(private val mouse: Boolean) {
                             },
                             onRate = { rating, _ -> grades += rating },
                             signals = signals
-                        ) { progress ->
+                        ) {
                             ChunkCard(
                                 label = "Synthetic fixture",
                                 prompt = if (longPrompt) "A reading line.\n".repeat(80) else "A short prompt",
                                 answer = "An answer",
                                 hint = null,
                                 revealed = revealed.value,
-                                showTapHint = false,
-                                progress = progress,
+                                animations = false,
                                 onTap = {
                                     reveals += "tap"
                                     signals.reveal("tap")

@@ -13,6 +13,7 @@ const val EASY_MIN_PRIOR_SUCCESSES = 3
 const val INPUT_SWIPE = "swipe"
 const val INPUT_KEYBOARD = "keyboard"
 const val INPUT_ACCESSIBILITY = "accessibility"
+const val INPUT_BUTTON = "button"
 
 /**
  * Current timing protocol. V2 measures until the final answer action after the

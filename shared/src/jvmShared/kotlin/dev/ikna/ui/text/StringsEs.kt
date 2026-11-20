@@ -393,7 +393,7 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "add.072" to "Si no hay un mazo preparado",
     "add.073" to "La vía opcional: pedir un mazo a un modelo. Lo que llegue hay que revisarlo con la vista.",
     "add.074" to "MÉTODO CON MODELO",
-    "card.002" to "toca en cualquier lugar",
+    "card.reveal" to "Mostrar respuesta", "card.002" to "toca en cualquier lugar",
     "card.003" to "← NO LO SÉ",
     "card.004" to "LO SÉ →",
     "sess.001" to "un momento…",

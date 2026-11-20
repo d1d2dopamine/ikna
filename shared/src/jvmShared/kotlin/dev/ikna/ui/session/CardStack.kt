@@ -4,11 +4,18 @@ import dev.ikna.ui.text.S
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,11 +35,13 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
@@ -40,6 +49,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
@@ -51,19 +61,21 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.grading.INPUT_ACCESSIBILITY
+import dev.ikna.domain.grading.INPUT_BUTTON
 import dev.ikna.domain.grading.INPUT_KEYBOARD
 import dev.ikna.domain.grading.INPUT_SWIPE
 import dev.ikna.domain.session.ReviewSignalTracker
 import dev.ikna.domain.session.ReviewSignals
 import dev.ikna.domain.session.TimingDiscardReason
 import dev.ikna.ui.theme.IknaScrollableColumn
+import dev.ikna.ui.theme.IknaWideButton
+import dev.ikna.ui.theme.LocalIknaMotionEnabled
 import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.theme.Space
+import dev.ikna.ui.theme.iknaTileShape
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
 
 private const val EXIT_X = 1400f
 private const val PROGRAMMATIC_THROW_SPEED = 1200f
@@ -74,45 +86,11 @@ data class ProgrammaticSwipe(val token: Int, val rating: Rating)
 /** How far the card leans as it travels. Larger divisor, calmer rotation. */
 private const val ROTATION_DIVISOR = 64f
 
-/** The strip at the bottom that the two words live in, and never leave. */
-private val RAIL_HEIGHT = 40.dp
+private val CARD_MARGIN = 16.dp
 
 /**
- * One card, thrown left or right.
- *
- * The layer that moves and the layer that explains are now two different things,
- * and that is the whole fix.
- *
- * The words "know" and "do not know" used to be drawn *inside* the card, at its
- * left and right edges. The card is the object that travels: pull it to the
- * right and the word that tells you what the right side means travels with it,
- * off the screen, at exactly the moment you are looking for it. The label under
- * the thumb was the first thing to disappear. Both words now belong to the
- * screen instead: the card slides underneath them and they do not move by a
- * pixel, so the map stays where the map was.
- *
- * A card whose back you have not seen cannot be graded. Pulling one sideways
- * shows the answer -- the same act as tapping it, done with the hand that was
- * already moving -- and then springs back. The grade needs a second, deliberate
- * throw. Without that rule the peek and the answer are the same gesture, and
- * every look at the back would record something.
- *
- * A spring, not a line. Letting go of a card that did not travel far enough runs
- * a slightly underdamped spring, which is the motion of an object with mass.
- *
- * Speed counts as an answer. See [decideRating]: a flick that travels a third of
- * the threshold but leaves the finger at 900px/s is an answer, and the card goes
- * with it at the speed it was thrown.
- *
- * A tick at the line. The moment the drag crosses into an answer, one short
- * haptic pulse -- before the finger lifts, while the decision can still be taken
- * back. This is the part that closes the loop without a single number on screen:
- * the hand knows the answer landed, so the eye does not have to go looking for
- * confirmation.
- *
- * And the whole thing has a keyboard-and-screen-reader twin: two custom
- * accessibility actions carrying the same two verbs, because an interface whose
- * only verb is a swipe is an interface that cannot be used with TalkBack on.
+ * The reading card follows the pointer. A front-side drag can reveal the answer,
+ * while a rating requires a new gesture that began with the answer visible.
  */
 @Composable
 fun SwipeableCard(
@@ -120,7 +98,7 @@ fun SwipeableCard(
     revealed: Boolean,
     animations: Boolean,
     haptics: Boolean,
-    railsAtRest: Boolean,
+    hasNextCard: Boolean = false,
     onReveal: (String) -> Unit,
     onRate: (Rating, ReviewSignals) -> Unit,
     signals: ReviewSignalTracker,
@@ -134,7 +112,7 @@ fun SwipeableCard(
      * proportion to the card whatever size the window is.
      */
     threshold: Float = SWIPE_THRESHOLD,
-    content: @Composable (progress: () -> Float) -> Unit
+    content: @Composable () -> Unit
 ) {
     val offsetX = remember(key) { Animatable(0f) }
     // Where the pointer has taken the card, held in a plain state.
@@ -156,6 +134,8 @@ fun SwipeableCard(
     // Was the back of the card visible when this gesture began? Read once, at
     // the start, so a pull that reveals the answer cannot also grade it.
     val gradable = remember(key) { mutableStateOf(false) }
+    val throwing = remember(key) { mutableStateOf<Rating?>(null) }
+    val currentKey = rememberUpdatedState(key)
     val tracker = remember(key) { VelocityTracker() }
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
@@ -184,7 +164,14 @@ fun SwipeableCard(
     }
 
     val line = if (threshold > 0f) threshold else SWIPE_THRESHOLD
-    val progress: () -> Float = { (shift() / line).coerceIn(-1f, 1f) }
+    val progress: () -> Float = {
+        when (throwing.value) {
+            Rating.AGAIN -> -1f
+            Rating.GOOD -> 1f
+            else -> if (gradable.value) (shift() / line).coerceIn(-1f, 1f) else 0f
+        }
+    }
+    val ready: () -> Boolean = { armed.value != null || throwing.value != null }
 
     // A/D are final-answer controls only. Space (or a pointer) reveals first;
     // then one key-down performs the same visible throw as a mouse gesture. The
@@ -207,170 +194,245 @@ fun SwipeableCard(
         }
         val direction = if (command.rating == Rating.AGAIN) -1f else 1f
         flying.value = true
+        throwing.value = command.rating
         offsetX.snapTo(drag.value)
         signals.keyboardStarted()
         val observation = signals.snapshot(inputMethod = INPUT_KEYBOARD)
         val visualVelocity = PROGRAMMATIC_THROW_SPEED * direction
         if (animations) throwOut(offsetX, command.rating, Velocity(visualVelocity, 0f))
-        rateNow.value(command.rating, observation)
+        if (currentKey.value == key) rateNow.value(command.rating, observation)
+        throwing.value = null
         offsetX.snapTo(0f)
         drag.value = 0f
         flying.value = false
         programmaticHandledNow.value(command.token)
     }
 
-    val revealAction = S.t("card.002")
+    fun rateFromButton(rating: Rating) {
+        if (!revealedNow.value || flying.value) return
+        flying.value = true
+        throwing.value = rating
+        signals.answerStarted(INPUT_BUTTON)
+        val observation = signals.snapshot(inputMethod = INPUT_BUTTON)
+        scope.launch {
+            offsetX.snapTo(drag.value)
+            val speed = if (rating == Rating.AGAIN) -PROGRAMMATIC_THROW_SPEED else PROGRAMMATIC_THROW_SPEED
+            if (animations) throwOut(offsetX, rating, Velocity(speed, 0f))
+            if (currentKey.value == key) rateNow.value(rating, observation)
+            offsetX.snapTo(0f)
+            drag.value = 0f
+            throwing.value = null
+            flying.value = false
+        }
+    }
+
+    val revealAction = S.t("card.reveal")
     val missAction = S.t("a11y.008")
     val keepAction = S.t("a11y.009")
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .onGloballyPositioned { signals.shown() }
-            .semantics {
-                // TalkBack follows the same two-step contract as a finger. The
-                // old semantics exposed both grades on the front, so a screen-
-                // reader action could record an answer that had never been
-                // revealed even though touch input deliberately forbids that.
-                customActions = if (revealed) {
-                    listOf(
-                        CustomAccessibilityAction(keepAction) {
-                            val canRate = revealedNow.value
-                            if (canRate) {
-                                signals.answerStarted(INPUT_ACCESSIBILITY)
-                                rateNow.value(Rating.GOOD, signals.snapshot())
-                            }
-                            canRate
-                        },
-                        CustomAccessibilityAction(missAction) {
-                            val canRate = revealedNow.value
-                            if (canRate) {
-                                signals.answerStarted(INPUT_ACCESSIBILITY)
-                                rateNow.value(Rating.AGAIN, signals.snapshot())
-                            }
-                            canRate
-                        }
-                    )
-                } else {
-                    listOf(
-                        CustomAccessibilityAction(revealAction) {
-                            val canReveal = !revealedNow.value
-                            if (canReveal) revealNow.value(INPUT_ACCESSIBILITY)
-                            canReveal
-                        }
-                    )
-                }
-            }
-            // On the whole screen rather than on the card: the card moves, and a
-            // touch area that moves with it stops accepting the second half of a
-            // long drag.
-            // Vertical drags belong to the reading viewport, never a rating.
-            .pointerInput(key, signals) {
-                var revealedByDrag = false
-                detectHorizontalDragGestures(
-                    onDragStart = {
-                        tracker.resetTracking()
-                        armed.value = null
-                        revealedByDrag = false
-                        gradable.value = revealedNow.value
-                        if (gradable.value) signals.dragStarted()
-                    },
-                    onHorizontalDrag = { change, delta ->
-                        tracker.addPosition(change.uptimeMillis, change.position)
-                        val next = drag.value + delta
-                        drag.value = next
-                        if (gradable.value) {
-                            // One tick when the gesture becomes an answer, one when
-                            // it stops being one. Never a stream of them.
-                            val candidate = armedRating(next, 0f, line)
-                            if (candidate != armed.value) {
-                                if (candidate != null && haptics) {
-                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                }
-                                armed.value = candidate
-                            }
-                        } else if (!revealedByDrag && !revealedNow.value && abs(next) >= PEEK_TRAVEL) {
-                            revealedByDrag = true
-                            revealNow.value(INPUT_SWIPE)
-                        }
-                    },
-                    onDragCancel = {
-                        armed.value = null
-                        scope.launch {
-                            flying.value = true
-                            offsetX.snapTo(drag.value)
-                            settle(offsetX, animations)
-                            drag.value = 0f
-                            flying.value = false
-                        }
-                    },
-                    onDragEnd = {
-                        // Compose has already consumed this horizontal gesture,
-                        // cancelling the inner click. A short pull below the peek
-                        // distance must still reveal on release, not do nothing.
-                        // Keep the start-of-gesture grade gate: this release can
-                        // never also answer the newly revealed card. Cancellation
-                        // deliberately has no corresponding fallback.
-                        if (!gradable.value && !revealedByDrag && !revealedNow.value) {
-                            revealedByDrag = true
-                            revealNow.value(INPUT_SWIPE)
-                        }
-                        val velocity = tracker.calculateVelocity()
-                        val rating =
-                            if (gradable.value) decideRating(drag.value, 0f, velocity.x, line) else null
-                        armed.value = null
-                        if (rating == null) {
-                            scope.launch {
-                                flying.value = true
-                                offsetX.snapTo(drag.value)
-                                settle(offsetX, animations, velocity)
-                                drag.value = 0f
-                                flying.value = false
-                            }
-                        } else {
-                            // Freeze before animation: its duration and any later
-                            // queued disk work are not retrieval latency.
-                            val observation = signals.snapshot(velocity.x)
-                            if (haptics) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            scope.launch {
-                                flying.value = true
-                                offsetX.snapTo(drag.value)
-                                if (animations) throwOut(offsetX, rating, velocity)
-                                rateNow.value(rating, observation)
-                                offsetX.snapTo(0f)
-                                drag.value = 0f
-                                flying.value = false
-                            }
-                        }
-                    }
-                )
-            }
-    ) {
-        // The travelling layer.
+    Column(Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    val landed = arrival.value.coerceIn(0f, 1f)
-                    val travelled = shift()
-                    translationX = travelled
-                    translationY = (1f - landed) * 16.dp.toPx()
-                    rotationZ = travelled / ROTATION_DIVISOR
-                    val grow = 0.972f + 0.028f * landed
-                    scaleX = grow
-                    scaleY = grow
-                    alpha = landed
+                .fillMaxWidth()
+                .weight(1f)
+                .onGloballyPositioned { signals.shown() }
+                .semantics {
+                    // TalkBack follows the same two-step contract as a finger. The
+                    // old semantics exposed both grades on the front, so a screen-
+                    // reader action could record an answer that had never been
+                    // revealed even though touch input deliberately forbids that.
+                    customActions = if (revealed) {
+                        listOf(
+                            CustomAccessibilityAction(keepAction) {
+                                val canRate = revealedNow.value && !flying.value
+                                if (canRate) {
+                                    signals.answerStarted(INPUT_ACCESSIBILITY)
+                                    rateNow.value(Rating.GOOD, signals.snapshot())
+                                }
+                                canRate
+                            },
+                            CustomAccessibilityAction(missAction) {
+                                val canRate = revealedNow.value && !flying.value
+                                if (canRate) {
+                                    signals.answerStarted(INPUT_ACCESSIBILITY)
+                                    rateNow.value(Rating.AGAIN, signals.snapshot())
+                                }
+                                canRate
+                            }
+                        )
+                    } else {
+                        listOf(
+                            CustomAccessibilityAction(revealAction) {
+                                val canReveal = !revealedNow.value
+                                if (canReveal) revealNow.value(INPUT_ACCESSIBILITY)
+                                canReveal
+                            }
+                        )
+                    }
+                }
+                // On the whole screen rather than on the card: the card moves, and a
+                // touch area that moves with it stops accepting the second half of a
+                // long drag.
+                // Vertical drags belong to the reading viewport, never a rating.
+                .pointerInput(key, signals) {
+                    var revealedByDrag = false
+                    var acceptedDrag = false
+                    detectHorizontalDragGestures(
+                        onDragStart = {
+                            acceptedDrag = !flying.value
+                            if (!acceptedDrag) return@detectHorizontalDragGestures
+                            tracker.resetTracking()
+                            armed.value = null
+                            revealedByDrag = false
+                            gradable.value = revealedNow.value
+                            if (gradable.value) signals.dragStarted()
+                        },
+                        onHorizontalDrag = { change, delta ->
+                            if (!acceptedDrag) return@detectHorizontalDragGestures
+                            tracker.addPosition(change.uptimeMillis, change.position)
+                            val next = drag.value + delta
+                            drag.value = next
+                            if (gradable.value) {
+                                // One tick when the gesture becomes an answer, one when
+                                // it stops being one. Never a stream of them.
+                                val candidate = armedRating(next, 0f, line)
+                                if (candidate != armed.value) {
+                                    if (candidate != null && haptics) {
+                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    }
+                                    armed.value = candidate
+                                }
+                            } else if (!revealedByDrag && !revealedNow.value && abs(next) >= PEEK_TRAVEL) {
+                                revealedByDrag = true
+                                revealNow.value(INPUT_SWIPE)
+                            }
+                        },
+                        onDragCancel = {
+                            if (!acceptedDrag) return@detectHorizontalDragGestures
+                            armed.value = null
+                            flying.value = true
+                            scope.launch {
+                                offsetX.snapTo(drag.value)
+                                settle(offsetX, animations)
+                                drag.value = 0f
+                                flying.value = false
+                            }
+                        },
+                        onDragEnd = {
+                            // Compose has already consumed this horizontal gesture,
+                            // cancelling the inner click. A short pull below the peek
+                            // distance must still reveal on release, not do nothing.
+                            // Keep the start-of-gesture grade gate: this release can
+                            // never also answer the newly revealed card. Cancellation
+                            // deliberately has no corresponding fallback.
+                            if (!acceptedDrag) return@detectHorizontalDragGestures
+                            if (!gradable.value && !revealedByDrag && !revealedNow.value) {
+                                revealedByDrag = true
+                                revealNow.value(INPUT_SWIPE)
+                            }
+                            val velocity = tracker.calculateVelocity()
+                            val rating =
+                                if (gradable.value) decideRating(drag.value, 0f, velocity.x, line) else null
+                            armed.value = null
+                            flying.value = true
+                            if (rating == null) {
+                                scope.launch {
+                                    offsetX.snapTo(drag.value)
+                                    settle(offsetX, animations, velocity)
+                                    drag.value = 0f
+                                    flying.value = false
+                                }
+                            } else {
+                                // Freeze before animation: its duration and any later
+                                // queued disk work are not retrieval latency.
+                                val observation = signals.snapshot(velocity.x)
+                                throwing.value = rating
+                                scope.launch {
+                                    offsetX.snapTo(drag.value)
+                                    if (animations) throwOut(offsetX, rating, velocity)
+                                    if (currentKey.value == key) rateNow.value(rating, observation)
+                                    throwing.value = null
+                                    offsetX.snapTo(0f)
+                                    drag.value = 0f
+                                    flying.value = false
+                                }
+                            }
+                        }
+                    )
                 }
         ) {
-            content(progress)
-        }
+            SwipeGlow(progress, ready)
+            if (hasNextCard && animations && throwing.value != null) {
+                val backingShape = iknaTileShape()
+                Box(
+                    Modifier.matchParentSize()
+                        .padding(horizontal = 24.dp, vertical = 14.dp)
+                        .graphicsLayer {
+                            val leaving = (abs(shift()) / size.width.coerceAtLeast(1f)).coerceIn(0f, 1f)
+                            scaleX = 0.96f + 0.04f * leaving
+                            scaleY = scaleX
+                            translationY = (1f - leaving) * 12.dp.toPx()
+                        }
+                        .background(MaterialTheme.colorScheme.surface, backingShape)
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, backingShape)
+                )
+            }
+            // The travelling layer.
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        val landed = arrival.value.coerceIn(0f, 1f)
+                        val travelled = shift()
+                        translationX = travelled
+                        val lift = abs(progress())
+                        translationY = if (animations) ((1f - landed) * 12.dp - 4.dp * lift).toPx() else 0f
+                        rotationZ = if (animations) (travelled / ROTATION_DIVISOR).coerceIn(-6f, 6f) else 0f
+                        val grow = 0.972f + 0.028f * landed
+                        scaleX = grow
+                        scaleY = grow
+                        alpha = landed
+                    }
+            ) {
+                content()
+            }
 
-        // The fixed layer. Nothing here ever moves.
-        if (revealed) {
-            CommitEdge(progress = progress)
-            AnswerRails(progress = progress, atRest = if (railsAtRest) 0.32f else 0f)
+            if (revealed) SwipeIntent(progress, ready)
         }
-    }
+        Row(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .widthIn(max = 680.dp)
+                .fillMaxWidth()
+                .padding(horizontal = CARD_MARGIN, vertical = Space.sm),
+            horizontalArrangement = Arrangement.spacedBy(Space.sm)
+        ) {
+            if (revealed) {
+                IknaWideButton(
+                    label = missAction,
+                    onClick = { rateFromButton(Rating.AGAIN) },
+                    modifier = Modifier.weight(1f),
+                    height = 48.dp,
+                    enabled = !flying.value
+                )
+                IknaWideButton(
+                    label = keepAction,
+                    onClick = { rateFromButton(Rating.GOOD) },
+                    modifier = Modifier.weight(1f),
+                    height = 48.dp,
+                    enabled = !flying.value
+                )
+            } else {
+                IknaWideButton(
+                    label = revealAction,
+                    onClick = { if (!revealedNow.value && !flying.value) revealNow.value(INPUT_BUTTON) },
+                    filled = true,
+                    height = 48.dp,
+                    enabled = !flying.value
+                )
+            }
+        }
+        }
 }
 
 /** Back to rest, carrying whatever speed the finger left behind. */
@@ -396,29 +458,11 @@ private suspend fun throwOut(
     x.animateTo(target, Motion.thrown(abs(velocity.x)), initialVelocity = velocity.x)
 }
 
-/**
- * The card itself: a rectangle that takes the whole screen.
- *
- * Not a small rounded tile floating in padding, and not a panel on a background
- * either -- there is no window around the text and nothing behind it. The card is
- * the screen, and the only thing separating it from the edges is the text inset.
- *
- * The chunk is set large and left-aligned like a line in a book, because that is
- * how it will be read in the wild, and because centred text of unpredictable
- * length moves its own first letter around between cards.
- *
- * One card, one look. There used to be a second variant for a card returning
- * from the amnesty pool -- the same card with " - CAME BACK" appended to its
- * label. It marked the user's absence on the material they were in the middle of
- * remembering, which is the one place this app had promised never to keep score.
- *
- * [tapEnabled] rather than a look at [revealed]: turning the card over is a tap
- * on the card itself, and that surface has to stop answering once the answer is
- * already on screen.
- */
+/** A reading surface with a stable question and an answer that opens below it. */
 @Composable
 fun ChunkCard(
     label: String,
+    language: String? = null,
     prompt: String,
     answer: String,
     /** Where the phrase sits inside [prompt], when the prompt is a sentence. */
@@ -439,41 +483,32 @@ fun ChunkCard(
     sourceLabel: String? = null,
     onSource: (() -> Unit)? = null,
     revealed: Boolean,
-    showTapHint: Boolean,
-    progress: () -> Float,
+    animations: Boolean = LocalIknaMotionEnabled.current,
     onTap: () -> Unit,
     tapEnabled: Boolean,
     modifier: Modifier = Modifier
 ) {
-    // Which way the card is going, as a wash of colour rather than a verdict.
-    // Accent for "kept it", muted for "lost it": a red tint on a card you just
-    // failed is a punishment animation, and this app does not have those.
-    val kept = MaterialTheme.colorScheme.primary
-    val lost = MaterialTheme.colorScheme.onSurfaceVariant
+    val palette = MaterialTheme.colorScheme
+    val shape = iknaTileShape()
+    val surface = lerp(palette.background, palette.surfaceVariant, 0.22f)
+    val answerAlpha = animateFloatAsState(
+        targetValue = if (revealed) 1f else 0f,
+        animationSpec = if (animations) tween(160) else snap(),
+        label = "card-answer"
+    )
 
     Box(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = CARD_MARGIN, vertical = Space.sm)
+            .clip(shape)
+            .background(surface)
+            .border(1.dp, palette.outlineVariant.copy(alpha = 0.65f), shape)
             .clickable(
                 enabled = tapEnabled,
                 onClickLabel = S.t("a11y.016"),
-                onClick = onTap)
+                onClick = onTap
+            )
     ) {
-        // Drawn rather than recomposed: the wash follows the finger frame by
-        // frame, and rebuilding the card's text on every one of those frames to
-        // change one alpha would be the most expensive way to tint a rectangle.
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .drawBehind {
-                    val p = progress()
-                    val strength = abs(p)
-                    if (strength <= 0.05f) return@drawBehind
-                    val color = if (p > 0f) kept else lost
-                    drawRect(color = color.copy(alpha = 0.10f * strength))
-                }
-        )
-
         IknaScrollableColumn(
             modifier = Modifier
                 .fillMaxHeight()
@@ -483,16 +518,32 @@ fun ChunkCard(
                 .widthIn(max = 680.dp)
                 .align(Alignment.Center)
                 .padding(horizontal = Space.lg)
-                .padding(top = Space.lg, bottom = RAIL_HEIGHT),
+                .padding(vertical = Space.lg),
             scrollKey = prompt
         ) {
-            Text(
-                text = label.uppercase(),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Space.sm),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (language != null) {
+                    Text(
+                        text = language.uppercase(),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = palette.primary,
+                        modifier = Modifier
+                            .background(palette.primary.copy(alpha = 0.10f), shape)
+                            .padding(horizontal = Space.sm, vertical = Space.xs)
+                    )
+                }
+                Text(
+                    text = label.uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = palette.onSurfaceVariant
+                )
+            }
 
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.height(Space.xl))
 
             Text(
                 text = marked(prompt, promptTarget, MaterialTheme.colorScheme.primary),
@@ -515,141 +566,95 @@ fun ChunkCard(
 
             if (revealed) {
                 Spacer(Modifier.height(Space.lg))
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(2.dp)
-                        .background(MaterialTheme.colorScheme.primary)
-                )
-                Spacer(Modifier.height(Space.lg))
-                Text(
-                    text = marked(answer, answerTarget, MaterialTheme.colorScheme.primary),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                if (!answerTranscription.isNullOrBlank()) {
-                    Spacer(Modifier.height(Space.sm))
+                        .graphicsLayer {
+                            alpha = answerAlpha.value
+                            translationY = (1f - answerAlpha.value) * 6.dp.toPx()
+                        }
+                        .background(palette.primary.copy(alpha = 0.07f), shape)
+                        .padding(Space.md)
+                ) {
                     Text(
-                        text = answerTranscription,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = marked(answer, answerTarget, MaterialTheme.colorScheme.primary),
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
+                    if (!answerTranscription.isNullOrBlank()) {
+                        Spacer(Modifier.height(Space.sm))
+                        Text(
+                            text = answerTranscription,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    if (!hint.isNullOrBlank()) {
+                        Spacer(Modifier.height(Space.md))
+                        Text(
+                            text = hint,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    if (!sourceLabel.isNullOrBlank() && onSource != null) {
+                        Spacer(Modifier.height(Space.md))
+                        Text(
+                            text = sourceLabel,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            textDecoration = TextDecoration.Underline,
+                            modifier = Modifier.clickable(onClickLabel = S.t("a11y.017"), onClick = onSource)
+                        )
+                    }
                 }
-                if (!hint.isNullOrBlank()) {
-                    Spacer(Modifier.height(Space.md))
-                    Text(
-                        text = hint,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                if (!sourceLabel.isNullOrBlank() && onSource != null) {
-                    Spacer(Modifier.height(Space.md))
-                    Text(
-                        text = sourceLabel,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        textDecoration = TextDecoration.Underline,
-                        modifier = Modifier.clickable(onClickLabel = S.t("a11y.017"), onClick = onSource)
-                    )
-                }
-            } else if (showTapHint) {
-                Spacer(Modifier.height(Space.lg))
-                Text(
-                    text = S.t("card.002"),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
-
-            Spacer(Modifier.weight(1f))
         }
     }
 }
 
-/**
- * A bar on the edge the card is being thrown at.
- *
- * It grows with the gesture and reaches full strength exactly where the answer
- * registers, so the edge is a progress bar for the decision itself. It is drawn
- * on the screen, not on the card, which is why it is still there when the card
- * has travelled halfway out of the frame.
- */
 @Composable
-private fun BoxScope.CommitEdge(progress: () -> Float) {
-    val kept = MaterialTheme.colorScheme.primary
-    val lost = MaterialTheme.colorScheme.onSurfaceVariant
-
+private fun BoxScope.SwipeGlow(progress: () -> Float, ready: () -> Boolean) {
+    val known = MaterialTheme.colorScheme.primary
+    val unknown = MaterialTheme.colorScheme.tertiary
     Box(
-        modifier = Modifier
-            .matchParentSize()
-            .drawBehind {
-                val p = progress()
-                val strength = abs(p)
-                if (strength <= 0.05f) return@drawBehind
-                val band = 4.dp.toPx() * strength
-                val color = if (p > 0f) kept else lost
-                val left = if (p > 0f) size.width - band else 0f
-                drawRect(
-                    color = color.copy(alpha = 0.35f + 0.65f * strength),
-                    topLeft = Offset(left, 0f),
-                    size = Size(band, size.height)
-                )
-            }
+        Modifier.matchParentSize().drawBehind {
+            val direction = progress()
+            if (abs(direction) < 0.02f) return@drawBehind
+            val center = Offset(size.width * (0.5f + 0.44f * direction), size.height * 0.57f)
+            val color = if (direction > 0f) known else unknown
+            val radius = (size.width * 0.52f).coerceAtMost(320.dp.toPx())
+            val alpha = if (ready()) 0.68f else 0.12f + 0.34f * abs(direction)
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(color.copy(alpha = alpha), color.copy(alpha = 0f)),
+                    center = center,
+                    radius = radius
+                ),
+                radius = radius,
+                center = center
+            )
+        }
     )
 }
 
-/**
- * The two words, at the bottom corners they belong to.
- *
- * They sit in the screen's frame, below the reading area and above the bar with
- * the way out, which is the one band of the screen a thumb passes through on
- * every single answer. Left is muted, right is the accent colour, always -- the
- * colour is part of the word rather than a reaction to the gesture, so the two
- * sides can be told apart before anything has been touched.
- *
- * [atRest] is how visible they are when the card is still: present while the
- * movement is being learned, and gone afterwards. Dragging always brings the
- * matching word up to full strength and fades the other one out, so the label
- * under the thumb says what will happen if the finger lifts here -- and, more
- * usefully, what will happen if it does not.
- */
 @Composable
-private fun BoxScope.AnswerRails(progress: () -> Float, atRest: Float) {
-    RailLabel(
-        text = S.t("card.003"),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        alpha = { max(atRest * (1f - max(0f, progress())), max(0f, -progress())) },
-        modifier = Modifier
-            .align(Alignment.BottomStart)
-            .padding(start = Space.lg, bottom = Space.md)
-    )
-    RailLabel(
-        text = S.t("card.004"),
-        color = MaterialTheme.colorScheme.primary,
-        alpha = { max(atRest * (1f + min0(progress())), max(0f, progress())) },
-        modifier = Modifier
-            .align(Alignment.BottomEnd)
-            .padding(end = Space.lg, bottom = Space.md)
-    )
-}
-
-/** Negative part of a signed progress, as a value in -1..0. */
-private fun min0(v: Float): Float = if (v < 0f) v else 0f
-
-@Composable
-private fun RailLabel(
-    text: String,
-    color: Color,
-    alpha: () -> Float,
-    modifier: Modifier = Modifier
-) {
+private fun BoxScope.SwipeIntent(progress: () -> Float, ready: () -> Boolean) {
+    val direction = progress()
+    if (abs(direction) < 0.06f) return
+    val known = direction > 0f
+    val palette = MaterialTheme.colorScheme
+    val color = if (known) palette.primary else palette.tertiary
     Text(
-        text = text,
-        style = MaterialTheme.typography.labelSmall,
-        color = color,
-        maxLines = 1,
-        modifier = modifier.graphicsLayer { this.alpha = alpha().coerceIn(0f, 1f) }
+        text = S.t(if (known) "card.004" else "card.003"),
+        style = MaterialTheme.typography.labelLarge,
+        color = palette.onSurface,
+        modifier = Modifier
+            .align(if (known) Alignment.TopEnd else Alignment.TopStart)
+            .padding(horizontal = Space.lg, vertical = Space.md)
+            .clearAndSetSemantics { }
+            .background(lerp(palette.surface, color, if (ready()) 0.26f else 0.12f), iknaTileShape())
+            .padding(horizontal = Space.md, vertical = Space.xs)
     )
 }
 

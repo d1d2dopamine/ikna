@@ -394,7 +394,7 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "add.072" to "Se não houver um baralho pronto",
     "add.073" to "O caminho opcional: pedir a um modelo que escreva um baralho. O resultado precisa ser conferido visualmente.",
     "add.074" to "O CAMINHO DO MODELO",
-    "card.002" to "toque em qualquer lugar",
+    "card.reveal" to "Mostrar resposta", "card.002" to "toque em qualquer lugar",
     "card.003" to "← NÃO SEI",
     "card.004" to "SEI →",
     "sess.001" to "um momento…",
