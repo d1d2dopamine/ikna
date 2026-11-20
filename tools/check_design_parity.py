@@ -733,7 +733,8 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('signalFrameFadeInDurationMillis = 80', metrics)
         self.assertIn('signalFrameFadeOutDurationMillis = 55', metrics)
         self.assertGreaterEqual(controls.count('.iknaSignalFrame('), 7)
-        self.assertGreaterEqual(decks.count('.iknaSignalFrame('), 2)
+        self.assertIn('.iknaSignalFrame(', decks)
+        self.assertIn('IknaWideButton(', decks)
         # Outer controls answer the overlay only with pointer presence; keyboard
         # focus on them lives in their own boundary.
         self.assertGreaterEqual(controls.count('if (focused) 2.dp else 1.dp'), 2)
@@ -749,7 +750,6 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('onDrawWithContent { drawContent() }', frame)
         self.assertEqual(controls.count('placement = SignalFramePlacement.Outer'), 5)
         self.assertIn('cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp)', decks)
-        self.assertIn('.iknaSignalFrame(interaction)', decks)
         self.assertIn('placement = SignalFramePlacement.Outer', browse)
         self.assertIn('cornerRadius = iknaFrameRadius(rounded = 12.dp, angular = 8.dp)', palettes)
         self.assertIn('.hoverable(tileInteraction)', palettes)
@@ -911,11 +911,11 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('suspend fun hasAny(): Boolean', dao)
         self.assertIn('allowedNew = if (s.hasScheduledCards) 0 else config.maxNewPerDay', governor)
 
-        self.assertIn('container.learningRepository.remainingTodayCount()', android_home)
+        self.assertIn('container.learningRepository.todayStudySummary()', android_home)
         self.assertNotIn('today.values.sum()', android_home)
         self.assertIn('container.learningRepository.remainingTodayCount()', worker)
         self.assertNotIn('remainingByDeck().values.sum()', worker)
-        self.assertIn('container.learningRepository.remainingTodayCount()', desktop)
+        self.assertIn('container.learningRepository.todayStudySummary()', desktop)
         self.assertNotIn('remaining.values.sum()', desktop)
 
 

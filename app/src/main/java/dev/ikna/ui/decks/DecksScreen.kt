@@ -3,7 +3,6 @@ package dev.ikna.ui.decks
 import dev.ikna.ui.text.S
 import dev.ikna.ui.text.quantityWord
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -50,7 +48,7 @@ import dev.ikna.ui.theme.IknaMemoryField
 import dev.ikna.ui.theme.IknaTransientNotice
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Space
-import dev.ikna.ui.theme.iknaNumberStyle
+import dev.ikna.data.repo.TodayStudySummary
 import dev.ikna.widget.TodayWidget
 import kotlinx.coroutines.launch
 
@@ -69,7 +67,7 @@ class DecksHomeState {
     var today by mutableStateOf<Map<String, Int>>(emptyMap())
         private set
 
-    var todayTotal by mutableStateOf(0)
+    var todaySummary by mutableStateOf(TodayStudySummary())
         private set
 
     var browseAvailability by mutableStateOf<Map<String, BrowseAvailability>>(emptyMap())
@@ -80,9 +78,9 @@ class DecksHomeState {
         val nextToday = runCatching {
             container.learningRepository.remainingByDeck()
         }.getOrDefault(emptyMap())
-        val nextTodayTotal = runCatching {
-            container.learningRepository.remainingTodayCount()
-        }.getOrDefault(0)
+        val nextTodaySummary = runCatching {
+            container.learningRepository.todayStudySummary()
+        }.getOrDefault(TodayStudySummary())
         val nextBrowseAvailability = runCatching {
             container.learningRepository.browseDeckAvailability(nextDecks.map { it.id })
         }.getOrElse {
@@ -92,7 +90,7 @@ class DecksHomeState {
         }
         decks = nextDecks
         today = nextToday
-        todayTotal = nextTodayTotal
+        todaySummary = nextTodaySummary
         browseAvailability = nextBrowseAvailability
     }
 }
@@ -132,7 +130,7 @@ fun DecksScreen(
     val scope = rememberCoroutineScope()
     val decks = state.decks
     val today = state.today
-    val todayTotal = state.todayTotal
+    val todayTotal = state.todaySummary.remaining
 
     // Re-runs whenever this screen comes back to the front, so the counts are
     // right after a session instead of a minute stale. Coming back from the
@@ -194,7 +192,11 @@ fun DecksScreen(
 
         Column(modifier = Modifier.padding(horizontal = Edge)) {
             Spacer(Modifier.height(Space.md))
-            TodayBlock(total = todayTotal, onClick = { onOpenSession(null) })
+            IknaTodayBlock(
+                summary = state.todaySummary,
+                perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
+                onClick = { onOpenSession(null) }
+            )
             Spacer(Modifier.height(Space.xl))
         }
 
@@ -344,68 +346,6 @@ fun DecksScreen(
                 .padding(start = Edge, end = Edge, bottom = BarHeight + Space.md)
         )
     }
-}
-
-/**
- * Everything due today, as a number and nothing else.
- *
- * This was a bordered box with a heading inside it — a control, competing for
- * attention with every other bordered box below. It is not a control. It is the
- * answer to the only question the screen is asked, said in one line -- today,
- * the count and the arrow -- with the arrow kept in the accent colour. The eye
- * lands on it before it has read a single word, which is the whole job.
- *
- * On a finished day it drops to the muted colour and the arrow goes away — but it
- * still opens. A dead control is not restraint, it is a screen that stopped
- * answering: "ничего не ждёт" is an answer, and the session screen already knows
- * how to hand a few extra cards to someone who asks anyway. No congratulation, no
- * badge, no streak: the reward for finishing is that the screen goes quiet.
- */
-@Composable
-private fun TodayBlock(total: Int, onClick: () -> Unit) {
-	val enabled = total > 0
-	Row(
-		modifier = Modifier
-			.fillMaxWidth()
-			.clickable(onClickLabel = S.t("a11y.019"), onClick = onClick)
-			.padding(vertical = Space.sm),
-		verticalAlignment = Alignment.CenterVertically
-	) {
-		// One sentence in one size and weight; the digits keep their mono face.
-		Text(
-			text = S.t("deck.007"),
-			style = MaterialTheme.typography.titleMedium,
-			color = MaterialTheme.colorScheme.onSurfaceVariant
-		)
-		Spacer(Modifier.width(Space.md))
-		if (enabled) {
-			Text(
-				text = total.toString(),
-				style = iknaNumberStyle(MaterialTheme.typography.titleMedium),
-				color = MaterialTheme.colorScheme.primary
-			)
-			Spacer(Modifier.width(Space.xs))
-			Text(
-				text = cardWord(total),
-				style = MaterialTheme.typography.titleMedium,
-				color = MaterialTheme.colorScheme.onBackground
-			)
-		} else {
-			Text(
-				text = S.t("deck.008"),
-				style = MaterialTheme.typography.titleMedium,
-				color = MaterialTheme.colorScheme.onSurfaceVariant
-			)
-		}
-		Spacer(Modifier.weight(1f))
-		if (enabled) {
-			Text(
-				text = "\u2192",
-				style = MaterialTheme.typography.titleMedium,
-				color = MaterialTheme.colorScheme.primary
-			)
-		}
-	}
 }
 
 /** Android and Desktop deliberately render [IknaDeckRow] from the shared module. */

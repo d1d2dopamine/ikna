@@ -44,6 +44,7 @@ import dev.ikna.data.repo.DeckSummary
 import dev.ikna.domain.session.BrowseAvailability
 import dev.ikna.domain.session.BrowseUnavailableReason
 import dev.ikna.ui.decks.IknaDeckRow
+import dev.ikna.data.repo.TodayStudySummary
 import dev.ikna.ui.decks.IknaTodayBlock
 import dev.ikna.ui.nav.sharedAxisEnter
 import dev.ikna.ui.nav.sharedAxisExit
@@ -293,7 +294,7 @@ private fun DesktopShell(
     val deckListState = rememberLazyListState()
     var decks by remember { mutableStateOf<List<DeckSummary>>(emptyList()) }
     var remaining by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
-    var remainingTotal by remember { mutableStateOf(0) }
+    var todaySummary by remember { mutableStateOf(TodayStudySummary()) }
     var browseAvailability by remember { mutableStateOf<Map<String, BrowseAvailability>>(emptyMap()) }
 
     LaunchedEffect(ui.reload) {
@@ -301,8 +302,8 @@ private fun DesktopShell(
         decks = nextDecks
         remaining = runCatching { container.learningRepository.remainingByDeck() }
             .getOrDefault(emptyMap())
-        remainingTotal = runCatching { container.learningRepository.remainingTodayCount() }
-            .getOrDefault(0)
+        todaySummary = runCatching { container.learningRepository.todayStudySummary() }
+            .getOrDefault(TodayStudySummary())
         browseAvailability = runCatching {
             container.learningRepository.browseDeckAvailability(nextDecks.map { it.id })
         }.getOrElse {
@@ -334,14 +335,14 @@ private fun DesktopShell(
                 // column wears the panel tone, the content keeps the window
                 // background (docs/ai-audits.md 7.4, variant 1).
                 Box(Modifier.width(listWidth).fillMaxHeight().background(MaterialTheme.colorScheme.surface)) {
-                    DecksColumn(container, settings, palette, ui, decks, remaining, remainingTotal, browseAvailability, deckListState)
+                    DecksColumn(container, settings, palette, ui, decks, remaining, todaySummary, browseAvailability, deckListState)
                 }
                 Box(Modifier.weight(1f).fillMaxHeight()) {
                     PaneContent(container, settings, palette, ui, decks, wide = true, onRestartRequested = onRestartRequested)
                 }
             }
         } else if (ui.listOpen) {
-            DecksColumn(container, settings, palette, ui, decks, remaining, remainingTotal, browseAvailability, deckListState)
+            DecksColumn(container, settings, palette, ui, decks, remaining, todaySummary, browseAvailability, deckListState)
         } else {
             PaneContent(container, settings, palette, ui, decks, wide = false, onRestartRequested = onRestartRequested)
         }
@@ -365,12 +366,11 @@ private fun DecksColumn(
     ui: DesktopUi,
     decks: List<DeckSummary>,
     remaining: Map<String, Int>,
-    remainingTotal: Int,
+    todaySummary: TodayStudySummary,
     browseAvailability: Map<String, BrowseAvailability>,
     listState: LazyListState
 ) {
     val scope = rememberCoroutineScope()
-    val todayTotal = remainingTotal
     var notice by remember { mutableStateOf<String?>(null) }
 
     Box(Modifier.fillMaxSize().iknaInspect("DecksColumn")) {
@@ -398,7 +398,9 @@ private fun DecksColumn(
 
             Column(Modifier.padding(horizontal = Edge)) {
                 Spacer(Modifier.height(Space.md))
-                IknaTodayBlock(total = todayTotal) { ui.study(null) }
+                IknaTodayBlock(todaySummary, settings.answerMs.takeIf { it > 0 }?.toLong()) {
+                    ui.study(null)
+                }
                 Spacer(Modifier.height(Space.xl))
             }
 

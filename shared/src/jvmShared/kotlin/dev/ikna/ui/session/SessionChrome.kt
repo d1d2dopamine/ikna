@@ -268,7 +268,7 @@ private fun emptyExplanation(state: SessionUiState): String = when {
     else -> reasonText(state.reason)
 }
 
-private fun reasonText(reason: GovernorReason): String = when (reason) {
+internal fun reasonText(reason: GovernorReason): String = when (reason) {
     GovernorReason.FIRST_RUN -> S.t("sess.019")
     GovernorReason.OK -> S.t("sess.020")
     GovernorReason.NO_HEADROOM -> S.t("sess.021")

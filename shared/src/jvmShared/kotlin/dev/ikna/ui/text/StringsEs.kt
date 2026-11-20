@@ -287,7 +287,7 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "deck.004" to "Mazos",
     "deck.005" to "Aún no hay mazos. El signo más de abajo contiene el prompt para la IA y un lugar donde pegarlo.",
     "deck.006" to "leyendo el archivo…",
-    "deck.007" to "HOY",
+    "today.start" to "Empezar a estudiar", "today.resume" to "Continuar estudiando", "today.reviews" to "Hoy solo hay repasos.", "deck.007" to "HOY",
     "deck.008" to "nada pendiente",
     "deck.009" to "hoy ",
     "deck.010" to "nada para hoy",

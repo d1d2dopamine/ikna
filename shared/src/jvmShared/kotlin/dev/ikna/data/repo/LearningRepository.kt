@@ -978,17 +978,24 @@ class LearningRepository(
      * intentionally overlap. The Home counter and widget represent the global
      * daily plan and therefore count each scheduled card key once.
      */
-    suspend fun remainingTodayCount(now: Long = System.currentTimeMillis()): Int {
+    suspend fun remainingTodayCount(now: Long = System.currentTimeMillis()): Int =
+        todayStudySummary(now).remaining
+
+    /** Home and the widget share the same unique global queue. */
+    suspend fun todayStudySummary(now: Long = System.currentTimeMillis()): TodayStudySummary {
         val plan = ensureDailyPlan(now)
         val answered = reviewDao.answeredKeysSince(startOfDay(now)).toSet()
         val hidden = suppressedNow()
-        return builder().materialize(plan.ids)
-            .asSequence()
-            .filterNot { it.chunk.id in hidden }
-            .filterNot { it.card.key in answered }
-            .map { it.card.key }
-            .distinct()
-            .count()
+        val materialized = builder().materialize(plan.ids)
+        val pending = materialized.filterNot { it.chunk.id in hidden || it.card.key in answered }
+        return TodayStudySummary(
+            remaining = pending.map { it.card.key }.distinct().size,
+            started = materialized.any { it.card.key in answered },
+            reviewOnly = pending.isNotEmpty() && pending.none { it.isFirstContact },
+            reviewOnlyReason = if (plan.allowedNew == 0) {
+                runCatching { GovernorReason.valueOf(plan.reason) }.getOrNull()
+            } else null
+        )
     }
 
     /**
@@ -1916,3 +1923,10 @@ class LearningRepository(
         const val LEECH_LIMIT = 8
     }
 }
+
+data class TodayStudySummary(
+    val remaining: Int = 0,
+    val started: Boolean = false,
+    val reviewOnly: Boolean = false,
+    val reviewOnlyReason: GovernorReason? = null
+)

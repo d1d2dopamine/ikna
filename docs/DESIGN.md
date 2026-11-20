@@ -136,6 +136,11 @@ unloaded, and texture is never painted on the learning card.
 
 ## A session
 
+Today offers one primary action to start or resume the shared plan. The home
+count and widget count unique scheduled questions. A duration appears when
+the app has measured enough answers, and review-only queues explain the reason
+when riar-manage recorded it.
+
 The day's plan is decided once and persisted. It can only shrink as you answer, and
 it grows only when you ask for more — the counter at the top is not allowed to go up
 while you work, because watching the finish line move away is how a session ends

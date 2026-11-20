@@ -175,7 +175,7 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "dbg.010" to " neu=", "dbg.011" to " fällig=", "dbg.012" to " Prognose3T=", "dbg.013" to " Rückstand=", "dbg.014" to " Genauigkeit=", "dbg.015" to " Spielraum=",
     "deck.001" to "Keine einzige Zeile konnte gelesen werden", "deck.002" to "Chunks hinzugefügt: ", "deck.003" to ", übersprungen ",
     "deck.004" to "Decks", "deck.005" to "Noch keine Decks. Das Plus unten enthält den KI-Prompt und einen Platz zum Einfügen.",
-    "deck.006" to "Datei wird gelesen…", "deck.007" to "HEUTE", "deck.008" to "nichts wartet", "deck.009" to "heute ", "deck.010" to "heute nichts",
+    "deck.006" to "Datei wird gelesen…", "today.start" to "Lernen starten", "today.resume" to "Weiterlernen", "today.reviews" to "Heute nur Wiederholungen.", "deck.007" to "HEUTE", "deck.008" to "nichts wartet", "deck.009" to "heute ", "deck.010" to "heute nichts",
     "deck.014" to "Karten", "deck.015" to "Karte", "deck.016" to "Karten", "deck.017" to "Karten", "deck.018" to " · <1 Min.", "deck.019" to " Min.",
     "add.001" to "Neues Deck", "add.002" to "Ein Deck ist Klartext. Eine Zeile ist eine Karte: Wendung, Beispielsatz und Übersetzung, getrennt durch |.",
     "add.003" to "Kopiere den Prompt und sende ihn an eine beliebige KI.", "add.004" to "Nenne Sprache und Thema: „Polnisch, Kochen, 100 Karten“.",

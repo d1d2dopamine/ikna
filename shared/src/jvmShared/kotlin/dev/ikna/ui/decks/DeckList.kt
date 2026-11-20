@@ -35,6 +35,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.ikna.data.prefs.DeckLook
 import dev.ikna.data.repo.DeckSummary
+import dev.ikna.data.repo.TodayStudySummary
+import dev.ikna.domain.governor.GovernorReason
+import dev.ikna.ui.session.reasonText
+import dev.ikna.ui.theme.IknaWideButton
+import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.text.S
 import dev.ikna.ui.text.quantityWord
 import dev.ikna.ui.theme.IknaGlyph
@@ -54,75 +59,38 @@ import dev.ikna.ui.theme.iknaNumberStyle
 private val DECK_MARK_SIZE = 52.dp
 private val DECK_PROGRESS_HEIGHT = 14.dp
 
-/*
- * The deck list, compiled once and drawn on both machines.
- *
- * These are the phone's own three pieces -- the figure for the day, the row for
- * a deck, and the square that marks it -- moved here so the window cannot grow
- * its own version of them. Everything about them is a decision that was already
- * made on the phone: the today line reads as one sentence with the arrow at
- * its end,
- * the row has no outline and is separated by space, the square is filled when the
- * deck owes work and hollow when it does not, and the percentage sits beside
- * today's figure rather than under the bar while the row can grow for larger text and reachable actions.
- */
-
-/**
- * Everything due today, said in one line.
- *
- * On a finished day it drops to the muted colour and the arrow goes away -- but
- * it still opens, because "nothing is waiting" is an answer and the session
- * screen already knows how to hand out a few extra cards to somebody who asks
- * anyway.
- */
 @Composable
-fun IknaTodayBlock(total: Int, onClick: () -> Unit) {
-    val enabled = total > 0
-    val interaction = remember { MutableInteractionSource() }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .hoverable(interaction)
-            .iknaSignalFrame(interaction)
-            .clickable(interactionSource = interaction, indication = null,
-                onClickLabel = S.t("a11y.019"), onClick = onClick)
-            .padding(vertical = Space.sm)
-            .iknaInspect("IknaTodayBlock"),
-        verticalAlignment = Alignment.CenterVertically
+fun IknaTodayBlock(summary: TodayStudySummary, perCardMs: Long?, onClick: () -> Unit) {
+    val palette = MaterialTheme.colorScheme
+    val total = summary.remaining
+    Column(
+        modifier = Modifier.fillMaxWidth().iknaInspect("IknaTodayBlock"),
+        verticalArrangement = Arrangement.spacedBy(Space.sm)
     ) {
-        // One sentence in one size and weight; the digits keep their mono face.
+        Text(S.t("deck.007"), style = MaterialTheme.typography.labelMedium, color = palette.onSurfaceVariant)
         Text(
-            text = S.t("deck.007"),
+            text = if (total > 0) "$total ${iknaCardWord(total)}${iknaMinutesTail(total, perCardMs)}"
+                else S.t("deck.008"),
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = palette.onSurface
         )
-        Spacer(Modifier.width(Space.md))
-        if (enabled) {
-            Text(
-                text = total.toString(),
-                style = iknaNumberStyle(MaterialTheme.typography.titleMedium),
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(Modifier.width(Space.xs))
-            Text(
-                text = iknaCardWord(total),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground
+        if (summary.reviewOnly) {
+            val reason = when (val reason = summary.reviewOnlyReason) {
+                null, GovernorReason.OK, GovernorReason.FIRST_RUN, GovernorReason.SAFETY_VALVE ->
+                    S.t("today.reviews")
+                else -> reasonText(reason)
+            }
+            Text(reason, style = MaterialTheme.typography.bodySmall, color = palette.onSurfaceVariant)
+        }
+        if (total > 0) {
+            IknaWideButton(
+                label = S.t(if (summary.started) "today.resume" else "today.start"),
+                onClick = onClick,
+                filled = true,
+                height = 48.dp
             )
         } else {
-            Text(
-                text = S.t("deck.008"),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Spacer(Modifier.weight(1f))
-        if (enabled) {
-            Text(
-                text = "\u2192",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
+            IknaTextButton(label = S.t("a11y.019"), onClick = onClick)
         }
     }
 }

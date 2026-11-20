@@ -184,7 +184,7 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "dbg.014" to " précision=", "dbg.015" to " marge=",
     "deck.001" to "Aucune ligne lisible", "deck.002" to "Fragments ajoutés : ", "deck.003" to ", ignorés ",
     "deck.004" to "Paquets", "deck.005" to "Aucun paquet. Le plus en bas contient le prompt IA et l’endroit où coller le résultat.",
-    "deck.006" to "lecture du fichier…", "deck.007" to "AUJOURD’HUI", "deck.008" to "rien en attente",
+    "deck.006" to "lecture du fichier…", "today.start" to "Commencer la séance", "today.resume" to "Reprendre la séance", "today.reviews" to "Aujourd’hui, seulement des révisions.", "deck.007" to "AUJOURD’HUI", "deck.008" to "rien en attente",
     "deck.009" to "aujourd’hui ", "deck.010" to "rien pour aujourd’hui", "deck.014" to "cartes", "deck.015" to "carte",
     "deck.016" to "cartes", "deck.017" to "cartes", "deck.018" to " · <1 min", "deck.019" to " min",
     "add.001" to "Nouveau paquet", "add.002" to "Un paquet est du texte brut. Une ligne par carte : expression, phrase qui la contient et traduction, séparées par |.",
