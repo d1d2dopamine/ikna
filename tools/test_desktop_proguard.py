@@ -44,21 +44,6 @@ DETECTOR_OWNERS = {
     'com.google.common.hash.Hashing$Crc32cMethodHandles',
     'com.google.common.hash.LittleEndianByteArray$VarHandleLittleEndianBytes$1',
     'com.google.common.util.concurrent.AbstractFutureState$VarHandleAtomicHelper',
-    'net.arnx.jsonic.web.Container',
-    'net.arnx.jsonic.web.ExternalContext',
-    'net.arnx.jsonic.web.GatewayFilter',
-    'net.arnx.jsonic.web.GatewayFilter$GZIPResponse',
-    'net.arnx.jsonic.web.GatewayFilter$GZIPResponse$1',
-    'net.arnx.jsonic.web.RESTServlet',
-    'net.arnx.jsonic.web.RESTServlet$RouteMapping',
-    'net.arnx.jsonic.web.RPCServlet',
-    'net.arnx.jsonic.web.RPCServlet$RouteMapping',
-    'net.arnx.jsonic.web.WebServiceServlet',
-    'net.arnx.jsonic.web.WebServiceServlet$Route',
-    'net.arnx.jsonic.web.WebServiceServlet$RouteMapping',
-    'net.arnx.jsonic.web.extension.GuiceContainer',
-    'net.arnx.jsonic.web.extension.S2Container',
-    'net.arnx.jsonic.web.extension.SpringContainer',
 }
 # This isolated fixture follows the pinned production libraries, not ProGuard's
 # own tool classpath. It does not include optional HTTP/native TLS dependencies.

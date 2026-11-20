@@ -42,6 +42,16 @@ class StagedDeckImportTest {
             val retry = decks.importText("batch.txt", staged, "Starter", appendTo = pack.id)
             assertEquals(0, retry.installed)
             assertEquals(2, dao.chunksForPack(pack.id).size)
+
+            val longExamples = """
+                walk | We walk through the park every morning before going to work. | Move on foot.
+                wait | Please wait outside the building until your brother gets here. | Stay until something happens.
+                leave | We should leave early tomorrow so we can catch the first train. | Go away from a place.
+                share | I always share my lunch with my friend when she forgets to bring hers. | Give part to another person.
+            """.trimIndent()
+            val languageDeck = decks.importText("english.txt", longExamples, "English")
+            assertEquals(4, languageDeck.installed)
+            assertEquals("en", dao.pack(languageDeck.packId)?.lang)
         } finally {
             database.close()
             home.deleteRecursively()

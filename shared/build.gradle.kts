@@ -86,8 +86,11 @@ kotlin {
             implementation("com.squareup.okhttp3:okhttp-tls:4.12.0")
             implementation("com.optimaize.languagedetector:language-detector:0.6") {
                 exclude(group = "com.intellij", module = "annotations")
+                // Version 0.6 reads profiles internally. Its published POM still declares JSONIC.
+                exclude(group = "net.arnx", module = "jsonic")
             }
             implementation("com.google.guava:guava:33.4.8-android")
+            runtimeOnly("org.slf4j:slf4j-nop:1.7.36")
 
             api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
             api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
@@ -101,8 +104,6 @@ kotlin {
         }
 
         desktopMain.dependencies {
-            // The detector uses SLF4J for diagnostics. There is no desktop logging backend.
-            runtimeOnly("org.slf4j:slf4j-nop:1.7.36")
             // No remote adapter or app setup is activated by this primitive.
             implementation("com.google.crypto.tink:tink:1.23.0")
             // SQLite compiled into the jar. Windows has none to borrow, and this
