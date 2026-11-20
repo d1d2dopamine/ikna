@@ -254,6 +254,14 @@ fun SettingsPane(
                     ToggleRow(S.t("bar.dock_top"), settings.homeDockAtTop, palette) {
                         save { container.settings.setHomeDockAtTop(it) }
                     }
+                    Text(S.t("deck.screen_style"))
+                    dev.ikna.data.prefs.DeckScreenStyle.entries.forEach { style ->
+                        IknaChip(
+                            label = S.t("deck.screen_" + style.name.lowercase(java.util.Locale.ROOT)),
+                            selected = settings.deckScreenStyle == style,
+                            onClick = { save { container.settings.setDeckScreenStyle(style) } }
+                        )
+                    }
                 }
             }
             item(key = "language", contentType = "settings-section") {

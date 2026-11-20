@@ -111,7 +111,6 @@ fun DecksScreen(
     // is already in the list and already counted.
     LaunchedEffect(Unit) { state.reload(container) }
 
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
 
     // The number on the home screen widget comes from here. A widget cannot read
     // the database from the launcher's process, so the app hands it the finished
@@ -126,62 +125,65 @@ fun DecksScreen(
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        IknaHomeBackdrop()
+    dev.ikna.ui.theme.IknaDeckSurface(settings.deckScreenStyle) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            val muted = MaterialTheme.colorScheme.onSurfaceVariant
+            IknaHomeBackdrop()
 
-        IknaHomeChrome(
-            dockAtTop = settings.homeDockAtTop,
-            leftHanded = settings.leftHanded,
-            onNavigate = { destination ->
-                when (destination) {
-                    HomeDestination.STATS -> onOpenStats()
-                    HomeDestination.SETTINGS -> onOpenSettings()
-                    HomeDestination.SEARCH -> onOpenSearch()
-                    HomeDestination.ADD -> onAddDeck()
-                    HomeDestination.SUPPORT -> onOpenSupport()
+            IknaHomeChrome(
+                dockAtTop = settings.homeDockAtTop,
+                leftHanded = settings.leftHanded,
+                onNavigate = { destination ->
+                    when (destination) {
+                        HomeDestination.STATS -> onOpenStats()
+                        HomeDestination.SETTINGS -> onOpenSettings()
+                        HomeDestination.SEARCH -> onOpenSearch()
+                        HomeDestination.ADD -> onAddDeck()
+                        HomeDestination.SUPPORT -> onOpenSupport()
+                    }
                 }
-            }
-        ) {
-            Column(modifier = Modifier.padding(horizontal = Edge)) {
-                Spacer(Modifier.height(Space.md))
-                IknaTodayBlock(
-                    summary = state.todaySummary,
-                    perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
-                    onClick = { onOpenSession(null) }
-                )
-                Spacer(Modifier.height(Space.xl))
-            }
-
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = Edge),
-                verticalArrangement = Arrangement.spacedBy(Space.lg)
             ) {
-                items(decks, key = { it.id }) { deck ->
-                    IknaDeckRow(
-                        deck = deck,
-                        look = settings.lookFor(deck.id),
-                        dueToday = today[deck.id] ?: 0,
-                        onOpen = { onOpenDeck(deck.id) }
+                Column(modifier = Modifier.padding(horizontal = Edge)) {
+                    Spacer(Modifier.height(Space.md))
+                    IknaTodayBlock(
+                        summary = state.todaySummary,
+                        perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
+                        onClick = { onOpenSession(null) }
                     )
+                    Spacer(Modifier.height(Space.xl))
                 }
-                if (decks.isEmpty()) {
-                    item {
-                        Column {
-                            Text(
-                                text = S.t("deck.005"),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = muted
-                            )
-                            Spacer(Modifier.height(Space.lg))
-                            IknaLatticePlaceholder()
+
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = Edge),
+                    verticalArrangement = Arrangement.spacedBy(Space.lg)
+                ) {
+                    items(decks, key = { it.id }) { deck ->
+                        IknaDeckRow(
+                            deck = deck,
+                            look = settings.lookFor(deck.id),
+                            dueToday = today[deck.id] ?: 0,
+                            onOpen = { onOpenDeck(deck.id) }
+                        )
+                    }
+                    if (decks.isEmpty()) {
+                        item {
+                            Column {
+                                Text(
+                                    text = S.t("deck.005"),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = muted
+                                )
+                                Spacer(Modifier.height(Space.lg))
+                                IknaLatticePlaceholder()
+                            }
                         }
                     }
                 }
-            }
 
+            }
         }
     }
 }
