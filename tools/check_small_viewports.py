@@ -50,8 +50,8 @@ class SmallViewportContract(unittest.TestCase):
         self.assertIn('val knobSize = if (roundedKnob) 22.dp else 24.dp', toggle)
         rows = (SHARED / 'decks/DeckList.kt').read_text()
         self.assertEqual(rows.count('size = 48.dp,'), 2)
-        self.assertIn('.heightIn(min = DECK_ROW_HEIGHT)', rows)
-        self.assertNotIn('.height(DECK_INFO_HEIGHT)', rows)
+        row = rows.split('fun IknaDeckRow(', 1)[1].split('\n        if (deck.isActive) {', 1)[0]
+        self.assertNotIn('.height(', row)
         self.assertIn('private val DECK_MARK_SIZE = 52.dp', rows)
 
 

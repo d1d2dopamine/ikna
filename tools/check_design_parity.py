@@ -602,22 +602,24 @@ class DesignContracts(unittest.TestCase):
         self.assertNotIn('private fun DeckRow(', android_rows)
         self.assertNotIn('private fun DeckMark(', android_rows)
         for required in [
-            'private val DECK_ROW_HEIGHT = 52.dp',
             'private val DECK_MARK_SIZE = 52.dp',
-            'private val DECK_INFO_HEIGHT = 48.dp',
             'private val DECK_PROGRESS_HEIGHT = 14.dp',
             '.hoverable(interaction)\n            .clipToBounds()\n            .iknaSignalFrame(\n                interaction,\n                cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp),\n                placement = SignalFramePlacement.Outer\n            )\n            .clickable(interactionSource = interaction, indication = null, onClick = onOpen)',
             '.size(DECK_MARK_SIZE)',
-            'Column(modifier = Modifier.weight(1f))',
-            'modifier = Modifier.heightIn(min = DECK_INFO_HEIGHT)',
-            '.heightIn(min = DECK_ROW_HEIGHT)',
             'size = 48.dp',
             'verticalArrangement = Arrangement.SpaceBetween',
-            'Spacer(Modifier.height(Space.xs))\n                IknaDeckProgress(',
-            'modifier = Modifier.heightIn(min = DECK_PROGRESS_HEIGHT)'
+            '.heightIn(min = DECK_PROGRESS_HEIGHT)'
         ]:
             self.assertIn(required, shared_rows)
         row = shared_rows[shared_rows.index('fun IknaDeckRow('):shared_rows.index('/** Makes the long-term bar')]
+        header, progress = row.split('\n        if (deck.isActive) {', 1)
+        header = header.split('Row(verticalAlignment = Alignment.CenterVertically) {', 1)[1]
+        for child in ['IknaDeckMark(', 'text = deck.title', 'IknaToggle(']:
+            self.assertIn(child, header)
+        self.assertEqual(header.count('IknaIconButton('), 2)
+        self.assertNotIn('IknaDeckProgress(', header)
+        self.assertIn('IknaDeckProgress(', progress)
+        self.assertIn('.padding(start = DECK_MARK_SIZE + Space.md)', progress)
         self.assertNotIn('68.dp', row)
         self.assertIn('style = MaterialTheme.typography.labelSmall', row)
         self.assertGreaterEqual(row.count('overflow = TextOverflow.Ellipsis'), 2)

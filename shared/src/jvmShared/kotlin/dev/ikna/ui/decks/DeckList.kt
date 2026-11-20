@@ -50,9 +50,7 @@ import dev.ikna.ui.theme.iknaSignalFrame
 import dev.ikna.ui.theme.iknaTileShape
 import dev.ikna.ui.theme.iknaNumberStyle
 
-private val DECK_ROW_HEIGHT = 52.dp
 private val DECK_MARK_SIZE = 52.dp
-private val DECK_INFO_HEIGHT = 48.dp
 private val DECK_PROGRESS_HEIGHT = 14.dp
 
 /*
@@ -146,10 +144,9 @@ fun IknaDeckRow(
     val owes = dueToday > 0
     val interaction = remember { MutableInteractionSource() }
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = DECK_ROW_HEIGHT)
             .hoverable(interaction)
             .clipToBounds()
             .iknaSignalFrame(
@@ -158,76 +155,71 @@ fun IknaDeckRow(
                 placement = SignalFramePlacement.Outer
             )
             .clickable(interactionSource = interaction, indication = null, onClick = onOpen)
-            .iknaInspect("IknaDeckRow[${deck.title}]"),
-        verticalAlignment = Alignment.Top
+            .iknaInspect("IknaDeckRow[${deck.title}]")
     ) {
-        IknaDeckMark(deck = deck, owes = owes, look = look)
-        Spacer(Modifier.width(Space.md))
-        Column(modifier = Modifier.weight(1f)) {
-            Row(
-                modifier = Modifier.heightIn(min = DECK_INFO_HEIGHT),
-                verticalAlignment = Alignment.CenterVertically
+        // The progress line sits below the row that aligns the mark, text and controls.
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IknaDeckMark(deck = deck, owes = owes, look = look)
+            Spacer(Modifier.width(Space.md))
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = deck.title,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onBackground.copy(
-                            alpha = if (deck.isActive) 1f else 0.55f
-                        )
+                Text(
+                    text = deck.title,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(
+                        alpha = if (deck.isActive) 1f else 0.55f
                     )
-                    Text(
-                        text = if (owes) {
-                            S.t("deck.009") + dueToday + iknaMinutesTail(dueToday, perCardMs)
-                        } else {
-                            S.t("deck.010")
-                        },
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (owes) accent else muted
-                    )
-                }
-                IknaIconButton(
-                    glyph = IknaGlyph.BROWSE,
-                    onClick = onBrowse,
-                    size = 48.dp,
-                    glyphSize = 18.dp,
-                    color = if (browseAvailable) accent else muted,
-                    label = S.t(if (browseAvailable) "a11y.012" else "a11y.015")
                 )
-                IknaIconButton(
-                    glyph = IknaGlyph.DOTS,
-                    onClick = onOpenDeck,
-                    size = 48.dp,
-                    glyphSize = 18.dp,
-                    color = muted,
-                    label = S.t("a11y.010")
-                )
-                Spacer(Modifier.width(Space.sm))
-                IknaToggle(
-                    checked = deck.isActive,
-                    onCheckedChange = onToggle,
-                    label = S.t("a11y.006")
-                )
-            }
-            if (deck.isActive) {
-                // Keep the original 52dp square; the row can grow independently
-                // for readable text and non-overlapping 48dp action targets.
-                Spacer(Modifier.height(Space.xs))
-                IknaDeckProgress(
-                    introduced = deck.introduced,
-                    total = deck.total,
-                    modifier = Modifier.heightIn(min = DECK_PROGRESS_HEIGHT),
+                Text(
+                    text = if (owes) {
+                        S.t("deck.009") + dueToday + iknaMinutesTail(dueToday, perCardMs)
+                    } else {
+                        S.t("deck.010")
+                    },
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.labelSmall,
                     color = if (owes) accent else muted
                 )
             }
+            IknaIconButton(
+                glyph = IknaGlyph.BROWSE,
+                onClick = onBrowse,
+                size = 48.dp,
+                glyphSize = 18.dp,
+                color = if (browseAvailable) accent else muted,
+                label = S.t(if (browseAvailable) "a11y.012" else "a11y.015")
+            )
+            IknaIconButton(
+                glyph = IknaGlyph.DOTS,
+                onClick = onOpenDeck,
+                size = 48.dp,
+                glyphSize = 18.dp,
+                color = muted,
+                label = S.t("a11y.010")
+            )
+            Spacer(Modifier.width(Space.sm))
+            IknaToggle(
+                checked = deck.isActive,
+                onCheckedChange = onToggle,
+                label = S.t("a11y.006")
+            )
+        }
+        if (deck.isActive) {
+            Spacer(Modifier.height(Space.xs))
+            IknaDeckProgress(
+                introduced = deck.introduced,
+                total = deck.total,
+                modifier = Modifier
+                    .padding(start = DECK_MARK_SIZE + Space.md)
+                    .heightIn(min = DECK_PROGRESS_HEIGHT),
+                color = if (owes) accent else muted
+            )
         }
     }
 }
