@@ -123,8 +123,8 @@ one side of the signal. INNER frames remain local. Motion, stroke, dash rhythm a
 shared phase are the same in both placements.
 
 Home offers the classic pixel field, a smooth tonal gradient and a solid
-background. The setting is independent of the deck-screen palette in
-Appearance. The classic field is the default and stays inside the deck list.
+background. Appearance shows previews of all three in the active app palette.
+The classic field is the default and stays inside the deck list.
 Window chrome and secondary action bars use solid surfaces. The navigation dock is a compact, raised
 shelf with a tinted tile for the current desktop destination. The option in
 Appearance moves it to the top and moves the deck heading, wordmark and cat to

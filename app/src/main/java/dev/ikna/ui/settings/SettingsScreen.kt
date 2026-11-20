@@ -510,10 +510,9 @@ fun SettingsScreen(
                             onCheckedChange = { scope.launch { container.settings.setHomeDockAtTop(it) } }
                         )
                         Spacer(Modifier.height(16.dp))
-                        dev.ikna.ui.decks.IknaDeckAppearanceSettings(
-                            style = settings.deckScreenStyle,
+                        dev.ikna.ui.decks.IknaDeckBackgroundSettings(
+
                             background = settings.deckBackground,
-                            onStyle = { style -> scope.launch { container.settings.setDeckScreenStyle(style) } },
                             onBackground = { background -> scope.launch { container.settings.setDeckBackground(background) } }
                         )
                     }

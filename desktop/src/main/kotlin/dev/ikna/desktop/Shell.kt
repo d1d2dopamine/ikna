@@ -410,85 +410,83 @@ private fun DecksColumn(
     showWordmark: Boolean = true
 ) {
 
-    dev.ikna.ui.theme.IknaDeckSurface(settings.deckScreenStyle) {
-        Box(Modifier.fillMaxSize().iknaInspect("DecksColumn")) {
-            IknaHomeBackdrop(settings.deckBackground)
+    Box(Modifier.fillMaxSize().iknaInspect("DecksColumn")) {
+        IknaHomeBackdrop(settings.deckBackground)
 
-            val activeDestination = when (ui.pane) {
-                Pane.STATS -> HomeDestination.STATS
-                Pane.SETTINGS, Pane.BACKUP -> HomeDestination.SETTINGS
-                Pane.SEARCH -> HomeDestination.SEARCH
-                Pane.SUPPORT -> HomeDestination.SUPPORT
-                Pane.ADD, Pane.CATALOG, Pane.ANKI -> HomeDestination.ADD
-                else -> null
+        val activeDestination = when (ui.pane) {
+            Pane.STATS -> HomeDestination.STATS
+            Pane.SETTINGS, Pane.BACKUP -> HomeDestination.SETTINGS
+            Pane.SEARCH -> HomeDestination.SEARCH
+            Pane.SUPPORT -> HomeDestination.SUPPORT
+            Pane.ADD, Pane.CATALOG, Pane.ANKI -> HomeDestination.ADD
+            else -> null
+        }
+        IknaHomeChrome(
+            dockAtTop = settings.homeDockAtTop,
+            leftHanded = settings.leftHanded,
+            selected = activeDestination,
+            showWordmark = showWordmark,
+            onNavigate = { destination ->
+                ui.show(when (destination) {
+                    HomeDestination.STATS -> Pane.STATS
+                    HomeDestination.SETTINGS -> Pane.SETTINGS
+                    HomeDestination.SEARCH -> Pane.SEARCH
+                    HomeDestination.ADD -> Pane.ADD
+                    HomeDestination.SUPPORT -> Pane.SUPPORT
+                })
             }
-            IknaHomeChrome(
-                dockAtTop = settings.homeDockAtTop,
-                leftHanded = settings.leftHanded,
-                selected = activeDestination,
-                showWordmark = showWordmark,
-                onNavigate = { destination ->
-                    ui.show(when (destination) {
-                        HomeDestination.STATS -> Pane.STATS
-                        HomeDestination.SETTINGS -> Pane.SETTINGS
-                        HomeDestination.SEARCH -> Pane.SEARCH
-                        HomeDestination.ADD -> Pane.ADD
-                        HomeDestination.SUPPORT -> Pane.SUPPORT
-                    })
+        ) {
+            Column(Modifier.padding(horizontal = Edge)) {
+                Spacer(Modifier.height(Space.md))
+                IknaTodayBlock(todaySummary, settings.answerMs.takeIf { it > 0 }?.toLong()) {
+                    ui.study(null)
                 }
+                Spacer(Modifier.height(Space.xl))
+            }
+
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = Edge),
+                verticalArrangement = Arrangement.spacedBy(Space.lg)
             ) {
-                Column(Modifier.padding(horizontal = Edge)) {
-                    Spacer(Modifier.height(Space.md))
-                    IknaTodayBlock(todaySummary, settings.answerMs.takeIf { it > 0 }?.toLong()) {
-                        ui.study(null)
-                    }
-                    Spacer(Modifier.height(Space.xl))
-                }
-
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = Edge),
-                    verticalArrangement = Arrangement.spacedBy(Space.lg)
-                ) {
-                    if (update != null) {
-                        item(key = "desktop-update") {
-                            Column {
-                                Text(
-                                    text = S.t("upd.016") + update.version,
-                                    style = MaterialTheme.typography.labelLarge
-                                )
-                                update.packages.forEach { (kind, asset) ->
-                                    IknaTextButton(kind.updateLabel(), onClick = { openInBrowser(asset.url) })
-                                }
-                                IknaTextButton(S.t("upd.006"), onClick = onSkipUpdate)
+                if (update != null) {
+                    item(key = "desktop-update") {
+                        Column {
+                            Text(
+                                text = S.t("upd.016") + update.version,
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                            update.packages.forEach { (kind, asset) ->
+                                IknaTextButton(kind.updateLabel(), onClick = { openInBrowser(asset.url) })
                             }
+                            IknaTextButton(S.t("upd.006"), onClick = onSkipUpdate)
                         }
                     }
-                    items(decks, key = { it.id }) { deck ->
-                        IknaDeckRow(
-                            deck = deck,
-                            look = settings.lookFor(deck.id),
-                            dueToday = remaining[deck.id] ?: 0,
-                            onOpen = { ui.openDeckScreen(deck.id) }
-                        )
-                    }
-                    if (decks.isEmpty()) {
-                        item {
-                            Column {
-                                Text(
-                                    text = S.t("deck.005"),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Spacer(Modifier.height(Space.lg))
-                                IknaLatticePlaceholder()
-                            }
+                }
+                items(decks, key = { it.id }) { deck ->
+                    IknaDeckRow(
+                        deck = deck,
+                        look = settings.lookFor(deck.id),
+                        dueToday = remaining[deck.id] ?: 0,
+                        onOpen = { ui.openDeckScreen(deck.id) }
+                    )
+                }
+                if (decks.isEmpty()) {
+                    item {
+                        Column {
+                            Text(
+                                text = S.t("deck.005"),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.height(Space.lg))
+                            IknaLatticePlaceholder()
                         }
                     }
-                    item { Spacer(Modifier.height(Space.lg)) }
                 }
-
+                item { Spacer(Modifier.height(Space.lg)) }
             }
+
         }
     }
 }

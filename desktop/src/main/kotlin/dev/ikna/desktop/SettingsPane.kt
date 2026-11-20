@@ -255,10 +255,9 @@ fun SettingsPane(
                         save { container.settings.setHomeDockAtTop(it) }
                     }
                     Spacer(Modifier.height(16.dp))
-                    dev.ikna.ui.decks.IknaDeckAppearanceSettings(
-                        style = settings.deckScreenStyle,
+                    dev.ikna.ui.decks.IknaDeckBackgroundSettings(
+
                         background = settings.deckBackground,
-                        onStyle = { style -> save { container.settings.setDeckScreenStyle(style) } },
                         onBackground = { background -> save { container.settings.setDeckBackground(background) } }
                     )
                 }

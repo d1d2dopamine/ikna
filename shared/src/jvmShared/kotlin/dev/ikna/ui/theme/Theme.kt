@@ -710,33 +710,6 @@ fun rememberContentFont(mode: FontMode, fontName: String): FontFamily {
 }
 
 @Composable
-fun IknaDeckSurface(style: dev.ikna.data.prefs.DeckScreenStyle, content: @Composable () -> Unit) {
-    val current = MaterialTheme.colorScheme
-    val palette = when (style) {
-        dev.ikna.data.prefs.DeckScreenStyle.CURRENT -> null
-        dev.ikna.data.prefs.DeckScreenStyle.PAPER -> IknaPalette(
-            Color(0xFFF6EDDF), Color(0xFF30251F), Color(0xFF66564B),
-            mix(current.primary, Color(0xFF533727), 0.72f)
-        )
-        dev.ikna.data.prefs.DeckScreenStyle.DUSK -> IknaPalette(
-            Color(0xFF141A22), Color(0xFFE3EAF0), Color(0xFFA2B0BC),
-            mix(current.primary, Color(0xFFBBD6E3), 0.32f)
-        )
-    }
-    if (palette == null) {
-        content()
-    } else {
-        val controls = remember(palette) { controlColors(palette) }
-        val scheme = remember(palette, controls) { schemeOf(palette, controls) }
-        MaterialTheme(colorScheme = scheme) {
-            CompositionLocalProvider(LocalContentColor provides palette.ink, LocalIknaControlColors provides controls) {
-                content()
-            }
-        }
-    }
-}
-
-@Composable
 fun IknaTheme(
     palette: IknaPalette = DarkPalette,
     contentFont: FontFamily? = null,

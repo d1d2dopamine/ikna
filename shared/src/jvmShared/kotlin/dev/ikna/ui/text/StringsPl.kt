@@ -473,7 +473,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "deck.background_classic" to "Klasyczny wzór",
     "deck.background_tonal" to "Gradient",
     "deck.background_solid" to "Jednolite",
-	"deck.panel_show" to "Pokaż talie", "deck.panel_hide" to "Ukryj talie", "support.title" to "Support & Social", "support.body" to "Jeśli lubisz Iknę, dodaj gwiazdkę oficjalnemu repozytorium na GitHubie. Masz pomysł lub znalazłeś błąd? Otwórz zgłoszenie albo napisz e-mail. Twoje uwagi pomagają rozwijać Iknę.", "deck.hidden" to "Ukryte fiszki", "deck.restore_card" to "Przywróć fiszkę", "deck.screen_style" to "Ekran talii", "deck.screen_current" to "Domyślny", "deck.screen_paper" to "Papier", "deck.screen_dusk" to "Zmierzch", "deck.language_unknown" to "Nieokreślony lub mieszany", "deck.004" to "Talie",
+	"deck.panel_show" to "Pokaż talie", "deck.panel_hide" to "Ukryj talie", "support.title" to "Support & Social", "support.body" to "Jeśli lubisz Iknę, dodaj gwiazdkę oficjalnemu repozytorium na GitHubie. Masz pomysł lub znalazłeś błąd? Otwórz zgłoszenie albo napisz e-mail. Twoje uwagi pomagają rozwijać Iknę.", "deck.hidden" to "Ukryte fiszki", "deck.restore_card" to "Przywróć fiszkę", "deck.language_unknown" to "Nieokreślony lub mieszany", "deck.004" to "Talie",
 	// Пока ни одной колоды. Плюс сверху добавит файл .jsonl.
 	"deck.005" to "Nie ma jeszcze talii. Plus na dole ma prompt dla AI i miejsce na wklejenie.",
 	// читаю файл…

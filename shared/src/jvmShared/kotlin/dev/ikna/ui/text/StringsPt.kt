@@ -289,7 +289,7 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "deck.background_classic" to "Padrão clássico",
     "deck.background_tonal" to "Gradiente",
     "deck.background_solid" to "Sólido",
-    "deck.panel_show" to "Mostrar baralhos", "deck.panel_hide" to "Ocultar baralhos", "support.title" to "Support & Social", "support.body" to "Se você gosta do Ikna, dê uma estrela ao repositório oficial no GitHub. Tem uma ideia ou encontrou um erro? Abra uma issue ou envie um e-mail. Seu feedback ajuda a melhorar o Ikna.", "deck.hidden" to "Cartões ocultos", "deck.restore_card" to "Restaurar cartão", "deck.screen_style" to "Tela de baralhos", "deck.screen_current" to "Padrão", "deck.screen_paper" to "Papel", "deck.screen_dusk" to "Crepúsculo", "deck.language_unknown" to "Indefinido ou misto", "deck.004" to "Baralhos",
+    "deck.panel_show" to "Mostrar baralhos", "deck.panel_hide" to "Ocultar baralhos", "support.title" to "Support & Social", "support.body" to "Se você gosta do Ikna, dê uma estrela ao repositório oficial no GitHub. Tem uma ideia ou encontrou um erro? Abra uma issue ou envie um e-mail. Seu feedback ajuda a melhorar o Ikna.", "deck.hidden" to "Cartões ocultos", "deck.restore_card" to "Restaurar cartão", "deck.language_unknown" to "Indefinido ou misto", "deck.004" to "Baralhos",
     "deck.005" to "Ainda não há baralhos. O botão de mais na parte inferior contém o prompt para IA e um espaço para colar.",
     "deck.006" to "lendo o arquivo…",
     "today.return" to "Você pode retomar a sessão.", "today.start" to "Começar a estudar", "today.resume" to "Continuar estudando", "today.deck_change_failed" to "Não foi possível alterar o baralho. Tente novamente.", "today.reviews" to "Hoje, só revisões.", "deck.007" to "HOJE",

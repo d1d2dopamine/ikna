@@ -125,65 +125,63 @@ fun DecksScreen(
         )
     }
 
-    dev.ikna.ui.theme.IknaDeckSurface(settings.deckScreenStyle) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            val muted = MaterialTheme.colorScheme.onSurfaceVariant
-            IknaHomeBackdrop(settings.deckBackground)
+    Box(modifier = Modifier.fillMaxSize()) {
+        val muted = MaterialTheme.colorScheme.onSurfaceVariant
+        IknaHomeBackdrop(settings.deckBackground)
 
-            IknaHomeChrome(
-                dockAtTop = settings.homeDockAtTop,
-                leftHanded = settings.leftHanded,
-                onNavigate = { destination ->
-                    when (destination) {
-                        HomeDestination.STATS -> onOpenStats()
-                        HomeDestination.SETTINGS -> onOpenSettings()
-                        HomeDestination.SEARCH -> onOpenSearch()
-                        HomeDestination.ADD -> onAddDeck()
-                        HomeDestination.SUPPORT -> onOpenSupport()
-                    }
+        IknaHomeChrome(
+            dockAtTop = settings.homeDockAtTop,
+            leftHanded = settings.leftHanded,
+            onNavigate = { destination ->
+                when (destination) {
+                    HomeDestination.STATS -> onOpenStats()
+                    HomeDestination.SETTINGS -> onOpenSettings()
+                    HomeDestination.SEARCH -> onOpenSearch()
+                    HomeDestination.ADD -> onAddDeck()
+                    HomeDestination.SUPPORT -> onOpenSupport()
                 }
+            }
+        ) {
+            Column(modifier = Modifier.padding(horizontal = Edge)) {
+                Spacer(Modifier.height(Space.md))
+                IknaTodayBlock(
+                    summary = state.todaySummary,
+                    perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
+                    onClick = { onOpenSession(null) }
+                )
+                Spacer(Modifier.height(Space.xl))
+            }
+
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = Edge),
+                verticalArrangement = Arrangement.spacedBy(Space.lg)
             ) {
-                Column(modifier = Modifier.padding(horizontal = Edge)) {
-                    Spacer(Modifier.height(Space.md))
-                    IknaTodayBlock(
-                        summary = state.todaySummary,
-                        perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
-                        onClick = { onOpenSession(null) }
+                items(decks, key = { it.id }) { deck ->
+                    IknaDeckRow(
+                        deck = deck,
+                        look = settings.lookFor(deck.id),
+                        dueToday = today[deck.id] ?: 0,
+                        onOpen = { onOpenDeck(deck.id) }
                     )
-                    Spacer(Modifier.height(Space.xl))
                 }
-
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = Edge),
-                    verticalArrangement = Arrangement.spacedBy(Space.lg)
-                ) {
-                    items(decks, key = { it.id }) { deck ->
-                        IknaDeckRow(
-                            deck = deck,
-                            look = settings.lookFor(deck.id),
-                            dueToday = today[deck.id] ?: 0,
-                            onOpen = { onOpenDeck(deck.id) }
-                        )
-                    }
-                    if (decks.isEmpty()) {
-                        item {
-                            Column {
-                                Text(
-                                    text = S.t("deck.005"),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = muted
-                                )
-                                Spacer(Modifier.height(Space.lg))
-                                IknaLatticePlaceholder()
-                            }
+                if (decks.isEmpty()) {
+                    item {
+                        Column {
+                            Text(
+                                text = S.t("deck.005"),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = muted
+                            )
+                            Spacer(Modifier.height(Space.lg))
+                            IknaLatticePlaceholder()
                         }
                     }
                 }
-
             }
+
         }
     }
 }

@@ -159,11 +159,9 @@ these in separate changes so each interaction can be reviewed on its own.
    wordmark while that heading is visible. When the sidebar is hidden, use the
    title bar where available. Moving the dock to the top should still move the
    branded deck heading to the bottom, with a single wordmark on screen.
-3. **Add two deck-screen appearance presets.** Try a light paper-like surface
-   and a darker surface with a restrained tonal gradient, both using the current
-   palette for accents. Preview them with actual deck marks, long names and the
-   dock. Apply the choice to the deck screen and check text contrast and focus
-   on desktop and Android.
+3. **Let the learner choose the deck background.** In Appearance, show swatches
+   for the classic field, gradient and solid background in the active palette.
+   Apply the choice to the deck screen on desktop and Android.
 4. **Name the state of the card.** Replace the ambiguous «Узнать» label with
    «Новая карточка» on first exposure and «Повторение» once the learner has seen
    it. Derive the label from recorded exposure or review state, including a
