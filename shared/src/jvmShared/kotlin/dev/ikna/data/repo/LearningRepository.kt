@@ -1258,20 +1258,7 @@ class LearningRepository(
      */
     private suspend fun addExtraLocked(count: Int, deckId: String?, now: Long): Int {
         val plan = ensureDailyPlanLocked(now)
-        val answered = reviewDao.answeredKeysSince(startOfDay(now))
-        val exclude = (plan.ids + answered).distinct()
-
-        // Inside a deck session the extra cards come from that deck, asked for
-        // by the query itself. This used to over-ask by ten and filter the result
-        // in Kotlin, which returned nothing whenever those candidates happened to
-        // belong to other decks.
-        val hidden = suppressedNow()
-        val repeats = builder().pickExtra(exclude, count, now, deckId)
-            .filterNot { it.chunkId in hidden }
-
-        // No fallback to [introduce]. This button is voluntary repetition, not
-        // a second way around the governor's one daily new-material decision.
-        val extra = repeats.take(count)
+        val extra = extraReviewCandidates(plan, count, deckId, now)
         if (extra.isEmpty()) return 0
 
         planDao.upsert(
@@ -1282,6 +1269,26 @@ class LearningRepository(
             )
         )
         return extra.size
+    }
+
+    /** Probe the same candidates the voluntary review action can actually add. */
+    suspend fun extraReviewAvailable(deckId: String?, now: Long): Boolean = writeLock.withLock {
+        val plan = planDao.plan(dayKey(now))?.classicOnly() ?: return@withLock false
+        extraReviewCandidates(plan, count = 5, deckId = deckId, now = now).isNotEmpty()
+    }
+
+    private suspend fun extraReviewCandidates(
+        plan: DailyPlanEntity,
+        count: Int,
+        deckId: String?,
+        now: Long
+    ): List<CardEntity> {
+        val answered = reviewDao.answeredKeysSince(startOfDay(now))
+        val exclude = (plan.ids + answered).distinct()
+        val hidden = suppressedNow()
+        return builder().pickExtra(exclude, count, now, deckId)
+            .filterNot { it.chunkId in hidden }
+            .take(count)
     }
 
     /**

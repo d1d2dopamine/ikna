@@ -144,6 +144,11 @@ In a wide desktop window, the panel button toggles the deck list without leaving
 the current session. The reading surface fills the available width when the
 deck list is collapsed.
 
+When a session finishes, the shared finish screen checks whether the voluntary
+review action can add any real cards. When none are available, one of 24 local
+messages describes the context using the current time, next due date and plan
+state. The check refreshes while the finish screen is visible.
+
 Today offers one primary action to start or resume the shared plan. The home
 count and widget count unique scheduled questions. A duration appears when
 the app has measured enough answers, and review-only queues explain the reason

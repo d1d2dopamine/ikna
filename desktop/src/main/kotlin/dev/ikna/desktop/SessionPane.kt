@@ -585,7 +585,12 @@ private fun SessionPaneContent(
                     if (!loading && !saving && acceptsInput()) { loading = true; reload += 1 }
                 })
             } else if (current == null) {
-                IknaSessionEmptyState(presentation, settings.animations, onExtra = addMore, onOptionalHard = startOptional)
+                IknaSessionEmptyState(
+                    presentation, settings.animations,
+                    onExtra = addMore,
+                    checkExtra = { now -> container.learningRepository.extraReviewAvailable(deckId, now) },
+                    onOptionalHard = startOptional
+                )
             } else {
                 val mode = settings.phoneticsFor(current.chunk.packId)
                 val subject = current.chunk.lang == NO_LANG

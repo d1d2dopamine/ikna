@@ -17,6 +17,8 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 private val BAR_HEIGHT = 44.dp
 private val UNDO_HEIGHT = 48.dp
 private val EDGE = 20.dp
@@ -98,8 +100,27 @@ fun IknaSessionEmptyState(
     state: SessionUiState,
     animations: Boolean,
     onExtra: () -> Unit,
+    checkExtra: suspend (Long) -> Boolean,
     onOptionalHard: (() -> Unit)? = null
 ) {
+    val check by rememberUpdatedState(checkExtra)
+    val availability by produceState<Pair<Instant, Boolean>?>(null, state.deckTitle,
+        state.answeredToday, state.noMoreExtra, state.optionalHardReview) {
+        value = null
+        while (true) {
+            val now = Instant.now()
+            val extra = try {
+                check(now.toEpochMilli())
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                false
+            }
+            value = now to extra
+            delay(60_000)
+        }
+    }
+    val result = availability
     IknaScrollableColumn(
         modifier = Modifier
             .fillMaxWidth()
@@ -139,7 +160,9 @@ fun IknaSessionEmptyState(
         Spacer(Modifier.height(16.dp))
 
         Text(
-            text = emptyExplanation(state),
+            text = if (result != null && !result.second && !state.optionalHardReview) {
+                S.t(sessionFinishMessageKey(state, result.first))
+            } else emptyExplanation(state),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -169,21 +192,7 @@ fun IknaSessionEmptyState(
             Spacer(Modifier.height(Space.md))
         }
 
-        if (state.noMoreExtra) {
-            Text(
-                text = S.t("sess.007"),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-            Spacer(Modifier.height(8.dp))
-            // Never a dead end: the same request again, in case something came due
-            // in the meantime.
-            IknaTextButton(label = S.t("sess.008"), onClick = onExtra)
-        } else {
-            // "A bit more" is an offer, not the way out. It used to be a
-            // full-width 56dp slab — the loudest object on a screen whose entire
-            // message is that you are finished, arguing with the sentence above it.
+        if (result?.second == true) {
             IknaTextButton(label = S.t("sess.009"), onClick = onExtra)
             Spacer(Modifier.height(Space.md))
             Text(

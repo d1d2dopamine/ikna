@@ -219,6 +219,7 @@ fun SessionScreen(
                     state = state,
                     animations = settings.animations,
                     onExtra = vm::addExtra,
+                    checkExtra = { now -> container.learningRepository.extraReviewAvailable(deckId, now) },
                     onOptionalHard = vm::startOptionalHardReview
                 )
             }
