@@ -191,7 +191,9 @@ class CardRevealPointerIntegrationTest(private val mouse: Boolean) {
                         }
                     }
                 }) {
-                    Box(Modifier.size(640.dp, 480.dp)) {
+                    // Gesture coordinates belong to the viewport. The reading surface
+                    // inside it has margins and can move without changing hit testing.
+                    Box(Modifier.size(640.dp, 480.dp).testTag("card-viewport")) {
                         SwipeableCard(
                             key = cardKey.value,
                             revealed = revealed.value,
@@ -218,7 +220,7 @@ class CardRevealPointerIntegrationTest(private val mouse: Boolean) {
                                     if (updateRevealState) revealed.value = true
                                 },
                                 tapEnabled = !revealed.value,
-                                modifier = Modifier.fillMaxSize().testTag("card")
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
                     }
@@ -237,7 +239,7 @@ class CardRevealPointerIntegrationTest(private val mouse: Boolean) {
             }
         }
         if (replaceBeforeRelease) {
-            onNodeWithTag("card").gesture(delta, cancel = false, release = false)
+            onNodeWithTag("card-viewport").gesture(delta, cancel = false, release = false)
             waitForIdle()
             runOnIdle {
                 assertEquals("old card has not revealed before replacement", 0, reveals.size)
@@ -246,12 +248,12 @@ class CardRevealPointerIntegrationTest(private val mouse: Boolean) {
                 revealed.value = false
             }
             waitForIdle()
-            onNodeWithTag("card").let { node ->
+            onNodeWithTag("card-viewport").let { node ->
                 if (mouse) node.performMouseInput { release() }
                 else node.performTouchInput { up() }
             }
         } else {
-            onNodeWithTag("card").gesture(delta, cancel, secondary, start, steps)
+            onNodeWithTag("card-viewport").gesture(delta, cancel, secondary, start, steps)
         }
         waitForIdle()
         runOnIdle {
@@ -267,7 +269,7 @@ class CardRevealPointerIntegrationTest(private val mouse: Boolean) {
             runOnIdle { assertTrue("reading content actually scrolled", scroll.value() > 0f) }
         }
         if (gradeNext) {
-            onNodeWithTag("card").gesture(Offset(190f, 0f), cancel = false)
+            onNodeWithTag("card-viewport").gesture(Offset(190f, 0f), cancel = false)
             waitForIdle()
             runOnIdle {
                 assertEquals("a fresh answer gesture can grade", listOf(Rating.GOOD), grades)
