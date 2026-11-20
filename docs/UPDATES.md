@@ -1,5 +1,13 @@
 # Updates
 
+## Windows and Linux
+
+Settings → Updates checks the version packaged in the desktop build against the
+latest stable GitHub release. A newer release offers direct downloads for the
+running platform and architecture. Windows offers installer and portable builds
+when both are published. Linux offers the AppImage. The browser handles the
+download, and installation or file replacement remains a user action.
+
 This app is not in a store. A build reaches a phone as an APK from the releases
 page, which has one consequence that took four versions to become obvious: a
 person running a version with a known bug in it has no way of finding out. There

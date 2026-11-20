@@ -865,7 +865,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"upd.010" to "CHECK NOW",
 	"upd.011" to "Installed: ",
 	"upd.012" to "Nothing newer. If there is no network the check simply failed — the app cannot tell those apart.",
-	"upd.013" to "RELEASES PAGE",
+	"upd.desktop_setup" to "Download Windows installer", "upd.desktop_portable" to "Download Windows portable", "upd.desktop_appimage" to "Download Linux AppImage", "upd.013" to "RELEASES PAGE",
 	"upd.014" to "CHECKING…",
 	"upd.015" to "Skipped: ",
 	"upd.016" to "Update to ",

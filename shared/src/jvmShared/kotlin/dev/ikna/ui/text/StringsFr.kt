@@ -307,7 +307,7 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "upd.007" to "L’app télécharge le fichier ; la barre et le pourcentage sont ici. Android installe la nouvelle version par-dessus l’ancienne sans perdre les cartes.",
     "upd.008" to "Rechercher les mises à jour", "upd.009" to "Une requête vers la page des versions, au plus une fois par jour. Rien n’est envoyé. Désactivé, aucune connexion n’est ouverte.",
     "upd.010" to "VÉRIFIER", "upd.011" to "Installée : ", "upd.012" to "Rien de plus récent. Sans réseau, la vérification a simplement échoué ; l’app ne peut pas distinguer les deux cas.",
-    "upd.013" to "PAGE DES VERSIONS", "upd.014" to "VÉRIFICATION…", "upd.015" to "Ignorée : ", "upd.016" to "Mettre à jour vers ", "upd.017" to "TÉLÉCHARGEMENT",
+    "upd.desktop_setup" to "Télécharger l’installateur Windows", "upd.desktop_portable" to "Télécharger la version portable Windows", "upd.desktop_appimage" to "Télécharger l’AppImage Linux", "upd.013" to "PAGE DES VERSIONS", "upd.014" to "VÉRIFICATION…", "upd.015" to "Ignorée : ", "upd.016" to "Mettre à jour vers ", "upd.017" to "TÉLÉCHARGEMENT",
     "upd.018" to "Le fichier est prêt. Android installe la nouvelle version par-dessus l’ancienne ; cartes, progression et réglages restent.",
     "upd.019" to "ANNULER", "upd.020" to "INSTALLER", "upd.021" to "Android demande l’autorisation d’installer depuis cette source. Le fichier est déjà téléchargé et reste disponible.",
     "upd.022" to "AUTORISER", "upd.023" to "Échec du téléchargement : connexion coupée ou fichier incomplet. Réessayez ou utilisez le navigateur.",

@@ -29,13 +29,24 @@ import java.net.URL
  */
 class UpdateCheck(
     private val installedVersion: String,
-    private val has64Bit: Boolean
+    private val has64Bit: Boolean = true
 ) {
 
     suspend fun latest(): UpdateRelease? = withContext(Dispatchers.IO) {
-        val json = runCatching { fetch() }.getOrNull() ?: return@withContext null
-        runCatching { parse(json) }.getOrNull()
+        val release = readRelease() ?: return@withContext null
+        val apk = pickAsset(release.assets, has64Bit) ?: return@withContext null
+        UpdateRelease(release.version, release.tag, release.notes, apk.url, apk.sizeBytes)
     }
+
+    suspend fun latestDesktop(osName: String, architecture: String): DesktopUpdateRelease? =
+        withContext(Dispatchers.IO) {
+            val release = readRelease() ?: return@withContext null
+            val packages = pickDesktopAssets(release.assets, osName, architecture)
+            if (packages.isEmpty()) null else DesktopUpdateRelease(release.version, release.notes, packages)
+        }
+
+    private fun readRelease(): ReleaseMetadata? =
+        runCatching { fetch()?.let(::parse) }.getOrNull()
 
     private fun fetch(): String? {
         val connection = URL(LATEST_URL).openConnection() as HttpURLConnection
@@ -76,7 +87,14 @@ class UpdateCheck(
     // behaviour of optString/optBoolean/optLong exactly: a field that is
     // missing, null or of the wrong type is a default, never an exception. The
     // Android build therefore treats a reply the same way it did before.
-    private fun parse(json: String): UpdateRelease? {
+    private data class ReleaseMetadata(
+        val version: String,
+        val tag: String,
+        val notes: String,
+        val assets: List<UpdateAsset>
+    )
+
+    private fun parse(json: String): ReleaseMetadata? {
         val root = JSON.parseToJsonElement(json) as? JsonObject ?: return null
         if (root.flag("draft") || root.flag("prerelease")) return null
         val tag = root.text("tag_name").trim()
@@ -95,16 +113,12 @@ class UpdateCheck(
                 )
             )
         }
-        val asset = pickAsset(assets, has64Bit) ?: return null
-        // A release with no notes is still an update; a release with no file is
-        // not, which is why the asset is what decides above.
         val name = root.text("name").trim()
-        return UpdateRelease(
+        return ReleaseMetadata(
             version = versionLabel(tag, name),
             tag = tag,
             notes = tidyNotes(root.text("body")),
-            apkUrl = asset.url,
-            sizeBytes = asset.sizeBytes
+            assets = assets
         )
     }
 

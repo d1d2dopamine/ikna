@@ -38,6 +38,8 @@ import dev.ikna.data.prefs.IknaAppearanceVariant
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.LANGUAGE_SYSTEM
 import dev.ikna.data.prefs.ThemeMode
+import dev.ikna.data.update.DesktopUpdatePackage
+import dev.ikna.data.update.DesktopUpdateRelease
 import dev.ikna.data.update.UpdateCheck
 import dev.ikna.ui.text.S
 import dev.ikna.ui.text.UI_LANGUAGES
@@ -104,6 +106,7 @@ fun SettingsPane(
     // Notes and armed states for the sections that touch the disk.
     var dataNote by remember { mutableStateOf<String?>(null) }
     var updateNote by remember { mutableStateOf<String?>(null) }
+    var desktopUpdate by remember { mutableStateOf<DesktopUpdateRelease?>(null) }
     var checking by remember { mutableStateOf(false) }
     // Rare stays closed; DEV exit is visible outside the fold.
     var advancedOpen by remember { mutableStateOf(false) }
@@ -375,9 +378,13 @@ fun SettingsPane(
                             scope.launch {
                                 checking = true
                                 val release = runCatching {
-                                    UpdateCheck(APP_VERSION, true).latest()
+                                    UpdateCheck(APP_VERSION).latestDesktop(
+                                        osName = System.getProperty("os.name").orEmpty(),
+                                        architecture = System.getProperty("os.arch").orEmpty()
+                                    )
                                 }.getOrNull()
                                 checking = false
+                                desktopUpdate = release
                                 save { container.settings.markUpdateChecked(System.currentTimeMillis()) }
                                 updateNote = if (release == null) S.t("upd.012")
                                 else S.t("upd.016") + release.version
@@ -394,6 +401,22 @@ fun SettingsPane(
                             style = MaterialTheme.typography.labelMedium,
                             color = palette.ink
                         )
+                    }
+                    desktopUpdate?.let { release ->
+                        Spacer(Modifier.height(10.dp))
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (release.notes.isNotBlank()) {
+                                Text(release.notes, style = MaterialTheme.typography.bodySmall, color = palette.muted, maxLines = 5)
+                            }
+                            release.packages.forEach { (kind, asset) ->
+                                val label = when (kind) {
+                                    DesktopUpdatePackage.WINDOWS_SETUP -> "upd.desktop_setup"
+                                    DesktopUpdatePackage.WINDOWS_PORTABLE -> "upd.desktop_portable"
+                                    DesktopUpdatePackage.LINUX_APPIMAGE -> "upd.desktop_appimage"
+                                }
+                                IknaButton(label = S.t(label), palette = palette) { openInBrowser(asset.url) }
+                            }
+                        }
                     }
                 }
             }
@@ -799,7 +822,11 @@ private fun themeLabel(mode: ThemeMode): String = when (mode) {
  * manager here, so the number lives next to the code that shows it and next to
  * the code that asks the release feed whether anything newer exists.
  */
-private const val APP_VERSION = "0.10.0 press"
+private val APP_VERSION: String by lazy {
+    object {}.javaClass.getResourceAsStream("/ikna-version.txt")
+        ?.bufferedReader(Charsets.UTF_8)?.use { it.readText().trim() }
+        ?.takeIf(String::isNotEmpty) ?: "?"
+}
 
 /**
  * The technical summary behind the diagnostics button.

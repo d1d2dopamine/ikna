@@ -1,5 +1,8 @@
 package dev.ikna.data.update
 
+import java.net.URI
+import java.util.Locale
+
 /*
  * Everything about an update that can be decided without a network.
  *
@@ -26,6 +29,48 @@ data class UpdateRelease(
     val apkUrl: String,
     val sizeBytes: Long
 )
+
+enum class DesktopUpdatePackage {
+    WINDOWS_SETUP, WINDOWS_PORTABLE, LINUX_APPIMAGE
+}
+
+data class DesktopUpdateRelease(
+    val version: String,
+    val notes: String,
+    val packages: Map<DesktopUpdatePackage, UpdateAsset>
+)
+
+fun pickDesktopAssets(
+    assets: List<UpdateAsset>,
+    osName: String,
+    architecture: String
+): Map<DesktopUpdatePackage, UpdateAsset> {
+    if (architecture.lowercase(Locale.ROOT) !in setOf("amd64", "x86_64")) return emptyMap()
+    val os = osName.lowercase(Locale.ROOT)
+    val ownAssets = assets.filter { asset ->
+        val uri = runCatching { URI(asset.url) }.getOrNull()
+        uri?.scheme == "https" && uri.host == "github.com" &&
+            uri.path.startsWith("/d1d2dopamine/ikna/releases/download/")
+    }
+
+    fun assetEnding(vararg suffixes: String): UpdateAsset? = ownAssets.firstOrNull { asset ->
+        suffixes.any { suffix -> asset.name.endsWith(suffix, ignoreCase = true) }
+    }
+
+    return buildMap {
+        when {
+            os.startsWith("windows") -> {
+                assetEnding("-windows-x64-setup.exe")?.let { put(DesktopUpdatePackage.WINDOWS_SETUP, it) }
+                assetEnding("-windows-x64-portable.zip", "-windows-x64.zip")?.let {
+                    put(DesktopUpdatePackage.WINDOWS_PORTABLE, it)
+                }
+            }
+            os.startsWith("linux") -> {
+                assetEnding("-linux-x86_64.AppImage")?.let { put(DesktopUpdatePackage.LINUX_APPIMAGE, it) }
+            }
+        }
+    }
+}
 
 /**
  * The three numbers in a tag or a version name, or null if there are not three.

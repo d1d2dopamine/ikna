@@ -44,7 +44,23 @@ dependencies {
 // constants -- a second copy in the repository is a second copy to forget to
 // update. ClasspathAssets looks for them under /assets, which is what `into`
 // below produces.
+val releaseVersionSource = rootProject.layout.projectDirectory.file("app/build.gradle.kts")
+val desktopVersionResource = layout.buildDirectory.file("generated/desktopVersion/ikna-version.txt")
+val writeDesktopVersion by tasks.registering {
+    inputs.file(releaseVersionSource)
+    outputs.file(desktopVersionResource)
+    doLast {
+        val version = Regex("(?m)^val appVersionName = \"([^\"]+)\"")
+            .find(releaseVersionSource.asFile.readText())?.groupValues?.get(1)
+            ?: error("Missing appVersionName")
+        val output = desktopVersionResource.get().asFile
+        output.parentFile.mkdirs()
+        output.writeText(version, Charsets.UTF_8)
+    }
+}
+
 tasks.named<Copy>("processResources") {
+    from(writeDesktopVersion)
     from(rootProject.file("app/src/main/assets")) {
         into("assets")
     }

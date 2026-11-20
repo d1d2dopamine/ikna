@@ -567,7 +567,7 @@ val STRINGS_RU: Map<String, String> = mapOf(
 	"upd.010" to "ПРОВЕРИТЬ СЕЙЧАС",
 	"upd.011" to "Установлено: ",
 	"upd.012" to "Новее ничего нет. Если сети нет, проверить не удалось — отличить одно от другого приложение не может.",
-	"upd.013" to "СТРАНИЦА РЕЛИЗОВ",
+	"upd.desktop_setup" to "Скачать установщик Windows", "upd.desktop_portable" to "Скачать portable для Windows", "upd.desktop_appimage" to "Скачать Linux AppImage", "upd.013" to "СТРАНИЦА РЕЛИЗОВ",
 	"upd.014" to "ПРОВЕРЯЮ…",
 	"upd.015" to "Отложено: ",
 	"upd.016" to "Обновление до ",

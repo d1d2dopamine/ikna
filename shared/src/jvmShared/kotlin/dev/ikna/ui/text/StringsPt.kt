@@ -560,7 +560,7 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "upd.010" to "VERIFICAR AGORA",
     "upd.011" to "Instalada: ",
     "upd.012" to "Nada mais recente. Se não houver rede, a verificação simplesmente falhou — o aplicativo não consegue distinguir as duas situações.",
-    "upd.013" to "PÁGINA DE LANÇAMENTOS",
+    "upd.desktop_setup" to "Baixar instalador do Windows", "upd.desktop_portable" to "Baixar versão portátil para Windows", "upd.desktop_appimage" to "Baixar AppImage para Linux", "upd.013" to "PÁGINA DE LANÇAMENTOS",
     "upd.014" to "VERIFICANDO…",
     "upd.015" to "Ignorada: ",
     "upd.016" to "Atualizar para ",

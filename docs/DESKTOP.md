@@ -32,10 +32,10 @@ the disappointment:
 - **The home screen widget.** There is no such surface on Windows. A tray icon
   showing what is due is the nearest equivalent and is a later stage, not a
   translation of `widget/`.
-- **Updating itself.** The Android build downloads an APK and hands it to the
-  package installer. Windows has no equivalent that is safe to do from an
-  unsigned program; the desktop build will check the version and open the
-  release page in a browser instead.
+- **Installing updates.** The desktop update check links directly to the latest
+  Windows installer or portable ZIP, or to the Linux AppImage. The browser saves
+  the file. Run the Windows installer after closing the app, or replace the
+  portable application files. The learner profile is stored separately.
 - **Speech.** See "Voice" below. The Windows build ships with the section
   visible and marked as not available on PC.
 

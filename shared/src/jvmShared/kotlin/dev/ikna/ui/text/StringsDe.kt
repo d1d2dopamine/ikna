@@ -288,7 +288,7 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "upd.007" to "Die App lädt die Datei selbst; Balken und Prozent stehen hier. Android installiert die neue Version über die alte, Karten und Fortschritt bleiben.",
     "upd.008" to "Nach Aktualisierungen suchen", "upd.009" to "Eine Anfrage an die Releaseseite, höchstens einmal täglich. Nichts wird gesendet. Ausgeschaltet wird keine Verbindung geöffnet.",
     "upd.010" to "JETZT PRÜFEN", "upd.011" to "Installiert: ", "upd.012" to "Nichts Neueres. Ohne Netz ist die Prüfung nur fehlgeschlagen; die App kann beides nicht unterscheiden.",
-    "upd.013" to "RELEASESEITE", "upd.014" to "PRÜFEN…", "upd.015" to "Übersprungen: ", "upd.016" to "Aktualisieren auf ", "upd.017" to "DOWNLOAD",
+    "upd.desktop_setup" to "Windows-Installer herunterladen", "upd.desktop_portable" to "Portable Windows-Version herunterladen", "upd.desktop_appimage" to "Linux-AppImage herunterladen", "upd.013" to "RELEASESEITE", "upd.014" to "PRÜFEN…", "upd.015" to "Übersprungen: ", "upd.016" to "Aktualisieren auf ", "upd.017" to "DOWNLOAD",
     "upd.018" to "Die Datei ist bereit. Android installiert sie über die alte Version; Karten, Fortschritt und Einstellungen bleiben.", "upd.019" to "ABBRECHEN", "upd.020" to "INSTALLIEREN",
     "upd.021" to "Android verlangt die Erlaubnis, Apps aus dieser Quelle zu installieren. Die Datei ist bereits geladen und bleibt gespeichert.", "upd.022" to "ERLAUBEN",
     "upd.023" to "Download fehlgeschlagen: Verbindung abgebrochen oder Datei unvollständig. Erneut versuchen oder im Browser laden.", "upd.024" to "ERNEUT VERSUCHEN", "upd.025" to "IM BROWSER",

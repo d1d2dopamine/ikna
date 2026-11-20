@@ -865,7 +865,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"upd.010" to "SPRAWDŹ TERAZ",
 	"upd.011" to "Zainstalowana: ",
 	"upd.012" to "Nic nowszego. Jeśli nie ma sieci, sprawdzenie się nie udało — aplikacja tego nie rozróżni.",
-	"upd.013" to "STRONA WYDAŃ",
+	"upd.desktop_setup" to "Pobierz instalator Windows", "upd.desktop_portable" to "Pobierz wersję przenośną dla Windows", "upd.desktop_appimage" to "Pobierz AppImage dla Linuksa", "upd.013" to "STRONA WYDAŃ",
 	"upd.014" to "SPRAWDZAM…",
 	"upd.015" to "Odłożone: ",
 	"upd.016" to "Aktualizacja do ",
