@@ -42,8 +42,6 @@ import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.text.S
 import dev.ikna.ui.text.quantityWord
-import dev.ikna.ui.theme.IknaGlyph
-import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.LocalIknaControlColors
@@ -95,25 +93,19 @@ fun IknaTodayBlock(summary: TodayStudySummary, perCardMs: Long?, onClick: () -> 
     }
 }
 
-/** One deck: its mark, what it owes today, and how far through it you are. */
+/** Deck selection opens its details, where study and management live. */
 @Composable
 fun IknaDeckRow(
     deck: DeckSummary,
     look: DeckLook,
     dueToday: Int,
-    perCardMs: Long?,
-    onOpen: () -> Unit,
-    onOpenDeck: () -> Unit,
-    onToggle: (Boolean) -> Unit,
-    browseAvailable: Boolean,
-    onBrowse: () -> Unit
+    onOpen: () -> Unit
 ) {
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    val accent = MaterialTheme.colorScheme.primary
+    val palette = MaterialTheme.colorScheme
     val owes = dueToday > 0
     val interaction = remember { MutableInteractionSource() }
 
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .hoverable(interaction)
@@ -123,75 +115,52 @@ fun IknaDeckRow(
                 cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp),
                 placement = SignalFramePlacement.Outer
             )
-            .clickable(interactionSource = interaction, indication = null, onClick = onOpen)
-            .iknaInspect("IknaDeckRow[${deck.title}]")
+            .clickable(interactionSource = interaction, indication = null,
+                onClickLabel = S.t("a11y.010"), onClick = onOpen)
+            .iknaInspect("IknaDeckRow[${deck.title}]"),
+        verticalAlignment = Alignment.Top
     ) {
-        // The title and mark share a top edge even when the font scale changes.
-        Row(verticalAlignment = Alignment.Top) {
-            IknaDeckMark(deck = deck, owes = owes, look = look)
-            Spacer(Modifier.width(Space.md))
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = deck.title,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onBackground.copy(
-                        alpha = if (deck.isActive) 1f else 0.55f
-                    )
-                )
-                Text(
-                    text = if (owes) {
-                        S.t("deck.009") + dueToday + iknaMinutesTail(dueToday, perCardMs)
-                    } else {
-                        S.t("deck.010")
-                    },
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (owes) accent else muted
-                )
-            }
-            IknaIconButton(
-                glyph = IknaGlyph.BROWSE,
-                onClick = onBrowse,
-                modifier = Modifier.align(Alignment.CenterVertically),
-                size = 48.dp,
-                glyphSize = 18.dp,
-                color = if (browseAvailable) accent else muted,
-                label = S.t(if (browseAvailable) "a11y.012" else "a11y.015")
+        IknaDeckMark(deck = deck, owes = owes, look = look)
+        Spacer(Modifier.width(Space.md))
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Space.xs)) {
+            Text(
+                text = deck.title,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium,
+                color = if (deck.isActive || owes) palette.onSurface else palette.onSurfaceVariant
             )
-            IknaIconButton(
-                glyph = IknaGlyph.DOTS,
-                onClick = onOpenDeck,
-                modifier = Modifier.align(Alignment.CenterVertically),
-                size = 48.dp,
-                glyphSize = 18.dp,
-                color = muted,
-                label = S.t("a11y.010")
-            )
-            Spacer(Modifier.width(Space.sm))
-            IknaToggle(
-                checked = deck.isActive,
-                onCheckedChange = onToggle,
-                modifier = Modifier.align(Alignment.CenterVertically),
-                label = S.t("a11y.006")
+            Text(
+                text = if (owes) S.t("deck.009") + dueToday else S.t("deck.010"),
+                style = MaterialTheme.typography.labelSmall,
+                color = if (owes) palette.primary else palette.onSurfaceVariant
             )
         }
-        if (deck.isActive) {
-            Spacer(Modifier.height(Space.xs))
-            IknaDeckProgress(
-                introduced = deck.introduced,
-                total = deck.total,
-                modifier = Modifier
-                    .padding(start = DECK_MARK_SIZE + Space.md)
-                    .heightIn(min = DECK_PROGRESS_HEIGHT),
-                color = if (owes) accent else muted
+    }
+}
+
+@Composable
+fun IknaDeckActions(
+    active: Boolean,
+    changing: Boolean,
+    onStudy: () -> Unit,
+    onBrowse: () -> Unit,
+    onToggle: (Boolean) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(Space.sm)) {
+        IknaWideButton(label = S.t("a11y.019"), onClick = onStudy, filled = true, height = 48.dp, enabled = !changing)
+        IknaWideButton(label = S.t("a11y.012"), onClick = onBrowse, height = 48.dp, enabled = !changing)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Space.md)
+        ) {
+            Text(
+                S.t("a11y.006"),
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium
             )
+            IknaToggle(checked = active, onCheckedChange = onToggle, enabled = !changing, label = S.t("a11y.006"))
         }
     }
 }
@@ -206,7 +175,7 @@ fun IknaDeckProgress(
 ) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     Row(
-        modifier = modifier.fillMaxWidth().iknaInspect("IknaDeckProgress[$introduced/$total]"),
+        modifier = modifier.fillMaxWidth().heightIn(min = DECK_PROGRESS_HEIGHT).iknaInspect("IknaDeckProgress[$introduced/$total]"),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(

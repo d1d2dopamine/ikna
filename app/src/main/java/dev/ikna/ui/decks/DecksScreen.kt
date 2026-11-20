@@ -23,7 +23,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,9 +33,6 @@ import dev.ikna.AppContainer
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.lookFor
 import dev.ikna.data.repo.DeckSummary
-import dev.ikna.domain.session.BrowseAvailability
-import dev.ikna.domain.session.BrowseUnavailableReason
-import dev.ikna.ui.session.browseUnavailableText
 import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaBottomBar
@@ -45,12 +41,10 @@ import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaReadingCat
 import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaMemoryField
-import dev.ikna.ui.theme.IknaTransientNotice
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Space
 import dev.ikna.data.repo.TodayStudySummary
 import dev.ikna.widget.TodayWidget
-import kotlinx.coroutines.launch
 
 /**
  * Data that belongs to the Home back-stack entry, not to one composition of it.
@@ -70,9 +64,6 @@ class DecksHomeState {
     var todaySummary by mutableStateOf(TodayStudySummary())
         private set
 
-    var browseAvailability by mutableStateOf<Map<String, BrowseAvailability>>(emptyMap())
-        private set
-
     suspend fun reload(container: AppContainer) {
         val nextDecks = container.deckRepository.decks()
         val nextToday = runCatching {
@@ -81,17 +72,9 @@ class DecksHomeState {
         val nextTodaySummary = runCatching {
             container.learningRepository.todayStudySummary()
         }.getOrDefault(TodayStudySummary())
-        val nextBrowseAvailability = runCatching {
-            container.learningRepository.browseDeckAvailability(nextDecks.map { it.id })
-        }.getOrElse {
-            nextDecks.associate { deck ->
-                deck.id to BrowseAvailability.blocked(BrowseUnavailableReason.CHECK_FAILED)
-            }
-        }
         decks = nextDecks
         today = nextToday
         todaySummary = nextTodaySummary
-        browseAvailability = nextBrowseAvailability
     }
 }
 
@@ -119,7 +102,6 @@ fun DecksScreen(
     state: DecksHomeState,
     listState: LazyListState,
     onOpenSession: (String?) -> Unit,
-    onOpenBrowse: (String) -> Unit,
     onOpenDeck: (String) -> Unit,
     onOpenStats: () -> Unit,
     onOpenSettings: () -> Unit,
@@ -127,7 +109,6 @@ fun DecksScreen(
     onAddDeck: () -> Unit
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val decks = state.decks
     val today = state.today
     val todayTotal = state.todaySummary.remaining
@@ -156,7 +137,6 @@ fun DecksScreen(
     // Only ever says that something did not work. A share that worked is
     // announced by the share sheet itself, and a line congratulating the user
     // for a thing they watched happen is noise.
-    var note by remember { mutableStateOf<String?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Only the unused field carries the lattice. Content remains on plain
@@ -208,41 +188,11 @@ fun DecksScreen(
             verticalArrangement = Arrangement.spacedBy(Space.lg)
         ) {
             items(decks, key = { it.id }) { deck ->
-                val browse = state.browseAvailability[deck.id]
-                    ?: BrowseAvailability.blocked(BrowseUnavailableReason.CHECKING)
                 IknaDeckRow(
                     deck = deck,
                     look = settings.lookFor(deck.id),
                     dueToday = today[deck.id] ?: 0,
-                    perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
-                    onOpen = { onOpenSession(deck.id) },
-                    browseAvailable = browse.available,
-                    onBrowse = {
-                        scope.launch {
-                            val latest = runCatching {
-                                container.learningRepository
-                                    .browseDeckAvailability(listOf(deck.id))[deck.id]
-                            }.getOrNull()
-                                ?: BrowseAvailability.blocked(BrowseUnavailableReason.CHECK_FAILED)
-                            if (latest.available) onOpenBrowse(deck.id)
-                            else note = browseUnavailableText(latest)
-                        }
-                    },
-                    onOpenDeck = { onOpenDeck(deck.id) },
-                    onToggle = { active ->
-                        scope.launch {
-                            container.deckRepository.setActive(deck.id, active)
-                            // Switching a deck on or off changes what a day is
-                            // made of, and the day has already been built and
-                            // stored. Without dropping it, a deck turned on now
-                            // owes nothing until tomorrow — which is how a deck
-                            // could be enabled and then refuse to open. Importing
-                            // a deck does exactly this, for exactly this reason;
-                            // the toggle was the path that forgot to.
-                            container.learningRepository.invalidatePlan()
-                            state.reload(container)
-                        }
-                    }
+                    onOpen = { onOpenDeck(deck.id) }
                 )
             }
             if (decks.isEmpty()) {
@@ -338,13 +288,7 @@ fun DecksScreen(
             }
         }
         }
-        IknaTransientNotice(
-            message = note,
-            onDismiss = { note = null },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(start = Edge, end = Edge, bottom = BarHeight + Space.md)
-        )
+
     }
 }
 

@@ -141,6 +141,9 @@ count and widget count unique scheduled questions. A duration appears when
 the app has measured enough answers, and review-only queues explain the reason
 when riar-manage recorded it.
 
+The deck list shows the mark, name and daily status. Selecting a deck opens its
+details, with study, Browse, the active switch and long-term progress together.
+
 The day's plan is decided once and persisted. It can only shrink as you answer, and
 it grows only when you ask for more — the counter at the top is not allowed to go up
 while you work, because watching the finish line move away is how a session ends

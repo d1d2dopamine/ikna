@@ -475,7 +475,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// читаю файл…
 	"deck.006" to "czytam plik…",
 	// СЕГОДНЯ
-	"today.start" to "Rozpocznij naukę", "today.resume" to "Kontynuuj naukę", "today.reviews" to "Dzisiaj tylko powtórki.", "deck.007" to "DZIŚ",
+	"today.start" to "Rozpocznij naukę", "today.resume" to "Kontynuuj naukę", "today.deck_change_failed" to "Nie udało się zmienić talii. Spróbuj ponownie.", "today.reviews" to "Dzisiaj tylko powtórki.", "deck.007" to "DZIŚ",
 	// ничего не ждёт
 	"deck.008" to "nic nie czeka",
 	// сегодня

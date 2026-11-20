@@ -1,5 +1,8 @@
 package dev.ikna.ui.decks
 
+import dev.ikna.domain.session.BrowseAvailability
+import dev.ikna.domain.session.BrowseUnavailableReason
+import dev.ikna.ui.session.browseUnavailableText
 import dev.ikna.ui.text.S
 
 import android.net.Uri
@@ -75,12 +78,17 @@ fun DeckScreen(
     container: AppContainer,
     settings: IknaSettings,
     deckId: String,
+    onStudy: () -> Unit,
+    onBrowse: () -> Unit,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var deck by remember { mutableStateOf<DeckSummary?>(null) }
     var note by remember { mutableStateOf<String?>(null) }
+    var actionNotice by remember(deckId) { mutableStateOf<String?>(null) }
+    var changing by remember(deckId) { mutableStateOf(false) }
+
 
     // Deleting takes two taps on the same button rather than a dialog, the way
     // erasing everything already works in settings. A dialog asks a question the
@@ -174,6 +182,44 @@ fun DeckScreen(
                         total = current.total,
                         color = MaterialTheme.colorScheme.primary
                     )
+
+                    Spacer(Modifier.height(Space.md))
+                    IknaDeckActions(
+                        active = current.isActive,
+                        changing = changing,
+                        onStudy = onStudy,
+                        onBrowse = {
+                            scope.launch {
+                                val latest = runCatching {
+                                    container.learningRepository.browseDeckAvailability(listOf(deckId))[deckId]
+                                }.getOrNull() ?: BrowseAvailability.blocked(BrowseUnavailableReason.CHECK_FAILED)
+                                if (latest.available) onBrowse()
+                                else actionNotice = browseUnavailableText(latest)
+                            }
+                        },
+                        onToggle = { active ->
+                            if (!changing) {
+                                changing = true
+                                scope.launch {
+                                    try {
+                                        container.deckRepository.setActive(deckId, active)
+                                        container.learningRepository.invalidatePlan()
+                                        deck = deck?.copy(isActive = active)
+                                        actionNotice = null
+                                    } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                                        throw cancelled
+                                    } catch (_: Exception) {
+                                        actionNotice = S.t("today.deck_change_failed")
+                                    } finally {
+                                        changing = false
+                                    }
+                                }
+                            }
+                        }
+                    )
+                    actionNotice?.let {
+                        Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
 
                     Spacer(Modifier.height(Space.xl))
                     IknaRule()

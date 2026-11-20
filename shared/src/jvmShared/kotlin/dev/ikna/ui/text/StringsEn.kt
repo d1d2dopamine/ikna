@@ -475,7 +475,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// читаю файл…
 	"deck.006" to "reading the file…",
 	// СЕГОДНЯ
-	"today.start" to "Start studying", "today.resume" to "Continue studying", "today.reviews" to "Only reviews today.", "deck.007" to "TODAY",
+	"today.start" to "Start studying", "today.resume" to "Continue studying", "today.deck_change_failed" to "Could not update the deck. Try again.", "today.reviews" to "Only reviews today.", "deck.007" to "TODAY",
 	// ничего не ждёт
 	"deck.008" to "nothing waiting",
 	// сегодня

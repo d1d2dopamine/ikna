@@ -1,4 +1,8 @@
 package dev.ikna.desktop
+import dev.ikna.domain.session.BrowseAvailability
+import dev.ikna.domain.session.BrowseUnavailableReason
+import dev.ikna.ui.session.browseUnavailableText
+import dev.ikna.ui.decks.IknaDeckActions
 import dev.ikna.ui.decks.IknaDeckAppearance
 import dev.ikna.ui.decks.IknaDeckProgress
 import dev.ikna.ui.decks.LangChips
@@ -68,6 +72,8 @@ fun DeckPane(
     settings: IknaSettings,
     palette: IknaPalette,
     deckId: String,
+    onStudy: () -> Unit,
+    onBrowse: () -> Unit,
     onChanged: () -> Unit,
     onDeleted: () -> Unit,
     onBack: () -> Unit = {}
@@ -79,6 +85,9 @@ fun DeckPane(
     var reload by remember(deckId) { mutableStateOf(0) }
     var adding by remember(deckId) { mutableStateOf(false) }
     var note by remember(deckId) { mutableStateOf<String?>(null) }
+    var actionNotice by remember(deckId) { mutableStateOf<String?>(null) }
+    var changing by remember(deckId) { mutableStateOf(false) }
+
 
     LaunchedEffect(deckId, reload) {
         val loaded = runCatching { container.deckRepository.deck(deckId) }.getOrNull()
@@ -175,6 +184,45 @@ fun DeckPane(
             total = current.total,
             modifier = Modifier.fillMaxWidth()
         )
+
+        Spacer(Modifier.height(Space.md))
+        IknaDeckActions(
+            active = current.isActive,
+            changing = changing,
+            onStudy = onStudy,
+            onBrowse = {
+                scope.launch {
+                    val latest = runCatching {
+                        container.learningRepository.browseDeckAvailability(listOf(deckId))[deckId]
+                    }.getOrNull() ?: BrowseAvailability.blocked(BrowseUnavailableReason.CHECK_FAILED)
+                    if (latest.available) onBrowse()
+                    else actionNotice = browseUnavailableText(latest)
+                }
+            },
+            onToggle = { active ->
+                if (!changing) {
+                    changing = true
+                    scope.launch {
+                        try {
+                            container.deckRepository.setActive(deckId, active)
+                            container.learningRepository.invalidatePlan()
+                            deck = deck?.copy(isActive = active)
+                            actionNotice = null
+                            onChanged()
+                        } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                            throw cancelled
+                        } catch (_: Exception) {
+                            actionNotice = S.t("today.deck_change_failed")
+                        } finally {
+                            changing = false
+                        }
+                    }
+                }
+            }
+        )
+        actionNotice?.let {
+            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
 
         Spacer(Modifier.height(28.dp))
 

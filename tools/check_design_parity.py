@@ -271,19 +271,11 @@ class DesignContracts(unittest.TestCase):
         self.assertNotIn('IknaGlyph.STACK', flat)
         self.assertNotIn('crossed: Boolean', flat)
         source = read(SHARED, 'ui/decks/DeckList.kt')
-        for required in ['browseAvailable: Boolean', 'glyph = IknaGlyph.BROWSE',
-                         'color = if (browseAvailable) accent else muted',
-                         'if (browseAvailable) "a11y.012" else "a11y.015"']:
-            self.assertIn(required, source)
-        self.assertNotIn('crossed =', source)
-        self.assertNotIn('if (onBrowse != null)', source)
-        for base, name, notice in [
-            (ANDROID, 'ui/decks/DecksScreen.kt', 'note'),
-            (DESKTOP, 'Shell.kt', 'notice'),
-        ]:
+        actions = source.split('fun IknaDeckActions(', 1)[1].split('fun IknaDeckProgress(', 1)[0]
+        self.assertIn('IknaWideButton(label = S.t("a11y.012"), onClick = onBrowse', actions)
+        for base, name in [(ANDROID, 'ui/decks/DeckScreen.kt'), (DESKTOP, 'DeckPane.kt')]:
             source = read(base, name)
-            self.assertIn('browseAvailable = browse.available', source)
-            self.assertIn('BrowseAvailability.blocked(BrowseUnavailableReason.CHECKING)', source)
+            self.assertIn('IknaDeckActions(', source)
             self.assertIn('BrowseUnavailableReason.CHECK_FAILED', source)
             self.assertIn('browseUnavailableText(latest)', source)
             self.assertIn('if (latest.available)', source)
@@ -601,28 +593,19 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('IknaDeckRow(', android_rows)
         self.assertNotIn('private fun DeckRow(', android_rows)
         self.assertNotIn('private fun DeckMark(', android_rows)
-        for required in [
-            'private val DECK_MARK_SIZE = 52.dp',
-            'private val DECK_PROGRESS_HEIGHT = 14.dp',
-            '.hoverable(interaction)\n            .clipToBounds()\n            .iknaSignalFrame(\n                interaction,\n                cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp),\n                placement = SignalFramePlacement.Outer\n            )\n            .clickable(interactionSource = interaction, indication = null, onClick = onOpen)',
-            '.size(DECK_MARK_SIZE)',
-            'size = 48.dp',
-            'verticalArrangement = Arrangement.SpaceBetween',
-            '.heightIn(min = DECK_PROGRESS_HEIGHT)'
-        ]:
-            self.assertIn(required, shared_rows)
-        row = shared_rows[shared_rows.index('fun IknaDeckRow('):shared_rows.index('/** Makes the long-term bar')]
-        header, progress = row.split('\n        if (deck.isActive) {', 1)
-        header = header.split('Row(verticalAlignment = Alignment.Top) {', 1)[1]
-        for child in ['IknaDeckMark(', 'text = deck.title', 'IknaToggle(']:
-            self.assertIn(child, header)
-        self.assertEqual(header.count('IknaIconButton('), 2)
-        self.assertNotIn('IknaDeckProgress(', header)
-        self.assertIn('IknaDeckProgress(', progress)
-        self.assertIn('.padding(start = DECK_MARK_SIZE + Space.md)', progress)
-        self.assertNotIn('68.dp', row)
-        self.assertIn('style = MaterialTheme.typography.labelSmall', row)
-        self.assertGreaterEqual(row.count('overflow = TextOverflow.Ellipsis'), 2)
+        self.assertIn('private val DECK_MARK_SIZE = 52.dp', shared_rows)
+        self.assertIn('.size(DECK_MARK_SIZE)', shared_rows)
+        row = shared_rows.split('fun IknaDeckRow(', 1)[1].split('fun IknaDeckActions(', 1)[0]
+        for required in ['IknaDeckMark(', 'text = deck.title', 'verticalAlignment = Alignment.Top',
+                         '.hoverable(interaction)', 'SignalFramePlacement.Outer',
+                         'onClickLabel = S.t("a11y.010"), onClick = onOpen']:
+            self.assertIn(required, row)
+        for moved in ['IknaIconButton(', 'IknaToggle(', 'IknaDeckProgress(']:
+            self.assertNotIn(moved, row)
+        for device, name in [(ANDROID, 'ui/decks/DeckScreen.kt'), (DESKTOP, 'DeckPane.kt')]:
+            details = read(device, name)
+            self.assertIn('IknaDeckActions(', details)
+            self.assertIn('IknaDeckProgress(', details)
 
     def test_reading_cat_header_and_desktop_inspector(self):
         lattice = read(SHARED, 'ui/theme/MemoryLattice.kt')

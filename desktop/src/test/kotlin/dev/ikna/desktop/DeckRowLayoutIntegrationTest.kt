@@ -34,12 +34,7 @@ class DeckRowLayoutIntegrationTest {
                             deck = DeckSummary("test", title, "en", 20, 5, 0, isActive = true),
                             look = DeckLook(label = "EN"),
                             dueToday = 5,
-                            perCardMs = null,
-                            onOpen = {},
-                            onOpenDeck = {},
-                            onToggle = {},
-                            browseAvailable = true,
-                            onBrowse = {}
+                            onOpen = {}
                         )
                     }
                 }

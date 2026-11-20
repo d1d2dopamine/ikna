@@ -49,8 +49,11 @@ class SmallViewportContract(unittest.TestCase):
         self.assertLess(toggle.index('.padding(vertical = 8.dp)'), toggle.index('.background(trackColor'))
         self.assertIn('val knobSize = if (roundedKnob) 22.dp else 24.dp', toggle)
         rows = (SHARED / 'decks/DeckList.kt').read_text()
-        self.assertEqual(rows.count('size = 48.dp,'), 2)
-        row = rows.split('fun IknaDeckRow(', 1)[1].split('\n        if (deck.isActive) {', 1)[0]
+        row, details = rows.split('fun IknaDeckActions(', 1)
+        row = row.split('fun IknaDeckRow(', 1)[1]
+        actions = details.split('fun IknaDeckProgress(', 1)[0]
+        self.assertEqual(actions.count('height = 48.dp'), 2)
+        self.assertIn('IknaToggle(', actions)
         self.assertNotIn('.height(', row)
         self.assertIn('private val DECK_MARK_SIZE = 52.dp', rows)
 

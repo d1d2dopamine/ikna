@@ -39,39 +39,20 @@ class MobileDeckUiContractTest {
         assertTrue(shared.contains("private val DECK_PROGRESS_HEIGHT = 14.dp"))
 
         val row = shared.substringAfter("fun IknaDeckRow(")
-            .substringBefore("/** Makes the long-term bar")
+            .substringBefore("fun IknaDeckActions(")
         for (required in listOf(
-            ".hoverable(interaction)",
-            ".clipToBounds()",
-            "cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp)",
-            "placement = SignalFramePlacement.Outer",
-            ".clickable(interactionSource = interaction, indication = null, onClick = onOpen)",
-            "Row(verticalAlignment = Alignment.Top)",
-            "modifier = Modifier.weight(1f)",
-            "verticalArrangement = Arrangement.SpaceBetween",
-            "Spacer(Modifier.height(Space.xs))",
-            ".padding(start = DECK_MARK_SIZE + Space.md)",
-            ".heightIn(min = DECK_PROGRESS_HEIGHT)"
+            "IknaDeckMark(",
+            "text = deck.title",
+            "verticalAlignment = Alignment.Top",
+            "style = MaterialTheme.typography.labelSmall"
         )) assertTrue(required, row.contains(required))
-
-        val progressStart = row.indexOf("if (deck.isActive) {")
-        assertTrue("Expected a separate progress block for active decks", progressStart >= 0)
-        val header = row.substring(0, progressStart)
-        val progress = row.substring(progressStart)
-        assertTrue(header.contains("IknaDeckMark("))
-        assertTrue(header.contains("IknaToggle("))
-        assertFalse(header.contains("IknaDeckProgress("))
-        assertTrue(progress.contains("IknaDeckProgress("))
-
-        // The visual mark stays compact; text and 48dp actions must not be clipped
-        // by a fixed-height header at larger font scales.
-        assertFalse(header.contains(".height("))
-        assertFalse(header.contains(".requiredHeight("))
-        assertFalse(header.contains(".fillMaxHeight("))
-        assertTrue(header.split("size = 48.dp,").size == 3)
-        assertFalse(header.contains("68.dp"))
-        assertTrue(header.contains("style = MaterialTheme.typography.labelSmall"))
-        assertTrue(header.split("overflow = TextOverflow.Ellipsis").size >= 2)
+        assertFalse(row.contains(".height("))
+        assertFalse(row.contains("IknaToggle("))
+        assertFalse(row.contains("IknaIconButton("))
+        assertFalse(row.contains("IknaDeckProgress("))
+        val details = androidSource("DeckScreen.kt")
+        assertTrue(details.contains("IknaDeckActions("))
+        assertTrue(details.contains("IknaDeckProgress("))
     }
 
     private fun androidSource(name: String): String = source(

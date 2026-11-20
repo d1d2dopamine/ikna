@@ -201,7 +201,6 @@ fun IknaNavHost(
                     state = decksState,
                     listState = decksListState,
                     onOpenSession = { deckId -> forward(Routes.session(deckId)) },
-                    onOpenBrowse = { deckId -> forward(Routes.browse(deckId)) },
                     onOpenDeck = { deckId -> forward(Routes.deck(deckId)) },
                     onOpenStats = { forward(Routes.STATS) },
                     onOpenSettings = { forward(Routes.SETTINGS) },
@@ -249,9 +248,7 @@ fun IknaNavHost(
                 )
             }
 
-            // One deck on its own: its language, sending it to someone, deleting
-            // it. The switch that turns a deck on and off stays on the list,
-            // where all of them can be compared at once.
+            // One deck on its own: study, browse, progress and management.
             composable(
                 route = Routes.DECK,
                 arguments = listOf(navArgument("deck") { type = NavType.StringType })
@@ -261,6 +258,8 @@ fun IknaNavHost(
                         container = container,
                         settings = settings,
                         deckId = deckId,
+                        onStudy = { forward(Routes.session(deckId)) },
+                        onBrowse = { forward(Routes.browse(deckId)) },
                         onBack = { back() }
                     )
                 }

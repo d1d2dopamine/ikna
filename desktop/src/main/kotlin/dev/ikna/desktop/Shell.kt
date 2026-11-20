@@ -29,7 +29,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,14 +40,11 @@ import dev.ikna.data.prefs.HotkeyBindings
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.lookFor
 import dev.ikna.data.repo.DeckSummary
-import dev.ikna.domain.session.BrowseAvailability
-import dev.ikna.domain.session.BrowseUnavailableReason
 import dev.ikna.ui.decks.IknaDeckRow
 import dev.ikna.data.repo.TodayStudySummary
 import dev.ikna.ui.decks.IknaTodayBlock
 import dev.ikna.ui.nav.sharedAxisEnter
 import dev.ikna.ui.nav.sharedAxisExit
-import dev.ikna.ui.session.browseUnavailableText
 import dev.ikna.ui.onboarding.FirstStudyDestination
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.BarHeight
@@ -64,7 +60,6 @@ import dev.ikna.ui.theme.IknaMemoryField
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaPanel
 import dev.ikna.ui.theme.IknaTheme
-import dev.ikna.ui.theme.IknaTransientNotice
 import dev.ikna.ui.theme.IknaTextButton
 import kotlinx.coroutines.CancellationException
 import dev.ikna.ui.theme.IknaWordmark
@@ -74,7 +69,6 @@ import dev.ikna.ui.theme.paletteFor
 import dev.ikna.ui.theme.rememberContentFont
 import dev.ikna.ui.theme.iknaInspect
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Which screen the content area is showing. */
@@ -295,7 +289,6 @@ private fun DesktopShell(
     var decks by remember { mutableStateOf<List<DeckSummary>>(emptyList()) }
     var remaining by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
     var todaySummary by remember { mutableStateOf(TodayStudySummary()) }
-    var browseAvailability by remember { mutableStateOf<Map<String, BrowseAvailability>>(emptyMap()) }
 
     LaunchedEffect(ui.reload) {
         val nextDecks = runCatching { container.deckRepository.decks() }.getOrDefault(emptyList())
@@ -304,13 +297,7 @@ private fun DesktopShell(
             .getOrDefault(emptyMap())
         todaySummary = runCatching { container.learningRepository.todayStudySummary() }
             .getOrDefault(TodayStudySummary())
-        browseAvailability = runCatching {
-            container.learningRepository.browseDeckAvailability(nextDecks.map { it.id })
-        }.getOrElse {
-            nextDecks.associate { deck ->
-                deck.id to BrowseAvailability.blocked(BrowseUnavailableReason.CHECK_FAILED)
-            }
-        }
+
     }
 
     BoxWithConstraints(Modifier.fillMaxSize().iknaInspect("DesktopShell")) {
@@ -335,14 +322,14 @@ private fun DesktopShell(
                 // column wears the panel tone, the content keeps the window
                 // background (docs/ai-audits.md 7.4, variant 1).
                 Box(Modifier.width(listWidth).fillMaxHeight().background(MaterialTheme.colorScheme.surface)) {
-                    DecksColumn(container, settings, palette, ui, decks, remaining, todaySummary, browseAvailability, deckListState)
+                    DecksColumn(container, settings, palette, ui, decks, remaining, todaySummary, deckListState)
                 }
                 Box(Modifier.weight(1f).fillMaxHeight()) {
                     PaneContent(container, settings, palette, ui, decks, wide = true, onRestartRequested = onRestartRequested)
                 }
             }
         } else if (ui.listOpen) {
-            DecksColumn(container, settings, palette, ui, decks, remaining, todaySummary, browseAvailability, deckListState)
+            DecksColumn(container, settings, palette, ui, decks, remaining, todaySummary, deckListState)
         } else {
             PaneContent(container, settings, palette, ui, decks, wide = false, onRestartRequested = onRestartRequested)
         }
@@ -367,11 +354,8 @@ private fun DecksColumn(
     decks: List<DeckSummary>,
     remaining: Map<String, Int>,
     todaySummary: TodayStudySummary,
-    browseAvailability: Map<String, BrowseAvailability>,
     listState: LazyListState
 ) {
-    val scope = rememberCoroutineScope()
-    var notice by remember { mutableStateOf<String?>(null) }
 
     Box(Modifier.fillMaxSize().iknaInspect("DecksColumn")) {
         IknaMemoryField(seed = 0x1A4B_7C2D, modifier = Modifier.fillMaxSize())
@@ -410,36 +394,11 @@ private fun DecksColumn(
                 verticalArrangement = Arrangement.spacedBy(Space.lg)
             ) {
                 items(decks, key = { it.id }) { deck ->
-                    val browse = browseAvailability[deck.id]
-                        ?: BrowseAvailability.blocked(BrowseUnavailableReason.CHECKING)
                     IknaDeckRow(
                         deck = deck,
                         look = settings.lookFor(deck.id),
                         dueToday = remaining[deck.id] ?: 0,
-                        perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
-                        onOpen = { ui.study(deck.id) },
-                        onOpenDeck = { ui.openDeckScreen(deck.id) },
-                        browseAvailable = browse.available,
-                        onBrowse = {
-                            scope.launch {
-                                val latest = runCatching {
-                                    container.learningRepository
-                                        .browseDeckAvailability(listOf(deck.id))[deck.id]
-                                }.getOrNull()
-                                    ?: BrowseAvailability.blocked(BrowseUnavailableReason.CHECK_FAILED)
-                                if (latest.available) ui.browse(deck.id)
-                                else notice = browseUnavailableText(latest)
-                            }
-                        },
-                        onToggle = { on ->
-                            scope.launch {
-                                runCatching {
-                                    container.deckRepository.setActive(deck.id, on)
-                                    container.learningRepository.invalidatePlan()
-                                }.onFailure { error -> logLine("deck toggle failed: " + error) }
-                                ui.refresh()
-                            }
-                        }
+                        onOpen = { ui.openDeckScreen(deck.id) }
                     )
                 }
                 if (decks.isEmpty()) {
@@ -521,13 +480,7 @@ private fun DecksColumn(
                 }
             }
         }
-        IknaTransientNotice(
-            message = notice,
-            onDismiss = { notice = null },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(start = Edge, end = Edge, bottom = BarHeight + Space.md)
-        )
+
     }
 }
 
@@ -606,6 +559,8 @@ private fun PaneContent(
                         settings = settings,
                         palette = palette,
                         deckId = id,
+                        onStudy = { ui.study(id) },
+                        onBrowse = { ui.browse(id) },
                         onChanged = { ui.refresh() },
                         onDeleted = {
                             ui.openDeck = null
