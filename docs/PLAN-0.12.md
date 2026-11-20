@@ -190,6 +190,40 @@ these in separate changes so each interaction can be reviewed on its own.
    results explicitly. Preserve existing deck data and check that transcription
    and speech use the detected language correctly.
 
+### Study demo, returning learners and AI-assisted deck editing
+
+1. **Show the default study flow in the demo.** Open a normal deck, reveal an
+   answer, show the two grades and a swipe to the next card, then show the end
+   of the daily plan and the next scheduled review. Include a brief look at
+   the return screen. Use the ordinary controls and a readable example.
+2. **Welcome learners back after a break.** Use a short, neutral line above
+   «Продолжить занятие», such as «Можно продолжить английский». For a subject
+   deck, use its name. Describe the actual plan when helpful, for example
+   «На сегодня — несколько знакомых фраз» when only familiar material is
+   scheduled. Avoid blame, streak warnings and missed-day counts.
+3. **Make MCP over the Ikna CLI opt-in.** Let an assistant create cards and
+   append to a deck the learner chooses. Before enabling access, explain its
+   scope and recommend a capable model that knows the language or subject.
+   Explain that even strong models can produce inaccurate chunks and invite
+   the learner to review examples before adding them.
+4. **Confirm the brief and sample before writing.** Ask for the language or
+   subject, current level, desired style and approximate card count. Ask only
+   for missing details. Offer ordinary examples by default and allow a story,
+   place, situation or custom style. Preview three to five cards and let the
+   learner correct the level, tone or context before confirming the batch and
+   target deck. Enforce the 1,000-card limit per operation in Ikna itself.
+5. **Create the `ikna` skill for the CLI workflow.** Document how to gather
+   the brief, preview cards, select the target deck and confirm a write.
+   Instruct the assistant to verify each card before submission: check that
+   the target phrase appears in a natural example, the translation matches
+   the meaning in context, the difficulty fits the learner's level and the
+   card does not duplicate existing material or another card in the batch.
+6. **Make marking a bad example reversible.** Use Ikna's existing suppression
+   path for «Отметить плохой пример». Keep the card in the deck, hide it from
+   future study and record no new rating. Preserve all prior reviews and their
+   contribution to historical statistics. Show hidden cards in deck details
+   and let the learner restore one with its existing history intact.
+
 ## Current batch and next checkpoint
 
 Round 01 implements pointer-lifetime/bounds arbitration for Signal Frame, shared
