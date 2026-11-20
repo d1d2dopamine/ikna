@@ -169,10 +169,8 @@ fun UpdateSheet(
             // The version being left and the version being offered, in that
             // order, because the question a person actually has is not "what is
             // new" but "how far behind am I".
-            Text(
-                text = installed + "  \u2192  " + release.version,
-                style = MaterialTheme.typography.headlineSmall
-            )
+            Text(S.t("upd.011") + installed, style = MaterialTheme.typography.bodyMedium, color = muted)
+            Text(S.t("upd.016") + release.version, style = MaterialTheme.typography.headlineSmall)
             Spacer(Modifier.height(6.dp))
             Text(
                 text = S.t("upd.002") + megabytes(release.sizeBytes) + " " + S.t("upd.003"),

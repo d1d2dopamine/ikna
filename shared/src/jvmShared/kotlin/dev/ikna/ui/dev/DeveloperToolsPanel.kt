@@ -87,7 +87,7 @@ fun DeveloperToolsPanel(
             Text(S.t("dev.tools.010"), style = MaterialTheme.typography.labelMedium)
             state.decks.forEach { deck ->
                 IknaWideButton(
-                    label = (if (selectedDeck == deck.id) "✓ " else "") + deck.title,
+                    label = deck.title,
                     filled = selectedDeck == deck.id, enabled = enabled && !busy,
                     onClick = { selectedDeck = deck.id }
                 )

@@ -433,7 +433,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// Пока в бете и по умолчанию выключено: как звучит голос, решает движок на телефоне, а плохой голос хуже тишины.
 	"set.124" to "In beta and off by default: how the voice sounds is decided by the engine on the phone, and a bad voice is worse than silence.",
 	// ← НАЗАД
-	"dbg.001" to "← BACK",
+	"dbg.001" to "BACK",
 	// ВЫГРУЗИТЬ ЖУРНАЛ ОТВЕТОВ
 	"dbg.002" to "EXPORT THE ANSWER LOG",
 	// Файл: Документы/ikna/
@@ -473,6 +473,11 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "deck.background_classic" to "Classic pattern",
     "deck.background_tonal" to "Gradient",
     "deck.background_solid" to "Solid",
+    "support.repo" to "GitHub",
+    "support.issue" to "Issues",
+    "support.mail" to "Gmail",
+    "support.author" to "Profile",
+    "support.open_failed" to "Could not open the link.",
 	"deck.panel_show" to "Show decks", "deck.panel_hide" to "Hide decks", "support.title" to "Support & Social", "support.body" to "If you like Ikna, star the official repository on GitHub. Have an idea, found a bug, or noticed something missing? Open an issue or send an email. Your feedback helps shape what gets fixed and built next.", "deck.hidden" to "Hidden cards", "deck.restore_card" to "Restore card", "deck.language_unknown" to "Undetermined or mixed", "deck.004" to "Decks",
 	// Пока ни одной колоды. Плюс сверху добавит файл .jsonl.
 	"deck.005" to "No decks yet. The plus at the bottom has the AI prompt and a place to paste.",
@@ -600,9 +605,9 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// тап в любом месте
 	"card.new" to "New card", "card.review" to "Review", "card.reveal" to "Show answer", "card.002" to "tap anywhere",
 	// ← НЕ ЗНАЮ
-	"card.003" to "← DON'T KNOW",
+	"card.003" to "DON'T KNOW",
 	// ЗНАЮ →
-	"card.004" to "KNOW →",
+	"card.004" to "KNOW",
 	// секунду…
 	"sess.001" to "one moment…",
 	// знакомство

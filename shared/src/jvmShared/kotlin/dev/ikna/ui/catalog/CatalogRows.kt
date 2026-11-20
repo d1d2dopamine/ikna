@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import dev.ikna.data.catalog.*
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun IknaCatalogDeckRow(
 	deck: CatalogDeck,
@@ -52,13 +53,21 @@ fun IknaCatalogDeckRow(
 					color = ink
 				)
 				Spacer(Modifier.height(Space.xs))
-				Text(
-					text = deck.lang.uppercase() + " \u2192 " + deck.meaningLang.uppercase() +
-						"  \u00B7  " + deck.chunkCount + " " + S.t("cat.015") +
-						(if (size != null) "  \u00B7  " + size + " " + S.t("cat.024") else ""),
-					style = MaterialTheme.typography.labelMedium,
-					color = muted
-				)
+				FlowRow(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+					val label = MaterialTheme.typography.labelMedium
+					Row(horizontalArrangement = Arrangement.spacedBy(Space.xs),
+						verticalAlignment = Alignment.CenterVertically) {
+						Text(deck.lang.uppercase(), style = label, color = muted)
+						IknaGlyphIcon(IknaGlyph.FORWARD, muted, size = 10.dp)
+						Text(deck.meaningLang.uppercase(), style = label, color = muted)
+					}
+					Text(
+						text = deck.chunkCount.toString() + " " + S.t("cat.015") +
+							(if (size != null) "  \u00B7  " + size + " " + S.t("cat.024") else ""),
+						style = label,
+						color = muted
+					)
+				}
 			}
 			IknaTextButton(
 				label = if (open) S.t("add.068") else S.t("add.067"),

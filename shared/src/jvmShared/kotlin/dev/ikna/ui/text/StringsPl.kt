@@ -433,7 +433,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// Пока в бете и по умолчанию выключено: как звучит голос, решает движок на телефоне, а плохой голос хуже тишины.
 	"set.124" to "Na razie w wersji beta i domyślnie wyłączone: jak brzmi głos, decyduje silnik w telefonie, a zły głos jest gorszy od ciszy.",
 	// ← НАЗАД
-	"dbg.001" to "← WSTECZ",
+	"dbg.001" to "WSTECZ",
 	// ВЫГРУЗИТЬ ЖУРНАЛ ОТВЕТОВ
 	"dbg.002" to "EKSPORTUJ DZIENNIK ODPOWIEDZI",
 	// Файл: Документы/ikna/
@@ -473,6 +473,11 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "deck.background_classic" to "Klasyczny wzór",
     "deck.background_tonal" to "Gradient",
     "deck.background_solid" to "Jednolite",
+    "support.repo" to "GitHub",
+    "support.issue" to "Zgłoszenia",
+    "support.mail" to "Gmail",
+    "support.author" to "Profil",
+    "support.open_failed" to "Nie udało się otworzyć odnośnika.",
 	"deck.panel_show" to "Pokaż talie", "deck.panel_hide" to "Ukryj talie", "support.title" to "Support & Social", "support.body" to "Jeśli lubisz Iknę, dodaj gwiazdkę oficjalnemu repozytorium na GitHubie. Masz pomysł lub znalazłeś błąd? Otwórz zgłoszenie albo napisz e-mail. Twoje uwagi pomagają rozwijać Iknę.", "deck.hidden" to "Ukryte fiszki", "deck.restore_card" to "Przywróć fiszkę", "deck.language_unknown" to "Nieokreślony lub mieszany", "deck.004" to "Talie",
 	// Пока ни одной колоды. Плюс сверху добавит файл .jsonl.
 	"deck.005" to "Nie ma jeszcze talii. Plus na dole ma prompt dla AI i miejsce na wklejenie.",
@@ -600,9 +605,9 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// тап в любом месте
 	"card.new" to "Nowa fiszka", "card.review" to "Powtórka", "card.reveal" to "Pokaż odpowiedź", "card.002" to "dotknij gdziekolwiek",
 	// ← НЕ ЗНАЮ
-	"card.003" to "← NIE ZNAM",
+	"card.003" to "NIE ZNAM",
 	// ЗНАЮ →
-	"card.004" to "ZNAM →",
+	"card.004" to "ZNAM",
 	// секунду…
 	"sess.001" to "chwilka…",
 	// знакомство

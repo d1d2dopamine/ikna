@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import dev.ikna.ui.theme.*
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -37,17 +38,9 @@ fun PromptChoice(
 
 @Composable
 fun Step(text: String) {
-	Row(modifier = Modifier.padding(bottom = Space.sm)) {
-		Text(
-			text = "\u25AA",
-			style = MaterialTheme.typography.bodyMedium,
-			color = MaterialTheme.colorScheme.primary
-		)
-		Spacer(Modifier.padding(start = Space.sm))
-		Text(
-			text = text,
-			style = MaterialTheme.typography.bodyMedium,
-			modifier = Modifier.padding(start = Space.sm)
-		)
+	Row(Modifier.padding(bottom = Space.sm), horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+		Box(Modifier.padding(top = Space.sm).size(5.dp)
+			.background(MaterialTheme.colorScheme.primary, iknaTileShape()))
+		Text(text = text, style = MaterialTheme.typography.bodyMedium)
 	}
 }

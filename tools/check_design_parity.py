@@ -23,6 +23,24 @@ def interface_locale_suffixes():
 
 
 class DesignContracts(unittest.TestCase):
+    def test_interface_icons_are_drawn_instead_of_rendered_as_characters(self):
+        graphical = re.compile(r'[\u2190-\u21ff\u2300-\u23ff\u25a0-\u27bf\ufe0f\U0001f000-\U0001faff]')
+        literal = re.compile(r'"(?:\\.|[^"\\])*"')
+        violations = []
+        for directory in (SHARED / 'ui', ANDROID / 'ui', DESKTOP):
+            for path in directory.rglob('*.kt'):
+                for number, line in enumerate(path.read_text(encoding='utf-8').splitlines(), 1):
+                    if line.lstrip().startswith(('//', '*')):
+                        continue
+                    for value in literal.findall(line):
+                        value = re.sub(r'\\u([0-9a-fA-F]{4})', lambda match: chr(int(match[1], 16)), value)
+                        # These values spell physical keyboard keys in shortcut text.
+                        if path.name == 'HotkeyInput.kt' or '"pc.002" to' in line:
+                            value = value.translate(str.maketrans('', '', '←→↑↓'))
+                        if graphical.search(value):
+                            violations.append(f'{path.relative_to(ROOT)}:{number}: {value}')
+        self.assertEqual([], violations)
+
     def test_windows_title_bar_is_themed_and_other_frames_stay_native(self):
         main = read(DESKTOP, 'Main.kt')
         bar = read(DESKTOP, 'WindowTitleBar.kt')

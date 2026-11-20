@@ -139,6 +139,11 @@ It never overlaps the title or Today block. Empty search, catalogue and
 statistics states retain a compact unfinished structure instead of looking
 unloaded, and texture is never painted on the learning card.
 
+Use drawn icons for interface actions and statuses. Emoji and Unicode symbols
+from text fonts must not be used as icons. Localized content, learner text and
+the names of physical keyboard keys remain text. Support & Social uses a
+horizontal row of dedicated icon links that respect the app's shape variant.
+
 ## A session
 
 In a wide desktop window, the panel button toggles the deck list without leaving

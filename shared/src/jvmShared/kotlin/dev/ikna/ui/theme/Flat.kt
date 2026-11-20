@@ -49,6 +49,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import dev.ikna.data.prefs.IknaAppearanceVariant
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -92,7 +93,7 @@ import kotlin.math.floor
  * clip-art, and a pulled-in icon font would bring Material's rounded geometry
  * back through the side door.
  */
-enum class IknaGlyph { SPARK, BROWSE, BARS, SLIDERS, GEAR, PLUS, BACK, SOUND, DOTS, SEARCH, DECK_PANEL, SUPPORT }
+enum class IknaGlyph { SPARK, BROWSE, BARS, SLIDERS, GEAR, PLUS, BACK, FORWARD, SOUND, DOTS, SEARCH, DECK_PANEL, SUPPORT }
 
 @Composable
 fun IknaGlyphIcon(
@@ -246,19 +247,33 @@ fun IknaGlyphIcon(
                 )
             }
             IknaGlyph.SUPPORT -> {
+                val corner = if (roundMarks) s * 0.12f else 0f
+                val left = s * 0.12f
+                val right = s * 0.88f
+                val top = s * 0.16f
+                val bottom = s * 0.68f
                 val bubble = Path().apply {
-                    moveTo(s * 0.12f, s * 0.16f)
-                    lineTo(s * 0.88f, s * 0.16f)
-                    lineTo(s * 0.88f, s * 0.68f)
-                    lineTo(s * 0.44f, s * 0.68f)
+                    moveTo(left + corner, top)
+                    lineTo(right - corner, top)
+                    quadraticTo(right, top, right, top + corner)
+                    lineTo(right, bottom - corner)
+                    quadraticTo(right, bottom, right - corner, bottom)
+                    lineTo(s * 0.44f, bottom)
                     lineTo(s * 0.24f, s * 0.86f)
-                    lineTo(s * 0.24f, s * 0.68f)
-                    lineTo(s * 0.12f, s * 0.68f)
+                    lineTo(s * 0.24f, bottom)
+                    lineTo(left + corner, bottom)
+                    quadraticTo(left, bottom, left, bottom - corner)
+                    lineTo(left, top + corner)
+                    quadraticTo(left, top, left + corner, top)
                     close()
                 }
-                drawPath(bubble, color, style = Stroke(width = s * 0.09f))
+                val join = if (roundMarks) StrokeJoin.Round else StrokeJoin.Miter
+                drawPath(bubble, color, style = Stroke(width = s * 0.09f, join = join))
                 for (position in listOf(0.33f, 0.50f, 0.67f)) {
-                    drawCircle(color, s * 0.045f, Offset(s * position, s * 0.42f))
+                    drawRoundRect(
+                        color, Offset(s * (position - 0.045f), s * 0.375f),
+                        Size(s * 0.09f, s * 0.09f), CornerRadius(if (roundMarks) s * 0.045f else 0f)
+                    )
                 }
             }
             IknaGlyph.DECK_PANEL -> {
@@ -271,13 +286,14 @@ fun IknaGlyphIcon(
                 drawLine(color, Offset(s * 0.36f, top), Offset(s * 0.36f, top + height),
                     strokeWidth = s * 0.09f)
             }
-            // Back out of a screen.
-            IknaGlyph.BACK -> {
+            IknaGlyph.BACK, IknaGlyph.FORWARD -> {
                 val w = s * 0.12f
                 val y = s * 0.5f
-                drawLine(color, Offset(s, y), Offset(s * 0.06f, y), strokeWidth = w, cap = lineCap)
-                drawLine(color, Offset(s * 0.06f, y), Offset(s * 0.46f, s * 0.12f), strokeWidth = w, cap = lineCap)
-                drawLine(color, Offset(s * 0.06f, y), Offset(s * 0.46f, s * 0.88f), strokeWidth = w, cap = lineCap)
+                fun x(fraction: Float) = s * if (glyph == IknaGlyph.BACK) fraction else 1f - fraction
+                val tip = Offset(x(0.06f), y)
+                drawLine(color, Offset(x(1f), y), tip, strokeWidth = w, cap = lineCap)
+                drawLine(color, tip, Offset(x(0.46f), s * 0.12f), strokeWidth = w, cap = lineCap)
+                drawLine(color, tip, Offset(x(0.46f), s * 0.88f), strokeWidth = w, cap = lineCap)
             }
         }
     }
