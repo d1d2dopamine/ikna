@@ -183,8 +183,8 @@ class GradingChecks(unittest.TestCase):
     def test_observations_are_frozen_before_throw_animation(self):
         source = (SHARED / "ui/session/CardStack.kt").read_text()
         snapshot = source.index("val observation = signals.snapshot(velocity.x)")
-        throw = source.index("if (animations) throwOut(offsetX, rating, velocity)")
-        rate = source.index("rateNow.value(rating, observation)")
+        throw = source.index("if (animations) throwOut(offsetX, rating, velocity)", snapshot)
+        rate = source.index("rateNow.value(rating, observation)", throw)
         self.assertLess(snapshot, throw)
         self.assertLess(throw, rate)
         self.assertIn(".onGloballyPositioned { signals.shown() }", source)

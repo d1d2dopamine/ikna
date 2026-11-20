@@ -386,7 +386,7 @@ fun SwipeableCard(
                         val travelled = shift()
                         translationX = travelled
                         val lift = abs(progress())
-                        translationY = if (animations) ((1f - landed) * 12.dp - 4.dp * lift).toPx() else 0f
+                        translationY = if (animations) ((1f - landed) * 12f - 4f * lift).dp.toPx() else 0f
                         rotationZ = if (animations) (travelled / ROTATION_DIVISOR).coerceIn(-6f, 6f) else 0f
                         val grow = 0.972f + 0.028f * landed
                         scaleX = grow
