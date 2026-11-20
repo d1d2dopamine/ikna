@@ -244,17 +244,10 @@ fun DeckPane(
 
         Spacer(Modifier.height(28.dp))
 
-        SectionTitle(S.t("dp.003"), palette)
-        Spacer(Modifier.height(4.dp))
-        Text(S.t("dp.004"), color = palette.muted, style = MaterialTheme.typography.labelMedium)
-        Spacer(Modifier.height(10.dp))
-        LangChips(current.lang) { code ->
-            scope.launch {
-                container.deckRepository.setLang(current.id, code)
-                reload += 1; onChanged()
-            }
-        }
-        Spacer(Modifier.height(Space.lg)); IknaRule(); Spacer(Modifier.height(Space.lg))
+        Text(S.t("dp.003") + " · " + (current.lang.takeUnless { it == "custom" }
+            ?.let { java.util.Locale.forLanguageTag(it).getDisplayLanguage(java.util.Locale.forLanguageTag(S.lang)) }
+            ?: S.t("deck.language_unknown")), style = MaterialTheme.typography.bodyMedium)
+        Spacer(Modifier.height(Space.lg))
         val muted = palette.muted
         if (current.hasPhonetics && current.lang in Phonetics.SUPPORTED) {
             val mode = settings.phoneticsFor(deckId)

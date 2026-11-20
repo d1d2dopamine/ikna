@@ -240,7 +240,8 @@ class DeckRepository(
         text: String,
         fallbackTitle: String,
         lang: String = NO_LANG,
-        appendTo: String? = null
+        appendTo: String? = null,
+        inferLanguage: Boolean = true
     ): DeckImport {
         // Adding to a deck that already exists, rather than making another one.
         // Until now every import made a deck: a course arriving in portions
@@ -261,6 +262,9 @@ class DeckRepository(
         }
 
         val parse = SeedFormat.parse(text)
+        val importLanguage = if (inferLanguage && into == null && deckLang == NO_LANG) {
+            detectDeckLanguage(parse.rows.map { it.sentence }) ?: NO_LANG
+        } else deckLang
         // Portions overlap. A row whose phrase is already in the deck is skipped
         // rather than added again under a new id, because a duplicate card is a
         // card whose history is split in two.
@@ -272,7 +276,7 @@ class DeckRepository(
         val result = packLoader.importChunks(
             packId = packId,
             title = title,
-            lang = deckLang,
+            lang = importLanguage,
             // Numbering continues from what the deck already holds.
             source = SeedFormat.chunks(packId, rows, into?.chunkCount ?: 0),
             skipped = skipped,

@@ -164,7 +164,7 @@ class DesignContracts(unittest.TestCase):
     def test_deck_marks_and_phonetics_are_real(self):
         for base, name in [(ANDROID, 'ui/decks/DeckScreen.kt'), (DESKTOP, 'DeckPane.kt')]:
             source = read(base, name)
-            for required in ['IknaDeckAppearance(', 'Phonetics.sample(', 'current.hasPhonetics', 'LangChips(']:
+            for required in ['IknaDeckAppearance(', 'Phonetics.sample(', 'current.hasPhonetics', 'deck.language_unknown']:
                 self.assertIn(required, source)
         self.assertIn('FlowRow(', read(SHARED, 'ui/decks/DeckLangs.kt'))
         mark = read(SHARED, 'ui/decks/DeckMark.kt')

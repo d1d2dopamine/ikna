@@ -270,33 +270,10 @@ fun DeckScreen(
                     IknaRule()
                     Spacer(Modifier.height(Space.lg))
 
-                    Text(
-                        text = S.t("dp.003"),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Spacer(Modifier.height(Space.xs))
-                    Text(
-                        text = S.t("dp.004"),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = muted
-                    )
-                    Spacer(Modifier.height(Space.md))
-
-                    LangChips(
-                        current = current.lang,
-                        onPick = { code ->
-                            scope.launch {
-                                container.deckRepository.setLang(deckId, code)
-                                reload()
-                            }
-                        }
-                    )
-
+                    Text(S.t("dp.003") + " · " + (current.lang.takeUnless { it == "custom" }
+                        ?.let { java.util.Locale.forLanguageTag(it).getDisplayLanguage(java.util.Locale.forLanguageTag(S.lang)) }
+                        ?: S.t("deck.language_unknown")), style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(Space.lg))
-                    IknaRule()
-                    Spacer(Modifier.height(Space.lg))
-
                     // How this deck writes down the way its phrases sound.
                     //
                     // Here, in the deck's own settings, and that placement is

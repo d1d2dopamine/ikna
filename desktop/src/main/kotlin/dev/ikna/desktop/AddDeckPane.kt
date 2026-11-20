@@ -128,7 +128,8 @@ fun AddDeckPane(
                         fileName = fileName,
                         text = text,
                         fallbackTitle = fallbackTitle,
-                        lang = if (subject) NO_LANG else lang
+                        lang = if (subject) NO_LANG else lang,
+                        inferLanguage = !subject
                     )
                     container.learningRepository.invalidatePlan()
                     report

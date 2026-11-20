@@ -148,7 +148,8 @@ fun AddDeckScreen(
 					fileName = name,
 					text = text,
 					fallbackTitle = S.t("deckrepo.001"),
-					lang = lang
+					lang = lang,
+                    inferLanguage = !subject
 				)
 			}.getOrNull()
 		}
