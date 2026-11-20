@@ -166,6 +166,20 @@ tasks.register<JavaExec>("gradingLab") {
     }
 }
 
+tasks.register<JavaExec>("studyMigrationReference") {
+    dependsOn("testClasses")
+    group = "verification"
+    description = "Capture the Kotlin study flow for the Rust migration"
+    classpath = sourceSets["test"].runtimeClasspath
+    mainClass.set("dev.ikna.desktop.StudyMigrationReferenceKt")
+    systemProperty("user.timezone", "UTC")
+    if (System.getProperty("os.name").startsWith("Linux", ignoreCase = true)) {
+        environment("LD_BIND_NOW", "1")
+    }
+    val output = layout.buildDirectory.file("migration/study-reference.jsonl")
+    args(output.get().asFile.absolutePath)
+}
+
 // Match the Linux AppRun linker contract before Compose/Skiko native loading.
 // The Compose fixture opens bundled SQLite first, just like Main.kt startup.
 tasks.withType<Test>().configureEach {

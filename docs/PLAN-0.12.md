@@ -118,6 +118,10 @@ Kotlin app available for use and fixes until the Rust app is ready to take over.
    compare decisions and due dates with the current Kotlin app. Use this flow
    to compare UI toolkits for accessibility, packaging and Android ABI coverage
    before committing to one.
+   The grading workflow includes a `study-reference.jsonl` artifact produced
+   by `:desktop:studyMigrationReference`. It runs the Kotlin repositories
+   against a synthetic starter deck in UTC, covers both user grades and records
+   the plan, answer, due time and state after reopening the database.
 2. **Verify data compatibility.** Test importing decks, restoring existing
    backups, and replaying reviews from earlier app versions without changing
    card identity or review history. Test interrupted migration and safe retry on

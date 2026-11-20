@@ -92,6 +92,8 @@ jobs:
               -Pgrading.output="build/grading/$scenario.txt"
           done
           python3 tools/grading/check_reports.py build/grading
+      - name: Capture the Kotlin study reference for migration
+        run: bash tools/ci/run-gradle.sh ci-logs/study-reference.log :desktop:studyMigrationReference
       - name: Room output agrees with committed schema
         run: |
           changes=$(git status --porcelain app/schemas)
@@ -108,6 +110,7 @@ jobs:
           path: |
             build/grading/
             desktop/build/reports/tests/test/
+            desktop/build/migration/study-reference.jsonl
             shared/build/reports/tests/
             app/build/reports/tests/testReleaseUnitTest/
             app/schemas/
