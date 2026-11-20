@@ -1,4 +1,4 @@
-# Load Governor
+# riar-manage
 
 The governor answers exactly one question, once per day: **how many new chunks may be
 introduced?** Not "which cards are due" (that is FSRS) and not "what should the user study"
@@ -251,7 +251,7 @@ Two records outlive the plan row, and the rebuild reads both:
   whether as chunks introduced with the plan or as cards promoted while
   answering.
 
-From those, `ruledOnceToday` and `dailyNewRoom` (both in `LoadGovernor.kt`, both
+From those, `ruledOnceToday` and `dailyNewRoom` (both in `RiarManage.kt`, both
 covered by `DailyBudgetTest`) give the rule: **the earliest ruling of the day is
 a ceiling, a later ruling may lower it but never raise it, and only what the day
 has not yet spent may still be handed out.** The same ceiling is applied to the

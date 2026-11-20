@@ -23,7 +23,7 @@ stutter. Build it and see it; it takes one `gradlew assembleDebug`.
 | Card presentation | Classic only: full context, tap for meaning, existing side/rating controls; stored 1/2 are historical |
 | Scheduler | FSRS-6 (21 parameters), local optimisation later |
 | Second memory layer | component-level (lemma) state, one-directional influence |
-| New-material control | `LoadGovernor` — a forecast-aware valve |
+| New-material control | `riar-manage` — a forecast-aware limit on new material |
 | Debt handling | amnesty pool, 20% of each session, never a visible backlog number |
 | Streaks | none. The metric is *days with a session in the last 30* |
 | Daily minimum | 1 card |
@@ -346,7 +346,7 @@ by a later action remain; it is not an indefinitely retained multi-step history.
 Onboarding and study-state reading content keeps its ordinary spacing when it
 fits and scrolls when it does not. Horizontal grading must not capture vertical
 reading scrolls. Deck rows may grow; fixed artwork dimensions do not cap text or
-hit targets. Ordinary icon/text/wide controls have minimum 48dp targets, and
+hit targets. The title and 52 dp deck mark share a top edge at every font scale. Ordinary icon/text/wide controls have minimum 48dp targets, and
 labels may wrap rather than being cut off. Toggle artwork stays compact within
 its larger hit area. Device checks at large text remain required.
 

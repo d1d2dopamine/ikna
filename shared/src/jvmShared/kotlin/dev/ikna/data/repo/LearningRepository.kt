@@ -35,7 +35,7 @@ import dev.ikna.domain.governor.GovernorConfig
 import dev.ikna.domain.governor.GovernorDecision
 import dev.ikna.domain.governor.GovernorReason
 import dev.ikna.domain.governor.GovernorSignals
-import dev.ikna.domain.governor.LoadGovernor
+import dev.ikna.domain.governor.RiarManage
 import dev.ikna.domain.governor.dailyNewRoom
 import dev.ikna.domain.governor.ruledOnceToday
 import dev.ikna.domain.session.Level
@@ -190,7 +190,7 @@ class LearningRepository(
         )
 
     // Cheap objects, rebuilt per call so a settings change takes effect at once.
-    private fun governor() = LoadGovernor(config)
+    private fun governor() = RiarManage(config)
     private fun builder() = SessionBuilder(cardDao, chunkDao, config)
 
     /**
@@ -1701,7 +1701,7 @@ class LearningRepository(
             else -> currentDailyTarget()
         }
         val signals = collectSignals(now, targetOverride = target)
-        val preview = LoadGovernor(baseConfig.copy(targetDailyReviews = target))
+        val preview = RiarManage(baseConfig.copy(targetDailyReviews = target))
         val decision = withNightRule(preview.decide(signals), now)
         DeveloperDiagnostics(
             capturedAt = now, planReason = plan?.reason,

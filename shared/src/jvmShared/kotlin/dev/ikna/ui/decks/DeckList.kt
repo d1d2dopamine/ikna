@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -157,8 +158,8 @@ fun IknaDeckRow(
             .clickable(interactionSource = interaction, indication = null, onClick = onOpen)
             .iknaInspect("IknaDeckRow[${deck.title}]")
     ) {
-        // The progress line sits below the row that aligns the mark, text and controls.
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        // The title and mark share a top edge even when the font scale changes.
+        Row(verticalAlignment = Alignment.Top) {
             IknaDeckMark(deck = deck, owes = owes, look = look)
             Spacer(Modifier.width(Space.md))
             Column(
@@ -190,6 +191,7 @@ fun IknaDeckRow(
             IknaIconButton(
                 glyph = IknaGlyph.BROWSE,
                 onClick = onBrowse,
+                modifier = Modifier.align(Alignment.CenterVertically),
                 size = 48.dp,
                 glyphSize = 18.dp,
                 color = if (browseAvailable) accent else muted,
@@ -198,6 +200,7 @@ fun IknaDeckRow(
             IknaIconButton(
                 glyph = IknaGlyph.DOTS,
                 onClick = onOpenDeck,
+                modifier = Modifier.align(Alignment.CenterVertically),
                 size = 48.dp,
                 glyphSize = 18.dp,
                 color = muted,
@@ -207,6 +210,7 @@ fun IknaDeckRow(
             IknaToggle(
                 checked = deck.isActive,
                 onCheckedChange = onToggle,
+                modifier = Modifier.align(Alignment.CenterVertically),
                 label = S.t("a11y.006")
             )
         }
@@ -297,6 +301,7 @@ fun IknaDeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
     Box(
         modifier = Modifier
             .size(DECK_MARK_SIZE)
+            .testTag("ikna-deck-mark")
             .iknaInspect("IknaDeckMark[${deck.title}]")
             .clip(iknaTileShape())
             .background(fill),

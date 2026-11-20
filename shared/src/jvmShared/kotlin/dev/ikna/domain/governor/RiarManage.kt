@@ -155,7 +155,7 @@ data class GovernorDecision(
  * material as free is what produces the avalanche three weeks in, and the
  * avalanche is what ends the habit.
  */
-class LoadGovernor(private val config: GovernorConfig) {
+class RiarManage(private val config: GovernorConfig) {
 
     fun decide(s: GovernorSignals): GovernorDecision {
         // Both halves of return mode: the day the user comes back, and the few

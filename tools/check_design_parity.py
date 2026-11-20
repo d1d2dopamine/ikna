@@ -613,7 +613,7 @@ class DesignContracts(unittest.TestCase):
             self.assertIn(required, shared_rows)
         row = shared_rows[shared_rows.index('fun IknaDeckRow('):shared_rows.index('/** Makes the long-term bar')]
         header, progress = row.split('\n        if (deck.isActive) {', 1)
-        header = header.split('Row(verticalAlignment = Alignment.CenterVertically) {', 1)[1]
+        header = header.split('Row(verticalAlignment = Alignment.Top) {', 1)[1]
         for child in ['IknaDeckMark(', 'text = deck.title', 'IknaToggle(']:
             self.assertIn(child, header)
         self.assertEqual(header.count('IknaIconButton('), 2)
@@ -898,7 +898,7 @@ class DesignContracts(unittest.TestCase):
 
     def test_today_count_is_unique_and_first_batch_does_not_multiply(self):
         repo = read(SHARED, 'data/repo/LearningRepository.kt')
-        governor = read(SHARED, 'domain/governor/LoadGovernor.kt')
+        governor = read(SHARED, 'domain/governor/RiarManage.kt')
         dao = read(SHARED, 'data/db/Daos.kt')
         android_home = read(ANDROID, 'ui/decks/DecksScreen.kt')
         worker = read(ANDROID, 'work/DailyPlanWorker.kt')

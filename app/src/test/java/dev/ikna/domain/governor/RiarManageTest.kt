@@ -9,10 +9,10 @@ import org.junit.Test
  * is also the cheapest thing here to protect. Each test pins one promise the
  * product makes to the user.
  */
-class LoadGovernorTest {
+class RiarManageTest {
 
     private val config = GovernorConfig()
-    private val governor = LoadGovernor(config)
+    private val governor = RiarManage(config)
 
     private fun signals(
         dueToday: Int = 0,
@@ -301,7 +301,7 @@ class LoadGovernorTest {
         )
         assertEquals(config.maxNewPerDay, sloppy.allowedNew)
 
-        val lenient = LoadGovernor(config.copy(accelerateMinAccuracy = 0.5))
+        val lenient = RiarManage(config.copy(accelerateMinAccuracy = 0.5))
         val raised = lenient.decide(
             signals(
                 daysSinceStart = config.settlingDays + 1,

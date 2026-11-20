@@ -282,7 +282,7 @@ class LearningSimulationTest {
                     .format(plan.reason, plan.plannedTotal, plan.capacity, plan.allowedNew)
             )
             // The safety valve outranks the return-mode gate on a long gap
-            // (LoadGovernor keeps the original gate in `gate`), so the reason
+            // (RiarManage keeps the original gate in `gate`), so the reason
             // may name either; the contract is a small plan and at most one
             // new chunk on the first day back.
             assertTrue(

@@ -46,7 +46,7 @@ class MobileDeckUiContractTest {
             "cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp)",
             "placement = SignalFramePlacement.Outer",
             ".clickable(interactionSource = interaction, indication = null, onClick = onOpen)",
-            "Row(verticalAlignment = Alignment.CenterVertically)",
+            "Row(verticalAlignment = Alignment.Top)",
             "modifier = Modifier.weight(1f)",
             "verticalArrangement = Arrangement.SpaceBetween",
             "Spacer(Modifier.height(Space.xs))",

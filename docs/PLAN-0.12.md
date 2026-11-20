@@ -104,31 +104,41 @@ Preparation completed in this batch:
 - [x] Record tasks and available acceptance evidence in
   [ROUND-0.12-01.md](ROUND-0.12-01.md).
 
-### Gradual Rust migration
+### Full application migration to Rust
 
-Start with the shared learning engine. Use the current Kotlin implementation as
-the reference for behaviour. Keep Compose, Room, platform integrations and the
-existing release pipeline in place during the prototype.
+Migrate the Ikna application in stages across Android, Windows and Linux.
+The target includes the learning engine, storage, study screens and the
+platform integrations needed to replace the current app. Keep the shipped
+Kotlin app available for use and fixes until the Rust app is ready to take over.
 
-1. **Prototype the Load Governor.** Port the calculation to a standalone Rust
-   crate. Run the same fixtures in Kotlin and Rust, covering a fresh install,
-   normal study, overdue reviews, return after a break, and thresholds where
-   rounding or gate order can change the result. Compare the full
-   `GovernorDecision`, including the allowed count, limits and reason.
-2. **Integrate one component.** After parity, try a small Kotlin-to-Rust binding
-   in a development build while the Kotlin implementation remains the default.
-   Verify native-library loading and packaging on Android (including
-   `arm64-v8a` and `armeabi-v7a`), Windows and Linux. Review startup and build
-   overhead, document the rollback path and switch the default only after the
-   integration is verified.
-3. **Review further ports one module at a time.** Consider the scheduler and
-   grading separately after the Governor trial. For any code that affects
-   scheduling or replay, require equivalent results on the same saved review
-   histories and confirm that existing backups still restore. Keep review
-   history append-only and preserve stored formats during the trial.
+1. **Build an end-to-end study session.** Open a starter deck, build today's
+   plan, reveal and grade a card, save the review locally, then reopen the app
+   and confirm the answer and next due date survived. Include scheduling,
+   grading and riar-manage in this slice. Run the same fixed histories and
+   compare decisions and due dates with the current Kotlin app. Use this flow
+   to compare UI toolkits for accessibility, packaging and Android ABI coverage
+   before committing to one.
+2. **Verify data compatibility.** Test importing decks, restoring existing
+   backups, and replaying reviews from earlier app versions without changing
+   card identity or review history. Test interrupted migration and safe retry on
+   copies before reading user data. Keep the current app usable during testing.
+3. **Complete the replacement.** Port the remaining daily-use features,
+   including Browse, progress, Catalogue, Anki import and the supported
+   platform integrations, including Android reminders, speech and the widget.
+   Verify native builds, upgrades and rollback on Android, Windows and Linux.
+4. **Ship after a preview.** Give users a preview that can use copies of real
+   decks and backups, and check first study, daily use and data recovery before
+   making it the default app.
 
-The first deliverable is a parity report for the Governor prototype. Use it and
-the cost of platform integration to decide how far to continue the migration.
+### Study card interface refresh
+
+Design the front, revealed answer and transition to the next card as one flow.
+Prototype typography, spacing, reveal motion and feedback after grading.
+Start with a single card that makes the next action clear on touch and with a
+keyboard. Cover large text and the setting that disables animation. Preserve
+the rule that revealing a card cannot also grade it, and verify that long
+sentences can still be read or scrolled at narrow widths. Use the prototype in
+the Rust study flow after checking it on both Android and desktop.
 
 ## Current batch and next checkpoint
 

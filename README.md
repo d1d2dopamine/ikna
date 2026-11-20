@@ -35,7 +35,7 @@
 
 ikna teaches languages through **chunks**: a useful phrase, a natural sentence that contains it, and its meaning.
 
-You do not build a giant card collection and then spend months managing it. ikna handles the daily load for you. Its **load governor** looks at upcoming reviews, backlog, recent accuracy and missed days, then decides whether new material fits today.
+You do not build a giant card collection and then spend months managing it. ikna handles the daily load for you. Its **riar-manage** looks at upcoming reviews, backlog, recent accuracy and missed days, then decides whether new material fits today.
 
 There is no streak to protect, no visible backlog counter and no four-button confidence ritual: during review you make one decision, **know** or **do not know**, and the scheduler handles the rest.
 
@@ -199,7 +199,7 @@ ikna учит язык **кусками**: полезная фраза, есте
 
 ## ✨ Как это устроено
 
-Каждый повтор заканчивается решением: **знаю** или **не знаю**. Дальше работает планировщик. FSRS-6 тренирует каждый кусок на трёх уровнях: узнавание, пропуск, производство, и планирует их независимо. Сколько нового материала поместится в день, регулятор решает до начала сессии. Когда обязательный план закрыт, знакомые карточки появляются в Browse, ленте для чтения без оценки. Когда истории набирается достаточно, приложение может локально подобрать параметры FSRS и уточнить часть оценок, всё на устройстве.
+Каждый повтор заканчивается решением: **знаю** или **не знаю**. Дальше работает планировщик. FSRS-6 тренирует каждый кусок на трёх уровнях: узнавание, пропуск, производство, и планирует их независимо. Сколько нового материала поместится в день, `riar-manage` решает до начала сессии. Когда обязательный план закрыт, знакомые карточки появляются в Browse, ленте для чтения без оценки. Когда истории набирается достаточно, приложение может локально подобрать параметры FSRS и уточнить часть оценок, всё на устройстве.
 
 Подробнее: [`docs/GRADING.md`](docs/GRADING.md) · [`docs/GOVERNOR.md`](docs/GOVERNOR.md) · [`docs/LEARNING-ENGINE.md`](docs/LEARNING-ENGINE.md) · [`docs/FSRS-OPTIMIZER.md`](docs/FSRS-OPTIMIZER.md) · [`docs/DESIGN.md`](docs/DESIGN.md)
 
