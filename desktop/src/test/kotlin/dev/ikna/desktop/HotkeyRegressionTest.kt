@@ -30,8 +30,13 @@ class HotkeyRegressionTest {
 
         assertTrue(session.contains("LaunchedEffect(revealed, current?.card?.key)"))
         assertTrue(session.contains("if (revealed) runCatching { focus.requestFocus() }"))
-        assertTrue(stack.contains("snapshotFlow { flying.value }.first { active -> !active }"))
-        assertTrue(stack.countOccurrences("if (!revealedNow.value)") >= 2)
+        val keyboard = stack.substringAfter("LaunchedEffect(key, programmaticSwipe?.token)")
+            .substringBefore("fun rateFromButton(")
+        val firstGuard = keyboard.indexOf("if (!revealedNow.value)")
+        val wait = keyboard.indexOf("snapshotFlow { flying.value }.first { active -> !active }")
+        val secondGuard = keyboard.indexOf("if (revealedNow.value && !savingNow.value && currentKey.value == key)")
+        val grade = keyboard.indexOf("completeDirectGrade(command.rating")
+        assertTrue(firstGuard >= 0 && firstGuard < wait && wait < secondGuard && secondGuard < grade)
     }
 
     private fun source(vararg candidates: String): String = candidates.asSequence()
@@ -40,6 +45,4 @@ class HotkeyRegressionTest {
         ?.readText()
         ?: error("source not found: ${candidates.joinToString()}")
 
-    private fun String.countOccurrences(needle: String): Int =
-        windowed(needle.length).count { it == needle }
 }

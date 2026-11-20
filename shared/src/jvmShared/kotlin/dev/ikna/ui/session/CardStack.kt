@@ -207,6 +207,10 @@ fun SwipeableCard(
     // evidence distinct from the pointer's distance and velocity.
     LaunchedEffect(key, programmaticSwipe?.token) {
         val command = programmaticSwipe ?: return@LaunchedEffect
+        if (!revealedNow.value) {
+            programmaticHandledNow.value(command.token)
+            return@LaunchedEffect
+        }
         if (flying.value) snapshotFlow { flying.value }.first { active -> !active }
         if (revealedNow.value && !savingNow.value && currentKey.value == key) {
             flying.value = true
