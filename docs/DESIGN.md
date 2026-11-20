@@ -6,13 +6,16 @@ surface.
 
 ## What it looks like
 
-A study card carries its language and highlighted phrase on a tinted reading
+A study card carries its compact deck seal and highlighted phrase on a tinted reading
 surface. Revealing inserts the answer below without moving the question. The
 action row exposes reveal and the two grades for touch and keyboard use.
 During a horizontal drag, a soft glow and one label identify the selected
 direction. The glow becomes stronger at the rating threshold, where the
 optional haptic fires. An uncommitted drag returns to rest. The gesture that
 reveals an answer cannot also grade it.
+Desktop buttons show the current shortcut bindings. During an animated answer
+commit, the next card first appears face-down so it can take the old card's place
+without showing its prompt before the current answer is saved.
 
 No screenshots, on purpose: a still frame is a poor description of an app whose
 whole answer mechanism is a movement, and a recording of a swipe looks like a

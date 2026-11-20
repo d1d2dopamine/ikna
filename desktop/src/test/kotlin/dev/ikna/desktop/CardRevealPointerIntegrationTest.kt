@@ -17,7 +17,10 @@ import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.MouseButton
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.runDesktopComposeUiTest
@@ -27,6 +30,7 @@ import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.session.ReviewSignalTracker
 import dev.ikna.ui.session.ChunkCard
 import dev.ikna.ui.session.SwipeableCard
+import dev.ikna.ui.text.S
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
@@ -59,6 +63,46 @@ class CardRevealPointerIntegrationTest(private val mouse: Boolean) {
     }
 
     @Test fun frontTapRevealsExactlyOnceWithoutGrading() = checkGesture(Offset.Zero)
+
+    @Test
+    fun buttonsRevealInPlaceThenRecordOneAnswer() = runDesktopComposeUiTest(width = 440, height = 560) {
+        val revealed = mutableStateOf(false)
+        val grades = mutableListOf<Rating>()
+        val signals = ReviewSignalTracker()
+        val question = "A stable reading prompt"
+        setContent {
+            MaterialTheme {
+                SwipeableCard(
+                    key = "button-card",
+                    revealed = revealed.value,
+                    animations = false,
+                    haptics = false,
+                    onReveal = { revealed.value = true },
+                    onRate = { rating, _ -> grades += rating },
+                    signals = signals
+                ) {
+                    ChunkCard(
+                        label = "Synthetic fixture",
+                        prompt = question,
+                        answer = "A revealed answer",
+                        hint = null,
+                        revealed = revealed.value,
+                        animations = false,
+                        onTap = { revealed.value = true },
+                        tapEnabled = !revealed.value,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
+        }
+        val questionNode = onNodeWithText(question, useUnmergedTree = true)
+        val before = questionNode.getUnclippedBoundsInRoot().top
+        onNodeWithText(S.t("card.reveal")).performClick()
+        assertEquals(before, questionNode.getUnclippedBoundsInRoot().top)
+        runOnIdle { assertTrue(grades.isEmpty()) }
+        onNodeWithText(S.t("a11y.009")).performClick()
+        runOnIdle { assertEquals(listOf(Rating.GOOD), grades) }
+    }
 
     @Test fun frontSubSlopJitterRevealsExactlyOnceWithoutGrading() =
         checkGesture(Offset(if (mouse) 0.05f else 1f, 0f))

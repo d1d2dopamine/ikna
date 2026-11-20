@@ -211,7 +211,7 @@ fun IknaDeckProgress(
  * the owner removed the frame from the marks entirely.
  */
 @Composable
-fun IknaDeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
+fun IknaDeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook, compact: Boolean = false) {
     val accent = deckTintColor(look.tint, MaterialTheme.colorScheme.primary)
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val background = MaterialTheme.colorScheme.background
@@ -237,7 +237,7 @@ fun IknaDeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
 
     Box(
         modifier = Modifier
-            .size(DECK_MARK_SIZE)
+            .then(if (compact) Modifier.size(32.dp) else Modifier.size(DECK_MARK_SIZE))
             .testTag("ikna-deck-mark")
             .iknaInspect("IknaDeckMark[${deck.title}]")
             .clip(iknaTileShape())
@@ -261,7 +261,7 @@ fun IknaDeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook) {
         }
         Text(
             text = look.label.ifEmpty { monogramOf(deck.lang, deck.title) },
-            style = MaterialTheme.typography.titleMedium,
+            style = if (compact) MaterialTheme.typography.labelMedium else MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             color = ink,
             maxLines = 1

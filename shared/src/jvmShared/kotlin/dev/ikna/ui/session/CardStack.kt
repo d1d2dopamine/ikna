@@ -59,7 +59,10 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import dev.ikna.data.prefs.DeckLook
+import dev.ikna.data.repo.DeckSummary
 import dev.ikna.domain.fsrs.Rating
+import dev.ikna.ui.decks.IknaDeckMark
 import dev.ikna.domain.grading.INPUT_ACCESSIBILITY
 import dev.ikna.domain.grading.INPUT_BUTTON
 import dev.ikna.domain.grading.INPUT_KEYBOARD
@@ -83,6 +86,11 @@ private const val PROGRAMMATIC_THROW_SPEED = 1200f
 /** A real review command from a non-pointer input, never fake pointer telemetry. */
 data class ProgrammaticSwipe(val token: Int, val rating: Rating)
 
+data class CardShortcuts(val reveal: String?, val miss: String?, val know: String?)
+
+private fun withShortcut(label: String, shortcut: String?): String =
+    if (shortcut.isNullOrBlank()) label else "$label  ($shortcut)"
+
 /** How far the card leans as it travels. Larger divisor, calmer rotation. */
 private const val ROTATION_DIVISOR = 64f
 
@@ -99,6 +107,8 @@ fun SwipeableCard(
     animations: Boolean,
     haptics: Boolean,
     hasNextCard: Boolean = false,
+    saving: Boolean = false,
+    shortcuts: CardShortcuts? = null,
     onReveal: (String) -> Unit,
     onRate: (Rating, ReviewSignals) -> Unit,
     signals: ReviewSignalTracker,
@@ -136,6 +146,7 @@ fun SwipeableCard(
     val gradable = remember(key) { mutableStateOf(false) }
     val throwing = remember(key) { mutableStateOf<Rating?>(null) }
     val currentKey = rememberUpdatedState(key)
+    val savingNow = rememberUpdatedState(saving)
     val tracker = remember(key) { VelocityTracker() }
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
@@ -209,7 +220,7 @@ fun SwipeableCard(
     }
 
     fun rateFromButton(rating: Rating) {
-        if (!revealedNow.value || flying.value) return
+        if (!revealedNow.value || flying.value || savingNow.value) return
         flying.value = true
         throwing.value = rating
         signals.answerStarted(INPUT_BUTTON)
@@ -244,7 +255,7 @@ fun SwipeableCard(
                     customActions = if (revealed) {
                         listOf(
                             CustomAccessibilityAction(keepAction) {
-                                val canRate = revealedNow.value && !flying.value
+                                val canRate = revealedNow.value && !flying.value && !savingNow.value
                                 if (canRate) {
                                     signals.answerStarted(INPUT_ACCESSIBILITY)
                                     rateNow.value(Rating.GOOD, signals.snapshot())
@@ -252,7 +263,7 @@ fun SwipeableCard(
                                 canRate
                             },
                             CustomAccessibilityAction(missAction) {
-                                val canRate = revealedNow.value && !flying.value
+                                val canRate = revealedNow.value && !flying.value && !savingNow.value
                                 if (canRate) {
                                     signals.answerStarted(INPUT_ACCESSIBILITY)
                                     rateNow.value(Rating.AGAIN, signals.snapshot())
@@ -263,7 +274,7 @@ fun SwipeableCard(
                     } else {
                         listOf(
                             CustomAccessibilityAction(revealAction) {
-                                val canReveal = !revealedNow.value
+                                val canReveal = !revealedNow.value && !savingNow.value
                                 if (canReveal) revealNow.value(INPUT_ACCESSIBILITY)
                                 canReveal
                             }
@@ -279,8 +290,8 @@ fun SwipeableCard(
                     var acceptedDrag = false
                     detectHorizontalDragGestures(
                         onDragStart = {
-                            acceptedDrag = !flying.value
-                            if (!acceptedDrag) return@detectHorizontalDragGestures
+                            acceptedDrag = !flying.value && !savingNow.value
+                            if (!acceptedDrag || flying.value || savingNow.value) return@detectHorizontalDragGestures
                             tracker.resetTracking()
                             armed.value = null
                             revealedByDrag = false
@@ -288,7 +299,7 @@ fun SwipeableCard(
                             if (gradable.value) signals.dragStarted()
                         },
                         onHorizontalDrag = { change, delta ->
-                            if (!acceptedDrag) return@detectHorizontalDragGestures
+                            if (!acceptedDrag || flying.value || savingNow.value) return@detectHorizontalDragGestures
                             tracker.addPosition(change.uptimeMillis, change.position)
                             val next = drag.value + delta
                             drag.value = next
@@ -308,7 +319,7 @@ fun SwipeableCard(
                             }
                         },
                         onDragCancel = {
-                            if (!acceptedDrag) return@detectHorizontalDragGestures
+                            if (!acceptedDrag || flying.value || savingNow.value) return@detectHorizontalDragGestures
                             armed.value = null
                             flying.value = true
                             scope.launch {
@@ -325,7 +336,7 @@ fun SwipeableCard(
                             // Keep the start-of-gesture grade gate: this release can
                             // never also answer the newly revealed card. Cancellation
                             // deliberately has no corresponding fallback.
-                            if (!acceptedDrag) return@detectHorizontalDragGestures
+                            if (!acceptedDrag || flying.value || savingNow.value) return@detectHorizontalDragGestures
                             if (!gradable.value && !revealedByDrag && !revealedNow.value) {
                                 revealedByDrag = true
                                 revealNow.value(INPUT_SWIPE)
@@ -361,20 +372,15 @@ fun SwipeableCard(
                     )
                 }
         ) {
-            SwipeGlow(progress, ready)
-            if (hasNextCard && animations && throwing.value != null) {
-                val backingShape = iknaTileShape()
-                Box(
-                    Modifier.matchParentSize()
-                        .padding(horizontal = 24.dp, vertical = 14.dp)
-                        .graphicsLayer {
-                            val leaving = (abs(shift()) / size.width.coerceAtLeast(1f)).coerceIn(0f, 1f)
-                            scaleX = 0.96f + 0.04f * leaving
-                            scaleY = scaleX
-                            translationY = (1f - leaving) * 12.dp.toPx()
-                        }
-                        .background(MaterialTheme.colorScheme.surface, backingShape)
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, backingShape)
+            SwipeGlow(progress, ready, animations)
+            if (hasNextCard && animations && (throwing.value != null || saving)) {
+                IknaCardBacking(
+                    Modifier.matchParentSize().graphicsLayer {
+                        val leaving = if (saving) 1f else (abs(shift()) / size.width.coerceAtLeast(1f)).coerceIn(0f, 1f)
+                        scaleX = 0.96f + 0.04f * leaving
+                        scaleY = scaleX
+                        translationY = (1f - leaving) * 12.dp.toPx()
+                    }
                 )
             }
             // The travelling layer.
@@ -391,7 +397,7 @@ fun SwipeableCard(
                         val grow = 0.972f + 0.028f * landed
                         scaleX = grow
                         scaleY = grow
-                        alpha = landed
+                        alpha = if (saving && animations) 0f else landed
                     }
             ) {
                 content()
@@ -409,26 +415,26 @@ fun SwipeableCard(
         ) {
             if (revealed) {
                 IknaWideButton(
-                    label = missAction,
+                    label = withShortcut(missAction, shortcuts?.miss),
                     onClick = { rateFromButton(Rating.AGAIN) },
                     modifier = Modifier.weight(1f),
                     height = 48.dp,
-                    enabled = !flying.value
+                    enabled = !flying.value && !saving
                 )
                 IknaWideButton(
-                    label = keepAction,
+                    label = withShortcut(keepAction, shortcuts?.know),
                     onClick = { rateFromButton(Rating.GOOD) },
                     modifier = Modifier.weight(1f),
                     height = 48.dp,
-                    enabled = !flying.value
+                    enabled = !flying.value && !saving
                 )
             } else {
                 IknaWideButton(
-                    label = revealAction,
-                    onClick = { if (!revealedNow.value && !flying.value) revealNow.value(INPUT_BUTTON) },
+                    label = withShortcut(revealAction, shortcuts?.reveal),
+                    onClick = { if (!revealedNow.value && !flying.value && !savingNow.value) revealNow.value(INPUT_BUTTON) },
                     filled = true,
                     height = 48.dp,
-                    enabled = !flying.value
+                    enabled = !flying.value && !saving
                 )
             }
         }
@@ -463,6 +469,8 @@ private suspend fun throwOut(
 fun ChunkCard(
     label: String,
     language: String? = null,
+    deck: DeckSummary? = null,
+    look: DeckLook = DeckLook(),
     prompt: String,
     answer: String,
     /** Where the phrase sits inside [prompt], when the prompt is a sentence. */
@@ -526,7 +534,9 @@ fun ChunkCard(
                 horizontalArrangement = Arrangement.spacedBy(Space.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (language != null) {
+                if (deck != null) {
+                    IknaDeckMark(deck, owes = false, look = look, compact = true)
+                } else if (language != null) {
                     Text(
                         text = language.uppercase(),
                         style = MaterialTheme.typography.labelMedium,
@@ -613,18 +623,36 @@ fun ChunkCard(
     }
 }
 
+/** Face-down preview while the next prompt waits for the current answer to save. */
 @Composable
-private fun BoxScope.SwipeGlow(progress: () -> Float, ready: () -> Boolean) {
+fun IknaCardBacking(modifier: Modifier = Modifier) {
+    val shape = iknaTileShape()
+    val palette = MaterialTheme.colorScheme
+    Box(
+        modifier
+            .padding(horizontal = CARD_MARGIN, vertical = Space.sm)
+            .background(lerp(palette.background, palette.surfaceVariant, 0.22f), shape)
+            .border(1.dp, palette.outlineVariant, shape)
+    )
+}
+
+@Composable
+private fun BoxScope.SwipeGlow(progress: () -> Float, ready: () -> Boolean, animations: Boolean) {
+    val emphasis = animateFloatAsState(
+        targetValue = if (ready()) 1f else 0f,
+        animationSpec = if (animations) tween(90) else snap(),
+        label = "swipe-glow-threshold"
+    )
     val known = MaterialTheme.colorScheme.primary
     val unknown = MaterialTheme.colorScheme.tertiary
     Box(
         Modifier.matchParentSize().drawBehind {
             val direction = progress()
             if (abs(direction) < 0.02f) return@drawBehind
-            val center = Offset(size.width * (0.5f + 0.44f * direction), size.height * 0.57f)
+            val center = Offset(size.width * (0.5f + 0.34f * direction), size.height * 0.82f)
             val color = if (direction > 0f) known else unknown
-            val radius = (size.width * 0.52f).coerceAtMost(320.dp.toPx())
-            val alpha = if (ready()) 0.68f else 0.12f + 0.34f * abs(direction)
+            val radius = (size.width * 0.68f).coerceIn(120.dp.toPx(), 400.dp.toPx())
+            val alpha = 0.15f + 0.36f * abs(direction) + 0.24f * emphasis.value
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(color.copy(alpha = alpha), color.copy(alpha = 0f)),

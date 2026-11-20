@@ -1,4 +1,8 @@
 package dev.ikna.desktop
+import androidx.compose.runtime.produceState
+import dev.ikna.data.repo.DeckSummary
+import dev.ikna.data.prefs.lookFor
+import dev.ikna.ui.session.CardShortcuts
 import dev.ikna.ui.session.cardLoadResult
 import dev.ikna.ui.session.IknaCardLoadFailure
 import dev.ikna.ui.session.SessionUiState
@@ -499,14 +503,13 @@ private fun SessionPaneContent(
         nextDueAt = plan?.nextDueAt, noMoreExtra = noMoreExtra,
         optionalHardReview = optionalBatch != null, optionalHardAvailable = optionalAvailable,
         optionalHardEmpty = optionalEmpty)
+    val sessionDecks by produceState(emptyMap<String, DeckSummary>(), container) {
+        value = runCatching { container.deckRepository.decks().associateBy { it.id } }.getOrDefault(emptyMap())
+    }
     val hotkeys = remember(settings.hotkeys) { HotkeyBindings.decode(settings.hotkeys) }
     // Keyboard discoverability: the hint names the bindings the user actually
     // has, not the defaults (docs/ai-audits.md 7, Track G).
-val keysHint = if (current == null) null else S.t("pc.025")
-    .replace("{reveal}", hotkeys[HotkeyAction.REVEAL]?.encoded.orEmpty())
-    .replace("{miss}", hotkeys[HotkeyAction.MISS]?.encoded.orEmpty())
-    .replace("{know}", hotkeys[HotkeyAction.KNOW]?.encoded.orEmpty())
-    .replace("{undo}", hotkeys[HotkeyAction.UNDO]?.encoded.orEmpty())
+
 
     LaunchedEffect(current?.card?.key, reportCard, loading) {
         if (!loading && reportCard == null) runCatching { focus.requestFocus() }
@@ -555,15 +558,7 @@ val keysHint = if (current == null) null else S.t("pc.025")
         if (!loading && !loadFailed && !invalidated && !sessionChanged && !inspecting) {
             Column(Modifier.fillMaxWidth().widthIn(max = 680.dp).align(Alignment.CenterHorizontally)) {
                 IknaSessionTopBar(presentation, onFinishOptional = finishOptional)
-                IknaTodayProgress(state = presentation, trailing = {
-                    if (keysHint != null) {
-                        Text(
-                            text = keysHint,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = palette.muted
-                        )
-                    }
-                })
+                IknaTodayProgress(state = presentation)
             }
 
         }
@@ -605,6 +600,12 @@ val keysHint = if (current == null) null else S.t("pc.025")
                         animations = settings.animations,
                         haptics = settings.haptics,
                         hasNextCard = index + 1 < cards.size,
+                        saving = saving,
+                        shortcuts = CardShortcuts(
+                            reveal = hotkeys[HotkeyAction.REVEAL]?.encoded,
+                            miss = hotkeys[HotkeyAction.MISS]?.encoded,
+                            know = hotkeys[HotkeyAction.KNOW]?.encoded
+                        ),
                         onReveal = reveal,
                         onRate = gradeWithSignals,
                         signals = reviewSignals,
@@ -617,6 +618,8 @@ val keysHint = if (current == null) null else S.t("pc.025")
                         ChunkCard(
                             label = askLabel(current.ask, subject),
                             language = current.chunk.lang.takeUnless { it == NO_LANG },
+                            deck = sessionDecks[current.chunk.packId],
+                            look = settings.lookFor(current.chunk.packId),
                             prompt = current.prompt,
                             answer = current.answer,
                             promptTarget = current.promptTarget,

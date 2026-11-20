@@ -1,5 +1,9 @@
 package dev.ikna.ui.session
 
+import androidx.compose.runtime.produceState
+import dev.ikna.data.repo.DeckSummary
+import dev.ikna.data.prefs.lookFor
+import dev.ikna.ui.session.IknaCardBacking
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -99,6 +103,9 @@ fun SessionScreen(
     val state by vm.state.collectAsState()
     val settings by container.settings.flow.collectAsState(initial = IknaSettings())
 
+    val sessionDecks by produceState(emptyMap<String, DeckSummary>(), container) {
+        value = runCatching { container.deckRepository.decks().associateBy { it.id } }.getOrDefault(emptyMap())
+    }
     val card = state.current
     LaunchedEffect(card?.card?.key) { if (card == null) reportCard = null }
     ObserveReviewInterruptions(vm.reviewSignals)
@@ -139,6 +146,10 @@ fun SessionScreen(
             contentAlignment = Alignment.Center
         ) {
             when {
+                state.loading && state.revealed && settings.animations &&
+                    state.queue.getOrNull(state.index + 1) != null ->
+                    IknaCardBacking(Modifier.fillMaxSize())
+
                 state.loading -> Text(
                     text = S.t("sess.001"),
                     style = MaterialTheme.typography.labelMedium,
@@ -162,6 +173,8 @@ fun SessionScreen(
                     ChunkCard(
                         label = askLabel(card.ask, card.chunk.lang == NO_LANG),
                         language = card.chunk.lang.takeUnless { it == NO_LANG },
+                        deck = sessionDecks[card.chunk.packId],
+                        look = settings.lookFor(card.chunk.packId),
                         prompt = card.prompt,
                         answer = card.answer,
                         // Which part of the sentence the card is actually
