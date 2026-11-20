@@ -4,6 +4,8 @@ import dev.ikna.ui.text.S
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
@@ -32,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,7 +84,6 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 private const val EXIT_X = 1400f
-private const val PROGRAMMATIC_THROW_SPEED = 1200f
 
 /** A real review command from a non-pointer input, never fake pointer telemetry. */
 data class ProgrammaticSwipe(val token: Int, val rating: Rating)
@@ -137,7 +139,10 @@ fun SwipeableCard(
     // the throw off screen.
     val drag = remember(key) { mutableStateOf(0f) }
     val flying = remember(key) { mutableStateOf(false) }
-    val shift: () -> Float = { if (flying.value) offsetX.value else drag.value }
+    val usesAnimatedOffset = remember(key) { mutableStateOf(false) }
+    val shift: () -> Float = { if (usesAnimatedOffset.value) offsetX.value else drag.value }
+    val directExit = remember(key) { Animatable(0f) }
+    val directGrade = remember(key) { mutableStateOf<Rating?>(null) }
     // 0 while the card is still arriving, 1 once it has taken its place.
     val arrival = remember(key) { Animatable(if (animations) 0f else 1f) }
     val armed = remember(key) { mutableStateOf<Rating?>(null) }
@@ -171,69 +176,55 @@ fun SwipeableCard(
     }
 
     LaunchedEffect(key, animations) {
-        if (animations) arrival.animateTo(1f, Motion.arrive) else arrival.snapTo(1f)
+        if (animations) arrival.animateTo(1f, tween(230, easing = LinearOutSlowInEasing)) else arrival.snapTo(1f)
     }
 
     val line = if (threshold > 0f) threshold else SWIPE_THRESHOLD
     val progress: () -> Float = {
-        when (throwing.value) {
+        if (directGrade.value != null) 0f else when (throwing.value) {
             Rating.AGAIN -> -1f
             Rating.GOOD -> 1f
             else -> if (gradable.value) (shift() / line).coerceIn(-1f, 1f) else 0f
         }
     }
-    val ready: () -> Boolean = { armed.value != null || throwing.value != null }
+    val ready: () -> Boolean = { directGrade.value == null && (armed.value != null || throwing.value != null) }
 
-    // A/D are final-answer controls only. Space (or a pointer) reveals first;
-    // then one key-down performs the same visible throw as a mouse gesture. The
-    // fixed visual speed is animation only and never becomes pointer evidence.
+    suspend fun completeDirectGrade(rating: Rating, observation: ReviewSignals) {
+        directGrade.value = rating
+        try {
+            if (animations) directExit.animateTo(1f, tween(215, easing = FastOutSlowInEasing))
+            if (currentKey.value == key) {
+                rateNow.value(rating, observation)
+                if (animations) withFrameNanos { }
+            }
+        } finally {
+            directGrade.value = null
+            flying.value = false
+        }
+    }
+
+    // Buttons and keys use the same short transition and keep their input
+    // evidence distinct from the pointer's distance and velocity.
     LaunchedEffect(key, programmaticSwipe?.token) {
         val command = programmaticSwipe ?: return@LaunchedEffect
-        if (!revealedNow.value) {
-            programmaticHandledNow.value(command.token)
-            return@LaunchedEffect
+        if (flying.value) snapshotFlow { flying.value }.first { active -> !active }
+        if (revealedNow.value && !savingNow.value && currentKey.value == key) {
+            flying.value = true
+            signals.keyboardStarted()
+            completeDirectGrade(command.rating, signals.snapshot(inputMethod = INPUT_KEYBOARD))
+            directExit.snapTo(0f)
         }
-        // A mouse pull reveals first and then springs back. A/D pressed during
-        // that short spring must be queued, not silently discarded. Waiting on
-        // the actual state also keeps keyboard timing out of pointer telemetry.
-        if (flying.value) {
-            snapshotFlow { flying.value }.first { active -> !active }
-        }
-        if (!revealedNow.value) {
-            programmaticHandledNow.value(command.token)
-            return@LaunchedEffect
-        }
-        val direction = if (command.rating == Rating.AGAIN) -1f else 1f
-        flying.value = true
-        throwing.value = command.rating
-        offsetX.snapTo(drag.value)
-        signals.keyboardStarted()
-        val observation = signals.snapshot(inputMethod = INPUT_KEYBOARD)
-        val visualVelocity = PROGRAMMATIC_THROW_SPEED * direction
-        if (animations) throwOut(offsetX, command.rating, Velocity(visualVelocity, 0f))
-        if (currentKey.value == key) rateNow.value(command.rating, observation)
-        throwing.value = null
-        offsetX.snapTo(0f)
-        drag.value = 0f
-        flying.value = false
         programmaticHandledNow.value(command.token)
     }
 
     fun rateFromButton(rating: Rating) {
         if (!revealedNow.value || flying.value || savingNow.value) return
         flying.value = true
-        throwing.value = rating
         signals.answerStarted(INPUT_BUTTON)
         val observation = signals.snapshot(inputMethod = INPUT_BUTTON)
         scope.launch {
-            offsetX.snapTo(drag.value)
-            val speed = if (rating == Rating.AGAIN) -PROGRAMMATIC_THROW_SPEED else PROGRAMMATIC_THROW_SPEED
-            if (animations) throwOut(offsetX, rating, Velocity(speed, 0f))
-            if (currentKey.value == key) rateNow.value(rating, observation)
-            offsetX.snapTo(0f)
-            drag.value = 0f
-            throwing.value = null
-            flying.value = false
+            completeDirectGrade(rating, observation)
+            directExit.snapTo(0f)
         }
     }
 
@@ -324,8 +315,10 @@ fun SwipeableCard(
                             flying.value = true
                             scope.launch {
                                 offsetX.snapTo(drag.value)
+                                usesAnimatedOffset.value = true
                                 settle(offsetX, animations)
                                 drag.value = 0f
+                                usesAnimatedOffset.value = false
                                 flying.value = false
                             }
                         },
@@ -349,8 +342,10 @@ fun SwipeableCard(
                             if (rating == null) {
                                 scope.launch {
                                     offsetX.snapTo(drag.value)
+                                    usesAnimatedOffset.value = true
                                     settle(offsetX, animations, velocity)
                                     drag.value = 0f
+                                    usesAnimatedOffset.value = false
                                     flying.value = false
                                 }
                             } else {
@@ -360,11 +355,13 @@ fun SwipeableCard(
                                 throwing.value = rating
                                 scope.launch {
                                     offsetX.snapTo(drag.value)
+                                    usesAnimatedOffset.value = true
                                     if (animations) throwOut(offsetX, rating, velocity)
                                     if (currentKey.value == key) rateNow.value(rating, observation)
                                     throwing.value = null
                                     offsetX.snapTo(0f)
                                     drag.value = 0f
+                                    usesAnimatedOffset.value = false
                                     flying.value = false
                                 }
                             }
@@ -373,10 +370,14 @@ fun SwipeableCard(
                 }
         ) {
             SwipeGlow(progress, ready, animations)
-            if (hasNextCard && animations && (throwing.value != null || saving)) {
+            if (hasNextCard && animations && (throwing.value != null || directGrade.value != null || saving)) {
                 IknaCardBacking(
                     Modifier.matchParentSize().graphicsLayer {
-                        val leaving = if (saving) 1f else (abs(shift()) / size.width.coerceAtLeast(1f)).coerceIn(0f, 1f)
+                        val leaving = when {
+                            saving -> 1f
+                            directGrade.value != null -> directExit.value
+                            else -> (abs(shift()) / size.width.coerceAtLeast(1f)).coerceIn(0f, 1f)
+                        }
                         scaleX = 0.96f + 0.04f * leaving
                         scaleY = scaleX
                         translationY = (1f - leaving) * 12.dp.toPx()
@@ -390,14 +391,13 @@ fun SwipeableCard(
                     .graphicsLayer {
                         val landed = arrival.value.coerceIn(0f, 1f)
                         val travelled = shift()
-                        translationX = travelled
+                        val exiting = if (directGrade.value != null) directExit.value else 0f
+                        val direction = if (directGrade.value == Rating.AGAIN) -1f else 1f
+                        translationX = travelled + direction * exiting * 14.dp.toPx()
                         val lift = abs(progress())
-                        translationY = if (animations) ((1f - landed) * 12f - 4f * lift).dp.toPx() else 0f
+                        translationY = if (animations) ((1f - landed) * 5f - 4f * lift).dp.toPx() else 0f
                         rotationZ = if (animations) (travelled / ROTATION_DIVISOR).coerceIn(-6f, 6f) else 0f
-                        val grow = 0.972f + 0.028f * landed
-                        scaleX = grow
-                        scaleY = grow
-                        alpha = if (saving && animations) 0f else landed
+                        alpha = if (saving && animations) 0f else landed * (1f - exiting)
                     }
             ) {
                 content()
@@ -438,7 +438,7 @@ fun SwipeableCard(
                 )
             }
         }
-        }
+    }
 }
 
 /** Back to rest, carrying whatever speed the finger left behind. */
@@ -501,7 +501,7 @@ fun ChunkCard(
     val surface = lerp(palette.background, palette.surfaceVariant, 0.22f)
     val answerAlpha = animateFloatAsState(
         targetValue = if (revealed) 1f else 0f,
-        animationSpec = if (animations) tween(160) else snap(),
+        animationSpec = if (animations) tween(190, easing = LinearOutSlowInEasing) else snap(),
         label = "card-answer"
     )
 
@@ -581,7 +581,7 @@ fun ChunkCard(
                         .fillMaxWidth()
                         .graphicsLayer {
                             alpha = answerAlpha.value
-                            translationY = (1f - answerAlpha.value) * 6.dp.toPx()
+                            translationY = (1f - answerAlpha.value) * 3.dp.toPx()
                         }
                         .background(palette.primary.copy(alpha = 0.07f), shape)
                         .padding(Space.md)
@@ -648,19 +648,21 @@ private fun BoxScope.SwipeGlow(progress: () -> Float, ready: () -> Boolean, anim
     Box(
         Modifier.matchParentSize().drawBehind {
             val direction = progress()
-            if (abs(direction) < 0.02f) return@drawBehind
-            val center = Offset(size.width * (0.5f + 0.34f * direction), size.height * 0.82f)
+            val distance = abs(direction)
+            if (distance == 0f || size.width <= 0f || size.height <= 0f) return@drawBehind
             val color = if (direction > 0f) known else unknown
-            val radius = (size.width * 0.68f).coerceIn(120.dp.toPx(), 400.dp.toPx())
-            val alpha = 0.15f + 0.36f * abs(direction) + 0.24f * emphasis.value
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(color.copy(alpha = alpha), color.copy(alpha = 0f)),
-                    center = center,
-                    radius = radius
-                ),
-                radius = radius,
-                center = center
+            val reach = distance * (2f - distance)
+            val intensity = reach * (0.34f + 0.12f * emphasis.value)
+            val toward = if (direction > 0f) size.width else 0f
+            drawRect(
+                brush = Brush.linearGradient(
+                    0f to color.copy(alpha = 0f),
+                    0.47f to color.copy(alpha = intensity * 0.18f),
+                    0.78f to color.copy(alpha = intensity * 0.62f),
+                    1f to color.copy(alpha = intensity),
+                    start = Offset(size.width - toward, size.height * 0.34f),
+                    end = Offset(toward, size.height)
+                )
             )
         }
     )
@@ -668,22 +670,27 @@ private fun BoxScope.SwipeGlow(progress: () -> Float, ready: () -> Boolean, anim
 
 @Composable
 private fun BoxScope.SwipeIntent(progress: () -> Float, ready: () -> Boolean) {
-    val direction = progress()
-    if (abs(direction) < 0.06f) return
-    val known = direction > 0f
     val palette = MaterialTheme.colorScheme
-    val color = if (known) palette.primary else palette.tertiary
-    Text(
-        text = S.t(if (known) "card.004" else "card.003"),
-        style = MaterialTheme.typography.labelLarge,
-        color = palette.onSurface,
-        modifier = Modifier
-            .align(if (known) Alignment.TopEnd else Alignment.TopStart)
-            .padding(horizontal = Space.lg, vertical = Space.md)
-            .clearAndSetSemantics { }
-            .background(lerp(palette.surface, color, if (ready()) 0.26f else 0.12f), iknaTileShape())
-            .padding(horizontal = Space.md, vertical = Space.xs)
-    )
+    val shape = iknaTileShape()
+    for (known in listOf(false, true)) {
+        val color = if (known) palette.primary else palette.tertiary
+        Text(
+            text = S.t(if (known) "card.004" else "card.003"),
+            style = MaterialTheme.typography.labelLarge,
+            color = palette.onSurface,
+            modifier = Modifier
+                .align(if (known) Alignment.TopEnd else Alignment.TopStart)
+                .padding(horizontal = Space.lg, vertical = Space.md)
+                .clearAndSetSemantics { }
+                .graphicsLayer {
+                    val toward = if (known) progress() else -progress()
+                    val distance = toward.coerceIn(0f, 1f)
+                    alpha = distance * (if (ready()) 1f else 0.86f)
+                }
+                .background(lerp(palette.surface, color, 0.20f), shape)
+                .padding(horizontal = Space.md, vertical = Space.xs)
+        )
+    }
 }
 
 /**
