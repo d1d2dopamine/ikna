@@ -104,6 +104,32 @@ Preparation completed in this batch:
 - [x] Record tasks and available acceptance evidence in
   [ROUND-0.12-01.md](ROUND-0.12-01.md).
 
+### Gradual Rust migration
+
+Start with the shared learning engine. Use the current Kotlin implementation as
+the reference for behaviour. Keep Compose, Room, platform integrations and the
+existing release pipeline in place during the prototype.
+
+1. **Prototype the Load Governor.** Port the calculation to a standalone Rust
+   crate. Run the same fixtures in Kotlin and Rust, covering a fresh install,
+   normal study, overdue reviews, return after a break, and thresholds where
+   rounding or gate order can change the result. Compare the full
+   `GovernorDecision`, including the allowed count, limits and reason.
+2. **Integrate one component.** After parity, try a small Kotlin-to-Rust binding
+   in a development build while the Kotlin implementation remains the default.
+   Verify native-library loading and packaging on Android (including
+   `arm64-v8a` and `armeabi-v7a`), Windows and Linux. Review startup and build
+   overhead, document the rollback path and switch the default only after the
+   integration is verified.
+3. **Review further ports one module at a time.** Consider the scheduler and
+   grading separately after the Governor trial. For any code that affects
+   scheduling or replay, require equivalent results on the same saved review
+   histories and confirm that existing backups still restore. Keep review
+   history append-only and preserve stored formats during the trial.
+
+The first deliverable is a parity report for the Governor prototype. Use it and
+the cost of platform integration to decide how far to continue the migration.
+
 ## Current batch and next checkpoint
 
 Round 01 implements pointer-lifetime/bounds arbitration for Signal Frame, shared
