@@ -761,7 +761,7 @@ class DesignContracts(unittest.TestCase):
         self.assertIn('cornerRadius = iknaFrameRadius(rounded = 12.dp, angular = 8.dp)', palettes)
         self.assertIn('.hoverable(tileInteraction)', palettes)
         self.assertIn('selected: Boolean = false', controls)
-        self.assertIn('selected = activeDestination', desktop_shell)
+        self.assertEqual(2, desktop_shell.count('selected = ui.pane.homeDestination()'))
         self.assertIn('selected = active', read(SHARED, 'ui/decks/HomeChrome.kt'))
 
     def test_palette_grid_shares_lighting_and_accessible_selection_on_both_platforms(self):

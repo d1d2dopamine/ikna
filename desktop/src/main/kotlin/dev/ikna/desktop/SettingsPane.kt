@@ -254,9 +254,12 @@ fun SettingsPane(
                     ToggleRow(S.t("bar.dock_top"), settings.homeDockAtTop, palette) {
                         save { container.settings.setHomeDockAtTop(it) }
                     }
+                    Spacer(Modifier.height(12.dp))
+                    ToggleRow(S.t("bar.dock_full"), settings.homeDockFullWidth, palette) {
+                        save { container.settings.setHomeDockFullWidth(it) }
+                    }
                     Spacer(Modifier.height(16.dp))
                     dev.ikna.ui.decks.IknaDeckBackgroundSettings(
-
                         background = settings.deckBackground,
                         onBackground = { background -> save { container.settings.setDeckBackground(background) } }
                     )

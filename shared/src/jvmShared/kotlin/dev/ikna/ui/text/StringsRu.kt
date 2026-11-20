@@ -565,6 +565,7 @@ val STRINGS_RU: Map<String, String> = mapOf(
 	"look.004" to "1-2 символа. Оставьте пустым - буквы подберутся сами.",
 	"bar.001" to "Логотип ikna",
 	"bar.dock_top" to "Панель навигации сверху", "bar.003" to "Под левую руку",
+    "bar.dock_full" to "Панель навигации на всю ширину",
 
 	// The update window and the update section in settings.
 	"upd.001" to "ДОСТУПНО ОБНОВЛЕНИЕ",

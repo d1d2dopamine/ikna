@@ -63,21 +63,36 @@ class HomeDockLayoutTest {
         BundledSQLiteDriver().open(":memory:").close()
         runDesktopComposeUiTest(width = 300, height = 500) {
             val atTop = mutableStateOf(false)
+            val fullWidth = mutableStateOf(false)
             val opened = mutableListOf<HomeDestination>()
             setContent {
                 MaterialTheme {
-                    IknaHomeChrome(dockAtTop = atTop.value, leftHanded = false, onNavigate = { opened += it }) {
-                        Box(Modifier.fillMaxWidth().weight(1f))
+                    IknaHomeChrome(
+                        dockAtTop = atTop.value,
+                        leftHanded = false,
+                        fullWidthDock = fullWidth.value,
+                        today = { Text("Today summary") },
+                        onNavigate = { opened += it }
+                    ) {
+                        Box(Modifier.fillMaxWidth().weight(1f)) { Text("First deck") }
                     }
                 }
             }
             val heading = onNodeWithText(S.t("deck.004"))
             val search = onNodeWithContentDescription(S.t("a11y.011"))
             assertTrue(heading.getUnclippedBoundsInRoot().bottom < search.getUnclippedBoundsInRoot().top)
-            runOnIdle { atTop.value = true }
-            assertTrue(search.getUnclippedBoundsInRoot().bottom < heading.getUnclippedBoundsInRoot().top)
-            search.performClick()
-            runOnIdle { assertEquals(listOf(HomeDestination.SEARCH), opened) }
+            for (wideBar in listOf(false, true)) {
+                runOnIdle {
+                    atTop.value = true
+                    fullWidth.value = wideBar
+                }
+                val bounds = search.getUnclippedBoundsInRoot()
+                assertTrue(onNodeWithText("Today summary").getUnclippedBoundsInRoot().bottom < bounds.top)
+                assertTrue(bounds.bottom < onNodeWithText("First deck").getUnclippedBoundsInRoot().top)
+                assertTrue(bounds.bottom < heading.getUnclippedBoundsInRoot().top)
+                search.performClick()
+            }
+            runOnIdle { assertEquals(List(2) { HomeDestination.SEARCH }, opened) }
         }
     }
 }

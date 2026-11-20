@@ -296,6 +296,7 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "voice.050" to "Ein großes Modell braucht Minuten zum Entpacken; der Telefonprozessor verarbeitet bzip2.", "voice.051" to "Du kannst diesen Bildschirm verlassen; die Installation läuft weiter. Lege die App nicht lange weg.",
     "look.001" to "Erscheinungsbild", "look.002" to "Buchstaben und Farbe des Quadrats in der Deckliste. Nur für dich; beim Teilen werden nur die Karten gesendet.",
     "look.003" to "Farbe des Quadrats", "look.004" to "Ein oder zwei Zeichen. Leer bestimmt das Quadrat sie selbst.", "bar.001" to "Das ikna-Zeichen", "bar.dock_top" to "Navigation oben", "bar.003" to "Für die linke Hand",
+    "bar.dock_full" to "Navigationsleiste über die ganze Breite",
     "upd.001" to "AKTUALISIERUNG VERFÜGBAR", "upd.002" to "Größe: ", "upd.003" to "MB", "upd.004" to "Neu:", "upd.005" to "AKTUALISIEREN", "upd.006" to "ÜBERSPRINGEN",
     "upd.007" to "Die App lädt die Datei selbst; Balken und Prozent stehen hier. Android installiert die neue Version über die alte, Karten und Fortschritt bleiben.",
     "upd.008" to "Nach Aktualisierungen suchen", "upd.009" to "Eine Anfrage an die Releaseseite, höchstens einmal täglich. Nichts wird gesendet. Ausgeschaltet wird keine Verbindung geöffnet.",

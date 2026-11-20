@@ -560,6 +560,7 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "look.004" to "Um ou dois caracteres. Se ficar vazio, o quadrado escolhe sozinho.",
     "bar.001" to "A marca da Ikna",
     "bar.dock_top" to "Navegação no topo", "bar.003" to "Para a mão esquerda",
+    "bar.dock_full" to "Barra de navegação de largura total",
     "upd.001" to "ATUALIZAÇÃO DISPONÍVEL",
     "upd.002" to "Tamanho: ",
     "upd.003" to "MB",

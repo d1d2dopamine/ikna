@@ -559,6 +559,7 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "look.004" to "Uno o dos caracteres. Si se deja vacío, el cuadrado los calcula solo.",
     "bar.001" to "La marca ikna",
     "bar.dock_top" to "Navegación arriba", "bar.003" to "Para la mano izquierda",
+    "bar.dock_full" to "Barra de navegación de ancho completo",
     "upd.001" to "ACTUALIZACIÓN DISPONIBLE",
     "upd.002" to "Tamaño: ",
     "upd.003" to "MB",

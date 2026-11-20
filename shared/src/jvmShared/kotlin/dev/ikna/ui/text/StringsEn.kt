@@ -862,6 +862,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	// Слева в нижнем баре. Выключите — место уйдёт кнопкам
 	// Под левую руку
 	"bar.dock_top" to "Navigation at the top", "bar.003" to "For the left hand",
+    "bar.dock_full" to "Full-width navigation bar",
 	// Нижний бар зеркалится: плюс уходит в левый угол, остальные кнопки — вправо
 
 	// The update window and the update section in settings.

@@ -315,6 +315,7 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "voice.050" to "Un grand modèle met plusieurs minutes à se décompresser sur le processeur du téléphone.", "voice.051" to "Vous pouvez quitter cet écran ; l’installation continue. Ne laissez pas l’app longtemps en arrière-plan.",
     "look.001" to "Apparence", "look.002" to "Lettres et couleur du carré dans la liste. Elles restent sur votre téléphone ; le destinataire ne reçoit que les cartes.",
     "look.003" to "Couleur du carré", "look.004" to "Un ou deux caractères. Vide, le carré choisit seul.", "bar.001" to "La marque ikna", "bar.dock_top" to "Navigation en haut", "bar.003" to "Pour la main gauche",
+    "bar.dock_full" to "Barre de navigation pleine largeur",
     "upd.001" to "MISE À JOUR DISPONIBLE", "upd.002" to "Taille : ", "upd.003" to "Mo", "upd.004" to "Nouveautés :", "upd.005" to "METTRE À JOUR", "upd.006" to "PASSER",
     "upd.007" to "L’app télécharge le fichier ; la barre et le pourcentage sont ici. Android installe la nouvelle version par-dessus l’ancienne sans perdre les cartes.",
     "upd.008" to "Rechercher les mises à jour", "upd.009" to "Une requête vers la page des versions, au plus une fois par jour. Rien n’est envoyé. Désactivé, aucune connexion n’est ouverte.",

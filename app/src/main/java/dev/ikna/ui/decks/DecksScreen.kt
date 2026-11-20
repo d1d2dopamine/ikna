@@ -132,6 +132,18 @@ fun DecksScreen(
         IknaHomeChrome(
             dockAtTop = settings.homeDockAtTop,
             leftHanded = settings.leftHanded,
+            fullWidthDock = settings.homeDockFullWidth,
+            today = {
+                Column(modifier = Modifier.padding(horizontal = Edge)) {
+                    Spacer(Modifier.height(Space.md))
+                    IknaTodayBlock(
+                        summary = state.todaySummary,
+                        perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
+                        onClick = { onOpenSession(null) }
+                    )
+                    Spacer(Modifier.height(if (settings.homeDockAtTop) Space.xs else Space.xl))
+                }
+            },
             onNavigate = { destination ->
                 when (destination) {
                     HomeDestination.STATS -> onOpenStats()
@@ -142,16 +154,6 @@ fun DecksScreen(
                 }
             }
         ) {
-            Column(modifier = Modifier.padding(horizontal = Edge)) {
-                Spacer(Modifier.height(Space.md))
-                IknaTodayBlock(
-                    summary = state.todaySummary,
-                    perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
-                    onClick = { onOpenSession(null) }
-                )
-                Spacer(Modifier.height(Space.xl))
-            }
-
             LazyColumn(
                 state = listState,
                 modifier = Modifier

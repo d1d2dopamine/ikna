@@ -509,9 +509,14 @@ fun SettingsScreen(
                             checked = settings.homeDockAtTop,
                             onCheckedChange = { scope.launch { container.settings.setHomeDockAtTop(it) } }
                         )
+                        IknaSettingsToggleRow(
+                            title = S.t("bar.dock_full"),
+                            subtitle = null,
+                            checked = settings.homeDockFullWidth,
+                            onCheckedChange = { scope.launch { container.settings.setHomeDockFullWidth(it) } }
+                        )
                         Spacer(Modifier.height(16.dp))
                         dev.ikna.ui.decks.IknaDeckBackgroundSettings(
-
                             background = settings.deckBackground,
                             onBackground = { background -> scope.launch { container.settings.setDeckBackground(background) } }
                         )

@@ -50,6 +50,7 @@ import dev.ikna.ui.decks.IknaDeckRow
 import dev.ikna.data.repo.TodayStudySummary
 import dev.ikna.ui.decks.IknaTodayBlock
 import dev.ikna.ui.decks.IknaHomeChrome
+import dev.ikna.ui.decks.IknaHomeDock
 import dev.ikna.ui.decks.HomeDestination
 import dev.ikna.ui.nav.sharedAxisEnter
 import dev.ikna.ui.nav.sharedAxisExit
@@ -78,6 +79,15 @@ import kotlinx.coroutines.withContext
 /** Which screen the content area is showing. */
 enum class Pane { SESSION, BROWSE, DECK, STATS, SETTINGS, ADD, CATALOG, SEARCH, ANKI, BACKUP, SUPPORT }
 
+private fun Pane.homeDestination(): HomeDestination? = when (this) {
+    Pane.STATS -> HomeDestination.STATS
+    Pane.SETTINGS, Pane.BACKUP -> HomeDestination.SETTINGS
+    Pane.SEARCH -> HomeDestination.SEARCH
+    Pane.SUPPORT -> HomeDestination.SUPPORT
+    Pane.ADD, Pane.CATALOG, Pane.ANKI -> HomeDestination.ADD
+    else -> null
+}
+
 /**
  * The state the window agrees on with its key handler.
  *
@@ -104,6 +114,16 @@ class DesktopUi {
     fun show(target: Pane) {
         pane = target
         listOpen = false
+    }
+
+    internal fun navigateHome(destination: HomeDestination) {
+        show(when (destination) {
+            HomeDestination.STATS -> Pane.STATS
+            HomeDestination.SETTINGS -> Pane.SETTINGS
+            HomeDestination.SEARCH -> Pane.SEARCH
+            HomeDestination.ADD -> Pane.ADD
+            HomeDestination.SUPPORT -> Pane.SUPPORT
+        })
     }
 
     /** Start or resume the cards, for one deck or for everything due. */
@@ -351,26 +371,34 @@ private fun DesktopShell(
         }
 
         if (wide) {
-            Row(Modifier.fillMaxSize()) {
-                // The panes separate by surface tone, not by a line: the deck
-                // column wears the panel tone, the content keeps the window
-                // background (docs/ai-audits.md 7.4, variant 1).
-                val expanded = ui.pane != Pane.SESSION || !ui.studyDecksCollapsed
-                val sidebarWidth by animateDpAsState(
-                    targetValue = if (expanded) listWidth else 0.dp,
-                    animationSpec = if (settings.animations) tween(240) else snap(),
-                    label = "deck-sidebar"
-                )
-                DesktopDeckSidebarViewport(sidebarWidth, listWidth) {
-                    DecksColumn(settings, palette, ui, decks, remaining, todaySummary, deckListState,
-                        offeredUpdate, skipUpdate, showWordmark = expanded)
+            val windowDock = settings.homeDockFullWidth && !settings.homeDockAtTop
+            Column(Modifier.fillMaxSize()) {
+                Row(Modifier.weight(1f).fillMaxWidth()) {
+                    val expanded = ui.pane != Pane.SESSION || !ui.studyDecksCollapsed
+                    val sidebarWidth by animateDpAsState(
+                        targetValue = if (expanded) listWidth else 0.dp,
+                        animationSpec = if (settings.animations) tween(240) else snap(),
+                        label = "deck-sidebar"
+                    )
+                    DesktopDeckSidebarViewport(sidebarWidth, listWidth) {
+                        DecksColumn(settings, ui, decks, remaining, todaySummary, deckListState,
+                            offeredUpdate, skipUpdate, showWordmark = expanded, dockInWindow = windowDock)
+                    }
+                    Box(Modifier.weight(1f).fillMaxHeight()) {
+                        PaneContent(container, settings, palette, ui, decks, wide = true, onRestartRequested = onRestartRequested)
+                    }
                 }
-                Box(Modifier.weight(1f).fillMaxHeight()) {
-                    PaneContent(container, settings, palette, ui, decks, wide = true, onRestartRequested = onRestartRequested)
+                if (windowDock) {
+                    IknaHomeDock(
+                        leftHanded = settings.leftHanded,
+                        selected = ui.pane.homeDestination(),
+                        fullWidth = true,
+                        onNavigate = ui::navigateHome
+                    )
                 }
             }
         } else if (ui.listOpen) {
-            DecksColumn(settings, palette, ui, decks, remaining, todaySummary, deckListState,
+            DecksColumn(settings, ui, decks, remaining, todaySummary, deckListState,
                 offeredUpdate, skipUpdate)
         } else {
             PaneContent(container, settings, palette, ui, decks, wide = false, onRestartRequested = onRestartRequested)
@@ -399,7 +427,6 @@ internal fun DesktopDeckSidebarViewport(
 @Composable
 private fun DecksColumn(
     settings: IknaSettings,
-    palette: IknaPalette,
     ui: DesktopUi,
     decks: List<DeckSummary>,
     remaining: Map<String, Int>,
@@ -407,43 +434,31 @@ private fun DecksColumn(
     listState: LazyListState,
     update: DesktopUpdateRelease?,
     onSkipUpdate: () -> Unit,
-    showWordmark: Boolean = true
+    showWordmark: Boolean = true,
+    dockInWindow: Boolean = false
 ) {
 
     Box(Modifier.fillMaxSize().iknaInspect("DecksColumn")) {
         IknaHomeBackdrop(settings.deckBackground)
 
-        val activeDestination = when (ui.pane) {
-            Pane.STATS -> HomeDestination.STATS
-            Pane.SETTINGS, Pane.BACKUP -> HomeDestination.SETTINGS
-            Pane.SEARCH -> HomeDestination.SEARCH
-            Pane.SUPPORT -> HomeDestination.SUPPORT
-            Pane.ADD, Pane.CATALOG, Pane.ANKI -> HomeDestination.ADD
-            else -> null
-        }
         IknaHomeChrome(
             dockAtTop = settings.homeDockAtTop,
             leftHanded = settings.leftHanded,
-            selected = activeDestination,
+            selected = ui.pane.homeDestination(),
             showWordmark = showWordmark,
-            onNavigate = { destination ->
-                ui.show(when (destination) {
-                    HomeDestination.STATS -> Pane.STATS
-                    HomeDestination.SETTINGS -> Pane.SETTINGS
-                    HomeDestination.SEARCH -> Pane.SEARCH
-                    HomeDestination.ADD -> Pane.ADD
-                    HomeDestination.SUPPORT -> Pane.SUPPORT
-                })
-            }
-        ) {
-            Column(Modifier.padding(horizontal = Edge)) {
-                Spacer(Modifier.height(Space.md))
-                IknaTodayBlock(todaySummary, settings.answerMs.takeIf { it > 0 }?.toLong()) {
-                    ui.study(null)
+            fullWidthDock = settings.homeDockFullWidth,
+            dockInWindow = dockInWindow,
+            today = {
+                Column(Modifier.padding(horizontal = Edge)) {
+                    Spacer(Modifier.height(Space.md))
+                    IknaTodayBlock(todaySummary, settings.answerMs.takeIf { it > 0 }?.toLong()) {
+                        ui.study(null)
+                    }
+                    Spacer(Modifier.height(if (settings.homeDockAtTop) Space.xs else Space.xl))
                 }
-                Spacer(Modifier.height(Space.xl))
-            }
-
+            },
+            onNavigate = ui::navigateHome
+        ) {
             LazyColumn(
                 state = listState,
                 modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = Edge),

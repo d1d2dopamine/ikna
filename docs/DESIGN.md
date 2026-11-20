@@ -122,13 +122,14 @@ DrawScope: scroll viewports, animated pane clips and tight rows must never cut o
 one side of the signal. INNER frames remain local. Motion, stroke, dash rhythm and
 shared phase are the same in both placements.
 
-Home offers the classic pixel field, a smooth tonal gradient and a solid
-background. Appearance shows previews of all three in the active app palette.
+Home offers the default pixel field, a gradient, a solid background, a soft
+glow and a grid. Appearance previews them in the active app palette.
 The classic field is the default and stays inside the deck list.
 Window chrome and secondary action bars use solid surfaces. The navigation dock is a compact, raised
-shelf with a tinted tile for the current desktop destination. The option in
-Appearance moves it to the top and moves the deck heading, wordmark and cat to
-the bottom. Native window controls stay in the window frame. The reading cat
+shelf or a full-width bar with centered icons and a tint for the active
+destination. On wide desktop windows the full-width bottom bar spans both panes.
+The upper placement puts the dock below Today and above the deck list, and moves
+the deck heading, wordmark and cat to the bottom. Native window controls stay in the window frame. The reading cat
 keeps its 48 dp slot beside the title. Its transparent artwork maps contours to ink, the book to accent and light
 interiors to the current background; it has no hit target or accessibility label.
 Keep the selected 1254 px artwork intact. Its small slot uses mipmap-aware Medium

@@ -7,12 +7,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,20 +44,32 @@ enum class HomeDestination(val glyph: IknaGlyph, val labelKey: String) {
     SUPPORT(IknaGlyph.SUPPORT, "support.title")
 }
 
-/** The content keeps its available height when the heading and dock trade places. */
+/** The upper dock belongs between Today and the deck list. */
 @Composable
 fun IknaHomeChrome(
     dockAtTop: Boolean,
     leftHanded: Boolean,
     selected: HomeDestination? = null,
     showWordmark: Boolean = true,
+    fullWidthDock: Boolean = false,
+    dockInWindow: Boolean = false,
+    today: @Composable ColumnScope.() -> Unit = {},
     onNavigate: (HomeDestination) -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(Modifier.fillMaxSize()) {
-        if (dockAtTop) HomeDock(leftHanded, selected, onNavigate) else HomeHeading(showWordmark)
+        if (!dockAtTop) HomeHeading(showWordmark)
+        today()
+        if (dockAtTop) {
+            IknaHomeDock(leftHanded, selected, fullWidthDock, onNavigate)
+            Spacer(Modifier.height(Space.sm))
+        }
         content()
-        if (dockAtTop) HomeHeading(showWordmark) else HomeDock(leftHanded, selected, onNavigate)
+        if (dockAtTop) {
+            HomeHeading(showWordmark)
+        } else if (!dockInWindow) {
+            IknaHomeDock(leftHanded, selected, fullWidthDock, onNavigate)
+        }
     }
 }
 
@@ -82,25 +97,32 @@ private fun HomeHeading(showWordmark: Boolean) {
 }
 
 @Composable
-private fun HomeDock(
+fun IknaHomeDock(
     leftHanded: Boolean,
     selected: HomeDestination?,
+    fullWidth: Boolean,
     onNavigate: (HomeDestination) -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
     val rim = RoundedCornerShape(22.dp)
     val order = if (leftHanded) HomeDestination.entries.asReversed() else HomeDestination.entries
+    val fill = lerp(colors.surface, colors.outlineVariant, if (fullWidth) 0.08f else 0.12f)
+    val shell = if (fullWidth) Modifier.background(fill) else Modifier.padding(Space.sm)
     Box(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = Space.sm, vertical = Space.sm),
+        modifier = Modifier.fillMaxWidth().then(shell),
         contentAlignment = Alignment.Center
     ) {
+        if (fullWidth) {
+            HorizontalDivider(Modifier.align(Alignment.TopCenter), color = colors.outlineVariant)
+        }
+        val dock = if (fullWidth) Modifier else Modifier
+            .shadow(3.dp, rim)
+            .background(fill, rim)
+            .border(1.dp, colors.outlineVariant.copy(alpha = 0.76f), rim)
         Row(
-            modifier = Modifier
+            modifier = dock
                 .iknaInspect("Home dock")
-                .shadow(3.dp, rim)
-                .background(lerp(colors.surface, colors.outlineVariant, 0.12f), rim)
-                .border(1.dp, colors.outlineVariant.copy(alpha = 0.76f), rim)
-                .padding(horizontal = 6.dp, vertical = 4.dp),
+                .padding(horizontal = 6.dp, vertical = if (fullWidth) 6.dp else 4.dp),
             horizontalArrangement = Arrangement.spacedBy(Space.xs),
             verticalAlignment = Alignment.CenterVertically
         ) {

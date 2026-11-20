@@ -202,6 +202,7 @@ data class IknaSettings(
      */
     val leftHanded: Boolean = false,
     val homeDockAtTop: Boolean = false,
+    val homeDockFullWidth: Boolean = false,
     val deckBackground: DeckBackground = DeckBackground.CLASSIC,
     /**
      * How each deck's square looks: a label and a colour, stored as
@@ -343,6 +344,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val showWordmark = booleanPreferencesKey("showWordmark")
         val leftHanded = booleanPreferencesKey("leftHanded")
         val homeDockAtTop = booleanPreferencesKey("homeDockAtTop")
+        val homeDockFullWidth = booleanPreferencesKey("homeDockFullWidth")
         val deckBackground = stringPreferencesKey("deckBackground")
         val deckLooks = stringPreferencesKey("deckLooks")
         val deckPhonetics = stringPreferencesKey("deckPhonetics")
@@ -416,6 +418,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             showWordmark = p[Keys.showWordmark] ?: defaults.showWordmark,
             leftHanded = p[Keys.leftHanded] ?: defaults.leftHanded,
             homeDockAtTop = p[Keys.homeDockAtTop] ?: defaults.homeDockAtTop,
+            homeDockFullWidth = p[Keys.homeDockFullWidth] ?: defaults.homeDockFullWidth,
             deckBackground = DeckBackground.entries.firstOrNull { it.name == p[Keys.deckBackground] }
                 ?: defaults.deckBackground,
             deckLooks = p[Keys.deckLooks] ?: defaults.deckLooks,
@@ -498,6 +501,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
     suspend fun setShowWordmark(on: Boolean) = put { it[Keys.showWordmark] = on }
     suspend fun setLeftHanded(on: Boolean) = put { it[Keys.leftHanded] = on }
     suspend fun setHomeDockAtTop(on: Boolean) = put { it[Keys.homeDockAtTop] = on }
+    suspend fun setHomeDockFullWidth(on: Boolean) = put { it[Keys.homeDockFullWidth] = on }
     suspend fun setDeckBackground(background: DeckBackground) = put { it[Keys.deckBackground] = background.name }
 
     /** Every deck's look at once. Used by a restore. */
