@@ -84,7 +84,10 @@ kotlin {
 
             // TLS certificate generation only; connections use platform JSSE with exact peer pins.
             implementation("com.squareup.okhttp3:okhttp-tls:4.12.0")
-            implementation("com.optimaize.languagedetector:language-detector:0.6")
+            implementation("com.optimaize.languagedetector:language-detector:0.6") {
+                exclude(group = "com.intellij", module = "annotations")
+            }
+            implementation("com.google.guava:guava:33.4.8-android")
 
             api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
             api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
