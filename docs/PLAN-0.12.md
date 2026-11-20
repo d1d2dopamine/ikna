@@ -178,9 +178,11 @@ these in separate changes so each interaction can be reviewed on its own.
    how recall changed, which cards were repeatedly missed and when the next
    reviews are due. Derive summaries from the retained review journal. Label
    estimates and show when there is too little data, particularly for recall.
-7. **Export statistics from one expandable action.** «Скачать статистику»
-   opens compact choices attached to the button for period and format, then
-   offers Save. Periods are all available history, 7 days and 30 days. Start
+7. **Export statistics from one anchored popup.** «Скачать статистику»
+   opens a panel above or below the button, depending on available space.
+   Period and format sit in separate columns that wrap on narrow screens.
+   Save opens the system file chooser. Periods are all available history,
+   7 days and 30 days. Start
    with CSV for spreadsheets and JSON for structured export. Include review
    records and the corresponding summaries for the selected period. Define day
    boundaries consistently with the app and check that undone answers and
