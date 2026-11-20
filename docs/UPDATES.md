@@ -2,11 +2,13 @@
 
 ## Windows and Linux
 
-Settings → Updates checks the version packaged in the desktop build against the
-latest stable GitHub release. A newer release offers direct downloads for the
-running platform and architecture. Windows offers installer and portable builds
-when both are published. Linux offers the AppImage. The browser handles the
-download, and installation or file replacement remains a user action.
+The deck list shows available updates after startup when update checks are
+enabled. It checks at most once a day, and Skip dismisses that version.
+Settings → Updates can check again on demand. A newer release offers direct
+downloads for the running platform and architecture. Windows offers installer
+and portable builds when both are published. Linux offers the AppImage.
+The browser handles the download, and installation or file replacement remains
+a user action.
 
 This app is not in a store. A build reaches a phone as an APK from the releases
 page, which has one consequence that took four versions to become obvious: a

@@ -33,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +43,8 @@ import dev.ikna.data.prefs.HotkeyBindings
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.lookFor
 import dev.ikna.data.repo.DeckSummary
+import dev.ikna.data.update.DesktopUpdateRelease
+import dev.ikna.data.update.UpdateCheck
 import dev.ikna.ui.decks.IknaDeckRow
 import dev.ikna.data.repo.TodayStudySummary
 import dev.ikna.ui.decks.IknaTodayBlock
@@ -68,6 +71,7 @@ import dev.ikna.ui.theme.paletteFor
 import dev.ikna.ui.theme.rememberContentFont
 import dev.ikna.ui.theme.iknaInspect
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Which screen the content area is showing. */
@@ -295,6 +299,29 @@ private fun DesktopShell(
     var decks by remember { mutableStateOf<List<DeckSummary>>(emptyList()) }
     var remaining by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
     var todaySummary by remember { mutableStateOf(TodayStudySummary()) }
+    val scope = rememberCoroutineScope()
+    var checkedForUpdate by remember { mutableStateOf(false) }
+    var desktopUpdate by remember { mutableStateOf<DesktopUpdateRelease?>(null) }
+
+    LaunchedEffect(settings.updateCheck, settings.updateCheckedAt) {
+        if (container.isDeveloperMode || checkedForUpdate || !settings.updateCheck) return@LaunchedEffect
+        val now = System.currentTimeMillis()
+        if (now - settings.updateCheckedAt in 0 until UpdateCheck.CHECK_EVERY_MS) return@LaunchedEffect
+        val release = UpdateCheck(APP_VERSION).latestDesktop(
+            osName = System.getProperty("os.name").orEmpty(),
+            architecture = System.getProperty("os.arch").orEmpty()
+        )
+        checkedForUpdate = true
+        if (release != null && release.version != settings.updateSkipped) desktopUpdate = release
+        container.settings.markUpdateChecked(now)
+    }
+    val offeredUpdate = desktopUpdate.takeIf { settings.updateCheck }
+    val skipUpdate: () -> Unit = {
+        desktopUpdate?.let { release ->
+            desktopUpdate = null
+            scope.launch { container.settings.skipUpdate(release.version, System.currentTimeMillis()) }
+        }
+    }
 
     LaunchedEffect(ui.reload) {
         val nextDecks = runCatching { container.deckRepository.decks() }.getOrDefault(emptyList())
@@ -337,7 +364,8 @@ private fun DesktopShell(
                     .clipToBounds().background(MaterialTheme.colorScheme.surface)) {
                     if (sidebarWidth > 0.dp) {
                         Box(Modifier.wrapContentSize(Alignment.TopStart, unbounded = true).width(listWidth).fillMaxHeight()) {
-                            DecksColumn(settings, palette, ui, decks, remaining, todaySummary, deckListState, showWordmark = expanded)
+                            DecksColumn(settings, palette, ui, decks, remaining, todaySummary, deckListState,
+                                offeredUpdate, skipUpdate, showWordmark = expanded)
                         }
                     }
                 }
@@ -346,7 +374,8 @@ private fun DesktopShell(
                 }
             }
         } else if (ui.listOpen) {
-            DecksColumn(settings, palette, ui, decks, remaining, todaySummary, deckListState)
+            DecksColumn(settings, palette, ui, decks, remaining, todaySummary, deckListState,
+                offeredUpdate, skipUpdate)
         } else {
             PaneContent(container, settings, palette, ui, decks, wide = false, onRestartRequested = onRestartRequested)
         }
@@ -363,6 +392,8 @@ private fun DecksColumn(
     remaining: Map<String, Int>,
     todaySummary: TodayStudySummary,
     listState: LazyListState,
+    update: DesktopUpdateRelease?,
+    onSkipUpdate: () -> Unit,
     showWordmark: Boolean = true
 ) {
 
@@ -406,6 +437,20 @@ private fun DecksColumn(
                     modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = Edge),
                     verticalArrangement = Arrangement.spacedBy(Space.lg)
                 ) {
+                    if (update != null) {
+                        item(key = "desktop-update") {
+                            Column {
+                                Text(
+                                    text = S.t("upd.016") + update.version,
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                                update.packages.forEach { (kind, asset) ->
+                                    IknaTextButton(kind.updateLabel(), onClick = { openInBrowser(asset.url) })
+                                }
+                                IknaTextButton(S.t("upd.006"), onClick = onSkipUpdate)
+                            }
+                        }
+                    }
                     items(decks, key = { it.id }) { deck ->
                         IknaDeckRow(
                             deck = deck,

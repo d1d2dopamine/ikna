@@ -417,12 +417,7 @@ fun SettingsPane(
                                 Text(release.notes, style = MaterialTheme.typography.bodySmall, color = palette.muted, maxLines = 5)
                             }
                             release.packages.forEach { (kind, asset) ->
-                                val label = when (kind) {
-                                    DesktopUpdatePackage.WINDOWS_SETUP -> "upd.desktop_setup"
-                                    DesktopUpdatePackage.WINDOWS_PORTABLE -> "upd.desktop_portable"
-                                    DesktopUpdatePackage.LINUX_APPIMAGE -> "upd.desktop_appimage"
-                                }
-                                IknaButton(label = S.t(label), palette = palette) { openInBrowser(asset.url) }
+                                IknaButton(label = kind.updateLabel(), palette = palette) { openInBrowser(asset.url) }
                             }
                         }
                     }
@@ -830,7 +825,13 @@ private fun themeLabel(mode: ThemeMode): String = when (mode) {
  * manager here, so the number lives next to the code that shows it and next to
  * the code that asks the release feed whether anything newer exists.
  */
-private val APP_VERSION: String by lazy {
+internal fun DesktopUpdatePackage.updateLabel(): String = S.t(when (this) {
+    DesktopUpdatePackage.WINDOWS_SETUP -> "upd.desktop_setup"
+    DesktopUpdatePackage.WINDOWS_PORTABLE -> "upd.desktop_portable"
+    DesktopUpdatePackage.LINUX_APPIMAGE -> "upd.desktop_appimage"
+})
+
+internal val APP_VERSION: String by lazy {
     object {}.javaClass.getResourceAsStream("/ikna-version.txt")
         ?.bufferedReader(Charsets.UTF_8)?.use { it.readText().trim() }
         ?.takeIf(String::isNotEmpty) ?: "?"
