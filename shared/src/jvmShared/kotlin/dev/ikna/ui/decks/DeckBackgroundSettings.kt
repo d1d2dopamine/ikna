@@ -16,9 +16,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import dev.ikna.data.prefs.DeckBackground
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaHomeBackdrop
@@ -34,6 +38,7 @@ fun IknaDeckBackgroundSettings(
 ) {
     val colors = MaterialTheme.colorScheme
     val shape = iknaTileShape()
+    val captionHeight = with(LocalDensity.current) { 14.sp.toDp() } + Space.sm
     Column(verticalArrangement = Arrangement.spacedBy(Space.sm)) {
         Text(S.t("deck.background_title"), style = MaterialTheme.typography.titleSmall)
         FlowRow(
@@ -50,11 +55,18 @@ fun IknaDeckBackgroundSettings(
                         .selectable(selected = selected, role = Role.RadioButton, onClick = { onBackground(option) })
                 ) {
                     Box(Modifier.fillMaxWidth().height(54.dp)) { IknaHomeBackdrop(option) }
-                    Text(
-                        S.t("deck.background_" + option.name.lowercase(Locale.ROOT)),
-                        modifier = Modifier.padding(Space.xs),
-                        style = MaterialTheme.typography.labelMedium
-                    )
+                    Box(
+                        Modifier.fillMaxWidth().height(captionHeight).padding(horizontal = Space.xs),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            S.t("deck.background_" + option.name.lowercase(Locale.ROOT)),
+                            style = MaterialTheme.typography.labelSmall,
+                            letterSpacing = 0.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
         }

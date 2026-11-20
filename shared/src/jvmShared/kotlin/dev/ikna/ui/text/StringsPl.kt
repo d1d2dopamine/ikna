@@ -470,9 +470,11 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"deck.003" to ", pominięto ",
 	// Колоды
     "deck.background_title" to "Tło ekranu talii",
-    "deck.background_classic" to "Klasyczny wzór",
+    "deck.background_classic" to "Domyślne",
     "deck.background_tonal" to "Gradient",
     "deck.background_solid" to "Jednolite",
+    "deck.background_glow" to "Poświata",
+    "deck.background_grid" to "Siatka",
     "support.repo" to "GitHub",
     "support.issue" to "Zgłoszenia",
     "support.mail" to "Gmail",

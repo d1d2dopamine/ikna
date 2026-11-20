@@ -101,7 +101,7 @@ private const val DEFAULT_CUSTOM_INK = 0xFFE5EAF4
 private const val DEFAULT_CUSTOM_MUTED = 0xFF78859C
 private const val DEFAULT_CUSTOM_ACCENT = 0xFFFF7A5C
 
-enum class DeckBackground { CLASSIC, TONAL, SOLID }
+enum class DeckBackground { CLASSIC, TONAL, SOLID, GLOW, GRID }
 
 data class IknaSettings(
     val theme: ThemeMode = ThemeMode.DARK,

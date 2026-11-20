@@ -36,6 +36,25 @@ fun IknaHomeBackdrop(background: DeckBackground, modifier: Modifier = Modifier) 
             )
         )
         DeckBackground.SOLID -> Box(fill.background(colors.background))
+        DeckBackground.GLOW -> Canvas(fill) {
+            drawRect(Brush.radialGradient(
+                colors = listOf(lerp(colors.background, colors.primary, 0.16f), colors.background),
+                center = Offset(size.width * 0.82f, size.height * 0.20f),
+                radius = size.maxDimension.coerceAtLeast(1f) * 0.72f
+            ))
+        }
+        DeckBackground.GRID -> Canvas(fill.background(colors.background)) {
+            val pitch = 24.dp.toPx()
+            val line = colors.onSurfaceVariant.copy(alpha = 0.13f)
+            for (column in 1..(size.width / pitch).toInt()) {
+                val x = column * pitch
+                drawLine(line, Offset(x, 0f), Offset(x, size.height))
+            }
+            for (row in 1..(size.height / pitch).toInt()) {
+                val y = row * pitch
+                drawLine(line, Offset(0f, y), Offset(size.width, y))
+            }
+        }
     }
 }
 

@@ -470,9 +470,11 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"deck.003" to ", skipped ",
 	// Колоды
     "deck.background_title" to "Deck screen background",
-    "deck.background_classic" to "Classic pattern",
+    "deck.background_classic" to "Default",
     "deck.background_tonal" to "Gradient",
     "deck.background_solid" to "Solid",
+    "deck.background_glow" to "Glow",
+    "deck.background_grid" to "Grid",
     "support.repo" to "GitHub",
     "support.issue" to "Issues",
     "support.mail" to "Gmail",
