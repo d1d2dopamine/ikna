@@ -217,6 +217,7 @@ fun DeckScreen(
                             }
                         }
                     )
+                    IknaHiddenDeckCards(deckId, settings.suppressed, container.deckRepository, container.settings)
                     actionNotice?.let {
                         Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }

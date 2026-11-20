@@ -284,7 +284,7 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "deck.001" to "No se pudo leer ni una línea",
     "deck.002" to "Fragmentos añadidos: ",
     "deck.003" to ", omitidos ",
-    "deck.panel_show" to "Mostrar mazos", "deck.panel_hide" to "Ocultar mazos", "support.title" to "Support & Social", "support.body" to "Si te gusta Ikna, dale una estrella al repositorio oficial de GitHub. Si tienes una idea, encuentras un error o echas algo en falta, abre un issue o envía un correo. Tus comentarios ayudan a mejorar Ikna.", "deck.004" to "Mazos",
+    "deck.panel_show" to "Mostrar mazos", "deck.panel_hide" to "Ocultar mazos", "support.title" to "Support & Social", "support.body" to "Si te gusta Ikna, dale una estrella al repositorio oficial de GitHub. Si tienes una idea, encuentras un error o echas algo en falta, abre un issue o envía un correo. Tus comentarios ayudan a mejorar Ikna.", "deck.hidden" to "Tarjetas ocultas", "deck.restore_card" to "Restaurar tarjeta", "deck.004" to "Mazos",
     "deck.005" to "Aún no hay mazos. El signo más de abajo contiene el prompt para la IA y un lugar donde pegarlo.",
     "deck.006" to "leyendo el archivo…",
     "today.return" to "Puedes retomar la sesión.", "today.start" to "Empezar a estudiar", "today.resume" to "Continuar estudiando", "today.deck_change_failed" to "No se pudo cambiar el mazo. Inténtalo de nuevo.", "today.reviews" to "Hoy solo hay repasos.", "deck.007" to "HOY",

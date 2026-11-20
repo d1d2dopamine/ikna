@@ -550,6 +550,12 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         }
     }
 
+    suspend fun restoreSuppressedChunk(id: String) = put { prefs ->
+        prefs[Keys.suppressed] = suppressedOf(prefs[Keys.suppressed].orEmpty())
+            .filterNot { it == id }
+            .joinToString(";")
+    }
+
     /** Puts every marked chunk back into circulation. */
     suspend fun clearSuppressed() = put { it[Keys.suppressed] = "" }
 

@@ -126,6 +126,9 @@ class DeckRepository(
         )
     }
 
+    suspend fun hiddenCards(deckId: String, hiddenIds: Set<String>): List<dev.ikna.data.db.ChunkEntity> =
+        if (hiddenIds.isEmpty()) emptyList() else chunkDao.chunksForPack(deckId).filter { it.id in hiddenIds }
+
     suspend fun setActive(id: String, active: Boolean) = chunkDao.setPackActive(id, active)
 
     /** One deck, for its own screen. Null once it has been deleted. */

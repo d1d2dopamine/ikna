@@ -469,7 +469,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	// , пропущено
 	"deck.003" to ", pominięto ",
 	// Колоды
-	"deck.panel_show" to "Pokaż talie", "deck.panel_hide" to "Ukryj talie", "support.title" to "Support & Social", "support.body" to "Jeśli lubisz Iknę, dodaj gwiazdkę oficjalnemu repozytorium na GitHubie. Masz pomysł lub znalazłeś błąd? Otwórz zgłoszenie albo napisz e-mail. Twoje uwagi pomagają rozwijać Iknę.", "deck.004" to "Talie",
+	"deck.panel_show" to "Pokaż talie", "deck.panel_hide" to "Ukryj talie", "support.title" to "Support & Social", "support.body" to "Jeśli lubisz Iknę, dodaj gwiazdkę oficjalnemu repozytorium na GitHubie. Masz pomysł lub znalazłeś błąd? Otwórz zgłoszenie albo napisz e-mail. Twoje uwagi pomagają rozwijać Iknę.", "deck.hidden" to "Ukryte fiszki", "deck.restore_card" to "Przywróć fiszkę", "deck.004" to "Talie",
 	// Пока ни одной колоды. Плюс сверху добавит файл .jsonl.
 	"deck.005" to "Nie ma jeszcze talii. Plus na dole ma prompt dla AI i miejsce na wklejenie.",
 	// читаю файл…
