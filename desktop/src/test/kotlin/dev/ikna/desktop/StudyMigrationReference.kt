@@ -45,7 +45,7 @@ private suspend fun captureStudy(rating: Rating): JsonObject {
     try {
         val first = openIknaDatabase(database)
         val recorded = try {
-            val decks = DeckRepository(first.chunkDao(), PackLoader(ClasspathAssets, first.chunkDao()))
+            val decks = DeckRepository(first, PackLoader(ClasspathAssets, first.chunkDao()))
             val imported = decks.importText("starter.txt", STARTER, "Starter", lang = "en")
             check(imported.installed == 3)
             val installed = requireNotNull(first.chunkDao().pack(imported.packId))

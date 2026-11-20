@@ -2,11 +2,15 @@ package dev.ikna.data.repo
 
 import dev.ikna.data.db.ChunkDao
 import dev.ikna.data.db.ChunkSearchRow
+import dev.ikna.data.db.IknaDatabase
+import dev.ikna.data.db.inTransaction
 import dev.ikna.data.pack.ImportResult
 import dev.ikna.data.pack.PackLoader
 import dev.ikna.data.pack.SeedFormat
 import dev.ikna.data.pack.SeedLineProblem
 import dev.ikna.data.pack.SeedLineWarning
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 
 /**
  * What a deck starts as when nobody has said which language it is in.
@@ -73,9 +77,10 @@ data class DeckSummary(
  * not mean twice the reviews; they mean the same budget drawn from two pools.
  */
 class DeckRepository(
-    private val chunkDao: ChunkDao,
+    private val database: IknaDatabase,
     private val packLoader: PackLoader
 ) {
+    private val chunkDao: ChunkDao = database.chunkDao()
 
     suspend fun decks(): List<DeckSummary> = chunkDao.packs().map { pack ->
         DeckSummary(
@@ -244,22 +249,40 @@ class DeckRepository(
         appendTo: String? = null,
         inferLanguage: Boolean = true
     ): DeckImport {
-        // Adding to a deck that already exists, rather than making another one.
-        // Until now every import made a deck: a course arriving in portions
-        // became five decks with the same name, and nothing in the app could
-        // put them back together.
-        val into = appendTo?.let { chunkDao.pack(it) }
         val header = "# Ikna MCP v1: "
         val firstLine = text.lineSequence().first()
-        val stagedAiImport = firstLine.startsWith(header)
-        val stagedTitle = if (stagedAiImport) firstLine.removePrefix(header).trim() else null
-        if (stagedTitle != null) {
-            require(stagedTitle.isNotEmpty() && stagedTitle.length <= 200)
-            require(appendTo == null || into?.title == stagedTitle)
-            require(text.lineSequence().drop(1).filter { it.isNotBlank() }.take(1001).count() <= 1000)
+        if (!firstLine.startsWith(header)) {
+            return importPack(fileName, text, fallbackTitle, lang, appendTo, inferLanguage)
         }
+
+        val stagedTitle = firstLine.removePrefix(header).trim()
+        require(stagedTitle.isNotEmpty() && stagedTitle.length <= 200)
+        require(text.lineSequence().drop(1).filter { it.isNotBlank() }.take(1001).count() <= 1000)
+        val caller = currentCoroutineContext()
+        return database.inTransaction {
+            val report = importPack(fileName, text, fallbackTitle, lang, appendTo, inferLanguage, stagedTitle)
+            caller.ensureActive()
+            report
+        }
+    }
+
+    private suspend fun importPack(
+        fileName: String,
+        text: String,
+        fallbackTitle: String,
+        lang: String,
+        appendTo: String?,
+        inferLanguage: Boolean,
+        stagedTitle: String? = null
+    ): DeckImport {
+        val into = appendTo?.let { chunkDao.pack(it) }
+        val stagedAiImport = stagedTitle != null
+        require(!stagedAiImport || appendTo == null || into?.title == stagedTitle)
         val stem = fileName.substringBeforeLast('.')
         val packId = into?.id ?: packIdFor(stem)
+        if (stagedAiImport && into == null && chunkDao.pack(packId) != null) {
+            return DeckImport(packId, 0, 0, null, stagedAiImport = true)
+        }
         // A deck being added to keeps its own name and its own language. The
         // name of the file a second portion happened to arrive in is not a
         // reason to rename a deck somebody is halfway through.
@@ -283,6 +306,9 @@ class DeckRepository(
             parse.rows.filterNot { known.contains(it.phrase) }
         }
         val skipped = parse.problems.size + (parse.rows.size - rows.size)
+        if (stagedAiImport && rows.isEmpty()) {
+            return DeckImport(packId, 0, skipped, parse.problems.firstOrNull(), stagedAiImport = true)
+        }
         val result = packLoader.importChunks(
             packId = packId,
             title = title,

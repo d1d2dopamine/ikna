@@ -123,7 +123,7 @@ class AppContainer(
     val studyStatsRepository = dev.ikna.data.repo.StudyStatsRepository(db, config.dayStartHour)
 
     val deckRepository = DeckRepository(
-        chunkDao = db.chunkDao(),
+        database = db,
         packLoader = packLoader
     )
 
