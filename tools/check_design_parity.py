@@ -150,7 +150,7 @@ class DesignContracts(unittest.TestCase):
         # Shell keeps one temporary loading wordmark; the desktop home footer has none.
         self.assertEqual(1, shell.count('IknaWordmark('))
         home_chrome = read(SHARED, 'ui/decks/HomeChrome.kt')
-        self.assertIn('IknaWordmark(modifier = Modifier.alignBy { it.height }, height = 16.dp)', home_chrome)
+        self.assertIn('IknaWordmark(modifier = Modifier.alignBy { it.measuredHeight }, height = 16.dp)', home_chrome)
         self.assertIn('Modifier.alignByBaseline()', home_chrome)
         self.assertIn('dockAtTop = settings.homeDockAtTop', shell + mobile_decks)
 

@@ -88,7 +88,7 @@ private fun HomeHeading(showWordmark: Boolean) {
             horizontalArrangement = Arrangement.spacedBy(Space.sm)
         ) {
             if (showWordmark) {
-                IknaWordmark(modifier = Modifier.alignBy { it.height }, height = 16.dp)
+                IknaWordmark(modifier = Modifier.alignBy { it.measuredHeight }, height = 16.dp)
             }
             Text(
                 text = S.t("deck.004"),
