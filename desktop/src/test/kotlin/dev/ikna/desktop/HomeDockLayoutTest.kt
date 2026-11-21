@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.ikna.ui.decks.HomeDestination
 import dev.ikna.ui.decks.IknaHomeChrome
+import dev.ikna.ui.decks.IknaTodayBlock
+import dev.ikna.data.repo.TodayStudySummary
 import dev.ikna.ui.text.S
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -27,6 +29,21 @@ import org.junit.Test
 
 @OptIn(ExperimentalTestApi::class)
 class HomeDockLayoutTest {
+    @Test
+    fun emptyTodayActionLabelSharesTheLeftEdgeOfToday() {
+        BundledSQLiteDriver().open(":memory:").close()
+        runDesktopComposeUiTest(width = 420, height = 300) {
+            setContent {
+                MaterialTheme {
+                    IknaTodayBlock(TodayStudySummary(), perCardMs = null, onClick = {})
+                }
+            }
+            val heading = onNodeWithText(S.t("deck.007"), useUnmergedTree = true).getUnclippedBoundsInRoot()
+            val action = onNodeWithText(S.t("a11y.019"), useUnmergedTree = true).getUnclippedBoundsInRoot()
+            assertEquals(heading.left, action.left)
+        }
+    }
+
     @Test
     fun deckListAndDockKeepTheirHeightDuringSidebarResize() {
         BundledSQLiteDriver().open(":memory:").close()
