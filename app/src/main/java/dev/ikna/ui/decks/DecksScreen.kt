@@ -159,7 +159,7 @@ fun DecksScreen(
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = Edge),
-                verticalArrangement = Arrangement.spacedBy(Space.lg)
+                verticalArrangement = Arrangement.spacedBy(Space.md)
             ) {
                 items(decks, key = { it.id }) { deck ->
                     IknaDeckRow(

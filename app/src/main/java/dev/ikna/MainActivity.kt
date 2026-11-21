@@ -99,6 +99,8 @@ class MainActivity : ComponentActivity() {
                 palette = palette,
                 contentFont = contentFont,
                 motionEnabled = settings.animations,
+                deckBackgroundAnimated = settings.deckBackgroundAnimation,
+                uiSoundsEnabled = settings.uiSounds,
                 appearanceVariant = settings.appearanceVariant
             ) {
                 if (profileRestart) {

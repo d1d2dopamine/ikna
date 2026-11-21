@@ -189,6 +189,8 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "deck.background_solid" to "Uni",
     "deck.background_glow" to "Halo",
     "deck.background_grid" to "Grille",
+    "deck.background_anim" to "Animer le fond des paquets",
+    "set.ui_sounds" to "Sons de l’interface",
     "support.description" to "Des cartes pour apprendre des langues et d’autres sujets.",
     "support.changelog" to "Nouveautés",
     "support.repo" to "GitHub",

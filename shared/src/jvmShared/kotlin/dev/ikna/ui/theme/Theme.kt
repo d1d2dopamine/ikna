@@ -616,6 +616,7 @@ private fun shapesFor(variant: IknaAppearanceVariant): Shapes = when (variant) {
 }
 
 val LocalIknaAppearanceVariant = staticCompositionLocalOf { IknaAppearanceVariant.ANGULAR }
+val LocalIknaDeckBackgroundAnimated = staticCompositionLocalOf { true }
 
 /** Chips, buttons, fields, notices: the workhorse corner of the variant. */
 @Composable
@@ -714,12 +715,15 @@ fun IknaTheme(
     palette: IknaPalette = DarkPalette,
     contentFont: FontFamily? = null,
     motionEnabled: Boolean = true,
+    deckBackgroundAnimated: Boolean = true,
+    uiSoundsEnabled: Boolean = true,
     appearanceVariant: IknaAppearanceVariant = IknaAppearanceVariant.ANGULAR,
     content: @Composable () -> Unit
 ) {
     val controls = remember(palette) { controlColors(palette) }
     val scheme = remember(palette, controls) { schemeOf(palette, controls) }
     val signalFrameCoordinator = rememberSignalFrameCoordinator(motionEnabled)
+    iknaUiSoundsLiveGate.set(uiSoundsEnabled)
     MaterialTheme(
         colorScheme = scheme,
         typography = typographyOf(contentFont),
@@ -743,6 +747,8 @@ fun IknaTheme(
             LocalContentColor provides palette.ink,
             LocalIknaControlColors provides controls,
             LocalIknaMotionEnabled provides motionEnabled,
+            LocalIknaDeckBackgroundAnimated provides (motionEnabled && deckBackgroundAnimated),
+            LocalIknaSoundFeedback provides if (uiSoundsEnabled) LiveIknaSoundFeedback else NoOpIknaSoundFeedback,
             LocalIknaAppearanceVariant provides appearanceVariant,
             LocalSignalFrameCoordinator provides signalFrameCoordinator
         ) {

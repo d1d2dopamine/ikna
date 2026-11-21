@@ -2,9 +2,11 @@ package dev.ikna.ui.theme
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -55,6 +57,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -310,6 +313,24 @@ fun IknaGlyphIcon(
  * try.
  */
 @Composable
+internal fun iknaPressScale(
+    pressed: Boolean,
+    motionEnabled: Boolean,
+    pressedScale: Float = 0.975f
+): Float {
+    val scale by animateFloatAsState(
+        targetValue = if (pressed && motionEnabled) pressedScale else 1f,
+        animationSpec = if (motionEnabled) {
+            spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessHigh)
+        } else {
+            snap()
+        },
+        label = "ikna-press-scale"
+    )
+    return scale
+}
+
+@Composable
 fun IknaIconButton(
     glyph: IknaGlyph,
     onClick: () -> Unit,
@@ -324,10 +345,18 @@ fun IknaIconButton(
     label: String? = null
 ) {
     val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val motionEnabled = LocalIknaMotionEnabled.current
+    val sound = LocalIknaSoundFeedback.current
+    val pressScale = iknaPressScale(enabled && pressed, motionEnabled, pressedScale = 0.92f)
     Box(
         modifier = modifier
             .iknaInspect("IknaIconButton[${label ?: glyph.name}]")
             .size(size.coerceAtLeast(48.dp))
+            .graphicsLayer {
+                scaleX = pressScale
+                scaleY = pressScale
+            }
             .semantics {
                 role = Role.Button
                 if (selected) this.selected = true
@@ -340,7 +369,10 @@ fun IknaIconButton(
                 indication = null,
                 enabled = enabled,
                 role = Role.Button,
-                onClick = onClick
+                onClick = {
+                    sound.play(IknaSoundCue.TAP)
+                    onClick()
+                }
             ),
         contentAlignment = Alignment.Center
     ) {
@@ -370,7 +402,8 @@ fun IknaWideButton(
     quiet: Boolean = false,
     enabled: Boolean = true,
     height: Dp = 56.dp,
-    fillWidth: Boolean = true
+    fillWidth: Boolean = true,
+    soundCue: IknaSoundCue? = IknaSoundCue.TAP
 ) {
     val colors = LocalIknaControlColors.current
     val interaction = remember { MutableInteractionSource() }
@@ -378,6 +411,8 @@ fun IknaWideButton(
     val focused by interaction.collectIsFocusedAsState()
     val pressed by interaction.collectIsPressedAsState()
     val motionEnabled = LocalIknaMotionEnabled.current
+    val sound = LocalIknaSoundFeedback.current
+    val pressScale = iknaPressScale(enabled && pressed, motionEnabled, pressedScale = 0.985f)
     val alpha by animateFloatAsState(
         targetValue = if (enabled) 1f else 0.35f,
         animationSpec = if (motionEnabled) tween(
@@ -400,15 +435,20 @@ fun IknaWideButton(
         label = "wide-button-fill"
     ) }
     val boundary = if (filled || (enabled && focused)) colors.mark else colors.outline
+    val boundaryAlpha = if (filled || (enabled && (focused || hovered))) alpha else alpha * 0.72f
 
     Box(
         modifier = modifier
             .iknaInspect("IknaWideButton[$label]")
             .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier)
             .heightIn(min = height.coerceAtLeast(48.dp))
+            .graphicsLayer {
+                scaleX = pressScale
+                scaleY = pressScale
+            }
             .clip(iknaControlShape())
             .background(fillColor.copy(alpha = fillColor.alpha * alpha))
-            .border(if (enabled && focused) 2.dp else 1.dp, boundary.copy(alpha = alpha), iknaControlShape())
+            .border(if (enabled && focused) 2.dp else 1.dp, boundary.copy(alpha = boundaryAlpha), iknaControlShape())
             .hoverable(interaction, enabled = enabled)
             .iknaSignalFrame(
                 interaction,
@@ -418,7 +458,10 @@ fun IknaWideButton(
                 pressFeedback = false
             )
             .clickable(interactionSource = interaction, indication = null,
-                enabled = enabled, role = Role.Button, onClick = onClick)
+                enabled = enabled, role = Role.Button, onClick = {
+                    soundCue?.let(sound::play)
+                    onClick()
+                })
             .padding(horizontal = Space.md, vertical = Space.sm),
         contentAlignment = Alignment.Center
     ) {
@@ -447,7 +490,10 @@ fun IknaTextButton(
     horizontalPadding: Dp = 8.dp
 ) {
     val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
     val motionEnabled = LocalIknaMotionEnabled.current
+    val sound = LocalIknaSoundFeedback.current
+    val pressScale = iknaPressScale(enabled && pressed, motionEnabled, pressedScale = 0.96f)
     val alpha by animateFloatAsState(
         targetValue = if (enabled) 1f else 0.35f,
         animationSpec = if (motionEnabled) tween(
@@ -460,6 +506,10 @@ fun IknaTextButton(
         modifier = modifier
             .iknaInspect("IknaTextButton[$label]")
             .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+            .graphicsLayer {
+                scaleX = pressScale
+                scaleY = pressScale
+            }
             .hoverable(interaction, enabled = enabled)
             .iknaSignalFrame(interaction, enabled = enabled)
             .clickable(
@@ -467,7 +517,10 @@ fun IknaTextButton(
                 indication = null,
                 enabled = enabled,
                 role = Role.Button,
-                onClick = onClick
+                onClick = {
+                    sound.play(IknaSoundCue.TAP)
+                    onClick()
+                }
             )
             .padding(horizontal = horizontalPadding, vertical = 8.dp),
         contentAlignment = Alignment.Center
@@ -508,6 +561,8 @@ fun IknaToggle(
     val pressed by interaction.collectIsPressedAsState()
     val alpha = if (enabled) 1f else 0.35f
     val motionEnabled = LocalIknaMotionEnabled.current
+    val sound = LocalIknaSoundFeedback.current
+    val knobPressScale = iknaPressScale(enabled && pressed, motionEnabled, pressedScale = 0.92f)
     // The rounded variant uses a rounded knob one size smaller than the
     // content area, so it floats with visible gaps on every side of the pill.
     // The angular knob keeps its 24dp square and its own gaps.
@@ -560,7 +615,10 @@ fun IknaToggle(
                 indication = null,
                 enabled = enabled,
                 role = Role.Switch,
-                onValueChange = onCheckedChange
+                onValueChange = { next ->
+                    sound.play(if (next) IknaSoundCue.TOGGLE_ON else IknaSoundCue.TOGGLE_OFF)
+                    onCheckedChange(next)
+                }
             )
             // The hit target is 48dp tall; the authored track stays 32dp.
             .padding(vertical = 8.dp)
@@ -579,6 +637,10 @@ fun IknaToggle(
         Box(
             modifier = Modifier
                 .offset(x = knobOffset)
+                .graphicsLayer {
+                    scaleX = knobPressScale
+                    scaleY = knobPressScale
+                }
                 .size(width = knobSize, height = knobSize)
                 .clip(knobShape)
                 .background(knobColor.copy(alpha = alpha))
@@ -601,6 +663,8 @@ fun IknaChip(
     val focused by interaction.collectIsFocusedAsState()
     val pressed by interaction.collectIsPressedAsState()
     val motionEnabled = LocalIknaMotionEnabled.current
+    val sound = LocalIknaSoundFeedback.current
+    val pressScale = iknaPressScale(pressed, motionEnabled, pressedScale = 0.965f)
     val fillColor by key(colors) { animateColorAsState(
         targetValue = when {
             pressed -> colors.pressed
@@ -626,6 +690,10 @@ fun IknaChip(
     Box(
         modifier = modifier
             .height(40.dp)
+            .graphicsLayer {
+                scaleX = pressScale
+                scaleY = pressScale
+            }
             .clip(iknaControlShape())
             .background(fillColor)
             .border(if (selected || focused) 2.dp else 1.dp, borderColor, iknaControlShape())
@@ -638,7 +706,10 @@ fun IknaChip(
                 pressFeedback = false
             )
             .clickable(interactionSource = interaction, indication = null,
-                role = Role.Button, onClick = onClick)
+                role = Role.Button, onClick = {
+                    sound.play(IknaSoundCue.TAP)
+                    onClick()
+                })
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center
     ) {

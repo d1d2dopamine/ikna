@@ -73,8 +73,10 @@ import dev.ikna.domain.session.ReviewSignalTracker
 import dev.ikna.domain.session.ReviewSignals
 import dev.ikna.domain.session.TimingDiscardReason
 import dev.ikna.ui.theme.IknaScrollableColumn
+import dev.ikna.ui.theme.IknaSoundCue
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.LocalIknaMotionEnabled
+import dev.ikna.ui.theme.LocalIknaSoundFeedback
 import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.theme.Space
 import dev.ikna.ui.theme.iknaTileShape
@@ -152,6 +154,15 @@ fun SwipeableCard(
     val tracker = remember(key) { VelocityTracker() }
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
+    val soundNow = rememberUpdatedState(LocalIknaSoundFeedback.current)
+    val wasRevealed = remember(key) { mutableStateOf(revealed) }
+
+    LaunchedEffect(key, revealed) {
+        if (revealed && !wasRevealed.value) {
+            soundNow.value.play(IknaSoundCue.REVEAL)
+        }
+        wasRevealed.value = revealed
+    }
 
     // The gesture detector outlives recomposition, so everything it reads has to
     // be read through a handle that stays current. Capturing the values directly
@@ -187,6 +198,7 @@ fun SwipeableCard(
     val ready: () -> Boolean = { armed.value != null || throwing.value != null }
 
     suspend fun completeDirectGrade(rating: Rating, observation: ReviewSignals) {
+        soundNow.value.play(if (rating == Rating.GOOD) IknaSoundCue.KNOW else IknaSoundCue.DONT_KNOW)
         throwing.value = rating
         try {
             if (animations) {
@@ -253,6 +265,7 @@ fun SwipeableCard(
                             CustomAccessibilityAction(keepAction) {
                                 val canRate = revealedNow.value && !flying.value && !savingNow.value
                                 if (canRate) {
+                                    soundNow.value.play(IknaSoundCue.KNOW)
                                     signals.answerStarted(INPUT_ACCESSIBILITY)
                                     rateNow.value(Rating.GOOD, signals.snapshot())
                                 }
@@ -261,6 +274,7 @@ fun SwipeableCard(
                             CustomAccessibilityAction(missAction) {
                                 val canRate = revealedNow.value && !flying.value && !savingNow.value
                                 if (canRate) {
+                                    soundNow.value.play(IknaSoundCue.DONT_KNOW)
                                     signals.answerStarted(INPUT_ACCESSIBILITY)
                                     rateNow.value(Rating.AGAIN, signals.snapshot())
                                 }
@@ -357,6 +371,7 @@ fun SwipeableCard(
                                 // Freeze before animation: its duration and any later
                                 // queued disk work are not retrieval latency.
                                 val observation = signals.snapshot(velocity.x)
+                                soundNow.value.play(if (rating == Rating.GOOD) IknaSoundCue.KNOW else IknaSoundCue.DONT_KNOW)
                                 throwing.value = rating
                                 scope.launch {
                                     offsetX.snapTo(drag.value)
@@ -421,14 +436,16 @@ fun SwipeableCard(
                     onClick = { rateFromButton(Rating.AGAIN) },
                     modifier = Modifier.weight(1f),
                     height = 48.dp,
-                    enabled = !flying.value && !saving
+                    enabled = !flying.value && !saving,
+                    soundCue = null
                 )
                 IknaWideButton(
                     label = withShortcut(keepAction, shortcuts?.know),
                     onClick = { rateFromButton(Rating.GOOD) },
                     modifier = Modifier.weight(1f),
                     height = 48.dp,
-                    enabled = !flying.value && !saving
+                    enabled = !flying.value && !saving,
+                    soundCue = null
                 )
             } else {
                 IknaWideButton(
@@ -436,7 +453,8 @@ fun SwipeableCard(
                     onClick = { if (!revealedNow.value && !flying.value && !savingNow.value) revealNow.value(INPUT_BUTTON) },
                     filled = true,
                     height = 48.dp,
-                    enabled = !flying.value && !saving
+                    enabled = !flying.value && !saving,
+                    soundCue = null
                 )
             }
         }

@@ -230,6 +230,8 @@ fun IknaDesktopApp(
         palette = palette,
         contentFont = contentFont,
         motionEnabled = settings.animations,
+        deckBackgroundAnimated = settings.deckBackgroundAnimation,
+        uiSoundsEnabled = settings.uiSounds,
         appearanceVariant = settings.appearanceVariant
     ) {
         IknaElementInspector(enabled = settings.elementInspector) {
@@ -462,7 +464,7 @@ private fun DecksColumn(
             LazyColumn(
                 state = listState,
                 modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = Edge),
-                verticalArrangement = Arrangement.spacedBy(Space.lg)
+                verticalArrangement = Arrangement.spacedBy(Space.md)
             ) {
                 if (update != null) {
                     item(key = "desktop-update") {

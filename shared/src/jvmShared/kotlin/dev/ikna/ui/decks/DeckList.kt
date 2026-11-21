@@ -22,6 +22,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +34,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,13 +49,18 @@ import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.text.S
 import dev.ikna.ui.text.quantityWord
 import dev.ikna.ui.theme.IknaProgress
+import dev.ikna.ui.theme.IknaSoundCue
 import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.LocalIknaControlColors
+import dev.ikna.ui.theme.LocalIknaMotionEnabled
+import dev.ikna.ui.theme.LocalIknaSoundFeedback
 import dev.ikna.ui.theme.Space
 import dev.ikna.ui.theme.SignalFramePlacement
 import dev.ikna.ui.theme.deckTintColor
+import dev.ikna.ui.theme.iknaControlShape
 import dev.ikna.ui.theme.iknaFrameRadius
 import dev.ikna.ui.theme.iknaInspect
+import dev.ikna.ui.theme.iknaPressScale
 import dev.ikna.ui.theme.iknaSignalFrame
 import dev.ikna.ui.theme.iknaTileShape
 import dev.ikna.ui.theme.iknaNumberStyle
@@ -69,7 +80,8 @@ fun IknaTodayBlock(summary: TodayStudySummary, perCardMs: Long?, onClick: () -> 
         Text(
             text = if (total > 0) "$total ${iknaCardWord(total)}${iknaMinutesTail(total, perCardMs)}"
                 else S.t("deck.008"),
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.SemiBold,
             color = palette.onSurface
         )
         if (summary.returning && total > 0) {
@@ -105,14 +117,37 @@ fun IknaDeckRow(
     onOpen: () -> Unit
 ) {
     val palette = MaterialTheme.colorScheme
+    val controlColors = LocalIknaControlColors.current
+    val motionEnabled = LocalIknaMotionEnabled.current
+    val sound = LocalIknaSoundFeedback.current
     val owes = dueToday > 0
     val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    val pressed by interaction.collectIsPressedAsState()
+    val pressScale = iknaPressScale(pressed, motionEnabled, pressedScale = 0.986f)
+    val rowTint = when {
+        pressed -> controlColors.pressed.copy(alpha = 0.72f)
+        hovered -> controlColors.idle.copy(alpha = 0.85f)
+        else -> Color.Transparent
+    }
+    LaunchedEffect(interaction, sound) {
+        interaction.interactions.collect { event ->
+            if (event is PressInteraction.Release) {
+                sound.play(IknaSoundCue.TAP)
+            }
+        }
+    }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = pressScale
+                scaleY = pressScale
+            }
             .hoverable(interaction)
             .clipToBounds()
+            .background(rowTint, iknaControlShape())
             .iknaSignalFrame(
                 interaction,
                 cornerRadius = iknaFrameRadius(rounded = 10.dp, angular = 8.dp),
@@ -120,6 +155,7 @@ fun IknaDeckRow(
             )
             .clickable(interactionSource = interaction, indication = null,
                 onClickLabel = S.t("a11y.010"), onClick = onOpen)
+            .padding(vertical = Space.xs)
             .iknaInspect("IknaDeckRow[${deck.title}]"),
         verticalAlignment = Alignment.Top
     ) {

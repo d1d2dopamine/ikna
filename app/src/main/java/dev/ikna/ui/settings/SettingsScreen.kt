@@ -491,6 +491,12 @@ fun SettingsScreen(
                             onCheckedChange = { scope.launch { container.settings.setAnimations(it) } }
                         )
                         IknaSettingsToggleRow(
+                            title = S.t("set.ui_sounds"),
+                            subtitle = null,
+                            checked = settings.uiSounds,
+                            onCheckedChange = { scope.launch { container.settings.setUiSounds(it) } }
+                        )
+                        IknaSettingsToggleRow(
                             title = S.t("set.022"),
                             subtitle = null,
                             checked = settings.haptics,
@@ -519,6 +525,13 @@ fun SettingsScreen(
                         dev.ikna.ui.decks.IknaDeckBackgroundSettings(
                             background = settings.deckBackground,
                             onBackground = { background -> scope.launch { container.settings.setDeckBackground(background) } }
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        IknaSettingsToggleRow(
+                            title = S.t("deck.background_anim"),
+                            subtitle = null,
+                            checked = settings.deckBackgroundAnimation,
+                            onCheckedChange = { scope.launch { container.settings.setDeckBackgroundAnimation(it) } }
                         )
                     }
                 }

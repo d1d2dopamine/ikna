@@ -68,6 +68,7 @@ data class SettingsSnapshot(
     val reminderMinute: Int = 0,
     val haptics: Boolean = true,
     val animations: Boolean = true,
+    val uiSounds: Boolean? = null,
     val autoExport: Boolean = true,
     // Off, matching the setting's own default. A file from an older build has no
     // such field, and a missing field must not be able to switch speech on for
@@ -90,6 +91,7 @@ data class SettingsSnapshot(
     val homeDockAtTop: Boolean? = null,
     val homeDockFullWidth: Boolean? = null,
     val deckBackground: String? = null,
+    val deckBackgroundAnimation: Boolean? = null,
     // Deck icons and colours. They name decks by id, so a restore onto an install
     // without those decks simply carries a line nothing reads -- which is right:
     // importing the deck again gives it its square back.
@@ -130,6 +132,7 @@ object SettingsBackup {
         reminderMinute = settings.reminderMinute,
         haptics = settings.haptics,
         animations = settings.animations,
+        uiSounds = settings.uiSounds,
         autoExport = settings.autoExport,
         speech = settings.speechEnabled,
         phoneVoice = settings.phoneVoice,
@@ -141,6 +144,7 @@ object SettingsBackup {
         homeDockAtTop = settings.homeDockAtTop,
         homeDockFullWidth = settings.homeDockFullWidth,
         deckBackground = settings.deckBackground.name,
+        deckBackgroundAnimation = settings.deckBackgroundAnimation,
         deckLooks = settings.deckLooks,
         deckPhonetics = settings.deckPhonetics,
         suppressed = settings.suppressed,
@@ -197,6 +201,7 @@ object SettingsBackup {
         store.setReminder(snapshot.reminderEnabled, snapshot.reminderHour, snapshot.reminderMinute)
         store.setHaptics(snapshot.haptics)
         store.setAnimations(snapshot.animations)
+        snapshot.uiSounds?.let { store.setUiSounds(it) }
         store.setAutoExport(snapshot.autoExport)
         store.setSpeechEnabled(snapshot.speech)
         store.setPhoneVoice(snapshot.phoneVoice)
@@ -220,6 +225,7 @@ object SettingsBackup {
         snapshot.homeDockFullWidth?.let { store.setHomeDockFullWidth(it) }
         dev.ikna.data.prefs.DeckBackground.entries.firstOrNull { it.name == snapshot.deckBackground }
             ?.let { store.setDeckBackground(it) }
+        snapshot.deckBackgroundAnimation?.let { store.setDeckBackgroundAnimation(it) }
         store.setDeckLooks(snapshot.deckLooks)
         store.setDeckPhonetics(snapshot.deckPhonetics)
         store.setSuppressed(snapshot.suppressed)

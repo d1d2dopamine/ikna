@@ -36,6 +36,8 @@ class SettingsBackupTest {
             reminderHour = 7,
             reminderMinute = 30,
             animations = false,
+            uiSounds = false,
+            deckBackgroundAnimation = false,
             speechEnabled = false,
             phoneVoice = false,
             autoSpeakEvery = true,
@@ -61,6 +63,8 @@ class SettingsBackupTest {
         assertEquals(false, decoded?.autoLoad)
         assertEquals(7, decoded?.reminderHour)
         assertEquals(false, decoded?.animations)
+        assertEquals(false, decoded?.uiSounds)
+        assertEquals(false, decoded?.deckBackgroundAnimation)
         assertEquals(false, decoded?.phoneVoice)
         assertEquals(true, decoded?.autoSpeakEvery)
         assertEquals(FontMode.CUSTOM.name, decoded?.fontMode)
@@ -85,6 +89,8 @@ class SettingsBackupTest {
         assertEquals(false, decoded?.autoSpeakEvery)
         assertEquals("", decoded?.fontMode)
         assertEquals("Atkinson.ttf", decoded?.fontName)
+        assertNull(decoded?.uiSounds)
+        assertNull(decoded?.deckBackgroundAnimation)
         assertEquals(IknaSettings().hotkeys, decoded?.hotkeys)
     }
 

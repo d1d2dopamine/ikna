@@ -475,6 +475,8 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "deck.background_solid" to "Solid",
     "deck.background_glow" to "Glow",
     "deck.background_grid" to "Grid",
+    "deck.background_anim" to "Animate deck background",
+    "set.ui_sounds" to "Interface sounds",
     "support.description" to "Flashcards for languages and other subjects.",
     "support.changelog" to "What’s new",
     "support.repo" to "GitHub",

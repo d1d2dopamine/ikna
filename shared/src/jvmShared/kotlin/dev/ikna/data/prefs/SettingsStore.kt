@@ -147,6 +147,7 @@ data class IknaSettings(
     val reminderMinute: Int = 0,
     val haptics: Boolean = true,
     val animations: Boolean = true,
+    val uiSounds: Boolean = true,
     val autoExport: Boolean = true,
     /** Legacy serialized field retained for old settings files; runtime policy ignores it. */
     val derivedGrading: Boolean = false,
@@ -202,6 +203,7 @@ data class IknaSettings(
     val homeDockAtTop: Boolean = false,
     val homeDockFullWidth: Boolean = false,
     val deckBackground: DeckBackground = DeckBackground.CLASSIC,
+    val deckBackgroundAnimation: Boolean = true,
     /**
      * How each deck's square looks: a label and a colour, stored as
      * "packId=label|tint" pairs joined by semicolons.
@@ -331,6 +333,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val reminderMinute = intPreferencesKey("reminderMinute")
         val haptics = booleanPreferencesKey("haptics")
         val animations = booleanPreferencesKey("animations")
+        val uiSounds = booleanPreferencesKey("uiSounds")
         val autoExport = booleanPreferencesKey("autoExport")
         val derivedGrading = booleanPreferencesKey("derivedGrading")
         val speechEnabled = booleanPreferencesKey("speechEnabled")
@@ -343,6 +346,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val homeDockAtTop = booleanPreferencesKey("homeDockAtTop")
         val homeDockFullWidth = booleanPreferencesKey("homeDockFullWidth")
         val deckBackground = stringPreferencesKey("deckBackground")
+        val deckBackgroundAnimation = booleanPreferencesKey("deckBackgroundAnimation")
         val deckLooks = stringPreferencesKey("deckLooks")
         val deckPhonetics = stringPreferencesKey("deckPhonetics")
         val suppressed = stringPreferencesKey("suppressed")
@@ -392,6 +396,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             reminderMinute = p[Keys.reminderMinute] ?: defaults.reminderMinute,
             haptics = p[Keys.haptics] ?: defaults.haptics,
             animations = p[Keys.animations] ?: defaults.animations,
+            uiSounds = p[Keys.uiSounds] ?: defaults.uiSounds,
             autoExport = p[Keys.autoExport] ?: defaults.autoExport,
             derivedGrading = p[Keys.derivedGrading] ?: false,
             speechEnabled = p[Keys.speechEnabled] ?: defaults.speechEnabled,
@@ -417,6 +422,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             homeDockFullWidth = p[Keys.homeDockFullWidth] ?: defaults.homeDockFullWidth,
             deckBackground = DeckBackground.entries.firstOrNull { it.name == p[Keys.deckBackground] }
                 ?: defaults.deckBackground,
+            deckBackgroundAnimation = p[Keys.deckBackgroundAnimation] ?: defaults.deckBackgroundAnimation,
             deckLooks = p[Keys.deckLooks] ?: defaults.deckLooks,
             deckPhonetics = p[Keys.deckPhonetics] ?: defaults.deckPhonetics,
             suppressed = p[Keys.suppressed] ?: defaults.suppressed,
@@ -471,6 +477,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
     suspend fun setAutoLoad(on: Boolean) = put { it[Keys.autoLoad] = on }
     suspend fun setHaptics(on: Boolean) = put { it[Keys.haptics] = on }
     suspend fun setAnimations(on: Boolean) = put { it[Keys.animations] = on }
+    suspend fun setUiSounds(on: Boolean) = put { it[Keys.uiSounds] = on }
     suspend fun setAutoExport(on: Boolean) = put { it[Keys.autoExport] = on }
     suspend fun setOnboardingDone(done: Boolean) = put { it[Keys.onboardingDone] = done }
 
@@ -498,6 +505,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
     suspend fun setHomeDockAtTop(on: Boolean) = put { it[Keys.homeDockAtTop] = on }
     suspend fun setHomeDockFullWidth(on: Boolean) = put { it[Keys.homeDockFullWidth] = on }
     suspend fun setDeckBackground(background: DeckBackground) = put { it[Keys.deckBackground] = background.name }
+    suspend fun setDeckBackgroundAnimation(on: Boolean) = put { it[Keys.deckBackgroundAnimation] = on }
 
     /** Every deck's look at once. Used by a restore. */
     suspend fun setDeckLooks(value: String) = put { it[Keys.deckLooks] = value }

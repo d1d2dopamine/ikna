@@ -247,6 +247,10 @@ fun SettingsPane(
                         save { container.settings.setAnimations(it) }
                     }
                     Spacer(Modifier.height(12.dp))
+                    ToggleRow(S.t("set.ui_sounds"), settings.uiSounds, palette) {
+                        save { container.settings.setUiSounds(it) }
+                    }
+                    Spacer(Modifier.height(12.dp))
                     ToggleRow(S.t("bar.003"), settings.leftHanded, palette) {
                         save { container.settings.setLeftHanded(it) }
                     }
@@ -263,6 +267,10 @@ fun SettingsPane(
                         background = settings.deckBackground,
                         onBackground = { background -> save { container.settings.setDeckBackground(background) } }
                     )
+                    Spacer(Modifier.height(12.dp))
+                    ToggleRow(S.t("deck.background_anim"), settings.deckBackgroundAnimation, palette) {
+                        save { container.settings.setDeckBackgroundAnimation(it) }
+                    }
                 }
             }
             item(key = "language", contentType = "settings-section") {

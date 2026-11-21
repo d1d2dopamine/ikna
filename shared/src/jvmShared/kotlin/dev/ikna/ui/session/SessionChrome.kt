@@ -22,6 +22,7 @@ import kotlinx.coroutines.delay
 private val BAR_HEIGHT = 44.dp
 private val UNDO_HEIGHT = 48.dp
 private val EDGE = 20.dp
+private var lastCelebratedAnswersToday: Int = 0
 
 @Composable
 fun IknaSessionTopBar(state: SessionUiState, onFinishOptional: (() -> Unit)? = null) {
@@ -134,7 +135,14 @@ fun IknaSessionEmptyState(
         // accent colour, so the object that ends a session is the object that
         // started it.
         if (state.answeredToday > 0) {
+            val sound = LocalIknaSoundFeedback.current
             val appear = remember { Animatable(if (animations) 0f else 1f) }
+            LaunchedEffect(state.answeredToday) {
+                if (state.answeredToday != lastCelebratedAnswersToday) {
+                    lastCelebratedAnswersToday = state.answeredToday
+                    sound.play(IknaSoundCue.COMPLETE)
+                }
+            }
             LaunchedEffect(animations) {
                 if (animations) appear.animateTo(1f, Motion.reveal) else appear.snapTo(1f)
             }
