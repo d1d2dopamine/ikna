@@ -33,6 +33,8 @@ Ikna builds a daily plan from the cards you have due and your recent study histo
 
 FSRS‑6 schedules reviews. `riar-manage` decides how much new material fits in the day. After the daily plan, you can read familiar material in Browse. [Learning engine](docs/LEARNING-ENGINE.md) · [Daily workload](docs/GOVERNOR.md)
 
+<a name="download"></a>
+
 ## <img src="docs/assets/icons/download.svg" width="28" height="28" align="absmiddle" alt=""> Download
 
 These files are from [the published 0.11.0 press release](https://github.com/d1d2dopamine/ikna/releases/tag/v0.11.0-press). The branch `main` also contains work for 0.12, including statistics export and deck-screen backgrounds. See the [working plan](docs/PLAN-0.12.md) for its status.
@@ -100,6 +102,8 @@ Ikna is free software under the [GNU General Public License, version 3 or later]
 3. **Ответь.** Выбери «знаю» или «не знаю». По ответу Икна назначит следующий повтор.
 
 Повторы планирует FSRS‑6. Сколько нового материала взять сегодня, решает `riar-manage`. После дневного плана знакомый материал можно почитать в режиме «Чтение». [Учебный движок](docs/LEARNING-ENGINE.md) · [Дневная нагрузка](docs/GOVERNOR.md)
+
+<a name="скачать"></a>
 
 ## <img src="docs/assets/icons/download.svg" width="28" height="28" align="absmiddle" alt=""> Скачать
 
