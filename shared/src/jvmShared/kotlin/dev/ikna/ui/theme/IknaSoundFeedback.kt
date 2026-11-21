@@ -13,7 +13,8 @@ import kotlin.math.sin
  * Restrained tactile sound cues synthesized offline at runtime.
  *
  * No bundled audio files, no network calls, and no punishment buzzers:
- * every cue uses a short, soft envelope with smooth attack and decay.
+ * every cue uses a warm low-pass filtered percussive or wooden envelope
+ * with smooth attack and decay.
  */
 enum class IknaSoundCue {
     TAP,
@@ -54,156 +55,177 @@ expect fun playIknaSoundCue(cue: IknaSoundCue)
 /** Deterministic 16-bit signed little-endian mono PCM synthesis for every cue. */
 internal fun synthesizeIknaCuePcm16Le(cue: IknaSoundCue): ByteArray {
     val samples = when (cue) {
-        IknaSoundCue.TAP -> renderSweep(
-            durationMs = 16,
-            startHz = 760.0,
-            endHz = 390.0,
-            gain = 0.14,
-            decay = 16.0,
-            harmonicMix = 0.18
+        IknaSoundCue.TAP -> lowPass(
+            renderWarmTap(
+                durationMs = 13,
+                startHz = 440.0,
+                endHz = 230.0,
+                gain = 0.13,
+                decay = 14.0
+            ),
+            cutoffHz = 1050.0
         )
-        IknaSoundCue.TOGGLE_ON -> renderTwoStep(
-            firstHz = 520.0,
-            secondHz = 740.0,
-            stepMs = 15,
-            gain = 0.15
+        IknaSoundCue.TOGGLE_ON -> lowPass(
+            renderMarimbaStep(
+                frequencies = doubleArrayOf(360.0, 490.0),
+                strideMs = 15,
+                noteMs = 24,
+                gain = 0.13,
+                attackMs = 3.5,
+                decay = 9.5
+            ),
+            cutoffHz = 1150.0
         )
-        IknaSoundCue.TOGGLE_OFF -> renderTwoStep(
-            firstHz = 640.0,
-            secondHz = 440.0,
-            stepMs = 15,
-            gain = 0.14
+        IknaSoundCue.TOGGLE_OFF -> lowPass(
+            renderMarimbaStep(
+                frequencies = doubleArrayOf(450.0, 325.0),
+                strideMs = 15,
+                noteMs = 24,
+                gain = 0.12,
+                attackMs = 3.5,
+                decay = 9.5
+            ),
+            cutoffHz = 1050.0
         )
-        IknaSoundCue.REVEAL -> renderSweep(
-            durationMs = 36,
-            startHz = 440.0,
-            endHz = 587.33,
-            gain = 0.15,
-            decay = 9.5,
-            harmonicMix = 0.14
+        IknaSoundCue.REVEAL -> lowPass(
+            renderPaperReveal(durationMs = 36, gain = 0.13),
+            cutoffHz = 1250.0
         )
-        IknaSoundCue.KNOW -> renderChord(
-            durationMs = 64,
-            frequencies = doubleArrayOf(523.25, 783.99),
-            weights = doubleArrayOf(0.65, 0.35),
-            gain = 0.17,
-            decay = 7.2
+        IknaSoundCue.KNOW -> lowPass(
+            renderMarimbaStep(
+                frequencies = doubleArrayOf(392.0, 523.25),
+                strideMs = 26,
+                noteMs = 74,
+                gain = 0.145,
+                attackMs = 7.0,
+                decay = 6.2
+            ),
+            cutoffHz = 1200.0
         )
-        IknaSoundCue.DONT_KNOW -> renderSweep(
-            durationMs = 46,
-            startHz = 275.0,
-            endHz = 205.0,
-            gain = 0.16,
-            decay = 8.5,
-            harmonicMix = 0.10
+        IknaSoundCue.DONT_KNOW -> lowPass(
+            renderWarmTap(
+                durationMs = 40,
+                startHz = 215.0,
+                endHz = 152.0,
+                gain = 0.135,
+                decay = 8.2
+            ),
+            cutoffHz = 700.0
         )
-        IknaSoundCue.COMPLETE -> renderArpeggio(
-            frequencies = doubleArrayOf(523.25, 659.25, 783.99),
-            strideMs = 52,
-            noteMs = 110,
-            gain = 0.16
+        IknaSoundCue.COMPLETE -> lowPass(
+            renderMarimbaStep(
+                frequencies = doubleArrayOf(392.0, 493.88, 587.33),
+                strideMs = 56,
+                noteMs = 118,
+                gain = 0.14,
+                attackMs = 7.0,
+                decay = 5.4
+            ),
+            cutoffHz = 1280.0
         )
     }
+    applyEdgeFades(samples)
     return pcm16LeBytes(samples)
 }
 
-private fun renderSweep(
+private fun renderWarmTap(
     durationMs: Int,
     startHz: Double,
     endHz: Double,
     gain: Double,
-    decay: Double,
-    harmonicMix: Double
+    decay: Double
 ): DoubleArray {
     val count = (IKNA_SOUND_SAMPLE_RATE * durationMs) / 1000
     val out = DoubleArray(count)
-    val attackSamples = (IKNA_SOUND_SAMPLE_RATE * 0.002).coerceAtLeast(1.0)
+    val attackSamples = (IKNA_SOUND_SAMPLE_RATE * 0.0025).coerceAtLeast(1.0)
     var phase = 0.0
     for (i in 0 until count) {
         val u = i.toDouble() / count.coerceAtLeast(1)
         val hz = startHz + (endHz - startHz) * u
         phase += 2.0 * PI * hz / IKNA_SOUND_SAMPLE_RATE
         val attack = if (i < attackSamples) 0.5 * (1.0 - cos(PI * i / attackSamples)) else 1.0
-        val release = exp(-decay * u) * (1.0 - u)
-        val wave = sin(phase) + harmonicMix * sin(phase * 2.0)
-        out[i] = wave * attack * release * gain
+        val env = attack * exp(-decay * u) * (1.0 - u)
+        val body = sin(phase) + 0.12 * sin(phase * 2.0)
+        out[i] = body * env * gain
     }
     return out
 }
 
-private fun renderTwoStep(
-    firstHz: Double,
-    secondHz: Double,
-    stepMs: Int,
-    gain: Double
-): DoubleArray {
-    val stepSamples = (IKNA_SOUND_SAMPLE_RATE * stepMs) / 1000
-    val total = stepSamples * 2
-    val out = DoubleArray(total)
-    val attack = (IKNA_SOUND_SAMPLE_RATE * 0.002).coerceAtLeast(1.0)
-    for (segment in 0..1) {
-        val hz = if (segment == 0) firstHz else secondHz
-        val offset = segment * stepSamples
-        val segGain = if (segment == 0) gain * 0.78 else gain
-        var phase = 0.0
-        for (i in 0 until stepSamples) {
-            val u = i.toDouble() / stepSamples.coerceAtLeast(1)
-            phase += 2.0 * PI * hz / IKNA_SOUND_SAMPLE_RATE
-            val a = if (i < attack) 0.5 * (1.0 - cos(PI * i / attack)) else 1.0
-            val env = a * exp(-8.0 * u) * (1.0 - u)
-            out[offset + i] = sin(phase) * env * segGain
-        }
-    }
-    return out
-}
-
-private fun renderChord(
-    durationMs: Int,
-    frequencies: DoubleArray,
-    weights: DoubleArray,
-    gain: Double,
-    decay: Double
-): DoubleArray {
+private fun renderPaperReveal(durationMs: Int, gain: Double): DoubleArray {
     val count = (IKNA_SOUND_SAMPLE_RATE * durationMs) / 1000
     val out = DoubleArray(count)
-    val attack = (IKNA_SOUND_SAMPLE_RATE * 0.003).coerceAtLeast(1.0)
+    val attack = (IKNA_SOUND_SAMPLE_RATE * 0.005).coerceAtLeast(1.0)
+    var phase = 0.0
+    var noiseState = 0x5EED_1234
     for (i in 0 until count) {
-        val t = i.toDouble() / IKNA_SOUND_SAMPLE_RATE
         val u = i.toDouble() / count.coerceAtLeast(1)
+        val hz = 310.0 + 85.0 * u
+        phase += 2.0 * PI * hz / IKNA_SOUND_SAMPLE_RATE
+        noiseState = noiseState xor (noiseState shl 13)
+        noiseState = noiseState xor (noiseState ushr 17)
+        noiseState = noiseState xor (noiseState shl 5)
+        val noise = ((noiseState and 0xFFFF) / 32768.0) - 1.0
         val a = if (i < attack) 0.5 * (1.0 - cos(PI * i / attack)) else 1.0
-        val env = a * exp(-decay * u) * (1.0 - u)
-        var sum = 0.0
-        for (k in frequencies.indices) {
-            sum += weights[k] * sin(2.0 * PI * frequencies[k] * t)
-        }
-        out[i] = sum * env * gain
+        val env = a * exp(-6.8 * u) * (1.0 - u)
+        out[i] = (0.78 * sin(phase) + 0.22 * noise) * env * gain
     }
     return out
 }
 
-private fun renderArpeggio(
+private fun renderMarimbaStep(
     frequencies: DoubleArray,
     strideMs: Int,
     noteMs: Int,
-    gain: Double
+    gain: Double,
+    attackMs: Double,
+    decay: Double
 ): DoubleArray {
     val stride = (IKNA_SOUND_SAMPLE_RATE * strideMs) / 1000
     val noteCount = (IKNA_SOUND_SAMPLE_RATE * noteMs) / 1000
     val total = stride * (frequencies.size - 1) + noteCount
     val out = DoubleArray(total)
-    val attack = (IKNA_SOUND_SAMPLE_RATE * 0.004).coerceAtLeast(1.0)
+    val attack = (IKNA_SOUND_SAMPLE_RATE * (attackMs / 1000.0)).coerceAtLeast(1.0)
     frequencies.forEachIndexed { idx, hz ->
         val start = idx * stride
-        val noteGain = gain * (0.85 + 0.075 * idx)
+        val noteGain = gain * (0.86 + 0.08 * idx)
         for (i in 0 until noteCount) {
             val t = i.toDouble() / IKNA_SOUND_SAMPLE_RATE
             val u = i.toDouble() / noteCount.coerceAtLeast(1)
             val a = if (i < attack) 0.5 * (1.0 - cos(PI * i / attack)) else 1.0
-            val env = a * exp(-5.8 * u) * (1.0 - u)
-            out[start + i] += sin(2.0 * PI * hz * t) * env * noteGain
+            val env = a * exp(-decay * u) * (1.0 - u)
+            // Soft marimba-like fundamental plus a quiet, fast-fading woody overtone.
+            val overtoneEnv = exp(-decay * 2.4 * u)
+            val wave = sin(2.0 * PI * hz * t) + 0.14 * overtoneEnv * sin(2.0 * PI * hz * 2.0 * t)
+            out[start + i] += wave * env * noteGain
         }
     }
     return out
+}
+
+/** Smooth one-pole low-pass filter to remove harsh digital sheen. */
+private fun lowPass(samples: DoubleArray, cutoffHz: Double): DoubleArray {
+    if (samples.isEmpty()) return samples
+    val rc = 1.0 / (2.0 * PI * cutoffHz)
+    val dt = 1.0 / IKNA_SOUND_SAMPLE_RATE
+    val alpha = dt / (rc + dt)
+    val out = DoubleArray(samples.size)
+    var y = samples[0]
+    out[0] = y
+    for (i in 1 until samples.size) {
+        y += alpha * (samples[i] - y)
+        out[i] = y
+    }
+    return out
+}
+
+private fun applyEdgeFades(samples: DoubleArray) {
+    val edge = minOf(samples.size / 6, 48)
+    if (edge <= 1) return
+    for (i in 0 until edge) {
+        val factor = 0.5 * (1.0 - cos(PI * i / edge))
+        samples[i] *= factor
+        samples[samples.size - 1 - i] *= factor
+    }
 }
 
 private fun pcm16LeBytes(samples: DoubleArray): ByteArray {

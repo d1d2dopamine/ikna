@@ -31,8 +31,8 @@ import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.lookFor
 import dev.ikna.data.repo.DeckSummary
 import dev.ikna.ui.theme.Edge
-import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaHomeBackdrop
+import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.Space
 import dev.ikna.data.repo.TodayStudySummary
 import dev.ikna.widget.TodayWidget
@@ -171,14 +171,18 @@ fun DecksScreen(
                 }
                 if (decks.isEmpty()) {
                     item {
-                        Column {
+                        Column(verticalArrangement = Arrangement.spacedBy(Space.md)) {
                             Text(
                                 text = S.t("deck.005"),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = muted
                             )
-                            Spacer(Modifier.height(Space.lg))
-                            IknaLatticePlaceholder()
+                            IknaWideButton(
+                                label = S.t("a11y.004"),
+                                onClick = onAddDeck,
+                                filled = true,
+                                height = 48.dp
+                            )
                         }
                     }
                 }

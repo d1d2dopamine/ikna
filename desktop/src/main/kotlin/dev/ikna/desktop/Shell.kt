@@ -65,6 +65,7 @@ import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaPanel
 import dev.ikna.ui.theme.IknaTheme
 import dev.ikna.ui.theme.IknaTextButton
+import dev.ikna.ui.theme.IknaWideButton
 import kotlinx.coroutines.CancellationException
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Motion
@@ -267,7 +268,7 @@ fun IknaDesktopApp(
                         ) {
                             IknaWordmark(height = 22.dp, ink = palette.ink, dot = palette.accent)
                             Spacer(Modifier.height(Space.lg))
-                            Box(Modifier.width(220.dp)) { IknaLatticePlaceholder() }
+                            Box(Modifier.width(220.dp)) { IknaLatticePlaceholder(loading = true) }
                         }
                     } else if (!settings.onboardingDone || firstRunVisible) {
                         DesktopOnboardingPane(container) { destination ->
@@ -384,7 +385,15 @@ private fun DesktopShell(
                     )
                     DesktopDeckSidebarViewport(sidebarWidth, listWidth) {
                         DecksColumn(settings, ui, decks, remaining, todaySummary, deckListState,
-                            offeredUpdate, skipUpdate, showWordmark = expanded, dockInWindow = windowDock)
+                            offeredUpdate, skipUpdate, showWordmark = expanded, dockInWindow = windowDock, wide = true)
+                    }
+                    if (sidebarWidth > 0.dp) {
+                        Box(
+                            Modifier
+                                .width(1.dp)
+                                .fillMaxHeight()
+                                .background(palette.line.copy(alpha = 0.42f))
+                        )
                     }
                     Box(Modifier.weight(1f).fillMaxHeight()) {
                         PaneContent(container, settings, palette, ui, decks, wide = true, onRestartRequested = onRestartRequested)
@@ -437,8 +446,15 @@ private fun DecksColumn(
     update: DesktopUpdateRelease?,
     onSkipUpdate: () -> Unit,
     showWordmark: Boolean = true,
-    dockInWindow: Boolean = false
+    dockInWindow: Boolean = false,
+    wide: Boolean = false
 ) {
+    val activeDeckId = when (ui.pane) {
+        Pane.DECK -> ui.openDeck
+        Pane.SESSION -> ui.sessionDeck
+        Pane.BROWSE -> ui.browseDeck
+        else -> null
+    }
 
     Box(Modifier.fillMaxSize().iknaInspect("DecksColumn")) {
         IknaHomeBackdrop(settings.deckBackground)
@@ -448,27 +464,34 @@ private fun DecksColumn(
             leftHanded = settings.leftHanded,
             selected = ui.pane.homeDestination(),
             showWordmark = showWordmark,
-            fullWidthDock = settings.homeDockFullWidth,
+            fullWidthDock = wide || settings.homeDockFullWidth,
             dockInWindow = dockInWindow,
             today = {
-                Column(Modifier.padding(horizontal = Edge)) {
-                    Spacer(Modifier.height(Space.md))
-                    IknaTodayBlock(todaySummary, settings.answerMs.takeIf { it > 0 }?.toLong()) {
+                Column(Modifier.padding(horizontal = if (wide) Space.md else Edge)) {
+                    Spacer(Modifier.height(if (wide) Space.sm else Space.md))
+                    IknaTodayBlock(
+                        summary = todaySummary,
+                        perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
+                        compact = wide
+                    ) {
                         ui.study(null)
                     }
-                    Spacer(Modifier.height(if (settings.homeDockAtTop) Space.xs else Space.xl))
+                    Spacer(Modifier.height(if (settings.homeDockAtTop) Space.xs else if (wide) Space.md else Space.xl))
                 }
             },
             onNavigate = ui::navigateHome
         ) {
             LazyColumn(
                 state = listState,
-                modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = Edge),
-                verticalArrangement = Arrangement.spacedBy(Space.md)
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = if (wide) Space.sm else Edge),
+                verticalArrangement = Arrangement.spacedBy(if (wide) Space.xs else Space.md)
             ) {
                 if (update != null) {
                     item(key = "desktop-update") {
-                        Column {
+                        Column(Modifier.padding(horizontal = if (wide) Space.sm else 0.dp)) {
                             Text(
                                 text = S.t("upd.016") + update.version,
                                 style = MaterialTheme.typography.labelLarge
@@ -485,19 +508,28 @@ private fun DecksColumn(
                         deck = deck,
                         look = settings.lookFor(deck.id),
                         dueToday = remaining[deck.id] ?: 0,
-                        onOpen = { ui.openDeckScreen(deck.id) }
+                        onOpen = { ui.openDeckScreen(deck.id) },
+                        compact = wide,
+                        selected = wide && activeDeckId == deck.id
                     )
                 }
                 if (decks.isEmpty()) {
                     item {
-                        Column {
+                        Column(
+                            modifier = Modifier.padding(horizontal = if (wide) Space.sm else 0.dp),
+                            verticalArrangement = Arrangement.spacedBy(Space.md)
+                        ) {
                             Text(
                                 text = S.t("deck.005"),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            Spacer(Modifier.height(Space.lg))
-                            IknaLatticePlaceholder()
+                            IknaWideButton(
+                                label = S.t("a11y.004"),
+                                onClick = { ui.show(Pane.ADD) },
+                                filled = true,
+                                height = 48.dp
+                            )
                         }
                     }
                 }

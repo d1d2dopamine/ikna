@@ -435,7 +435,12 @@ fun IknaWideButton(
         label = "wide-button-fill"
     ) }
     val boundary = if (filled || (enabled && focused)) colors.mark else colors.outline
-    val boundaryAlpha = if (filled || (enabled && (focused || hovered))) alpha else alpha * 0.72f
+    val boundaryAlpha = when {
+        filled || (enabled && focused) -> alpha
+        enabled && hovered -> alpha * 0.65f
+        else -> alpha * 0.36f
+    }
+    val restingSurface = if (!filled) colors.idle.copy(alpha = alpha) else Color.Transparent
 
     Box(
         modifier = modifier
@@ -447,6 +452,7 @@ fun IknaWideButton(
                 scaleY = pressScale
             }
             .clip(iknaControlShape())
+            .background(restingSurface)
             .background(fillColor.copy(alpha = fillColor.alpha * alpha))
             .border(if (enabled && focused) 2.dp else 1.dp, boundary.copy(alpha = boundaryAlpha), iknaControlShape())
             .hoverable(interaction, enabled = enabled)
@@ -467,7 +473,7 @@ fun IknaWideButton(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.titleSmall,
             color = (if (quiet) colors.quietLabel else colors.label).copy(alpha = alpha),
             textAlign = TextAlign.Center
         )
@@ -527,7 +533,7 @@ fun IknaTextButton(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.titleSmall,
             color = color.copy(alpha = alpha),
             textAlign = TextAlign.Center
         )
@@ -687,6 +693,12 @@ fun IknaChip(
         label = "chip-border"
     ) }
 
+    val chipBorderAlpha = when {
+        selected || focused -> 1f
+        hovered -> 0.65f
+        else -> 0.36f
+    }
+
     Box(
         modifier = modifier
             .height(40.dp)
@@ -695,8 +707,9 @@ fun IknaChip(
                 scaleY = pressScale
             }
             .clip(iknaControlShape())
+            .background(if (!selected) colors.idle else Color.Transparent)
             .background(fillColor)
-            .border(if (selected || focused) 2.dp else 1.dp, borderColor, iknaControlShape())
+            .border(if (selected || focused) 2.dp else 1.dp, borderColor.copy(alpha = chipBorderAlpha), iknaControlShape())
             .semantics { this.selected = selected }
             .hoverable(interaction)
             .iknaSignalFrame(
@@ -715,7 +728,7 @@ fun IknaChip(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = colors.label,
             maxLines = 1
         )

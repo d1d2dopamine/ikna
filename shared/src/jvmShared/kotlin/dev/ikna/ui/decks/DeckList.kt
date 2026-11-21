@@ -57,6 +57,7 @@ import dev.ikna.ui.theme.LocalIknaSoundFeedback
 import dev.ikna.ui.theme.Space
 import dev.ikna.ui.theme.SignalFramePlacement
 import dev.ikna.ui.theme.deckTintColor
+import dev.ikna.ui.theme.iknaCardShape
 import dev.ikna.ui.theme.iknaControlShape
 import dev.ikna.ui.theme.iknaFrameRadius
 import dev.ikna.ui.theme.iknaInspect
@@ -69,23 +70,37 @@ private val DECK_MARK_SIZE = 52.dp
 private val DECK_PROGRESS_HEIGHT = 14.dp
 
 @Composable
-fun IknaTodayBlock(summary: TodayStudySummary, perCardMs: Long?, onClick: () -> Unit) {
+fun IknaTodayBlock(
+    summary: TodayStudySummary,
+    perCardMs: Long?,
+    compact: Boolean = false,
+    onClick: () -> Unit
+) {
     val palette = MaterialTheme.colorScheme
     val total = summary.remaining
+    val surfaceModifier = if (compact) {
+        Modifier
+            .fillMaxWidth()
+            .clip(iknaCardShape())
+            .background(palette.surfaceVariant)
+            .padding(Space.md)
+    } else {
+        Modifier.fillMaxWidth()
+    }
     Column(
-        modifier = Modifier.fillMaxWidth().iknaInspect("IknaTodayBlock"),
-        verticalArrangement = Arrangement.spacedBy(Space.sm)
+        modifier = surfaceModifier.iknaInspect("IknaTodayBlock"),
+        verticalArrangement = Arrangement.spacedBy(if (compact) Space.xs else Space.sm)
     ) {
         Text(S.t("deck.007"), style = MaterialTheme.typography.labelMedium, color = palette.onSurfaceVariant)
         Text(
             text = if (total > 0) "$total ${iknaCardWord(total)}${iknaMinutesTail(total, perCardMs)}"
                 else S.t("deck.008"),
-            style = MaterialTheme.typography.headlineSmall,
+            style = if (compact) MaterialTheme.typography.titleLarge else MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold,
             color = palette.onSurface
         )
         if (summary.returning && total > 0) {
-            Text(S.t("today.return"), style = MaterialTheme.typography.bodyMedium)
+            Text(S.t("today.return"), style = MaterialTheme.typography.bodySmall, color = palette.onSurfaceVariant)
         }
         if (summary.reviewOnly) {
             val reason = when (val reason = summary.reviewOnlyReason) {
@@ -95,6 +110,7 @@ fun IknaTodayBlock(summary: TodayStudySummary, perCardMs: Long?, onClick: () -> 
             }
             Text(reason, style = MaterialTheme.typography.bodySmall, color = palette.onSurfaceVariant)
         }
+        if (compact) Spacer(Modifier.height(Space.xs))
         if (total > 0) {
             IknaWideButton(
                 label = S.t(if (summary.started || summary.returning) "today.resume" else "today.start"),
@@ -114,7 +130,9 @@ fun IknaDeckRow(
     deck: DeckSummary,
     look: DeckLook,
     dueToday: Int,
-    onOpen: () -> Unit
+    onOpen: () -> Unit,
+    compact: Boolean = false,
+    selected: Boolean = false
 ) {
     val palette = MaterialTheme.colorScheme
     val controlColors = LocalIknaControlColors.current
@@ -127,7 +145,8 @@ fun IknaDeckRow(
     val pressScale = iknaPressScale(pressed, motionEnabled, pressedScale = 0.986f)
     val rowTint = when {
         pressed -> controlColors.pressed.copy(alpha = 0.72f)
-        hovered -> controlColors.idle.copy(alpha = 0.85f)
+        selected -> controlColors.fill
+        hovered -> controlColors.idle.copy(alpha = 0.90f)
         else -> Color.Transparent
     }
     LaunchedEffect(interaction, sound) {
@@ -155,20 +174,39 @@ fun IknaDeckRow(
             )
             .clickable(interactionSource = interaction, indication = null,
                 onClickLabel = S.t("a11y.010"), onClick = onOpen)
-            .padding(vertical = Space.xs)
+            .padding(
+                horizontal = if (compact) Space.sm else 0.dp,
+                vertical = if (compact) Space.sm else Space.xs
+            )
             .iknaInspect("IknaDeckRow[${deck.title}]"),
         verticalAlignment = Alignment.Top
     ) {
-        IknaDeckMark(deck = deck, owes = owes, look = look)
+        if (compact) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .size(width = 3.dp, height = 22.dp)
+                    .background(if (selected) palette.primary else Color.Transparent, iknaControlShape())
+            )
+            Spacer(Modifier.width(Space.sm))
+        }
+        Box(modifier = if (compact) Modifier.align(Alignment.CenterVertically) else Modifier) {
+            IknaDeckMark(deck = deck, owes = owes, look = look, compact = compact)
+        }
         Spacer(Modifier.width(Space.md))
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Space.xs)) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .then(if (compact) Modifier.align(Alignment.CenterVertically) else Modifier),
+            verticalArrangement = Arrangement.spacedBy(if (compact) 2.dp else Space.xs)
+        ) {
             Text(
                 text = deck.title,
-                maxLines = 2,
+                maxLines = if (compact) 1 else 2,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-                color = if (deck.isActive || owes) palette.onSurface else palette.onSurfaceVariant
+                style = if (compact) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.titleMedium,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                color = if (selected || deck.isActive || owes) palette.onSurface else palette.onSurfaceVariant
             )
             Text(
                 text = if (owes) S.t("deck.009") + dueToday else S.t("deck.010"),

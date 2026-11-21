@@ -203,8 +203,14 @@ private fun IknaMemoryField(
 
 /** A compact unfinished lattice used instead of a dash or a blank chart. */
 @Composable
-fun IknaLatticePlaceholder(modifier: Modifier = Modifier) {
+fun IknaLatticePlaceholder(
+    modifier: Modifier = Modifier,
+    loading: Boolean = false
+) {
     val ink = MaterialTheme.colorScheme.onSurfaceVariant
+    val accent = MaterialTheme.colorScheme.primary
+    val animated = loading && LocalIknaMotionEnabled.current
+    val phase = rememberBackdropPhase(animated, durationMillis = 1600, label = "lattice-loading")
     Canvas(
         modifier = modifier
             .fillMaxWidth()
@@ -222,8 +228,19 @@ fun IknaLatticePlaceholder(modifier: Modifier = Modifier) {
                 val present = ((column * 5 + row * 7) % 9 < 3) ||
                     (row == 1 && column in 3..7)
                 if (!present) continue
+                val baseAlpha = if (row == 1) 0.20f else 0.11f
+                val wave = if (animated) {
+                    0.5f + 0.5f * sin(TAU * phase - column * 0.55f - row * 0.35f)
+                } else {
+                    0f
+                }
+                val color = if (animated && row == 1) {
+                    lerp(ink, accent, wave * 0.45f).copy(alpha = baseAlpha + 0.22f * wave)
+                } else {
+                    ink.copy(alpha = if (animated) baseAlpha + 0.14f * wave else baseAlpha)
+                }
                 drawRect(
-                    color = ink.copy(alpha = if (row == 1) 0.20f else 0.11f),
+                    color = color,
                     topLeft = Offset(left + column * (cell + gap), row * rowStep),
                     size = Size(cell, cell)
                 )
