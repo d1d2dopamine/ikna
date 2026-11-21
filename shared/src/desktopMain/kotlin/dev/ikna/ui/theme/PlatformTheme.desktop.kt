@@ -11,6 +11,8 @@ import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.platform.Font
+import java.awt.RenderingHints
+import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
@@ -64,7 +66,41 @@ actual fun iknaWordmarkAccentPainter(): Painter = remember {
     loadWordmark("/drawable/ikna_wordmark_accent.png")
 }
 
+private fun downscaleSmooth(source: BufferedImage, targetSize: Int): BufferedImage {
+    var current = source
+    while (current.width > targetSize * 2 && current.height > targetSize * 2) {
+        val nextW = (current.width / 2).coerceAtLeast(targetSize)
+        val nextH = (current.height / 2).coerceAtLeast(targetSize)
+        val step = BufferedImage(nextW, nextH, BufferedImage.TYPE_INT_ARGB)
+        val g = step.createGraphics()
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
+        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+        g.drawImage(current, 0, 0, nextW, nextH, null)
+        g.dispose()
+        current = step
+    }
+    if (current.width <= targetSize && current.height <= targetSize) return current
+    val scale = targetSize.toDouble() / maxOf(current.width, current.height).toDouble()
+    val outW = (current.width * scale).toInt().coerceAtLeast(1)
+    val outH = (current.height * scale).toInt().coerceAtLeast(1)
+    val out = BufferedImage(outW, outH, BufferedImage.TYPE_INT_ARGB)
+    val g = out.createGraphics()
+    g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC)
+    g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+    g.drawImage(current, 0, 0, outW, outH, null)
+    g.dispose()
+    return out
+}
+
 @Composable
 actual fun iknaReadingCatPainter(): Painter = remember {
-    loadWordmark("/drawable/ikna_reading_cat.png", filterQuality = FilterQuality.Medium)
+    val stream = WordmarkAnchor.javaClass.getResourceAsStream("/drawable/ikna_reading_cat.png")
+    val image = stream?.let { runCatching { it.use { s -> ImageIO.read(s) } }.getOrNull() }
+    if (image == null) {
+        NothingPainter
+    } else {
+        BitmapPainter(downscaleSmooth(image, 192).toComposeImageBitmap(), filterQuality = FilterQuality.Medium)
+    }
 }

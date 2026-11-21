@@ -31,7 +31,6 @@ import dev.ikna.ui.theme.BarHeight
 import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
-import dev.ikna.ui.theme.IknaReadingCat
 import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Space
@@ -101,7 +100,6 @@ private fun HomeHeading(showWordmark: Boolean) {
                 overflow = TextOverflow.Ellipsis
             )
         }
-        IknaReadingCat()
     }
 }
 

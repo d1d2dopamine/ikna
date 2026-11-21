@@ -33,6 +33,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "shared/src/desktopMain/resources/drawable/ikna_wordmark.png"
 ACCENT_SOURCE = ROOT / "shared/src/desktopMain/resources/drawable/ikna_wordmark_accent.png"
 APP_ICON = ROOT / "docs/assets/brand/ikna-app-icon-rounded.png"
+VERTICAL_BANNER = ROOT / "docs/assets/brand/ikna-banner-vertical.png"
 OUT = ROOT / "desktop/installer"
 DOCS = ROOT / "docs"
 BACKGROUND = (0xD0, 0xD3, 0xD9)
@@ -93,15 +94,23 @@ def paste_app_icon(image: Image.Image, position: tuple[int, int], size: int) -> 
 
 
 def sidebar() -> Image.Image:
-    image = Image.new("RGB", (164, 314), BACKGROUND)
-    draw = ImageDraw.Draw(image)
-    mark = tinted_wordmark(116)
-    image.paste(mark, (22, 38), mark)
-    draw.rectangle((22, 111, 115, 113), fill=INK)
-    draw.rectangle((22, 119, 91, 121), fill=MUTED)
-    draw.rectangle((22, 127, 65, 129), fill=MUTED)
-    paste_app_icon(image, (101, 231), 49)
-    return image
+    target_w, target_h = 164, 314
+    with Image.open(VERTICAL_BANNER) as source:
+        banner = source.convert("RGB")
+        target_ratio = target_w / target_h
+        src_ratio = banner.width / banner.height
+        if src_ratio > target_ratio:
+            crop_h = banner.height
+            crop_w = round(crop_h * target_ratio)
+            crop_x = (banner.width - crop_w) // 2
+            crop_y = 0
+        else:
+            crop_w = banner.width
+            crop_h = round(crop_w / target_ratio)
+            crop_x = 0
+            crop_y = (banner.height - crop_h) // 2
+        cropped = banner.crop((crop_x, crop_y, crop_x + crop_w, crop_y + crop_h))
+        return cropped.resize((target_w, target_h), Image.Resampling.LANCZOS)
 
 
 def header() -> Image.Image:

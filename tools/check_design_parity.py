@@ -447,12 +447,17 @@ class DesignContracts(unittest.TestCase):
                          'DesktopOnboardingPane(container)', 'resetForFirstRun()']:
             self.assertIn(required, shell)
         for required in ['"onb.001"', '"onb.003"', '"onb.005"', '"onb.011"',
-                         'IknaOnboardingTitle(', 'branded = step == 0', 'GestureDemo()', 'container.completeOnboarding()',
-                         'DesktopOnboardingSlide("onb.005", "onb.006", demo = true)',
-                         'DesktopOnboardingSlide("onb.011", "onb.012")']:
+                         'IknaOnboardingTitle(', 'branded = step == 0', 'IknaBrandPatternBackdrop(', 'container.completeOnboarding()',
+                         'DesktopOnboardingSlide("onb.005", "onb.006")',
+                         'DesktopOnboardingSlide("onb.011", "onb.012")',
+                         'S.t("a11y.001")']:
             self.assertIn(required, onboarding)
-        self.assertIn('Slide("onb.005", "onb.006", demo = true)', android_onboarding)
+        self.assertNotIn('GestureDemo(', onboarding)
+        self.assertNotIn('GestureDemo(', android_onboarding)
+        self.assertIn('Slide("onb.005", "onb.006")', android_onboarding)
         self.assertIn('Slide("onb.011", "onb.012")', android_onboarding)
+        self.assertIn('IknaBrandPatternBackdrop(', android_onboarding)
+        self.assertIn('S.t("a11y.001")', android_onboarding)
         for required in [
             '"onb.001" to "Это"',
             'современный рынок SRS-приложений',
@@ -640,7 +645,7 @@ class DesignContracts(unittest.TestCase):
         desktop_settings = read(DESKTOP, 'SettingsPane.kt')
 
         self.assertNotIn('fun IknaDeckHeaderPaint(', lattice)
-        self.assertIn('IknaReadingCat()', read(SHARED, 'ui/decks/HomeChrome.kt'))
+        self.assertIn('IknaReadingCat(', read(SHARED, 'ui/decks/DeckList.kt'))
         for home in (android_home, desktop_shell):
             self.assertIn('IknaHomeChrome(', home)
             self.assertNotIn('IknaDeckHeaderPaint', home)
@@ -653,7 +658,7 @@ class DesignContracts(unittest.TestCase):
         cat = read(SHARED, 'ui/theme/ReadingCat.kt')
         self.assertIn('contentDescription = null', cat)
         self.assertIn('remember(ink, accent, paper)', cat)
-        self.assertIn('modifier = modifier.size(48.dp)', cat)
+        self.assertIn('modifier = modifier.size(size)', cat)
         import struct
         android_asset = ROOT / 'shared/src/androidMain/res/drawable-nodpi/ikna_reading_cat.png'
         desktop_asset = ROOT / 'shared/src/desktopMain/resources/drawable/ikna_reading_cat.png'

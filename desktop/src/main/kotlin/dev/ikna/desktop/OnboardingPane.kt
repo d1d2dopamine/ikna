@@ -1,7 +1,9 @@
 package dev.ikna.desktop
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -10,10 +12,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,15 +26,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import dev.ikna.data.prefs.IknaAppearanceVariant
 import dev.ikna.ui.onboarding.FirstStudyDestination
-import dev.ikna.ui.text.S
-import kotlinx.coroutines.CancellationException
 import dev.ikna.ui.onboarding.IknaOnboardingTitle
-import dev.ikna.ui.theme.IknaTextButton
+import dev.ikna.ui.text.S
+import dev.ikna.ui.theme.IknaBrandPatternBackdrop
 import dev.ikna.ui.theme.IknaScrollableColumn
+import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaWideButton
+import dev.ikna.ui.theme.LocalIknaAppearanceVariant
+import dev.ikna.ui.theme.LocalIknaMotionEnabled
+import dev.ikna.ui.theme.Motion
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -40,14 +48,13 @@ import kotlinx.coroutines.withContext
 /** One desktop introduction slide, named by the same catalogue keys as Android. */
 private data class DesktopOnboardingSlide(
     val titleKey: String,
-    val bodyKey: String,
-    val demo: Boolean = false
+    val bodyKey: String
 )
 
 private val DESKTOP_ONBOARDING_SLIDES = listOf(
     DesktopOnboardingSlide("onb.001", "onb.002"),
     DesktopOnboardingSlide("onb.003", "onb.004"),
-    DesktopOnboardingSlide("onb.005", "onb.006", demo = true),
+    DesktopOnboardingSlide("onb.005", "onb.006"),
     DesktopOnboardingSlide("onb.011", "onb.012")
 )
 
@@ -68,6 +75,9 @@ fun DesktopOnboardingPane(
     var destination by remember { mutableStateOf(FirstStudyDestination.SESSION) }
     val scope = rememberCoroutineScope()
     val slide = DESKTOP_ONBOARDING_SLIDES[step]
+    val motionEnabled = LocalIknaMotionEnabled.current
+    val rounded = LocalIknaAppearanceVariant.current == IknaAppearanceVariant.ROUNDED
+    val dotShape = RoundedCornerShape(if (rounded) 50 else 0)
 
     fun finish(selected: FirstStudyDestination) {
         if (busy) return
@@ -90,9 +100,12 @@ fun DesktopOnboardingPane(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
+        IknaBrandPatternBackdrop(intensity = 0.72f)
         IknaScrollableColumn(
             modifier = Modifier
                 .widthIn(max = 720.dp)
@@ -117,11 +130,6 @@ fun DesktopOnboardingPane(
                 textAlign = TextAlign.Center
             )
 
-            if (slide.demo) {
-                Spacer(Modifier.height(24.dp))
-                GestureDemo()
-            }
-
             if (step == DESKTOP_ONBOARDING_SLIDES.lastIndex) {
                 Spacer(Modifier.height(20.dp))
                 Text(
@@ -134,20 +142,27 @@ fun DesktopOnboardingPane(
 
             Spacer(Modifier.weight(1f))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 DESKTOP_ONBOARDING_SLIDES.indices.forEach { index ->
+                    val width by animateDpAsState(
+                        targetValue = if (index == step) 22.dp else 8.dp,
+                        animationSpec = if (motionEnabled) tween(Motion.controlChangeDurationMillis) else snap(),
+                        label = "onb-step-dot"
+                    )
                     Box(
                         modifier = Modifier
-                            .size(
-                                width = if (index == step) 16.dp else 8.dp,
-                                height = 8.dp
-                            )
+                            .size(width = width, height = 8.dp)
+                            .clip(dotShape)
                             .background(
                                 if (index == step) {
                                     MaterialTheme.colorScheme.primary
                                 } else {
                                     MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
-                                }
+                                },
+                                dotShape
                             )
                     )
                 }
@@ -177,6 +192,7 @@ fun DesktopOnboardingPane(
                 height = 56.dp,
                 onClick = {
                     if (step < DESKTOP_ONBOARDING_SLIDES.lastIndex) {
+                        failed = false
                         step++
                     } else {
                         finish(if (failed) destination else FirstStudyDestination.SESSION)
@@ -184,51 +200,41 @@ fun DesktopOnboardingPane(
                 }
             )
 
-            if (step < DESKTOP_ONBOARDING_SLIDES.lastIndex) {
-                IknaTextButton(
-                    label = S.t("onb.010"),
-                    onClick = { step = DESKTOP_ONBOARDING_SLIDES.lastIndex },
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            } else {
-                IknaTextButton(
-                    label = S.t("onb.015"),
-                    enabled = !busy,
-                    onClick = { finish(FirstStudyDestination.CATALOGUE) },
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (step > 0) {
+                    IknaTextButton(
+                        label = S.t("a11y.001"),
+                        enabled = !busy,
+                        onClick = {
+                            failed = false
+                            step--
+                        },
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                if (step < DESKTOP_ONBOARDING_SLIDES.lastIndex) {
+                    IknaTextButton(
+                        label = S.t("onb.010"),
+                        enabled = !busy,
+                        onClick = {
+                            failed = false
+                            step = DESKTOP_ONBOARDING_SLIDES.lastIndex
+                        },
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    IknaTextButton(
+                        label = S.t("onb.015"),
+                        enabled = !busy,
+                        onClick = { finish(FirstStudyDestination.CATALOGUE) },
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
-    }
-}
-
-/** The same static answer explanation the phone shows beside the error text. */
-@Composable
-private fun GestureDemo() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 132.dp)
-            .border(1.dp, MaterialTheme.colorScheme.outline, dev.ikna.ui.theme.iknaCardShape())
-    ) {
-        Text(
-            text = S.t("card.003"),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .fillMaxWidth(0.5f)
-                .padding(start = 20.dp, bottom = 12.dp)
-        )
-        Text(
-            text = S.t("card.004"),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.primary,
-            textAlign = TextAlign.End,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .fillMaxWidth(0.5f)
-                .padding(end = 20.dp, bottom = 12.dp)
-        )
     }
 }

@@ -374,10 +374,35 @@ fun IknaGlyphIcon(
                 )
             }
             IknaGlyph.FONT -> {
-                val w = s * 0.115f
-                drawLine(color, Offset(s * 0.14f, s * 0.20f), Offset(s * 0.86f, s * 0.20f), strokeWidth = w, cap = lineCap)
-                drawLine(color, Offset(s * 0.50f, s * 0.20f), Offset(s * 0.50f, s * 0.84f), strokeWidth = w, cap = lineCap)
-                drawLine(color, Offset(s * 0.34f, s * 0.84f), Offset(s * 0.66f, s * 0.84f), strokeWidth = w * 0.85f, cap = lineCap)
+                val w = s * 0.10f
+                val join = if (roundMarks) StrokeJoin.Round else StrokeJoin.Miter
+                val letterA = Path().apply {
+                    moveTo(s * 0.10f, s * 0.84f)
+                    lineTo(s * 0.31f, s * 0.18f)
+                    lineTo(s * 0.52f, s * 0.84f)
+                }
+                drawPath(letterA, color, style = Stroke(width = w, cap = lineCap, join = join))
+                drawLine(color, Offset(s * 0.18f, s * 0.63f), Offset(s * 0.44f, s * 0.63f), strokeWidth = w * 0.9f, cap = lineCap)
+
+                val smallTop = Path().apply {
+                    moveTo(s * 0.64f, s * 0.44f)
+                    if (roundMarks) {
+                        lineTo(s * 0.78f, s * 0.44f)
+                        quadraticTo(s * 0.88f, s * 0.44f, s * 0.88f, s * 0.54f)
+                    } else {
+                        lineTo(s * 0.88f, s * 0.44f)
+                    }
+                    lineTo(s * 0.88f, s * 0.84f)
+                }
+                drawPath(smallTop, color, style = Stroke(width = w, cap = lineCap, join = join))
+                val bowlCorner = CornerRadius(if (roundMarks) s * 0.11f else 0f)
+                drawRoundRect(
+                    color = color,
+                    topLeft = Offset(s * 0.61f, s * 0.59f),
+                    size = Size(s * 0.27f, s * 0.25f),
+                    cornerRadius = bowlCorner,
+                    style = Stroke(width = w * 0.92f)
+                )
             }
             IknaGlyph.KEYBOARD -> {
                 val w = s * 0.095f

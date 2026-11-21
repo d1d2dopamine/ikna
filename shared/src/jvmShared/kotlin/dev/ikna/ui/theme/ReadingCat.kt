@@ -9,13 +9,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
  * Decorative reading cat. The transparent raster uses black contours, red book
- * and white interiors. Map those three roles to ink, accent and the current
- * background without changing its alpha, so no white patch remains in any theme.
- * It occupies its own header slot; it never overlays the title or Today block.
+ * and white interiors. Map those three roles to ink, accent and the surface
+ * behind it without changing its alpha, so no white patch remains in any theme.
  */
 internal fun readingCatColorMatrix(ink: Color, accent: Color, paper: Color): ColorMatrix =
     ColorMatrix(floatArrayOf(
@@ -26,18 +26,21 @@ internal fun readingCatColorMatrix(ink: Color, accent: Color, paper: Color): Col
     ))
 
 @Composable
-fun IknaReadingCat(modifier: Modifier = Modifier) {
+fun IknaReadingCat(
+    modifier: Modifier = Modifier,
+    size: Dp = 64.dp,
+    paper: Color = MaterialTheme.colorScheme.background
+) {
     val scheme = MaterialTheme.colorScheme
     val ink = scheme.onBackground
     val accent = scheme.primary
-    val paper = scheme.background
     val filter = remember(ink, accent, paper) {
         ColorFilter.colorMatrix(readingCatColorMatrix(ink, accent, paper))
     }
     Image(
         painter = iknaReadingCatPainter(),
         contentDescription = null,
-        modifier = modifier.size(48.dp),
+        modifier = modifier.size(size),
         colorFilter = filter
     )
 }

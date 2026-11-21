@@ -23,8 +23,6 @@ class SmallViewportContract(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertIn('IknaScrollableColumn(', source)
                 self.assertIn('scrollKey = step', source)
-                self.assertIn('.heightIn(min = 132.dp)', source)
-                self.assertEqual(source.count('.fillMaxWidth(0.5f)'), 2)
                 self.assertIn('branded = step == 0', source)
 
     def test_card_vertical_scroll_does_not_claim_rating_axis(self):

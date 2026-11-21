@@ -51,6 +51,7 @@ import dev.ikna.ui.text.quantityWord
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
+import dev.ikna.ui.theme.IknaReadingCat
 import dev.ikna.ui.theme.IknaSoundCue
 import dev.ikna.ui.theme.IknaToggle
 import dev.ikna.ui.theme.LocalIknaControlColors
@@ -80,6 +81,7 @@ fun IknaTodayBlock(
 ) {
     val palette = MaterialTheme.colorScheme
     val total = summary.remaining
+    val catPaper = if (compact) palette.surfaceVariant else palette.background
     val surfaceModifier = if (compact) {
         Modifier
             .fillMaxWidth()
@@ -93,27 +95,38 @@ fun IknaTodayBlock(
         modifier = surfaceModifier.iknaInspect("IknaTodayBlock"),
         verticalArrangement = Arrangement.spacedBy(if (compact) Space.xs else Space.sm)
     ) {
-        Text(S.t("deck.007"), style = MaterialTheme.typography.labelMedium, color = palette.onSurfaceVariant)
-        Text(
-            text = if (total > 0) "$total ${iknaCardWord(total)}${iknaMinutesTail(total, perCardMs)}"
-                else S.t("deck.008"),
-            style = if (compact) MaterialTheme.typography.titleLarge else MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = palette.onSurface
-        )
-        if (summary.returning && total > 0) {
-            Text(S.t("today.return"), style = MaterialTheme.typography.bodySmall, color = palette.onSurfaceVariant)
-        }
-        if (summary.reviewOnly) {
-            val reason = when (val reason = summary.reviewOnlyReason) {
-                null, GovernorReason.OK, GovernorReason.FIRST_RUN, GovernorReason.SAFETY_VALVE, GovernorReason.RETURN_MODE ->
-                    S.t("today.reviews")
-                else -> reasonText(reason)
-            }
-            Text(reason, style = MaterialTheme.typography.bodySmall, color = palette.onSurfaceVariant)
-        }
-        if (compact) Spacer(Modifier.height(Space.xs))
         if (total > 0) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Space.sm)
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(if (compact) Space.xs else Space.sm)
+                ) {
+                    Text(S.t("deck.007"), style = MaterialTheme.typography.labelMedium, color = palette.onSurfaceVariant)
+                    Text(
+                        text = "$total ${iknaCardWord(total)}${iknaMinutesTail(total, perCardMs)}",
+                        style = if (compact) MaterialTheme.typography.titleLarge else MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = palette.onSurface
+                    )
+                    if (summary.returning) {
+                        Text(S.t("today.return"), style = MaterialTheme.typography.bodySmall, color = palette.onSurfaceVariant)
+                    }
+                    if (summary.reviewOnly) {
+                        val reason = when (val reason = summary.reviewOnlyReason) {
+                            null, GovernorReason.OK, GovernorReason.FIRST_RUN, GovernorReason.SAFETY_VALVE, GovernorReason.RETURN_MODE ->
+                                S.t("today.reviews")
+                            else -> reasonText(reason)
+                        }
+                        Text(reason, style = MaterialTheme.typography.bodySmall, color = palette.onSurfaceVariant)
+                    }
+                }
+                IknaReadingCat(size = 64.dp, paper = catPaper)
+            }
+            if (compact) Spacer(Modifier.height(Space.xs))
             IknaWideButton(
                 label = S.t(if (summary.started || summary.returning) "today.resume" else "today.start"),
                 onClick = onClick,
@@ -121,7 +134,35 @@ fun IknaTodayBlock(
                 height = 48.dp
             )
         } else {
-            IknaTextButton(label = S.t("a11y.019"), onClick = onClick, horizontalPadding = 0.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(Space.sm)
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(if (compact) Space.xs else Space.sm)
+                ) {
+                    Text(S.t("deck.007"), style = MaterialTheme.typography.labelMedium, color = palette.onSurfaceVariant)
+                    Text(
+                        text = S.t("deck.008"),
+                        style = if (compact) MaterialTheme.typography.titleLarge else MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = palette.onSurface
+                    )
+                    if (summary.reviewOnly) {
+                        val reason = when (val reason = summary.reviewOnlyReason) {
+                            null, GovernorReason.OK, GovernorReason.FIRST_RUN, GovernorReason.SAFETY_VALVE, GovernorReason.RETURN_MODE ->
+                                S.t("today.reviews")
+                            else -> reasonText(reason)
+                        }
+                        Text(reason, style = MaterialTheme.typography.bodySmall, color = palette.onSurfaceVariant)
+                    }
+                    if (compact) Spacer(Modifier.height(Space.xs))
+                    IknaTextButton(label = S.t("a11y.019"), onClick = onClick, horizontalPadding = 0.dp)
+                }
+                IknaReadingCat(size = 68.dp, paper = catPaper)
+            }
         }
     }
 }
