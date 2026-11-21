@@ -190,7 +190,7 @@ fun AddDeckPane(
         }
     }
 
-    DesktopScrollablePane(S.t("add.001"), onBack) {
+    DesktopScrollablePane(S.t("add.001"), onBack, icon = dev.ikna.ui.theme.IknaGlyph.PLUS) {
 
 Text(S.t("cat.031"), style = MaterialTheme.typography.labelMedium, color = palette.muted)
 Spacer(Modifier.height(Space.md))

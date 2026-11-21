@@ -179,13 +179,15 @@ fun BrowsePane(
             }
         }
 
-        IknaBottomBar {
-            IknaIconButton(
-                glyph = IknaGlyph.BACK,
-                onClick = onBack,
-                label = S.t("a11y.001")
-            )
-            Spacer(Modifier.weight(1f))
+        if (!dev.ikna.ui.theme.LocalIknaUnifiedFooter.current) {
+            IknaBottomBar {
+                IknaIconButton(
+                    glyph = IknaGlyph.BACK,
+                    onClick = onBack,
+                    label = S.t("a11y.001")
+                )
+                Spacer(Modifier.weight(1f))
+            }
         }
     }
 }

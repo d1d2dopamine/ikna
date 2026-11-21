@@ -488,6 +488,12 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "support.mail" to "Gmail",
     "support.author" to "Profil",
     "support.open_failed" to "Nie udało się otworzyć odnośnika.",
+    "support.pillar_local_title" to "Lokalnie i offline",
+    "support.pillar_local_body" to "Talie, historia i harmonogram pozostają na urządzeniu i działają bez internetu.",
+    "support.pillar_private_title" to "Bez kont i śledzenia",
+    "support.pillar_private_body" to "Zero rejestracji, telemetrii, reklam ani sztucznych serii dni.",
+    "support.pillar_engine_title" to "FSRS-6 i riar-manage",
+    "support.pillar_engine_body" to "Interwały dopasowują się do pamięci, a skończony plan dnia chroni przed przeciążeniem.",
 	"deck.panel_show" to "Pokaż talie", "deck.panel_hide" to "Ukryj talie", "support.title" to "O Iknie", "support.body" to "Jeśli lubisz Iknę, dodaj gwiazdkę oficjalnemu repozytorium na GitHubie. Masz pomysł lub znalazłeś błąd? Otwórz zgłoszenie albo napisz e-mail. Twoje uwagi pomagają rozwijać Iknę.", "deck.hidden" to "Ukryte fiszki", "deck.restore_card" to "Przywróć fiszkę", "deck.language_unknown" to "Nieokreślony lub mieszany", "deck.004" to "Talie",
 	// Пока ни одной колоды. Плюс сверху добавит файл .jsonl.
 	"deck.005" to "Nie ma jeszcze talii. Plus na dole ma prompt dla AI i miejsce na wklejenie.",

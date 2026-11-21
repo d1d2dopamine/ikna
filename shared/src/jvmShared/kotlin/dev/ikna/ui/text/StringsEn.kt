@@ -488,6 +488,12 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "support.mail" to "Gmail",
     "support.author" to "Profile",
     "support.open_failed" to "Could not open the link.",
+    "support.pillar_local_title" to "Local-first and offline",
+    "support.pillar_local_body" to "Decks, review history, and schedules stay on your device and work without internet.",
+    "support.pillar_private_title" to "No accounts or tracking",
+    "support.pillar_private_body" to "No sign-in, telemetry, ads, or artificial daily streaks.",
+    "support.pillar_engine_title" to "FSRS-6 and riar-manage",
+    "support.pillar_engine_body" to "Intervals adapt to your memory while a finite daily plan prevents burnout.",
 	"deck.panel_show" to "Show decks", "deck.panel_hide" to "Hide decks", "support.title" to "About Ikna", "support.body" to "If you like Ikna, star the official repository on GitHub. Have an idea, found a bug, or noticed something missing? Open an issue or send an email. Your feedback helps shape what gets fixed and built next.", "deck.hidden" to "Hidden cards", "deck.restore_card" to "Restore card", "deck.language_unknown" to "Undetermined or mixed", "deck.004" to "Decks",
 	// Пока ни одной колоды. Плюс сверху добавит файл .jsonl.
 	"deck.005" to "No decks yet. The plus at the bottom has the AI prompt and a place to paste.",

@@ -47,7 +47,7 @@ fun StatsPane(
             failed = true
         }
     }
-    DesktopScrollablePane(S.t("stats.001"), onBack) {
+    DesktopScrollablePane(S.t("stats.001"), onBack, icon = dev.ikna.ui.theme.IknaGlyph.BARS) {
         IknaStatsExportAction(enabled = snapshot != null && !exporting) { days, format ->
             val chooser = JFileChooser().apply { selectedFile = File("ikna-statistics.${format.extension}") }
             if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {

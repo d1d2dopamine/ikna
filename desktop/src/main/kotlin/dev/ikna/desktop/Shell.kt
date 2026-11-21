@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -59,10 +60,13 @@ import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaDeveloperBadge
 import dev.ikna.ui.theme.IknaElementInspector
+import dev.ikna.ui.theme.IknaGlyph
+import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaHomeBackdrop
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaPanel
+import dev.ikna.ui.theme.LocalIknaUnifiedFooter
 import dev.ikna.ui.theme.IknaTheme
 import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaWideButton
@@ -375,6 +379,16 @@ private fun DesktopShell(
 
         if (wide) {
             val windowDock = settings.homeDockFullWidth && !settings.homeDockAtTop
+            var sessionReportAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+            LaunchedEffect(ui.pane) {
+                if (ui.pane != Pane.SESSION) sessionReportAction = null
+            }
+            val windowDockBack: (() -> Unit)? = when (ui.pane) {
+                Pane.SESSION -> null
+                Pane.ANKI, Pane.CATALOG -> ({ ui.show(Pane.ADD) })
+                Pane.BACKUP -> ({ ui.show(Pane.SETTINGS) })
+                else -> ({ ui.show(Pane.SESSION) })
+            }
             Column(Modifier.fillMaxSize()) {
                 Row(Modifier.weight(1f).fillMaxWidth()) {
                     val expanded = ui.pane != Pane.SESSION || !ui.studyDecksCollapsed
@@ -396,15 +410,44 @@ private fun DesktopShell(
                         )
                     }
                     Box(Modifier.weight(1f).fillMaxHeight()) {
-                        PaneContent(container, settings, palette, ui, decks, wide = true, onRestartRequested = onRestartRequested)
+                        CompositionLocalProvider(LocalIknaUnifiedFooter provides windowDock) {
+                            PaneContent(
+                                container, settings, palette, ui, decks,
+                                wide = true, onRestartRequested = onRestartRequested,
+                                onSessionReportActionChanged = { sessionReportAction = it }
+                            )
+                        }
                     }
                 }
                 if (windowDock) {
+                    val reportAction = if (ui.pane == Pane.SESSION) sessionReportAction else null
                     IknaHomeDock(
                         leftHanded = settings.leftHanded,
                         selected = ui.pane.homeDestination(),
                         fullWidth = true,
-                        onNavigate = ui::navigateHome
+                        onNavigate = ui::navigateHome,
+                        leading = {
+                            if (ui.pane == Pane.SESSION) {
+                                IknaIconButton(
+                                    glyph = IknaGlyph.DECK_PANEL,
+                                    onClick = { ui.studyDecksCollapsed = !ui.studyDecksCollapsed },
+                                    label = S.t(if (ui.studyDecksCollapsed) "deck.panel_show" else "deck.panel_hide")
+                                )
+                            } else if (windowDockBack != null) {
+                                IknaIconButton(
+                                    glyph = IknaGlyph.BACK,
+                                    onClick = windowDockBack,
+                                    label = S.t("a11y.001")
+                                )
+                            }
+                        },
+                        trailing = if (reportAction != null) ({
+                            IknaTextButton(
+                                label = S.t("sess.044"),
+                                onClick = reportAction,
+                                color = palette.muted
+                            )
+                        }) else null
                     )
                 }
             }
@@ -549,7 +592,8 @@ private fun PaneContent(
     ui: DesktopUi,
     decks: List<DeckSummary>,
     wide: Boolean,
-    onRestartRequested: () -> Unit
+    onRestartRequested: () -> Unit,
+    onSessionReportActionChanged: ((() -> Unit)?) -> Unit = {}
 ) {
     val travel = with(LocalDensity.current) { Motion.sharedAxisTravel.roundToPx() }
     val motion = settings.animations
@@ -591,7 +635,8 @@ private fun PaneContent(
                 // nowhere to take the learner, so the button stays hidden.
                 showBack = !wide,
                 decksCollapsed = ui.studyDecksCollapsed,
-                onToggleDecks = if (wide) ({ ui.studyDecksCollapsed = !ui.studyDecksCollapsed }) else null
+                onToggleDecks = if (wide) ({ ui.studyDecksCollapsed = !ui.studyDecksCollapsed }) else null,
+                onReportActionChanged = onSessionReportActionChanged
             )
 
             Pane.BROWSE -> {

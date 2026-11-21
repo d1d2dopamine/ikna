@@ -84,6 +84,7 @@ import dev.ikna.ui.theme.IknaChip
 import dev.ikna.ui.theme.IknaDialog
 import dev.ikna.ui.theme.IknaBottomBar
 import dev.ikna.ui.theme.IknaGlyph
+import dev.ikna.ui.theme.IknaGlyphIcon
 import dev.ikna.ui.theme.IknaHexField
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaRule
@@ -322,7 +323,16 @@ fun SettingsScreen(
                 .padding(bottom = BarHeight)
         ) {
             // Header and jump row stay put; only the settings themselves scroll.
-            Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+            Row(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                IknaGlyphIcon(
+                    glyph = IknaGlyph.GEAR,
+                    color = MaterialTheme.colorScheme.primary,
+                    size = 20.dp
+                )
                 Text(
                     text = S.t("set.012"),
                     style = MaterialTheme.typography.headlineSmall,
@@ -365,7 +375,7 @@ fun SettingsScreen(
                 contentPadding = PaddingValues(horizontal = 20.dp)
             ) {
                 item(key = ID_LOAD, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
-                    IknaSettingsSection(S.t("set.013"), null) {
+                    IknaSettingsSection(S.t("set.013"), null, icon = iknaSettingsSectionGlyph(ID_LOAD)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             IknaChip(
                                 label = S.t("set.015"),
@@ -406,7 +416,7 @@ fun SettingsScreen(
                 }
 
                 item(key = ID_LOOK, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
-                    IknaSettingsSection(S.t("set.019"), null) {
+                    IknaSettingsSection(S.t("set.019"), null, icon = iknaSettingsSectionGlyph(ID_LOOK)) {
                         // Which palette, then how it is lit. In that order, because
                         // the palette is the app's face and the mode is only the lamp
                         // pointed at it — and because the tiles below are the answer to
@@ -541,7 +551,7 @@ fun SettingsScreen(
                 }
 
                 item(key = ID_LANGUAGE, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
-                    IknaSettingsSection(S.t("set.024"), null) {
+                    IknaSettingsSection(S.t("set.024"), null, icon = iknaSettingsSectionGlyph(ID_LANGUAGE)) {
                         // Two chips to a row rather than one full-width chip per
                         // language. A section that grows by a row of forty-four
                         // points for every language added is a section that becomes a
@@ -590,7 +600,8 @@ fun SettingsScreen(
                         // app did not write and cannot inspect, so it is offered
                         // rather than assumed.
                         S.t("set.026") + " · " + S.t("set.123"),
-                        S.t("set.124") + " " + S.t("set.027")
+                        S.t("set.124") + " " + S.t("set.027"),
+                        icon = iknaSettingsSectionGlyph(ID_SPEECH)
                     ) {
                         IknaSettingsToggleRow(
                             title = S.t("set.028"),
@@ -719,7 +730,8 @@ fun SettingsScreen(
                 item(key = ID_FONT, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
                     IknaSettingsSection(
                         S.t("set.040"),
-                        S.t("set.041")
+                        S.t("set.041"),
+                        icon = iknaSettingsSectionGlyph(ID_FONT)
                     ) {
                         Text(
                             text = when (settings.fontMode) {
@@ -759,7 +771,7 @@ fun SettingsScreen(
                 }
 
                 item(key = ID_REMINDER, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
-                    IknaSettingsSection(S.t("set.047"), null) {
+                    IknaSettingsSection(S.t("set.047"), null, icon = iknaSettingsSectionGlyph(ID_REMINDER)) {
                         IknaSettingsToggleRow(
                             title = S.t("set.049"),
                             subtitle = if (settings.reminderEnabled)
@@ -821,7 +833,7 @@ fun SettingsScreen(
                 // check lives here, on demand, and here the skipped version is
                 // ignored -- pressing the button is the change of mind.
                 item(key = ID_UPDATE, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
-                    IknaSettingsSection(S.t("set.138"), S.t("set.139")) {
+                    IknaSettingsSection(S.t("set.138"), S.t("set.139"), icon = iknaSettingsSectionGlyph(ID_UPDATE)) {
                         Text(
                             text = S.t("upd.011") + installedVersion(context),
                             style = MaterialTheme.typography.bodySmall,
@@ -921,7 +933,8 @@ fun SettingsScreen(
                 item(key = ID_DATA, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
                     IknaSettingsSection(
                         S.t("set.052"),
-                        S.t("set.053")
+                        S.t("set.053"),
+                        icon = iknaSettingsSectionGlyph(ID_DATA)
                     ) {
                         if (!container.isDeveloperMode) {
                             DeviceSyncSettings(container.deviceSync)
@@ -1087,7 +1100,7 @@ fun SettingsScreen(
                 }
 
                 item(key = ID_ADVANCED, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
-                    IknaSettingsSection(S.t("set.063"), null) {
+                    IknaSettingsSection(S.t("set.063"), null, icon = iknaSettingsSectionGlyph(ID_ADVANCED)) {
                         if (container.isDeveloperMode) {
                             dev.ikna.ui.dev.DeveloperProfileControls(
                                 profile = container.dataProfile, enabled = !developerRestarting,

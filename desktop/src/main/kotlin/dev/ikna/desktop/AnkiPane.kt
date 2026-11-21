@@ -89,7 +89,7 @@ fun AnkiPane(
         }
     }
 
-    DesktopScrollablePane(S.t("anki.001"), onBack) {
+    DesktopScrollablePane(S.t("anki.001"), onBack, icon = dev.ikna.ui.theme.IknaGlyph.DATA) {
 
 Spacer(Modifier.height(Space.md))
 Note(S.t("anki.002"), palette)

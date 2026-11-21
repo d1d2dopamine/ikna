@@ -1,18 +1,38 @@
 package dev.ikna.ui.session
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.ikna.data.prefs.IknaAppearanceVariant
+import dev.ikna.domain.governor.GovernorReason
 import dev.ikna.ui.text.S
 import dev.ikna.ui.text.quantityWord
 import dev.ikna.ui.theme.*
-import androidx.compose.animation.core.Animatable
-import androidx.compose.ui.text.style.TextAlign
-import dev.ikna.domain.governor.GovernorReason
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -20,7 +40,7 @@ import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 private val BAR_HEIGHT = 44.dp
-private val UNDO_HEIGHT = 48.dp
+private val UNDO_HEIGHT = 52.dp
 private val EDGE = 20.dp
 private var lastCelebratedAnswersToday: Int = 0
 
@@ -213,6 +233,8 @@ fun IknaSessionEmptyState(
     }
 }
 
+private enum class UndoCapsuleMode { FAILED, WRONG, UNDO }
+
 @Composable
 fun IknaSessionUndoBar(
     visible: Boolean,
@@ -224,55 +246,224 @@ fun IknaSessionUndoBar(
     onDismiss: () -> Unit,
     onOpenSource: (String) -> Unit
 ) {
+    val activeMode = when {
+        failed -> UndoCapsuleMode.FAILED
+        wrong -> UndoCapsuleMode.WRONG
+        visible -> UndoCapsuleMode.UNDO
+        else -> null
+    }
+    var renderedMode by remember { mutableStateOf(activeMode ?: UndoCapsuleMode.UNDO) }
+    if (activeMode != null) renderedMode = activeMode
+
+    val motionEnabled = LocalIknaMotionEnabled.current
+    val colors = MaterialTheme.colorScheme
+    val rounded = LocalIknaAppearanceVariant.current == IknaAppearanceVariant.ROUNDED
+    val capsuleShape = RoundedCornerShape(if (rounded) 14.dp else 0.dp)
+    val actionShape = RoundedCornerShape(if (rounded) 9.dp else 0.dp)
+    val surfaceFill = lerp(colors.surface, colors.onSurface, 0.06f)
+    val borderColor = colors.outline.copy(alpha = 0.42f)
+    val sound = LocalIknaSoundFeedback.current
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(UNDO_HEIGHT)
             .padding(horizontal = EDGE),
-        contentAlignment = Alignment.CenterStart
+        contentAlignment = Alignment.Center
     ) {
-        when {
-            failed -> Text(
-                text = S.t("sess.011"),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            // Said once, without an undo beside it: the card is gone on
-            // purpose, and it can be brought back in settings if that was a
-            // mistake, which is the right amount of friction for a decision
-            // about the deck rather than about an answer.
-            wrong -> Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+        AnimatedVisibility(
+            visible = activeMode != null,
+            enter = if (motionEnabled) {
+                fadeIn(tween(140)) + scaleIn(tween(160), initialScale = 0.96f)
+            } else {
+                EnterTransition.None
+            },
+            exit = if (motionEnabled) fadeOut(tween(110)) else ExitTransition.None
+        ) {
+            Row(
+                modifier = Modifier
+                    .widthIn(max = 520.dp)
+                    .heightIn(min = 40.dp)
+                    .clip(capsuleShape)
+                    .background(surfaceFill, capsuleShape)
+                    .border(1.dp, borderColor, capsuleShape)
+                    .padding(start = 10.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Text(
-                    text = if (reportCopied) S.t("src.006") else S.t("sess.045"),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f)
-                )
-                if (wrongSourceId != null) {
-                    IknaTextButton(
-                        label = S.t("src.007"),
-                        onClick = { onOpenSource(wrongSourceId) }
-                    )
+                when (renderedMode) {
+                    UndoCapsuleMode.FAILED -> {
+                        Box(
+                            modifier = Modifier
+                                .size(22.dp)
+                                .clip(actionShape)
+                                .background(colors.error.copy(alpha = 0.14f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            IknaGlyphIcon(
+                                glyph = IknaGlyph.CLOSE,
+                                color = colors.error,
+                                size = 11.dp
+                            )
+                        }
+                        Text(
+                            text = S.t("sess.011"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colors.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(end = 6.dp)
+                        )
+                    }
+
+                    // Said once, without an undo beside it: the card is gone on
+                    // purpose, and it can be brought back in settings if that was a
+                    // mistake, which is the right amount of friction for a decision
+                    // about the deck rather than about an answer.
+                    UndoCapsuleMode.WRONG -> {
+                        Box(
+                            modifier = Modifier
+                                .size(22.dp)
+                                .clip(actionShape)
+                                .background(colors.outline.copy(alpha = 0.22f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            IknaGlyphIcon(
+                                glyph = IknaGlyph.CHECK,
+                                color = colors.onSurfaceVariant,
+                                size = 12.dp
+                            )
+                        }
+                        Text(
+                            text = if (reportCopied) S.t("src.006") else S.t("sess.045"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colors.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                        if (wrongSourceId != null) {
+                            IknaTextButton(
+                                label = S.t("src.007"),
+                                onClick = { onOpenSource(wrongSourceId) }
+                            )
+                        }
+                    }
+
+                    UndoCapsuleMode.UNDO -> {
+                        val undoInteraction = remember { MutableInteractionSource() }
+                        val undoHovered by undoInteraction.collectIsHoveredAsState()
+                        val undoPressed by undoInteraction.collectIsPressedAsState()
+                        val undoScale = iknaPressScale(undoPressed, motionEnabled, pressedScale = 0.96f)
+
+                        val dismissInteraction = remember { MutableInteractionSource() }
+                        val dismissHovered by dismissInteraction.collectIsHoveredAsState()
+                        val dismissPressed by dismissInteraction.collectIsPressedAsState()
+                        val dismissScale = iknaPressScale(dismissPressed, motionEnabled, pressedScale = 0.94f)
+
+                        Box(
+                            modifier = Modifier
+                                .size(22.dp)
+                                .clip(actionShape)
+                                .background(colors.primary.copy(alpha = 0.14f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            IknaGlyphIcon(
+                                glyph = IknaGlyph.CHECK,
+                                color = colors.primary,
+                                size = 12.dp
+                            )
+                        }
+                        Text(
+                            text = S.t("sess.012"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colors.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .width(1.dp)
+                                .height(16.dp)
+                                .background(colors.outline.copy(alpha = 0.35f))
+                        )
+                        Row(
+                            modifier = Modifier
+                                .graphicsLayer {
+                                    scaleX = undoScale
+                                    scaleY = undoScale
+                                }
+                                .clip(actionShape)
+                                .background(
+                                    colors.primary.copy(
+                                        alpha = when {
+                                            undoPressed -> 0.24f
+                                            undoHovered -> 0.18f
+                                            else -> 0.11f
+                                        }
+                                    ),
+                                    actionShape
+                                )
+                                .hoverable(undoInteraction)
+                                .clickable(
+                                    interactionSource = undoInteraction,
+                                    indication = null,
+                                    role = Role.Button
+                                ) {
+                                    sound.play(IknaSoundCue.TAP)
+                                    onUndo()
+                                }
+                                .padding(horizontal = 10.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            IknaGlyphIcon(
+                                glyph = IknaGlyph.UNDO,
+                                color = colors.primary,
+                                size = 13.dp
+                            )
+                            Text(
+                                text = S.t("sess.013"),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = colors.primary,
+                                maxLines = 1
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .graphicsLayer {
+                                    scaleX = dismissScale
+                                    scaleY = dismissScale
+                                }
+                                .clip(actionShape)
+                                .background(
+                                    if (dismissHovered || dismissPressed) colors.onSurface.copy(alpha = 0.08f)
+                                    else colors.surface.copy(alpha = 0f),
+                                    actionShape
+                                )
+                                .hoverable(dismissInteraction)
+                                .clickable(
+                                    interactionSource = dismissInteraction,
+                                    indication = null,
+                                    role = Role.Button
+                                ) {
+                                    sound.play(IknaSoundCue.TAP)
+                                    onDismiss()
+                                }
+                                .semantics { contentDescription = S.t("sess.014") },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            IknaGlyphIcon(
+                                glyph = IknaGlyph.CLOSE,
+                                color = if (dismissHovered) colors.onSurface else colors.onSurfaceVariant,
+                                size = 12.dp
+                            )
+                        }
+                    }
                 }
-            }
-
-            visible -> Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = S.t("sess.012"),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.weight(1f))
-                IknaTextButton(label = S.t("sess.013"), onClick = onUndo)
-                Spacer(Modifier.width(12.dp))
-                IknaTextButton(label = S.t("sess.014"), onClick = onDismiss, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

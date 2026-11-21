@@ -119,7 +119,7 @@ fun CatalogPane(
     val decks = current?.let { decksFor(it, filter) }.orEmpty()
 
     // The pane owns jobs and status; lazy row disposal only releases the presentation.
-    DesktopLazyPane(S.t("cat.001"), onBack) {
+    DesktopLazyPane(S.t("cat.001"), onBack, icon = dev.ikna.ui.theme.IknaGlyph.BROWSE) {
         item(key = "catalog-intro") {
             Column(Modifier.fillMaxWidth()) {
                 Spacer(Modifier.height(Space.lg))

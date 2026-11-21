@@ -106,12 +106,13 @@ fun SessionPane(
     /** False in the wide window, where the session pane is the app's home and back has nowhere to go. */
     showBack: Boolean = true,
     decksCollapsed: Boolean = false,
-    onToggleDecks: (() -> Unit)? = null
+    onToggleDecks: (() -> Unit)? = null,
+    onReportActionChanged: ((() -> Unit)?) -> Unit = {}
 ) {
     // A deck switch disposes the whole session, including its asynchronous work.
     // An old answer must never advance a newly selected deck's queue.
     key(deckId) {
-        SessionPaneContent(container, settings, palette, deckId, onChanged, onBack, showBack, decksCollapsed, onToggleDecks)
+        SessionPaneContent(container, settings, palette, deckId, onChanged, onBack, showBack, decksCollapsed, onToggleDecks, onReportActionChanged)
     }
 }
 
@@ -125,7 +126,8 @@ private fun SessionPaneContent(
     onBack: () -> Unit,
     showBack: Boolean,
     decksCollapsed: Boolean,
-    onToggleDecks: (() -> Unit)?
+    onToggleDecks: (() -> Unit)?,
+    onReportActionChanged: ((() -> Unit)?) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val committedGeneration by container.sessionChanges.generation.collectAsState()
@@ -667,26 +669,38 @@ private fun SessionPaneContent(
         IknaSessionUndoBar(undoVisible && !loading && !loadFailed && acceptsInput(), undoFailed && !loading && !loadFailed && acceptsInput(), wrongMarked && acceptsInput(), wrongSourceId, reportCopied,
             onUndo = undo, onDismiss = { undoVisible = false },
             onOpenSource = { id -> tatoebaSentenceUrl(id)?.let(::openInBrowser) })
-        IknaBottomBar {
-            // The session pane is the app's default state in a wide window, so
-            // back has nowhere to take the learner; the button only appears
-            // where it can actually do something (narrow layout, list hidden).
-            if (showBack) {
-                IknaIconButton(IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
+        val unifiedFooter = dev.ikna.ui.theme.LocalIknaUnifiedFooter.current
+        val canReport = current != null && revealed && !saving
+        val triggerReport by androidx.compose.runtime.rememberUpdatedState<() -> Unit>({
+            val active = current
+            if (active != null) {
+                reportCopied = false
+                if (catalogCardReport(active.chunk) != null) reportCard = active else wrong()
             }
-            if (onToggleDecks != null) {
-                IknaIconButton(
-                    glyph = IknaGlyph.DECK_PANEL,
-                    onClick = onToggleDecks,
-                    label = S.t(if (decksCollapsed) "deck.panel_show" else "deck.panel_hide")
-                )
-            }
-            Spacer(Modifier.weight(1f))
-            if (current != null && revealed && !saving) {
-                IknaTextButton(S.t("sess.044"), onClick = {
-                    reportCopied = false
-                    if (catalogCardReport(current.chunk) != null) reportCard = current else wrong()
-                }, color = palette.muted)
+        })
+        androidx.compose.runtime.DisposableEffect(unifiedFooter, canReport) {
+            onReportActionChanged(if (unifiedFooter && canReport) ({ triggerReport() }) else null)
+            onDispose { onReportActionChanged(null) }
+        }
+        if (!unifiedFooter) {
+            IknaBottomBar {
+                // The session pane is the app's default state in a wide window, so
+                // back has nowhere to take the learner; the button only appears
+                // where it can actually do something (narrow layout, list hidden).
+                if (showBack) {
+                    IknaIconButton(IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
+                }
+                if (onToggleDecks != null) {
+                    IknaIconButton(
+                        glyph = IknaGlyph.DECK_PANEL,
+                        onClick = onToggleDecks,
+                        label = S.t(if (decksCollapsed) "deck.panel_show" else "deck.panel_hide")
+                    )
+                }
+                Spacer(Modifier.weight(1f))
+                if (canReport) {
+                    IknaTextButton(S.t("sess.044"), onClick = triggerReport, color = palette.muted)
+                }
             }
         }
     }

@@ -44,7 +44,7 @@ fun SearchPane(container: DesktopContainer, palette: IknaPalette, decks: List<De
             rows = result.getOrDefault(emptyList()); failed = result.isFailure; busy = false
         }
     }
-    DesktopPaneFrame(S.t("search.001"), onBack) {
+    DesktopPaneFrame(S.t("search.001"), onBack, icon = dev.ikna.ui.theme.IknaGlyph.SEARCH) {
         Column(Modifier.widthIn(max = 840.dp).fillMaxWidth().align(Alignment.CenterHorizontally).padding(horizontal = 40.dp)) {
             Spacer(Modifier.height(Space.md))
             Text(S.t("search.002"), style = MaterialTheme.typography.bodyMedium, color = palette.muted)

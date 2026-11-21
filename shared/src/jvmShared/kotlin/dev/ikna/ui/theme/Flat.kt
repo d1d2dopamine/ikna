@@ -44,6 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -96,7 +97,10 @@ import kotlin.math.floor
  * clip-art, and a pulled-in icon font would bring Material's rounded geometry
  * back through the side door.
  */
-enum class IknaGlyph { SPARK, BROWSE, BARS, SLIDERS, GEAR, PLUS, BACK, FORWARD, SOUND, DOTS, SEARCH, DECK_PANEL, SUPPORT }
+enum class IknaGlyph {
+    SPARK, BROWSE, BARS, SLIDERS, GEAR, PLUS, BACK, FORWARD, SOUND, DOTS, SEARCH, DECK_PANEL, SUPPORT,
+    UNDO, CLOSE, CHECK, PALETTE, GLOBE, FONT, KEYBOARD, BELL, UPDATE, DATA, ADVANCED, LOCAL, PRIVACY, MEMORY
+}
 
 @Composable
 fun IknaGlyphIcon(
@@ -297,6 +301,191 @@ fun IknaGlyphIcon(
                 drawLine(color, Offset(x(1f), y), tip, strokeWidth = w, cap = lineCap)
                 drawLine(color, tip, Offset(x(0.46f), s * 0.12f), strokeWidth = w, cap = lineCap)
                 drawLine(color, tip, Offset(x(0.46f), s * 0.88f), strokeWidth = w, cap = lineCap)
+            }
+            IknaGlyph.UNDO -> {
+                val w = s * 0.11f
+                val join = if (roundMarks) StrokeJoin.Round else StrokeJoin.Miter
+                val head = Path().apply {
+                    moveTo(s * 0.34f, s * 0.16f)
+                    lineTo(s * 0.12f, s * 0.36f)
+                    lineTo(s * 0.34f, s * 0.56f)
+                }
+                drawPath(head, color, style = Stroke(width = w, cap = lineCap, join = join))
+                val arc = Path().apply {
+                    moveTo(s * 0.16f, s * 0.36f)
+                    lineTo(s * 0.62f, s * 0.36f)
+                    if (roundMarks) {
+                        quadraticTo(s * 0.88f, s * 0.36f, s * 0.88f, s * 0.60f)
+                        quadraticTo(s * 0.88f, s * 0.84f, s * 0.62f, s * 0.84f)
+                    } else {
+                        lineTo(s * 0.88f, s * 0.36f)
+                        lineTo(s * 0.88f, s * 0.84f)
+                    }
+                    lineTo(s * 0.38f, s * 0.84f)
+                }
+                drawPath(arc, color, style = Stroke(width = w, cap = lineCap, join = join))
+            }
+            IknaGlyph.CLOSE -> {
+                val w = s * 0.12f
+                drawLine(color, Offset(s * 0.18f, s * 0.18f), Offset(s * 0.82f, s * 0.82f), strokeWidth = w, cap = lineCap)
+                drawLine(color, Offset(s * 0.82f, s * 0.18f), Offset(s * 0.18f, s * 0.82f), strokeWidth = w, cap = lineCap)
+            }
+            IknaGlyph.CHECK -> {
+                val w = s * 0.13f
+                val join = if (roundMarks) StrokeJoin.Round else StrokeJoin.Miter
+                val tick = Path().apply {
+                    moveTo(s * 0.14f, s * 0.54f)
+                    lineTo(s * 0.40f, s * 0.80f)
+                    lineTo(s * 0.86f, s * 0.24f)
+                }
+                drawPath(tick, color, style = Stroke(width = w, cap = lineCap, join = join))
+            }
+            IknaGlyph.PALETTE -> {
+                val cell = s * 0.36f
+                val gap = s * 0.12f
+                val start = (s - cell * 2 - gap) / 2f
+                val c = CornerRadius(if (roundMarks) s * 0.10f else 0f)
+                drawRoundRect(color, Offset(start, start), Size(cell, cell), c)
+                drawRoundRect(color.copy(alpha = 0.55f), Offset(start + cell + gap, start), Size(cell, cell), c)
+                drawRoundRect(color.copy(alpha = 0.55f), Offset(start, start + cell + gap), Size(cell, cell), c)
+                drawRoundRect(
+                    color,
+                    Offset(start + cell + gap, start + cell + gap),
+                    Size(cell, cell),
+                    c,
+                    style = Stroke(width = s * 0.09f)
+                )
+            }
+            IknaGlyph.GLOBE -> {
+                val w = s * 0.095f
+                val inset = s * 0.10f
+                val span = s - inset * 2
+                val frameRadius = CornerRadius(if (roundMarks) span * 0.48f else 0f)
+                drawRoundRect(color, Offset(inset, inset), Size(span, span), frameRadius, style = Stroke(width = w))
+                drawLine(color, Offset(inset, s * 0.5f), Offset(s - inset, s * 0.5f), strokeWidth = w)
+                drawLine(color, Offset(s * 0.5f, inset), Offset(s * 0.5f, s - inset), strokeWidth = w)
+                val innerInset = s * 0.28f
+                drawRoundRect(
+                    color,
+                    Offset(innerInset, inset),
+                    Size(s - innerInset * 2, span),
+                    CornerRadius(if (roundMarks) (s - innerInset * 2) * 0.48f else 0f),
+                    style = Stroke(width = w * 0.82f)
+                )
+            }
+            IknaGlyph.FONT -> {
+                val w = s * 0.115f
+                drawLine(color, Offset(s * 0.14f, s * 0.20f), Offset(s * 0.86f, s * 0.20f), strokeWidth = w, cap = lineCap)
+                drawLine(color, Offset(s * 0.50f, s * 0.20f), Offset(s * 0.50f, s * 0.84f), strokeWidth = w, cap = lineCap)
+                drawLine(color, Offset(s * 0.34f, s * 0.84f), Offset(s * 0.66f, s * 0.84f), strokeWidth = w * 0.85f, cap = lineCap)
+            }
+            IknaGlyph.KEYBOARD -> {
+                val w = s * 0.095f
+                drawRoundRect(color, Offset(s * 0.08f, s * 0.20f), Size(s * 0.84f, s * 0.60f), markCorner, style = Stroke(width = w))
+                val key = s * 0.10f
+                val c = CornerRadius(if (roundMarks) s * 0.03f else 0f)
+                for (kx in listOf(0.22f, 0.45f, 0.68f)) {
+                    drawRoundRect(color, Offset(s * kx, s * 0.36f), Size(key, key), c)
+                }
+                drawRoundRect(color, Offset(s * 0.26f, s * 0.58f), Size(s * 0.48f, s * 0.09f), c)
+            }
+            IknaGlyph.BELL -> {
+                val w = s * 0.095f
+                val join = if (roundMarks) StrokeJoin.Round else StrokeJoin.Miter
+                val dome = Path().apply {
+                    moveTo(s * 0.16f, s * 0.72f)
+                    lineTo(s * 0.24f, s * 0.62f)
+                    lineTo(s * 0.24f, s * 0.42f)
+                    if (roundMarks) {
+                        quadraticTo(s * 0.24f, s * 0.16f, s * 0.50f, s * 0.16f)
+                        quadraticTo(s * 0.76f, s * 0.16f, s * 0.76f, s * 0.42f)
+                    } else {
+                        lineTo(s * 0.24f, s * 0.18f)
+                        lineTo(s * 0.76f, s * 0.18f)
+                        lineTo(s * 0.76f, s * 0.42f)
+                    }
+                    lineTo(s * 0.76f, s * 0.62f)
+                    lineTo(s * 0.84f, s * 0.72f)
+                    close()
+                }
+                drawPath(dome, color, style = Stroke(width = w, join = join, cap = lineCap))
+                drawRoundRect(color, Offset(s * 0.40f, s * 0.80f), Size(s * 0.20f, s * 0.10f), markCorner)
+            }
+            IknaGlyph.UPDATE -> {
+                val w = s * 0.11f
+                val join = if (roundMarks) StrokeJoin.Round else StrokeJoin.Miter
+                drawLine(color, Offset(s * 0.50f, s * 0.70f), Offset(s * 0.50f, s * 0.14f), strokeWidth = w, cap = lineCap)
+                val tip = Path().apply {
+                    moveTo(s * 0.26f, s * 0.38f)
+                    lineTo(s * 0.50f, s * 0.14f)
+                    lineTo(s * 0.74f, s * 0.38f)
+                }
+                drawPath(tip, color, style = Stroke(width = w, cap = lineCap, join = join))
+                val tray = Path().apply {
+                    moveTo(s * 0.14f, s * 0.66f)
+                    lineTo(s * 0.14f, s * 0.86f)
+                    lineTo(s * 0.86f, s * 0.86f)
+                    lineTo(s * 0.86f, s * 0.66f)
+                }
+                drawPath(tray, color, style = Stroke(width = w, cap = lineCap, join = join))
+            }
+            IknaGlyph.DATA -> {
+                val w = s * 0.095f
+                val h = s * 0.22f
+                val c = CornerRadius(if (roundMarks) s * 0.08f else 0f)
+                drawRoundRect(color, Offset(s * 0.14f, s * 0.14f), Size(s * 0.72f, h), c, style = Stroke(width = w))
+                drawRoundRect(color, Offset(s * 0.14f, s * 0.40f), Size(s * 0.72f, h), c, style = Stroke(width = w))
+                drawRoundRect(color, Offset(s * 0.14f, s * 0.66f), Size(s * 0.72f, h), c, style = Stroke(width = w))
+            }
+            IknaGlyph.ADVANCED -> {
+                val w = s * 0.11f
+                val join = if (roundMarks) StrokeJoin.Round else StrokeJoin.Miter
+                val chevron = Path().apply {
+                    moveTo(s * 0.16f, s * 0.26f)
+                    lineTo(s * 0.44f, s * 0.50f)
+                    lineTo(s * 0.16f, s * 0.74f)
+                }
+                drawPath(chevron, color, style = Stroke(width = w, cap = lineCap, join = join))
+                drawLine(color, Offset(s * 0.52f, s * 0.74f), Offset(s * 0.86f, s * 0.74f), strokeWidth = w, cap = lineCap)
+            }
+            IknaGlyph.LOCAL -> {
+                val w = s * 0.095f
+                drawRoundRect(color, Offset(s * 0.12f, s * 0.16f), Size(s * 0.76f, s * 0.54f), markCorner, style = Stroke(width = w))
+                drawLine(color, Offset(s * 0.30f, s * 0.84f), Offset(s * 0.70f, s * 0.84f), strokeWidth = w, cap = lineCap)
+                drawLine(color, Offset(s * 0.50f, s * 0.70f), Offset(s * 0.50f, s * 0.84f), strokeWidth = w, cap = lineCap)
+                val dot = s * 0.14f
+                drawRoundRect(color, Offset(s * 0.50f - dot / 2f, s * 0.43f - dot / 2f), Size(dot, dot), CornerRadius(if (roundMarks) dot / 2f else 0f))
+            }
+            IknaGlyph.PRIVACY -> {
+                val w = s * 0.095f
+                val join = if (roundMarks) StrokeJoin.Round else StrokeJoin.Miter
+                val shackle = Path().apply {
+                    moveTo(s * 0.30f, s * 0.44f)
+                    lineTo(s * 0.30f, s * 0.30f)
+                    if (roundMarks) {
+                        quadraticTo(s * 0.30f, s * 0.12f, s * 0.50f, s * 0.12f)
+                        quadraticTo(s * 0.70f, s * 0.12f, s * 0.70f, s * 0.30f)
+                    } else {
+                        lineTo(s * 0.30f, s * 0.14f)
+                        lineTo(s * 0.70f, s * 0.14f)
+                    }
+                    lineTo(s * 0.70f, s * 0.44f)
+                }
+                drawPath(shackle, color, style = Stroke(width = w, cap = lineCap, join = join))
+                drawRoundRect(color, Offset(s * 0.18f, s * 0.44f), Size(s * 0.64f, s * 0.44f), markCorner, style = Stroke(width = w))
+                drawRoundRect(color, Offset(s * 0.45f, s * 0.60f), Size(s * 0.10f, s * 0.14f), CornerRadius(if (roundMarks) s * 0.05f else 0f))
+            }
+            IknaGlyph.MEMORY -> {
+                val cell = s * 0.22f
+                val c = CornerRadius(if (roundMarks) s * 0.06f else 0f)
+                val coords = listOf(
+                    0.12f to 0.12f, 0.39f to 0.12f, 0.66f to 0.39f,
+                    0.39f to 0.39f, 0.12f to 0.66f, 0.66f to 0.66f
+                )
+                coords.forEachIndexed { idx, (fx, fy) ->
+                    val alpha = if (idx == 2 || idx == 4) 1f else 0.48f
+                    drawRoundRect(color.copy(alpha = alpha), Offset(s * fx, s * fy), Size(cell, cell), c)
+                }
             }
         }
     }
@@ -910,6 +1099,12 @@ fun IknaDialog(
  * does not need a panel, a shadow or a colour of its own to stop being part of
  * the content.
  */
+/**
+ * True when the desktop shell renders one unified full-width bottom bar that
+ * owns Back and session actions, so individual panes omit their second bottom bar.
+ */
+val LocalIknaUnifiedFooter = staticCompositionLocalOf { false }
+
 @Composable
 fun IknaBottomBar(
     modifier: Modifier = Modifier,

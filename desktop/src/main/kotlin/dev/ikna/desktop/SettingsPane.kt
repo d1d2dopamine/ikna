@@ -45,6 +45,7 @@ import dev.ikna.ui.text.S
 import dev.ikna.ui.text.UI_LANGUAGES
 import dev.ikna.ui.text.uiLanguageLabel
 import dev.ikna.ui.theme.IknaChip
+import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaHexField
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaSwatch
@@ -131,7 +132,7 @@ fun SettingsPane(
     val sections = listOf("load" to "set.091", "look" to "set.092", "language" to "set.093",
         "font" to "set.095", "keys" to "keys.001",
         "update" to "set.140", "data" to "set.097", "advanced" to "set.098")
-    DesktopPaneFrame(S.t("set.012"), onBack) {
+    DesktopPaneFrame(S.t("set.012"), onBack, icon = IknaGlyph.GEAR) {
         // The measured settings column centres in the pane; the jump strip and
         // the rule follow it so the landmarks never sit somewhere else than the
         // sections they name.
@@ -144,13 +145,13 @@ fun SettingsPane(
             }
         }
         Box(Modifier.widthIn(max = 1040.dp).fillMaxWidth().align(Alignment.CenterHorizontally)) {
-            dev.ikna.ui.theme.IknaRule()
+            dev.ikna.ui.theme.IknaRule(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.16f))
         }
         LazyColumn(state = listState,
             modifier = Modifier.widthIn(max = 1040.dp).fillMaxSize().align(Alignment.CenterHorizontally),
             contentPadding = PaddingValues(start = 40.dp, end = 40.dp, bottom = 32.dp)) {
             item(key = "load", contentType = "settings-section") {
-                IknaSettingsSection(S.t("set.013"), null) {
+                IknaSettingsSection(S.t("set.013"), null, icon = iknaSettingsSectionGlyph("load")) {
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         IknaChip(
@@ -174,7 +175,7 @@ fun SettingsPane(
                 }
             }
             item(key = "look", contentType = "settings-section") {
-                IknaSettingsSection(S.t("set.019"), null) {
+                IknaSettingsSection(S.t("set.019"), null, icon = iknaSettingsSectionGlyph("look")) {
                     Spacer(Modifier.height(14.dp))
                     Text(
                         text = S.t("set.114"),
@@ -274,7 +275,7 @@ fun SettingsPane(
                 }
             }
             item(key = "language", contentType = "settings-section") {
-                IknaSettingsSection(S.t("set.024"), null) {
+                IknaSettingsSection(S.t("set.024"), null, icon = iknaSettingsSectionGlyph("language")) {
                     val languages = listOf(LANGUAGE_SYSTEM) + UI_LANGUAGES.map { it.code }
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         languages.forEach { code ->
@@ -287,7 +288,7 @@ fun SettingsPane(
                 }
             }
             item(key = "font", contentType = "settings-section") {
-                IknaSettingsSection(S.t("set.040"), null) {
+                IknaSettingsSection(S.t("set.040"), null, icon = iknaSettingsSectionGlyph("font")) {
                     Spacer(Modifier.height(8.dp))
                     Text(
                         text = S.t("set.041"),
@@ -335,7 +336,7 @@ fun SettingsPane(
                 }
             }
             item(key = "keys", contentType = "settings-section") {
-                IknaSettingsSection(S.t("keys.001"), S.t("keys.002")) {
+                IknaSettingsSection(S.t("keys.001"), S.t("keys.002"), icon = iknaSettingsSectionGlyph("keys")) {
                     HotkeySettingsContent(
                         settings = settings,
                         palette = palette,
@@ -346,7 +347,7 @@ fun SettingsPane(
                 }
             }
             item(key = "update", contentType = "settings-section") {
-                IknaSettingsSection(S.t("set.138"), null) {
+                IknaSettingsSection(S.t("set.138"), null, icon = iknaSettingsSectionGlyph("update")) {
                     Spacer(Modifier.height(8.dp))
                     Text(
                         text = S.t("set.139"),
@@ -423,7 +424,7 @@ fun SettingsPane(
                 }
             }
             item(key = "data", contentType = "settings-section") {
-                IknaSettingsSection(S.t("set.052"), null) {
+                IknaSettingsSection(S.t("set.052"), null, icon = iknaSettingsSectionGlyph("data")) {
                     if (!container.isDeveloperMode) {
                         DeviceSyncSettings(container.deviceSync)
                         Spacer(Modifier.height(16.dp))
@@ -534,7 +535,7 @@ fun SettingsPane(
                 }
             }
             item(key = "advanced", contentType = "settings-section") {
-                IknaSettingsSection(S.t("set.063"), null) {
+                IknaSettingsSection(S.t("set.063"), null, icon = iknaSettingsSectionGlyph("advanced")) {
                     if (container.isDeveloperMode) {
                         dev.ikna.ui.dev.DeveloperProfileControls(
                             profile = container.dataProfile, enabled = !developerRestarting,

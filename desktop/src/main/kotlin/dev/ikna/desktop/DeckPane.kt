@@ -173,7 +173,7 @@ fun DeckPane(
         }
     }
 
-    DesktopScrollablePane(current.title, onBack) {
+    DesktopScrollablePane(current.title, onBack, icon = dev.ikna.ui.theme.IknaGlyph.SLIDERS) {
         Spacer(Modifier.height(Space.xs))
         Text(
             text = current.total.toString() + " " + iknaCardWord(current.total),

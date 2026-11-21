@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
@@ -109,7 +110,9 @@ fun IknaHomeDock(
     leftHanded: Boolean,
     selected: HomeDestination?,
     fullWidth: Boolean,
-    onNavigate: (HomeDestination) -> Unit
+    onNavigate: (HomeDestination) -> Unit,
+    leading: (@Composable RowScope.() -> Unit)? = null,
+    trailing: (@Composable RowScope.() -> Unit)? = null
 ) {
     val colors = MaterialTheme.colorScheme
     val rim = RoundedCornerShape(22.dp)
@@ -117,7 +120,8 @@ fun IknaHomeDock(
     val fill = lerp(colors.surface, colors.outlineVariant, if (fullWidth) 0.08f else 0.12f)
     if (fullWidth) {
         // Match IknaBottomBar exactly (1dp rule + BarHeight row) so the divider aligns
-        // pixel-for-pixel with the Back bar in the adjacent desktop pane.
+        // pixel-for-pixel with adjacent panes, and host unified Back/session actions
+        // when the desktop shell spans the dock across the full window.
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -127,11 +131,20 @@ fun IknaHomeDock(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(BarHeight),
-                contentAlignment = Alignment.Center
+                    .height(BarHeight)
+                    .padding(horizontal = Space.sm)
             ) {
+                if (leading != null) {
+                    Row(
+                        modifier = Modifier.align(Alignment.CenterStart),
+                        horizontalArrangement = Arrangement.spacedBy(Space.xs),
+                        verticalAlignment = Alignment.CenterVertically,
+                        content = leading
+                    )
+                }
                 Row(
                     modifier = Modifier
+                        .align(Alignment.Center)
                         .iknaInspect("Home dock")
                         .padding(horizontal = 6.dp),
                     horizontalArrangement = Arrangement.spacedBy(Space.xs),
@@ -150,6 +163,14 @@ fun IknaHomeDock(
                             label = S.t(destination.labelKey)
                         )
                     }
+                }
+                if (trailing != null) {
+                    Row(
+                        modifier = Modifier.align(Alignment.CenterEnd),
+                        horizontalArrangement = Arrangement.spacedBy(Space.xs),
+                        verticalAlignment = Alignment.CenterVertically,
+                        content = trailing
+                    )
                 }
             }
         }

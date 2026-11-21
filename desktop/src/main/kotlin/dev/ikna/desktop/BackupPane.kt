@@ -144,7 +144,7 @@ fun BackupPane(
         }
     }
 
-    DesktopScrollablePane(S.t("bk.001"), onBack) {
+    DesktopScrollablePane(S.t("bk.001"), onBack, icon = dev.ikna.ui.theme.IknaGlyph.DATA) {
 
 Spacer(Modifier.height(Space.md))
 BackupNote(S.t("bk.016"), palette)

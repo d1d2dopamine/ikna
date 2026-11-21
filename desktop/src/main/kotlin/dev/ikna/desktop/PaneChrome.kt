@@ -19,19 +19,31 @@ import androidx.compose.ui.unit.Dp
 @Composable
 fun DesktopPaneFrame(title: String, onBack: () -> Unit,
     titleStyle: TextStyle = MaterialTheme.typography.headlineSmall,
+    icon: IknaGlyph? = null,
     content: @Composable ColumnScope.() -> Unit) {
+    val unifiedFooter = LocalIknaUnifiedFooter.current
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).clipToBounds()) {
         IknaBrandPatternBackdrop(intensity = 0.72f)
-        Column(Modifier.fillMaxSize().padding(bottom = BarHeight)) {
+        Column(Modifier.fillMaxSize().padding(bottom = if (unifiedFooter) 0.dp else BarHeight)) {
             Row(Modifier.fillMaxWidth().height(BarHeight).padding(horizontal = 40.dp),
-                verticalAlignment = Alignment.CenterVertically) {
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (icon != null) {
+                    IknaGlyphIcon(
+                        glyph = icon,
+                        color = MaterialTheme.colorScheme.primary,
+                        size = 20.dp
+                    )
+                }
                 Text(title, style = titleStyle, fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onBackground, maxLines = 1)
             }
             Column(Modifier.weight(1f).fillMaxWidth(), content = content)
         }
-        IknaBottomBar(Modifier.align(Alignment.BottomCenter)) {
-            IknaIconButton(IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
+        if (!unifiedFooter) {
+            IknaBottomBar(Modifier.align(Alignment.BottomCenter)) {
+                IknaIconButton(IknaGlyph.BACK, onClick = onBack, label = S.t("a11y.001"))
+            }
         }
     }
 }
@@ -39,8 +51,10 @@ fun DesktopPaneFrame(title: String, onBack: () -> Unit,
 @Composable
 fun DesktopScrollablePane(title: String, onBack: () -> Unit,
     titleStyle: TextStyle = MaterialTheme.typography.headlineSmall,
-    readingWidth: Dp = 760.dp, content: @Composable ColumnScope.() -> Unit) {
-    DesktopPaneFrame(title, onBack, titleStyle) {
+    readingWidth: Dp = 760.dp,
+    icon: IknaGlyph? = null,
+    content: @Composable ColumnScope.() -> Unit) {
+    DesktopPaneFrame(title, onBack, titleStyle, icon = icon) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 40.dp)) {
             Spacer(Modifier.height(Space.md))
             // The reading measure centres in the pane instead of hugging the
@@ -55,8 +69,10 @@ fun DesktopScrollablePane(title: String, onBack: () -> Unit,
 @Composable
 fun DesktopLazyPane(title: String, onBack: () -> Unit,
     titleStyle: TextStyle = MaterialTheme.typography.headlineSmall,
-    readingWidth: Dp = 760.dp, content: LazyListScope.() -> Unit) {
-    DesktopPaneFrame(title, onBack, titleStyle) {
+    readingWidth: Dp = 760.dp,
+    icon: IknaGlyph? = null,
+    content: LazyListScope.() -> Unit) {
+    DesktopPaneFrame(title, onBack, titleStyle, icon = icon) {
         Box(Modifier.fillMaxSize().padding(horizontal = 40.dp)) {
             LazyColumn(
                 modifier = Modifier.widthIn(max = readingWidth).fillMaxWidth().fillMaxHeight()

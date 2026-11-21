@@ -1,28 +1,54 @@
 package dev.ikna.ui.settings
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.ikna.data.prefs.IknaAppearanceVariant
+import dev.ikna.data.prefs.MANUAL_LOAD_MAX
+import dev.ikna.data.prefs.MANUAL_LOAD_MIN
+import dev.ikna.data.prefs.MANUAL_LOAD_STEP
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.*
 import dev.ikna.ui.theme.iknaNumberStyle
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import dev.ikna.data.prefs.MANUAL_LOAD_MIN
-import dev.ikna.data.prefs.MANUAL_LOAD_MAX
-import dev.ikna.data.prefs.MANUAL_LOAD_STEP
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
+
+fun iknaSettingsSectionGlyph(sectionId: String): IknaGlyph = when (sectionId) {
+    "load" -> IknaGlyph.SLIDERS
+    "look" -> IknaGlyph.PALETTE
+    "language" -> IknaGlyph.GLOBE
+    "speech" -> IknaGlyph.SOUND
+    "font" -> IknaGlyph.FONT
+    "keys" -> IknaGlyph.KEYBOARD
+    "reminder" -> IknaGlyph.BELL
+    "update" -> IknaGlyph.UPDATE
+    "data" -> IknaGlyph.DATA
+    "advanced" -> IknaGlyph.ADVANCED
+    else -> IknaGlyph.GEAR
+}
 
 @Composable
 fun IknaSettingsJumpRow(
@@ -99,46 +125,123 @@ fun IknaJumpRow(
         }
     }
 
-    Row(
+    val targetLeft = activeSpot?.first?.toFloat() ?: 0f
+    val targetRight = activeSpot?.last?.toFloat() ?: 0f
+    val hasSpot = activeSpot != null
+    val animLeft = remember { Animatable(0f) }
+    val animRight = remember { Animatable(0f) }
+    var indicatorReady by remember { mutableStateOf(false) }
+
+    LaunchedEffect(targetLeft, targetRight, hasSpot, animations) {
+        if (!hasSpot) return@LaunchedEffect
+        if (!indicatorReady || !animations) {
+            animLeft.snapTo(targetLeft)
+            animRight.snapTo(targetRight)
+            indicatorReady = true
+        } else {
+            val spec = tween<Float>(
+                durationMillis = 220,
+                easing = FastOutSlowInEasing
+            )
+            launch { animLeft.animateTo(targetLeft, spec) }
+            launch { animRight.animateTo(targetRight, spec) }
+        }
+    }
+
+    val colors = MaterialTheme.colorScheme
+    val rounded = LocalIknaAppearanceVariant.current == IknaAppearanceVariant.ROUNDED
+    val sound = LocalIknaSoundFeedback.current
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .onGloballyPositioned { rowWidth = it.size.width }
             .horizontalScroll(row)
-            .padding(horizontal = edgePadding),
-        horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        sections.forEach { jump ->
-            val here = jump.first == activeId
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.onGloballyPositioned { coords ->
-                    val x = coords.parentLayoutCoordinates
-                        ?.localPositionOf(coords, Offset.Zero)
-                        ?.x
-                        ?: 0f
-                    val left = x.roundToInt()
-                    spots[jump.first] = left..(left + coords.size.width)
-                }
+        Box {
+            Row(
+                modifier = Modifier.padding(horizontal = edgePadding),
+                horizontalArrangement = Arrangement.spacedBy(18.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                IknaTextButton(
-                    label = S.t(jump.second),
-                    onClick = { onJump(jump.first) },
-                    color = if (here) MaterialTheme.colorScheme.onBackground
-                    else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                    repeat(3) { index ->
-                        Box(
-                            modifier = Modifier
-                                .width(6.dp)
-                                .height(2.dp)
-                                .background(
-                                    if (here) MaterialTheme.colorScheme.primary.copy(
-                                        alpha = if (index == 1) 1f else 0.52f
-                                    ) else Color.Transparent
-                                )
+                sections.forEach { jump ->
+                    val here = jump.first == activeId
+                    val interaction = remember { MutableInteractionSource() }
+                    val hovered by interaction.collectIsHoveredAsState()
+                    val pressed by interaction.collectIsPressedAsState()
+                    val scale = iknaPressScale(pressed, animations, pressedScale = 0.96f)
+                    val labelColor by animateColorAsState(
+                        targetValue = when {
+                            here -> colors.onBackground
+                            hovered -> colors.onBackground.copy(alpha = 0.85f)
+                            else -> colors.onSurfaceVariant
+                        },
+                        animationSpec = if (animations) tween(Motion.controlChangeDurationMillis) else snap(),
+                        label = "jump-tab-label"
+                    )
+                    val iconColor by animateColorAsState(
+                        targetValue = when {
+                            here -> colors.primary
+                            hovered -> colors.onBackground.copy(alpha = 0.80f)
+                            else -> colors.onSurfaceVariant.copy(alpha = 0.78f)
+                        },
+                        animationSpec = if (animations) tween(Motion.controlChangeDurationMillis) else snap(),
+                        label = "jump-tab-icon"
+                    )
+                    Row(
+                        modifier = Modifier
+                            .onGloballyPositioned { coords ->
+                                val x = coords.parentLayoutCoordinates
+                                    ?.localPositionOf(coords, Offset.Zero)
+                                    ?.x
+                                    ?: 0f
+                                val left = x.roundToInt()
+                                spots[jump.first] = left..(left + coords.size.width)
+                            }
+                            .heightIn(min = 42.dp)
+                            .graphicsLayer {
+                                scaleX = scale
+                                scaleY = scale
+                            }
+                            .semantics { selected = here }
+                            .hoverable(interaction)
+                            .clickable(
+                                interactionSource = interaction,
+                                indication = null,
+                                role = Role.Tab
+                            ) {
+                                sound.play(IknaSoundCue.TAP)
+                                onJump(jump.first)
+                            }
+                            .padding(horizontal = 4.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(7.dp)
+                    ) {
+                        IknaGlyphIcon(
+                            glyph = iknaSettingsSectionGlyph(jump.first),
+                            color = iconColor,
+                            size = 14.dp
+                        )
+                        Text(
+                            text = S.t(jump.second),
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = if (here) FontWeight.SemiBold else FontWeight.Medium,
+                            color = labelColor,
+                            maxLines = 1
                         )
                     }
+                }
+            }
+            Canvas(modifier = Modifier.matchParentSize()) {
+                if (indicatorReady && animRight.value > animLeft.value) {
+                    val barHeight = 2.5.dp.toPx()
+                    val corner = CornerRadius(if (rounded) barHeight / 2f else 0f)
+                    drawRoundRect(
+                        color = colors.primary,
+                        topLeft = Offset(animLeft.value, size.height - barHeight),
+                        size = Size(animRight.value - animLeft.value, barHeight),
+                        cornerRadius = corner
+                    )
                 }
             }
         }
@@ -185,14 +288,27 @@ fun IknaSettingsStepper(
 fun IknaSettingsSection(
     title: String,
     subtitle: String?,
+    icon: IknaGlyph? = null,
     content: @Composable () -> Unit
 ) {
     Spacer(Modifier.height(Space.xl))
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Medium
-    )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        if (icon != null) {
+            IknaGlyphIcon(
+                glyph = icon,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.88f),
+                size = 18.dp
+            )
+        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Medium
+        )
+    }
     if (subtitle != null) {
         Spacer(Modifier.height(4.dp))
         Text(
