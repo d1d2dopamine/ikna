@@ -27,3 +27,5 @@ app/src/main/assets/packs/en-ru-beginner.jsonl
 
 # Python bytecode from the tooling checkers.
 __pycache__/
+
+.kotlin/
