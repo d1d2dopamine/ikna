@@ -22,19 +22,19 @@ class LaunchWindowTest {
 
     @Test
     fun `the launch window is the default palette's dark background`() {
-        assertEquals("0B1120", hexOf(DarkPalette.background))
+        assertEquals("1B2232", hexOf(DarkPalette.background))
     }
 
     @Test
     fun `the widget wears the default palette's dark version`() {
-        assertEquals("0B1120", hexOf(DefaultPaletteSpec.dark.background))
-        assertEquals("E5EAF4", hexOf(DefaultPaletteSpec.dark.ink))
-        assertEquals("78859C", hexOf(DefaultPaletteSpec.dark.muted))
-        assertEquals("FF7A5C", hexOf(DefaultPaletteSpec.dark.accent))
+        assertEquals("1B2232", hexOf(DefaultPaletteSpec.dark.background))
+        assertEquals("BDCAE1", hexOf(DefaultPaletteSpec.dark.ink))
+        assertEquals("8C9CB8", hexOf(DefaultPaletteSpec.dark.muted))
+        assertEquals("61A9AF", hexOf(DefaultPaletteSpec.dark.accent))
     }
 
     @Test
-    fun `the clean install default is still Ink`() {
-        assertEquals("ink", DEFAULT_PALETTE_ID)
+    fun `the clean install default is Frost`() {
+        assertEquals("frost", DEFAULT_PALETTE_ID)
     }
 }

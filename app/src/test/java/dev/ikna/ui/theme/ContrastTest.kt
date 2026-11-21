@@ -67,7 +67,7 @@ class ContrastTest {
     @Test
     fun `the grey background is grey and dark`() {
         assertTrue(relativeLuminance(GreyPalette.background) in 0.012..0.05)
-        assertTrue(relativeLuminance(DarkPalette.background) < 0.013)
+        assertTrue(relativeLuminance(DarkPalette.background) < 0.018)
     }
 
     @Test
@@ -92,8 +92,8 @@ class ContrastTest {
     @Test
     fun `a colour survives the trip through the text field`() {
         assertEquals("1B1813", hexOf(parseHexColor("1b1813")!!))
-        assertEquals("FF927C", hexOf(GreyPalette.accent))
-        assertEquals("0B1120", hexOf(DarkPalette.background))
+        assertEquals("7BC0C6", hexOf(GreyPalette.accent))
+        assertEquals("1B2232", hexOf(DarkPalette.background))
     }
 
     @Test

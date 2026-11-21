@@ -122,7 +122,7 @@ class PaletteContracts(unittest.TestCase):
                     self.assertLess(max(p['background']) - min(p['background']), .05)
                     self.assertGreater(value, luminance(palettes()[(identity, 'dark')]['background']))
                 else:
-                    self.assertLess(value, .013)
+                    self.assertLess(value, .018)
 
     def test_grey_accents_keep_the_palette_identity(self):
         import colorsys

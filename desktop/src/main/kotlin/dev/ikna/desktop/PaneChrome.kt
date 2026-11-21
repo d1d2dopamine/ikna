@@ -21,6 +21,7 @@ fun DesktopPaneFrame(title: String, onBack: () -> Unit,
     titleStyle: TextStyle = MaterialTheme.typography.headlineSmall,
     content: @Composable ColumnScope.() -> Unit) {
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).clipToBounds()) {
+        IknaBrandPatternBackdrop(intensity = 0.72f)
         Column(Modifier.fillMaxSize().padding(bottom = BarHeight)) {
             Row(Modifier.fillMaxWidth().height(BarHeight).padding(horizontal = 40.dp),
                 verticalAlignment = Alignment.CenterVertically) {

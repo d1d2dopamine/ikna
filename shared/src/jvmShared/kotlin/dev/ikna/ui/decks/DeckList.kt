@@ -48,6 +48,8 @@ import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.text.S
 import dev.ikna.ui.text.quantityWord
+import dev.ikna.ui.theme.IknaGlyph
+import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.IknaSoundCue
 import dev.ikna.ui.theme.IknaToggle
@@ -124,13 +126,14 @@ fun IknaTodayBlock(
     }
 }
 
-/** Deck selection opens its details, where study and management live. */
+/** Clicking the deck opens study; the trailing icon opens deck details and settings. */
 @Composable
 fun IknaDeckRow(
     deck: DeckSummary,
     look: DeckLook,
     dueToday: Int,
     onOpen: () -> Unit,
+    onManage: (() -> Unit)? = null,
     compact: Boolean = false,
     selected: Boolean = false
 ) {
@@ -173,10 +176,12 @@ fun IknaDeckRow(
                 placement = SignalFramePlacement.Outer
             )
             .clickable(interactionSource = interaction, indication = null,
-                onClickLabel = S.t("a11y.010"), onClick = onOpen)
+                onClickLabel = S.t("today.start"), onClick = onOpen)
             .padding(
-                horizontal = if (compact) Space.sm else 0.dp,
-                vertical = if (compact) Space.sm else Space.xs
+                start = if (compact) Space.sm else 0.dp,
+                end = if (onManage != null) 0.dp else if (compact) Space.sm else 0.dp,
+                top = if (compact) Space.xs else Space.xs,
+                bottom = if (compact) Space.xs else Space.xs
             )
             .iknaInspect("IknaDeckRow[${deck.title}]"),
         verticalAlignment = Alignment.Top
@@ -212,6 +217,17 @@ fun IknaDeckRow(
                 text = if (owes) S.t("deck.009") + dueToday else S.t("deck.010"),
                 style = MaterialTheme.typography.labelSmall,
                 color = if (owes) palette.primary else palette.onSurfaceVariant
+            )
+        }
+        if (onManage != null) {
+            IknaIconButton(
+                glyph = IknaGlyph.DOTS,
+                onClick = onManage,
+                modifier = Modifier.align(Alignment.CenterVertically),
+                size = 48.dp,
+                glyphSize = 18.dp,
+                color = palette.onSurfaceVariant,
+                label = S.t("a11y.010")
             )
         }
     }

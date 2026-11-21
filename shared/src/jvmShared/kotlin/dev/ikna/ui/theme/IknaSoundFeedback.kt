@@ -92,15 +92,14 @@ internal fun synthesizeIknaCuePcm16Le(cue: IknaSoundCue): ByteArray {
             cutoffHz = 1250.0
         )
         IknaSoundCue.KNOW -> lowPass(
-            renderMarimbaStep(
-                frequencies = doubleArrayOf(392.0, 523.25),
-                strideMs = 26,
-                noteMs = 74,
-                gain = 0.145,
-                attackMs = 7.0,
-                decay = 6.2
+            renderWarmTap(
+                durationMs = 34,
+                startHz = 285.0,
+                endHz = 385.0,
+                gain = 0.18,
+                decay = 8.6
             ),
-            cutoffHz = 1200.0
+            cutoffHz = 960.0
         )
         IknaSoundCue.DONT_KNOW -> lowPass(
             renderWarmTap(

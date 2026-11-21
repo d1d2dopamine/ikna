@@ -508,7 +508,8 @@ private fun DecksColumn(
                         deck = deck,
                         look = settings.lookFor(deck.id),
                         dueToday = remaining[deck.id] ?: 0,
-                        onOpen = { ui.openDeckScreen(deck.id) },
+                        onOpen = { ui.study(deck.id) },
+                        onManage = { ui.openDeckScreen(deck.id) },
                         compact = wide,
                         selected = wide && activeDeckId == deck.id
                     )

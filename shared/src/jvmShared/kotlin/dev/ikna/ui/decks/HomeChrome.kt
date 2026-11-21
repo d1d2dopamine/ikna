@@ -31,6 +31,7 @@ import dev.ikna.ui.theme.Edge
 import dev.ikna.ui.theme.IknaGlyph
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaReadingCat
+import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaWordmark
 import dev.ikna.ui.theme.Space
 import dev.ikna.ui.theme.iknaInspect
@@ -114,22 +115,58 @@ fun IknaHomeDock(
     val rim = RoundedCornerShape(22.dp)
     val order = if (leftHanded) HomeDestination.entries.asReversed() else HomeDestination.entries
     val fill = lerp(colors.surface, colors.outlineVariant, if (fullWidth) 0.08f else 0.12f)
-    val shell = if (fullWidth) Modifier.background(fill) else Modifier.padding(Space.sm)
+    if (fullWidth) {
+        // Match IknaBottomBar exactly (1dp rule + BarHeight row) so the divider aligns
+        // pixel-for-pixel with the Back bar in the adjacent desktop pane.
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(colors.background)
+        ) {
+            IknaRule()
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(BarHeight),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    modifier = Modifier
+                        .iknaInspect("Home dock")
+                        .padding(horizontal = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(Space.xs),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    for (destination in order) {
+                        val active = destination == selected
+                        IknaIconButton(
+                            glyph = destination.glyph,
+                            onClick = { onNavigate(destination) },
+                            modifier = if (active) Modifier.background(
+                                colors.primary.copy(alpha = 0.14f), iknaTileShape()
+                            ) else Modifier,
+                            selected = active,
+                            color = if (active) colors.primary else colors.onSurface,
+                            label = S.t(destination.labelKey)
+                        )
+                    }
+                }
+            }
+        }
+        return
+    }
     Box(
-        modifier = Modifier.fillMaxWidth().then(shell),
+        modifier = Modifier.fillMaxWidth().padding(Space.sm),
         contentAlignment = Alignment.Center
     ) {
-        if (fullWidth) {
-            HorizontalDivider(Modifier.align(Alignment.TopCenter), color = colors.outlineVariant)
-        }
-        val dock = if (fullWidth) Modifier else Modifier
+        val dock = Modifier
             .shadow(3.dp, rim)
             .background(fill, rim)
             .border(1.dp, colors.outlineVariant.copy(alpha = 0.76f), rim)
         Row(
             modifier = dock
                 .iknaInspect("Home dock")
-                .padding(horizontal = 6.dp, vertical = if (fullWidth) 6.dp else 4.dp),
+                .padding(horizontal = 6.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(Space.xs),
             verticalAlignment = Alignment.CenterVertically
         ) {

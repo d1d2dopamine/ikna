@@ -5,29 +5,16 @@
          close to the default Ink background (#0B1120). Keeping this colour tied
          to the clean-install default prevents a visible rim if a launcher exposes
          any of the adaptive-icon background around the raster foreground. -->
-    <color name="ic_launcher_background">#0B1120</color>
+    <color name="ic_launcher_background">#1B2232</color>
 
-    <!-- The default palette's dark background from Theme.kt - "Чернила", which is
-         what DEFAULT_PALETTE_ID has named since 0.9.0. The app opens dark, so
-         this is what the launch window should be; Compose repaints it a frame
-         later. It has to track the current default rather than a neutral grey or
-         a retired palette: on Android 12+ this is also the system splash field,
-         and a mismatched flash in front of the first frame is visible on every
-         single launch. ContrastTest pins this hex to DarkPalette.background so
-         the two cannot drift again. -->
-    <color name="window_background">#0B1120</color>
+    <!-- The default palette's dark background from Theme.kt - "Иней", matched to
+         the Ikna brand banner. The app opens dark, so this is what the launch
+         window should be; Compose repaints it a frame later. -->
+    <color name="window_background">#1B2232</color>
 
-    <!-- The widget is drawn by the launcher, which cannot read the Compose
-         palette, so the four colours it needs are duplicated here. These are the
-         default palette's dark version from Theme.kt: a widget that followed the
-         in-app light theme would be a white brick on most people's wallpaper.
-
-         The widget deliberately does not follow the palette the user picked. It
-         cannot - the launcher process has no access to the app's preferences at
-         draw time - and a tile that lagged one palette behind the app would look
-         broken rather than themed. It wears the brand instead. -->
-    <color name="widget_background">#0B1120</color>
-    <color name="widget_ink">#E5EAF4</color>
-    <color name="widget_muted">#78859C</color>
-    <color name="widget_accent">#FF7A5C</color>
+    <!-- The widget wears the default Frost dark palette from Theme.kt. -->
+    <color name="widget_background">#1B2232</color>
+    <color name="widget_ink">#BDCAE1</color>
+    <color name="widget_muted">#8C9CB8</color>
+    <color name="widget_accent">#61A9AF</color>
 </resources>

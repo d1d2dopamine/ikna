@@ -244,6 +244,7 @@ fun CatalogScreen(
 	val muted = MaterialTheme.colorScheme.onSurfaceVariant
 
 	Box(modifier = Modifier.fillMaxSize()) {
+		dev.ikna.ui.theme.IknaBrandPatternBackdrop(intensity = 0.65f)
 		Column(modifier = Modifier.fillMaxSize().padding(bottom = BarHeight)) {
 			Row(
 				modifier = Modifier

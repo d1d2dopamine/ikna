@@ -27,7 +27,7 @@ class PaletteTest {
 	@Test
 	fun `the chooser contains twelve authored palettes`() {
 		assertEquals(12, IknaPalettes.size)
-		assertEquals("ink", DEFAULT_PALETTE_ID)
+		assertEquals("frost", DEFAULT_PALETTE_ID)
 		assertEquals(listOf("ink", "library", "ember"), IknaPalettes.take(3).map { it.id })
 		assertEquals(
 			listOf("ultraviolet", "lagoon", "cobalt"),
@@ -75,7 +75,7 @@ class PaletteTest {
 			)
 			assertTrue(
 				spec.id + " dark background is near black",
-				relativeLuminance(spec.dark.background) < 0.013
+				relativeLuminance(spec.dark.background) < 0.018
 			)
 		}
 	}

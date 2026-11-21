@@ -310,11 +310,15 @@ fun SettingsScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        dev.ikna.ui.theme.IknaBrandPatternBackdrop(intensity = 0.65f)
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
                 .padding(bottom = BarHeight)
         ) {
             // Header and jump row stay put; only the settings themselves scroll.

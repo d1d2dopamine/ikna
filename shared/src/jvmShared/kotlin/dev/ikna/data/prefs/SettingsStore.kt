@@ -58,7 +58,7 @@ enum class IknaAppearanceVariant { ANGULAR, ROUNDED }
  * have a default that the preferences layer can name without reaching up into the
  * interface. The colours themselves are in ui/theme/Theme.kt.
  */
-const val DEFAULT_PALETTE_ID = "ink"
+const val DEFAULT_PALETTE_ID = "frost"
 
 /**
  * The hand-set daily norm.
@@ -189,7 +189,7 @@ data class IknaSettings(
     /** Main interface face. Geologica is the product default; system and a picked file remain available. */
     val fontMode: FontMode = FontMode.GEOLOGICA,
     /** Corner language of the whole interface. Both variants share one component tree. */
-    val appearanceVariant: IknaAppearanceVariant = IknaAppearanceVariant.ANGULAR,
+    val appearanceVariant: IknaAppearanceVariant = IknaAppearanceVariant.ROUNDED,
     /** File name of the installed custom font. Kept even while another built-in mode is selected. */
     val fontName: String = "",
     /**
@@ -202,7 +202,7 @@ data class IknaSettings(
     val leftHanded: Boolean = false,
     val homeDockAtTop: Boolean = false,
     val homeDockFullWidth: Boolean = false,
-    val deckBackground: DeckBackground = DeckBackground.CLASSIC,
+    val deckBackground: DeckBackground = DeckBackground.TONAL,
     val deckBackgroundAnimation: Boolean = true,
     /**
      * How each deck's square looks: a label and a colour, stored as

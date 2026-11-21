@@ -48,7 +48,7 @@ class MobileDeckUiContractTest {
         )) assertTrue(required, row.contains(required))
         assertFalse(row.contains(".height("))
         assertFalse(row.contains("IknaToggle("))
-        assertFalse(row.contains("IknaIconButton("))
+        assertTrue(row.contains("onManage"))
         assertFalse(row.contains("IknaDeckProgress("))
         val details = androidSource("DeckScreen.kt")
         assertTrue(details.contains("IknaDeckActions("))

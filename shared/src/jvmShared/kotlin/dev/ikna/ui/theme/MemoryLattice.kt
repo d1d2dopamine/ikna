@@ -16,17 +16,35 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
 import dev.ikna.data.prefs.DeckBackground
 import kotlin.math.PI
+import kotlin.math.ceil
 import kotlin.math.cos
+import kotlin.math.hypot
 import kotlin.math.sin
 
 private const val TAU = (PI * 2.0).toFloat()
+
+/**
+ * Exact 6x7 Ikna pixel emblem from the brand banner.
+ * '#' = primary ink/slate cell, 'A' = accent cell, '.' = empty.
+ */
+private val IKNA_PIXEL_EMBLEM: Array<String> = arrayOf(
+    "###.#A",
+    "#.##.#",
+    ".##.A#",
+    "A..##.",
+    "##..#.",
+    "..#.#.",
+    "..A..."
+)
 
 @Composable
 private fun rememberBackdropPhase(animated: Boolean, durationMillis: Int, label: String): Float {
@@ -42,6 +60,62 @@ private fun rememberBackdropPhase(animated: Boolean, durationMillis: Int, label:
         label = "$label-phase"
     )
     return phase
+}
+
+/**
+ * Tilted, repeating Ikna pixel-emblem background pattern inspired by the brand banner.
+ * Gently drifts along its diagonal axis when background animation is enabled, and
+ * freezes cleanly with zero redraws when disabled.
+ */
+@Composable
+fun IknaBrandPatternBackdrop(
+    modifier: Modifier = Modifier,
+    animated: Boolean = LocalIknaDeckBackgroundAnimated.current,
+    intensity: Float = 1f
+) {
+    val colors = MaterialTheme.colorScheme
+    val phase = rememberBackdropPhase(animated, durationMillis = 26000, label = "brand-pattern")
+    Canvas(modifier = modifier.fillMaxSize().clipToBounds()) {
+        val cell = 7.dp.toPx()
+        val pitchX = 112.dp.toPx()
+        val pitchY = 104.dp.toPx()
+        // Alternating rows are staggered by pitchX / 2, so drifting by (pitchX / 2, pitchY)
+        // maps every row seamlessly onto the next row when phase wraps from 1 to 0.
+        val driftX = if (animated) phase * (pitchX * 0.5f) else 0f
+        val driftY = if (animated) phase * pitchY else 0f
+
+        val inkCell = lerp(colors.background, colors.onSurface, 0.085f * intensity)
+        val accentCell = lerp(colors.background, colors.primary, 0.20f * intensity)
+
+        val diagonal = hypot(size.width, size.height)
+        val halfSpan = diagonal * 0.65f
+        val cols = ceil((halfSpan * 2f) / pitchX).toInt() + 2
+        val rows = ceil((halfSpan * 2f) / pitchY).toInt() + 2
+        val originX = size.width * 0.5f - (cols / 2) * pitchX
+        val originY = size.height * 0.5f - (rows / 2) * pitchY
+
+        rotate(degrees = -14f, pivot = Offset(size.width * 0.5f, size.height * 0.5f)) {
+            for (row in -1..rows) {
+                val stagger = if (Math.floorMod(row, 2) == 0) 0f else pitchX * 0.5f
+                val baseY = originY + row * pitchY + driftY
+                for (col in -1..cols) {
+                    val baseX = originX + col * pitchX + stagger + driftX
+                    for (r in IKNA_PIXEL_EMBLEM.indices) {
+                        val patternRow = IKNA_PIXEL_EMBLEM[r]
+                        for (c in patternRow.indices) {
+                            val ch = patternRow[c]
+                            if (ch == '.') continue
+                            drawRect(
+                                color = if (ch == 'A') accentCell else inkCell,
+                                topLeft = Offset(baseX + c * cell, baseY + r * cell),
+                                size = Size(cell + 0.5f, cell + 0.5f)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -62,8 +136,8 @@ fun IknaHomeBackdrop(
         DeckBackground.TONAL -> {
             val phase = rememberBackdropPhase(animated, durationMillis = 12000, label = "tonal-backdrop")
             val wave = if (animated) sin(TAU * phase) else 0f
-            val topMix = 0.48f + 0.08f * wave
-            val midStop = (0.55f + 0.11f * wave).coerceIn(0.32f, 0.78f)
+            val topMix = 0.44f + 0.07f * wave
+            val midStop = (0.55f + 0.10f * wave).coerceIn(0.32f, 0.78f)
             val bottomMix = 0.16f - 0.04f * wave
             Box(
                 fill.background(
@@ -73,7 +147,9 @@ fun IknaHomeBackdrop(
                         1f to lerp(colors.background, colors.surfaceVariant, bottomMix)
                     )
                 )
-            )
+            ) {
+                IknaBrandPatternBackdrop(animated = animated, intensity = 0.92f)
+            }
         }
         DeckBackground.SOLID -> Box(fill.background(colors.background))
         DeckBackground.GLOW -> {
@@ -97,8 +173,7 @@ fun IknaHomeBackdrop(
             Canvas(fill.background(colors.background)) {
                 val pitch = 24.dp.toPx()
                 val drift = if (animated) phase * pitch else 0f
-                val pulse = if (animated) 0.5f + 0.5f * sin(TAU * phase) else 0f
-                val line = colors.onSurfaceVariant.copy(alpha = 0.12f + 0.025f * pulse)
+                val line = colors.onSurfaceVariant.copy(alpha = 0.13f)
                 val columns = (size.width / pitch).toInt() + 1
                 val rows = (size.height / pitch).toInt() + 1
                 for (column in 0..columns) {
@@ -112,17 +187,6 @@ fun IknaHomeBackdrop(
                     if (y in 0f..size.height) {
                         drawLine(line, Offset(0f, y), Offset(size.width, y))
                     }
-                }
-                if (animated) {
-                    val bandY = size.height * (0.15f + 0.70f * (0.5f + 0.5f * sin(TAU * phase)))
-                    val band = Brush.verticalGradient(
-                        0f to colors.primary.copy(alpha = 0f),
-                        0.5f to colors.primary.copy(alpha = 0.055f),
-                        1f to colors.primary.copy(alpha = 0f),
-                        startY = (bandY - pitch * 3f).coerceAtLeast(0f),
-                        endY = (bandY + pitch * 3f).coerceAtMost(size.height.coerceAtLeast(1f))
-                    )
-                    drawRect(band)
                 }
             }
         }

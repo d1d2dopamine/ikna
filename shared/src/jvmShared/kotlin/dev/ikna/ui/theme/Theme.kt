@@ -268,16 +268,16 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
         id = "frost",
         nameKey = "set.126",
         dark = IknaPalette(
-            background = Color(0xFF08131A),
-            ink = Color(0xFFE2EEF3),
-            muted = Color(0xFF7C929C),
-            accent = Color(0xFF5FD2E8)
+            background = Color(0xFF1B2232),
+            ink = Color(0xFFBDCAE1),
+            muted = Color(0xFF8C9CB8),
+            accent = Color(0xFF61A9AF)
         ),
         grey = IknaPalette(
-            background = Color(0xFF232A2E),
-            ink = Color(0xFFC8D1D5),
-            muted = Color(0xFF8D9AA0),
-            accent = Color(0xFF80D8E7)
+            background = Color(0xFF292D32),
+            ink = Color(0xFFCCD4E0),
+            muted = Color(0xFF94A1B4),
+            accent = Color(0xFF7BC0C6)
         )
     ),
     // Фосфор. The odd one out, and the reason it is here.
@@ -615,7 +615,7 @@ private fun shapesFor(variant: IknaAppearanceVariant): Shapes = when (variant) {
     )
 }
 
-val LocalIknaAppearanceVariant = staticCompositionLocalOf { IknaAppearanceVariant.ANGULAR }
+val LocalIknaAppearanceVariant = staticCompositionLocalOf { IknaAppearanceVariant.ROUNDED }
 val LocalIknaDeckBackgroundAnimated = staticCompositionLocalOf { true }
 
 /** Chips, buttons, fields, notices: the workhorse corner of the variant. */
@@ -717,7 +717,7 @@ fun IknaTheme(
     motionEnabled: Boolean = true,
     deckBackgroundAnimated: Boolean = true,
     uiSoundsEnabled: Boolean = true,
-    appearanceVariant: IknaAppearanceVariant = IknaAppearanceVariant.ANGULAR,
+    appearanceVariant: IknaAppearanceVariant = IknaAppearanceVariant.ROUNDED,
     content: @Composable () -> Unit
 ) {
     val controls = remember(palette) { controlColors(palette) }

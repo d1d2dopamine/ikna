@@ -619,10 +619,11 @@ class DesignContracts(unittest.TestCase):
         row = shared_rows.split('fun IknaDeckRow(', 1)[1].split('fun IknaDeckActions(', 1)[0]
         for required in ['IknaDeckMark(', 'text = deck.title', 'verticalAlignment = Alignment.Top',
                          '.hoverable(interaction)', 'SignalFramePlacement.Outer',
-                         'onClickLabel = S.t("a11y.010"), onClick = onOpen']:
+                         'onClickLabel = S.t("today.start"), onClick = onOpen']:
             self.assertIn(required, row)
-        for moved in ['IknaIconButton(', 'IknaToggle(', 'IknaDeckProgress(']:
+        for moved in ['IknaToggle(', 'IknaDeckProgress(']:
             self.assertNotIn(moved, row)
+        self.assertIn('onManage', row)
         for device, name in [(ANDROID, 'ui/decks/DeckScreen.kt'), (DESKTOP, 'DeckPane.kt')]:
             details = read(device, name)
             self.assertIn('IknaDeckActions(', details)

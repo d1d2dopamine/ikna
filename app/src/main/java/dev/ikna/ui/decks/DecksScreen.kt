@@ -167,7 +167,8 @@ fun DecksScreen(
                         deck = deck,
                         look = settings.lookFor(deck.id),
                         dueToday = today[deck.id] ?: 0,
-                        onOpen = { onOpenDeck(deck.id) }
+                        onOpen = { onOpenSession(deck.id) },
+                        onManage = { onOpenDeck(deck.id) }
                     )
                 }
                 if (decks.isEmpty()) {
