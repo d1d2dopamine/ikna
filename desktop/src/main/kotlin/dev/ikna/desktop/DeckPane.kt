@@ -231,7 +231,7 @@ fun DeckPane(
 
         SectionTitle(S.t("dp.013"), palette)
         Spacer(Modifier.height(8.dp))
-        Box(Modifier.fillMaxWidth().border(Space.hair, palette.line).padding(Space.md)) {
+        Box(Modifier.fillMaxWidth().border(Space.hair, palette.line, dev.ikna.ui.theme.iknaControlShape()).padding(Space.md)) {
             BasicTextField(value = title, onValueChange = { raw ->
                 val value = raw.take(dev.ikna.data.repo.DeckRepository.MAX_TITLE)
                 title = value; deck = deck?.copy(title = value)
@@ -320,9 +320,7 @@ fun DeckPane(
                 color = muted
             )
 
-            Spacer(Modifier.height(Space.lg))
-            IknaRule()
-            Spacer(Modifier.height(Space.lg))
+            Spacer(Modifier.height(Space.xl))
         }
         IknaDeckAppearance(settings.lookFor(deckId)) { label, tint ->
             scope.launch { container.settings.setDeckLook(deckId, label, tint) }

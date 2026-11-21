@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
@@ -136,20 +137,18 @@ fun IknaHomeBackdrop(
         DeckBackground.TONAL -> {
             val phase = rememberBackdropPhase(animated, durationMillis = 12000, label = "tonal-backdrop")
             val wave = if (animated) sin(TAU * phase) else 0f
-            val topMix = 0.44f + 0.07f * wave
-            val midStop = (0.55f + 0.10f * wave).coerceIn(0.32f, 0.78f)
-            val bottomMix = 0.16f - 0.04f * wave
+            val topMix = 0.48f + 0.08f * wave
+            val midStop = (0.55f + 0.11f * wave).coerceIn(0.32f, 0.78f)
+            val bottomMix = 0.18f - 0.05f * wave
             Box(
                 fill.background(
                     Brush.verticalGradient(
                         0f to lerp(colors.background, colors.surface, topMix),
                         midStop to colors.background,
-                        1f to lerp(colors.background, colors.surfaceVariant, bottomMix)
+                        1f to lerp(colors.background, colors.primary, bottomMix * 0.45f)
                     )
                 )
-            ) {
-                IknaBrandPatternBackdrop(animated = animated, intensity = 0.92f)
-            }
+            )
         }
         DeckBackground.SOLID -> Box(fill.background(colors.background))
         DeckBackground.GLOW -> {
@@ -187,6 +186,98 @@ fun IknaHomeBackdrop(
                     if (y in 0f..size.height) {
                         drawLine(line, Offset(0f, y), Offset(size.width, y))
                     }
+                }
+            }
+        }
+        DeckBackground.EMBLEM -> {
+            Box(fill.background(colors.background)) {
+                IknaBrandPatternBackdrop(animated = animated, intensity = 1f)
+            }
+        }
+        DeckBackground.DOTS -> {
+            val phase = rememberBackdropPhase(animated, durationMillis = 10000, label = "dots-backdrop")
+            Canvas(fill.background(colors.background)) {
+                val pitch = 18.dp.toPx()
+                val baseRadius = 1.35.dp.toPx()
+                val columns = (size.width / pitch).toInt() + 1
+                val rows = (size.height / pitch).toInt() + 1
+                val angle = TAU * phase
+                for (row in 0..rows) {
+                    val y = row * pitch + pitch * 0.5f
+                    if (y > size.height) break
+                    for (col in 0..columns) {
+                        val x = col * pitch + pitch * 0.5f
+                        if (x > size.width) break
+                        val wave = if (animated) 0.5f + 0.5f * sin(angle - row * 0.32f - col * 0.24f) else 0.35f
+                        val isAccent = ((row * 7 + col * 11) % 19) == 0
+                        val color = if (isAccent) {
+                            colors.primary.copy(alpha = 0.10f + 0.14f * wave)
+                        } else {
+                            colors.onSurfaceVariant.copy(alpha = 0.08f + 0.10f * wave)
+                        }
+                        drawCircle(
+                            color = color,
+                            radius = baseRadius * (0.85f + 0.35f * wave),
+                            center = Offset(x, y)
+                        )
+                    }
+                }
+            }
+        }
+        DeckBackground.DIAGONAL -> {
+            val phase = rememberBackdropPhase(animated, durationMillis = 48000, label = "diagonal-backdrop")
+            Canvas(fill.background(colors.background).clipToBounds()) {
+                val pitch = 22.dp.toPx()
+                // Every 6th line is accented, so drifting by 6 * pitch loops seamlessly.
+                val drift = if (animated) phase * pitch * 6f else 0f
+                val line = colors.onSurfaceVariant.copy(alpha = 0.12f)
+                val accentLine = colors.primary.copy(alpha = 0.11f)
+                val span = hypot(size.width, size.height) * 0.75f
+                val count = ceil((span * 2f) / pitch).toInt() + 2
+                val originY = size.height * 0.5f - (count / 2) * pitch
+                rotate(degrees = -14f, pivot = Offset(size.width * 0.5f, size.height * 0.5f)) {
+                    for (i in -6..count) {
+                        val y = originY + i * pitch + drift
+                        drawLine(
+                            color = if (Math.floorMod(i, 6) == 0) accentLine else line,
+                            start = Offset(size.width * 0.5f - span, y),
+                            end = Offset(size.width * 0.5f + span, y),
+                            strokeWidth = 1.dp.toPx()
+                        )
+                    }
+                }
+            }
+        }
+        DeckBackground.WAVES -> {
+            val phase = rememberBackdropPhase(animated, durationMillis = 18000, label = "waves-backdrop")
+            Canvas(fill.background(colors.background).clipToBounds()) {
+                val w = size.width.coerceAtLeast(1f)
+                val h = size.height.coerceAtLeast(1f)
+                val layers = 4
+                val stepPx = (w / 32f).coerceAtLeast(10f)
+                for (layer in 0 until layers) {
+                    val baseFrac = 0.42f + layer * 0.15f
+                    val amp = (14.dp.toPx()) * (0.7f + 0.25f * layer)
+                    val speed = if (layer % 2 == 0) 1f else -1f
+                    val shift = if (animated) TAU * phase * speed + layer * 1.4f else layer * 1.4f
+                    val path = Path().apply {
+                        moveTo(0f, h)
+                        var x = 0f
+                        while (x <= w + stepPx) {
+                            val cx = x.coerceAtMost(w)
+                            val y = h * baseFrac + sin((cx / w) * TAU * (1.15f + layer * 0.2f) + shift) * amp
+                            if (x == 0f) lineTo(0f, y) else lineTo(cx, y)
+                            x += stepPx
+                        }
+                        lineTo(w, h)
+                        close()
+                    }
+                    val tint = if (layer == layers - 1) {
+                        lerp(colors.background, colors.primary, 0.09f)
+                    } else {
+                        lerp(colors.background, colors.onSurface, 0.035f + layer * 0.018f)
+                    }
+                    drawPath(path, color = tint)
                 }
             }
         }

@@ -176,10 +176,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFFFF7A5C)
         ),
         grey = IknaPalette(
-            background = Color(0xFF262931),
-            ink = Color(0xFFC9CED6),
-            muted = Color(0xFF9098A4),
-            accent = Color(0xFFFF927C)
+            background = Color(0xFF282934),
+            ink = Color(0xFFE2E8F5),
+            muted = Color(0xFF95A2BA),
+            accent = Color(0xFFFF8A70)
         )
     ),
     // Библиотека. Bottle green and brass: a reading room, nothing hurrying.
@@ -193,10 +193,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFFE3B45E)
         ),
         grey = IknaPalette(
-            background = Color(0xFF252A26),
-            ink = Color(0xFFC8D0CA),
-            muted = Color(0xFF8B968E),
-            accent = Color(0xFFE9BD70)
+            background = Color(0xFF202C27),
+            ink = Color(0xFFE2ECE5),
+            muted = Color(0xFF92A699),
+            accent = Color(0xFFEDC16C)
         )
     ),
     // Уголь. Kept for existing installs: burnt earth and an ember, finally
@@ -211,10 +211,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFFF2683C)
         ),
         grey = IknaPalette(
-            background = Color(0xFF2A2622),
-            ink = Color(0xFFD4CDC5),
-            muted = Color(0xFF9C9288),
-            accent = Color(0xFFFF946F)
+            background = Color(0xFF2E2622),
+            ink = Color(0xFFEFE6DC),
+            muted = Color(0xFFA8978A),
+            accent = Color(0xFFFF885E)
         )
     ),
     // Слива. The loudest one: aubergine and mint.
@@ -228,10 +228,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFF45D6A6)
         ),
         grey = IknaPalette(
-            background = Color(0xFF28232D),
-            ink = Color(0xFFCDC7D3),
-            muted = Color(0xFF928B9B),
-            accent = Color(0xFF69DDB6)
+            background = Color(0xFF2B2531),
+            ink = Color(0xFFECE4F4),
+            muted = Color(0xFFA092B0),
+            accent = Color(0xFF5CE0B4)
         )
     ),
     // Роза. Pink without the sugar: a wine-dark field and a rose that reads as a
@@ -252,10 +252,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFFFF7FB8)
         ),
         grey = IknaPalette(
-            background = Color(0xFF2A2326),
-            ink = Color(0xFFD2CACD),
-            muted = Color(0xFF9B8E93),
-            accent = Color(0xFFF89CC4)
+            background = Color(0xFF30242B),
+            ink = Color(0xFFF2E4EB),
+            muted = Color(0xFFAE94A0),
+            accent = Color(0xFFFF8EC0)
         )
     ),
     // Иней. The one palette with nothing warm in it anywhere.
@@ -274,10 +274,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFF61A9AF)
         ),
         grey = IknaPalette(
-            background = Color(0xFF292D32),
-            ink = Color(0xFFCCD4E0),
-            muted = Color(0xFF94A1B4),
-            accent = Color(0xFF7BC0C6)
+            background = Color(0xFF2B2C37),
+            ink = Color(0xFFD8E2F2),
+            muted = Color(0xFF95A4BC),
+            accent = Color(0xFF72C2C9)
         )
     ),
     // Фосфор. The odd one out, and the reason it is here.
@@ -301,10 +301,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFF4AF08C)
         ),
         grey = IknaPalette(
-            background = Color(0xFF222925),
-            ink = Color(0xFFC9D1CB),
-            muted = Color(0xFF8B958E),
-            accent = Color(0xFF73DDA0)
+            background = Color(0xFF1E2924),
+            ink = Color(0xFFD4F5DE),
+            muted = Color(0xFF8BB399),
+            accent = Color(0xFF62EB9D)
         )
     ),
     // Ноль. No hue at all, in either direction.
@@ -318,10 +318,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFFFFFFFF)
         ),
         grey = IknaPalette(
-            background = Color(0xFF2A2A2A),
-            ink = Color(0xFFD2D2D2),
-            muted = Color(0xFF969696),
-            accent = Color(0xFFABABAB)
+            background = Color(0xFF262626),
+            ink = Color(0xFFE8E8E8),
+            muted = Color(0xFFA0A0A0),
+            accent = Color(0xFFC8C8C8)
         )
     ),
     // The original neutral identity, now with the same grey light treatment.
@@ -336,10 +336,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFF97A4D8)
         ),
         grey = IknaPalette(
-            background = Color(0xFF292826),
-            ink = Color(0xFFD3CFC8),
-            muted = Color(0xFF99948B),
-            accent = Color(0xFFADB9EB)
+            background = Color(0xFF2C2A27),
+            ink = Color(0xFFEAE5DD),
+            muted = Color(0xFFA29C92),
+            accent = Color(0xFFA8B6EC)
         )
     ),
     // Ультрафиолет. Purple is the accent as well as the atmosphere: unlike
@@ -354,10 +354,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFFC29BFF)
         ),
         grey = IknaPalette(
-            background = Color(0xFF26222D),
-            ink = Color(0xFFCCC7D5),
-            muted = Color(0xFF948DA2),
-            accent = Color(0xFFC6ACF4)
+            background = Color(0xFF272733),
+            ink = Color(0xFFECE5FA),
+            muted = Color(0xFFA295BA),
+            accent = Color(0xFFCCA8FF)
         )
     ),
     // Лагуна. A green-blue field with no brass or coral: calm, cool and distinct
@@ -372,10 +372,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFF69E0C0)
         ),
         grey = IknaPalette(
-            background = Color(0xFF232B29),
-            ink = Color(0xFFC8D0CE),
-            muted = Color(0xFF8A9492),
-            accent = Color(0xFF86D9C3)
+            background = Color(0xFF20292C),
+            ink = Color(0xFFDFF2EE),
+            muted = Color(0xFF8DA8A3),
+            accent = Color(0xFF76E3C6)
         )
     ),
     // Кобальт. A deep blue field with a yellow signal. Чернила is navy and
@@ -390,10 +390,10 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFFFFD45A)
         ),
         grey = IknaPalette(
-            background = Color(0xFF242730),
-            ink = Color(0xFFCACFD8),
-            muted = Color(0xFF8E96A4),
-            accent = Color(0xFFEBCB78)
+            background = Color(0xFF242430),
+            ink = Color(0xFFE4ECFA),
+            muted = Color(0xFF929FB8),
+            accent = Color(0xFFFAD66B)
         )
     )
 )

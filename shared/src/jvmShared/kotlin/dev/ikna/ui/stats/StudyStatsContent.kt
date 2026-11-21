@@ -72,10 +72,10 @@ fun IknaStudyStatsContent(snapshot: StudyStats) {
             Spacer(Modifier.height(Space.sm))
             Text(S.t("study.020"), style = MaterialTheme.typography.bodySmall)
         }
-        Spacer(Modifier.height(Space.lg)); IknaRule(); Spacer(Modifier.height(Space.lg))
+        Spacer(Modifier.height(Space.xl))
         key(days) {
             StudyTargetGroup("study.010", "study.011", period.recovered)
-            Spacer(Modifier.height(Space.lg)); IknaRule(); Spacer(Modifier.height(Space.lg))
+            Spacer(Modifier.height(Space.xl))
             StudyTargetGroup("study.012", "study.013", period.attention)
         }
     }

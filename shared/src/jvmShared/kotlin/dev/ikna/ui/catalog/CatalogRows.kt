@@ -256,7 +256,7 @@ fun IknaCatalogPreviewCard(
 	Column(
 		modifier = Modifier
 			.fillMaxWidth()
-			.background(MaterialTheme.colorScheme.surface)
+			.background(MaterialTheme.colorScheme.surface, dev.ikna.ui.theme.iknaCardShape())
 			.padding(Space.md)
 	) {
 		Text(

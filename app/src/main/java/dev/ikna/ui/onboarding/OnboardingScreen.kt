@@ -222,7 +222,7 @@ private fun GestureDemo() {
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 132.dp)
-            .border(1.dp, MaterialTheme.colorScheme.outline)
+            .border(1.dp, MaterialTheme.colorScheme.outline, dev.ikna.ui.theme.iknaCardShape())
     ) {
         Text(
             text = S.t("card.003"),

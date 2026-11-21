@@ -187,9 +187,7 @@ fun IknaSettingsSection(
     subtitle: String?,
     content: @Composable () -> Unit
 ) {
-    Spacer(Modifier.height(24.dp))
-    IknaRule(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.18f))
-    Spacer(Modifier.height(16.dp))
+    Spacer(Modifier.height(Space.xl))
     Text(
         text = title,
         style = MaterialTheme.typography.titleMedium,

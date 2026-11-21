@@ -153,11 +153,12 @@ fun UpdateSheet(
     val notes = rememberScrollState()
     val download = rememberUpdateDownload()
     Dialog(onDismissRequest = { if (!download.running) onSkip() }) {
+        val cardShape = dev.ikna.ui.theme.iknaCardShape()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background)
-                .border(1.dp, ink)
+                .background(MaterialTheme.colorScheme.background, cardShape)
+                .border(1.dp, ink, cardShape)
                 .padding(horizontal = 20.dp, vertical = 24.dp)
         ) {
             Text(

@@ -1,12 +1,14 @@
 package dev.ikna.ui.settings
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,45 +17,45 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaPalettes
-import dev.ikna.ui.theme.LocalIknaControlColors
+import dev.ikna.ui.theme.IknaSoundCue
+import dev.ikna.ui.theme.LocalIknaMotionEnabled
+import dev.ikna.ui.theme.LocalIknaSoundFeedback
 import dev.ikna.ui.theme.SignalFramePlacement
 import dev.ikna.ui.theme.iknaFrameRadius
+import dev.ikna.ui.theme.iknaKnobShape
+import dev.ikna.ui.theme.iknaPressScale
 import dev.ikna.ui.theme.iknaSignalFrame
 import dev.ikna.ui.theme.iknaTileShape
 
-private const val WORDMARK = "ikna"
-
 /**
- * The palettes, shown as themselves.
+ * Compact palette swatches rendered in Ikna's own visual grammar.
  *
- * A list of names is not a choice of colours -- nobody knows what "Cliva" is
- * until they have already switched to it and switched back. Each tile is
- * painted in the palette it offers: its own background, the wordmark in its
- * ink, and a bar of accent next to a bar of muted, which is every colour the
- * palette has. The name sits under the tile, in the app's own ink.
- *
- * Selection is a heavier border rather than a tint or a tick, for the same
- * reason everything else here is: a tick would have to be drawn in some colour,
- * and on a tile whose whole point is its own colours there is no colour left
- * to use.
- *
- * Lifted out of the phone's settings screen unchanged so that the desktop shows
- * the same grid rather than a second design that drifts from it. The only thing
- * a window is allowed to change is how many tiles fit on a row.
+ * Each swatch wears its palette background, a 2x2 pixel colour cluster
+ * (ink, muted, accent), and the palette name in clean Geologica inside
+ * one quiet surface — no redundant wordmark, heavy outer borders, or
+ * separate caption underneath.
  */
 @Composable
 fun IknaPaletteTiles(
@@ -62,13 +64,14 @@ fun IknaPaletteTiles(
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier,
     columns: Int = 3,
-    tileHeight: Dp = 64.dp,
-    gap: Dp = 12.dp
+    tileHeight: Dp = 58.dp,
+    gap: Dp = 10.dp
 ) {
-    val ink = MaterialTheme.colorScheme.onBackground
-    val line = MaterialTheme.colorScheme.outline
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    val motionEnabled = LocalIknaMotionEnabled.current
+    val sound = LocalIknaSoundFeedback.current
     val perRow = if (columns < 1) 1 else columns
+    val shape = iknaTileShape()
+    val dotShape = iknaKnobShape()
 
     Column(modifier = modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(gap)) {
         IknaPalettes.chunked(perRow).forEach { row ->
@@ -77,83 +80,79 @@ fun IknaPaletteTiles(
                     val p = spec.palette(grey = grey)
                     val selected = spec.id == selectedId
                     val tileInteraction = remember(spec.id) { MutableInteractionSource() }
-                    val captionInteraction = remember(spec.id) { MutableInteractionSource() }
                     val tileFocused by tileInteraction.collectIsFocusedAsState()
-                    // The tap zone is the tile and its own name, never the empty
-                    // space beside a name as short as "NULL": a click aimed at
-                    // nothing must not repaint the entire app.
-                    Column(modifier = Modifier.weight(1f)) {
-                        Column(
-                            modifier = Modifier
-                                .clip(iknaTileShape())
-                                .hoverable(tileInteraction)
-                                .semantics { this.selected = selected }
-                                .iknaSignalFrame(
-                                    tileInteraction,
-                                    cornerRadius = iknaFrameRadius(rounded = 12.dp, angular = 8.dp),
-                                    placement = SignalFramePlacement.Outer
-                                )
-                                .clickable(
-                                    interactionSource = tileInteraction,
-                                    indication = null,
-                                    role = Role.RadioButton,
-                                    onClickLabel = S.t(spec.nameKey),
-                                    onClick = { onPick(spec.id) }
-                                )
-                                .fillMaxWidth()
-                                .height(tileHeight)
-                                .background(p.background)
-                                .border(
-                                    if (selected || tileFocused) 2.dp else 1.dp,
-                                    if (selected || tileFocused) LocalIknaControlColors.current.mark else line,
-                                    iknaTileShape()
-                                )
-                                .padding(8.dp)
-                        ) {
-                            Text(
-                                text = WORDMARK,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = p.ink,
-                                maxLines = 1
+                    val tileHovered by tileInteraction.collectIsHoveredAsState()
+                    val tilePressed by tileInteraction.collectIsPressedAsState()
+                    val pressScale = iknaPressScale(tilePressed, motionEnabled, pressedScale = 0.97f)
+                    val borderColor = when {
+                        selected || tileFocused -> p.accent
+                        tileHovered -> p.line
+                        else -> p.line.copy(alpha = 0.50f)
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(tileHeight)
+                            .graphicsLayer {
+                                scaleX = pressScale
+                                scaleY = pressScale
+                            }
+                            .clip(shape)
+                            .background(p.background)
+                            .border(1.dp, borderColor, shape)
+                            .hoverable(tileInteraction)
+                            .semantics { this.selected = selected }
+                            .iknaSignalFrame(
+                                tileInteraction,
+                                cornerRadius = iknaFrameRadius(rounded = 12.dp, angular = 8.dp),
+                                placement = SignalFramePlacement.Outer
                             )
-                            Spacer(Modifier.weight(1f))
-                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            .clickable(
+                                interactionSource = tileInteraction,
+                                indication = null,
+                                role = Role.RadioButton,
+                                onClickLabel = S.t(spec.nameKey),
+                                onClick = {
+                                    sound.play(IknaSoundCue.TAP)
+                                    onPick(spec.id)
+                                }
+                            )
+                            .padding(horizontal = 10.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Canvas(modifier = Modifier.size(14.dp)) {
+                                val gapPx = 2.dp.toPx()
+                                val cell = (size.minDimension - gapPx) / 2f
+                                drawRect(p.ink, Offset(0f, 0f), Size(cell, cell))
+                                drawRect(p.accent, Offset(cell + gapPx, 0f), Size(cell, cell))
+                                drawRect(p.muted, Offset(0f, cell + gapPx), Size(cell, cell))
+                                drawRect(p.ink.copy(alpha = 0.45f), Offset(cell + gapPx, cell + gapPx), Size(cell, cell))
+                            }
+                            if (selected) {
                                 Box(
                                     modifier = Modifier
-                                        .weight(2f)
-                                        .height(8.dp)
+                                        .size(7.dp)
+                                        .clip(dotShape)
                                         .background(p.accent)
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(8.dp)
-                                        .background(p.muted)
                                 )
                             }
                         }
-                        Spacer(Modifier.height(6.dp))
                         Text(
                             text = S.t(spec.nameKey),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (selected) ink else muted,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                            color = p.ink,
                             maxLines = 1,
-                            modifier = Modifier
-                                .hoverable(captionInteraction)
-                                .iknaSignalFrame(captionInteraction)
-                                .semantics { this.selected = selected }
-                                .clickable(
-                                    interactionSource = captionInteraction,
-                                    indication = null,
-                                    role = Role.RadioButton,
-                                    onClickLabel = S.t(spec.nameKey),
-                                    onClick = { onPick(spec.id) }
-                                )
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
-                // A last row of two must not stretch its tiles to the width of
-                // three, or the grid stops being a grid.
                 repeat(perRow - row.size) { Spacer(Modifier.weight(1f)) }
             }
         }

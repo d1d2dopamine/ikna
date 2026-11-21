@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
@@ -253,12 +254,14 @@ private fun HotkeyCaptureField(
     LaunchedEffect(capturing) {
         if (capturing) focusRequester.requestFocus()
     }
+    val fieldShape = dev.ikna.ui.theme.iknaControlShape()
     Box(
         modifier = Modifier
             .width(fieldWidth)
             .height(40.dp)
-            .background(if (capturing) palette.accent.copy(alpha = 0.08f) else palette.panel)
-            .border(if (capturing) 2.dp else 1.dp, if (capturing) palette.accent else palette.line)
+            .clip(fieldShape)
+            .background(if (capturing) palette.accent.copy(alpha = 0.08f) else palette.panel, fieldShape)
+            .border(if (capturing) 2.dp else 1.dp, if (capturing) palette.accent else palette.line, fieldShape)
             .focusRequester(focusRequester)
             .onPreviewKeyEvent { event ->
                 if (!capturing || event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false

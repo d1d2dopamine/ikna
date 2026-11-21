@@ -130,7 +130,7 @@ fun DeckListRow(
     Row(
         Modifier
             .fillMaxWidth()
-            .background(if (selected) palette.panel else Color.Transparent)
+            .background(if (selected) palette.panel else Color.Transparent, dev.ikna.ui.theme.iknaControlShape())
             .handCursor()
             .clickable { onStudy() }
             .padding(horizontal = Space.sm, vertical = Space.sm),

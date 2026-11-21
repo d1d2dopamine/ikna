@@ -110,9 +110,7 @@ Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
     }
 }
 
-Spacer(Modifier.height(Space.lg))
-IknaRule()
-Spacer(Modifier.height(Space.lg))
+Spacer(Modifier.height(Space.xl))
 
 
 }

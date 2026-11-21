@@ -49,7 +49,7 @@ fun SearchPane(container: DesktopContainer, palette: IknaPalette, decks: List<De
             Spacer(Modifier.height(Space.md))
             Text(S.t("search.002"), style = MaterialTheme.typography.bodyMedium, color = palette.muted)
             Spacer(Modifier.height(Space.md))
-            Box(Modifier.widthIn(max = 760.dp).fillMaxWidth().border(Space.hair, palette.line).padding(Space.md)) {
+            Box(Modifier.widthIn(max = 760.dp).fillMaxWidth().border(Space.hair, palette.line, dev.ikna.ui.theme.iknaControlShape()).padding(Space.md)) {
                 BasicTextField(query, onValueChange = {
                     query = it; token++; rows = emptyList(); searched = false; busy = false; failed = false
                 }, singleLine = true, textStyle = MaterialTheme.typography.bodyLarge.copy(color = palette.ink),
@@ -66,7 +66,7 @@ fun SearchPane(container: DesktopContainer, palette: IknaPalette, decks: List<De
             IknaWideButton(if (busy) S.t("search.005") else S.t("search.004"), onClick = ::search,
                 modifier = Modifier.widthIn(max = 320.dp), filled = true,
                 enabled = !busy && localSearchTerms(query) != null)
-            Spacer(Modifier.height(Space.lg)); IknaRule(); Spacer(Modifier.height(Space.md))
+            Spacer(Modifier.height(Space.lg))
         }
         LazyColumn(Modifier.weight(1f).widthIn(max = 840.dp).fillMaxWidth().align(Alignment.CenterHorizontally), contentPadding = PaddingValues(horizontal = 40.dp, vertical = 12.dp)) {
             if (busy || failed || !searched || rows.isEmpty()) item {

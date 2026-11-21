@@ -442,7 +442,7 @@ fun AddDeckScreen(
 					Box(
 						modifier = Modifier
 							.fillMaxWidth()
-							.border(Space.hair, line)
+							.border(Space.hair, line, dev.ikna.ui.theme.iknaControlShape())
 							.padding(Space.md)
 					) {
 						if (topic.isEmpty()) {
@@ -539,7 +539,7 @@ fun AddDeckScreen(
 							modifier = Modifier
 								.fillMaxWidth()
 								.heightIn(max = 220.dp)
-								.border(Space.hair, line)
+								.border(Space.hair, line, dev.ikna.ui.theme.iknaControlShape())
 								.padding(Space.md)
 								.verticalScroll(pasteScroll)
 						) {
@@ -567,7 +567,7 @@ fun AddDeckScreen(
 						modifier = Modifier
 							.fillMaxWidth()
 							.heightIn(min = 140.dp, max = 220.dp)
-							.border(Space.hair, line)
+							.border(Space.hair, line, dev.ikna.ui.theme.iknaControlShape())
 							.padding(Space.md)
 							.verticalScroll(pasteScroll)
 					) {

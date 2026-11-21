@@ -776,12 +776,9 @@ class DesignContracts(unittest.TestCase):
             self.assertNotIn('light = isLight(', host)
         self.assertNotIn('private fun PaletteTiles(', android)
         self.assertIn('modifier.selectableGroup()', palettes)
-        # The tile and its text remain the two explicit targets; empty space
-        # beside a short name must not become an accidental palette action.
-        self.assertEqual(2, palettes.count('.semantics { this.selected = selected }'))
-        self.assertEqual(2, palettes.count('role = Role.RadioButton'))
-        self.assertIn('.iknaSignalFrame(captionInteraction)', palettes)
-        self.assertIn('interactionSource = captionInteraction', palettes)
+        self.assertIn('.semantics { this.selected = selected }', palettes)
+        self.assertIn('role = Role.RadioButton', palettes)
+        self.assertIn('iknaTileShape()', palettes)
 
     def test_rounded_variant_is_a_first_class_variant(self):
         theme = read(SHARED, "ui/theme/Theme.kt")

@@ -243,7 +243,7 @@ fun DeckScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .border(Space.hair, MaterialTheme.colorScheme.outline)
+                            .border(Space.hair, MaterialTheme.colorScheme.outline, dev.ikna.ui.theme.iknaControlShape())
                             .padding(horizontal = Space.md, vertical = Space.sm)
                     ) {
                         BasicTextField(
@@ -267,9 +267,7 @@ fun DeckScreen(
                         )
                     }
 
-                    Spacer(Modifier.height(Space.lg))
-                    IknaRule()
-                    Spacer(Modifier.height(Space.lg))
+                    Spacer(Modifier.height(Space.xl))
 
                     Text(S.t("dp.003") + " · " + (current.lang.takeUnless { it == "custom" }
                         ?.let { java.util.Locale.forLanguageTag(it).getDisplayLanguage(java.util.Locale.forLanguageTag(S.lang)) }
@@ -370,9 +368,7 @@ fun DeckScreen(
                             color = muted
                         )
 
-                        Spacer(Modifier.height(Space.lg))
-                        IknaRule()
-                        Spacer(Modifier.height(Space.lg))
+                        Spacer(Modifier.height(Space.xl))
                     }
 
                     // What the deck looks like on the list.

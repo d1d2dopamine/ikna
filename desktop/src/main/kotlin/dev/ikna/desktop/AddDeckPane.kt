@@ -374,7 +374,7 @@ if (modelWay) {
 	Box(
 		modifier = Modifier
 			.fillMaxWidth()
-			.border(Space.hair, line)
+			.border(Space.hair, line, dev.ikna.ui.theme.iknaControlShape())
 			.padding(Space.md)
 	) {
 		if (topic.isEmpty()) {
@@ -415,9 +415,7 @@ if (modelWay) {
 
 }
 
-Spacer(Modifier.height(Space.lg))
-IknaRule()
-Spacer(Modifier.height(Space.lg))
+Spacer(Modifier.height(Space.xl))
 
 Text(S.t("add.016"), style = MaterialTheme.typography.labelMedium, color = muted)
 Spacer(Modifier.height(Space.sm))
@@ -436,7 +434,7 @@ if (large) {
         }
     }
 } else {
-    Box(Modifier.fillMaxWidth().heightIn(min = 132.dp, max = 220.dp).border(Space.hair, line).padding(Space.md)) {
+    Box(Modifier.fillMaxWidth().heightIn(min = 132.dp, max = 220.dp).border(Space.hair, line, dev.ikna.ui.theme.iknaControlShape()).padding(Space.md)) {
         if (pasted.isEmpty()) Text(S.t("add.012"), style = MaterialTheme.typography.bodyMedium, color = muted)
         BasicTextField(pasted, onValueChange = {
             pasted = it.take(1_600_000); previewOpen = false

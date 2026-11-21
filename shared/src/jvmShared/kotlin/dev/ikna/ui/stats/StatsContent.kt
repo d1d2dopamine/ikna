@@ -272,9 +272,7 @@ private fun Leeches(items: List<LeechItem>) {
 
 @Composable
 private fun StatsDivider() {
-    Spacer(Modifier.height(28.dp))
-    IknaRule()
-    Spacer(Modifier.height(28.dp))
+    Spacer(Modifier.height(36.dp))
 }
 
 @Composable
