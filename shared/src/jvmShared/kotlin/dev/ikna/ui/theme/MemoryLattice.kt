@@ -2,6 +2,8 @@ package dev.ikna.ui.theme
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.StartOffset
+import androidx.compose.animation.core.StartOffsetType
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -16,10 +18,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.CornerRadius
@@ -43,7 +43,7 @@ import kotlin.math.hypot
 import kotlin.math.sin
 
 private const val TAU = (PI * 2.0).toFloat()
-private const val BRAND_PATTERN_PERIOD_NANOS = 26_000_000_000L
+private const val BRAND_PATTERN_PERIOD_MS = 26_000L
 
 /**
  * Exact 6x7 Ikna pixel emblem from the brand banner.
@@ -78,17 +78,23 @@ private fun rememberBackdropPhase(animated: Boolean, durationMillis: Int, label:
 @Composable
 private fun rememberSharedBrandPatternPhase(animated: Boolean): Float {
     if (!animated) return 0f
-    val phase by produceState(
-        initialValue = (Math.floorMod(System.nanoTime(), BRAND_PATTERN_PERIOD_NANOS)).toFloat() /
-            BRAND_PATTERN_PERIOD_NANOS.toFloat()
-    ) {
-        while (true) {
-            withFrameNanos { frameNanos ->
-                val mod = Math.floorMod(frameNanos, BRAND_PATTERN_PERIOD_NANOS)
-                value = mod.toFloat() / BRAND_PATTERN_PERIOD_NANOS.toFloat()
-            }
-        }
+    val startOffsetMs = remember {
+        Math.floorMod(System.nanoTime() / 1_000_000L, BRAND_PATTERN_PERIOD_MS).toInt()
     }
+    val transition = rememberInfiniteTransition(label = "brand-pattern")
+    val phase by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = BRAND_PATTERN_PERIOD_MS.toInt(),
+                easing = LinearEasing
+            ),
+            repeatMode = RepeatMode.Restart,
+            initialStartOffset = StartOffset(startOffsetMs, StartOffsetType.FastForward)
+        ),
+        label = "brand-pattern-phase"
+    )
     return phase
 }
 
