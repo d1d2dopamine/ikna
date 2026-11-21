@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,14 +34,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ikna.ui.text.S
+import dev.ikna.ui.theme.IknaGlyph
+import dev.ikna.ui.theme.IknaGlyphIcon
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaRule
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.Space
+import dev.ikna.ui.theme.iknaCardShape
+import dev.ikna.ui.theme.iknaControlShape
+import dev.ikna.ui.theme.iknaNumberStyle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -49,6 +61,46 @@ import javax.swing.JFileChooser
 /** A deck file that is larger than this is not a deck; it is a mistake. */
 private const val MAX_FILE_BYTES = 4L * 1024L * 1024L
 private const val MAX_TOPIC_CHARS = 120
+private const val MCP_GUIDE_URL = "https://github.com/d1d2dopamine/ikna/blob/main/docs/IKNA-MCP.md"
+
+private fun escapeJsonString(raw: String): String = buildString(raw.length) {
+    for (ch in raw) {
+        when (ch) {
+            '\\' -> append("\\\\")
+            '"' -> append("\\\"")
+            '\b' -> append("\\b")
+            '\u000C' -> append("\\f")
+            '\n' -> append("\\n")
+            '\r' -> append("\\r")
+            '\t' -> append("\\t")
+            else -> if (ch.code < 0x20) {
+                append("\\u")
+                append(ch.code.toString(16).padStart(4, '0'))
+            } else {
+                append(ch)
+            }
+        }
+    }
+}
+
+private fun mcpClientConfigSnippet(stagingDir: File): String {
+    val escapedDir = escapeJsonString(stagingDir.absolutePath)
+    return """
+{
+  "mcpServers": {
+    "ikna": {
+      "command": "<path-to-venv-python>",
+      "args": [
+        "<path-to-ikna>/tools/ikna_mcp.py",
+        "--enable-deck-tools",
+        "--output-dir",
+        "$escapedDir"
+      ]
+    }
+  }
+}
+""".trimIndent()
+}
 
 /**
  * Everything behind the plus, which the window did not have at all.
@@ -73,11 +125,15 @@ fun AddDeckPane(
     var busy by remember { mutableStateOf(false) }
     var note by remember { mutableStateOf<String?>(null) }
     val clipboard = LocalClipboardManager.current
+    val uriHandler = LocalUriHandler.current
     val muted = palette.muted
     val line = palette.line
     var previewOpen by remember { mutableStateOf(false) }
     var modelWay by remember { mutableStateOf(false) }
+    var mcpOpen by remember { mutableStateOf(false) }
     var guide by remember { mutableStateOf(false) }
+    val mcpStagingDir = remember(container.home) { File(container.home, "mcp-staging") }
+    val mcpConfig = remember(mcpStagingDir) { mcpClientConfigSnippet(mcpStagingDir) }
     var subject by remember { mutableStateOf(false) }
     var learningLanguage by remember { mutableStateOf(NO_LANG) }
     var meanings by remember { mutableStateOf(S.lang) }
@@ -151,8 +207,9 @@ fun AddDeckPane(
         }
     }
 
-    fun importFromFile() {
-        val file = addPickFileForRead() ?: return
+    fun importFromFile(initialDir: File? = null) {
+        if (initialDir != null) runCatching { initialDir.mkdirs() }
+        val file = addPickFileForRead(initialDir) ?: return
         if (file.length() > MAX_FILE_BYTES) {
             note = S.t("add.018")
             return
@@ -413,6 +470,107 @@ if (modelWay) {
 		onClick = { savePrompt() }
 	)
 
+	Spacer(Modifier.height(Space.lg))
+	val mcpCardShape = iknaCardShape()
+	val mcpCodeShape = iknaControlShape()
+	val colors = MaterialTheme.colorScheme
+	Column(
+		modifier = Modifier
+			.fillMaxWidth()
+			.clip(mcpCardShape)
+			.background(lerp(colors.surface, colors.onSurface, 0.04f), mcpCardShape)
+			.border(1.dp, colors.outline.copy(alpha = 0.36f), mcpCardShape)
+			.padding(Space.md),
+		verticalArrangement = Arrangement.spacedBy(Space.sm)
+	) {
+		Row(
+			modifier = Modifier.fillMaxWidth(),
+			verticalAlignment = Alignment.CenterVertically,
+			horizontalArrangement = Arrangement.spacedBy(Space.sm)
+		) {
+			IknaGlyphIcon(
+				glyph = IknaGlyph.ADVANCED,
+				color = colors.primary,
+				size = 18.dp
+			)
+			Text(
+				text = S.t("mcp.001"),
+				style = MaterialTheme.typography.titleSmall,
+				fontWeight = FontWeight.SemiBold,
+				color = colors.onBackground,
+				modifier = Modifier.weight(1f)
+			)
+			IknaTextButton(
+				label = if (mcpOpen) S.t("add.037") else S.t("add.036"),
+				onClick = { mcpOpen = !mcpOpen },
+				color = colors.primary
+			)
+		}
+		Text(
+			text = S.t("mcp.002"),
+			style = MaterialTheme.typography.bodySmall,
+			color = muted
+		)
+		if (mcpOpen) {
+			Text(
+				text = S.t("mcp.008"),
+				style = MaterialTheme.typography.bodySmall,
+				color = muted
+			)
+			Text(
+				text = S.t("mcp.007") + mcpStagingDir.absolutePath,
+				style = iknaNumberStyle(MaterialTheme.typography.labelSmall),
+				color = colors.onSurfaceVariant
+			)
+			Box(
+				modifier = Modifier
+					.fillMaxWidth()
+					.clip(mcpCodeShape)
+					.background(colors.background.copy(alpha = 0.72f), mcpCodeShape)
+					.border(1.dp, colors.outline.copy(alpha = 0.28f), mcpCodeShape)
+					.padding(Space.md)
+			) {
+				Text(
+					text = mcpConfig,
+					style = iknaNumberStyle(MaterialTheme.typography.labelSmall),
+					color = colors.onSurface
+				)
+			}
+			FlowRow(
+				horizontalArrangement = Arrangement.spacedBy(Space.sm),
+				verticalArrangement = Arrangement.spacedBy(Space.xs)
+			) {
+				IknaWideButton(
+					label = S.t("mcp.003"),
+					filled = true,
+					fillWidth = false,
+					height = 48.dp,
+					enabled = !busy,
+					onClick = {
+						clipboard.setText(AnnotatedString(mcpConfig))
+						note = S.t("mcp.004")
+					}
+				)
+				IknaWideButton(
+					label = S.t("mcp.005"),
+					fillWidth = false,
+					height = 48.dp,
+					enabled = !busy,
+					onClick = { importFromFile(mcpStagingDir) }
+				)
+				IknaTextButton(
+					label = S.t("mcp.006"),
+					onClick = {
+						if (runCatching { uriHandler.openUri(MCP_GUIDE_URL) }.isFailure) {
+							note = S.t("support.open_failed")
+						}
+					},
+					color = muted
+				)
+			}
+		}
+	}
+
 }
 
 Spacer(Modifier.height(Space.xl))
@@ -505,8 +663,8 @@ Text(
 }
 
 /** Ask for a file to read, with the platform dialog. */
-private fun addPickFileForRead(): File? {
-    val chooser = JFileChooser()
+private fun addPickFileForRead(initialDir: File? = null): File? {
+    val chooser = if (initialDir != null) JFileChooser(initialDir) else JFileChooser()
     val answer = chooser.showOpenDialog(null)
     return if (answer == JFileChooser.APPROVE_OPTION) chooser.selectedFile else null
 }

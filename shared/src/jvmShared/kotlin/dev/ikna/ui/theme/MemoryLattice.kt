@@ -15,23 +15,35 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.dp
 import dev.ikna.data.prefs.DeckBackground
+import dev.ikna.data.prefs.IknaAppearanceVariant
 import kotlin.math.PI
 import kotlin.math.ceil
 import kotlin.math.cos
+import kotlin.math.floor
 import kotlin.math.hypot
 import kotlin.math.sin
 
 private const val TAU = (PI * 2.0).toFloat()
+private const val BRAND_PATTERN_PERIOD_NANOS = 26_000_000_000L
 
 /**
  * Exact 6x7 Ikna pixel emblem from the brand banner.
@@ -63,20 +75,47 @@ private fun rememberBackdropPhase(animated: Boolean, durationMillis: Int, label:
     return phase
 }
 
+@Composable
+private fun rememberSharedBrandPatternPhase(animated: Boolean): Float {
+    if (!animated) return 0f
+    val phase by produceState(
+        initialValue = (Math.floorMod(System.nanoTime(), BRAND_PATTERN_PERIOD_NANOS)).toFloat() /
+            BRAND_PATTERN_PERIOD_NANOS.toFloat()
+    ) {
+        while (true) {
+            withFrameNanos { frameNanos ->
+                val mod = Math.floorMod(frameNanos, BRAND_PATTERN_PERIOD_NANOS)
+                value = mod.toFloat() / BRAND_PATTERN_PERIOD_NANOS.toFloat()
+            }
+        }
+    }
+    return phase
+}
+
 /**
  * Tilted, repeating Ikna pixel-emblem background pattern inspired by the brand banner.
- * Gently drifts along its diagonal axis when background animation is enabled, and
- * freezes cleanly with zero redraws when disabled.
+ * Uses a shared monotonic frame clock and window-root tiling coordinates so adjacent
+ * panes (e.g. DeckBackground.EMBLEM next to Settings/Stats/About) drift in exact lockstep
+ * across the split divider, and freezes cleanly with zero redraws when disabled.
  */
 @Composable
 fun IknaBrandPatternBackdrop(
     modifier: Modifier = Modifier,
     animated: Boolean = LocalIknaDeckBackgroundAnimated.current,
-    intensity: Float = 1f
+    intensity: Float = 0.72f
 ) {
     val colors = MaterialTheme.colorScheme
-    val phase = rememberBackdropPhase(animated, durationMillis = 26000, label = "brand-pattern")
-    Canvas(modifier = modifier.fillMaxSize().clipToBounds()) {
+    val phase = rememberSharedBrandPatternPhase(animated)
+    var rootOrigin by remember { mutableStateOf(Offset.Zero) }
+    Canvas(
+        modifier = modifier
+            .fillMaxSize()
+            .clipToBounds()
+            .onGloballyPositioned { coords ->
+                val pos = coords.positionInRoot()
+                if (pos != rootOrigin) rootOrigin = pos
+            }
+    ) {
         val cell = 7.dp.toPx()
         val pitchX = 112.dp.toPx()
         val pitchY = 104.dp.toPx()
@@ -88,19 +127,47 @@ fun IknaBrandPatternBackdrop(
         val inkCell = lerp(colors.background, colors.onSurface, 0.085f * intensity)
         val accentCell = lerp(colors.background, colors.primary, 0.20f * intensity)
 
-        val diagonal = hypot(size.width, size.height)
-        val halfSpan = diagonal * 0.65f
-        val cols = ceil((halfSpan * 2f) / pitchX).toInt() + 2
-        val rows = ceil((halfSpan * 2f) / pitchY).toInt() + 2
-        val originX = size.width * 0.5f - (cols / 2) * pitchX
-        val originY = size.height * 0.5f - (rows / 2) * pitchY
+        val angleDeg = -14f
+        val invRad = (-angleDeg * PI / 180.0).toFloat()
+        val cosInv = cos(invRad)
+        val sinInv = sin(invRad)
 
-        rotate(degrees = -14f, pivot = Offset(size.width * 0.5f, size.height * 0.5f)) {
-            for (row in -1..rows) {
+        val rx = rootOrigin.x
+        val ry = rootOrigin.y
+        val w = size.width
+        val h = size.height
+
+        var minGx = Float.POSITIVE_INFINITY
+        var maxGx = Float.NEGATIVE_INFINITY
+        var minGy = Float.POSITIVE_INFINITY
+        var maxGy = Float.NEGATIVE_INFINITY
+        val cornersX = floatArrayOf(rx, rx + w, rx, rx + w)
+        val cornersY = floatArrayOf(ry, ry, ry + h, ry + h)
+        for (i in 0..3) {
+            val wx = cornersX[i]
+            val wy = cornersY[i]
+            val gx = wx * cosInv - wy * sinInv
+            val gy = wx * sinInv + wy * cosInv
+            if (gx < minGx) minGx = gx
+            if (gx > maxGx) maxGx = gx
+            if (gy < minGy) minGy = gy
+            if (gy > maxGy) maxGy = gy
+        }
+
+        val minCol = floor(((minGx - driftX) / pitchX).toDouble()).toInt() - 2
+        val maxCol = ceil(((maxGx - driftX) / pitchX).toDouble()).toInt() + 1
+        val minRow = floor(((minGy - driftY) / pitchY).toDouble()).toInt() - 2
+        val maxRow = ceil(((maxGy - driftY) / pitchY).toDouble()).toInt() + 1
+
+        withTransform({
+            translate(left = -rx, top = -ry)
+            rotate(degrees = angleDeg, pivot = Offset.Zero)
+        }) {
+            for (row in minRow..maxRow) {
                 val stagger = if (Math.floorMod(row, 2) == 0) 0f else pitchX * 0.5f
-                val baseY = originY + row * pitchY + driftY
-                for (col in -1..cols) {
-                    val baseX = originX + col * pitchX + stagger + driftX
+                val baseY = row * pitchY + driftY
+                for (col in minCol..maxCol) {
+                    val baseX = col * pitchX + stagger + driftX
                     for (r in IKNA_PIXEL_EMBLEM.indices) {
                         val patternRow = IKNA_PIXEL_EMBLEM[r]
                         for (c in patternRow.indices) {
@@ -191,7 +258,7 @@ fun IknaHomeBackdrop(
         }
         DeckBackground.EMBLEM -> {
             Box(fill.background(colors.background)) {
-                IknaBrandPatternBackdrop(animated = animated, intensity = 1f)
+                IknaBrandPatternBackdrop(animated = animated, intensity = 0.72f)
             }
         }
         DeckBackground.DOTS -> {
@@ -356,7 +423,7 @@ private fun IknaMemoryField(
     }
 }
 
-/** A compact unfinished lattice used instead of a dash or a blank chart. */
+/** A compact waiting lattice used instead of a dash or a blank chart. */
 @Composable
 fun IknaLatticePlaceholder(
     modifier: Modifier = Modifier,
@@ -364,8 +431,10 @@ fun IknaLatticePlaceholder(
 ) {
     val ink = MaterialTheme.colorScheme.onSurfaceVariant
     val accent = MaterialTheme.colorScheme.primary
-    val animated = loading && LocalIknaMotionEnabled.current
-    val phase = rememberBackdropPhase(animated, durationMillis = 1600, label = "lattice-loading")
+    val animated = LocalIknaMotionEnabled.current
+    val rounded = LocalIknaAppearanceVariant.current == IknaAppearanceVariant.ROUNDED
+    val periodMillis = if (loading) 1500 else 2600
+    val phase = rememberBackdropPhase(animated, durationMillis = periodMillis, label = "lattice-waiting")
     Canvas(
         modifier = modifier
             .fillMaxWidth()
@@ -378,26 +447,34 @@ fun IknaLatticePlaceholder(
         val used = cell * columns + gap * (columns - 1)
         val left = (size.width - used) / 2f
         val rowStep = (size.height - cell) / (rows - 1)
+        val corner = CornerRadius(if (rounded) 2.5.dp.toPx() else 0f)
         for (row in 0 until rows) {
             for (column in 0 until columns) {
                 val present = ((column * 5 + row * 7) % 9 < 3) ||
                     (row == 1 && column in 3..7)
                 if (!present) continue
-                val baseAlpha = if (row == 1) 0.20f else 0.11f
+                val baseAlpha = if (row == 1) 0.22f else 0.12f
                 val wave = if (animated) {
                     0.5f + 0.5f * sin(TAU * phase - column * 0.55f - row * 0.35f)
                 } else {
                     0f
                 }
-                val color = if (animated && row == 1) {
-                    lerp(ink, accent, wave * 0.45f).copy(alpha = baseAlpha + 0.22f * wave)
+                val accentMix = if (loading) 0.58f else 0.40f
+                val alphaBoost = if (loading) {
+                    if (row == 1) 0.30f else 0.18f
                 } else {
-                    ink.copy(alpha = if (animated) baseAlpha + 0.14f * wave else baseAlpha)
+                    if (row == 1) 0.22f else 0.13f
                 }
-                drawRect(
+                val color = if (animated && row == 1) {
+                    lerp(ink, accent, wave * accentMix).copy(alpha = baseAlpha + alphaBoost * wave)
+                } else {
+                    ink.copy(alpha = if (animated) baseAlpha + alphaBoost * wave else baseAlpha)
+                }
+                drawRoundRect(
                     color = color,
                     topLeft = Offset(left + column * (cell + gap), row * rowStep),
-                    size = Size(cell, cell)
+                    size = Size(cell, cell),
+                    cornerRadius = corner
                 )
             }
         }

@@ -41,8 +41,10 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.unit.dp
+import dev.ikna.ui.theme.IknaGlyph
+import dev.ikna.ui.theme.IknaGlyphIcon
 
-internal enum class SupportBrandIcon { REPOSITORY, ISSUE, GMAIL, AUTHOR }
+internal enum class SupportBrandIcon { REPOSITORY, ISSUE, GMAIL, AUTHOR, WEBSITE }
 
 @Composable
 internal fun SupportBrandMark(icon: SupportBrandIcon) {
@@ -52,12 +54,16 @@ internal fun SupportBrandMark(icon: SupportBrandIcon) {
     }
     val colors = MaterialTheme.colorScheme
     val ink = if (colors.surfaceVariant.luminance() > 0.179f) Color.Black else Color.White
+    if (icon == SupportBrandIcon.WEBSITE) {
+        IknaGlyphIcon(glyph = IknaGlyph.GLOBE, color = ink, size = 24.dp)
+        return
+    }
     val outline = remember(icon) {
         val data = when (icon) {
             SupportBrandIcon.REPOSITORY -> githubRepoPath
             SupportBrandIcon.ISSUE -> githubIssuePath
             SupportBrandIcon.AUTHOR -> githubAuthorPath
-            SupportBrandIcon.GMAIL -> error("Gmail has its own multicolor asset")
+            SupportBrandIcon.GMAIL, SupportBrandIcon.WEBSITE -> error("Handled above")
         }
         PathParser().parsePathString(data).toPath()
     }

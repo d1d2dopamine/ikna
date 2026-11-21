@@ -33,7 +33,8 @@ private enum class SupportDestination(val label: String, val url: String, val ic
     REPO("support.repo", REPOSITORY, SupportBrandIcon.REPOSITORY),
     ISSUE("support.issue", "$REPOSITORY/issues/new/choose", SupportBrandIcon.ISSUE),
     MAIL("support.mail", "mailto:d1d2dopamine@gmail.com", SupportBrandIcon.GMAIL),
-    AUTHOR("support.author", "https://github.com/d1d2dopamine", SupportBrandIcon.AUTHOR)
+    AUTHOR("support.author", "https://github.com/d1d2dopamine", SupportBrandIcon.AUTHOR),
+    SITE("support.site", "https://d1d2dopamine.is-a.dev/", SupportBrandIcon.WEBSITE)
 }
 
 private data class SupportPillar(
@@ -320,7 +321,8 @@ private fun SupportLinkTile(
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Medium,
-            color = colors.onSurface
+            color = colors.onSurface,
+            maxLines = 1
         )
     }
 }

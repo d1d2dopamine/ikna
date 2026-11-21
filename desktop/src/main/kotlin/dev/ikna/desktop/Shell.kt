@@ -39,6 +39,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ikna.data.prefs.HotkeyBindings
@@ -58,6 +60,8 @@ import dev.ikna.ui.nav.sharedAxisExit
 import dev.ikna.ui.onboarding.FirstStudyDestination
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.Edge
+import dev.ikna.ui.theme.IknaBottomBar
+import dev.ikna.ui.theme.IknaBrandPatternBackdrop
 import dev.ikna.ui.theme.IknaDeveloperBadge
 import dev.ikna.ui.theme.IknaElementInspector
 import dev.ikna.ui.theme.IknaGlyph
@@ -325,6 +329,7 @@ private fun DesktopShell(
 ) {
     val deckListState = rememberLazyListState()
     var decks by remember { mutableStateOf<List<DeckSummary>>(emptyList()) }
+    var decksLoaded by remember { mutableStateOf(false) }
     var remaining by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
     var todaySummary by remember { mutableStateOf(TodayStudySummary()) }
     val scope = rememberCoroutineScope()
@@ -352,8 +357,11 @@ private fun DesktopShell(
     }
 
     LaunchedEffect(ui.reload) {
-        val nextDecks = runCatching { container.deckRepository.decks() }.getOrDefault(emptyList())
-        decks = nextDecks
+        val decksResult = runCatching { container.deckRepository.decks() }
+        if (decksResult.isSuccess) {
+            decks = decksResult.getOrThrow()
+            decksLoaded = true
+        }
         remaining = runCatching { container.learningRepository.remainingByDeck() }
             .getOrDefault(emptyMap())
         todaySummary = runCatching { container.learningRepository.todayStudySummary() }
@@ -414,6 +422,7 @@ private fun DesktopShell(
                             PaneContent(
                                 container, settings, palette, ui, decks,
                                 wide = true, onRestartRequested = onRestartRequested,
+                                decksLoaded = decksLoaded,
                                 onSessionReportActionChanged = { sessionReportAction = it }
                             )
                         }
@@ -455,7 +464,7 @@ private fun DesktopShell(
             DecksColumn(settings, ui, decks, remaining, todaySummary, deckListState,
                 offeredUpdate, skipUpdate)
         } else {
-            PaneContent(container, settings, palette, ui, decks, wide = false, onRestartRequested = onRestartRequested)
+            PaneContent(container, settings, palette, ui, decks, wide = false, onRestartRequested = onRestartRequested, decksLoaded = decksLoaded)
         }
     }
 }
@@ -593,6 +602,7 @@ private fun PaneContent(
     decks: List<DeckSummary>,
     wide: Boolean,
     onRestartRequested: () -> Unit,
+    decksLoaded: Boolean = false,
     onSessionReportActionChanged: ((() -> Unit)?) -> Unit = {}
 ) {
     val travel = with(LocalDensity.current) { Motion.sharedAxisTravel.roundToPx() }
@@ -624,20 +634,86 @@ private fun PaneContent(
         label = "pane"
     ) { pane ->
         when (pane) {
-            Pane.SESSION -> SessionPane(
-                container = container,
-                settings = settings,
-                palette = palette,
-                deckId = ui.sessionDeck,
-                onChanged = { ui.refresh() },
-                onBack = back,
-                // In a wide window the session is the app's home: back has
-                // nowhere to take the learner, so the button stays hidden.
-                showBack = !wide,
-                decksCollapsed = ui.studyDecksCollapsed,
-                onToggleDecks = if (wide) ({ ui.studyDecksCollapsed = !ui.studyDecksCollapsed }) else null,
-                onReportActionChanged = onSessionReportActionChanged
-            )
+            Pane.SESSION -> if (decksLoaded && decks.isEmpty()) {
+                val unifiedFooter = LocalIknaUnifiedFooter.current
+                Box(Modifier.fillMaxSize().background(palette.background).clipToBounds()) {
+                    IknaBrandPatternBackdrop(intensity = 0.72f)
+                    Column(Modifier.fillMaxSize()) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                                .padding(horizontal = Edge),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Column(
+                                modifier = Modifier.widthIn(max = 460.dp).fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Box(Modifier.width(220.dp)) { IknaLatticePlaceholder() }
+                                Spacer(Modifier.height(Space.lg))
+                                Text(
+                                    text = S.t("deck.empty_title"),
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = palette.ink,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(Modifier.height(Space.sm))
+                                Text(
+                                    text = S.t("deck.005"),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = palette.muted,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(Modifier.height(Space.lg))
+                                IknaWideButton(
+                                    label = S.t("cat.033"),
+                                    filled = true,
+                                    modifier = Modifier.widthIn(max = 280.dp),
+                                    onClick = { ui.show(Pane.CATALOG) }
+                                )
+                                Spacer(Modifier.height(Space.xs))
+                                IknaTextButton(
+                                    label = S.t("a11y.004"),
+                                    onClick = { ui.show(Pane.ADD) },
+                                    color = palette.muted
+                                )
+                            }
+                        }
+                        if (!unifiedFooter) {
+                            IknaBottomBar {
+                                if (!wide) {
+                                    IknaIconButton(IknaGlyph.BACK, onClick = back, label = S.t("a11y.001"))
+                                } else {
+                                    IknaIconButton(
+                                        glyph = IknaGlyph.DECK_PANEL,
+                                        onClick = { ui.studyDecksCollapsed = !ui.studyDecksCollapsed },
+                                        label = S.t(if (ui.studyDecksCollapsed) "deck.panel_show" else "deck.panel_hide")
+                                    )
+                                }
+                                Spacer(Modifier.weight(1f))
+                            }
+                        }
+                    }
+                }
+            } else {
+                SessionPane(
+                    container = container,
+                    settings = settings,
+                    palette = palette,
+                    deckId = ui.sessionDeck,
+                    onChanged = { ui.refresh() },
+                    onBack = back,
+                    // In a wide window the session is the app's home: back has
+                    // nowhere to take the learner, so the button stays hidden.
+                    showBack = !wide,
+                    decksCollapsed = ui.studyDecksCollapsed,
+                    onToggleDecks = if (wide) ({ ui.studyDecksCollapsed = !ui.studyDecksCollapsed }) else null,
+                    onReportActionChanged = onSessionReportActionChanged
+                )
+            }
 
             Pane.BROWSE -> {
                 val id = ui.browseDeck

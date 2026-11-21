@@ -35,7 +35,7 @@ class SupportScreenLayoutTest {
                     }
                 }
             }
-            val tiles = listOf("support.repo", "support.issue", "support.mail", "support.author")
+            val tiles = listOf("support.repo", "support.issue", "support.mail", "support.author", "support.site")
                 .map { onNodeWithText(S.t(it)) }
             onNodeWithText(S.t("upd.011") + "0.12.0").assertExists()
             onNodeWithText(S.t("support.changelog")).performClick()
@@ -52,7 +52,8 @@ class SupportScreenLayoutTest {
                         "https://github.com/d1d2dopamine/ikna",
                         "https://github.com/d1d2dopamine/ikna/issues/new/choose",
                         "mailto:d1d2dopamine@gmail.com",
-                        "https://github.com/d1d2dopamine"
+                        "https://github.com/d1d2dopamine",
+                        "https://d1d2dopamine.is-a.dev/"
                     ),
                     visited
                 )
