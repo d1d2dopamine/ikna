@@ -76,7 +76,13 @@ Ikna is free software under the [GNU General Public License, version 3 or later]
 
 ---
 
-<h1 align="center" id="русский">Икна</h1>
+<a name="русский"></a>
+
+<p align="center">
+  <img src="docs/assets/brand/ikna-banner.png" alt="ikna" width="800">
+</p>
+
+<h1 align="center">Икна</h1>
 
 <p align="center">
   <a href="#ikna">English</a> · <strong>Русский</strong>
