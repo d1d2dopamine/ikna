@@ -32,6 +32,7 @@ except ImportError:
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "shared/src/desktopMain/resources/drawable/ikna_wordmark.png"
 ACCENT_SOURCE = ROOT / "shared/src/desktopMain/resources/drawable/ikna_wordmark_accent.png"
+APP_ICON = ROOT / "docs/assets/brand/ikna-app-icon-rounded.png"
 OUT = ROOT / "desktop/installer"
 DOCS = ROOT / "docs"
 BACKGROUND = (0xD0, 0xD3, 0xD9)
@@ -85,6 +86,12 @@ def pixel_icon() -> Image.Image:
     return image
 
 
+def paste_app_icon(image: Image.Image, position: tuple[int, int], size: int) -> None:
+    with Image.open(APP_ICON) as source:
+        icon = source.convert("RGBA").resize((size, size), Image.Resampling.LANCZOS)
+    image.paste(icon, position, icon)
+
+
 def sidebar() -> Image.Image:
     image = Image.new("RGB", (164, 314), BACKGROUND)
     draw = ImageDraw.Draw(image)
@@ -93,16 +100,15 @@ def sidebar() -> Image.Image:
     draw.rectangle((22, 111, 115, 113), fill=INK)
     draw.rectangle((22, 119, 91, 121), fill=MUTED)
     draw.rectangle((22, 127, 65, 129), fill=MUTED)
-    pixel_cluster(draw, 112, 231, 7)
+    paste_app_icon(image, (101, 231), 49)
     return image
 
 
 def header() -> Image.Image:
     image = Image.new("RGB", (150, 57), BACKGROUND)
-    draw = ImageDraw.Draw(image)
     mark = tinted_wordmark(76)
     image.paste(mark, (64, 13), mark)
-    pixel_cluster(draw, 8, 8, 5)
+    paste_app_icon(image, (8, 8), 41)
     return image
 
 
