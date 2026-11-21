@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import dev.ikna.data.update.UpdateCheck
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.*
 
@@ -30,7 +31,7 @@ private enum class SupportDestination(val label: String, val url: String, val ic
 }
 
 @Composable
-fun IknaSupportScreen(onBack: () -> Unit) {
+fun IknaSupportScreen(installedVersion: String, onBack: () -> Unit) {
     val handler = LocalUriHandler.current
     var failed by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -40,7 +41,14 @@ fun IknaSupportScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(Space.md),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            IknaWordmark(height = 28.dp)
             Text(S.t("support.title"), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineSmall)
+            Text(S.t("support.description"), textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyMedium)
+            Text(S.t("upd.011") + installedVersion, style = MaterialTheme.typography.labelMedium)
+            IknaTextButton(S.t("support.changelog"), onClick = {
+                failed = runCatching { handler.openUri(UpdateCheck.RELEASES_PAGE) }.isFailure
+            })
+            Spacer(Modifier.height(Space.sm))
             Text(S.t("support.body"), modifier = Modifier.widthIn(max = 560.dp),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyLarge)

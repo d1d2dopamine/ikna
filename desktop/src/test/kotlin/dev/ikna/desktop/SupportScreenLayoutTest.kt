@@ -5,6 +5,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -31,12 +32,14 @@ class SupportScreenLayoutTest {
             setContent {
                 MaterialTheme {
                     CompositionLocalProvider(LocalUriHandler provides handler) {
-                        IknaSupportScreen(onBack = {})
+                        IknaSupportScreen(installedVersion = "0.12.0", onBack = {})
                     }
                 }
             }
             val tiles = listOf("support.repo", "support.issue", "support.mail", "support.author")
                 .map { onNodeWithText(S.t(it)) }
+            onNodeWithText(S.t("upd.011") + "0.12.0").assertExists()
+            onNodeWithText(S.t("support.changelog")).performClick()
             val bounds = tiles.map { it.getUnclippedBoundsInRoot() }
             bounds.zipWithNext().forEach { (left, right) ->
                 assertTrue(left.right < right.left)
@@ -46,6 +49,7 @@ class SupportScreenLayoutTest {
             runOnIdle {
                 assertEquals(
                     listOf(
+                        "https://github.com/d1d2dopamine/ikna/releases",
                         "https://github.com/d1d2dopamine/ikna",
                         "https://github.com/d1d2dopamine/ikna/issues/new/choose",
                         "mailto:d1d2dopamine@gmail.com",

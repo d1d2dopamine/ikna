@@ -475,12 +475,14 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "deck.background_solid" to "Jednolite",
     "deck.background_glow" to "Poświata",
     "deck.background_grid" to "Siatka",
+    "support.description" to "Fiszki do nauki języków i innych tematów.",
+    "support.changelog" to "Co nowego",
     "support.repo" to "GitHub",
     "support.issue" to "Zgłoszenia",
     "support.mail" to "Gmail",
     "support.author" to "Profil",
     "support.open_failed" to "Nie udało się otworzyć odnośnika.",
-	"deck.panel_show" to "Pokaż talie", "deck.panel_hide" to "Ukryj talie", "support.title" to "Support & Social", "support.body" to "Jeśli lubisz Iknę, dodaj gwiazdkę oficjalnemu repozytorium na GitHubie. Masz pomysł lub znalazłeś błąd? Otwórz zgłoszenie albo napisz e-mail. Twoje uwagi pomagają rozwijać Iknę.", "deck.hidden" to "Ukryte fiszki", "deck.restore_card" to "Przywróć fiszkę", "deck.language_unknown" to "Nieokreślony lub mieszany", "deck.004" to "Talie",
+	"deck.panel_show" to "Pokaż talie", "deck.panel_hide" to "Ukryj talie", "support.title" to "O Iknie", "support.body" to "Jeśli lubisz Iknę, dodaj gwiazdkę oficjalnemu repozytorium na GitHubie. Masz pomysł lub znalazłeś błąd? Otwórz zgłoszenie albo napisz e-mail. Twoje uwagi pomagają rozwijać Iknę.", "deck.hidden" to "Ukryte fiszki", "deck.restore_card" to "Przywróć fiszkę", "deck.language_unknown" to "Nieokreślony lub mieszany", "deck.004" to "Talie",
 	// Пока ни одной колоды. Плюс сверху добавит файл .jsonl.
 	"deck.005" to "Nie ma jeszcze talii. Plus na dole ma prompt dla AI i miejsce na wklejenie.",
 	// читаю файл…

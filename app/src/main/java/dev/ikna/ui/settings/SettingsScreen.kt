@@ -1130,21 +1130,23 @@ fun SettingsScreen(
                                 }
                             )
                             Spacer(Modifier.height(8.dp))
-                            IknaWideButton(
-                                label = S.t("set.067"),
-                                height = 52.dp,
-                                enabled = !busy,
-                                onClick = {
-                                    scope.launch {
-                                        busy = true
-                                        withContext(Dispatchers.IO) {
-                                            container.components.rebuildFromReviews()
+                            if (container.isDeveloperMode) {
+                                IknaWideButton(
+                                    label = S.t("set.067"),
+                                    height = 52.dp,
+                                    enabled = !busy,
+                                    onClick = {
+                                        scope.launch {
+                                            busy = true
+                                            withContext(Dispatchers.IO) {
+                                                container.components.rebuildFromReviews()
+                                            }
+                                            busy = false
+                                            message = S.t("set.068")
                                         }
-                                        busy = false
-                                        message = S.t("set.068")
                                     }
-                                }
-                            )
+                                )
+                            }
                             // The way into the technical screen, in debug builds
                             // only. This is not a hidden button: in a release build
                             // the screen behind it is not compiled at all, and

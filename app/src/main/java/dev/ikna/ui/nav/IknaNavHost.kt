@@ -45,6 +45,8 @@ import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.theme.IknaDeveloperBadge
 import androidx.compose.material3.MaterialTheme
 import dev.ikna.ui.update.UpdateGate
+import dev.ikna.ui.update.installedVersion
+import androidx.compose.ui.platform.LocalContext
 
 /**
  * Where the app can be.
@@ -224,7 +226,10 @@ fun IknaNavHost(
             // the app never got to say what a deck file is — and there is no
             // room in a file browser to say it.
             composable(Routes.SUPPORT) {
-                dev.ikna.ui.decks.IknaSupportScreen(onBack = { back() })
+                dev.ikna.ui.decks.IknaSupportScreen(
+                    installedVersion = installedVersion(LocalContext.current),
+                    onBack = { back() }
+                )
             }
 
             composable(Routes.ADD_DECK) {

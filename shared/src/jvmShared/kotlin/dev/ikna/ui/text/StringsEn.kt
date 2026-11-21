@@ -475,12 +475,14 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "deck.background_solid" to "Solid",
     "deck.background_glow" to "Glow",
     "deck.background_grid" to "Grid",
+    "support.description" to "Flashcards for languages and other subjects.",
+    "support.changelog" to "What’s new",
     "support.repo" to "GitHub",
     "support.issue" to "Issues",
     "support.mail" to "Gmail",
     "support.author" to "Profile",
     "support.open_failed" to "Could not open the link.",
-	"deck.panel_show" to "Show decks", "deck.panel_hide" to "Hide decks", "support.title" to "Support & Social", "support.body" to "If you like Ikna, star the official repository on GitHub. Have an idea, found a bug, or noticed something missing? Open an issue or send an email. Your feedback helps shape what gets fixed and built next.", "deck.hidden" to "Hidden cards", "deck.restore_card" to "Restore card", "deck.language_unknown" to "Undetermined or mixed", "deck.004" to "Decks",
+	"deck.panel_show" to "Show decks", "deck.panel_hide" to "Hide decks", "support.title" to "About Ikna", "support.body" to "If you like Ikna, star the official repository on GitHub. Have an idea, found a bug, or noticed something missing? Open an issue or send an email. Your feedback helps shape what gets fixed and built next.", "deck.hidden" to "Hidden cards", "deck.restore_card" to "Restore card", "deck.language_unknown" to "Undetermined or mixed", "deck.004" to "Decks",
 	// Пока ни одной колоды. Плюс сверху добавит файл .jsonl.
 	"deck.005" to "No decks yet. The plus at the bottom has the AI prompt and a place to paste.",
 	// читаю файл…

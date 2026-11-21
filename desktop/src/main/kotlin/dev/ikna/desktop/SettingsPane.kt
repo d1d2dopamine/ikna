@@ -129,7 +129,7 @@ fun SettingsPane(
 
     val listState = rememberLazyListState()
     val sections = listOf("load" to "set.091", "look" to "set.092", "language" to "set.093",
-        "speech" to "set.094", "font" to "set.095", "keys" to "keys.001", "reminder" to "set.096",
+        "font" to "set.095", "keys" to "keys.001",
         "update" to "set.140", "data" to "set.097", "advanced" to "set.098")
     DesktopPaneFrame(S.t("set.012"), onBack) {
         // The measured settings column centres in the pane; the jump strip and
@@ -278,11 +278,6 @@ fun SettingsPane(
                     }
                 }
             }
-            item(key = "speech", contentType = "settings-section") {
-                IknaSettingsSection(S.t("set.094"), null) {
-                    Text(S.t("pc.001"), style = MaterialTheme.typography.bodySmall, color = palette.muted)
-                }
-            }
             item(key = "font", contentType = "settings-section") {
                 IknaSettingsSection(S.t("set.040"), null) {
                     Spacer(Modifier.height(8.dp))
@@ -340,11 +335,6 @@ fun SettingsPane(
                             save { container.settings.setHotkey(action, chord) }
                         }
                     )
-                }
-            }
-            item(key = "reminder", contentType = "settings-section") {
-                IknaSettingsSection(S.t("set.096"), null) {
-                    Text(S.t("pc.001"), style = MaterialTheme.typography.bodySmall, color = palette.muted)
                 }
             }
             item(key = "update", contentType = "settings-section") {
@@ -608,11 +598,13 @@ fun SettingsPane(
                             }
                         )
                         Spacer(Modifier.height(8.dp))
-                        IknaButton(label = S.t("set.067"), palette = palette) {
-                            scope.launch {
-                                runCatching { container.componentRepository.rebuildFromReviews() }
-                                    .onFailure { error -> logLine("rebuild failed: " + error) }
-                                dataNote = S.t("set.068")
+                        if (container.isDeveloperMode) {
+                            IknaButton(label = S.t("set.067"), palette = palette) {
+                                scope.launch {
+                                    runCatching { container.componentRepository.rebuildFromReviews() }
+                                        .onFailure { error -> logLine("rebuild failed: " + error) }
+                                    dataNote = S.t("set.068")
+                                }
                             }
                         }
 

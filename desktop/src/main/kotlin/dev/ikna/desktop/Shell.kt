@@ -647,7 +647,7 @@ private fun PaneContent(
             // Back goes to settings rather than the deck list, because
             // that is where this screen is reached from. A dropped file
             // lands here too, and settings is still the nearest place.
-            Pane.SUPPORT -> dev.ikna.ui.decks.IknaSupportScreen(onBack = back)
+            Pane.SUPPORT -> dev.ikna.ui.decks.IknaSupportScreen(installedVersion = APP_VERSION, onBack = back)
 
             Pane.BACKUP -> BackupPane(
                 container = container,
