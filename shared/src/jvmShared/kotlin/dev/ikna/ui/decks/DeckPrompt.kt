@@ -1,7 +1,5 @@
 package dev.ikna.ui.decks
 
-import dev.ikna.data.repo.NO_LANG
-
 /**
  * The answers the prompt asks for, written into the prompt.
  *
@@ -123,4 +121,4 @@ const val PROMPT_SUBJECT = "Subject:"
 const val PROMPT_CARDS_LANG = "Language of the cards:"
 
 /** The deck languages minus the honest "no voice", which is not a language. */
-val MEANING_LANGS = DECK_LANGS.filter { it != NO_LANG }
+val MEANING_LANGS = DECK_LANGS

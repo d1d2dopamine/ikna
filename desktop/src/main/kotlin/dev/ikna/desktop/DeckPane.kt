@@ -5,7 +5,6 @@ import dev.ikna.ui.session.browseUnavailableText
 import dev.ikna.ui.decks.IknaDeckActions
 import dev.ikna.ui.decks.IknaDeckAppearance
 import dev.ikna.ui.decks.IknaDeckProgress
-import dev.ikna.ui.decks.LangChips
 import dev.ikna.ui.decks.describe
 import dev.ikna.data.prefs.lookFor
 import dev.ikna.domain.phonetics.Phonetics

@@ -443,7 +443,8 @@ fun IknaTextButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    color: Color = MaterialTheme.colorScheme.onBackground
+    color: Color = MaterialTheme.colorScheme.onBackground,
+    horizontalPadding: Dp = 8.dp
 ) {
     val interaction = remember { MutableInteractionSource() }
     val motionEnabled = LocalIknaMotionEnabled.current
@@ -468,7 +469,7 @@ fun IknaTextButton(
                 role = Role.Button,
                 onClick = onClick
             )
-            .padding(horizontal = 8.dp, vertical = 8.dp),
+            .padding(horizontal = horizontalPadding, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(

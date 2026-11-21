@@ -150,7 +150,8 @@ class DesignContracts(unittest.TestCase):
         # Shell keeps one temporary loading wordmark; the desktop home footer has none.
         self.assertEqual(1, shell.count('IknaWordmark('))
         home_chrome = read(SHARED, 'ui/decks/HomeChrome.kt')
-        self.assertIn('IknaWordmark(height = 16.dp)', home_chrome)
+        self.assertIn('IknaWordmark(modifier = Modifier.alignBy { it.height }, height = 16.dp)', home_chrome)
+        self.assertIn('Modifier.alignByBaseline()', home_chrome)
         self.assertIn('dockAtTop = settings.homeDockAtTop', shell + mobile_decks)
 
     def test_desktop_hotkeys_are_captured_not_typed(self):
@@ -184,7 +185,7 @@ class DesignContracts(unittest.TestCase):
             source = read(base, name)
             for required in ['IknaDeckAppearance(', 'Phonetics.sample(', 'current.hasPhonetics', 'deck.language_unknown']:
                 self.assertIn(required, source)
-        self.assertIn('FlowRow(', read(SHARED, 'ui/decks/DeckLangs.kt'))
+        self.assertIn('FlowRow(', read(SHARED, 'ui/decks/PromptControls.kt'))
         mark = read(SHARED, 'ui/decks/DeckMark.kt')
         repo = read(SHARED, 'data/repo/DeckRepository.kt')
         for required in ['fun deckSealCells(deckId: String, installedAt: Long)',
@@ -233,7 +234,7 @@ class DesignContracts(unittest.TestCase):
 
     def test_model_path_and_paste_cost_are_bounded(self):
         source = read(DESKTOP, 'AddDeckPane.kt')
-        for required in ['if (modelWay)', 'ClasspathAssets.open', 'fillSubjectPrompt(', 'fillPrompt(', 'lineSequence().take(40)', '1_600_000', 'clipboard.getText()', 'lang = if (subject) NO_LANG else lang']:
+        for required in ['if (modelWay)', 'ClasspathAssets.open', 'fillSubjectPrompt(', 'fillPrompt(', 'lineSequence().take(40)', '1_600_000', 'clipboard.getText()', 'inferLanguage = !(modelWay && subject)']:
             self.assertIn(required, source)
         self.assertIn('firstProblem', read(SHARED, 'ui/decks/ImportDescription.kt'))
         self.assertIn('firstWarning', read(SHARED, 'ui/decks/ImportDescription.kt'))

@@ -225,7 +225,7 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "dp.017" to "API",
     "dp.018" to "Désactivée",
     "dp.019" to "Rien n’est affiché",
-    "add.036" to "fonctionnement", "add.037" to "masquer", "add.038" to "Langue des cartes",
+    "add.036" to "fonctionnement", "add.037" to "masquer", "add.038" to "Langue à apprendre",
     "add.039" to "Utilisée uniquement pour la voix. Modifiable plus tard dans le paquet.", "add.040" to "Ce qu’il faut demander au modèle",
     "add.041" to "Nombre de cartes", "add.042" to "Langue des significations", "add.043" to "débutant",
     "add.044" to "peut tenir une conversation", "add.045" to "courant", "add.046" to "Niveau",

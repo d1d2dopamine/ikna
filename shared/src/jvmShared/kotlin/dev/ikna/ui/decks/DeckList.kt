@@ -91,7 +91,7 @@ fun IknaTodayBlock(summary: TodayStudySummary, perCardMs: Long?, onClick: () -> 
                 height = 48.dp
             )
         } else {
-            IknaTextButton(label = S.t("a11y.019"), onClick = onClick)
+            IknaTextButton(label = S.t("a11y.019"), onClick = onClick, horizontalPadding = 0.dp)
         }
     }
 }

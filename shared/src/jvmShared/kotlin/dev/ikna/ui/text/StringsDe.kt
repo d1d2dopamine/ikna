@@ -212,7 +212,7 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "dp.017" to "IPA",
     "dp.018" to "Aus",
     "dp.019" to "Es wird nichts angezeigt",
-    "add.036" to "so funktioniert es", "add.037" to "ausblenden", "add.038" to "Sprache der Karten", "add.039" to "Nur für die Stimme; später auf der Deckseite änderbar.",
+    "add.036" to "so funktioniert es", "add.037" to "ausblenden", "add.038" to "Lernsprache", "add.039" to "Nur für die Stimme; später auf der Deckseite änderbar.",
     "add.040" to "Was das Modell erstellen soll", "add.041" to "Anzahl der Karten", "add.042" to "Sprache der Bedeutungen",
     "add.043" to "Anfang", "add.044" to "kann ein Gespräch führen", "add.045" to "fließend", "add.046" to "Niveau",
     "add.047" to "Thema oder Situation", "add.048" to "zum Beispiel Cafés und Essen bestellen", "add.049" to "Die Antworten landen im Prompt; im Chat muss nichts mehr eingegeben werden.",

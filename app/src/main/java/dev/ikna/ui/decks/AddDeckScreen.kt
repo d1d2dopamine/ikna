@@ -107,7 +107,7 @@ fun AddDeckScreen(
 	// longer a prompt and a hope that nothing came back malformed; the
 	// catalogue is the front door and this is the side one.
 	var modelWay by remember { mutableStateOf(false) }
-	var lang by remember { mutableStateOf(NO_LANG) }
+	var learningLanguage by remember { mutableStateOf(NO_LANG) }
 
 	// What the prompt used to leave blank for the person to type into a chat
 	// window by hand. Answered here instead, with the app's own language as the
@@ -132,11 +132,11 @@ fun AddDeckScreen(
 	}
 
 	// The prompt as it will actually be sent: the asset with the answers in it.
-	val filled = remember(prompt, subjectPrompt, subject, lang, meanings, count, topic, level) {
+	val filled = remember(prompt, subjectPrompt, subject, learningLanguage, meanings, count, topic, level) {
 		if (subject) {
 			fillSubjectPrompt(subjectPrompt, meanings, count, topic, level)
 		} else {
-			fillPrompt(prompt, lang, meanings, count, topic, level)
+			fillPrompt(prompt, learningLanguage, meanings, count, topic, level)
 		}
 	}
 
@@ -148,8 +148,8 @@ fun AddDeckScreen(
 					fileName = name,
 					text = text,
 					fallbackTitle = S.t("deckrepo.001"),
-					lang = lang,
-                    inferLanguage = !subject
+
+                    inferLanguage = !(modelWay && subject)
 				)
 			}.getOrNull()
 		}
@@ -358,17 +358,13 @@ fun AddDeckScreen(
 								// A subject deck claims no language: nothing in it is meant
 								// to be pronounced, and a voice reading definitions aloud in
 								// a guessed accent is worse than silence.
-								lang = NO_LANG
+								learningLanguage = NO_LANG
 								level = LEVEL_BEGINNER
 							}
 						)
 					}
 					Spacer(Modifier.height(Space.sm))
-					Text(
-						text = if (subject) S.t("add.058") else S.t("add.039"),
-						style = MaterialTheme.typography.bodySmall,
-						color = muted
-					)
+					if (subject) Text(S.t("add.058"), style = MaterialTheme.typography.bodySmall, color = muted)
 
 					Spacer(Modifier.height(Space.lg))
 					IknaRule()
@@ -388,6 +384,10 @@ fun AddDeckScreen(
 					)
 
 					Spacer(Modifier.height(Space.md))
+					if (!subject) {
+						Text(S.t("add.038"), style = MaterialTheme.typography.bodySmall)
+						PromptChoice(MEANING_LANGS, { it.uppercase() }, learningLanguage) { learningLanguage = it }
+					}
 					Text(
 						// On a subject deck this is the language the cards themselves are
 						// written in, not the language the meanings are translated into.
@@ -485,23 +485,6 @@ fun AddDeckScreen(
 				Spacer(Modifier.height(Space.lg))
 				IknaRule()
 				Spacer(Modifier.height(Space.lg))
-
-				// The language of the deck, asked where the deck actually arrives.
-				//
-				// It used to stand with the prompt questions, and the prompt is folded
-				// away now. A file a friend sent has a language too, and the voice and
-				// the reader for a deck are chosen by it, so the question stays here in
-				// the open where any deck being installed can answer it.
-				if (!subject) {
-					Text(
-						text = S.t("add.038"),
-						style = MaterialTheme.typography.labelMedium,
-						color = muted
-					)
-					Spacer(Modifier.height(Space.sm))
-					LangChips(current = lang, onPick = { lang = it })
-					Spacer(Modifier.height(Space.lg))
-				}
 
 				Text(
 					text = S.t("add.016"),

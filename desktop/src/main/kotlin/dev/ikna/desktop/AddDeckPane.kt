@@ -79,7 +79,7 @@ fun AddDeckPane(
     var modelWay by remember { mutableStateOf(false) }
     var guide by remember { mutableStateOf(false) }
     var subject by remember { mutableStateOf(false) }
-    var lang by remember { mutableStateOf(NO_LANG) }
+    var learningLanguage by remember { mutableStateOf(NO_LANG) }
     var meanings by remember { mutableStateOf(S.lang) }
     var count by remember { mutableStateOf(PROMPT_COUNTS[1]) }
     var level by remember { mutableStateOf(LEVEL_BEGINNER) }
@@ -98,9 +98,9 @@ fun AddDeckPane(
             else { prompt = templates.first; subjectPrompt = templates.second }
         }
     }
-    val filled = remember(prompt, subjectPrompt, subject, lang, meanings, count, topic, level) {
+    val filled = remember(prompt, subjectPrompt, subject, learningLanguage, meanings, count, topic, level) {
         if (subject) fillSubjectPrompt(subjectPrompt, meanings, count, topic, level)
-        else fillPrompt(prompt, lang, meanings, count, topic, level)
+        else fillPrompt(prompt, learningLanguage, meanings, count, topic, level)
     }
     fun savePrompt() {
         val chooser = JFileChooser().apply { selectedFile = File("ikna-deck-prompt.txt") }
@@ -128,8 +128,8 @@ fun AddDeckPane(
                         fileName = fileName,
                         text = text,
                         fallbackTitle = fallbackTitle,
-                        lang = if (subject) NO_LANG else lang,
-                        inferLanguage = !subject
+
+                        inferLanguage = !(modelWay && subject)
                     )
                     if (report.installed > 0 && !report.stagedAiImport) {
                         container.learningRepository.invalidatePlan()
@@ -291,17 +291,13 @@ if (modelWay) {
 				// A subject deck claims no language: nothing in it is meant
 				// to be pronounced, and a voice reading definitions aloud in
 				// a guessed accent is worse than silence.
-				lang = NO_LANG
+				learningLanguage = NO_LANG
 				level = LEVEL_BEGINNER
 			}
 		)
 	}
 	Spacer(Modifier.height(Space.sm))
-	Text(
-		text = if (subject) S.t("add.058") else S.t("add.039"),
-		style = MaterialTheme.typography.bodySmall,
-		color = muted
-	)
+	if (subject) Text(S.t("add.058"), style = MaterialTheme.typography.bodySmall, color = muted)
 
 	Spacer(Modifier.height(Space.lg))
 	IknaRule()
@@ -321,6 +317,10 @@ if (modelWay) {
 	)
 
 	Spacer(Modifier.height(Space.md))
+	if (!subject) {
+		Text(S.t("add.038"), style = MaterialTheme.typography.bodySmall)
+		PromptChoice(MEANING_LANGS, { it.uppercase() }, learningLanguage) { learningLanguage = it }
+	}
 	Text(
 		// On a subject deck this is the language the cards themselves are
 		// written in, not the language the meanings are translated into.
@@ -419,10 +419,6 @@ Spacer(Modifier.height(Space.lg))
 IknaRule()
 Spacer(Modifier.height(Space.lg))
 
-Text(S.t("add.038"), style = MaterialTheme.typography.labelMedium, color = muted)
-Spacer(Modifier.height(Space.sm))
-LangChips(lang) { lang = it }
-Spacer(Modifier.height(Space.lg))
 Text(S.t("add.016"), style = MaterialTheme.typography.labelMedium, color = muted)
 Spacer(Modifier.height(Space.sm))
 val lineCount = remember(pasted) { if (pasted.isEmpty()) 0 else pasted.count { it == '\n' } + 1 }

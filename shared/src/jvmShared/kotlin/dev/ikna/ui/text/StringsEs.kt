@@ -368,7 +368,7 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "dp.019" to "No se muestra nada",
     "add.036" to "cómo funciona",
     "add.037" to "ocultar",
-    "add.038" to "En qué idioma están las tarjetas",
+    "add.038" to "Idioma que quieres aprender",
     "add.039" to "Solo se usa para la voz. Se puede cambiar después en la página del mazo.",
     "add.040" to "Qué pedirle al modelo",
     "add.041" to "Cuántas tarjetas",

@@ -83,15 +83,22 @@ private fun HomeHeading(showWordmark: Boolean) {
         horizontalArrangement = Arrangement.spacedBy(Space.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (showWordmark) IknaWordmark(height = 16.dp)
-        Text(
-            text = S.t("deck.004"),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold,
+        Row(
             modifier = Modifier.weight(1f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+            horizontalArrangement = Arrangement.spacedBy(Space.sm)
+        ) {
+            if (showWordmark) {
+                IknaWordmark(modifier = Modifier.alignBy { it.height }, height = 16.dp)
+            }
+            Text(
+                text = S.t("deck.004"),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.alignByBaseline(),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
         IknaReadingCat()
     }
 }
