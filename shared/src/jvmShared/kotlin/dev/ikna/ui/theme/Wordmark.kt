@@ -16,12 +16,8 @@ import androidx.compose.ui.unit.dp
 /*
  * The logo, inside the app, wearing the palette.
  *
- * The supplied 0.11 wordmark is raster artwork. The black presentation field is
- * not part of the in-app mark, so a high-resolution transparent raster master is
- * split into two antialiased alpha masks: the blue letterforms and the warm cap
- * above the i. The edge pixels are recovered from the original black composite
- * before masking, which avoids the dark fringe and stair-step artefacts a hard
- * background threshold would create. Compose can then tint both layers from the
+ * The supplied wordmark is raster artwork. The transparent master is split into two
+ * antialiased alpha masks: the letterforms and the accent cap above the i. Compose can then tint both layers from the
  * active palette without tracing, retyping or otherwise redrawing the logo.
  *
  * The letter mask receives the interface ink colour. The cap receives the
@@ -31,7 +27,7 @@ import androidx.compose.ui.unit.dp
  */
 
 /** Width over height of the supplied mark after its black presentation field is removed. */
-const val WORDMARK_ASPECT = 2.909434f
+const val WORDMARK_ASPECT = 2.928258f
 
 /**
  * The app's name as it is drawn inside the interface.

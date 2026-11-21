@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="docs/assets/brand/ikna-banner.png" alt="ikna" width="600">
+  <img src="docs/assets/brand/ikna-banner.png" alt="ikna — know / don't know. we handle the rest." width="800">
 </p>
 
 <h1 align="center" id="ikna"></h1>
 
 <p align="center">
-  <strong>English</strong> · <a href="#русский">Русский</a>
+  <strong>English</strong> · <a href="#русский">Русский</a> · <a href="docs/assets/brand/README.md">Brand assets</a>
 </p>
 
 <p align="center">
@@ -126,7 +126,7 @@ ikna is free software under the **GNU General Public License, version 3 or (at y
 ---
 
 <p align="center">
-  <img src="docs/assets/brand/ikna-banner.png" alt="ikna" width="600">
+  <img src="docs/assets/brand/ikna-banner.png" alt="ikna — know / don't know. we handle the rest." width="800">
 </p>
 
 <h1 align="center" id="русский"></h1>
