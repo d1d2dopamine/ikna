@@ -85,10 +85,7 @@ data class SettingsSnapshot(
     val fontMode: String = "",
     val fontName: String = "",
     val appearanceVariant: String = "",
-    // The bar's look, defaulting to what a fresh install does. A file written
-    // before these existed must not be able to hide the wordmark or move the
-    // controls of whoever restores it.
-    val showWordmark: Boolean = true,
+    // Navigation preferences use the defaults of a fresh install.
     val leftHanded: Boolean = false,
     val homeDockAtTop: Boolean? = null,
     val homeDockFullWidth: Boolean? = null,
@@ -140,7 +137,6 @@ object SettingsBackup {
         fontMode = settings.fontMode.name,
         fontName = settings.fontName,
         appearanceVariant = settings.appearanceVariant.name,
-        showWordmark = settings.showWordmark,
         leftHanded = settings.leftHanded,
         homeDockAtTop = settings.homeDockAtTop,
         homeDockFullWidth = settings.homeDockFullWidth,
@@ -219,7 +215,6 @@ object SettingsBackup {
                 runCatching { IknaAppearanceVariant.valueOf(name) }.getOrNull()
             } ?: IknaAppearanceVariant.ANGULAR
         )
-        store.setShowWordmark(snapshot.showWordmark)
         store.setLeftHanded(snapshot.leftHanded)
         snapshot.homeDockAtTop?.let { store.setHomeDockAtTop(it) }
         snapshot.homeDockFullWidth?.let { store.setHomeDockFullWidth(it) }

@@ -570,7 +570,6 @@ val STRINGS_EN: Map<String, String> = mapOf(
 	"add.036" to "how this works",
 	"add.037" to "hide",
 	"add.038" to "Language to study",
-	"add.039" to "Used for the voice only. It can be changed later on the deck's own page.",
 	"add.040" to "What to ask the model for",
 	"add.041" to "How many cards",
 	"add.042" to "Language of the meanings",

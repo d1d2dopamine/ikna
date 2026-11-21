@@ -570,7 +570,6 @@ val STRINGS_PL: Map<String, String> = mapOf(
 	"add.036" to "jak to działa",
 	"add.037" to "ukryj",
 	"add.038" to "Język, którego się uczysz",
-	"add.039" to "Potrzebny tylko do czytania na głos. Można to zmienić później na stronie talii.",
 	"add.040" to "O co poprosić model",
 	"add.041" to "Ile kart",
 	"add.042" to "Język znaczeń",

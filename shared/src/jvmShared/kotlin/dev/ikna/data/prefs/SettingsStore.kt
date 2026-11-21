@@ -191,8 +191,6 @@ data class IknaSettings(
     val appearanceVariant: IknaAppearanceVariant = IknaAppearanceVariant.ANGULAR,
     /** File name of the installed custom font. Kept even while another built-in mode is selected. */
     val fontName: String = "",
-    /** Legacy serialized field; current chrome keeps exactly one platform-appropriate wordmark. */
-    val showWordmark: Boolean = true,
     /**
      * The bottom bar mirrored, so the marks sit under a left thumb.
      *
@@ -341,7 +339,6 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val fontMode = stringPreferencesKey("fontMode")
         val appearanceVariant = stringPreferencesKey("appearanceVariant")
         val fontName = stringPreferencesKey("fontName")
-        val showWordmark = booleanPreferencesKey("showWordmark")
         val leftHanded = booleanPreferencesKey("leftHanded")
         val homeDockAtTop = booleanPreferencesKey("homeDockAtTop")
         val homeDockFullWidth = booleanPreferencesKey("homeDockFullWidth")
@@ -415,7 +412,6 @@ class SettingsStore(private val store: DataStore<Preferences>) {
                 runCatching { IknaAppearanceVariant.valueOf(name) }.getOrNull()
             } ?: defaults.appearanceVariant,
             fontName = p[Keys.fontName] ?: defaults.fontName,
-            showWordmark = p[Keys.showWordmark] ?: defaults.showWordmark,
             leftHanded = p[Keys.leftHanded] ?: defaults.leftHanded,
             homeDockAtTop = p[Keys.homeDockAtTop] ?: defaults.homeDockAtTop,
             homeDockFullWidth = p[Keys.homeDockFullWidth] ?: defaults.homeDockFullWidth,
@@ -498,7 +494,6 @@ class SettingsStore(private val store: DataStore<Preferences>) {
     /** Retained for restore/tests that only need to remember the picked file name. */
     suspend fun setFontName(name: String) = put { it[Keys.fontName] = name }
 
-    suspend fun setShowWordmark(on: Boolean) = put { it[Keys.showWordmark] = on }
     suspend fun setLeftHanded(on: Boolean) = put { it[Keys.leftHanded] = on }
     suspend fun setHomeDockAtTop(on: Boolean) = put { it[Keys.homeDockAtTop] = on }
     suspend fun setHomeDockFullWidth(on: Boolean) = put { it[Keys.homeDockFullWidth] = on }

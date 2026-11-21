@@ -372,7 +372,6 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "add.036" to "como funciona",
     "add.037" to "ocultar",
     "add.038" to "Idioma que você quer estudar",
-    "add.039" to "Usado somente para a voz. Pode ser alterado depois na página do próprio baralho.",
     "add.040" to "O que pedir ao modelo",
     "add.041" to "Quantos cartões",
     "add.042" to "Idioma dos significados",
