@@ -68,19 +68,19 @@ fun IknaSupportScreen(installedVersion: String, onBack: () -> Unit) {
                     .weight(1f)
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = Edge, vertical = Space.xl),
+                    .padding(horizontal = Edge, vertical = Space.md),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(
                     modifier = Modifier.widthIn(max = 720.dp).fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(Space.lg),
+                    verticalArrangement = Arrangement.spacedBy(Space.md),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(Space.sm)
+                        verticalArrangement = Arrangement.spacedBy(Space.xs)
                     ) {
-                        IknaWordmark(height = 32.dp)
+                        IknaWordmark(height = 28.dp)
                         Text(
                             text = S.t("support.description"),
                             textAlign = TextAlign.Center,
@@ -96,7 +96,7 @@ fun IknaSupportScreen(installedVersion: String, onBack: () -> Unit) {
                                     .clip(badgeShape)
                                     .background(cardFill, badgeShape)
                                     .border(1.dp, cardBorder, badgeShape)
-                                    .padding(horizontal = 12.dp, vertical = 7.dp)
+                                    .padding(horizontal = 10.dp, vertical = 5.dp)
                             ) {
                                 Text(
                                     text = S.t("upd.011") + installedVersion,
@@ -119,6 +119,7 @@ fun IknaSupportScreen(installedVersion: String, onBack: () -> Unit) {
                                 for (pillar in SUPPORT_PILLARS) {
                                     SupportPillarCard(
                                         pillar = pillar,
+                                        compact = false,
                                         modifier = Modifier.weight(1f).fillMaxHeight()
                                     )
                                 }
@@ -126,11 +127,12 @@ fun IknaSupportScreen(installedVersion: String, onBack: () -> Unit) {
                         } else {
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
-                                verticalArrangement = Arrangement.spacedBy(Space.sm)
+                                verticalArrangement = Arrangement.spacedBy(Space.xs)
                             ) {
                                 for (pillar in SUPPORT_PILLARS) {
                                     SupportPillarCard(
                                         pillar = pillar,
+                                        compact = true,
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }
@@ -144,52 +146,28 @@ fun IknaSupportScreen(installedVersion: String, onBack: () -> Unit) {
                             .clip(cardShape)
                             .background(cardFill, cardShape)
                             .border(1.dp, cardBorder, cardShape)
-                            .padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(Space.md),
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(Space.sm),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
                             text = S.t("support.body"),
                             modifier = Modifier.widthIn(max = 580.dp),
                             textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodySmall,
                             color = colors.onSurface
                         )
-                        BoxWithConstraints(Modifier.fillMaxWidth()) {
-                            if (maxWidth >= 380.dp) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(Space.sm)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(Space.sm),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            for (destination in SupportDestination.entries) {
+                                SupportLinkTile(
+                                    destination = destination,
+                                    modifier = Modifier.weight(1f)
                                 ) {
-                                    for (destination in SupportDestination.entries) {
-                                        SupportLinkTile(
-                                            destination = destination,
-                                            modifier = Modifier.weight(1f)
-                                        ) {
-                                            failed = runCatching { handler.openUri(destination.url) }.isFailure
-                                        }
-                                    }
-                                }
-                            } else {
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalArrangement = Arrangement.spacedBy(Space.sm)
-                                ) {
-                                    for (pair in SupportDestination.entries.chunked(2)) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.spacedBy(Space.sm)
-                                        ) {
-                                            for (destination in pair) {
-                                                SupportLinkTile(
-                                                    destination = destination,
-                                                    modifier = Modifier.weight(1f)
-                                                ) {
-                                                    failed = runCatching { handler.openUri(destination.url) }.isFailure
-                                                }
-                                            }
-                                        }
-                                    }
+                                    failed = runCatching { handler.openUri(destination.url) }.isFailure
                                 }
                             }
                         }
@@ -215,44 +193,84 @@ fun IknaSupportScreen(installedVersion: String, onBack: () -> Unit) {
 @Composable
 private fun SupportPillarCard(
     pillar: SupportPillar,
+    compact: Boolean,
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colorScheme
     val cardShape = iknaCardShape()
     val badgeShape = iknaControlShape()
     val fill = lerp(colors.surface, colors.onSurface, 0.04f)
-    Column(
-        modifier = modifier
-            .clip(cardShape)
-            .background(fill, cardShape)
-            .border(1.dp, colors.outline.copy(alpha = 0.34f), cardShape)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(badgeShape)
-                .background(colors.primary.copy(alpha = 0.13f), badgeShape),
-            contentAlignment = Alignment.Center
+    val frameModifier = modifier
+        .clip(cardShape)
+        .background(fill, cardShape)
+        .border(1.dp, colors.outline.copy(alpha = 0.34f), cardShape)
+
+    if (compact) {
+        Row(
+            modifier = frameModifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.Top
         ) {
-            IknaGlyphIcon(
-                glyph = pillar.glyph,
-                color = colors.primary,
-                size = 16.dp
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(badgeShape)
+                    .background(colors.primary.copy(alpha = 0.13f), badgeShape),
+                contentAlignment = Alignment.Center
+            ) {
+                IknaGlyphIcon(
+                    glyph = pillar.glyph,
+                    color = colors.primary,
+                    size = 14.dp
+                )
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = S.t(pillar.titleKey),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colors.onBackground
+                )
+                Text(
+                    text = S.t(pillar.bodyKey),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.onSurfaceVariant
+                )
+            }
+        }
+    } else {
+        Column(
+            modifier = frameModifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(badgeShape)
+                    .background(colors.primary.copy(alpha = 0.13f), badgeShape),
+                contentAlignment = Alignment.Center
+            ) {
+                IknaGlyphIcon(
+                    glyph = pillar.glyph,
+                    color = colors.primary,
+                    size = 16.dp
+                )
+            }
+            Text(
+                text = S.t(pillar.titleKey),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.onBackground
+            )
+            Text(
+                text = S.t(pillar.bodyKey),
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.onSurfaceVariant
             )
         }
-        Text(
-            text = S.t(pillar.titleKey),
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = colors.onBackground
-        )
-        Text(
-            text = S.t(pillar.bodyKey),
-            style = MaterialTheme.typography.bodySmall,
-            color = colors.onSurfaceVariant
-        )
     }
 }
 
