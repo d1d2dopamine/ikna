@@ -60,7 +60,7 @@ internal fun synthesizeIknaCuePcm16Le(cue: IknaSoundCue): ByteArray {
                 durationMs = 13,
                 startHz = 440.0,
                 endHz = 230.0,
-                gain = 0.13,
+                gain = 0.19,
                 decay = 14.0
             ),
             cutoffHz = 1050.0
