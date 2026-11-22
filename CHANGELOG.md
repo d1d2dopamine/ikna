@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.12.0 press
+
+See [docs/RELEASE-NOTES-0.12.0.md](docs/RELEASE-NOTES-0.12.0.md) for the full release summary.
 
 ### 0.12 application round 62 — Windows private sync storage
 

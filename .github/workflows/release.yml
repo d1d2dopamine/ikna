@@ -120,7 +120,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: out/*.apk
-          generate_release_notes: true
+          body_path: docs/RELEASE-NOTES-0.12.0.md
 
   # The Windows build, attached to the same release as the APKs.
   #
@@ -195,7 +195,7 @@ jobs:
           files: |
             out/*.zip
             out/*-setup.exe
-          generate_release_notes: true
+          body_path: docs/RELEASE-NOTES-0.12.0.md
 
   # ---------------------------------------------------------------------------
   # The Linux file on the release page.
@@ -271,4 +271,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: out/*.AppImage
-          generate_release_notes: true
+          body_path: docs/RELEASE-NOTES-0.12.0.md
