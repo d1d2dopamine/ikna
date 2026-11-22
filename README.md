@@ -70,6 +70,12 @@ Ikna stores cards and review history on your device. It has no accounts or analy
 
 Choose a palette, angular or rounded controls, and whether animations are on. Android includes a widget and a daily reminder. The interface is available in Russian, English, Polish, Spanish, French, German and Brazilian Portuguese. [Interface design](docs/DESIGN.md)
 
+<p align="center">
+  <a href="docs/assets/ikna-demo.mp4">
+    <img src="docs/assets/screenshots/demo-cover.png" alt="Watch the Ikna v0.12.0 demo video" width="800">
+  </a>
+</p>
+
 | Review | Themes & settings |
 | :---: | :---: |
 | ![Review screen](docs/assets/screenshots/01-review.png) | ![Themes and settings](docs/assets/screenshots/02-palettes.png) |
@@ -163,6 +169,12 @@ Ikna is free software under the [GNU General Public License, version 3 or later]
 ## <img src="docs/assets/icons/interface.svg" width="28" height="28" align="absmiddle" alt=""> Интерфейс
 
 Можно выбрать палитру, угловатые или скруглённые элементы и отключить анимации. На Android есть виджет и ежедневное напоминание. Интерфейс доступен на русском, английском, польском, испанском, французском, немецком и бразильском португальском. [Дизайн интерфейса](docs/DESIGN.md)
+
+<p align="center">
+  <a href="docs/assets/ikna-demo.mp4">
+    <img src="docs/assets/screenshots/demo-cover.png" alt="Смотреть демо-видео Икны v0.12.0" width="800">
+  </a>
+</p>
 
 | Повторение карточек | Палитры и настройки |
 | :---: | :---: |
