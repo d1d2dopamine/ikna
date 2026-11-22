@@ -70,6 +70,12 @@ Ikna stores cards and review history on your device. It has no accounts or analy
 
 Choose a palette, angular or rounded controls, and whether animations are on. Android includes a widget and a daily reminder. The interface is available in Russian, English, Polish, Spanish, French, German and Brazilian Portuguese. [Interface design](docs/DESIGN.md)
 
+| Review | Themes & settings |
+| :---: | :---: |
+| ![Review screen](docs/assets/screenshots/01-review.png) | ![Themes and settings](docs/assets/screenshots/02-palettes.png) |
+| **Catalogue** | **About Ikna** |
+| ![Deck catalogue](docs/assets/screenshots/03-catalogue.png) | ![About Ikna](docs/assets/screenshots/04-about.png) |
+
 ## <img src="docs/assets/icons/build.svg" width="28" height="28" align="absmiddle" alt=""> Build
 
 [GitHub Actions](https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml) builds Android, Windows and Linux. The [contributor guide](CONTRIBUTING.md) covers building locally and running tests.
@@ -157,6 +163,12 @@ Ikna is free software under the [GNU General Public License, version 3 or later]
 ## <img src="docs/assets/icons/interface.svg" width="28" height="28" align="absmiddle" alt=""> Интерфейс
 
 Можно выбрать палитру, угловатые или скруглённые элементы и отключить анимации. На Android есть виджет и ежедневное напоминание. Интерфейс доступен на русском, английском, польском, испанском, французском, немецком и бразильском португальском. [Дизайн интерфейса](docs/DESIGN.md)
+
+| Повторение карточек | Палитры и настройки |
+| :---: | :---: |
+| ![Экран повторения](docs/assets/screenshots/01-review.png) | ![Палитры и настройки](docs/assets/screenshots/02-palettes.png) |
+| **Каталог колод** | **Об Икне** |
+| ![Каталог колод](docs/assets/screenshots/03-catalogue.png) | ![Об Икне](docs/assets/screenshots/04-about.png) |
 
 ## <img src="docs/assets/icons/build.svg" width="28" height="28" align="absmiddle" alt=""> Сборка
 
