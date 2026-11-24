@@ -265,57 +265,59 @@ fun IknaDesktopApp(
                 val deckHeadingVisible = if (maxWidth >= 900.dp) {
                     ui.pane != Pane.SESSION || !ui.studyDecksCollapsed
                 } else ui.listOpen
-                Column(
+                Box(
                     Modifier
                         .fillMaxSize()
                         .background(palette.background)
                         .iknaInspect("IknaDesktopApp")
                 ) {
-                    // Keep the draggable strip and window controls during welcome,
-                    // but do not repeat ikna in its top-left corner.
-                    titleBar(palette, ready && settings.onboardingDone && !firstRunVisible && !deckHeadingVisible)
-                Box(Modifier.weight(1f).fillMaxWidth()) {
-                    if (startupFailed && storedSettings != null) {
-                        Column(
-                            Modifier.fillMaxSize().padding(Space.lg),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(S.t("load.004"), style = MaterialTheme.typography.bodyMedium)
-                            Spacer(Modifier.height(Space.md))
-                            IknaTextButton(S.t("load.002"), onClick = { installAttempt++ })
+                    Box(Modifier.fillMaxSize().padding(top = if (settings.homeDockAtTop) 38.dp else 0.dp)) {
+                        if (startupFailed && storedSettings != null) {
+                            Column(
+                                Modifier.fillMaxSize().padding(Space.lg),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(S.t("load.004"), style = MaterialTheme.typography.bodyMedium)
+                                Spacer(Modifier.height(Space.md))
+                                IknaTextButton(S.t("load.002"), onClick = { installAttempt++ })
+                            }
+                        } else if (!ready || storedSettings == null) {
+                            Column(
+                                Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                IknaWordmark(height = 22.dp, ink = palette.ink, dot = palette.accent)
+                                Spacer(Modifier.height(Space.lg))
+                                Box(Modifier.width(220.dp)) { IknaLatticePlaceholder(loading = true) }
+                            }
+                        } else if (!settings.onboardingDone || firstRunVisible) {
+                            DesktopOnboardingPane(container) { destination ->
+                                ui.completeFirstRun(destination)
+                                firstRunVisible = false
+                            }
+                        } else {
+                            DesktopShell(container, settings, palette, ui, onRestartRequested)
                         }
-                    } else if (!ready || storedSettings == null) {
-                        Column(
-                            Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            IknaWordmark(height = 22.dp, ink = palette.ink, dot = palette.accent)
-                            Spacer(Modifier.height(Space.lg))
-                            Box(Modifier.width(220.dp)) { IknaLatticePlaceholder(loading = true) }
-                        }
-                    } else if (!settings.onboardingDone || firstRunVisible) {
-                        DesktopOnboardingPane(container) { destination ->
-                            ui.completeFirstRun(destination)
-                            firstRunVisible = false
-                        }
-                    } else {
-                        DesktopShell(container, settings, palette, ui, onRestartRequested)
-                    }
 
-                    if (ui.showShortcuts) {
-                        ShortcutsOverlay(palette, settings) { ui.showShortcuts = false }
+                        if (ui.showShortcuts) {
+                            ShortcutsOverlay(palette, settings) { ui.showShortcuts = false }
+                        }
+                        if (container.isDeveloperMode) {
+                            IknaDeveloperBadge(
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .padding(top = 4.dp)
+                            )
+                        }
                     }
-                    if (container.isDeveloperMode) {
-                        IknaDeveloperBadge(
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .padding(top = 4.dp)
-                        )
+                    // Keep the draggable strip and compact top-right controls overlaid cleanly
+                    // without stealing a full-width empty strip or drawing a divider across the app.
+                    Box(Modifier.align(Alignment.TopCenter).fillMaxWidth()) {
+                        titleBar(palette, ready && settings.onboardingDone && !firstRunVisible && !deckHeadingVisible)
                     }
                 }
-            }
         }
     }
 }

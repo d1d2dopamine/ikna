@@ -126,11 +126,20 @@ class StudyStatsRepository(private val db: IknaDatabase, private val dayStartHou
                         if (total <= 0) null
                         else {
                             val known = db.chunkDao().knownCountFor(pack.id, 21.0)
+                            val studied = db.chunkDao().knownCountFor(pack.id, 0.001)
                             val label = pack.title?.trim()?.takeIf { it.isNotEmpty() } ?: pack.id
-                            ProfileDeckProgress(title = label, known = known.coerceAtMost(total), total = total)
+                            ProfileDeckProgress(
+                                title = label,
+                                known = known.coerceAtMost(total),
+                                total = total,
+                                studied = studied.coerceAtMost(total)
+                            )
                         }
-                    }.sortedWith(compareByDescending<ProfileDeckProgress> { it.known }.thenByDescending { it.total })
-                        .take(4)
+                    }.sortedWith(
+                        compareByDescending<ProfileDeckProgress> { it.known }
+                            .thenByDescending { it.studied }
+                            .thenBy { it.title.lowercase() }
+                    ).take(4)
 
                     val insights = ProfileInsights(
                         matureCards = mature,

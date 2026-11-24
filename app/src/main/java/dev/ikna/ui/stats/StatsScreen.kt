@@ -151,6 +151,7 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
     }
     var failed by remember { mutableStateOf(false) }
     var reload by remember { mutableStateOf(0) }
+    var showJournalDetails by remember { mutableStateOf(false) }
     LaunchedEffect(reload) {
         failed = false
         snapshot = null
@@ -208,22 +209,34 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
                 }
             )
             Spacer(Modifier.height(16.dp))
-
-            IknaStatsExportAction(enabled = snapshot != null && pending == null && !exporting) { days, format ->
-                exportFailed = false
-                pending = days to format
-                save.launch(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = format.mimeType
-                    putExtra(Intent.EXTRA_TITLE, "ikna-statistics.${format.extension}")
-                })
-            }
-            if (exportFailed) Text(S.t("share.003"))
-            Spacer(Modifier.height(32.dp))
             when {
                 failed -> IknaStatsLoadFailure { reload++ }
                 snapshot == null -> IknaLatticePlaceholder()
-                else -> IknaStudyStatsContent(requireNotNull(snapshot))
+                else -> {
+                    dev.ikna.ui.theme.IknaRule()
+                    Spacer(Modifier.height(8.dp))
+                    dev.ikna.ui.theme.IknaTextButton(
+                        label = S.t(if (showJournalDetails) "prof.details_hide" else "prof.details_show"),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        horizontalPadding = 0.dp,
+                        onClick = { showJournalDetails = !showJournalDetails }
+                    )
+                    if (showJournalDetails) {
+                        Spacer(Modifier.height(12.dp))
+                        IknaStatsExportAction(enabled = pending == null && !exporting) { days, format ->
+                            exportFailed = false
+                            pending = days to format
+                            save.launch(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                                type = format.mimeType
+                                putExtra(Intent.EXTRA_TITLE, "ikna-statistics.${format.extension}")
+                            })
+                        }
+                        if (exportFailed) Text(S.t("share.003"))
+                        Spacer(Modifier.height(16.dp))
+                        IknaStudyStatsContent(requireNotNull(snapshot))
+                    }
+                }
             }
 
             // Room for the bar to sit over nothing but background.

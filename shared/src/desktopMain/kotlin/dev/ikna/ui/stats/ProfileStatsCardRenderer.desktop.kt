@@ -7,6 +7,7 @@ import java.awt.Color
 import java.awt.Font
 import java.awt.Graphics2D
 import java.awt.RenderingHints
+import java.awt.geom.Ellipse2D
 import java.awt.geom.RoundRectangle2D
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
@@ -41,209 +42,255 @@ actual fun renderProfileStatsCardPng(data: ProfileStatsCardData): ByteArray {
         g.fillRect(0, 0, w, h)
         drawBackdropEmblem(g, w, h, bg, ink, accent)
 
-        val sansSemi = loadFont("/font/geologica_semibold.ttf", Font.BOLD, 42f)
-        val sansReg = loadFont("/font/geologica_regular.ttf", Font.PLAIN, 20f)
-        val monoMed = loadFont("/font/ibm_plex_mono_medium.ttf", Font.PLAIN, 16f)
-        val monoBig = loadFont("/font/ibm_plex_mono_semibold.ttf", Font.BOLD, 38f)
+        val sansSemi = loadFont("/font/geologica_semibold.ttf", Font.BOLD, 38f)
+        val sansReg = loadFont("/font/geologica_regular.ttf", Font.PLAIN, 18f)
+        val monoMed = loadFont("/font/ibm_plex_mono_medium.ttf", Font.PLAIN, 14f)
+        val monoBig = loadFont("/font/ibm_plex_mono_semibold.ttf", Font.BOLD, 40f)
 
-        // Top eyebrow
-        g.color = accent
-        g.fill(RoundRectangle2D.Float(64f, 44f, 44f, 4f, 4f, 4f))
-        g.font = monoMed.deriveFont(15f)
-        g.drawString(data.headerText, 122f, 52f)
+        val marginX = 68f
+        val rightEdge = w - marginX
 
-        g.color = muted
-        val dateW = g.fontMetrics.stringWidth(data.generatedDate)
-        g.drawString(data.generatedDate, w - 64f - dateW, 52f)
-
-        // Avatar badge + Name + Bio/Subtitle
-        drawDesktopAvatarBadge(g, 64f, 76f, 82f, data, panel, line, ink, accent, sansSemi)
+        // 1. Open Editorial Header: circular avatar + identity + single date stamp top-right
+        drawDesktopAvatarCircle(g, marginX, 54f, 76f, data, panel, line, ink, accent)
 
         g.color = ink
-        g.font = sansSemi.deriveFont(42f)
-        g.drawString(fitText(g, data.profileName, 840), 166f, 118f)
+        g.font = sansSemi.deriveFont(36f)
+        g.drawString(fitText(g, data.profileName, 700), 166f, 92f)
 
+        val subLine = data.profileBio.ifBlank { data.periodLabel }
+        if (subLine.isNotBlank()) {
+            g.color = muted
+            g.font = sansReg.deriveFont(18f)
+            g.drawString(fitText(g, subLine, 720), 166f, 122f)
+        }
+
+        // Quiet single date stamp top-right (no duplicate footer date, no ALL-CAPS eyebrow)
+        g.font = monoMed.deriveFont(14f)
+        val metaText = if (data.generatedDate.isNotBlank()) "ikna · ${data.generatedDate}" else "ikna"
         g.color = muted
-        g.font = sansReg.deriveFont(20f)
-        val subLine = if (data.profileBio.isNotBlank()) "${data.profileBio}  ·  ${data.subtitle}" else data.subtitle
-        g.drawString(fitText(g, subLine, 960), 166f, 150f)
+        val metaW = g.fontMetrics.stringWidth(metaText)
+        g.drawString(metaText, rightEdge - metaW, 88f)
 
-        // Divider
-        g.color = withAlpha(line, 140)
-        g.stroke = BasicStroke(1.2f)
-        g.drawLine(64, 184, w - 64, 184)
+        // Hairline 1
+        g.color = withAlpha(line, 125)
+        g.stroke = BasicStroke(1f)
+        g.drawLine(marginX.toInt(), 160, rightEdge.toInt(), 160)
 
-        // LEFT COLUMN: 2x2 KPI Grid + Memory Maturity
-        val leftX = 64f
-        val leftW = 564f
-        val gap = 18f
-        val tileW = (leftW - gap) / 2f
-        val tileH = 132f
-        val gridY = 210f
-
-        val paceStr = if (data.medianSecPerCard30d > 0) " · ${data.medianSecPerCard30d}s" else ""
-        val stabStr = if (data.avgStabilityDays >= 1.0) " · ~${data.avgStabilityDays.roundToInt()}d" else ""
-        val tiles = listOf(
-            Triple(data.matureCards.toString(), data.labelMature.ifBlank { data.labelTargets }, "${data.targets} ${data.labelTargets}"),
-            Triple(
-                data.recallPercentText,
-                data.labelRecall,
-                if (data.repeatAnswers >= 5) "${data.recalledRepeatAnswers}/${data.repeatAnswers}" else "${data.answers} ${data.labelAnswers}"
+        // 2. Open Typographic KPI Strip (4 aligned columns, zero boxes, zero accent stripes)
+        val colW = 248f
+        val colGap = 24f
+        val stabDetail = if (data.avgStabilityDays >= 1.0) "~${data.avgStabilityDays.roundToInt()} ${data.unitDay}" else ""
+        val recallDetail = if (data.repeatAnswers >= 5) "${data.recalledRepeatAnswers}/${data.repeatAnswers}" else ""
+        val timeDetail = buildString {
+            if (data.answers > 0) {
+                append(data.answers)
+                if (data.medianSecPerCard30d > 0) append(" · ${data.medianSecPerCard30d}s")
+            }
+        }
+        val kpis = listOf(
+            KpiEntry(
+                value = data.matureCards.toString(),
+                label = data.labelMature.ifBlank { data.labelTargets },
+                detail = stabDetail,
+                emphasized = data.matureCards > 0
             ),
-            Triple(data.studyTimeText, data.labelStudyTime.ifBlank { data.labelAnswers }, "${data.answers} ${data.labelAnswers}$paceStr"),
-            Triple("${data.activeDays30d}/30", data.labelActiveDays.ifBlank { data.periodLabel }, "FSRS$stabStr")
+            KpiEntry(
+                value = data.recallPercentText,
+                label = data.labelRecall,
+                detail = recallDetail,
+                emphasized = data.repeatAnswers >= 5
+            ),
+            KpiEntry(
+                value = data.studyTimeText,
+                label = data.labelStudyTime.ifBlank { data.labelAnswers },
+                detail = timeDetail,
+                emphasized = false
+            ),
+            KpiEntry(
+                value = "${data.activeDays30d}/30",
+                label = data.labelActiveDays.ifBlank { data.periodLabel },
+                detail = "",
+                emphasized = false
+            )
         )
 
-        tiles.forEachIndexed { idx, (value, label, detail) ->
-            val col = idx % 2
-            val row = idx / 2
-            val x = leftX + col * (tileW + gap)
-            val y = gridY + row * (tileH + gap)
-            val rr = RoundRectangle2D.Float(x, y, tileW, tileH, 14f, 14f)
-
-            g.color = panel
-            g.fill(rr)
-            g.color = withAlpha(line, 155)
-            g.stroke = BasicStroke(1.2f)
-            g.draw(rr)
-
-            g.color = if (idx < 2) accent else withAlpha(muted, 175)
-            g.fill(RoundRectangle2D.Float(x + 20f, y + 22f, 4f, 40f, 3f, 3f))
-
-            g.color = if (idx < 2) accent else ink
-            g.font = monoBig.deriveFont(38f)
-            g.drawString(value, x + 36f, y + 58f)
+        kpis.forEachIndexed { idx, item ->
+            val cx = marginX + idx * (colW + colGap)
+            g.color = if (item.emphasized) accent else ink
+            g.font = monoBig.deriveFont(40f)
+            g.drawString(item.value, cx, 232f)
 
             g.color = ink
             g.font = sansSemi.deriveFont(15f)
-            g.drawString(fitText(g, label, (tileW - 40f).toInt()), x + 20f, y + 90f)
+            g.drawString(fitText(g, item.label, colW.toInt()), cx, 262f)
 
-            g.color = muted
-            g.font = sansReg.deriveFont(14f)
-            g.drawString(fitText(g, detail, (tileW - 40f).toInt()), x + 20f, y + 114f)
+            if (item.detail.isNotBlank()) {
+                g.color = muted
+                g.font = monoMed.deriveFont(13f)
+                g.drawString(fitText(g, item.detail, colW.toInt()), cx, 286f)
+            }
         }
 
-        // Memory Maturity Panel
-        val matRR = RoundRectangle2D.Float(leftX, 506f, leftW, 120f, 14f, 14f)
-        g.color = panel
-        g.fill(matRR)
-        g.color = withAlpha(line, 155)
-        g.draw(matRR)
+        // Hairline 2
+        g.color = withAlpha(line, 125)
+        g.stroke = BasicStroke(1f)
+        g.drawLine(marginX.toInt(), 316, rightEdge.toInt(), 316)
 
-        val studied = (data.matureCards + data.youngCards + data.learningCards).coerceAtLeast(0)
-        g.font = monoMed.deriveFont(14f)
-        g.color = muted
-        g.drawString(data.labelMaturity.ifBlank { "MEMORY MATURITY" }.uppercase(), leftX + 22f, 536f)
-        val totStr = studied.toString()
-        g.drawString(totStr, leftX + leftW - 22f - g.fontMetrics.stringWidth(totStr), 536f)
-
-        val barX = leftX + 22f
-        val barY = 554f
-        val barW = leftW - 44f
-        val barH = 18f
-        g.color = withAlpha(line, 90)
-        g.fill(RoundRectangle2D.Float(barX, barY, barW, barH, 6f, 6f))
-        if (studied > 0) {
-            val mW = barW * (data.matureCards.toFloat() / studied)
-            val yW = barW * (data.youngCards.toFloat() / studied)
-            val lW = (barW - mW - yW).coerceAtLeast(0f)
-            if (mW > 0f) { g.color = accent; g.fillRect(barX.toInt(), barY.toInt(), mW.toInt(), barH.toInt()) }
-            if (yW > 0f) { g.color = withAlpha(accent, 130); g.fillRect((barX + mW).toInt(), barY.toInt(), yW.toInt(), barH.toInt()) }
-            if (lW > 0f) { g.color = withAlpha(muted, 110); g.fillRect((barX + mW + yW).toInt(), barY.toInt(), lW.toInt(), barH.toInt()) }
-        }
-        g.font = sansReg.deriveFont(14f)
-        g.color = accent
-        g.drawString("${data.labelMature.ifBlank { "Mature" }}: ${data.matureCards}", barX, 604f)
-        g.color = muted
-        val midLeg = "${data.labelYoung.ifBlank { "Young" }}: ${data.youngCards}"
-        g.drawString(midLeg, leftX + (leftW - g.fontMetrics.stringWidth(midLeg)) / 2f, 604f)
-        val rightLeg = "${data.labelLearning.ifBlank { "Learning" }}: ${data.learningCards}"
-        g.drawString(rightLeg, leftX + leftW - 22f - g.fontMetrics.stringWidth(rightLeg), 604f)
-
-        // RIGHT COLUMN: 12-Week Heatmap + Top 3 Decks
-        val rightX = 654f
-        val rightW = 482f
-
-        val heatRR = RoundRectangle2D.Float(rightX, 210f, rightW, 218f, 14f, 14f)
-        g.color = panel
-        g.fill(heatRR)
-        g.color = withAlpha(line, 155)
-        g.draw(heatRR)
-
-        g.font = monoMed.deriveFont(14f)
-        g.color = muted
-        g.drawString(data.labelHeatmap.ifBlank { "12-WEEK ACTIVITY" }.uppercase(), rightX + 22f, 240f)
-
+        // 3. Balanced Two-Column Bottom Area
+        // LEFT: 12-week activity heatmap (crisp 1:1 squares, header bound to exact grid width)
         val days = if (data.dailyActivity84d.size == 84) data.dailyActivity84d else List(84) { 0 }
+        val activeDays84d = days.count { it > 0 }
         val maxDay = (days.maxOrNull() ?: 0).coerceAtLeast(1)
         val cols = 12
         val rows = 7
-        val hGap = 6f
-        val hmX = rightX + 22f
-        val hmY = 258f
-        val hmW = rightW - 44f
-        val hmH = 148f
-        val cW = (hmW - hGap * (cols - 1)) / cols
-        val cH = (hmH - hGap * (rows - 1)) / rows
+        val cellSize = 29f
+        val cellGap = 7f
+        val gridW = cols * cellSize + (cols - 1) * cellGap // 425px
+        val hmX = marginX
+        val hmY = 390f
+
+        g.font = sansSemi.deriveFont(16f)
+        g.color = ink
+        val heatLabel = data.labelHeatmap.ifBlank { "12-week activity" }
+        val activeCountStr = "$activeDays84d / 84 ${data.unitDay}"
+        g.font = monoMed.deriveFont(13f)
+        val activeCountW = g.fontMetrics.stringWidth(activeCountStr)
+        g.color = muted
+        g.drawString(activeCountStr, hmX + gridW - activeCountW, 366f)
+
+        g.font = sansSemi.deriveFont(16f)
+        g.color = ink
+        g.drawString(fitText(g, heatLabel, (gridW - activeCountW - 14f).toInt()), hmX, 366f)
+
         for (i in 0 until 84) {
             val c = i / 7
             val r = i % 7
             val cnt = days[i]
             g.color = when {
-                cnt <= 0 -> withAlpha(line, 80)
-                cnt <= maxDay / 4 -> withAlpha(accent, 90)
-                cnt <= maxDay / 2 -> withAlpha(accent, 145)
-                cnt <= (maxDay * 3) / 4 -> withAlpha(accent, 200)
+                cnt <= 0 -> withAlpha(line, 92)
+                cnt <= maxDay / 4 -> withAlpha(accent, 95)
+                cnt <= maxDay / 2 -> withAlpha(accent, 150)
+                cnt <= (maxDay * 3) / 4 -> withAlpha(accent, 205)
                 else -> accent
             }
-            val cx = hmX + c * (cW + hGap)
-            val cy = hmY + r * (cH + hGap)
-            g.fill(RoundRectangle2D.Float(cx, cy, cW, cH, 4f, 4f))
+            val cx = hmX + c * (cellSize + cellGap)
+            val cy = hmY + r * (cellSize + cellGap)
+            g.fill(RoundRectangle2D.Float(cx, cy, cellSize, cellSize, 4f, 4f))
         }
 
-        val deckRR = RoundRectangle2D.Float(rightX, 446f, rightW, 180f, 14f, 14f)
-        g.color = panel
-        g.fill(deckRR)
-        g.color = withAlpha(line, 155)
-        g.draw(deckRR)
+        // RIGHT: Memory Maturity + Calm Active Decks (zero 0/3000 denominators)
+        val rightX = 562f
+        val rightW = rightEdge - rightX // 570px
+
+        val studied = (data.matureCards + data.youngCards + data.learningCards).coerceAtLeast(0)
+        g.font = sansSemi.deriveFont(16f)
+        g.color = ink
+        g.drawString(data.labelMaturity.ifBlank { "Memory maturity" }, rightX, 366f)
 
         g.font = monoMed.deriveFont(14f)
         g.color = muted
-        g.drawString(data.labelDecks.ifBlank { "ACTIVE DECKS" }.uppercase(), rightX + 22f, 476f)
+        val totStr = studied.toString()
+        g.drawString(totStr, rightEdge - g.fontMetrics.stringWidth(totStr), 366f)
 
-        val decks = data.topDecks.take(3)
-        decks.forEachIndexed { idx, deck ->
-            val dy = 508f + idx * 40f
-            g.font = sansReg.deriveFont(15f)
-            val countText = "${deck.known}/${deck.total}"
-            val cw = g.fontMetrics.stringWidth(countText)
-            g.color = ink
-            g.drawString(fitText(g, deck.title, (rightW - 60f - cw).toInt()), rightX + 22f, dy)
-            g.color = muted
-            g.drawString(countText, rightX + rightW - 22f - cw, dy)
-
-            val frac = if (deck.total > 0) (deck.known.toFloat() / deck.total.toFloat()).coerceIn(0f, 1f) else 0f
-            val dBarY = dy + 8f
-            val dBarW = rightW - 44f
-            g.color = withAlpha(line, 90)
-            g.fill(RoundRectangle2D.Float(rightX + 22f, dBarY, dBarW, 6f, 3f, 3f))
-            if (frac > 0f) {
+        val barY = 390f
+        val barH = 8f
+        val barClip = RoundRectangle2D.Float(rightX, barY, rightW, barH, 4f, 4f)
+        val savedClip = g.clip
+        g.clip = barClip
+        g.color = withAlpha(line, 92)
+        g.fill(barClip)
+        if (studied > 0) {
+            val mW = rightW * (data.matureCards.toFloat() / studied)
+            val yW = rightW * (data.youngCards.toFloat() / studied)
+            val lW = (rightW - mW - yW).coerceAtLeast(0f)
+            if (mW > 0f) {
                 g.color = accent
-                g.fill(RoundRectangle2D.Float(rightX + 22f, dBarY, dBarW * frac, 6f, 3f, 3f))
+                g.fillRect(rightX.toInt(), barY.toInt(), mW.roundToInt().coerceAtLeast(1), barH.toInt())
+            }
+            if (yW > 0f) {
+                g.color = withAlpha(accent, 140)
+                g.fillRect((rightX + mW).roundToInt(), barY.toInt(), yW.roundToInt().coerceAtLeast(1), barH.toInt())
+            }
+            if (lW > 0f) {
+                g.color = withAlpha(muted, 115)
+                g.fillRect((rightX + mW + yW).roundToInt(), barY.toInt(), lW.roundToInt().coerceAtLeast(1), barH.toInt())
+            }
+        }
+        g.clip = savedClip
+
+        // Single-line measured dot legend (never wraps or collides)
+        val legendItems = listOf(
+            Triple(accent, data.labelMature.ifBlank { "Mature" }, data.matureCards),
+            Triple(withAlpha(accent, 140), data.labelYoung.ifBlank { "Young" }, data.youngCards),
+            Triple(withAlpha(muted, 115), data.labelLearning.ifBlank { "Learning" }, data.learningCards)
+        )
+        g.font = sansReg.deriveFont(14f)
+        var legX = rightX
+        val legBaseline = 424f
+        legendItems.forEach { (dotColor, label, count) ->
+            val txt = "$label $count"
+            val itemW = 7f + 8f + g.fontMetrics.stringWidth(txt)
+            if (legX + itemW <= rightEdge + 4f) {
+                g.color = dotColor
+                g.fill(Ellipse2D.Float(legX, legBaseline - 9f, 7f, 7f))
+                g.color = muted
+                g.drawString(txt, legX + 15f, legBaseline)
+                legX += itemW + 24f
             }
         }
 
-        // Footer
-        g.color = withAlpha(line, 120)
-        g.drawLine(64, h - 62, w - 64, h - 62)
+        // Subtle divider between Maturity and Decks
+        g.color = withAlpha(line, 100)
+        g.stroke = BasicStroke(1f)
+        g.drawLine(rightX.toInt(), 454, rightEdge.toInt(), 454)
 
-        g.color = muted
-        g.font = monoMed.deriveFont(15f)
-        g.drawString(data.footerText, 64f, (h - 28).toFloat())
+        // Active Decks (calm positive progress only)
+        g.font = sansSemi.deriveFont(16f)
+        g.color = ink
+        g.drawString(data.labelDecks.ifBlank { "Decks" }, rightX, 492f)
 
-        val rw = g.fontMetrics.stringWidth(data.recoveredText)
-        g.color = accent
-        g.drawString(data.recoveredText, w - 64f - rw, (h - 28).toFloat())
+        val decks = data.topDecks.take(3)
+        decks.forEachIndexed { idx, deck ->
+            val dy = 532f + idx * 44f
+            val statusText = formatDeckProgressQuiet(
+                deck = deck,
+                matureFmt = data.labelDeckMatureFmt,
+                studiedFmt = data.labelDeckStudiedFmt,
+                readyLabel = data.labelDeckReady
+            )
+            g.font = monoMed.deriveFont(13f)
+            val statusW = if (statusText.isNotBlank()) g.fontMetrics.stringWidth(statusText) else 0
+            if (statusText.isNotBlank()) {
+                g.color = if (deck.known > 0) accent else muted
+                g.drawString(statusText, rightEdge - statusW, dy)
+            }
+
+            g.font = sansReg.deriveFont(15f)
+            g.color = ink
+            val titleMaxW = (rightW - statusW - 20f).toInt().coerceAtLeast(120)
+            g.drawString(fitText(g, deck.title, titleMaxW), rightX, dy)
+
+            if (idx < decks.lastIndex) {
+                g.color = withAlpha(line, 65)
+                g.stroke = BasicStroke(1f)
+                g.drawLine(rightX.toInt(), (dy + 16f).toInt(), rightEdge.toInt(), (dy + 16f).toInt())
+            }
+        }
+
+        // 4. Minimal Footer (hairline + quiet wordmark; recovered only when > 0)
+        g.color = withAlpha(line, 95)
+        g.stroke = BasicStroke(1f)
+        g.drawLine(marginX.toInt(), h - 54, rightEdge.toInt(), h - 54)
+
+        g.color = withAlpha(muted, 195)
+        g.font = monoMed.deriveFont(14f)
+        g.drawString("ikna", marginX, (h - 24).toFloat())
+
+        if (data.recoveredCount > 0 && data.recoveredText.isNotBlank()) {
+            val rw = g.fontMetrics.stringWidth(data.recoveredText)
+            g.color = accent
+            g.drawString(data.recoveredText, rightEdge - rw, (h - 24).toFloat())
+        }
     } finally {
         g.dispose()
     }
@@ -252,7 +299,14 @@ actual fun renderProfileStatsCardPng(data: ProfileStatsCardData): ByteArray {
     return out.toByteArray()
 }
 
-private fun drawDesktopAvatarBadge(
+private data class KpiEntry(
+    val value: String,
+    val label: String,
+    val detail: String,
+    val emphasized: Boolean
+)
+
+private fun drawDesktopAvatarCircle(
     g: Graphics2D,
     x: Float,
     y: Float,
@@ -261,12 +315,11 @@ private fun drawDesktopAvatarBadge(
     panel: Color,
     line: Color,
     ink: Color,
-    accent: Color,
-    sansSemi: Font
+    accent: Color
 ) {
-    val rr = RoundRectangle2D.Float(x, y, size, size, 14f, 14f)
+    val circle = Ellipse2D.Float(x, y, size, size)
     g.color = panel
-    g.fill(rr)
+    g.fill(circle)
 
     val customImg = data.profileAvatar.takeIf { it.isNotBlank() }?.let { path ->
         runCatching {
@@ -276,7 +329,7 @@ private fun drawDesktopAvatarBadge(
     }
     if (customImg != null) {
         val oldClip = g.clip
-        g.clip = rr
+        g.clip = circle
         val side = minOf(customImg.width, customImg.height)
         val sx = (customImg.width - side) / 2
         val sy = (customImg.height - side) / 2
@@ -287,17 +340,17 @@ private fun drawDesktopAvatarBadge(
             null
         )
         g.clip = oldClip
-        g.color = withAlpha(line, 180)
-        g.stroke = BasicStroke(1.6f)
-        g.draw(rr)
+        g.color = withAlpha(line, 165)
+        g.stroke = BasicStroke(1.5f)
+        g.draw(circle)
         return
     }
 
-    g.color = withAlpha(line, 180)
-    g.stroke = BasicStroke(1.6f)
-    g.draw(rr)
+    g.color = withAlpha(line, 165)
+    g.stroke = BasicStroke(1.5f)
+    g.draw(circle)
 
-    val pad = size * 0.20f
+    val pad = size * 0.24f
     val cell = (size - pad * 2f) / 7f
     val ox = x + (size - cell * 6f) / 2f
     val oy = y + (size - cell * 7f) / 2f
@@ -307,15 +360,15 @@ private fun drawDesktopAvatarBadge(
             val ch = row[c]
             if (ch == '.') continue
             g.color = if (ch == 'A') accent else ink
-            g.fill(RoundRectangle2D.Float(ox + c * cell, oy + r * cell, cell - 1.5f, cell - 1.5f, 2f, 2f))
+            g.fill(RoundRectangle2D.Float(ox + c * cell, oy + r * cell, cell - 1.2f, cell - 1.2f, 2f, 2f))
         }
     }
 }
 
 private fun drawBackdropEmblem(g: Graphics2D, w: Int, h: Int, bg: Color, ink: Color, accent: Color) {
     val luma = (0.2126 * bg.red + 0.7152 * bg.green + 0.0722 * bg.blue) / 255.0
-    val inkMix = if (luma < 0.01) 0.14f else 0.075f
-    val accMix = if (luma < 0.01) 0.24f else 0.16f
+    val inkMix = if (luma < 0.01) 0.11f else 0.06f
+    val accMix = if (luma < 0.01) 0.18f else 0.12f
     val inkCell = blend(bg, ink, inkMix)
     val accCell = blend(bg, accent, accMix)
 

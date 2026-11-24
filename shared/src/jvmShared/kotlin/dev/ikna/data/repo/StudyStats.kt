@@ -17,7 +17,8 @@ data class StudyStats(
 data class ProfileDeckProgress(
     val title: String,
     val known: Int,
-    val total: Int
+    val total: Int,
+    val studied: Int = known
 )
 
 data class ProfileInsights(

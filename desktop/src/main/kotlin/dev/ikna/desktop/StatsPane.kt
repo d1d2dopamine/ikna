@@ -47,6 +47,7 @@ fun StatsPane(
     var snapshot by remember { mutableStateOf<StudyStats?>(null) }
     var failed by remember { mutableStateOf(false) }
     var reload by remember { mutableStateOf(0) }
+    var showJournalDetails by remember { mutableStateOf(false) }
     LaunchedEffect(reload) {
         failed = false
         snapshot = null
@@ -147,36 +148,50 @@ fun StatsPane(
                 }
             }
         )
-        Spacer(Modifier.height(14.dp))
-        IknaStatsExportAction(enabled = snapshot != null && !exporting) { days, format ->
-            val chooser = JFileChooser().apply { selectedFile = File("ikna-statistics.${format.extension}") }
-            if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-                val destination = chooser.selectedFile
-                if (!destination.exists() || JOptionPane.showConfirmDialog(
-                    chooser, destination.path, S.t("stats.save"), JOptionPane.YES_NO_OPTION
-                ) == JOptionPane.YES_OPTION) {
-                    exporting = true
-                    exportFailed = false
-                    scope.launch {
-                        try {
-                            val content = container.studyStatsRepository.export(days, format)
-                            withContext(Dispatchers.IO) { destination.writeText(content, Charsets.UTF_8) }
-                        } catch (cancelled: CancellationException) {
-                            throw cancelled
-                        } catch (_: Exception) {
-                            exportFailed = true
-                        } finally {
-                            exporting = false
-                        }
-                    }
-                }
-            }
-        }
-        if (exportFailed) Text(S.t("share.003"))
+        Spacer(Modifier.height(16.dp))
         when {
             failed -> dev.ikna.ui.stats.IknaStatsLoadFailure { reload++ }
             snapshot == null -> IknaLatticePlaceholder()
-            else -> dev.ikna.ui.stats.IknaStudyStatsContent(requireNotNull(snapshot))
+            else -> {
+                dev.ikna.ui.theme.IknaRule()
+                Spacer(Modifier.height(8.dp))
+                dev.ikna.ui.theme.IknaTextButton(
+                    label = S.t(if (showJournalDetails) "prof.details_hide" else "prof.details_show"),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    horizontalPadding = 0.dp,
+                    onClick = { showJournalDetails = !showJournalDetails }
+                )
+                if (showJournalDetails) {
+                    Spacer(Modifier.height(12.dp))
+                    IknaStatsExportAction(enabled = !exporting) { days, format ->
+                        val chooser = JFileChooser().apply { selectedFile = File("ikna-statistics.${format.extension}") }
+                        if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+                            val destination = chooser.selectedFile
+                            if (!destination.exists() || JOptionPane.showConfirmDialog(
+                                chooser, destination.path, S.t("stats.save"), JOptionPane.YES_NO_OPTION
+                            ) == JOptionPane.YES_OPTION) {
+                                exporting = true
+                                exportFailed = false
+                                scope.launch {
+                                    try {
+                                        val content = container.studyStatsRepository.export(days, format)
+                                        withContext(Dispatchers.IO) { destination.writeText(content, Charsets.UTF_8) }
+                                    } catch (cancelled: CancellationException) {
+                                        throw cancelled
+                                    } catch (_: Exception) {
+                                        exportFailed = true
+                                    } finally {
+                                        exporting = false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (exportFailed) Text(S.t("share.003"))
+                    Spacer(Modifier.height(12.dp))
+                    dev.ikna.ui.stats.IknaStudyStatsContent(requireNotNull(snapshot))
+                }
+            }
         }
     }
 }

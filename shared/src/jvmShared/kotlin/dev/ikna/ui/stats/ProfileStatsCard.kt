@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -101,7 +103,11 @@ data class ProfileStatsCardData(
     val lineArgb: Int,
     val inkArgb: Int,
     val mutedArgb: Int,
-    val accentArgb: Int
+    val accentArgb: Int,
+    val unitDay: String = "d",
+    val labelDeckMatureFmt: String = "{count} mature",
+    val labelDeckStudiedFmt: String = "{count} studied",
+    val labelDeckReady: String = ""
 ) {
     val recallPercentText: String
         get() = if (repeatAnswers >= 5) {
@@ -162,7 +168,7 @@ fun buildProfileStatsCardData(
         profileBio = profileBio.trim(),
         profileAvatar = profileAvatar.trim(),
         headerText = S.t("prof.card_header"),
-        subtitle = "$paletteDisplayName · ${S.t("study.002")}",
+        subtitle = S.t("study.002"),
         periodLabel = S.t("study.002"),
         generatedDate = dateStr,
         targets = period.targets,
@@ -200,7 +206,11 @@ fun buildProfileStatsCardData(
         lineArgb = palette.line.toArgb(),
         inkArgb = palette.ink.toArgb(),
         mutedArgb = palette.muted.toArgb(),
-        accentArgb = palette.accent.toArgb()
+        accentArgb = palette.accent.toArgb(),
+        unitDay = S.t("prof.unit_day"),
+        labelDeckMatureFmt = S.t("prof.deck_mature_count"),
+        labelDeckStudiedFmt = S.t("prof.deck_in_progress"),
+        labelDeckReady = S.t("prof.deck_ready")
     )
 }
 
@@ -525,87 +535,52 @@ fun IknaLocalProfileCard(
                 }
             }
 
-            // 4. Activity Grid — TRUE 1:1 SQUARE CELLS, never stretched wide bars!
-            if (ins.dailyActivity84d.size == 84) {
-                Box(Modifier.fillMaxWidth().height(1.dp).background(hairline))
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = S.t("prof.heatmap_title"),
-                            style = MaterialTheme.typography.titleSmall,
-                            color = colors.onBackground
-                        )
-                        Text(
-                            text = "${ins.activeDays84d} / 84 $uDay",
-                            style = iknaNumberStyle(MaterialTheme.typography.bodySmall),
-                            color = colors.onSurfaceVariant
-                        )
-                    }
-                    val maxDay = (ins.dailyActivity84d.maxOrNull() ?: 0).coerceAtLeast(1)
-                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                        val cols = 12
-                        val rows = 7
-                        val gapDp = 4.dp
-                        val maxCell = ((maxWidth - gapDp * (cols - 1)) / cols).coerceIn(10.dp, 18.dp)
-                        val gridWidth = maxCell * cols + gapDp * (cols - 1)
-                        val gridHeight = maxCell * rows + gapDp * (rows - 1)
-                        Canvas(modifier = Modifier.size(width = gridWidth, height = gridHeight)) {
-                            val cellPx = maxCell.toPx()
-                            val gapPx = gapDp.toPx()
-                            val corner = CornerRadius(3.dp.toPx(), 3.dp.toPx())
-                            for (i in 0 until 84) {
-                                val col = i / 7
-                                val row = i % 7
-                                val count = ins.dailyActivity84d[i]
-                                val fill = when {
-                                    count <= 0 -> colors.surface
-                                    count <= maxDay / 4 -> colors.primary.copy(alpha = 0.28f)
-                                    count <= maxDay / 2 -> colors.primary.copy(alpha = 0.52f)
-                                    count <= (maxDay * 3) / 4 -> colors.primary.copy(alpha = 0.78f)
-                                    else -> colors.primary
-                                }
-                                drawRoundRect(
-                                    color = fill,
-                                    topLeft = Offset(col * (cellPx + gapPx), row * (cellPx + gapPx)),
-                                    size = Size(cellPx, cellPx),
-                                    cornerRadius = corner
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 5. Memory Maturity & 7-Day Forecast (clean hairline sections, slender vertical bars)
+            // 4. Activity Grid + Memory Maturity & 7-Day Forecast (balanced, zero empty void)
+            val hasHeatmap = ins.dailyActivity84d.size == 84
             val studiedTotal = ins.matureCards + ins.youngCards + ins.learningCards
             val hasForecast = ins.forecastNext7d.size == 7 && ins.forecastNext7d.any { it > 0 }
-            if (studiedTotal > 0 || hasForecast) {
+            val hasRightCol = studiedTotal > 0 || hasForecast
+            if (hasHeatmap || hasRightCol) {
                 Box(Modifier.fillMaxWidth().height(1.dp).background(hairline))
                 BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                    val sideBySide = maxWidth >= 560.dp && studiedTotal > 0 && hasForecast
+                    val sideBySide = maxWidth >= 560.dp && hasHeatmap && hasRightCol
                     if (sideBySide) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(Space.xl),
                             verticalAlignment = Alignment.Top
                         ) {
-                            MemoryMaturitySection(
-                                mature = ins.matureCards,
-                                young = ins.youngCards,
-                                learning = ins.learningCards,
-                                modifier = Modifier.weight(1f)
+                            ActivityHeatmapSection(
+                                dailyActivity84d = ins.dailyActivity84d,
+                                activeDays84d = ins.activeDays84d,
+                                uDay = uDay,
+                                modifier = Modifier.weight(1.05f)
                             )
-                            ForecastBarsSection(
-                                forecast = ins.forecastNext7d,
-                                modifier = Modifier.weight(1f)
-                            )
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(Space.lg)
+                            ) {
+                                if (studiedTotal > 0) {
+                                    MemoryMaturitySection(
+                                        mature = ins.matureCards,
+                                        young = ins.youngCards,
+                                        learning = ins.learningCards
+                                    )
+                                }
+                                if (hasForecast) {
+                                    ForecastBarsSection(forecast = ins.forecastNext7d)
+                                }
+                            }
                         }
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(Space.lg)) {
+                            if (hasHeatmap) {
+                                ActivityHeatmapSection(
+                                    dailyActivity84d = ins.dailyActivity84d,
+                                    activeDays84d = ins.activeDays84d,
+                                    uDay = uDay
+                                )
+                            }
                             if (studiedTotal > 0) {
                                 MemoryMaturitySection(
                                     mature = ins.matureCards,
@@ -621,55 +596,130 @@ fun IknaLocalProfileCard(
                 }
             }
 
-            // 6. Active Decks Mastery (clean open rows, thin 3dp progress bars)
+            // 5. Active Decks (calm positive progress only — never show intimidating 0/3000 totals)
             if (ins.topDecks.isNotEmpty()) {
                 Box(Modifier.fillMaxWidth().height(1.dp).background(hairline))
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         text = S.t("prof.decks_title"),
                         style = MaterialTheme.typography.titleSmall,
                         color = colors.onBackground
                     )
-                    ins.topDecks.forEach { deck ->
-                        val frac = if (deck.total > 0) (deck.known.toFloat() / deck.total.toFloat()).coerceIn(0f, 1f) else 0f
-                        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
+                    ins.topDecks.forEachIndexed { idx, deck ->
+                        val statusText = formatDeckProgressQuiet(
+                            deck = deck,
+                            matureFmt = S.t("prof.deck_mature_count"),
+                            studiedFmt = S.t("prof.deck_in_progress"),
+                            readyLabel = S.t("prof.deck_ready")
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = deck.title,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = colors.onBackground,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (statusText.isNotBlank()) {
+                                Spacer(Modifier.width(Space.md))
                                 Text(
-                                    text = deck.title,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = colors.onBackground,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                Spacer(Modifier.width(Space.sm))
-                                Text(
-                                    text = "${deck.known} / ${deck.total}",
+                                    text = statusText,
                                     style = iknaNumberStyle(MaterialTheme.typography.bodySmall),
-                                    color = colors.onSurfaceVariant
+                                    color = if (deck.known > 0) colors.primary else colors.onSurfaceVariant,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(3.dp)
-                                    .background(colors.outline.copy(alpha = 0.25f))
-                            ) {
-                                if (frac > 0f) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth(frac)
-                                            .height(3.dp)
-                                            .background(colors.primary)
-                                    )
-                                }
                             }
                         }
+                        if (idx < ins.topDecks.lastIndex) {
+                            Box(Modifier.fillMaxWidth().height(1.dp).background(hairline.copy(alpha = 0.25f)))
+                        }
                     }
+                }
+            }
+        }
+    }
+}
+
+internal fun formatDeckProgressQuiet(
+    deck: ProfileDeckProgress,
+    matureFmt: String,
+    studiedFmt: String,
+    readyLabel: String
+): String = when {
+    deck.known > 0 -> matureFmt.replace("{count}", deck.known.toString())
+    deck.studied > 0 -> studiedFmt.replace("{count}", deck.studied.toString())
+    else -> readyLabel
+}
+
+@Composable
+private fun ActivityHeatmapSection(
+    dailyActivity84d: List<Int>,
+    activeDays84d: Int,
+    uDay: String,
+    modifier: Modifier = Modifier
+) {
+    val colors = MaterialTheme.colorScheme
+    val maxDay = (dailyActivity84d.maxOrNull() ?: 0).coerceAtLeast(1)
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val cols = 12
+        val rows = 7
+        val gapDp = 4.dp
+        val cellDp = ((maxWidth - gapDp * (cols - 1)) / cols).coerceIn(10.dp, 24.dp)
+        val gridWidth = cellDp * cols + gapDp * (cols - 1)
+        val gridHeight = cellDp * rows + gapDp * (rows - 1)
+        Column(
+            modifier = Modifier.width(gridWidth),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = S.t("prof.heatmap_title"),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = colors.onBackground,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
+                )
+                Spacer(Modifier.width(Space.sm))
+                Text(
+                    text = "$activeDays84d / 84 $uDay",
+                    style = iknaNumberStyle(MaterialTheme.typography.bodySmall),
+                    color = colors.onSurfaceVariant,
+                    maxLines = 1,
+                    softWrap = false
+                )
+            }
+            Canvas(modifier = Modifier.size(width = gridWidth, height = gridHeight)) {
+                val cellPx = cellDp.toPx()
+                val gapPx = gapDp.toPx()
+                val corner = CornerRadius(3.dp.toPx(), 3.dp.toPx())
+                for (i in 0 until 84) {
+                    val col = i / 7
+                    val row = i % 7
+                    val count = dailyActivity84d[i]
+                    val fill = when {
+                        count <= 0 -> colors.surface
+                        count <= maxDay / 4 -> colors.primary.copy(alpha = 0.28f)
+                        count <= maxDay / 2 -> colors.primary.copy(alpha = 0.52f)
+                        count <= (maxDay * 3) / 4 -> colors.primary.copy(alpha = 0.78f)
+                        else -> colors.primary
+                    }
+                    drawRoundRect(
+                        color = fill,
+                        topLeft = Offset(col * (cellPx + gapPx), row * (cellPx + gapPx)),
+                        size = Size(cellPx, cellPx),
+                        cornerRadius = corner
+                    )
                 }
             }
         }
@@ -710,6 +760,7 @@ private fun ProfileMetricColumn(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun MemoryMaturitySection(
     mature: Int,
@@ -746,9 +797,10 @@ private fun MemoryMaturitySection(
             if (yW > 0f) drawRect(colors.primary.copy(alpha = 0.48f), topLeft = Offset(mW, 0f), size = Size(yW, size.height))
             if (lW > 0f) drawRect(colors.onSurfaceVariant.copy(alpha = 0.42f), topLeft = Offset(mW + yW, 0f), size = Size(lW, size.height))
         }
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Space.md)
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             MaturityLegendItem(colors.primary, S.t("prof.kpi_mature"), mature)
             MaturityLegendItem(colors.primary.copy(alpha = 0.48f), S.t("prof.stage_young"), young)
@@ -768,7 +820,9 @@ private fun MaturityLegendItem(dotColor: Color, label: String, count: Int) {
         Text(
             text = "$label $count",
             style = MaterialTheme.typography.labelSmall,
-            color = colors.onSurfaceVariant
+            color = colors.onSurfaceVariant,
+            maxLines = 1,
+            softWrap = false
         )
     }
 }
