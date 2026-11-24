@@ -39,7 +39,8 @@ def render():
         x = 10 + (index % 2) * 695
         y = 76 + (index // 2) * row_height
         rect(x, y, 685, 184, p['background'])
-        text(x + 18, y + 27, identity.upper() + ' / ' + mode.upper(), p['ink'], 19)
+        name = 'Moss' if identity == 'cobalt' else identity
+        text(x + 18, y + 27, name.upper() + ' / ' + mode.upper(), p['ink'], 19)
         text(x + 18, y + 49, 'background #' + hex_of(p['background']) + ' / accent #' + hex_of(p['accent']), p['muted'], 12)
         text(x + 18, y + 72, 'Readable text. Calm surfaces, not inverted white rectangles.', p['ink'], 15)
         # Filled, outlined, quiet, selected and switch states use the same roles
@@ -73,5 +74,5 @@ if __name__ == '__main__':
             raise SystemExit('Preview is stale; run python3 tools/make_palette_preview.py')
         print('Palette preview agrees with all 24 production palette combinations.')
     else:
-        OUTPUT.write_text(content, encoding='utf-8')
+        OUTPUT.write_text(content, encoding='utf-8', newline='\n')
         print(OUTPUT.relative_to(ROOT))

@@ -32,7 +32,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.ikna.AppContainer
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.saveable.rememberSaveable
+import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.repo.StudyStats
+import dev.ikna.ui.theme.LocalIknaPalette
+import dev.ikna.ui.theme.paletteSpec
 import kotlinx.coroutines.CancellationException
 import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaBottomBar
@@ -47,9 +52,48 @@ private val EDGE = 20.dp
 fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val settings by container.settings.flow.collectAsState(initial = IknaSettings())
+    val activePalette = LocalIknaPalette.current
     var pending by remember { mutableStateOf<Pair<Int?, StatsExportFormat>?>(null) }
     var exporting by remember { mutableStateOf(false) }
     var exportFailed by remember { mutableStateOf(false) }
+    var pendingPngExport by rememberSaveable { mutableStateOf(false) }
+    var exportingPng by remember { mutableStateOf(false) }
+    var pngStatus by remember { mutableStateOf<String?>(null) }
+    var snapshot by remember { mutableStateOf<StudyStats?>(null) }
+    val savePng = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("image/png")
+    ) { uri ->
+        val shouldExport = pendingPngExport
+        pendingPngExport = false
+        if (uri != null && shouldExport) {
+            exportingPng = true
+            pngStatus = null
+            scope.launch {
+                try {
+                    val currentSnapshot = snapshot ?: container.studyStatsRepository.load()
+                    val currentSettings = container.settings.current()
+                    val card = buildProfileStatsCardData(
+                        profileName = currentSettings.profileName,
+                        snapshot = currentSnapshot,
+                        palette = activePalette,
+                        paletteDisplayName = S.t(paletteSpec(currentSettings.paletteId).nameKey)
+                    )
+                    val bytes = withContext(Dispatchers.Default) { renderProfileStatsCardPng(card) }
+                    withContext(Dispatchers.IO) {
+                        checkNotNull(context.contentResolver.openOutputStream(uri)).use { it.write(bytes) }
+                    }
+                    pngStatus = S.t("prof.png_saved")
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (_: Exception) {
+                    pngStatus = S.t("share.003")
+                } finally {
+                    exportingPng = false
+                }
+            }
+        }
+    }
     val save = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val request = pending
         pending = null
@@ -73,7 +117,6 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
             }
         }
     }
-    var snapshot by remember { mutableStateOf<StudyStats?>(null) }
     var failed by remember { mutableStateOf(false) }
     var reload by remember { mutableStateOf(0) }
     LaunchedEffect(reload) {
@@ -102,6 +145,20 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
                 style = MaterialTheme.typography.displaySmall,
                 color = MaterialTheme.colorScheme.onBackground
             )
+            Spacer(Modifier.height(16.dp))
+            IknaLocalProfileCard(
+                profileName = settings.profileName,
+                snapshot = snapshot,
+                paletteDisplayName = S.t(paletteSpec(settings.paletteId).nameKey),
+                exportingPng = exportingPng,
+                pngStatus = pngStatus,
+                onSaveName = { name -> scope.launch { container.settings.setProfileName(name) } },
+                onExportPng = {
+                    pendingPngExport = true
+                    savePng.launch("ikna-profile-stats.png")
+                }
+            )
+            Spacer(Modifier.height(16.dp))
 
             IknaStatsExportAction(enabled = snapshot != null && pending == null && !exporting) { days, format ->
                 exportFailed = false

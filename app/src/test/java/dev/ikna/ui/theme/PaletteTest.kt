@@ -36,6 +36,13 @@ class PaletteTest {
 	}
 
 	@Test
+	fun `a saved cobalt selection resolves to Moss in both lightings`() {
+		val settings = IknaSettings(paletteId = "cobalt")
+		assertEquals(Color(0xFFA7C97E), paletteFor(settings.copy(theme = ThemeMode.DARK)).accent)
+		assertEquals(Color(0xFFB3D38A), paletteFor(settings.copy(theme = ThemeMode.GREY)).accent)
+	}
+
+	@Test
 	fun `ultraviolet is actually a purple palette`() {
 		val ultraviolet = paletteSpec("ultraviolet")
 		listOf(ultraviolet.dark.accent, ultraviolet.grey.accent).forEach { accent ->

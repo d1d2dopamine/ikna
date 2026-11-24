@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -50,6 +51,31 @@ fun iknaSettingsSectionGlyph(sectionId: String): IknaGlyph = when (sectionId) {
     else -> IknaGlyph.GEAR
 }
 
+/** Select the keyed section at the reading line in the upper part of the viewport. */
+internal fun resolveActiveSettingsSectionId(
+    sectionIds: List<String>,
+    visibleItems: List<LazyListItemInfo>,
+    viewportStart: Int,
+    viewportEnd: Int,
+    totalItems: Int,
+    canScrollForward: Boolean
+): String {
+    val firstSection = sectionIds.firstOrNull().orEmpty()
+    val lastSection = sectionIds.lastOrNull() ?: return firstSection
+    val lastVisible = visibleItems.lastOrNull() ?: return firstSection
+    if (!canScrollForward && (lastVisible.key == lastSection || lastVisible.index == totalItems - 1)) {
+        return lastSection
+    }
+
+    val anchor = viewportStart + (viewportEnd - viewportStart) * 0.24f
+    val visibleSections = visibleItems.filter {
+        val key = it.key
+        key is String && key in sectionIds && it.offset < viewportEnd && it.offset + it.size > viewportStart
+    }
+    return (visibleSections.lastOrNull { it.offset <= anchor } ?: visibleSections.firstOrNull())
+        ?.key as? String ?: firstSection
+}
+
 @Composable
 fun IknaSettingsJumpRow(
     sections: List<Pair<String, String>>,
@@ -59,14 +85,33 @@ fun IknaSettingsJumpRow(
     edgePadding: Dp = 20.dp,
     onJump: (String) -> Unit
 ) {
-    val activeId by remember(listState) {
+    var pinnedId by remember(sections) { mutableStateOf<String?>(null) }
+    var jumpInFlight by remember(sections) { mutableStateOf(false) }
+
+    val scrollActiveId by remember(listState, sections) {
+        val sectionIds = sections.map { it.first }
         derivedStateOf {
-            sections[listState.firstVisibleItemIndex.coerceIn(0, sections.lastIndex)].first
+            val layout = listState.layoutInfo
+            resolveActiveSettingsSectionId(
+                sectionIds, layout.visibleItemsInfo, layout.viewportStartOffset,
+                layout.viewportEndOffset, layout.totalItemsCount, listState.canScrollForward
+            )
         }
     }
     val verticalScrolling by remember(listState) {
         derivedStateOf { listState.isScrollInProgress }
     }
+    LaunchedEffect(verticalScrolling) {
+        if (verticalScrolling) {
+            if (!jumpInFlight) pinnedId = null
+        } else if (jumpInFlight) {
+            jumpInFlight = false
+        }
+    }
+    val activeId = pinnedId?.takeIf { id ->
+        jumpInFlight || listState.layoutInfo.visibleItemsInfo.any { it.key == id }
+    } ?: scrollActiveId
+
     IknaJumpRow(
         sections = sections,
         activeId = activeId,
@@ -74,7 +119,11 @@ fun IknaSettingsJumpRow(
         settled = settled,
         verticalScrolling = verticalScrolling,
         edgePadding = edgePadding,
-        onJump = onJump
+        onJump = { target ->
+            pinnedId = target
+            jumpInFlight = true
+            onJump(target)
+        }
     )
 }
 

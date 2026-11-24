@@ -1,4 +1,5 @@
 package dev.ikna.desktop
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.LazyListState
@@ -10,6 +11,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -20,11 +24,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,14 +46,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import dev.ikna.data.prefs.HotkeyBindings
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.prefs.lookFor
 import dev.ikna.data.repo.DeckSummary
+import dev.ikna.data.update.DesktopUpdatePackage
 import dev.ikna.data.update.DesktopUpdateRelease
 import dev.ikna.data.update.UpdateCheck
 import dev.ikna.ui.decks.IknaDeckRow
@@ -65,12 +75,16 @@ import dev.ikna.ui.theme.IknaBrandPatternBackdrop
 import dev.ikna.ui.theme.IknaDeveloperBadge
 import dev.ikna.ui.theme.IknaElementInspector
 import dev.ikna.ui.theme.IknaGlyph
+import dev.ikna.ui.theme.IknaGlyphIcon
 import dev.ikna.ui.theme.IknaIconButton
 import dev.ikna.ui.theme.IknaLatticePlaceholder
 import dev.ikna.ui.theme.IknaHomeBackdrop
 import dev.ikna.ui.theme.IknaPalette
 import dev.ikna.ui.theme.IknaPanel
+import dev.ikna.ui.theme.LocalIknaPalette
+import dev.ikna.ui.theme.LocalIknaSoundFeedback
 import dev.ikna.ui.theme.LocalIknaUnifiedFooter
+import dev.ikna.ui.theme.IknaSoundCue
 import dev.ikna.ui.theme.IknaTheme
 import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaWideButton
@@ -80,7 +94,9 @@ import dev.ikna.ui.theme.Motion
 import dev.ikna.ui.theme.Space
 import dev.ikna.ui.theme.paletteFor
 import dev.ikna.ui.theme.rememberContentFont
+import dev.ikna.ui.theme.iknaCardShape
 import dev.ikna.ui.theme.iknaInspect
+import dev.ikna.ui.theme.iknaSignalFrame
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -200,7 +216,7 @@ fun IknaDesktopApp(
     // A desktop window has no reliable light/dark signal to read, so the
     // lighting follows the chosen palette and defaults to dark, which is what
     // the app has always looked like.
-    val palette = paletteFor(settings, systemDark = true)
+    val selectedPalette = paletteFor(settings, systemDark = true)
 
     LaunchedEffect(settings.language, settings.pseudoLocale) {
         S.apply(settings.language, settings.pseudoLocale)
@@ -236,13 +252,14 @@ fun IknaDesktopApp(
     }
 
     IknaTheme(
-        palette = palette,
+        palette = selectedPalette,
         contentFont = contentFont,
         motionEnabled = settings.animations,
         deckBackgroundAnimated = settings.deckBackgroundAnimation,
         uiSoundsEnabled = settings.uiSounds,
         appearanceVariant = settings.appearanceVariant
     ) {
+        val palette = LocalIknaPalette.current
         IknaElementInspector(enabled = settings.elementInspector) {
             BoxWithConstraints(Modifier.fillMaxSize()) {
                 val deckHeadingVisible = if (maxWidth >= 900.dp) {
@@ -349,6 +366,7 @@ private fun DesktopShell(
         container.settings.markUpdateChecked(now)
     }
     val offeredUpdate = desktopUpdate.takeIf { settings.updateCheck }
+    var updateDialogOpen by remember(offeredUpdate) { mutableStateOf(false) }
     val skipUpdate: () -> Unit = {
         desktopUpdate?.let { release ->
             desktopUpdate = null
@@ -407,7 +425,7 @@ private fun DesktopShell(
                     )
                     DesktopDeckSidebarViewport(sidebarWidth, listWidth) {
                         DecksColumn(settings, ui, decks, remaining, todaySummary, deckListState,
-                            offeredUpdate, skipUpdate, showWordmark = expanded, dockInWindow = windowDock, wide = true)
+                            offeredUpdate, { updateDialogOpen = true }, skipUpdate, showWordmark = expanded, dockInWindow = windowDock, wide = true)
                     }
                     if (sidebarWidth > 0.dp) {
                         Box(
@@ -462,10 +480,17 @@ private fun DesktopShell(
             }
         } else if (ui.listOpen) {
             DecksColumn(settings, ui, decks, remaining, todaySummary, deckListState,
-                offeredUpdate, skipUpdate)
+                offeredUpdate, { updateDialogOpen = true }, skipUpdate)
         } else {
             PaneContent(container, settings, palette, ui, decks, wide = false, onRestartRequested = onRestartRequested, decksLoaded = decksLoaded)
         }
+    }
+    if (offeredUpdate != null && updateDialogOpen) {
+        DesktopUpdateDialog(
+            release = offeredUpdate,
+            onDismiss = { updateDialogOpen = false },
+            onSkip = skipUpdate
+        )
     }
 }
 
@@ -486,6 +511,103 @@ internal fun DesktopDeckSidebarViewport(
     }
 }
 
+@Composable
+private fun DesktopUpdateBanner(
+    release: DesktopUpdateRelease,
+    onOpen: () -> Unit,
+    onSkip: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val colors = MaterialTheme.colorScheme
+    val shape = iknaCardShape()
+    val sound = LocalIknaSoundFeedback.current
+    val interaction = remember { MutableInteractionSource() }
+    Row(
+        modifier = modifier.fillMaxWidth().clip(shape).background(colors.surface)
+            .border(1.dp, colors.outline, shape),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .iknaSignalFrame(interaction)
+                .clickable(interactionSource = interaction, indication = null, role = Role.Button) {
+                    sound.play(IknaSoundCue.TAP)
+                    onOpen()
+                }
+                .padding(start = 12.dp, top = 10.dp, bottom = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IknaGlyphIcon(IknaGlyph.UPDATE, color = colors.primary, size = 16.dp)
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(S.t("upd.016") + release.version, style = MaterialTheme.typography.titleSmall)
+                Text(S.t("upd.011") + APP_VERSION, style = MaterialTheme.typography.bodySmall,
+                    color = colors.onSurfaceVariant)
+            }
+        }
+        IknaIconButton(IknaGlyph.CLOSE, onClick = onSkip, glyphSize = 14.dp,
+            color = colors.onSurfaceVariant, label = S.t("upd.006"))
+    }
+}
+
+@Composable
+private fun DesktopUpdateDialog(
+    release: DesktopUpdateRelease,
+    onDismiss: () -> Unit,
+    onSkip: () -> Unit
+) {
+    val colors = MaterialTheme.colorScheme
+    val shape = iknaCardShape()
+    val primary = release.packages[DesktopUpdatePackage.WINDOWS_SETUP]?.let {
+        DesktopUpdatePackage.WINDOWS_SETUP
+    } ?: release.packages.keys.firstOrNull()
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier.width(448.dp).background(colors.surface, shape)
+                .border(1.dp, colors.outline, shape).padding(24.dp)
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                IknaGlyphIcon(IknaGlyph.UPDATE, color = colors.primary, size = 18.dp)
+                Text(S.t("upd.001"), style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant)
+            }
+            Spacer(Modifier.height(12.dp))
+            Text(S.t("upd.011") + APP_VERSION, style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant)
+            Text(S.t("upd.016") + release.version, style = MaterialTheme.typography.headlineSmall)
+            if (release.notes.isNotBlank()) {
+                Spacer(Modifier.height(16.dp))
+                Text(S.t("upd.004"), style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant)
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    release.notes,
+                    modifier = Modifier.weight(1f, fill = false).fillMaxWidth().heightIn(max = 220.dp)
+                        .verticalScroll(rememberScrollState()),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            Spacer(Modifier.height(16.dp))
+            if (primary != null) {
+                IknaWideButton(
+                    label = primary.updateLabel(),
+                    onClick = { openInBrowser(release.packages.getValue(primary).url) },
+                    filled = true
+                )
+            }
+            release.packages.forEach { (kind, asset) ->
+                if (kind != primary) {
+                    IknaTextButton(kind.updateLabel(), onClick = { openInBrowser(asset.url) })
+                }
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                IknaTextButton(S.t("upd.013"), onClick = { openInBrowser(UpdateCheck.RELEASES_PAGE) },
+                    modifier = Modifier.weight(1f, fill = false), color = colors.onSurfaceVariant)
+                IknaTextButton(S.t("upd.006"), onClick = onSkip, color = colors.onSurfaceVariant)
+            }
+        }
+    }
+}
+
 /** The shared home layout persists beside the active pane in a wide window. */
 @Composable
 private fun DecksColumn(
@@ -496,6 +618,7 @@ private fun DecksColumn(
     todaySummary: TodayStudySummary,
     listState: LazyListState,
     update: DesktopUpdateRelease?,
+    onOpenUpdate: () -> Unit,
     onSkipUpdate: () -> Unit,
     showWordmark: Boolean = true,
     dockInWindow: Boolean = false,
@@ -543,16 +666,12 @@ private fun DecksColumn(
             ) {
                 if (update != null) {
                     item(key = "desktop-update") {
-                        Column(Modifier.padding(horizontal = if (wide) Space.sm else 0.dp)) {
-                            Text(
-                                text = S.t("upd.016") + update.version,
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                            update.packages.forEach { (kind, asset) ->
-                                IknaTextButton(kind.updateLabel(), onClick = { openInBrowser(asset.url) })
-                            }
-                            IknaTextButton(S.t("upd.006"), onClick = onSkipUpdate)
-                        }
+                        DesktopUpdateBanner(
+                            release = update,
+                            onOpen = onOpenUpdate,
+                            onSkip = onSkipUpdate,
+                            modifier = Modifier.padding(horizontal = if (wide) Space.sm else 0.dp)
+                        )
                     }
                 }
                 items(decks, key = { it.id }) { deck ->

@@ -45,7 +45,7 @@ class StringsCatalogTest {
         val expected = listOf("ru", "en", "pl", "es", "fr", "de", "pt")
         assertEquals(expected, UI_LANGUAGES.map { it.code })
         assertEquals(expected.size, UI_LANGUAGES.map { it.code }.toSet().size)
-        assertEquals("PORTUGUÊS (BRASIL)", uiLanguage("pt")?.nativeLabel)
+        assertEquals("PORTUGUÊS (BR)", uiLanguage("pt")?.nativeLabel)
         UI_LANGUAGES.forEach { language ->
             assertEquals("${language.code} catalogue", STRINGS_RU.keys, language.strings.keys)
         }

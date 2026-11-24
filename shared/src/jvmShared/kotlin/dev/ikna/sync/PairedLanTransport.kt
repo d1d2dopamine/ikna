@@ -420,13 +420,70 @@ class PairedLanTransport(
         const val MAX_PAYLOAD = 4 * 1024 * 1024
         const val MAX_FRAME = 6 * 1024 * 1024
         const val MAX_PEERS = 4
+        const val COMPACT_INVITATION_PREFIX = "ikna-pair:1:"
         private const val SOCKET_MS = 5_000
         private const val DEADLINE_MS = 15_000L
         private const val INVITATION_MS = 300_000L
         private const val MAX_PAIR_ATTEMPTS = 8
+        private const val MAX_INVITATION_JSON_BYTES = 8192
+
+        /** Compresses a JSON invitation into a shorter QR-friendly string without losing compatibility. */
+        fun encodeCompactInvitation(rawJson: String): String {
+            val input = rawJson.toByteArray(Charsets.UTF_8)
+            require(input.size in 1..MAX_INVITATION_JSON_BYTES)
+            val deflater = java.util.zip.Deflater(java.util.zip.Deflater.BEST_COMPRESSION)
+            return try {
+                deflater.setInput(input)
+                deflater.finish()
+                val out = java.io.ByteArrayOutputStream()
+                val buf = ByteArray(1024)
+                while (!deflater.finished()) {
+                    val count = deflater.deflate(buf)
+                    if (count <= 0) break
+                    out.write(buf, 0, count)
+                }
+                COMPACT_INVITATION_PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(out.toByteArray())
+            } finally {
+                deflater.end()
+            }
+        }
+
+        private fun decodeCompactInvitation(compact: String): String {
+            val encoded = compact.removePrefix(COMPACT_INVITATION_PREFIX).trim()
+            require(encoded.isNotEmpty() && encoded.length <= MAX_INVITATION_JSON_BYTES)
+            val compressed = Base64.getUrlDecoder().decode(encoded)
+            val inflater = java.util.zip.Inflater()
+            return try {
+                inflater.setInput(compressed)
+                val out = java.io.ByteArrayOutputStream()
+                val buf = ByteArray(1024)
+                var total = 0
+                while (!inflater.finished()) {
+                    val count = inflater.inflate(buf)
+                    if (count == 0) {
+                        if (inflater.needsInput() || inflater.needsDictionary()) break
+                    } else {
+                        total += count
+                        require(total <= MAX_INVITATION_JSON_BYTES)
+                        out.write(buf, 0, count)
+                    }
+                }
+                out.toString(Charsets.UTF_8.name())
+            } finally {
+                inflater.end()
+            }
+        }
+
         fun parseInvitation(text: String): PairingInvitation {
-            require(text.length <= 8192)
-            val value = Json.decodeFromString<PairingInvitation>(text)
+            val trimmed = text.trim()
+            require(trimmed.length <= MAX_INVITATION_JSON_BYTES)
+            val rawJson = if (trimmed.startsWith(COMPACT_INVITATION_PREFIX)) {
+                decodeCompactInvitation(trimmed)
+            } else {
+                trimmed
+            }
+            require(rawJson.length <= MAX_INVITATION_JSON_BYTES)
+            val value = Json.decodeFromString<PairingInvitation>(rawJson)
             require(value.version == 1 && value.port in 1..65535 && value.secret.matches(Regex("[A-Za-z0-9_-]{43}")))
             LanSyncSecurity.address(value.host)
             LanSyncSecurity.certificate(value.certificate).checkValidity()

@@ -126,6 +126,7 @@ change.
 | [VOICE.md](VOICE.md) | Speech runtime: models the user supplies, what the app never downloads. |
 | [UNSCHEDULED.md](UNSCHEDULED.md) | Optional ideas, explicitly not commitments. |
 | [REFACTOR.md](REFACTOR.md) | The planned split of two oversized files. |
+| [RUST-CORE-PLAN.md](RUST-CORE-PLAN.md) | Deferred future plan for an optional Rust compute core (`ikna-core`) paired with the major refactor. |
 
 ## Historical evidence (do not carry status forward from these)
 

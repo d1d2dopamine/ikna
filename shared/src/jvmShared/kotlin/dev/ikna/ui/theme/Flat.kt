@@ -65,6 +65,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -915,7 +916,7 @@ fun IknaChip(
 
     Box(
         modifier = modifier
-            .height(40.dp)
+            .heightIn(min = 40.dp)
             .graphicsLayer {
                 scaleX = pressScale
                 scaleY = pressScale
@@ -937,14 +938,16 @@ fun IknaChip(
                     sound.play(IknaSoundCue.TAP)
                     onClick()
                 })
-            .padding(horizontal = 12.dp),
+            .padding(horizontal = 10.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
             color = colors.label,
-            maxLines = 1
+            textAlign = TextAlign.Center,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 2
         )
     }
 }

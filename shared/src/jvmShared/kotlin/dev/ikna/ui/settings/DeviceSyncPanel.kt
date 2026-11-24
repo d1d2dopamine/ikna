@@ -2,6 +2,7 @@ package dev.ikna.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
@@ -11,8 +12,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import dev.ikna.sync.IknaQrCode
+import dev.ikna.sync.PairedLanTransport
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaTextField
@@ -168,11 +174,49 @@ fun DeviceSyncPanel(
                 onClick = { if (canPair && address.isNotBlank()) onCreateInvitation(address) }
             )
             state.invitation?.takeIf { it.isNotBlank() }?.let { invitation ->
+                val compact = remember(invitation) {
+                    runCatching { PairedLanTransport.encodeCompactInvitation(invitation) }.getOrDefault(invitation)
+                }
+                @Suppress("DEPRECATION")
+                val clipboard = LocalClipboardManager.current
+                var copied by remember(compact) { mutableStateOf(false) }
+                var showRawCode by remember(compact) { mutableStateOf(false) }
                 Text(S.t("sync.invitation_private"), style = MaterialTheme.typography.bodySmall)
-                SelectionContainer {
-                    Text(invitation, style = MaterialTheme.typography.bodySmall)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    IknaQrCode(content = compact, maxSize = 216.dp)
+                    Text(
+                        text = S.t("sync.qr_hint"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    IknaTextButton(
+                        label = S.t(if (copied) "sync.code_copied" else "sync.copy_code"),
+                        onClick = {
+                            clipboard.setText(AnnotatedString(compact))
+                            copied = true
+                        }
+                    )
+                    IknaTextButton(
+                        label = S.t(if (showRawCode) "sync.hide_code" else "sync.show_code"),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        onClick = { showRawCode = !showRawCode }
+                    )
+                }
+                if (showRawCode) {
+                    SelectionContainer {
+                        // Expose the standard JSON invitation as a fallback for peers on older builds.
+                        Text(invitation, style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             }
+            @Suppress("DEPRECATION")
+            val pasteClipboard = LocalClipboardManager.current
             IknaTextField(
                 value = pasted,
                 onValueChange = { pasted = it },
@@ -181,11 +225,26 @@ fun DeviceSyncPanel(
                 modifier = Modifier.fillMaxWidth(),
                 maxLength = 4096
             )
-            IknaWideButton(
-                label = S.t("sync.pair"),
-                enabled = canPair && pasted.isNotBlank(),
-                onClick = pair
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IknaWideButton(
+                    label = S.t("sync.pair"),
+                    enabled = canPair && pasted.isNotBlank(),
+                    modifier = Modifier.weight(1f),
+                    onClick = pair
+                )
+                IknaTextButton(
+                    label = S.t("sync.paste_btn"),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    onClick = {
+                        val clip = pasteClipboard.getText()?.text?.trim().orEmpty()
+                        if (clip.isNotEmpty()) pasted = clip.take(4096)
+                    }
+                )
+            }
         }
         if (state.peers.isNotEmpty()) {
             Text(S.t("sync.devices"), style = MaterialTheme.typography.titleSmall)

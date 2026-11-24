@@ -222,7 +222,9 @@ class PaletteContracts(unittest.TestCase):
 
     def test_one_provider_drives_both_platforms_and_windows_bar(self):
         theme = (THEME / 'Theme.kt').read_text(encoding='utf-8')
-        self.assertIn('val controls = remember(palette) { controlColors(palette) }', theme)
+        self.assertIn('val controls = remember(animatedPalette) { controlColors(animatedPalette) }', theme)
+        self.assertIn('schemeOf(animatedPalette, controls)', theme)
+        self.assertIn('LocalIknaPalette provides animatedPalette', theme)
         self.assertIn('LocalIknaControlColors provides controls', theme)
         self.assertEqual(theme.count('primaryContainer = controls.fill'), 2)
         self.assertIn('ThemeMode.GREY -> spec.grey', theme)

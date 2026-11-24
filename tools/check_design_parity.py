@@ -271,7 +271,7 @@ class DesignContracts(unittest.TestCase):
     def test_interface_language_registry_drives_both_targets(self):
         registry = read(SHARED, 'ui/text/UiLanguages.kt')
         self.assertEqual(registry.count('UiLanguage(LANG_'), 7)
-        for required in ['LANG_PT, "PORTUGUÊS (BRASIL)"', 'STRINGS_PT',
+        for required in ['LANG_PT, "PORTUGUÊS (BR)"', 'STRINGS_PT',
                          'QuantityRule.SLAVIC', 'QuantityRule.ONE_OTHER']:
             self.assertIn(required, registry)
         strings = read(SHARED, 'ui/text/Strings.kt')

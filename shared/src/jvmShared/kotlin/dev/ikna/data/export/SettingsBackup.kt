@@ -104,7 +104,8 @@ data class SettingsSnapshot(
     // put every card they threw away back into circulation.
     val suppressed: String = "",
     // Desktop review keys are portable token names, not machine key codes.
-    val hotkeys: String = DEFAULT_HOTKEYS
+    val hotkeys: String = DEFAULT_HOTKEYS,
+    val profileName: String = ""
 )
 
 object SettingsBackup {
@@ -148,7 +149,8 @@ object SettingsBackup {
         deckLooks = settings.deckLooks,
         deckPhonetics = settings.deckPhonetics,
         suppressed = settings.suppressed,
-        hotkeys = settings.hotkeys
+        hotkeys = settings.hotkeys,
+        profileName = settings.profileName
     )
 
     fun encode(settings: IknaSettings, synthetic: Boolean = false): String = json.encodeToString(
@@ -230,5 +232,6 @@ object SettingsBackup {
         store.setDeckPhonetics(snapshot.deckPhonetics)
         store.setSuppressed(snapshot.suppressed)
         store.setHotkeys(snapshot.hotkeys)
+        store.setProfileName(snapshot.profileName)
     }
 }

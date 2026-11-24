@@ -64,8 +64,10 @@ animations replaces every screen immediately.
 
 Settings is a pinned header over a lazy list of nine stable section items. Entry
 composes only the visible controls instead of measuring the complete settings
-document. Scroll-derived section tracking lives in a small recomposition scope,
-and the pinned strip never starts horizontal centring during a vertical fling.
+document. The active label follows the reading line 24% down the viewport and
+selects the final section at the bottom. Section tracking lives in a small
+recomposition scope, and the pinned strip never starts horizontal centring
+during a vertical fling.
 The jump strip navigates by item index; its own label-centering motion
 remains separate. It recentres after the active label is remeasured (including
 language/font changes), using the measured horizontal scroll extent, and waits
@@ -230,11 +232,15 @@ Colour is two choices, not one. **Which palette:**
 | Нейтральная | *neutral* | grey that gets out of the way |
 | Ультрафиолет | *ultraviolet* | saturated purple with pale violet ink |
 | Лагуна | *lagoon* | deep teal and clean mint |
-| Кобальт | *cobalt* | blue-black with a restrained yellow signal |
+| Мох | *cobalt* | olive-black with a soft moss-green accent |
 
 **And how it is lit:** dark, grey, as the phone is set, or four colours picked by
 hand (background, ink, muted, accent). There is no light theme: the second
 lighting is grey.
+
+Palette and lighting changes ease the four core colours over 320 ms and apply
+immediately with animations disabled. The repeating emblem uses stronger ink and
+accent mixes on near-black backgrounds so its cells remain visible.
 
 Palette preview tiles use the selected lighting mode, including the system
 fallback; both authored lightings have dark-background luminance. Brightness

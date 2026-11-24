@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -37,7 +36,11 @@ import dev.ikna.data.update.UpdateCheck
 import dev.ikna.data.update.UpdateRelease
 import dev.ikna.data.update.megabytes
 import dev.ikna.ui.text.S
+import dev.ikna.ui.theme.IknaGlyph
+import dev.ikna.ui.theme.IknaGlyphIcon
 import dev.ikna.ui.theme.IknaTextButton
+import dev.ikna.ui.theme.IknaWideButton
+import dev.ikna.ui.theme.iknaCardShape
 import kotlinx.coroutines.launch
 
 /*
@@ -124,23 +127,7 @@ fun UpdateGate(container: AppContainer, settings: IknaSettings) {
     )
 }
 
-/**
- * What is available, how big it is, what changed, and two small words.
- *
- * The notes come from the release itself rather than from a string in the app:
- * the build being offered knows what is in it and this one does not. They scroll
- * inside a fixed box, so a long release cannot push the buttons off the screen.
- *
- * There is no third button. Dismissing by tapping outside behaves like skip
- * without remembering it -- the update comes back tomorrow, which is the right
- * answer for a tap that may not have been aimed at anything. While bytes are
- * arriving that tap does nothing instead: a download cancelled by a misplaced
- * finger, at eighty percent, is the worst thing this window could do.
- *
- * Once update is pressed the two words are replaced by the download itself --
- * the band, the percentage, the megabytes -- and the window stays where it is
- * until the installer takes over.
- */
+/** Shows release details and keeps the download progress in the same dialog. */
 @Composable
 fun UpdateSheet(
     installed: String,
@@ -148,24 +135,30 @@ fun UpdateSheet(
     onSkip: () -> Unit
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val ink = MaterialTheme.colorScheme.onBackground
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    val colors = MaterialTheme.colorScheme
+    val muted = colors.onSurfaceVariant
     val notes = rememberScrollState()
     val download = rememberUpdateDownload()
     Dialog(onDismissRequest = { if (!download.running) onSkip() }) {
-        val cardShape = dev.ikna.ui.theme.iknaCardShape()
+        val cardShape = iknaCardShape()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background, cardShape)
-                .border(1.dp, ink, cardShape)
+                .background(colors.surface, cardShape)
+                .border(1.dp, colors.outline, cardShape)
                 .padding(horizontal = 20.dp, vertical = 24.dp)
         ) {
-            Text(
-                text = S.t("upd.001"),
-                style = MaterialTheme.typography.labelLarge,
-                color = muted
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IknaGlyphIcon(IknaGlyph.UPDATE, color = colors.primary, size = 18.dp)
+                Text(
+                    text = S.t("upd.001"),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = muted
+                )
+            }
             Spacer(Modifier.height(10.dp))
             // The version being left and the version being offered, in that
             // order, because the question a person actually has is not "what is
@@ -178,7 +171,7 @@ fun UpdateSheet(
                 style = MaterialTheme.typography.bodySmall,
                 color = muted
             )
-            if (release.notes.isNotEmpty()) {
+            if (release.notes.isNotBlank()) {
                 Spacer(Modifier.height(16.dp))
                 Text(
                     text = S.t("upd.004"),
@@ -188,6 +181,7 @@ fun UpdateSheet(
                 Spacer(Modifier.height(8.dp))
                 Box(
                     modifier = Modifier
+                        .weight(1f, fill = false)
                         .fillMaxWidth()
                         .heightIn(max = 240.dp)
                         .verticalScroll(notes)
@@ -208,15 +202,21 @@ fun UpdateSheet(
                 Spacer(Modifier.height(16.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IknaTextButton(label = S.t("upd.006"), onClick = onSkip, color = muted)
-                    Spacer(Modifier.width(20.dp))
                     IknaTextButton(
+                        label = S.t("upd.006"),
+                        onClick = onSkip,
+                        modifier = Modifier.weight(1f, fill = false),
+                        color = muted
+                    )
+                    IknaWideButton(
                         label = S.t("upd.005"),
                         onClick = { download.start(release) },
-                        color = ink
+                        modifier = Modifier.weight(1.5f),
+                        filled = true,
+                        height = 48.dp
                     )
                 }
             } else {

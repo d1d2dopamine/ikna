@@ -106,6 +106,9 @@ fun SettingsPane(
 
     // Notes and armed states for the sections that touch the disk.
     var dataNote by remember { mutableStateOf<String?>(null) }
+    var syncFileBusy by remember { mutableStateOf(false) }
+    var syncFileStatus by remember { mutableStateOf<String?>(null) }
+    var syncFileError by remember { mutableStateOf(false) }
     var updateNote by remember { mutableStateOf<String?>(null) }
     var desktopUpdate by remember { mutableStateOf<DesktopUpdateRelease?>(null) }
     var checking by remember { mutableStateOf(false) }
@@ -427,6 +430,71 @@ fun SettingsPane(
                 IknaSettingsSection(S.t("set.052"), null, icon = iknaSettingsSectionGlyph("data")) {
                     if (!container.isDeveloperMode) {
                         DeviceSyncSettings(container.deviceSync)
+                        dev.ikna.ui.settings.SyncFilePanel(
+                            busy = syncFileBusy,
+                            statusMessage = syncFileStatus,
+                            isError = syncFileError,
+                            onExportFile = {
+                                val chooser = javax.swing.JFileChooser().apply {
+                                    selectedFile = File("ikna-sync.${dev.ikna.sync.SyncDeltaFile.FILE_EXTENSION}")
+                                }
+                                if (chooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
+                                    val dest = chooser.selectedFile
+                                    if (!dest.exists() || javax.swing.JOptionPane.showConfirmDialog(
+                                            chooser, dest.path, S.t("stats.save"), javax.swing.JOptionPane.YES_NO_OPTION
+                                        ) == javax.swing.JOptionPane.YES_OPTION
+                                    ) {
+                                        syncFileBusy = true
+                                        syncFileError = false
+                                        syncFileStatus = null
+                                        scope.launch {
+                                            try {
+                                                val exported = dev.ikna.sync.SyncDeltaFile.exportFrom(
+                                                    container.restoreRepository,
+                                                    profileName = settings.profileName
+                                                )
+                                                withContext(Dispatchers.IO) { dest.writeBytes(exported.bytes) }
+                                                syncFileStatus = S.t("sync.file_exported")
+                                                    .replace("{count}", exported.recordCount.toString())
+                                            } catch (_: Exception) {
+                                                syncFileError = true
+                                                syncFileStatus = S.t("sync.file_error")
+                                            } finally {
+                                                syncFileBusy = false
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            onMergeFile = {
+                                val chooser = javax.swing.JFileChooser()
+                                if (chooser.showOpenDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
+                                    val src = chooser.selectedFile
+                                    syncFileBusy = true
+                                    syncFileError = false
+                                    syncFileStatus = null
+                                    scope.launch {
+                                        try {
+                                            val bytes = withContext(Dispatchers.IO) {
+                                                src.inputStream().use { dev.ikna.sync.SyncDeltaFile.readBounded(it) }
+                                            }
+                                            val merged = dev.ikna.sync.SyncDeltaFile.mergeInto(
+                                                bytes,
+                                                container.restoreRepository
+                                            )
+                                            syncFileStatus = S.t("sync.file_merged")
+                                                .replace("{imported}", merged.imported.toString())
+                                                .replace("{skipped}", merged.skipped.toString())
+                                        } catch (_: Exception) {
+                                            syncFileError = true
+                                            syncFileStatus = S.t("sync.file_error")
+                                        } finally {
+                                            syncFileBusy = false
+                                        }
+                                    }
+                                }
+                            }
+                        )
                         Spacer(Modifier.height(16.dp))
                     }
                     Spacer(Modifier.height(8.dp))

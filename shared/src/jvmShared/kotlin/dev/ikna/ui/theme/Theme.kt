@@ -1,5 +1,9 @@
 package dev.ikna.ui.theme
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +16,9 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -378,22 +385,21 @@ val IknaPalettes: List<IknaPaletteSpec> = listOf(
             accent = Color(0xFF76E3C6)
         )
     ),
-    // Кобальт. A deep blue field with a yellow signal. Чернила is navy and
-    // coral; this keeps the background family but reverses the temperature.
+    // Moss keeps the stored cobalt id so an existing selection follows the new colors.
     IknaPaletteSpec(
         id = "cobalt",
         nameKey = "set.143",
         dark = IknaPalette(
-            background = Color(0xFF0A132B),
-            ink = Color(0xFFEAF0FF),
-            muted = Color(0xFF8491B5),
-            accent = Color(0xFFFFD45A)
+            background = Color(0xFF131610),
+            ink = Color(0xFFEAECE6),
+            muted = Color(0xFF8C9484),
+            accent = Color(0xFFA7C97E)
         ),
         grey = IknaPalette(
-            background = Color(0xFF242430),
-            ink = Color(0xFFE4ECFA),
-            muted = Color(0xFF929FB8),
-            accent = Color(0xFFFAD66B)
+            background = Color(0xFF262A22),
+            ink = Color(0xFFE8ECE4),
+            muted = Color(0xFF9EA896),
+            accent = Color(0xFFB3D38A)
         )
     )
 )
@@ -710,6 +716,9 @@ fun rememberContentFont(mode: FontMode, fontName: String): FontFamily {
     }
 }
 
+/** Current theme colors for surfaces that use palette tokens directly. */
+val LocalIknaPalette = compositionLocalOf { DarkPalette }
+
 @Composable
 fun IknaTheme(
     palette: IknaPalette = DarkPalette,
@@ -720,14 +729,26 @@ fun IknaTheme(
     appearanceVariant: IknaAppearanceVariant = IknaAppearanceVariant.ROUNDED,
     content: @Composable () -> Unit
 ) {
-    val controls = remember(palette) { controlColors(palette) }
-    val scheme = remember(palette, controls) { schemeOf(palette, controls) }
+    val transition = remember(motionEnabled) {
+        if (motionEnabled) tween<Color>(durationMillis = 320, easing = FastOutSlowInEasing) else snap()
+    }
+    // Reset an in-flight transition when motion or background polarity changes
+    // so dark<->light custom switches never dip through low-contrast mid-grey frames.
+    val animatedPalette = key(motionEnabled, palette.light) {
+        val animBg by animateColorAsState(palette.background, transition, label = "palette-background")
+        val animInk by animateColorAsState(palette.ink, transition, label = "palette-ink")
+        val animMuted by animateColorAsState(palette.muted, transition, label = "palette-muted")
+        val animAccent by animateColorAsState(palette.accent, transition, label = "palette-accent")
+        if (motionEnabled) IknaPalette(animBg, animInk, animMuted, animAccent) else palette
+    }
+    val controls = remember(animatedPalette) { controlColors(animatedPalette) }
+    val scheme = remember(animatedPalette, controls) { schemeOf(animatedPalette, controls) }
     val signalFrameCoordinator = rememberSignalFrameCoordinator(motionEnabled)
     iknaUiSoundsLiveGate.set(uiSoundsEnabled)
     MaterialTheme(
         colorScheme = scheme,
-        typography = typographyOf(contentFont),
-        shapes = shapesFor(appearanceVariant)
+        typography = remember(contentFont) { typographyOf(contentFont) },
+        shapes = remember(appearanceVariant) { shapesFor(appearanceVariant) }
     ) {
         // Two defaults were quietly overriding the whole palette.
         //
@@ -744,7 +765,8 @@ fun IknaTheme(
         //
         // Both are fixed here once, for every screen, instead of per call site.
         CompositionLocalProvider(
-            LocalContentColor provides palette.ink,
+            LocalContentColor provides animatedPalette.ink,
+            LocalIknaPalette provides animatedPalette,
             LocalIknaControlColors provides controls,
             LocalIknaMotionEnabled provides motionEnabled,
             LocalIknaDeckBackgroundAnimated provides (motionEnabled && deckBackgroundAnimated),

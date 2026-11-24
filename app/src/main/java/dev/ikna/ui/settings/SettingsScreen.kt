@@ -30,10 +30,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -260,6 +262,67 @@ fun SettingsScreen(
         if (!granted) message = S.t("set.004")
     }
 
+    var syncFileBusy by remember { mutableStateOf(false) }
+    var syncFileStatus by remember { mutableStateOf<String?>(null) }
+    var syncFileError by remember { mutableStateOf(false) }
+
+    val syncFileExportPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument(dev.ikna.sync.SyncDeltaFile.MIME_TYPE)
+    ) { uri: Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        syncFileBusy = true
+        syncFileError = false
+        syncFileStatus = null
+        scope.launch {
+            try {
+                val exported = dev.ikna.sync.SyncDeltaFile.exportFrom(
+                    container.restoreRepository,
+                    profileName = settings.profileName
+                )
+                withContext(Dispatchers.IO) {
+                    checkNotNull(context.contentResolver.openOutputStream(uri)).use { it.write(exported.bytes) }
+                }
+                syncFileStatus = S.t("sync.file_exported")
+                    .replace("{count}", exported.recordCount.toString())
+            } catch (_: Exception) {
+                syncFileError = true
+                syncFileStatus = S.t("sync.file_error")
+            } finally {
+                syncFileBusy = false
+            }
+        }
+    }
+
+    val syncFileMergePicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        syncFileBusy = true
+        syncFileError = false
+        syncFileStatus = null
+        scope.launch {
+            try {
+                val bytes = withContext(Dispatchers.IO) {
+                    checkNotNull(context.contentResolver.openInputStream(uri)).use {
+                        dev.ikna.sync.SyncDeltaFile.readBounded(it)
+                    }
+                }
+                val merged = dev.ikna.sync.SyncDeltaFile.mergeInto(
+                    bytes,
+                    container.restoreRepository
+                )
+                syncFileStatus = S.t("sync.file_merged")
+                    .replace("{imported}", merged.imported.toString())
+                    .replace("{skipped}", merged.skipped.toString())
+            } catch (_: Exception) {
+                syncFileError = true
+                syncFileStatus = S.t("sync.file_error")
+            } finally {
+                syncFileBusy = false
+            }
+        }
+    }
+
     val restorePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
@@ -341,9 +404,7 @@ fun SettingsScreen(
             }
             Spacer(Modifier.height(16.dp))
 
-            // Lazy item indices replace measured pixel anchors. Only visible
-            // sections exist, and the first visible item tells the jump strip which
-            // section is active without measuring the full settings document.
+            // The jump row reads keyed sections near the top of the viewport.
             IknaSettingsJumpRow(
                 sections = JUMPS,
                 listState = listState,
@@ -565,12 +626,15 @@ fun SettingsScreen(
                         }
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             shown.chunked(2).forEach { pair ->
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(
+                                    modifier = Modifier.height(IntrinsicSize.Min),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
                                     pair.forEach { code ->
                                         IknaChip(
                                             label = languageLabel(code),
                                             selected = settings.language == code,
-                                            modifier = Modifier.weight(1f),
+                                            modifier = Modifier.weight(1f).fillMaxHeight(),
                                             onClick = {
                                                 scope.launch { container.settings.setLanguage(code) }
                                             }
@@ -938,6 +1002,17 @@ fun SettingsScreen(
                     ) {
                         if (!container.isDeveloperMode) {
                             DeviceSyncSettings(container.deviceSync)
+                            SyncFilePanel(
+                                busy = syncFileBusy,
+                                statusMessage = syncFileStatus,
+                                isError = syncFileError,
+                                onExportFile = {
+                                    syncFileExportPicker.launch("ikna-sync.${dev.ikna.sync.SyncDeltaFile.FILE_EXTENSION}")
+                                },
+                                onMergeFile = {
+                                    syncFileMergePicker.launch(arrayOf("*/*"))
+                                }
+                            )
                             Spacer(Modifier.height(16.dp))
                         }
                         IknaSettingsToggleRow(

@@ -62,8 +62,8 @@ def main() -> int:
         )
     if any(not label.strip() for label in labels):
         problems.append("UiLanguages.kt: every language needs a nonblank native label")
-    if ("pt", "PORTUGUÊS (BRASIL)") not in [(code, label) for code, label, _, _ in entries]:
-        problems.append("UiLanguages.kt: pt must be named PORTUGUÊS (BRASIL)")
+    if ("pt", "PORTUGUÊS (BR)") not in [(code, label) for code, label, _, _ in entries]:
+        problems.append("UiLanguages.kt: pt must be named PORTUGUÊS (BR)")
 
     expected_paths = {catalogue_path(table) for table in tables}
     actual_paths = set(TEXT.glob("Strings??.kt"))

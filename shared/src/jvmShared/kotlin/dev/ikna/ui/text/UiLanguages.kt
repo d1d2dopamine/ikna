@@ -19,7 +19,7 @@ val UI_LANGUAGES: List<UiLanguage> = listOf(
     UiLanguage(LANG_ES, "ESPAÑOL", STRINGS_ES, QuantityRule.ONE_OTHER),
     UiLanguage(LANG_FR, "FRANÇAIS", STRINGS_FR, QuantityRule.ONE_OTHER),
     UiLanguage(LANG_DE, "DEUTSCH", STRINGS_DE, QuantityRule.ONE_OTHER),
-    UiLanguage(LANG_PT, "PORTUGUÊS (BRASIL)", STRINGS_PT, QuantityRule.ONE_OTHER)
+    UiLanguage(LANG_PT, "PORTUGUÊS (BR)", STRINGS_PT, QuantityRule.ONE_OTHER)
 )
 
 private val UI_LANGUAGES_BY_CODE = UI_LANGUAGES.associateBy { it.code }

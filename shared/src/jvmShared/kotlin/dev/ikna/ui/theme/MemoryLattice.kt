@@ -26,10 +26,13 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.dp
@@ -98,6 +101,25 @@ private fun rememberSharedBrandPatternPhase(animated: Boolean): Float {
     return phase
 }
 
+internal fun brandPatternCellColors(
+    background: Color,
+    ink: Color,
+    accent: Color,
+    intensity: Float
+): Pair<Color, Color> {
+    val nearBlack = (1f - background.luminance() / 0.008f).coerceIn(0f, 1f)
+
+    fun cell(foreground: Color, normalMix: Float, blackMix: Float): Color {
+        val normal = lerp(background, foreground, normalMix * intensity)
+        if (nearBlack == 0f) return normal
+        // Compose's Oklab lerp makes small mixes into black almost invisible.
+        val boosted = foreground.copy(alpha = blackMix * intensity).compositeOver(background)
+        return lerp(normal, boosted, nearBlack)
+    }
+
+    return cell(ink, 0.085f, 0.155f) to cell(accent, 0.20f, 0.26f)
+}
+
 /**
  * Tilted, repeating Ikna pixel-emblem background pattern inspired by the brand banner.
  * Uses a shared monotonic frame clock and window-root tiling coordinates so adjacent
@@ -112,6 +134,9 @@ fun IknaBrandPatternBackdrop(
 ) {
     val colors = MaterialTheme.colorScheme
     val phase = rememberSharedBrandPatternPhase(animated)
+    val (inkCell, accentCell) = brandPatternCellColors(
+        colors.background, colors.onSurface, colors.primary, intensity
+    )
     var rootOrigin by remember { mutableStateOf(Offset.Zero) }
     Canvas(
         modifier = modifier
@@ -129,9 +154,6 @@ fun IknaBrandPatternBackdrop(
         // maps every row seamlessly onto the next row when phase wraps from 1 to 0.
         val driftX = if (animated) phase * (pitchX * 0.5f) else 0f
         val driftY = if (animated) phase * pitchY else 0f
-
-        val inkCell = lerp(colors.background, colors.onSurface, 0.085f * intensity)
-        val accentCell = lerp(colors.background, colors.primary, 0.20f * intensity)
 
         val angleDeg = -14f
         val invRad = (-angleDeg * PI / 180.0).toFloat()

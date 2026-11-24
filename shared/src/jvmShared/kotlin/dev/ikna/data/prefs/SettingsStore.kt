@@ -292,7 +292,9 @@ data class IknaSettings(
      */
     val updateSkipped: String = "",
     /** When the last check happened, epoch millis. Zero means never. */
-    val updateCheckedAt: Long = 0L
+    val updateCheckedAt: Long = 0L,
+    /** Optional local-only profile display name. Empty by default; never sent anywhere. */
+    val profileName: String = ""
 )
 
 class SettingsStore(private val store: DataStore<Preferences>) {
@@ -358,6 +360,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val updateCheck = booleanPreferencesKey("updateCheck")
         val updateSkipped = stringPreferencesKey("updateSkipped")
         val updateCheckedAt = longPreferencesKey("updateCheckedAt")
+        val profileName = stringPreferencesKey("profileName")
         // Internal Browse ledger. It is not a user preference and is not
         // restored from a settings backup, so an imported file cannot mint
         // passive cards without completing this installation's plans.
@@ -433,7 +436,8 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             answerMs = p[Keys.answerMs] ?: defaults.answerMs,
             updateCheck = p[Keys.updateCheck] ?: defaults.updateCheck,
             updateSkipped = p[Keys.updateSkipped] ?: defaults.updateSkipped,
-            updateCheckedAt = p[Keys.updateCheckedAt] ?: defaults.updateCheckedAt
+            updateCheckedAt = p[Keys.updateCheckedAt] ?: defaults.updateCheckedAt,
+            profileName = p[Keys.profileName] ?: defaults.profileName
         )
     }
 
@@ -602,6 +606,10 @@ class SettingsStore(private val store: DataStore<Preferences>) {
     }
 
     suspend fun markUpdateChecked(now: Long) = put { it[Keys.updateCheckedAt] = now }
+
+    suspend fun setProfileName(name: String) = put {
+        it[Keys.profileName] = name.trim().take(48)
+    }
 
     /**
      * Atomically credits a completed plan at most once and reconciles spending
