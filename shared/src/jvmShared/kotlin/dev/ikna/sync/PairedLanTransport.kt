@@ -75,7 +75,7 @@ class PairedLanTransport(
     )
     private class PayloadTooLargeException : IllegalArgumentException()
     private data class Pending(val invitation: PairingInvitation, val deadlineNanos: Long = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(INVITATION_MS), var attempts: Int = 0)
-    private val json = Json { ignoreUnknownKeys = false; isLenient = false }
+    private val json = Json { ignoreUnknownKeys = true; isLenient = false }
     private val identity = LanSyncSecurity.identity(privateDirectory)
     val deviceId: String = LanSyncSecurity.id(identity.certificate)
     private val gate = Any()
@@ -171,7 +171,8 @@ class PairedLanTransport(
                 pairingContext.ensureActive()
                 write(socket, Wire(operation = "pair", binding = binding, id = deviceId,
                     credential = invite.secret, challenge = challenge, certificate = identity.certificatePem(),
-                    port = ownPort, deviceName = sanitizeDeviceName(localDeviceName())))
+                    port = ownPort,
+                    deviceName = if (invite.deviceName.isNotBlank()) sanitizeDeviceName(localDeviceName()) else ""))
                 val response = read(socket)
                 require(response.version == 1 && response.operation == "paired" && response.binding == binding && response.challenge == challenge)
                 val peerName = sanitizeDeviceName(response.deviceName.ifBlank { invite.deviceName })
@@ -247,6 +248,7 @@ class PairedLanTransport(
                     val host = socket.inetAddress.hostAddress ?: error("No peer address")
                     LanSyncSecurity.address(host)
                     socket.startHandshake()
+                    socket.soTimeout = EXCHANGE_SOCKET_MS
                     val challenge = LanSyncSecurity.secret()
                     writeText(socket, challenge)
                     val request = read(socket)
@@ -288,7 +290,7 @@ class PairedLanTransport(
             peers += peer
             write(socket, Wire(operation = "paired", binding = binding, id = deviceId,
                 credential = peer.credential, challenge = request.challenge,
-                deviceName = sanitizeDeviceName(localDeviceName())))
+                deviceName = if (request.deviceName.isNotBlank()) sanitizeDeviceName(localDeviceName()) else ""))
         }
         publish()
     }
@@ -376,6 +378,7 @@ class PairedLanTransport(
             socket.enabledProtocols = socket.supportedProtocols.filter { it == "TLSv1.3" || it == "TLSv1.2" }.toTypedArray()
             socket.connect(InetSocketAddress(LanSyncSecurity.address(host), port), SOCKET_MS)
             socket.startHandshake()
+            socket.soTimeout = EXCHANGE_SOCKET_MS
             action(socket)
         }
     }
@@ -434,10 +437,12 @@ class PairedLanTransport(
         const val MAX_PEERS = 4
         const val COMPACT_INVITATION_PREFIX = "ikna-pair:1:"
         private const val SOCKET_MS = 5_000
-        private const val DEADLINE_MS = 30_000L
+        private const val EXCHANGE_SOCKET_MS = 30_000
+        private const val DEADLINE_MS = 60_000L
         private const val INVITATION_MS = 300_000L
         private const val MAX_PAIR_ATTEMPTS = 8
         private const val MAX_INVITATION_JSON_BYTES = 8192
+        private val invitationJson = Json { ignoreUnknownKeys = true; isLenient = false }
 
         fun sanitizeDeviceName(raw: String): String =
             raw.trim().replace(Regex("[\\r\\n\\t]+"), " ").take(48)
@@ -523,7 +528,7 @@ class PairedLanTransport(
                 trimmed
             }
             require(rawJson.length <= MAX_INVITATION_JSON_BYTES)
-            val value = Json.decodeFromString<PairingInvitation>(rawJson)
+            val value = invitationJson.decodeFromString<PairingInvitation>(rawJson)
             require(value.version == 1 && value.port in 1..65535 && value.secret.matches(Regex("[A-Za-z0-9_-]{43}")))
             LanSyncSecurity.address(value.host)
             LanSyncSecurity.certificate(value.certificate).checkValidity()

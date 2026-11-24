@@ -297,6 +297,16 @@ class ProfileTransferIntegrationTest {
         } finally { home.deleteRecursively() }
     }
 
+    @Test fun `reimported same deck with different local version counter merges cleanly`() = runBlocking {
+        fixture("a") { _, ar ->
+            val local = ar.profileTransfer.snapshot()
+            val reimported = local.copy(packs = local.packs.map { it.copy(version = it.version + 3) })
+            val preview = ar.profileTransfer.preview(reimported)
+            assertTrue(preview.canMerge)
+            assertEquals(ProfileTransferCodec.profileIdentity(local), ProfileTransferCodec.profileIdentity(reimported))
+        }
+    }
+
     private suspend fun expectRejected(block: suspend () -> Unit) {
         try { block(); fail("Expected rejection") } catch (_: IllegalArgumentException) { }
     }

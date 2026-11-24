@@ -64,6 +64,10 @@ class ProfileAdoptionService(
                 "local-profile-stale"
             }
             val candidate = slots.createCandidate()
+            val compatibleLocal = dev.ikna.data.repo.ProfileTransferRepository.filterCompatibleExtraContent(
+                incoming.copy(boundaryPresent = false),
+                local.copy(boundaryPresent = false, reviews = emptyList())
+            )
             var resultingIdentity: String
             val db = openNewDatabase(candidate.database)
             try {
@@ -72,20 +76,20 @@ class ProfileAdoptionService(
                 val chosenPreview = target.preview(chosen)
                 require(chosenPreview.canMerge) { "invalid-source-profile" }
                 target.commit(chosen, chosenPreview)
-                // Retain all compatible local content, but no local learning or reset generation.
-                val content = local.copy(boundaryPresent = false, reviews = emptyList())
-                val contentPreview = target.preview(content)
+                // Retain all compatible unique local decks, while letting the chosen source win any deck conflicts.
+                val contentPreview = target.preview(compatibleLocal)
                 require(contentPreview.canMerge) { "profile-content-conflict" }
-                target.commit(content, contentPreview)
+                target.commit(compatibleLocal, contentPreview)
                 // Deck enablement and installation timestamps belong to this device. Existing
                 // local decks keep them; newly received decks retain the importer's inactive default.
-                local.packs.forEach { pack -> db.chunkDao().upsertPack(pack) }
+                val localPacksById = local.packs.associateBy { it.id }
+                compatibleLocal.packs.forEach { pack -> localPacksById[pack.id]?.let { db.chunkDao().upsertPack(it) } }
                 val verified = target.snapshot()
                 resultingIdentity = ProfileTransferCodec.profileIdentity(verified)
                 require(ProfileTransferCodec.canonical(verified).reviews == ProfileTransferCodec.canonical(chosen).reviews) {
                     "profile-journal-verification-failed"
                 }
-                require(target.preview(chosen).canMerge && target.preview(content).canMerge) { "profile-content-verification-failed" }
+                require(target.preview(chosen).canMerge && target.preview(compatibleLocal).canMerge) { "profile-content-verification-failed" }
                 db.inTransaction {
                 caller.ensureActive()
                 db.profileSyncOperationDao().insert(ProfileSyncOperationEntity(
@@ -117,7 +121,7 @@ class ProfileAdoptionService(
                     "profile-journal-verification-failed"
                 }
                 require(target.preview(incoming.copy(boundaryPresent = false)).canMerge &&
-                    target.preview(local.copy(boundaryPresent = false, reviews = emptyList())).canMerge) {
+                    target.preview(compatibleLocal).canMerge) {
                     "profile-content-verification-failed"
                 }
             } finally { reopened.close() }

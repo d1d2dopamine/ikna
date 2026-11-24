@@ -193,7 +193,8 @@ class DeviceSyncController(
                     val alreadyApplied = repository.profileTransfer.appliedOperation(proposal.operationId,
                         configuration.afterLocalId, configuration.boundaryToken) != null
                     repository.profileTransfer.commitAdoptionDonor(incoming, preview, configuration.afterLocalId,
-                        configuration.boundaryToken, proposal.operationId, digest, journalAuthorization(proposal.operationId, digest))
+                        configuration.boundaryToken, proposal.operationId, digest, journalAuthorization(proposal.operationId, digest),
+                        allowConflictResolution = true)
                     val receipt = checkNotNull(repository.profileTransfer.appliedOperation(proposal.operationId,
                         configuration.afterLocalId, configuration.boundaryToken))
                     // Content-only donor changes also invalidate presentations, after storage guards return.

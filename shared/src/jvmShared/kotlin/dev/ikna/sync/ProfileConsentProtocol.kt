@@ -68,7 +68,8 @@ class ProfileConsentProtocol(
     private data class Offer(val snapshot: ProfileTransferSnapshot, val revision: String)
     private val mutex = Mutex()
     @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
-    private val json = Json { encodeDefaults = true; explicitNulls = false; ignoreUnknownKeys = false }
+    private val json = Json { encodeDefaults = true; explicitNulls = false; ignoreUnknownKeys = true }
+    private var peerWireProtocol: Int = WIRE_PROTOCOL
     private var completion: Completion? = savedCompletion
     private var completionConfirmed = false
     private var invalidatedOperationId: String? = savedInvalidation?.also { require(it.matches(ID)) }
@@ -115,7 +116,7 @@ class ProfileConsentProtocol(
         clearCurrentCatchUp()
         persistInvalidation(completion?.proposal?.operationId ?: proposal?.operationId ?: invalidatedOperationId)
         clearPending(); completion = null; completionConfirmed = false; store.saveCompletion(null)
-        peer = null; remote = null; publish()
+        peer = null; remote = null; peerWireProtocol = WIRE_PROTOCOL; publish()
     }
     suspend fun pause() = mutex.withLock {
         if (completion == null) clearPending()
@@ -156,7 +157,8 @@ class ProfileConsentProtocol(
         val incoming = checkNotNull(remote) { "awaiting-profile" }
         val own = offer()
         val checked = if (mode == Mode.MERGE) store.preview(incoming.snapshot) else store.previewAdoption(incoming.snapshot)
-        require(checked.localRevision == own.revision && checked.canMerge) { "profile-conflict-or-stale" }
+        val allowed = if (mode == Mode.MERGE) checked.canMerge else checked.canAdopt
+        require(checked.localRevision == own.revision && allowed) { "profile-conflict-or-stale" }
         proposal = Proposal(operationId = UUID.randomUUID().toString(), mode = mode,
             firstDevice = deviceId, secondDevice = peerId, binding = binding,
             firstSnapshot = ProfileTransferCodec.revision(own.snapshot),
@@ -172,7 +174,9 @@ class ProfileConsentProtocol(
         val p = checkNotNull(proposal) { "no-proposal" }
         require(p.operationId == operationId) { "stale-proposal" }
         require(receipt == null) { "already-applied" }
-        require((if (p.mode == Mode.MERGE) store.preview(remote!!.snapshot) else store.previewAdoption(remote!!.snapshot)) == preview && preview!!.canMerge) { "profile-conflict-or-stale" }
+        val current = if (p.mode == Mode.MERGE) store.preview(remote!!.snapshot) else store.previewAdoption(remote!!.snapshot)
+        val allowed = if (p.mode == Mode.MERGE) current.canMerge else current.canAdopt
+        require(current == preview && allowed) { "profile-conflict-or-stale" }
         localApproved = true
         applyIfApproved(); publish(); state
     }
@@ -183,10 +187,12 @@ class ProfileConsentProtocol(
         // tuple and stream-prefix formats. Reject older readers before nested
         // records or durable completion state can be interpreted or mutated.
         val envelope = json.parseToJsonElement(bytes.toString(Charsets.UTF_8)).jsonObject
-        if (envelope["protocol"]?.jsonPrimitive?.intOrNull != WIRE_PROTOCOL)
+        val wireVersion = envelope["protocol"]?.jsonPrimitive?.intOrNull
+        if (wireVersion !in SUPPORTED_WIRE_PROTOCOLS)
             throw UnsupportedSyncProtocolException()
         val wire = json.decodeFromJsonElement(Wire.serializer(), envelope)
         if (wire.journal != null) throw UnsupportedSyncProtocolException()
+        if (wireVersion != null && wireVersion < peerWireProtocol) peerWireProtocol = wireVersion
         checkPeer(peerId); validateCompletion(); expire()
         if (wire.proposal?.protocol?.let { it != 3 } == true ||
             wire.completion?.proposal?.protocol?.let { it != 3 } == true) throw UnsupportedSyncProtocolException()
@@ -209,7 +215,8 @@ class ProfileConsentProtocol(
                 require(ProfileTransferCodec.revision(own) == (if (first) p.firstSnapshot else p.secondSnapshot) &&
                     revision == (if (first) p.firstRevision else p.secondRevision)) { "local-profile-stale" }
                 val checked = if (p.mode == Mode.MERGE) store.preview(incoming) else store.previewAdoption(incoming)
-                require(checked.localRevision == revision && checked.canMerge) { "profile-conflict-or-stale" }
+                val allowed = if (p.mode == Mode.MERGE) checked.canMerge else checked.canAdopt
+                require(checked.localRevision == revision && allowed) { "profile-conflict-or-stale" }
             }
         }
         wire.completion?.let { received ->
@@ -283,7 +290,8 @@ class ProfileConsentProtocol(
                 require(ProfileTransferCodec.revision(own.snapshot) == (if (isFirst) p.firstSnapshot else p.secondSnapshot) &&
                     own.revision == (if (isFirst) p.firstRevision else p.secondRevision)) { "local-profile-stale" }
                 val checked = if (p.mode == Mode.MERGE) store.preview(incoming.snapshot) else store.previewAdoption(incoming.snapshot)
-                require(checked.localRevision == own.revision && checked.canMerge) { "profile-conflict-or-stale" }
+                val allowed = if (p.mode == Mode.MERGE) checked.canMerge else checked.canAdopt
+                require(checked.localRevision == own.revision && allowed) { "profile-conflict-or-stale" }
                 proposal = p; preview = checked
             }
             remote = incoming
@@ -311,8 +319,16 @@ class ProfileConsentProtocol(
     private fun journalProtocol(): IncrementalJournalProtocol = incremental ?: store.incremental(
         requireNotNull(completion), requireNotNull(peer)).also { incremental = it }
 
-    private fun encode(wire: Wire): ByteArray = json.encodeToString(wire).toByteArray(Charsets.UTF_8).also {
-        if (it.size > MAX_BYTES) throw dev.ikna.data.export.ProfileTransferLimitException(dev.ikna.data.export.ProfileTransferLimitException.Limit.BYTES)
+    private fun encode(wire: Wire): ByteArray {
+        val protocolVersion = peerWireProtocol
+        if (protocolVersion < WIRE_PROTOCOL) {
+            val hasPurpose = wire.snapshot?.reviews?.any { it.purpose != null } == true ||
+                wire.incremental?.data?.records?.any { it.purpose != null } == true
+            if (hasPurpose) throw UnsupportedSyncProtocolException()
+        }
+        return json.encodeToString(wire.copy(protocol = protocolVersion)).toByteArray(Charsets.UTF_8).also {
+            if (it.size > MAX_BYTES) throw dev.ikna.data.export.ProfileTransferLimitException(dev.ikna.data.export.ProfileTransferLimitException.Limit.BYTES)
+        }
     }
     private suspend fun persistInvalidation(operationId: String?) {
         // Durable before removing a checkpoint: a crash must not strand the other
@@ -356,8 +372,9 @@ class ProfileConsentProtocol(
             (p.mode == Mode.ADOPT_OTHER && p.secondDevice == deviceId)
 
     companion object {
-        /** v4 requires purpose-aware records; durable consent and stream formats remain v3. */
+        /** v4 supports purpose-aware records; v3 peers without optional_hard records remain compatible. */
         const val WIRE_PROTOCOL = 4
+        val SUPPORTED_WIRE_PROTOCOLS = setOf(3, WIRE_PROTOCOL)
         fun tupleDigest(proposal: Proposal): String = ProfileTransferCodec.digest(
             Json { encodeDefaults = true }.encodeToString(proposal).toByteArray(Charsets.UTF_8))
         const val TTL_MILLIS = 10 * 60 * 1000L

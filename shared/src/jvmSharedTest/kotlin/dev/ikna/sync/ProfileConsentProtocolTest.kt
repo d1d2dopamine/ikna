@@ -332,7 +332,7 @@ class ProfileConsentProtocolTest {
         p.a.approve(id); p.exchange(); p.b.approve(id); repeat(8) { p.exchange() }
         val saved = p.left.saved
         p.left.validationFailure = true // Must not be consulted for an incompatible envelope.
-        for (version in listOf(2, 3, 5)) {
+        for (version in listOf(2, 5)) {
             assertFailsWith<UnsupportedSyncProtocolException> {
                 p.a.receiveFrom("b", "{\"protocol\":$version,\"snapshot\":\"invalid-nested-records\"}".toByteArray())
             }
@@ -341,6 +341,39 @@ class ProfileConsentProtocolTest {
             assertEquals(1, p.left.commits)
             assertFalse(p.a.state.journalCaughtUp)
         }
+    }
+
+    @Test fun `v4 peer negotiates v3 wire with an older peer unless optional hard reviews exist`() = runBlocking {
+        val p = pair()
+        val v3Discovery = p.b.snapshotFor("a").toString(Charsets.UTF_8)
+            .replace("\"protocol\":4", "\"protocol\":3").toByteArray(Charsets.UTF_8)
+        p.a.receiveFrom("b", v3Discovery)
+        val negotiated = p.a.snapshotFor("b").toString(Charsets.UTF_8)
+        assertEquals(
+            kotlinx.serialization.json.JsonPrimitive(3),
+            Json.parseToJsonElement(negotiated).jsonObject["protocol"]
+        )
+        p.b.receiveFrom("a", negotiated.toByteArray(Charsets.UTF_8))
+        val id = p.a.propose("b").operationId!!
+        p.a.approve(id)
+        p.b.receiveFrom("a", p.a.snapshotFor("b"))
+        p.b.approve(id)
+        repeat(4) { p.exchange() }
+        assertTrue(p.a.state.complete)
+        assertTrue(p.b.state.complete)
+
+        // If optional_hard reviews are present, never silently drop them to a v3 peer.
+        val guarded = pair()
+        guarded.left.empty = guarded.left.empty.copy(reviews = listOf(ReviewRecord(
+            chunkId = "technical-fixture", ts = 1, rating = 3,
+            eventId = "optional-answer", purpose = "optional_hard")))
+        val v3Frame = guarded.b.snapshotFor("a").toString(Charsets.UTF_8)
+            .replace("\"protocol\":4", "\"protocol\":3").toByteArray(Charsets.UTF_8)
+        guarded.a.receiveFrom("b", v3Frame)
+        assertFailsWith<UnsupportedSyncProtocolException> {
+            guarded.a.snapshotFor("b")
+        }
+        Unit
     }
 
     @Test fun `v4 envelopes resume existing v3 consent and stream identities without bootstrap`() = runBlocking {

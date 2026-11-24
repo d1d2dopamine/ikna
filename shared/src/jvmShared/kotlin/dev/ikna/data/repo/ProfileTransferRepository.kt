@@ -132,14 +132,16 @@ class ProfileTransferRepository internal constructor(
 
     suspend fun commitAdoptionDonor(incoming: ProfileTransferSnapshot, preview: ProfileMergePreview,
                                    afterLocalId: Long, boundaryToken: String?, operationId: String,
-                                   operationDigest: String, journalAuthorization: JournalAuthorization? = null): RestoreResult =
-        commitProfile(incoming, preview, afterLocalId, boundaryToken, operationId, operationDigest, "adopt-donor", journalAuthorization)
+                                   operationDigest: String, journalAuthorization: JournalAuthorization? = null,
+                                   allowConflictResolution: Boolean = false): RestoreResult =
+        commitProfile(incoming, preview, afterLocalId, boundaryToken, operationId, operationDigest, "adopt-donor", journalAuthorization, allowConflictResolution)
 
     private suspend fun commitProfile(source: ProfileTransferSnapshot, preview: ProfileMergePreview,
                                       afterLocalId: Long, boundaryToken: String?, operationId: String?,
-                                      operationDigest: String?, mode: String, journalAuthorization: JournalAuthorization?): RestoreResult =
+                                      operationDigest: String?, mode: String, journalAuthorization: JournalAuthorization?,
+                                      allowConflictResolution: Boolean = false): RestoreResult =
         restore.journalMergeGuard {
-            val incoming = if (mode == "adopt-donor") source.copy(reviews = emptyList()) else source
+            val rawIncoming = if (mode == "adopt-donor") source.copy(reviews = emptyList()) else source
             val caller = currentCoroutineContext()
             db.inTransaction {
                 caller.ensureActive()
@@ -161,14 +163,16 @@ class ProfileTransferRepository internal constructor(
                         if (journalAuthorization != null) restore.incrementalJournal.requireAuthorizationInTransaction(
                             journalAuthorization, afterLocalId, boundaryToken, caller)
                         caller.ensureActive()
-                        return@inTransaction RestoreResult(0, incoming.reviews.size, 0)
+                        return@inTransaction RestoreResult(0, rawIncoming.reviews.size, 0)
                     }
                 }
                 val local = snapshotInTransaction(afterLocalId, boundaryToken, caller)
-                val current = compare(local, incoming, afterLocalId, boundaryToken)
+                val current = compare(local, rawIncoming, afterLocalId, boundaryToken)
                     .copy(incomingRevision = ProfileTransferCodec.revision(source))
                 require(current == preview) { "Profile changed after preview; review again" }
-                require(current.canMerge) { "Profile has identity conflicts" }
+                val resolveConflicts = allowConflictResolution && mode == "adopt-donor" && !current.canMerge && current.canAdopt
+                require(current.canMerge || resolveConflicts) { "Profile has identity conflicts" }
+                val incoming = if (resolveConflicts) filterCompatibleExtraContent(local, rawIncoming) else rawIncoming
                 val dao = db.chunkDao()
                 val packIds = local.packs.map { it.id }.toSet()
                 val chunkIds = local.chunks.map { it.id }.toSet()
@@ -183,7 +187,7 @@ class ProfileTransferRepository internal constructor(
                 val contextIds = local.contexts.map(::contextKey).toSet()
                 dao.upsertChunkContexts(incoming.contexts.filter { contextKey(it) !in contextIds })
                 val result = restore.mergeJournalLocked(incoming.reviews, afterLocalId, boundaryToken)
-                if (current.addedPacks > 0 || current.addedTargets > 0 ||
+                if (incoming.packs.any { it.id !in packIds } || incoming.chunks.any { it.id !in chunkIds } ||
                     incoming.memberships.any { listOf(it.packId, it.chunkId) !in membershipIds } ||
                     incoming.contexts.any { contextKey(it) !in contextIds }) db.planDao().clear()
                 // Bounds apply to the resulting profile too, even without a protocol receipt.
@@ -206,16 +210,18 @@ class ProfileTransferRepository internal constructor(
         val localDigest = ProfileTransferCodec.revision(local)
         val localRevision = ProfileTransferCodec.digest("$localDigest\n$cutoff\n${token.orEmpty()}".toByteArray(Charsets.UTF_8))
         val remoteRevision = ProfileTransferCodec.revision(remote)
+        val structuralErrors = mutableListOf<String>()
         val errors = mutableListOf<String>()
-        validate(local, "local", errors)
-        validate(remote, "incoming", errors)
+        validate(local, "local", structuralErrors)
+        validate(remote, "incoming", structuralErrors)
+        errors += structuralErrors
         fun <T, K> conflicts(a: List<T>, b: List<T>, key: (T) -> K, canonical: (T) -> Any, label: String) {
             val known = a.associateBy(key)
             b.forEach { row -> known[key(row)]?.let { old ->
                 if (canonical(old) != canonical(row)) errors += "$label identity conflict: ${key(row)}"
             } }
         }
-        conflicts(local.packs, remote.packs, { it.id }, { it.copy(installedAt = 0, isActive = true) }, "deck")
+        conflicts(local.packs, remote.packs, { it.id }, { it.copy(version = 0, installedAt = 0, isActive = true) }, "deck")
         // packId is a local home pointer; actual membership identities are compared separately.
         conflicts(local.chunks, remote.chunks, { it.id }, { it.copy(packId = "") }, "target")
         conflicts(local.memberships, remote.memberships, { listOf(it.packId, it.chunkId) }, { it }, "membership")
@@ -246,11 +252,19 @@ class ProfileTransferRepository internal constructor(
         val union = (localRecords + remoteRecords).associateBy { it.eventId }
         val targets = localTargets + remote.chunks.map { it.id }
         union.values.forEach { row ->
-            if (row.chunkId !in targets) errors += "Missing journal target: ${row.chunkId}"
+            if (row.chunkId !in targets) {
+                val msg = "Missing journal target: ${row.chunkId}"
+                errors += msg
+                structuralErrors += msg
+            }
             row.undoEventId?.let { undo ->
                 val original = union[undo]
                 if (original == null || original.undoEventId != null || original.chunkId != row.chunkId ||
-                    original.level != row.level || original.purpose != row.purpose) errors += "Invalid undo target: $undo"
+                    original.level != row.level || original.purpose != row.purpose) {
+                    val msg = "Invalid undo target: $undo"
+                    errors += msg
+                    structuralErrors += msg
+                }
             }
         }
         try {
@@ -262,13 +276,18 @@ class ProfileTransferRepository internal constructor(
                 contexts = (local.contexts + remote.contexts).distinctBy(::contextKey),
                 reviews = union.values.toList()
             ))
-        } catch (_: IllegalArgumentException) { errors += "Combined profile exceeds transfer limits" }
+        } catch (_: IllegalArgumentException) {
+            val msg = "Combined profile exceeds transfer limits"
+            errors += msg
+            structuralErrors += msg
+        }
         val localPackIds = local.packs.map { it.id }.toSet()
         return ProfileMergePreview(localRevision, remoteRevision,
             remote.packs.count { it.id !in localPackIds },
             remote.chunks.count { it.id !in localTargets },
             remoteRecords.map { it.eventId }.toSet().minus(localRecords.map { it.eventId }.toSet()).size,
-            errors.distinct().sorted())
+            errors.distinct().sorted(),
+            canAdopt = structuralErrors.isEmpty())
     }
 
     private fun boundaryIdentity(cutoff: Long, token: String?): String =
@@ -318,6 +337,69 @@ class ProfileTransferRepository internal constructor(
         // A transfer snapshot is portable, never a row-id-based restore file.
         if (snapshot.reviews.any { it.eventId == null || it.id != 0L || it.undoOf != null || it.synthetic }) {
             errors += "$origin non-portable journal"
+        }
+    }
+
+    companion object {
+        /**
+         * Keeps only unique decks from [extra] that do not conflict with [base], stripping reviews.
+         * Used by authoritative adoption so picking one device always succeeds while preserving
+         * any unrelated unique decks installed on the other device.
+         */
+        fun filterCompatibleExtraContent(
+            base: ProfileTransferSnapshot,
+            extra: ProfileTransferSnapshot
+        ): ProfileTransferSnapshot {
+            val basePackIds = base.packs.map { it.id }.toSet()
+            val baseChunks = base.chunks.associateBy { it.id }
+            val baseTokens = base.tokens.groupBy { it.chunkId }.mapValues { (_, list) -> list.sortedBy { it.position } }
+            val extraChunks = extra.chunks.associateBy { it.id }
+            val extraTokens = extra.tokens.groupBy { it.chunkId }.mapValues { (_, list) -> list.sortedBy { it.position } }
+            val extraMembershipsByPack = extra.memberships.groupBy { it.packId }
+            val extraContextsByPack = extra.contexts.groupBy { it.packId }
+
+            val keptPackIds = LinkedHashSet<String>()
+            for (pack in extra.packs) {
+                if (pack.id in basePackIds) continue
+                val packMemberships = extraMembershipsByPack[pack.id].orEmpty()
+                val packContexts = extraContextsByPack[pack.id].orEmpty()
+                val referencedChunks = (packMemberships.map { it.chunkId } + packContexts.map { it.chunkId }).toSet()
+                val compatible = referencedChunks.all { chunkId ->
+                    val baseChunk = baseChunks[chunkId]
+                    val extraChunk = extraChunks[chunkId]
+                    extraChunk != null && (baseChunk == null || (
+                        baseChunk.copy(packId = "") == extraChunk.copy(packId = "") &&
+                            baseTokens[chunkId].orEmpty() == extraTokens[chunkId].orEmpty()
+                        ))
+                }
+                if (compatible) keptPackIds += pack.id
+            }
+
+            val keptPacks = extra.packs.filter { it.id in keptPackIds }
+            val keptMemberships = extra.memberships.filter { it.packId in keptPackIds }
+            val keptContexts = extra.contexts.filter { it.packId in keptPackIds }
+            val homePackByChunk = LinkedHashMap<String, String>()
+            for (membership in keptMemberships) {
+                homePackByChunk.putIfAbsent(membership.chunkId, membership.packId)
+            }
+            val keptChunks = homePackByChunk.mapNotNull { (chunkId, homePack) ->
+                val chunk = extraChunks[chunkId] ?: return@mapNotNull null
+                if (chunk.packId in keptPackIds) chunk else chunk.copy(packId = homePack)
+            }
+            val keptChunkIds = keptChunks.map { it.id }.toSet()
+            val keptTokens = extra.tokens.filter { it.chunkId in keptChunkIds }
+            return ProfileTransferCodec.canonical(
+                ProfileTransferSnapshot(
+                    version = 1,
+                    boundaryPresent = false,
+                    packs = keptPacks,
+                    chunks = keptChunks,
+                    tokens = keptTokens,
+                    memberships = keptMemberships,
+                    contexts = keptContexts,
+                    reviews = emptyList()
+                )
+            )
         }
     }
 }

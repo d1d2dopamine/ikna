@@ -96,10 +96,20 @@ class RestoreRepository(
     }
 
     /** Strict, additive union. Any invalid payload rolls back history AND derived writes. */
-    suspend fun mergeJournal(records: List<ReviewRecord>, afterLocalId: Long = 0L, boundaryToken: String? = null): RestoreResult =
-        journalMergeGuard { mergeJournalLocked(records, afterLocalId, boundaryToken) }
+    suspend fun mergeJournal(
+        records: List<ReviewRecord>,
+        afterLocalId: Long = 0L,
+        boundaryToken: String? = null,
+        skipMissingTargets: Boolean = false
+    ): RestoreResult =
+        journalMergeGuard { mergeJournalLocked(records, afterLocalId, boundaryToken, skipMissingTargets) }
 
-    internal suspend fun mergeJournalLocked(records: List<ReviewRecord>, afterLocalId: Long, boundaryToken: String?): RestoreResult {
+    internal suspend fun mergeJournalLocked(
+        records: List<ReviewRecord>,
+        afterLocalId: Long,
+        boundaryToken: String?,
+        skipMissingTargets: Boolean = false
+    ): RestoreResult {
         val caller = currentCoroutineContext()
         caller.ensureActive()
         val incoming = validateJournalRecords(records)
@@ -108,8 +118,16 @@ class RestoreRepository(
             validateSyncBoundary(afterLocalId, boundaryToken)
             val localRows = reviewDao.afterId(afterLocalId)
             val local = dev.ikna.data.export.JournalIdentity.normalize(localRows.map { ReviewRecord.of(it) })
+            val filteredIncoming = if (!skipMissingTargets) incoming else {
+                val kept = incoming.filter { r ->
+                    caller.ensureActive()
+                    db.chunkDao().chunk(r.chunkId) != null
+                }
+                val availableIds = (local.mapNotNull { it.eventId } + kept.mapNotNull { it.eventId }).toSet()
+                kept.filter { r -> r.undoEventId == null || r.undoEventId in availableIds }
+            }
             val union = LinkedHashMap<String, ReviewRecord>()
-            for (r in local + incoming) {
+            for (r in local + filteredIncoming) {
                 val old = union.putIfAbsent(r.eventId!!, r)
                 require(old == null || old == r) { "Conflicting payload for event ${r.eventId}" }
             }
@@ -118,7 +136,9 @@ class RestoreRepository(
             for (r in union.values) {
                 totalDuration = Math.addExact(totalDuration, r.durationMs)
                 caller.ensureActive()
-                require(db.chunkDao().chunk(r.chunkId) != null) { "Install the matching deck before syncing target ${r.chunkId}" }
+                if (!skipMissingTargets) {
+                    require(db.chunkDao().chunk(r.chunkId) != null) { "Install the matching deck before syncing target ${r.chunkId}" }
+                }
                 r.undoEventId?.let { target ->
                     val answer = union[target]
                     require(answer != null && answer.undoEventId == null && answer.chunkId == r.chunkId &&

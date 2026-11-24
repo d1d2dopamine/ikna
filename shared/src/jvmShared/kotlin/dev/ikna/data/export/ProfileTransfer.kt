@@ -26,7 +26,8 @@ data class ProfileMergePreview(
     val addedPacks: Int,
     val addedTargets: Int,
     val addedReviews: Int,
-    val conflicts: List<String>
+    val conflicts: List<String>,
+    val canAdopt: Boolean = conflicts.isEmpty()
 ) {
     val canMerge: Boolean get() = conflicts.isEmpty()
 }
@@ -77,7 +78,7 @@ object ProfileTransferCodec {
 
     fun profileIdentity(snapshot: ProfileTransferSnapshot): String = revision(snapshot.copy(
         boundaryPresent = false,
-        packs = snapshot.packs.map { it.copy(installedAt = 0, isActive = true) },
+        packs = snapshot.packs.map { it.copy(version = 0, installedAt = 0, isActive = true) },
         chunks = snapshot.chunks.map { it.copy(packId = "") }
     ))
     fun revision(snapshot: ProfileTransferSnapshot): String = digest(encode(snapshot))

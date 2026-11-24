@@ -30,7 +30,7 @@ object SyncDeltaFile {
     const val FORMAT_VERSION = 1
     const val MAX_COMPRESSED_BYTES = 16 * 1024 * 1024
     private const val MAX_DECOMPRESSED_BYTES = 64 * 1024 * 1024
-    private val json = Json { ignoreUnknownKeys = false; isLenient = false; encodeDefaults = true }
+    private val json = Json { ignoreUnknownKeys = true; isLenient = false; encodeDefaults = true }
 
     @Serializable
     data class Envelope(
@@ -154,7 +154,8 @@ object SyncDeltaFile {
         val result: RestoreResult = repository.mergeJournal(
             records = envelope.records,
             afterLocalId = boundary?.afterLocalId ?: 0L,
-            boundaryToken = boundary?.token
+            boundaryToken = boundary?.token,
+            skipMissingTargets = true
         )
         if (result.imported > 0 || result.replayed > 0) {
             onMerged()

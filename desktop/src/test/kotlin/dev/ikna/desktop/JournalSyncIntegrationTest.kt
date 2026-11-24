@@ -44,6 +44,18 @@ class JournalSyncIntegrationTest {
             assertEquals(0, ar.mergeJournal(br.snapshotJournal()).replayed)
         } }
     }
+    @Test fun `skipMissingTargets imports installed deck reviews and skips uninstalled targets`() = runBlocking {
+        fixture { db, r ->
+            val result = r.mergeJournal(
+                listOf(answer("installed-a"), answer("uninstalled-b").copy(chunkId = "missing-deck-target")),
+                skipMissingTargets = true
+            )
+            assertEquals(1, result.imported)
+            assertEquals(1, result.skipped)
+            assertEquals(listOf("installed-a"), db.reviewDao().all().map { it.eventId })
+        }
+    }
+
     @Test fun `conflicting identity and missing content fail without partial state`() = runBlocking {
         fixture { db, r ->
             r.mergeJournal(listOf(answer("a")))

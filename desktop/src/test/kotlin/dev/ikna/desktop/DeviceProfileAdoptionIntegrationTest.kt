@@ -61,9 +61,9 @@ class DeviceProfileAdoptionIntegrationTest {
             }
         }
         private fun slot(file: File) = slots.slotId(file)
-        suspend fun seed(id: String) {
+        suspend fun seed(id: String, translation: String = "__TEST__") {
             db.chunkDao().upsertPack(PackEntity(id, 1, "en", 1, TS, title = "__SYNTHETIC_DECK__"))
-            db.chunkDao().insertChunksIgnore(listOf(ChunkEntity(id, id, "en", "__FIXTURE__", "__FIXTURE__", "__TEST__", 0, 1, 1)))
+            db.chunkDao().insertChunksIgnore(listOf(ChunkEntity(id, id, "en", "__FIXTURE__", "__FIXTURE__", translation, 0, 1, 1)))
             db.chunkDao().upsertPackChunks(listOf(PackChunkEntity(id, id, 1)))
             repository.mergeJournal(listOf(ReviewRecord(chunkId = id, ts = TS, rating = 3,
                 eventId = "event-$id", durationMs = 100, prevIsNew = true)))
@@ -229,6 +229,28 @@ class DeviceProfileAdoptionIntegrationTest {
                 source.controller.state.value.profileConsent.complete && recipient.controller.state.value.profileConsent.complete
             }
             assertEquals(listOf("event-__SOURCE__"), recipient.repository.snapshotJournal().map { it.eventId })
+        }
+    }
+
+    @Test(timeout = 60_000) fun `authoritative adoption resolves conflicting shared deck while keeping unique decks`() = runBlocking {
+        fixture { source, recipient ->
+            source.seed("__CONFLICT__", "__SOURCE_TEXT__")
+            recipient.seed("__CONFLICT__", "__RECIPIENT_TEXT__")
+            val operation = propose(source, recipient)
+            assertFalse(source.controller.state.value.profileConsent.preview!!.canMerge)
+            assertTrue(source.controller.state.value.profileConsent.preview!!.canAdopt)
+            source.controller.approveProfile(operation)
+            recipient.controller.approveProfile(operation)
+            withTimeout(15_000) { recipient.adoptionFinished.await() }
+            recipient.restart()
+            eventually("Authoritative adoption with conflicting deck must converge") {
+                source.controller.state.value.profileConsent.complete && recipient.controller.state.value.profileConsent.complete
+            }
+            assertEquals("__SOURCE_TEXT__", recipient.db.chunkDao().chunk("__CONFLICT__")!!.translation)
+            assertEquals("__SOURCE_TEXT__", source.db.chunkDao().chunk("__CONFLICT__")!!.translation)
+            assertEquals(setOf("__SOURCE__", "__RECIPIENT__", "__CONFLICT__"), recipient.db.chunkDao().packs().map { it.id }.toSet())
+            assertEquals(setOf("__SOURCE__", "__RECIPIENT__", "__CONFLICT__"), source.db.chunkDao().packs().map { it.id }.toSet())
+            assertEquals(source.repository.snapshotJournal(), recipient.repository.snapshotJournal())
         }
     }
 

@@ -107,12 +107,12 @@ fun ProfileConsentPanel(
                     )
                     IknaWideButton(
                         label = S.t("sync.profile.use_this_named").replace("{device}", thisLabel),
-                        enabled = preview.canMerge,
+                        enabled = preview.canAdopt,
                         onClick = { onProposeAdoption(peer, true) }
                     )
                     IknaWideButton(
                         label = S.t("sync.profile.use_other_named").replace("{device}", otherLabel),
-                        enabled = preview.canMerge,
+                        enabled = preview.canAdopt,
                         onClick = { onProposeAdoption(peer, false) }
                     )
                 } else {
@@ -122,9 +122,10 @@ fun ProfileConsentPanel(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     if (!state.localApproved) {
+                        val approveEnabled = if (state.mode == ProfileConsentProtocol.Mode.MERGE) preview.canMerge else preview.canAdopt
                         IknaWideButton(
                             label = S.t("sync.profile.approve"),
-                            enabled = preview.canMerge,
+                            enabled = approveEnabled,
                             onClick = { state.operationId?.let(onApprove) }
                         )
                     }
