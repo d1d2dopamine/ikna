@@ -12,7 +12,12 @@ import java.time.format.DateTimeFormatter
 
 /** Same opt-in controls on phone and desktop, without a second pairing implementation. */
 @Composable
-fun DeviceSyncSettings(controller: DeviceSyncController) {
+fun DeviceSyncSettings(
+    controller: DeviceSyncController,
+    scannedCode: String? = null,
+    onScannedCodeConsumed: () -> Unit = {},
+    onScanQr: (() -> Unit)? = null
+) {
     val current by controller.state.collectAsState()
     val scope = rememberCoroutineScope()
     val state = DeviceSyncUiState(
@@ -46,7 +51,10 @@ fun DeviceSyncSettings(controller: DeviceSyncController) {
         onPair = { scope.launch { controller.pair(it) } },
         onRevoke = { scope.launch { controller.revoke() } },
         onRevokePeer = { scope.launch { controller.revokePeer(it) } },
-        onStartNewHistory = { scope.launch { controller.startNewHistory() } })
+        onStartNewHistory = { scope.launch { controller.startNewHistory() } },
+        scannedCode = scannedCode,
+        onScannedCodeConsumed = onScannedCodeConsumed,
+        onScanQr = onScanQr)
     if (current.recoveryAvailable) ProfileRecoveryPanel {
         scope.launch { controller.recoverProfile() }
     }

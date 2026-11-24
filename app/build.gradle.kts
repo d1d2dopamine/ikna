@@ -287,6 +287,10 @@ dependencies {
     // than every architecture to each APK.
     implementation("com.github.luben:zstd-jni:1.5.6-8")
 
+    // Pure open-source QR scanner (Apache 2.0, zero Google Play Services) for
+    // one-tap serverless LAN pairing via QR code.
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
     testImplementation("junit:junit:4.13.2")
 
     // On-device tests. Only app/src/androidTest uses these, and only

@@ -38,6 +38,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -200,6 +201,7 @@ fun SwipeableCard(
     suspend fun completeDirectGrade(rating: Rating, observation: ReviewSignals) {
         soundNow.value.play(if (rating == Rating.GOOD) IknaSoundCue.KNOW else IknaSoundCue.DONT_KNOW)
         throwing.value = rating
+        var rated = false
         try {
             if (animations) {
                 offsetX.snapTo(drag.value)
@@ -208,13 +210,16 @@ fun SwipeableCard(
             }
             if (currentKey.value == key) {
                 rateNow.value(rating, observation)
+                rated = true
                 if (animations) withFrameNanos { }
             }
         } finally {
-            drag.value = 0f
-            usesAnimatedOffset.value = false
-            throwing.value = null
-            flying.value = false
+            if (!rated) {
+                drag.value = 0f
+                usesAnimatedOffset.value = false
+                throwing.value = null
+                flying.value = false
+            }
         }
     }
 
@@ -254,6 +259,7 @@ fun SwipeableCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
+                .clipToBounds()
                 .onGloballyPositioned { signals.shown() }
                 .semantics {
                     // TalkBack follows the same two-step contract as a finger. The
@@ -377,12 +383,18 @@ fun SwipeableCard(
                                     offsetX.snapTo(drag.value)
                                     usesAnimatedOffset.value = true
                                     if (animations) throwOut(offsetX, rating, velocity)
-                                    if (currentKey.value == key) rateNow.value(rating, observation)
-                                    throwing.value = null
-                                    offsetX.snapTo(0f)
-                                    drag.value = 0f
-                                    usesAnimatedOffset.value = false
-                                    flying.value = false
+                                    if (currentKey.value == key) {
+                                        rateNow.value(rating, observation)
+                                        // Keep the dismissed card off-screen while the next card loads;
+                                        // remember(key) creates fresh centered state when key advances.
+                                        if (animations) withFrameNanos { }
+                                    } else {
+                                        throwing.value = null
+                                        offsetX.snapTo(0f)
+                                        drag.value = 0f
+                                        usesAnimatedOffset.value = false
+                                        flying.value = false
+                                    }
                                 }
                             }
                         }
@@ -411,8 +423,7 @@ fun SwipeableCard(
                         val landed = arrival.value.coerceIn(0f, 1f)
                         val travelled = shift()
                         translationX = travelled
-                        val lift = abs(progress())
-                        translationY = if (animations) ((1f - landed) * 5f - 4f * lift).dp.toPx() else 0f
+                        translationY = if (animations) ((1f - landed) * 6f).dp.toPx() else 0f
                         rotationZ = if (animations) (travelled / ROTATION_DIVISOR).coerceIn(-6f, 6f) else 0f
                         alpha = if (saving && animations) 0f else landed
                     }

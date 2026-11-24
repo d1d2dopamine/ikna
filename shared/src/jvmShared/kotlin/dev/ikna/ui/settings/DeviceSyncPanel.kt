@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,13 +67,23 @@ fun DeviceSyncPanel(
     onRevoke: () -> Unit,
     onRevokePeer: (String) -> Unit,
     onStartNewHistory: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    scannedCode: String? = null,
+    onScannedCodeConsumed: () -> Unit = {},
+    onScanQr: (() -> Unit)? = null
 ) {
     var revokeId by remember(state.peers.map { it.id }) { mutableStateOf<String?>(null) }
     var pasted by remember(state.enabled, state.paired, state.blockedAfterReset) { mutableStateOf("") }
     var consent by remember(state.enabled, state.paired, state.blockedAfterReset) { mutableStateOf(false) }
     var confirmNewHistory by remember(state.blockedAfterReset, state.canStartNewHistory) { mutableStateOf(false) }
     var address by remember(state.localAddresses) { mutableStateOf(state.localAddresses.firstOrNull().orEmpty()) }
+    LaunchedEffect(scannedCode) {
+        val code = scannedCode?.trim().orEmpty()
+        if (code.isNotEmpty()) {
+            pasted = code.take(4096)
+            onScannedCodeConsumed()
+        }
+    }
     val canPair = state.enabled && !state.paired && !state.blockedAfterReset && !state.busy && consent
     val pair = {
         if (canPair && pasted.isNotBlank()) {
@@ -236,6 +247,12 @@ fun DeviceSyncPanel(
                     modifier = Modifier.weight(1f),
                     onClick = pair
                 )
+                if (onScanQr != null) {
+                    IknaTextButton(
+                        label = S.t("sync.scan_qr"),
+                        onClick = onScanQr
+                    )
+                }
                 IknaTextButton(
                     label = S.t("sync.paste_btn"),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

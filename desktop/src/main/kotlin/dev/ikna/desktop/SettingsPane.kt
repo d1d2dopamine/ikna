@@ -1,5 +1,7 @@
 package dev.ikna.desktop
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -495,6 +497,27 @@ fun SettingsPane(
                                 }
                             }
                         )
+                        Spacer(Modifier.height(16.dp))
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(palette.surface)
+                                .border(1.dp, palette.line)
+                                .padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = S.t("sync.title"),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = palette.ink
+                            )
+                            Text(
+                                text = S.t("sync.dev_notice"),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = palette.muted
+                            )
+                        }
                         Spacer(Modifier.height(16.dp))
                     }
                     Spacer(Modifier.height(8.dp))

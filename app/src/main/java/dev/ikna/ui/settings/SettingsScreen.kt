@@ -22,6 +22,8 @@ import android.provider.OpenableColumns
 import android.speech.tts.TextToSpeech
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -265,6 +267,14 @@ fun SettingsScreen(
     var syncFileBusy by remember { mutableStateOf(false) }
     var syncFileStatus by remember { mutableStateOf<String?>(null) }
     var syncFileError by remember { mutableStateOf(false) }
+    var scannedSyncCode by remember { mutableStateOf<String?>(null) }
+
+    val qrScannerLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
+        val code = result.contents?.trim()
+        if (!code.isNullOrEmpty()) {
+            scannedSyncCode = code
+        }
+    }
 
     val syncFileExportPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument(dev.ikna.sync.SyncDeltaFile.MIME_TYPE)
@@ -1001,7 +1011,21 @@ fun SettingsScreen(
                         icon = iknaSettingsSectionGlyph(ID_DATA)
                     ) {
                         if (!container.isDeveloperMode) {
-                            DeviceSyncSettings(container.deviceSync)
+                            DeviceSyncSettings(
+                                controller = container.deviceSync,
+                                scannedCode = scannedSyncCode,
+                                onScannedCodeConsumed = { scannedSyncCode = null },
+                                onScanQr = {
+                                    qrScannerLauncher.launch(
+                                        ScanOptions().apply {
+                                            setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                                            setPrompt(S.t("sync.scan_prompt"))
+                                            setBeepEnabled(false)
+                                            setOrientationLocked(false)
+                                        }
+                                    )
+                                }
+                            )
                             SyncFilePanel(
                                 busy = syncFileBusy,
                                 statusMessage = syncFileStatus,
@@ -1013,6 +1037,27 @@ fun SettingsScreen(
                                     syncFileMergePicker.launch(arrayOf("*/*"))
                                 }
                             )
+                            Spacer(Modifier.height(16.dp))
+                        } else {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(palette.surface)
+                                    .border(1.dp, palette.line)
+                                    .padding(14.dp),
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = S.t("sync.title"),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = palette.ink
+                                )
+                                Text(
+                                    text = S.t("sync.dev_notice"),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = palette.muted
+                                )
+                            }
                             Spacer(Modifier.height(16.dp))
                         }
                         IknaSettingsToggleRow(

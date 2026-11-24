@@ -153,12 +153,10 @@ object Motion {
      */
     fun thrown(speedPxPerSecond: Float, haste: Float = 1f): AnimationSpec<Float> {
         val speed = max(abs(speedPxPerSecond), 0f)
-        // The throw decides this much on its own, and this part is unchanged: with
-        // no weight asked for, a flick still leaves in 120ms and a slow push in
-        // 220.
-        val base = (220f - speed / 45f).coerceIn(120f, 220f)
+        // Smooth, deliberate exit: a fast flick leaves in ~210ms and a slow push in ~320ms.
+        val base = (320f - speed / 38f).coerceIn(210f, 320f)
         val scale = if (haste <= 0f) 1f else haste
-        val millis = (base / scale).coerceIn(90f, 340f).toInt()
+        val millis = (base / scale).coerceIn(180f, 380f).toInt()
         return tween(durationMillis = millis, easing = FastOutLinearInEasing)
     }
 }

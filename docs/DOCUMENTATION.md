@@ -127,6 +127,7 @@ change.
 | [UNSCHEDULED.md](UNSCHEDULED.md) | Optional ideas, explicitly not commitments. |
 | [REFACTOR.md](REFACTOR.md) | The planned split of two oversized files. |
 | [RUST-CORE-PLAN.md](RUST-CORE-PLAN.md) | Deferred future plan for an optional Rust compute core (`ikna-core`) paired with the major refactor. |
+| [PLANNED-ROADMAP.md](PLANNED-ROADMAP.md) | Open post-cycle tracks: major refactor & oversized files, deferred Rust core, Voice/TTS progression, and Catalogue v2 replenishment. |
 
 ## Historical evidence (do not carry status forward from these)
 
