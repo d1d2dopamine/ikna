@@ -25,10 +25,11 @@ class QrCodeEncoderTest {
 
     @Test
     fun compactInvitationRoundTripsThroughDeflatePrefix() {
-        val raw = """{"version":1,"host":"192.168.1.42","port":45123,"certificate":"-----BEGIN CERTIFICATE-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA\n-----END CERTIFICATE-----","binding":{"groupId":"g1","epoch":"e1","freshStart":false},"secret":"0123456789abcdef0123456789abcdef0123456789a","expiresAtMillis":9999999999999}"""
+        val pemBody = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtokenSampleLine123456\n".repeat(16)
+        val raw = """{"version":1,"host":"192.168.1.42","port":45123,"certificate":"-----BEGIN CERTIFICATE-----\n$pemBody-----END CERTIFICATE-----","binding":{"groupId":"g1","epoch":"e1","freshStart":false},"secret":"0123456789abcdef0123456789abcdef0123456789a","expiresAtMillis":9999999999999}"""
         val compact = PairedLanTransport.encodeCompactInvitation(raw)
         assertTrue(compact.startsWith(PairedLanTransport.COMPACT_INVITATION_PREFIX))
-        assertTrue(compact.length < raw.length, "Compact encoding should shorten typical JSON invitations")
+        assertTrue(compact.length < raw.length, "Compact encoding should shorten full PEM JSON invitations")
         val matrix = QrCodeEncoder.encode(compact)
         assertTrue(matrix.size in 21..177)
     }
