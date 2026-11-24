@@ -9,7 +9,7 @@ import kotlin.test.assertTrue
 class ProfileStatsCardRendererTest {
 
     @Test
-    fun rendersValid1200x675PngInMossAndZeroPalettes() {
+    fun rendersValid1200x720PngInMossAndZeroPalettes() {
         for (paletteId in listOf("cobalt", "zero")) {
             val palette = paletteSpec(paletteId).dark
             val data = ProfileStatsCardData(
@@ -49,7 +49,7 @@ class ProfileStatsCardRendererTest {
             val height = ((png[20].toInt() and 0xFF) shl 24) or ((png[21].toInt() and 0xFF) shl 16) or
                 ((png[22].toInt() and 0xFF) shl 8) or (png[23].toInt() and 0xFF)
             assertEquals(1200, width)
-            assertEquals(675, height)
+            assertEquals(720, height)
         }
     }
 }

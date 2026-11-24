@@ -112,7 +112,7 @@ class ProfileTransferResourceSafetyTest {
             expectLimit(ProfileTransferLimitException.Limit.ROWS) { f.repository().profileTransfer.snapshot() }
             assertTrue("Preflight must precede every entity query for $table", f.trace.entityQueries.isEmpty())
             assertEquals(0, f.trace.entityRows.get())
-            assertTrue(f.trace.scalarQueries.all { it.contains("LIMIT 50001") })
+            assertTrue(f.trace.scalarQueries.all { it.contains("LIMIT ${ProfileTransferCodec.MAX_ROWS + 1}") })
         }
     }
 
