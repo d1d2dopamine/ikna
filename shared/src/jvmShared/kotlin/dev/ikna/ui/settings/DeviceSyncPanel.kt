@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
-import dev.ikna.sync.IknaQrCode
+import dev.ikna.sync.IknaBrandedQrCard
 import dev.ikna.sync.PairedLanTransport
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaTextButton
@@ -74,22 +74,29 @@ fun DeviceSyncPanel(
 ) {
     var revokeId by remember(state.peers.map { it.id }) { mutableStateOf<String?>(null) }
     var pasted by remember(state.enabled, state.paired, state.blockedAfterReset) { mutableStateOf("") }
-    var consent by remember(state.enabled, state.paired, state.blockedAfterReset) { mutableStateOf(false) }
+    var showManualInput by remember(state.enabled, state.paired, state.blockedAfterReset) {
+        mutableStateOf(onScanQr == null)
+    }
     var confirmNewHistory by remember(state.blockedAfterReset, state.canStartNewHistory) { mutableStateOf(false) }
     var address by remember(state.localAddresses) { mutableStateOf(state.localAddresses.firstOrNull().orEmpty()) }
-    LaunchedEffect(scannedCode) {
+    val canPair = state.enabled && !state.paired && !state.blockedAfterReset && !state.busy
+    LaunchedEffect(scannedCode, canPair) {
         val code = scannedCode?.trim().orEmpty()
         if (code.isNotEmpty()) {
-            pasted = code.take(4096)
             onScannedCodeConsumed()
+            if (canPair) {
+                pasted = ""
+                onPair(code.take(4096))
+            } else {
+                pasted = code.take(4096)
+                showManualInput = true
+            }
         }
     }
-    val canPair = state.enabled && !state.paired && !state.blockedAfterReset && !state.busy && consent
     val pair = {
         if (canPair && pasted.isNotBlank()) {
             val invitation = pasted.trim()
             pasted = ""
-            consent = false
             onPair(invitation)
         }
     }
@@ -160,13 +167,18 @@ fun DeviceSyncPanel(
                 }
             )
         } else if (state.enabled && !state.paired) {
-            IknaSettingsToggleRow(
-                title = S.t("sync.consent"),
-                subtitle = S.t("sync.merge_scope"),
-                checked = consent,
-                enabled = !state.busy,
-                onCheckedChange = { consent = it }
+            Text(
+                text = S.t("sync.quick_guide"),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            if (onScanQr != null) {
+                IknaWideButton(
+                    label = S.t("sync.scan_qr"),
+                    enabled = canPair,
+                    onClick = onScanQr
+                )
+            }
             if (state.localAddresses.size > 1) {
                 Text(S.t("sync.address"), style = MaterialTheme.typography.bodySmall)
                 state.localAddresses.forEach { candidate ->
@@ -180,7 +192,7 @@ fun DeviceSyncPanel(
                 }
             }
             IknaWideButton(
-                label = S.t("sync.create"),
+                label = S.t("sync.show_qr_btn"),
                 enabled = canPair && address.isNotBlank(),
                 onClick = { if (canPair && address.isNotBlank()) onCreateInvitation(address) }
             )
@@ -192,19 +204,10 @@ fun DeviceSyncPanel(
                 val clipboard = LocalClipboardManager.current
                 var copied by remember(compact) { mutableStateOf(false) }
                 var showRawCode by remember(compact) { mutableStateOf(false) }
-                Text(S.t("sync.invitation_private"), style = MaterialTheme.typography.bodySmall)
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    IknaQrCode(content = compact, maxSize = 216.dp)
-                    Text(
-                        text = S.t("sync.qr_hint"),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                IknaBrandedQrCard(
+                    content = compact,
+                    subtitle = S.t("sync.qr_hint")
+                )
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     IknaTextButton(
                         label = S.t(if (copied) "sync.code_copied" else "sync.copy_code"),
@@ -226,41 +229,44 @@ fun DeviceSyncPanel(
                     }
                 }
             }
-            @Suppress("DEPRECATION")
-            val pasteClipboard = LocalClipboardManager.current
-            IknaTextField(
-                value = pasted,
-                onValueChange = { pasted = it },
-                placeholder = S.t("sync.paste"),
-                onSearch = pair,
-                modifier = Modifier.fillMaxWidth(),
-                maxLength = 4096
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IknaWideButton(
-                    label = S.t("sync.pair"),
-                    enabled = canPair && pasted.isNotBlank(),
-                    modifier = Modifier.weight(1f),
-                    onClick = pair
+            if (onScanQr != null) {
+                IknaTextButton(
+                    label = S.t(if (showManualInput) "sync.manual_hide" else "sync.manual_code"),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    onClick = { showManualInput = !showManualInput }
                 )
-                if (onScanQr != null) {
+            }
+            if (showManualInput) {
+                @Suppress("DEPRECATION")
+                val pasteClipboard = LocalClipboardManager.current
+                IknaTextField(
+                    value = pasted,
+                    onValueChange = { pasted = it },
+                    placeholder = S.t("sync.paste"),
+                    onSearch = pair,
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLength = 4096
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IknaWideButton(
+                        label = S.t("sync.pair"),
+                        enabled = canPair && pasted.isNotBlank(),
+                        modifier = Modifier.weight(1f),
+                        onClick = pair
+                    )
                     IknaTextButton(
-                        label = S.t("sync.scan_qr"),
-                        onClick = onScanQr
+                        label = S.t("sync.paste_btn"),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        onClick = {
+                            val clip = pasteClipboard.getText()?.text?.trim().orEmpty()
+                            if (clip.isNotEmpty()) pasted = clip.take(4096)
+                        }
                     )
                 }
-                IknaTextButton(
-                    label = S.t("sync.paste_btn"),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    onClick = {
-                        val clip = pasteClipboard.getText()?.text?.trim().orEmpty()
-                        if (clip.isNotEmpty()) pasted = clip.take(4096)
-                    }
-                )
             }
         }
         if (state.peers.isNotEmpty()) {

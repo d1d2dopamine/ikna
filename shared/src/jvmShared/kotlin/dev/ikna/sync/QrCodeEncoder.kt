@@ -3,46 +3,58 @@ package dev.ikna.sync
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import dev.ikna.ui.theme.iknaTileShape
 import kotlin.math.abs
 
 /**
- * Pure-Kotlin ISO/IEC 18004 QR Code encoder (Byte mode, Error Correction Level L, Versions 1..40).
- * Zero external dependencies so Android, Windows, Linux, and F-Droid builds stay self-contained.
+ * Pure-Kotlin ISO/IEC 18004 QR Code encoder (Byte mode, Error Correction Level H — 30% recovery,
+ * Versions 1..40). Level H allows placing the Ikna emblem cleanly in the center of the QR code
+ * without hurting scan reliability. Zero external dependencies.
  */
 class QrMatrix(val size: Int, private val modules: BooleanArray) {
     operator fun get(x: Int, y: Int): Boolean = modules[y * size + x]
 }
 
 object QrCodeEncoder {
-    // Total codewords, EC codewords per block, and block counts for Level L (versions 1..40).
-    private val EC_CODEWORDS_PER_BLOCK_L = intArrayOf(
+    // EC codewords per block and block counts for ISO/IEC 18004 Level H (30% recovery, versions 1..40).
+    private val EC_CODEWORDS_PER_BLOCK_H = intArrayOf(
         -1,
-        7, 10, 15, 20, 26, 18, 20, 24, 30, 18,
-        20, 24, 26, 30, 22, 24, 28, 30, 28, 28,
-        28, 28, 30, 30, 26, 28, 30, 30, 30, 30,
+        17, 28, 22, 16, 22, 28, 26, 26, 24, 28,
+        24, 28, 22, 24, 24, 30, 28, 28, 26, 28,
+        30, 24, 30, 30, 30, 30, 30, 30, 30, 30,
         30, 30, 30, 30, 30, 30, 30, 30, 30, 30
     )
-    private val NUM_BLOCKS_L = intArrayOf(
+    private val NUM_BLOCKS_H = intArrayOf(
         -1,
-        1, 1, 1, 1, 1, 2, 2, 2, 2, 4,
-        4, 4, 4, 4, 6, 6, 6, 6, 7, 8,
-        8, 9, 9, 10, 12, 12, 12, 13, 14, 15,
-        16, 17, 18, 19, 19, 20, 21, 22, 24, 25
+        1, 1, 2, 4, 4, 4, 5, 6, 8, 8,
+        11, 11, 16, 16, 18, 16, 19, 21, 25, 25,
+        25, 34, 30, 32, 35, 37, 40, 42, 45, 48,
+        51, 54, 57, 60, 63, 66, 70, 74, 77, 81
     )
 
     fun encode(text: String): QrMatrix {
@@ -117,12 +129,12 @@ object QrCodeEncoder {
 
     private fun dataCodewordsFor(version: Int): Int {
         val totalCodewords = rawDataModules(version) / 8
-        return totalCodewords - EC_CODEWORDS_PER_BLOCK_L[version] * NUM_BLOCKS_L[version]
+        return totalCodewords - EC_CODEWORDS_PER_BLOCK_H[version] * NUM_BLOCKS_H[version]
     }
 
     private fun addEccAndInterleave(data: ByteArray, version: Int): ByteArray {
-        val numBlocks = NUM_BLOCKS_L[version]
-        val blockEccLen = EC_CODEWORDS_PER_BLOCK_L[version]
+        val numBlocks = NUM_BLOCKS_H[version]
+        val blockEccLen = EC_CODEWORDS_PER_BLOCK_H[version]
         val rawCodewords = rawDataModules(version) / 8
         val numShortBlocks = numBlocks - rawCodewords % numBlocks
         val shortBlockLen = rawCodewords / numBlocks
@@ -274,8 +286,8 @@ object QrCodeEncoder {
     }
 
     private fun drawFormatBits(size: Int, mask: Int, mods: BooleanArray, fn: BooleanArray) {
-        // Level L format indicator = 01
-        val data = (0b01 shl 3) or mask
+        // Level H format indicator = 10
+        val data = (0b10 shl 3) or mask
         var rem = data
         for (i in 0 until 10) rem = (rem shl 1) xor ((rem ushr 9) * 0x537)
         val bits = ((data shl 10) or rem) xor 0x5412
@@ -409,27 +421,70 @@ object QrCodeEncoder {
     }
 }
 
+private val IKNA_QR_EMBLEM: Array<String> = arrayOf(
+    "###.#A",
+    "#.##.#",
+    ".##.A#",
+    "A..##.",
+    "##..#.",
+    "..#.#.",
+    "..A..."
+)
+
+@Composable
+fun IknaPixelEmblem(
+    modifier: Modifier = Modifier,
+    inkColor: Color = MaterialTheme.colorScheme.onBackground,
+    accentColor: Color = MaterialTheme.colorScheme.primary
+) {
+    Canvas(modifier = modifier) {
+        val cols = 6
+        val rows = 7
+        val cell = minOf(size.width / cols, size.height / rows)
+        val gap = cell * 0.14f
+        val drawSize = (cell - gap).coerceAtLeast(1f)
+        val radius = CornerRadius(drawSize * 0.18f, drawSize * 0.18f)
+        val startX = (size.width - cols * cell) / 2f + gap / 2f
+        val startY = (size.height - rows * cell) / 2f + gap / 2f
+        for (r in 0 until rows) {
+            val row = IKNA_QR_EMBLEM[r]
+            for (c in 0 until cols) {
+                val ch = row[c]
+                if (ch == '.') continue
+                drawRoundRect(
+                    color = if (ch == 'A') accentColor else inkColor,
+                    topLeft = Offset(startX + c * cell, startY + r * cell),
+                    size = Size(drawSize, drawSize),
+                    cornerRadius = radius
+                )
+            }
+        }
+    }
+}
+
 /**
- * Renders a crisp high-contrast QR matrix with standard quiet zone on a white tile
- * so phone cameras scan reliably under every dark or grey Ikna palette.
+ * Renders a crisp high-contrast Level-H QR matrix with the Ikna pixel emblem centered
+ * on a protective white badge, so cameras scan reliably under every Ikna palette.
  */
 @Composable
 fun IknaQrCode(
     content: String,
     modifier: Modifier = Modifier,
-    maxSize: Dp = 220.dp
+    maxSize: Dp = 228.dp
 ) {
     val matrix = remember(content) {
         runCatching { QrCodeEncoder.encode(content) }.getOrNull()
     } ?: return
     val shape = iknaTileShape()
+    val accent = MaterialTheme.colorScheme.primary
     Box(
         modifier = modifier
             .sizeIn(maxWidth = maxSize, maxHeight = maxSize)
             .aspectRatio(1f)
             .background(Color.White, shape)
             .border(1.dp, MaterialTheme.colorScheme.outline, shape)
-            .padding(10.dp)
+            .padding(10.dp),
+        contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val quiet = 2
@@ -448,6 +503,121 @@ fun IknaQrCode(
                         )
                     }
                 }
+            }
+            // Centered white badge (~19% width, safe under Level H 30% error recovery) + Ikna emblem
+            val badgeSide = (size.minDimension * 0.19f).coerceAtLeast(24f)
+            val badgeLeft = (size.width - badgeSide) / 2f
+            val badgeTop = (size.height - badgeSide) / 2f
+            val badgeCorner = CornerRadius(badgeSide * 0.22f, badgeSide * 0.22f)
+            drawRoundRect(
+                color = Color.White,
+                topLeft = Offset(badgeLeft, badgeTop),
+                size = Size(badgeSide, badgeSide),
+                cornerRadius = badgeCorner
+            )
+            val pad = badgeSide * 0.18f
+            val innerW = badgeSide - pad * 2f
+            val innerH = badgeSide - pad * 2f
+            val emCell = minOf(innerW / 6f, innerH / 7f)
+            val emGap = emCell * 0.14f
+            val emDraw = (emCell - emGap).coerceAtLeast(1f)
+            val emStartX = badgeLeft + (badgeSide - emCell * 6f) / 2f + emGap / 2f
+            val emStartY = badgeTop + (badgeSide - emCell * 7f) / 2f + emGap / 2f
+            for (r in IKNA_QR_EMBLEM.indices) {
+                val row = IKNA_QR_EMBLEM[r]
+                for (c in row.indices) {
+                    val ch = row[c]
+                    if (ch == '.') continue
+                    drawRoundRect(
+                        color = if (ch == 'A') accent else ink,
+                        topLeft = Offset(emStartX + c * emCell, emStartY + r * emCell),
+                        size = Size(emDraw, emDraw),
+                        cornerRadius = CornerRadius(emDraw * 0.18f, emDraw * 0.18f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Branded pairing card: Level-H QR code (with center Ikna emblem) paired alongside
+ * the full Ikna logo lockup (emblem + wordmark + subtitle).
+ */
+@Composable
+fun IknaBrandedQrCard(
+    content: String,
+    subtitle: String,
+    modifier: Modifier = Modifier
+) {
+    val shape = iknaTileShape()
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface, shape)
+            .border(1.dp, MaterialTheme.colorScheme.outline, shape)
+            .padding(14.dp)
+    ) {
+        val sideBySide = maxWidth >= 340.dp
+        if (sideBySide) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IknaQrCode(content = content, maxSize = 204.dp, modifier = Modifier.size(204.dp))
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IknaPixelEmblem(modifier = Modifier.size(width = 30.dp, height = 35.dp))
+                        Text(
+                            text = "ikna",
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                letterSpacing = (-0.5).sp
+                            ),
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        } else {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IknaPixelEmblem(modifier = Modifier.size(width = 26.dp, height = 30.dp))
+                    Text(
+                        text = "ikna",
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = (-0.5).sp
+                        ),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+                IknaQrCode(content = content, maxSize = 220.dp)
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

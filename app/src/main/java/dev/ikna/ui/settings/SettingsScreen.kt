@@ -16,14 +16,14 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.OpenableColumns
 import android.speech.tts.TextToSpeech
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import com.journeyapps.barcodescanner.ScanContract
-import com.journeyapps.barcodescanner.ScanOptions
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -268,12 +268,26 @@ fun SettingsScreen(
     var syncFileStatus by remember { mutableStateOf<String?>(null) }
     var syncFileError by remember { mutableStateOf(false) }
     var scannedSyncCode by remember { mutableStateOf<String?>(null) }
+    var showQrScanner by remember { mutableStateOf(false) }
 
-    val qrScannerLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
-        val code = result.contents?.trim()
-        if (!code.isNullOrEmpty()) {
-            scannedSyncCode = code
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            showQrScanner = true
+        } else {
+            message = S.t("sync.camera_denied")
         }
+    }
+
+    if (showQrScanner) {
+        IknaQrScannerDialog(
+            onScanned = { code ->
+                showQrScanner = false
+                scannedSyncCode = code
+            },
+            onDismiss = { showQrScanner = false }
+        )
     }
 
     val syncFileExportPicker = rememberLauncherForActivityResult(
@@ -1016,14 +1030,11 @@ fun SettingsScreen(
                                 scannedCode = scannedSyncCode,
                                 onScannedCodeConsumed = { scannedSyncCode = null },
                                 onScanQr = {
-                                    qrScannerLauncher.launch(
-                                        ScanOptions().apply {
-                                            setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-                                            setPrompt(S.t("sync.scan_prompt"))
-                                            setBeepEnabled(false)
-                                            setOrientationLocked(false)
-                                        }
-                                    )
+                                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                                        showQrScanner = true
+                                    } else {
+                                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                                    }
                                 }
                             )
                             SyncFilePanel(
