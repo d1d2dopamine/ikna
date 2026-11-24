@@ -221,6 +221,7 @@ fun IknaHomeBackdrop(
     animated: Boolean = LocalIknaDeckBackgroundAnimated.current
 ) {
     val colors = MaterialTheme.colorScheme
+    val isPureBlack = colors.background.luminance() < 0.01f
     val fill = modifier.fillMaxSize()
     when (background) {
         DeckBackground.CLASSIC -> {
@@ -235,12 +236,22 @@ fun IknaHomeBackdrop(
             val topMix = 0.48f + 0.08f * wave
             val midStop = (0.55f + 0.11f * wave).coerceIn(0.32f, 0.78f)
             val bottomMix = 0.18f - 0.05f * wave
+            val topColor = if (isPureBlack) {
+                lerp(colors.background, colors.onSurface, 0.14f + 0.03f * wave)
+            } else {
+                lerp(colors.background, colors.surface, topMix)
+            }
+            val bottomColor = if (isPureBlack) {
+                lerp(colors.background, colors.primary, 0.16f - 0.03f * wave)
+            } else {
+                lerp(colors.background, colors.primary, bottomMix * 0.45f)
+            }
             Box(
                 fill.background(
                     Brush.verticalGradient(
-                        0f to lerp(colors.background, colors.surface, topMix),
+                        0f to topColor,
                         midStop to colors.background,
-                        1f to lerp(colors.background, colors.primary, bottomMix * 0.45f)
+                        1f to bottomColor
                     )
                 )
             )
@@ -251,7 +262,7 @@ fun IknaHomeBackdrop(
             val orbitX = if (animated) 0.055f * cos(TAU * phase) else 0f
             val orbitY = if (animated) 0.045f * sin(TAU * phase) else 0f
             val breathe = if (animated) 0.08f * sin(TAU * phase) else 0f
-            val glowMix = 0.16f + if (animated) 0.03f * cos(TAU * phase) else 0f
+            val glowMix = (if (isPureBlack) 0.28f else 0.16f) + if (animated) (if (isPureBlack) 0.05f else 0.03f) * cos(TAU * phase) else 0f
             Canvas(fill) {
                 drawRect(
                     Brush.radialGradient(
@@ -267,7 +278,7 @@ fun IknaHomeBackdrop(
             Canvas(fill.background(colors.background)) {
                 val pitch = 24.dp.toPx()
                 val drift = if (animated) phase * pitch else 0f
-                val line = colors.onSurfaceVariant.copy(alpha = 0.13f)
+                val line = colors.onSurfaceVariant.copy(alpha = if (isPureBlack) 0.24f else 0.13f)
                 val columns = (size.width / pitch).toInt() + 1
                 val rows = (size.height / pitch).toInt() + 1
                 for (column in 0..columns) {
@@ -306,9 +317,9 @@ fun IknaHomeBackdrop(
                         val wave = if (animated) 0.5f + 0.5f * sin(angle - row * 0.32f - col * 0.24f) else 0.35f
                         val isAccent = ((row * 7 + col * 11) % 19) == 0
                         val color = if (isAccent) {
-                            colors.primary.copy(alpha = 0.10f + 0.14f * wave)
+                            colors.primary.copy(alpha = if (isPureBlack) 0.22f + 0.24f * wave else 0.10f + 0.14f * wave)
                         } else {
-                            colors.onSurfaceVariant.copy(alpha = 0.08f + 0.10f * wave)
+                            colors.onSurfaceVariant.copy(alpha = if (isPureBlack) 0.18f + 0.18f * wave else 0.08f + 0.10f * wave)
                         }
                         drawCircle(
                             color = color,
@@ -325,8 +336,8 @@ fun IknaHomeBackdrop(
                 val pitch = 22.dp.toPx()
                 // Every 6th line is accented, so drifting by 6 * pitch loops seamlessly.
                 val drift = if (animated) phase * pitch * 6f else 0f
-                val line = colors.onSurfaceVariant.copy(alpha = 0.12f)
-                val accentLine = colors.primary.copy(alpha = 0.11f)
+                val line = colors.onSurfaceVariant.copy(alpha = if (isPureBlack) 0.22f else 0.12f)
+                val accentLine = colors.primary.copy(alpha = if (isPureBlack) 0.26f else 0.11f)
                 val span = hypot(size.width, size.height) * 0.75f
                 val count = ceil((span * 2f) / pitch).toInt() + 2
                 val originY = size.height * 0.5f - (count / 2) * pitch
@@ -368,9 +379,13 @@ fun IknaHomeBackdrop(
                         close()
                     }
                     val tint = if (layer == layers - 1) {
-                        lerp(colors.background, colors.primary, 0.09f)
+                        lerp(colors.background, colors.primary, if (isPureBlack) 0.20f else 0.09f)
                     } else {
-                        lerp(colors.background, colors.onSurface, 0.035f + layer * 0.018f)
+                        lerp(
+                            colors.background,
+                            colors.onSurface,
+                            if (isPureBlack) 0.08f + layer * 0.04f else 0.035f + layer * 0.018f
+                        )
                     }
                     drawPath(path, color = tint)
                 }
@@ -387,8 +402,11 @@ private fun IknaMemoryField(
     phase: Float = 0f,
     modifier: Modifier = Modifier
 ) {
-    val ink = MaterialTheme.colorScheme.onSurfaceVariant
-    val accent = MaterialTheme.colorScheme.primary
+    val colors = MaterialTheme.colorScheme
+    val isPureBlack = colors.background.luminance() < 0.01f
+    val ink = colors.onSurfaceVariant
+    val accent = colors.primary
+    val boost = if (isPureBlack) 1.85f else 1f
     Canvas(modifier = modifier.fillMaxSize()) {
         val pitch = 7.dp.toPx()
         val dot = 1.25.dp.toPx()
@@ -420,7 +438,7 @@ private fun IknaMemoryField(
                     0 -> 0.130f
                     1 -> 0.095f
                     else -> 0.065f
-                }
+                } * boost
                 val isAccentGlint = animated && ((state ushr 16) and 31) == 0
                 val wave = if (animated) {
                     0.5f + 0.5f * sin(angleBase - row * 0.18f - column * 0.11f + ((state ushr 12) and 7) * 0.4f)
@@ -428,9 +446,9 @@ private fun IknaMemoryField(
                     0.5f
                 }
                 val color = if (isAccentGlint) {
-                    accent.copy(alpha = 0.04f + 0.14f * wave)
+                    accent.copy(alpha = ((if (isPureBlack) 0.14f else 0.04f) + (if (isPureBlack) 0.24f else 0.14f) * wave).coerceAtMost(0.45f))
                 } else {
-                    val alpha = if (animated) baseAlpha * (0.62f + 0.66f * wave) else baseAlpha
+                    val alpha = (if (animated) baseAlpha * (0.62f + 0.66f * wave) else baseAlpha).coerceAtMost(0.42f)
                     ink.copy(alpha = alpha)
                 }
                 val driftY = if (animated) (wave - 0.5f) * dot * 0.85f else 0f
