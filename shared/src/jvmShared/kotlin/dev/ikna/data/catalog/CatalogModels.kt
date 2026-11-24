@@ -175,3 +175,13 @@ data class CatalogPreviewCard(
 
 const val TIER_FULL: String = "full"
 const val TIER_THIN: String = "thin"
+
+const val COLLECTION_EVERYDAY: String = "everyday"
+const val COLLECTION_KNOWLEDGE: String = "knowledge"
+const val COLLECTION_WORLD: String = "world"
+
+val CATALOG_COLLECTIONS: List<String> = listOf(
+    COLLECTION_EVERYDAY,
+    COLLECTION_KNOWLEDGE,
+    COLLECTION_WORLD
+)

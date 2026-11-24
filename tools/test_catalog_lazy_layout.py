@@ -28,11 +28,11 @@ class CatalogLazyLayoutContracts(unittest.TestCase):
         self.assertIn('.weight(1f)', viewport)
         self.assertIn('.padding(horizontal = Edge)', viewport)
         desktop = DESKTOP.read_text(encoding='utf-8')
-        self.assertIn('DesktopLazyPane(S.t("cat.001"), onBack)', desktop)
+        self.assertIn('DesktopLazyPane(S.t("cat.001"), onBack', desktop)
         self.assertNotIn('DesktopScrollablePane(', desktop)
         chrome = CHROME.read_text(encoding='utf-8').split('fun DesktopLazyPane(', 1)[1]
         self.assertEqual(chrome.count('LazyColumn('), 1)
-        self.assertIn('DesktopPaneFrame(title, onBack, titleStyle)', chrome)
+        self.assertIn('DesktopPaneFrame(title, onBack, titleStyle', chrome)
         self.assertIn('readingWidth: Dp = 760.dp', chrome)
         self.assertIn('Box(Modifier.fillMaxSize().padding(horizontal = 40.dp))', chrome)
         self.assertIn('Modifier.widthIn(max = readingWidth).fillMaxWidth().fillMaxHeight()', chrome)

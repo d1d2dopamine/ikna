@@ -1,20 +1,216 @@
 package dev.ikna.ui.catalog
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import dev.ikna.ui.text.S
-import dev.ikna.ui.theme.*
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import dev.ikna.data.catalog.*
+import dev.ikna.data.prefs.IknaAppearanceVariant
+import dev.ikna.ui.text.S
+import dev.ikna.ui.theme.*
+import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
+
+/**
+ * Catalogue v2 collection selector: Everyday, Knowledge, World.
+ *
+ * Uses Ikna's gliding underline strip on open canvas rather than stacked cards
+ * or pill wrappers, with a single quiet description line for the active tab.
+ */
+@Composable
+fun IknaCatalogCollectionTabs(
+	selectedCollection: String,
+	counts: Map<String, Int>,
+	onSelect: (String) -> Unit
+) {
+	val colors = MaterialTheme.colorScheme
+	val animations = LocalIknaMotionEnabled.current
+	val rounded = LocalIknaAppearanceVariant.current == IknaAppearanceVariant.ROUNDED
+	val sound = LocalIknaSoundFeedback.current
+	val spots = remember { mutableStateMapOf<String, IntRange>() }
+	val active = selectedCollection.ifEmpty { COLLECTION_EVERYDAY }
+	val activeSpot = spots[active]
+	val targetLeft = activeSpot?.first?.toFloat() ?: 0f
+	val targetRight = activeSpot?.last?.toFloat() ?: 0f
+	val hasSpot = activeSpot != null
+	val animLeft = remember { Animatable(0f) }
+	val animRight = remember { Animatable(0f) }
+	var indicatorReady by remember { mutableStateOf(false) }
+
+	LaunchedEffect(targetLeft, targetRight, hasSpot, animations) {
+		if (!hasSpot) return@LaunchedEffect
+		if (!indicatorReady || !animations) {
+			animLeft.snapTo(targetLeft)
+			animRight.snapTo(targetRight)
+			indicatorReady = true
+		} else {
+			val spec = tween<Float>(durationMillis = 220, easing = FastOutSlowInEasing)
+			launch { animLeft.animateTo(targetLeft, spec) }
+			launch { animRight.animateTo(targetRight, spec) }
+		}
+	}
+
+	Column(modifier = Modifier.fillMaxWidth()) {
+		Box(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
+			Box {
+				Row(
+					horizontalArrangement = Arrangement.spacedBy(22.dp),
+					verticalAlignment = Alignment.CenterVertically
+				) {
+					CATALOG_COLLECTIONS.forEach { collectionId ->
+						val here = collectionId == active
+						val count = counts[collectionId] ?: 0
+						val interaction = remember { MutableInteractionSource() }
+						val hovered by interaction.collectIsHoveredAsState()
+						val pressed by interaction.collectIsPressedAsState()
+						val scale = iknaPressScale(pressed, animations, pressedScale = 0.96f)
+						val labelColor by animateColorAsState(
+							targetValue = when {
+								here -> colors.onBackground
+								hovered -> colors.onBackground.copy(alpha = 0.85f)
+								else -> colors.onSurfaceVariant
+							},
+							animationSpec = if (animations) tween(Motion.controlChangeDurationMillis) else snap(),
+							label = "catalog-collection-label"
+						)
+						Row(
+							modifier = Modifier
+								.onGloballyPositioned { coords ->
+									val x = coords.parentLayoutCoordinates
+										?.localPositionOf(coords, Offset.Zero)
+										?.x
+										?: 0f
+									val left = x.roundToInt()
+									spots[collectionId] = left..(left + coords.size.width)
+								}
+								.heightIn(min = 42.dp)
+								.graphicsLayer {
+									scaleX = scale
+									scaleY = scale
+								}
+								.semantics { selected = here }
+								.hoverable(interaction)
+								.clickable(
+									interactionSource = interaction,
+									indication = null,
+									role = Role.Tab
+								) {
+									sound.play(IknaSoundCue.TAP)
+									onSelect(collectionId)
+								}
+								.padding(horizontal = 2.dp, vertical = 10.dp),
+							verticalAlignment = Alignment.CenterVertically,
+							horizontalArrangement = Arrangement.spacedBy(6.dp)
+						) {
+							Text(
+								text = catalogCollectionTitle(collectionId),
+								style = MaterialTheme.typography.bodyMedium,
+								fontWeight = if (here) FontWeight.SemiBold else FontWeight.Medium,
+								color = labelColor,
+								maxLines = 1
+							)
+							if (count > 0) {
+								Text(
+									text = count.toString(),
+									style = iknaNumberStyle(MaterialTheme.typography.labelSmall),
+									color = if (here) colors.primary else colors.onSurfaceVariant.copy(alpha = 0.72f),
+									maxLines = 1
+								)
+							}
+						}
+					}
+				}
+				Canvas(modifier = Modifier.matchParentSize()) {
+					if (indicatorReady && animRight.value > animLeft.value) {
+						val barHeight = 2.dp.toPx()
+						val corner = CornerRadius(if (rounded) barHeight / 2f else 0f)
+						drawRoundRect(
+							color = colors.primary,
+							topLeft = Offset(animLeft.value, size.height - barHeight),
+							size = Size(animRight.value - animLeft.value, barHeight),
+							cornerRadius = corner
+						)
+					}
+				}
+			}
+		}
+		IknaRule()
+		Spacer(Modifier.height(Space.sm))
+		Text(
+			text = catalogCollectionDescription(active),
+			style = MaterialTheme.typography.bodySmall,
+			color = colors.onSurfaceVariant
+		)
+	}
+}
+
+/** Calm empty state for Catalogue v2 collections that are not published yet. */
+@Composable
+fun IknaCatalogCollectionEmptyState(
+	collection: String,
+	onOpenEveryday: () -> Unit
+) {
+	val colors = MaterialTheme.colorScheme
+	val titleKey = if (collection == COLLECTION_WORLD) "cat.052" else "cat.050"
+	val bodyKey = if (collection == COLLECTION_WORLD) "cat.053" else "cat.051"
+
+	Column(modifier = Modifier.fillMaxWidth().padding(vertical = Space.md)) {
+		Text(
+			text = S.t(titleKey),
+			style = MaterialTheme.typography.titleMedium,
+			fontWeight = FontWeight.SemiBold,
+			color = colors.onBackground
+		)
+		Spacer(Modifier.height(Space.xs))
+		Text(
+			text = S.t(bodyKey),
+			style = MaterialTheme.typography.bodyMedium,
+			color = colors.onSurfaceVariant
+		)
+		Spacer(Modifier.height(Space.md))
+		IknaTextButton(
+			label = S.t("cat.054"),
+			onClick = onOpenEveryday,
+			color = colors.primary
+		)
+	}
+}
+
+private fun catalogCollectionTitle(collectionId: String): String = when (collectionId) {
+	COLLECTION_KNOWLEDGE -> S.t("cat.045")
+	COLLECTION_WORLD -> S.t("cat.046")
+	else -> S.t("cat.044")
+}
+
+private fun catalogCollectionDescription(collectionId: String): String = when (collectionId) {
+	COLLECTION_KNOWLEDGE -> S.t("cat.048")
+	COLLECTION_WORLD -> S.t("cat.049")
+	else -> S.t("cat.047")
+}
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -41,6 +237,9 @@ fun IknaCatalogDeckRow(
 	val ink = MaterialTheme.colorScheme.onBackground
 	val muted = MaterialTheme.colorScheme.onSurfaceVariant
 	val size = catalogSize(deck.sizeBytes)
+	val contexts = if (deck.contextCount > deck.chunkCount) {
+		"  \u00B7  " + deck.contextCount + " " + S.t("cat.055")
+	} else ""
 
 	Column(modifier = Modifier.fillMaxWidth()) {
 		Row(verticalAlignment = Alignment.CenterVertically) {
@@ -63,6 +262,7 @@ fun IknaCatalogDeckRow(
 					}
 					Text(
 						text = deck.chunkCount.toString() + " " + S.t("cat.015") +
+							contexts +
 							(if (size != null) "  \u00B7  " + size + " " + S.t("cat.024") else ""),
 						style = label,
 						color = muted

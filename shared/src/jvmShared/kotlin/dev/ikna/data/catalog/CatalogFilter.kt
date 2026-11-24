@@ -19,12 +19,36 @@ data class CatalogFilter(
     val meaningLang: String = "",
     val subject: String = "",
     val level: String = "",
-    val query: String = ""
+    val query: String = "",
+    val collection: String = ""
 )
 
+/**
+ * Effective Catalogue v2 collection for a deck.
+ * Legacy v1 decks omit [CatalogDeck.collection] and belong to [COLLECTION_EVERYDAY].
+ */
+fun deckCollectionOf(deck: CatalogDeck): String =
+    deck.collection.trim().lowercase().ifEmpty { COLLECTION_EVERYDAY }
+
+/** Number of decks available inside one collection (or the whole index when empty). */
+fun collectionDeckCount(index: CatalogIndex, collection: String): Int {
+    val wanted = collection.trim().lowercase()
+    if (wanted.isEmpty()) return index.decks.size
+    return index.decks.count { deckCollectionOf(it) == wanted }
+}
+
+private fun matchesCollection(deck: CatalogDeck, collection: String): Boolean {
+    val wanted = collection.trim().lowercase()
+    return wanted.isEmpty() || deckCollectionOf(deck) == wanted
+}
+
 /** The languages there is anything at all to learn in, in a stable order. */
-fun learnableLangs(index: CatalogIndex): List<String> =
-    index.decks.map { it.lang }.distinct().sorted()
+fun learnableLangs(index: CatalogIndex, collection: String = ""): List<String> =
+    index.decks
+        .filter { matchesCollection(it, collection) }
+        .map { it.lang }
+        .distinct()
+        .sorted()
 
 /**
  * The languages the meanings can be in, for one language being learned.
@@ -32,8 +56,10 @@ fun learnableLangs(index: CatalogIndex): List<String> =
  * Asked in that order on purpose: somebody picks what they want to learn first
  * and what they already know second, and the second list is short.
  */
-fun meaningLangsFor(index: CatalogIndex, lang: String): List<String> =
-    index.decks.filter { lang.isEmpty() || it.lang == lang }
+fun meaningLangsFor(index: CatalogIndex, lang: String, collection: String = ""): List<String> =
+    index.decks
+        .filter { matchesCollection(it, collection) }
+        .filter { lang.isEmpty() || it.lang == lang }
         .map { it.meaningLang }
         .distinct()
         .sorted()
@@ -60,12 +86,12 @@ fun levelsFor(index: CatalogIndex, filter: CatalogFilter): List<String> {
 
 /**
  * Keep selections that are still offered, clearing unavailable dependent values
- * in question order. Search is deliberate free text and is never silently reset.
+ * in question order. Search and collection are deliberate choices and are never silently reset.
  */
 fun normalizeCatalogFilter(index: CatalogIndex, filter: CatalogFilter): CatalogFilter {
-    var current = filter.copy(lang = filter.lang.takeIf { it in learnableLangs(index) }.orEmpty())
+    var current = filter.copy(lang = filter.lang.takeIf { it in learnableLangs(index, filter.collection) }.orEmpty())
     current = current.copy(meaningLang = current.meaningLang
-        .takeIf { it in meaningLangsFor(index, current.lang) }.orEmpty())
+        .takeIf { it in meaningLangsFor(index, current.lang, current.collection) }.orEmpty())
     current = current.copy(subject = current.subject
         .takeIf { it in subjectsFor(index, current) }.orEmpty())
     return current.copy(level = current.level
@@ -83,6 +109,7 @@ fun decksFor(index: CatalogIndex, filter: CatalogFilter): List<CatalogDeck> =
         )
 
 private fun matchesLangs(deck: CatalogDeck, filter: CatalogFilter): Boolean {
+    if (!matchesCollection(deck, filter.collection)) return false
     if (filter.lang.isNotEmpty() && deck.lang != filter.lang) return false
     if (filter.meaningLang.isNotEmpty() && deck.meaningLang != filter.meaningLang) return false
     return true
@@ -107,8 +134,30 @@ fun matches(deck: CatalogDeck, filter: CatalogFilter): Boolean {
  * A pair with no row is not thin, it is absent, and the screen says so with a
  * different sentence -- which is why this returns null rather than THIN.
  */
-fun tierOf(index: CatalogIndex, lang: String, meaningLang: String): String? {
+fun tierOf(
+    index: CatalogIndex,
+    lang: String,
+    meaningLang: String,
+    collection: String = ""
+): String? {
     if (lang.isEmpty() || meaningLang.isEmpty()) return null
+    val wanted = collection.trim().lowercase()
+    if (wanted.isNotEmpty()) {
+        val scoped = index.collectionPairs.firstOrNull {
+            it.collection.equals(wanted, ignoreCase = true) &&
+                it.lang == lang &&
+                it.meaningLang == meaningLang
+        }
+        if (scoped != null) return if (scoped.tier == TIER_FULL) TIER_FULL else TIER_THIN
+        if (wanted == COLLECTION_EVERYDAY && index.collectionPairs.isEmpty()) {
+            val legacy = index.pairs.firstOrNull { it.lang == lang && it.meaningLang == meaningLang }
+            if (legacy != null) return if (legacy.tier == TIER_FULL) TIER_FULL else TIER_THIN
+        }
+        val has = index.decks.any {
+            matchesCollection(it, wanted) && it.lang == lang && it.meaningLang == meaningLang
+        }
+        return if (has) TIER_THIN else null
+    }
     val pair = index.pairs.firstOrNull { it.lang == lang && it.meaningLang == meaningLang }
     if (pair != null) return if (pair.tier == TIER_FULL) TIER_FULL else TIER_THIN
     // An index whose pipeline predates the pair table still has decks, and a

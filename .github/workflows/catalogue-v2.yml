@@ -18,6 +18,10 @@ on:
       contexts_per_target:
         description: "Natural source contexts kept per exact target and pair"
         default: "3"
+      include_knowledge:
+        description: "Include experimental WikiMatrix Knowledge decks (leave off for Everyday-only v2)"
+        type: boolean
+        default: false
       wikimatrix_hub:
         description: "Knowledge collection hub language"
         default: "en"
@@ -114,6 +118,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq libicu-dev
           mkdir -p corpus candidates raw morphology reports
+          touch wikimatrix-plan.tsv morphology/manifest.json
 
       - name: Tatoeba Everyday candidates
         shell: bash
@@ -151,6 +156,7 @@ jobs:
           ls -lh candidates/tatoeba.jsonl.gz
 
       - name: WikiMatrix Knowledge candidates
+        if: ${{ inputs.include_knowledge }}
         shell: bash
         run: |
           set -euo pipefail

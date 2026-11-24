@@ -183,4 +183,44 @@ class CatalogFilterTest {
         assertEquals(0f, progressFractionOf(50L, 0L), 0.0001f)
         assertEquals(0.5f, progressFractionOf(50L, 100L), 0.0001f)
     }
+
+    @Test
+    fun `legacy decks belong to everyday while unfinished collections stay empty`() {
+        assertEquals(5, collectionDeckCount(index, COLLECTION_EVERYDAY))
+        assertEquals(0, collectionDeckCount(index, COLLECTION_KNOWLEDGE))
+        assertEquals(0, collectionDeckCount(index, COLLECTION_WORLD))
+        assertEquals(5, decksFor(index, CatalogFilter(collection = COLLECTION_EVERYDAY)).size)
+        assertTrue(decksFor(index, CatalogFilter(collection = COLLECTION_KNOWLEDGE)).isEmpty())
+        assertTrue(decksFor(index, CatalogFilter(collection = COLLECTION_WORLD)).isEmpty())
+        assertEquals(TIER_FULL, tierOf(index, "en", "ru", COLLECTION_EVERYDAY))
+        assertNull(tierOf(index, "en", "ru", COLLECTION_KNOWLEDGE))
+    }
+
+    @Test
+    fun `v2 collection filter scopes languages, decks, and pair tiers independently`() {
+        val v2 = CatalogIndex(
+            version = 2,
+            catalogueVersion = 2,
+            decks = listOf(
+                deck("en-ru-everyday-beginner", "en", "ru", chunkCount = 1400, level = "beginner")
+                    .copy(collection = COLLECTION_EVERYDAY),
+                deck("de-en-knowledge-beginner", "de", "en", chunkCount = 900, level = "beginner")
+                    .copy(collection = COLLECTION_KNOWLEDGE)
+            ),
+            collectionPairs = listOf(
+                CatalogCollectionPair(COLLECTION_EVERYDAY, "en", "ru", TIER_FULL, 1, 1400, 4200),
+                CatalogCollectionPair(COLLECTION_KNOWLEDGE, "de", "en", TIER_THIN, 1, 900, 1800)
+            )
+        )
+        assertEquals(listOf("en"), learnableLangs(v2, COLLECTION_EVERYDAY))
+        assertEquals(listOf("de"), learnableLangs(v2, COLLECTION_KNOWLEDGE))
+        assertEquals(emptyList<String>(), learnableLangs(v2, COLLECTION_WORLD))
+        assertEquals(listOf("en-ru-everyday-beginner"), decksFor(v2, CatalogFilter(collection = COLLECTION_EVERYDAY)).map { it.id })
+        assertEquals(listOf("de-en-knowledge-beginner"), decksFor(v2, CatalogFilter(collection = COLLECTION_KNOWLEDGE)).map { it.id })
+        assertEquals(TIER_FULL, tierOf(v2, "en", "ru", COLLECTION_EVERYDAY))
+        assertEquals(TIER_THIN, tierOf(v2, "de", "en", COLLECTION_KNOWLEDGE))
+        assertNull(tierOf(v2, "en", "ru", COLLECTION_KNOWLEDGE))
+        val switched = normalizeCatalogFilter(v2, CatalogFilter(lang = "en", meaningLang = "ru", collection = COLLECTION_WORLD))
+        assertEquals(CatalogFilter(collection = COLLECTION_WORLD), switched)
+    }
 }

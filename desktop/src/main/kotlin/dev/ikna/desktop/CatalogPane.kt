@@ -1,6 +1,11 @@
 package dev.ikna.desktop
+import dev.ikna.ui.catalog.IknaCatalogCollectionEmptyState
+import dev.ikna.ui.catalog.IknaCatalogCollectionTabs
 import dev.ikna.ui.catalog.IknaCatalogDeckRow
+import dev.ikna.data.catalog.CATALOG_COLLECTIONS
+import dev.ikna.data.catalog.COLLECTION_EVERYDAY
 import dev.ikna.data.catalog.CatalogFilter
+import dev.ikna.data.catalog.collectionDeckCount
 import dev.ikna.data.catalog.decksFor
 import dev.ikna.data.catalog.learnableLangs
 import dev.ikna.data.catalog.levelsFor
@@ -75,7 +80,7 @@ fun CatalogPane(
 
     var index by remember { mutableStateOf<CatalogIndex?>(null) }
     var loading by remember { mutableStateOf(true) }
-    var filter by remember { mutableStateOf(CatalogFilter()) }
+    var filter by remember { mutableStateOf(CatalogFilter(collection = COLLECTION_EVERYDAY)) }
     val notes = remember { mutableStateMapOf<String, String>() }
     val planRefreshFailures = remember { mutableStateMapOf<String, Boolean>() }
     var busyDeck by remember { mutableStateOf<String?>(null) }
@@ -171,6 +176,9 @@ fun CatalogPane(
                 }
             }
             else -> {
+                val activeCollection = filter.collection.ifEmpty { COLLECTION_EVERYDAY }
+                val collectionCounts = CATALOG_COLLECTIONS.associateWith { collectionDeckCount(current, it) }
+                val collectionHasDecks = (collectionCounts[activeCollection] ?: 0) > 0
                 item(key = "catalog-filters") {
                     Column(Modifier.fillMaxWidth()) {
                         Text(
@@ -179,71 +187,95 @@ fun CatalogPane(
                             color = palette.muted
                         )
 
-                        Spacer(Modifier.height(Space.lg))
-                        FilterRow(
-                            title = S.t("cat.007"),
-                            values = learnableLangs(current),
-                            selected = filter.lang.ifEmpty { null },
-                            palette = palette,
-                            labelOf = { it.uppercase() },
-                            onPick = { picked -> filter = normalizeCatalogFilter(current, filter.copy(lang = picked.orEmpty())) }
-                        )
-                        FilterRow(
-                            title = S.t("cat.008"),
-                            values = meaningLangsFor(current, filter.lang),
-                            selected = filter.meaningLang.ifEmpty { null },
-                            palette = palette,
-                            labelOf = { it.uppercase() },
-                            onPick = { picked -> filter = normalizeCatalogFilter(current, filter.copy(meaningLang = picked.orEmpty())) }
-                        )
-                        FilterRow(
-                            title = S.t("cat.009"),
-                            values = subjectsFor(current, filter),
-                            selected = filter.subject.ifEmpty { null },
-                            palette = palette,
-                            labelOf = { it },
-                            onPick = { picked -> filter = normalizeCatalogFilter(current, filter.copy(subject = picked.orEmpty())) }
-                        )
-                        FilterRow(
-                            title = S.t("cat.010"),
-                            values = levelsFor(current, filter),
-                            selected = filter.level.ifEmpty { null },
-                            palette = palette,
-                            labelOf = { levelLabel(it) },
-                            onPick = { picked -> filter = normalizeCatalogFilter(current, filter.copy(level = picked.orEmpty())) }
+                        Spacer(Modifier.height(Space.md))
+                        IknaCatalogCollectionTabs(
+                            selectedCollection = activeCollection,
+                            counts = collectionCounts,
+                            onSelect = { picked ->
+                                filter = normalizeCatalogFilter(current, filter.copy(collection = picked))
+                                openDeckId = null
+                            }
                         )
 
-                        // How well this pair is served, computed by the
-                        // pipeline rather than decided here.
-                        val tier = tierOf(current, filter.lang, filter.meaningLang)
-                        if (filter.lang.isNotEmpty() && filter.meaningLang.isNotEmpty()) {
-                            Spacer(Modifier.height(Space.md))
-                            Text(
-                                text = when {
-                                    tier == null -> S.t("cat.014")
-                                    tier == TIER_FULL -> S.t("cat.012")
-                                    else -> S.t("cat.013")
-                                },
-                                style = MaterialTheme.typography.bodySmall,
-                                color = palette.muted
+                        if (collectionHasDecks) {
+                            Spacer(Modifier.height(Space.sm))
+                            FilterRow(
+                                title = S.t("cat.007"),
+                                values = learnableLangs(current, activeCollection),
+                                selected = filter.lang.ifEmpty { null },
+                                palette = palette,
+                                labelOf = { it.uppercase() },
+                                onPick = { picked -> filter = normalizeCatalogFilter(current, filter.copy(lang = picked.orEmpty())) }
                             )
-                        }
+                            FilterRow(
+                                title = S.t("cat.008"),
+                                values = meaningLangsFor(current, filter.lang, activeCollection),
+                                selected = filter.meaningLang.ifEmpty { null },
+                                palette = palette,
+                                labelOf = { it.uppercase() },
+                                onPick = { picked -> filter = normalizeCatalogFilter(current, filter.copy(meaningLang = picked.orEmpty())) }
+                            )
+                            FilterRow(
+                                title = S.t("cat.009"),
+                                values = subjectsFor(current, filter),
+                                selected = filter.subject.ifEmpty { null },
+                                palette = palette,
+                                labelOf = { it },
+                                onPick = { picked -> filter = normalizeCatalogFilter(current, filter.copy(subject = picked.orEmpty())) }
+                            )
+                            FilterRow(
+                                title = S.t("cat.010"),
+                                values = levelsFor(current, filter),
+                                selected = filter.level.ifEmpty { null },
+                                palette = palette,
+                                labelOf = { levelLabel(it) },
+                                onPick = { picked -> filter = normalizeCatalogFilter(current, filter.copy(level = picked.orEmpty())) }
+                            )
 
-                        Spacer(Modifier.height(Space.lg))
-                        IknaRule()
+                            // How well this pair is served, computed by the
+                            // pipeline rather than decided here.
+                            val tier = tierOf(current, filter.lang, filter.meaningLang, activeCollection)
+                            if (filter.lang.isNotEmpty() && filter.meaningLang.isNotEmpty()) {
+                                Spacer(Modifier.height(Space.md))
+                                Text(
+                                    text = when {
+                                        tier == null -> S.t("cat.014")
+                                        tier == TIER_FULL -> S.t("cat.012")
+                                        else -> S.t("cat.013")
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = palette.muted
+                                )
+                            }
+
+                            Spacer(Modifier.height(Space.lg))
+                            IknaRule()
+                        } else {
+                            Spacer(Modifier.height(Space.md))
+                        }
                     }
                 }
                 if (decks.isEmpty()) {
                     item(key = "catalog-empty") {
-                        Column(Modifier.fillMaxWidth()) {
-                            Spacer(Modifier.height(Space.lg))
-                            Text(
-                                text = S.t("cat.030"),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = palette.muted
+                        if (!collectionHasDecks) {
+                            IknaCatalogCollectionEmptyState(
+                                collection = activeCollection,
+                                onOpenEveryday = {
+                                    filter = normalizeCatalogFilter(current, filter.copy(collection = COLLECTION_EVERYDAY))
+                                    openDeckId = null
+                                }
                             )
-                            Spacer(Modifier.height(Space.lg))
-                            IknaLatticePlaceholder()
+                        } else {
+                            Column(Modifier.fillMaxWidth()) {
+                                Spacer(Modifier.height(Space.lg))
+                                Text(
+                                    text = S.t("cat.030"),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = palette.muted
+                                )
+                                Spacer(Modifier.height(Space.lg))
+                                IknaLatticePlaceholder()
+                            }
                         }
                     }
                 }

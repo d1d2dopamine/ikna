@@ -31,7 +31,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import dev.ikna.AppContainer
+import dev.ikna.data.catalog.CATALOG_COLLECTIONS
 import dev.ikna.data.catalog.CATALOG_PAGE_URL
+import dev.ikna.data.catalog.COLLECTION_EVERYDAY
 import dev.ikna.data.catalog.CatalogDeck
 import dev.ikna.data.catalog.CatalogFetch
 import dev.ikna.data.catalog.CatalogFilter
@@ -39,6 +41,7 @@ import dev.ikna.data.catalog.CatalogIndex
 import dev.ikna.data.catalog.CatalogPreviewCard
 import dev.ikna.data.catalog.TIER_FULL
 import dev.ikna.data.catalog.catalogPackId
+import dev.ikna.data.catalog.collectionDeckCount
 import dev.ikna.data.catalog.decksFor
 import dev.ikna.data.catalog.learnableLangs
 import dev.ikna.data.catalog.levelsFor
@@ -108,7 +111,7 @@ fun CatalogScreen(
 
 	var index by remember { mutableStateOf<CatalogIndex?>(null) }
 	var loading by remember { mutableStateOf(true) }
-	var filter by remember { mutableStateOf(CatalogFilter()) }
+	var filter by remember { mutableStateOf(CatalogFilter(collection = COLLECTION_EVERYDAY)) }
 
 	// Which row is open, which row is downloading, and how far it has got. One
 	// at a time on purpose: two decks arriving at once share a progress band
@@ -153,7 +156,7 @@ fun CatalogScreen(
 		// somebody reading this screen in Polish is not learning from Russian
 		// glosses. The language being learned is never guessed: it is the one
 		// question only the person can answer.
-		val meanings = meaningLangsFor(fetched, "")
+		val meanings = meaningLangsFor(fetched, "", filter.collection)
 		filter = normalizeCatalogFilter(fetched, filter.copy(
 			meaningLang = if (meanings.contains(S.lang)) S.lang else ""
 		))
@@ -315,110 +318,135 @@ fun CatalogScreen(
 						}
 					}
 				} else {
+					val activeCollection = filter.collection.ifEmpty { COLLECTION_EVERYDAY }
+					val collectionCounts = CATALOG_COLLECTIONS.associateWith { collectionDeckCount(list, it) }
+					val collectionHasDecks = (collectionCounts[activeCollection] ?: 0) > 0
 					item(key = "catalog-filters") {
 						Column(Modifier.fillMaxWidth()) {
-							Spacer(Modifier.height(Space.lg))
-							IknaRule()
-							Spacer(Modifier.height(Space.lg))
-
-							Text(
-								text = S.t("cat.007"),
-								style = MaterialTheme.typography.labelMedium,
-								color = muted
-							)
-							Spacer(Modifier.height(Space.sm))
-							CodeChips(
-								options = learnableLangs(list),
-								current = filter.lang,
-								onPick = { picked ->
-									// Keep only dependent answers offered for this language.
-									filter = normalizeCatalogFilter(list, filter.copy(lang = picked))
-									openId = null
-								}
-							)
-
 							Spacer(Modifier.height(Space.md))
-							Text(
-								text = S.t("cat.008"),
-								style = MaterialTheme.typography.labelMedium,
-								color = muted
-							)
-							Spacer(Modifier.height(Space.sm))
-							CodeChips(
-								options = meaningLangsFor(list, filter.lang),
-								current = filter.meaningLang,
-								onPick = { picked ->
-									filter = normalizeCatalogFilter(list, filter.copy(meaningLang = picked))
+							IknaCatalogCollectionTabs(
+								selectedCollection = activeCollection,
+								counts = collectionCounts,
+								onSelect = { picked ->
+									filter = normalizeCatalogFilter(list, filter.copy(collection = picked))
 									openId = null
 								}
 							)
 
-							val subjects = subjectsFor(list, filter)
-							if (subjects.isNotEmpty()) {
-								Spacer(Modifier.height(Space.md))
+							if (collectionHasDecks) {
+								Spacer(Modifier.height(Space.lg))
+
 								Text(
-									text = S.t("cat.009"),
+									text = S.t("cat.007"),
 									style = MaterialTheme.typography.labelMedium,
 									color = muted
 								)
 								Spacer(Modifier.height(Space.sm))
-								PickChips(
-									options = subjects,
-									label = { it },
-									current = filter.subject,
-									onPick = { picked -> filter = normalizeCatalogFilter(list, filter.copy(subject = picked)) }
+								CodeChips(
+									options = learnableLangs(list, activeCollection),
+									current = filter.lang,
+									onPick = { picked ->
+										// Keep only dependent answers offered for this language.
+										filter = normalizeCatalogFilter(list, filter.copy(lang = picked))
+										openId = null
+									}
 								)
-							}
 
-							val levels = levelsFor(list, filter)
-							if (levels.isNotEmpty()) {
 								Spacer(Modifier.height(Space.md))
 								Text(
-									text = S.t("cat.010"),
+									text = S.t("cat.008"),
 									style = MaterialTheme.typography.labelMedium,
 									color = muted
 								)
 								Spacer(Modifier.height(Space.sm))
-								PickChips(
-									options = levels,
-									label = { levelLabel(it) },
-									current = filter.level,
-									onPick = { picked -> filter = normalizeCatalogFilter(list, filter.copy(level = picked)) }
+								CodeChips(
+									options = meaningLangsFor(list, filter.lang, activeCollection),
+									current = filter.meaningLang,
+									onPick = { picked ->
+										filter = normalizeCatalogFilter(list, filter.copy(meaningLang = picked))
+										openId = null
+									}
 								)
-							}
 
-							// What the pipeline measured for this pair, said before the list
-							// rather than discovered by scrolling it.
-							val tier = tierOf(list, filter.lang, filter.meaningLang)
-							if (filter.lang.isNotEmpty() && filter.meaningLang.isNotEmpty()) {
+								val subjects = subjectsFor(list, filter)
+								if (subjects.isNotEmpty()) {
+									Spacer(Modifier.height(Space.md))
+									Text(
+										text = S.t("cat.009"),
+										style = MaterialTheme.typography.labelMedium,
+										color = muted
+									)
+									Spacer(Modifier.height(Space.sm))
+									PickChips(
+										options = subjects,
+										label = { it },
+										current = filter.subject,
+										onPick = { picked -> filter = normalizeCatalogFilter(list, filter.copy(subject = picked)) }
+									)
+								}
+
+								val levels = levelsFor(list, filter)
+								if (levels.isNotEmpty()) {
+									Spacer(Modifier.height(Space.md))
+									Text(
+										text = S.t("cat.010"),
+										style = MaterialTheme.typography.labelMedium,
+										color = muted
+									)
+									Spacer(Modifier.height(Space.sm))
+									PickChips(
+										options = levels,
+										label = { levelLabel(it) },
+										current = filter.level,
+										onPick = { picked -> filter = normalizeCatalogFilter(list, filter.copy(level = picked)) }
+									)
+								}
+
+								// What the pipeline measured for this pair, said before the list
+								// rather than discovered by scrolling it.
+								val tier = tierOf(list, filter.lang, filter.meaningLang, activeCollection)
+								if (filter.lang.isNotEmpty() && filter.meaningLang.isNotEmpty()) {
+									Spacer(Modifier.height(Space.md))
+									Text(
+										text = when (tier) {
+											TIER_FULL -> S.t("cat.012")
+											null -> S.t("cat.014")
+											else -> S.t("cat.013")
+										},
+										style = MaterialTheme.typography.bodySmall,
+										color = muted
+									)
+								}
+
+								Spacer(Modifier.height(Space.lg))
+								IknaRule()
+								Spacer(Modifier.height(Space.lg))
+							} else {
 								Spacer(Modifier.height(Space.md))
-								Text(
-									text = when (tier) {
-										TIER_FULL -> S.t("cat.012")
-										null -> S.t("cat.014")
-										else -> S.t("cat.013")
-									},
-									style = MaterialTheme.typography.bodySmall,
-									color = muted
-								)
 							}
-
-							Spacer(Modifier.height(Space.lg))
-							IknaRule()
-							Spacer(Modifier.height(Space.lg))
 						}
 					}
 					val decks = decksFor(list, filter)
 					if (decks.isEmpty()) {
 						item(key = "catalog-empty") {
-							Column(Modifier.fillMaxWidth()) {
-								Text(
-									text = S.t("cat.030"),
-									style = MaterialTheme.typography.bodyMedium,
-									color = muted
+							if (!collectionHasDecks) {
+								IknaCatalogCollectionEmptyState(
+									collection = activeCollection,
+									onOpenEveryday = {
+										filter = normalizeCatalogFilter(list, filter.copy(collection = COLLECTION_EVERYDAY))
+										openId = null
+									}
 								)
-								Spacer(Modifier.height(Space.lg))
-								IknaLatticePlaceholder()
+							} else {
+								Column(Modifier.fillMaxWidth()) {
+									Text(
+										text = S.t("cat.030"),
+										style = MaterialTheme.typography.bodyMedium,
+										color = muted
+									)
+									Spacer(Modifier.height(Space.lg))
+									IknaLatticePlaceholder()
+								}
 							}
 						}
 					} else {
