@@ -106,7 +106,8 @@ public final class SettingsSourceContracts {
         String chrome = source(SHARED + "ui/settings/SettingsChrome.kt");
         String desktop = source(DESKTOP + "SettingsPane.kt");
         // Item observation moved to shared; destination scrolling stays in the host.
-        has(chrome, "firstVisibleItemIndex", "The shared jump strip must follow the active lazy item");
+        has(chrome, "listState.layoutInfo", "The shared jump strip must follow the active lazy item");
+        has(chrome, "resolveActiveSettingsSectionId(", "The shared jump strip must resolve the active section from visible lazy items");
         has(android, "IknaSettingsJumpRow(", "Android must actually use the shared jump strip");
         has(android, "listState = listState", "Android must pass its real list state");
         has(android, "animateScrollToItem(targetIndex)", "Animated Android section navigation");
