@@ -104,35 +104,15 @@ Preparation completed in this batch:
 - [x] Record tasks and available acceptance evidence in
   [ROUND-0.12-01.md](ROUND-0.12-01.md).
 
-### Full application migration to Rust
+### Deferred Rust compute core (superseded)
 
-Migrate the Ikna application in stages across Android, Windows and Linux.
-The target includes the learning engine, storage, study screens and the
-platform integrations needed to replace the current app. Keep the shipped
-Kotlin app available for use and fixes until the Rust app is ready to take over.
-
-1. **Build an end-to-end study session.** Open a starter deck, build today's
-   plan, reveal and grade a card, save the review locally, then reopen the app
-   and confirm the answer and next due date survived. Include scheduling,
-   grading and riar-manage in this slice. Run the same fixed histories and
-   compare decisions and due dates with the current Kotlin app. Use this flow
-   to compare UI toolkits for accessibility, packaging and Android ABI coverage
-   before committing to one.
-   The grading workflow includes a `study-reference.jsonl` artifact produced
-   by `:desktop:studyMigrationReference`. It runs the Kotlin repositories
-   against a synthetic starter deck in UTC, covers both user grades and records
-   the plan, answer, due time and state after reopening the database.
-2. **Verify data compatibility.** Test importing decks, restoring existing
-   backups, and replaying reviews from earlier app versions without changing
-   card identity or review history. Test interrupted migration and safe retry on
-   copies before reading user data. Keep the current app usable during testing.
-3. **Complete the replacement.** Port the remaining daily-use features,
-   including Browse, progress, Catalogue, Anki import and the supported
-   platform integrations, including Android reminders, speech and the widget.
-   Verify native builds, upgrades and rollback on Android, Windows and Linux.
-4. **Ship after a preview.** Give users a preview that can use copies of real
-   decks and backups, and check first study, daily use and data recovery before
-   making it the default app.
+Owner decision, 2026-11-24: full application migration to Rust is **deferred**
+so day-to-day Kotlin/Compose releases stay fast. The planned narrow Rust compute
+core (`ikna-core`, paired with the future major refactor) is tracked in
+[planned/RUST-CORE-PLAN.md](planned/RUST-CORE-PLAN.md) and
+[planned/PLANNED-ROADMAP.md](planned/PLANNED-ROADMAP.md).
+The existing `:desktop:studyMigrationReference` grading workflow check remains
+intact as a regression reference.
 
 ### Study card interface refresh
 

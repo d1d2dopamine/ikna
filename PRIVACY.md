@@ -19,8 +19,8 @@ Synchronization does not send data to an Ikna server. It sends personal learning
 history and installed card content to the device you explicitly pair. Pairing authorizes the preview transfer; both devices must additionally approve the exact proposal before learning data changes. Treat pairing invitations as secrets;
 do not publish them or include them in bug reports. Disabling updates does not
 disable separately enabled synchronization. Disable sync or revoke pairing in
-Settings to stop it. See [sync scope and recovery](docs/SYNC-PROFILES-0.12.md),
-[updates](docs/UPDATES.md) and [sources](docs/SOURCES.md).
+Settings to stop it. See [sync scope and recovery](docs/contracts/SYNC-PROFILES-0.12.md),
+[updates](docs/contracts/UPDATES.md) and [sources](docs/contracts/SOURCES.md).
 
 ## What is stored, and where
 
@@ -72,6 +72,10 @@ appear at all.
 
 ## Android permissions
 
+- **Camera** — optional, requested only when you tap *Scan QR* inside local
+  device sync. Used strictly on-device to read an Ikna pairing QR code without
+  leaving the app; no camera frames are saved or sent anywhere. Refuse it and
+  manual code entry or offline `.ikna-sync` files continue to work unchanged.
 - **Notifications** — the daily reminder. Refuse it and the rest of the app works
   unchanged.
 - **Internet** — public downloads and the separately enabled authenticated local

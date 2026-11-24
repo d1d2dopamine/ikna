@@ -4,6 +4,13 @@
 
 See [docs/RELEASE-NOTES-0.12.0.md](docs/RELEASE-NOTES-0.12.0.md) for the full release summary.
 
+### 0.12 pre-release polish — Local Profile, serverless QR/.ikna-sync, Moss palette & Zero contrast
+
+- Rename the Statistics screen to **Profile** and replace the stub card with an open local profile: custom photo avatar (`+`), editable display name and study focus, memory maturity breakdown, 12-week square activity grid, 7-day due forecast, active deck progress, and 1200×720 PNG snapshot export.
+- Upgrade serverless device sync: custom in-app Android QR camera (no browser redirect), ISO Level-H branded QR with center Ikna emblem, real device names, modal merge/choose-device dialog, Wi-Fi subnet (`192.168.*`) address priority, raised `16 MiB / 200,000 rows` initial profile limit, clear DEV-mode sync notice, and offline `.ikna-sync` delta file export/merge.
+- Replace Cobalt with **Moss/Olive**, add smooth palette color crossfade, boost deck background visibility on pure-black Zero dark palette, fix Android tactile sound streaming (`MODE_STREAM`), smooth mobile card swipe exit with clipped bounds, and redesign the desktop update prompt.
+- Document deferred tracks in `docs/planned/PLANNED-ROADMAP.md` and organize `docs/` into `completed/`, `planned/`, and `contracts/`.
+
 ### 0.12 application round 62 — Windows private sync storage
 
 - Replace unsupported Windows owner-only File permission toggles with verified

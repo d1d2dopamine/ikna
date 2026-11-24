@@ -1,166 +1,79 @@
 # Documentation map
 
-What each document owns, where the current plans live, and what must be
-re-checked rather than trusted. Maintained contracts and runbooks use English;
-dated historical records retain their original language, including Russian.
-The entry documents are linked from the README in both interface languages. When a
-document is added, renamed or its ownership moves, update this map in the same
-change.
+Clean directory layout for Ikna's documentation. Maintained contracts and
+runbooks use English; dated historical records retain their original language.
 
-## Entry points
+## Folder layout
 
-- [../README.md](../README.md) — product overview, download links, build
-  pointers; mirrors in Russian in the second half. Owns the release download
-  file names and the interface-language list.
-- [../CONTRIBUTING.md](../CONTRIBUTING.md) — contributor entry point. Owns the
-  check commands, the build/toolchain pins summary and the active-plan marker
-  (`ikna-active-plan`). The linked plan, not this map, decides the cycle.
-- [../AGENTS.md](../AGENTS.md) — AI-contributor entry point and repository
-  invariants; links the two source-controlled skills.
-- [../PRIVACY.md](../PRIVACY.md) — network behaviour and data promises.
+- **`docs/` (root)** — entry points, active cycle plan, release notes, version
+  registry, and CI-pinned guides.
+- **`docs/contracts/`** — active technical contracts & architecture specs that
+  govern current code.
+- **`docs/planned/`** — open, non-obsolete future tracks, deferred plans, and
+  ongoing corpus/classifier research.
+- **`docs/completed/`** — completed 0.11 & 0.12 round logs (`ROUND-0.12-*`),
+  shipped 0.11 plans, and historical audits/evidence notes (archive; do not
+  carry status forward from these).
+- **`docs/evidence/`** — machine-generated census/selection/verification artifacts.
+- **`docs/assets/`** — brand and installer artwork.
+
+---
+
+## Entry points (repo root & `docs/`)
+
+- [../README.md](../README.md) — product overview, download table, build pointers (EN + RU).
+- [../CONTRIBUTING.md](../CONTRIBUTING.md) — contributor check commands and active-plan marker.
+- [../AGENTS.md](../AGENTS.md) — AI-contributor entry point and repository invariants.
+- [../PRIVACY.md](../PRIVACY.md) — network behaviour, Android permissions (including optional `CAMERA`), and data promises.
 - [../CHANGELOG.md](../CHANGELOG.md) — release history.
+- [ARCHITECTURE.md](ARCHITECTURE.md) — layers, learning-engine seams, data-safety rules, Developer isolation.
+- [DESIGN.md](DESIGN.md) — product behaviour and visual language (12 palettes, motion, typography).
+- [PLAN-0.12.md](PLAN-0.12.md) & [modern_PLAN-0.12.md](modern_PLAN-0.12.md) — active 0.12 working cycle.
+- [RELEASE-NOTES-0.12.0.md](RELEASE-NOTES-0.12.0.md) — GitHub release notes for `v0.12.0-press`.
+- [VERSIONS.md](VERSIONS.md) — version/epoch scheme and shipped release registry (`0.10`–`0.12`).
+- [HOT-RELOAD.md](HOT-RELOAD.md) — desktop hot-reload toolchain pins.
+- [IKNA-MCP.md](IKNA-MCP.md) — local MCP deck-import guide.
 
-## Active cycle (0.12)
+---
 
-- [ROUND-0.12-19.md](ROUND-0.12-19.md) — restored admitted pool, complete identity
-  scan and exact builder-compatible function-rank prefix. Compact next-stage
-  input and audit: [everyday-round19](evidence/everyday-round19/).
-
-- [ROUND-0.12-18.md](ROUND-0.12-18.md) — first-cat downsampling, confirmed DEV
-  profile/process switching, startup-only reseeds, genuine empty scenario and
-  verification limits. Owns this round's runtime acceptance checklist.
-
-- [ROUND-0.12-16.md](ROUND-0.12-16.md) — selected-intermediate lossless storage
-  experiment, full serialized reconstruction, measured dependency costs and
-  source-audited reader/materialization requirements. Exact storage report and
-  reader-source pins: [everyday-round16](evidence/everyday-round16/). Final pack,
-  runtime import, installed sizes and publication acceptance remain separate.
-
-- [ROUND-0.12-15.md](ROUND-0.12-15.md) — full local Everyday audit, byte-identical
-  quality-report reproduction, all-deck census and scoped acceptance for Part 12
-  storage measurements. [everyday-round15](evidence/everyday-round15/) retains the
-  snapshot passport, complete census, bounded allocation witness and exact
-  read-only analysis recipes. This does not certify semantics or approve release.
-
-- [CORPUS-CANDIDATES-0.12.md](CORPUS-CANDIDATES-0.12.md) — dated publisher/author
-  research on replenishment: WMT24++/MKQA Everyday experiments, separate NTREX
-  Knowledge candidate, data-licence distinctions and proposed incremental checks.
-  Recommendations do not admit sources or establish net card yield.
-
-- [ROUND-0.12-12.md](ROUND-0.12-12.md) — successful Everyday quality handoff,
-  source-supply versus context-allocation shortage diagnosis, deferred corpus
-  replenishment requirements and remaining census/freeze gates. Exact reports and
-  complete report-derived deck inventory: [everyday-round12](evidence/everyday-round12/).
-- [ROUND-0.12-11.md](ROUND-0.12-11.md) — classic-only cards, retained history,
-  actual DEV tools and fix-1 CI assertion corrections; runtime acceptance remains open.
-- [ROUND-0.12-10-fix1.md](ROUND-0.12-10-fix1.md) — canonical occurrence failure
-  and correction; its pending-run status is superseded by round 12 evidence.
-
-- [ROUND-0.12-10.md](ROUND-0.12-10.md) — last bounded selection correction,
-  Japanese boundary evidence, diverse alternate ordering, one saved-pool workflow
-  and full selection handoff. Owner review of all languages/cards is not required.
-- [ROUND-0.12-09.md](ROUND-0.12-09.md) — saved real Everyday preview audit,
-  preliminary material findings and offline card review. Input-bound machine
-  report, manual notes and viewer: [everyday-round09](evidence/everyday-round09/).
-- [ROUND-0.12-08.md](ROUND-0.12-08.md) — admitted Everyday selection, input
-  preservation/reproducible preview fixes, next single workflow and owner window
-  acceptance. [everyday-round08.json](evidence/everyday-round08.json) records the
-  public artifact checkpoint and local verification limits.
-- [ROUND-0.12-07.md](ROUND-0.12-07.md) — owner confirms round-06 artifacts
-  persist; pinned first-picture layout correction and bounded DEV trace; owner
-  subsequently reports it fixed. Input/source hashes: [windows-window-round07.json](evidence/windows-window-round07.json).
-- [ROUND-0.12-06.md](ROUND-0.12-06.md) — window bounds/restore/frame-pacing
-  repairs, pinned upstream research and integration with round-05 Catalogue.
-- [ROUND-0.12-05-GLM.md](ROUND-0.12-05-GLM.md) — reviewed GLM observations;
-  unsupported causal conclusions corrected, interactive checks still open.
-- [PLAN-0.12.md](PLAN-0.12.md) — the active working plan. Owns cycle
-  decisions, the 50/50 allocation and current status decisions. Linked from
-  CONTRIBUTING; the planning cycle is independent of the version in build files.
-- [modern_PLAN-0.12.md](modern_PLAN-0.12.md) — the 0.12 application-lane
-  inventory (source-reviewed task list).
-- [ROUND-0.12-01.md](ROUND-0.12-01.md) — round 01 record: repairs, evidence,
-  remaining platform smoke.
-- [EVERYDAY-POOL.md](EVERYDAY-POOL.md) — admitted Tatoeba-only Part 7 pool
-  runbook: exact input pins, full pool retention and explicit artifact reuse.
-- [ROUND-0.12-02.md](ROUND-0.12-02.md) — Catalogue tooling/application
-  evidence round 02 record and reviewed GLM integration.
-- [ROUND-0.12-02-GLM.md](ROUND-0.12-02-GLM.md) — documentation/audit round 02
-  record (this round's changes, checks and left-over findings).
-- [ROUND-0.12-03.md](ROUND-0.12-03.md) — visual/UX changes, reviewed Codex/GLM
-  integration, source verification and remaining runtime acceptance.
-- [ROUND-0.12-03-GLM.md](ROUND-0.12-03-GLM.md) — GLM's original source work and
-  reported PC attempts, with reviewer corrections and evidence limitations.
-- [ROUND-0.12-04.md](ROUND-0.12-04.md) — Windows Hot Reload recompiler diagnosis,
-  pinned source evidence, tooling repair and remaining native/runtime acceptance.
-- [ROUND-0.12-05.md](ROUND-0.12-05.md) — existing World run diagnosis, reusable
-  evidence/offline merge repair, scoped tests and the parallel GLM handoff.
-- [evidence/world-provenance-run-35009216395.json](evidence/world-provenance-run-35009216395.json)
-  — read-only API checkpoint with exact job/step outcomes, missing data and
-  retrieved-source hashes; not a substitute for the unavailable full run report.
-
-## Contracts — each document owns its area
+## Planned / open tracks (`docs/planned/`)
 
 | Document | Owns |
 | --- | --- |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Layers, learning-engine seams, data-safety rules, restore/replay, Developer isolation. |
-| [DESIGN.md](DESIGN.md) | Product behaviour and the visual language: palettes (twelve, two lightings), motion, typography. |
-| [LEARNING-ENGINE.md](LEARNING-ENGINE.md) | Scheduler/Governor/Target-Context-Transfer/Grading responsibility split. |
-| [SCIENCE.md](SCIENCE.md) | Evidence labels and what may be claimed as research. |
-| [GOVERNOR.md](GOVERNOR.md) | Load control: numbers, gates, what is not user-configurable. |
-| [GRADING.md](GRADING.md) · [GRADING-IMPLEMENTATION.md](GRADING-IMPLEMENTATION.md) | Grading contract and its CI/implementation hand-off. |
-| [FSRS-OPTIMIZER.md](FSRS-OPTIMIZER.md) · [FSRS-OPTIMIZER-INTEGRATION.md](FSRS-OPTIMIZER-INTEGRATION.md) | Local FSRS fitting: science and integration contract. |
-| [CATALOGUE-V2.md](CATALOGUE-V2.md) | Catalogue v2 identity, contexts, pack format, readiness gates. Owns the meaning of the generated `CATALOGUE-V2-READINESS.md`/`.json` (produced by the census workflow from `tools/catalog/readiness_audit.py`; not source files). |
-| [SOURCES.md](SOURCES.md) | Source registration, licences, provenance requirements. |
-| [CORPORA-0.11.md](CORPORA-0.11.md) | The fixed 0.11 corpus scope and admission rules; inherited contract until a scoped task updates it. |
-| [MORPHOLOGY.md](MORPHOLOGY.md) | Offline build enrichment rules; unresolved-token preference. |
-| [PHONETICS.md](PHONETICS.md) | IPA/transcription pipeline contracts. |
-| [DECKS.md](DECKS.md) | User-made deck format and the AI-prompt contract. |
-| [ANKI.md](ANKI.md) | Anki bridge: what imports, what is rejected, size limits. |
-| [DESKTOP.md](DESKTOP.md) | Desktop platform contracts: packaging, installer, AppImage, window state, platform omissions. Its port-time measurements are labelled historical. |
-| [HOT-RELOAD.md](HOT-RELOAD.md) | The fast desktop UI loop: `dev-hot-reload.cmd`, isolated developer profile, toolchain pins. |
-| [UPDATES.md](UPDATES.md) | Release checks and update behaviour. |
-| [VERSIONS.md](VERSIONS.md) | Version/epoch scheme, tag rules, where versions live. |
-| [KEYSTORE.md](KEYSTORE.md) | Signing identity: what exists, what never leaves source control. |
-| [DEVELOPER-MODE.md](DEVELOPER-MODE.md) | Developer Sandbox isolation contract. |
-| [THIRD-PARTY-FONTS.md](THIRD-PARTY-FONTS.md) | Bundled/importable font licensing. |
-| [VOICE.md](VOICE.md) | Speech runtime: models the user supplies, what the app never downloads. |
-| [UNSCHEDULED.md](UNSCHEDULED.md) | Optional ideas, explicitly not commitments. |
-| [REFACTOR.md](REFACTOR.md) | The planned split of two oversized files. |
-| [RUST-CORE-PLAN.md](RUST-CORE-PLAN.md) | Deferred future plan for an optional Rust compute core (`ikna-core`) paired with the major refactor. |
-| [PLANNED-ROADMAP.md](PLANNED-ROADMAP.md) | Open post-cycle tracks: major refactor & oversized files, deferred Rust core, Voice/TTS progression, and Catalogue v2 replenishment. |
+| [planned/PLANNED-ROADMAP.md](planned/PLANNED-ROADMAP.md) | Consolidated open post-0.12 roadmap: major refactor, deferred Rust core, Voice/TTS, Catalogue v2. |
+| [planned/REFACTOR.md](planned/REFACTOR.md) | Planned split of oversized `LearningRepository.kt` and `SettingsScreen.kt`. |
+| [planned/RUST-CORE-PLAN.md](planned/RUST-CORE-PLAN.md) | Deferred optional Rust compute core (`ikna-core`), scheduled after the major refactor. |
+| [planned/UNSCHEDULED.md](planned/UNSCHEDULED.md) | Optional ideas, explicitly not commitments. |
+| [planned/REMOTE-SYNC-DESIGN.md](planned/REMOTE-SYNC-DESIGN.md) | Optional future encrypted remote sync architecture. |
+| [planned/CORPUS-CANDIDATES-0.12.md](planned/CORPUS-CANDIDATES-0.12.md) · [planned/LARGE-CORPUS-CANDIDATES-0.12.md](planned/LARGE-CORPUS-CANDIDATES-0.12.md) | Catalogue v2 corpus replenishment candidates and licence review. |
+| [planned/EVERYDAY-POOL.md](planned/EVERYDAY-POOL.md) · [planned/SELECTION-ENGINE-PLAN-0.12.md](planned/SELECTION-ENGINE-PLAN-0.12.md) | Catalogue v2 pool runbook and selection engine plan. |
+| [planned/CLASSIFIER-FEASIBILITY-0.12.md](planned/CLASSIFIER-FEASIBILITY-0.12.md) · [planned/CLASSIFIER-ARCHIVE-AUDIT-0.12.md](planned/CLASSIFIER-ARCHIVE-AUDIT-0.12.md) | Classifier research and archive audit. |
 
-## Historical evidence (do not carry status forward from these)
+---
 
-- [PLAN-0.11.md](PLAN-0.11.md), [ROADMAP-0.11.md](ROADMAP-0.11.md),
-  [modern_PLAN-0.11.md](modern_PLAN-0.11.md) — the shipped 0.11 cycle.
-- [PARTS-5-10-RUNBOOK.md](PARTS-5-10-RUNBOOK.md),
-  [PARTS-6-9-DECISION-RECORD.md](PARTS-6-9-DECISION-RECORD.md),
-  [PART-9-FULL-PROVENANCE.md](PART-9-FULL-PROVENANCE.md) — 0.11 corpus
-  evidence run and admission decisions (inherited decision records).
-- [test-cli.md](test-cli.md) — dated CLI test report (includes the
-  memory-constraint evidence CONTRIBUTING cites).
-- [ai-audits.md](ai-audits.md), [rele.md](rele.md) — dated read-only audits
-  and research notes.
+## Active technical contracts (`docs/contracts/`)
 
-- [ROUND-0.12-17.md](ROUND-0.12-17.md) — reading-cat header, plain phone bottom bar, grey palette identity and verification limits.
+| Document | Owns |
+| --- | --- |
+| [contracts/LEARNING-ENGINE.md](contracts/LEARNING-ENGINE.md) | Scheduler / Governor / Target-Context-Transfer / Grading split. |
+| [contracts/SCIENCE.md](contracts/SCIENCE.md) | Evidence labels and research claims policy. |
+| [contracts/GOVERNOR.md](contracts/GOVERNOR.md) | `riar-manage` load control numbers and gates. |
+| [contracts/GRADING.md](contracts/GRADING.md) · [contracts/GRADING-IMPLEMENTATION.md](contracts/GRADING-IMPLEMENTATION.md) | Derived grading contract and CI hand-off. |
+| [contracts/FSRS-OPTIMIZER.md](contracts/FSRS-OPTIMIZER.md) · [contracts/FSRS-OPTIMIZER-INTEGRATION.md](contracts/FSRS-OPTIMIZER-INTEGRATION.md) | Local FSRS fitting science and integration. |
+| [contracts/SYNC-0.12.md](contracts/SYNC-0.12.md) · [contracts/SYNC-PROFILES-0.12.md](contracts/SYNC-PROFILES-0.12.md) · [contracts/SYNC-INCREMENTAL-0.12.md](contracts/SYNC-INCREMENTAL-0.12.md) | Local paired LAN sync, profile adoption, and incremental journal contracts. |
+| [contracts/CATALOGUE-V2.md](contracts/CATALOGUE-V2.md) · [contracts/SOURCES.md](contracts/SOURCES.md) · [contracts/CORPORA-0.11.md](contracts/CORPORA-0.11.md) | Catalogue v2 identity, pack format, source licensing, and corpus admission rules. |
+| [contracts/MORPHOLOGY.md](contracts/MORPHOLOGY.md) · [contracts/PHONETICS.md](contracts/PHONETICS.md) | Offline morphology enrichment and IPA/phonetics pipeline. |
+| [contracts/DECKS.md](contracts/DECKS.md) · [contracts/ANKI.md](contracts/ANKI.md) | User-made deck format, AI prompt contract, and Anki `.apkg` bridge. |
+| [contracts/DESKTOP.md](contracts/DESKTOP.md) · [contracts/UPDATES.md](contracts/UPDATES.md) · [contracts/KEYSTORE.md](contracts/KEYSTORE.md) | Desktop packaging, update checks, and signing identity. |
+| [contracts/DEVELOPER-MODE.md](contracts/DEVELOPER-MODE.md) · [contracts/VOICE.md](contracts/VOICE.md) · [contracts/THIRD-PARTY-FONTS.md](contracts/THIRD-PARTY-FONTS.md) | Developer Sandbox isolation, offline speech runtime, and font licensing. |
 
-## Facts that require regular re-verification
+---
 
-Never trust these from memory or from another document; read the owner:
+## Completed / archived (`docs/completed/`)
 
-- Current application version and tag agreement — [VERSIONS.md](VERSIONS.md)
-  against `app/build.gradle.kts` (`appVersionName`), `desktop/build.gradle.kts`
-  and the release workflow.
-- Release asset file names — README download table against
-  `release.yml`/`build.yml` outputs.
-- Check commands and toolchain pins — CONTRIBUTING against the scripts under
-  `tools/` and `.github/workflows/`.
-- Interface-language list and translation-table size — README/DESKTOP against
-  `shared/src/jvmShared/kotlin/dev/ikna/ui/text/Strings*.kt`.
-- Active plan status — [PLAN-0.12.md](PLAN-0.12.md) and
-  [modern_PLAN-0.12.md](modern_PLAN-0.12.md) against the actual tree; round
-  records state what was actually verified.
-- DESKTOP.md counts labelled "at port time" — historical by intent; do not
-  refresh them as if they were current.
-- This map itself — whenever documents are added, renamed or re-owned.
-
+Contains all finished 0.12 application/catalogue round records (`ROUND-0.12-01`
+through `ROUND-0.12-64`), the shipped 0.11 cycle (`PLAN-0.11.md`,
+`ROADMAP-0.11.md`, `modern_PLAN-0.11.md`), 0.11 corpus decision records
+(`PARTS-5-10-RUNBOOK.md`, `PARTS-6-9-DECISION-RECORD.md`,
+`PART-9-FULL-PROVENANCE.md`), and dated historical audits (`ai-audits.md`,
+`rele.md`, `test-cli.md`).

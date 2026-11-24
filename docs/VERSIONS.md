@@ -91,3 +91,18 @@ the release page cannot drift apart.
 - release targets: Android arm64 + legacy32, Windows x64, Linux x86_64
 - catalogue: the published catalogue remains v1 under the fixed `catalog` tag;
   Catalogue v2 publication is a separate, later step
+
+## 0.12.0 press
+
+- `versionName`: `0.12.0 press`
+- `versionCode`: `200120000`
+- release tag: `v0.12.0-press`
+- desktop package version: `0.12.0`
+- database schema: 10 (unchanged from 0.11.0 press; local profile preferences
+  live in DataStore and optional sync uses dedicated private storage)
+- scheduler: FSRS-6 / scheduler version 6
+- clean-install palette: Frost (with Moss/Olive replacing Cobalt)
+- release targets: Android arm64 + legacy32, Windows x64 (setup + portable),
+  Linux x86_64 AppImage
+- catalogue: the published catalogue remains v1 under the fixed `catalog` tag;
+  Catalogue v2 replenishment and freeze remain tracked in `docs/planned/`

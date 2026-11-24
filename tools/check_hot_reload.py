@@ -28,7 +28,7 @@ def main() -> int:
     bridge = text("gradlew.bat")
     cmd = text("dev-hot-reload.cmd")
     docs = text("docs/HOT-RELOAD.md")
-    plan = text("docs/modern_PLAN-0.11.md")
+    plan = text("docs/completed/modern_PLAN-0.11.md")
 
     require(
         'id("org.jetbrains.compose.hot-reload") version "1.1.1" apply false' in root_build,

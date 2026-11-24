@@ -39,7 +39,7 @@ Ikna builds a daily plan from the cards you have due and your recent study histo
 2. **Reveal.** “Can you watch my bag for a moment?”
 3. **Grade.** Choose “know” or “don’t know”. Ikna uses your answer to schedule the next review.
 
-FSRS‑6 schedules reviews. `riar-manage` decides how much new material fits in the day. After the daily plan, you can read familiar material in Browse. [Learning engine](docs/LEARNING-ENGINE.md) · [Daily workload](docs/GOVERNOR.md)
+FSRS‑6 schedules reviews. `riar-manage` decides how much new material fits in the day. After the daily plan, you can read familiar material in Browse. [Learning engine](docs/contracts/LEARNING-ENGINE.md) · [Daily workload](docs/contracts/GOVERNOR.md)
 
 <a name="download"></a>
 
@@ -54,17 +54,17 @@ These files are from [the published 0.12.0 press release](https://github.com/d1d
 | Windows x64 | [Installer](https://github.com/d1d2dopamine/ikna/releases/download/v0.12.0-press/ikna-windows-x64-setup.exe) · [Portable ZIP](https://github.com/d1d2dopamine/ikna/releases/download/v0.12.0-press/ikna-windows-x64-portable.zip) |
 | Linux x86_64 | [AppImage](https://github.com/d1d2dopamine/ikna/releases/download/v0.12.0-press/ikna-linux-x86_64.AppImage) |
 
-The Windows installer runs per user. The portable Windows build and the Linux AppImage ship with their runtime. On Linux, mark the AppImage executable before opening it. [Desktop setup](docs/DESKTOP.md) · [Updates](docs/UPDATES.md)
+The Windows installer runs per user. The portable Windows build and the Linux AppImage ship with their runtime. On Linux, mark the AppImage executable before opening it. [Desktop setup](docs/contracts/DESKTOP.md) · [Updates](docs/contracts/UPDATES.md)
 
 ## <img src="docs/assets/icons/decks.svg" width="28" height="28" align="absmiddle" alt=""> Decks
 
-- [Catalogue](docs/SOURCES.md). Choose a ready-made deck. Catalogue cards retain source and licence information.
-- [Your own deck](docs/DECKS.md). Paste rows in the form `phrase | example sentence | meaning`. Ikna can also prepare a prompt for an AI tool you choose.
-- [Anki import](docs/ANKI.md). Open an `.apkg` to import supported text cards and their review history. Images and audio are left out.
+- [Catalogue](docs/contracts/SOURCES.md). Choose a ready-made deck. Catalogue cards retain source and licence information.
+- [Your own deck](docs/contracts/DECKS.md). Paste rows in the form `phrase | example sentence | meaning`. Ikna can also prepare a prompt for an AI tool you choose.
+- [Anki import](docs/contracts/ANKI.md). Open an `.apkg` to import supported text cards and their review history. Images and audio are left out.
 
 ## <img src="docs/assets/icons/privacy.svg" width="28" height="28" align="absmiddle" alt=""> Privacy and data
 
-Ikna stores cards and review history on your device. It has no accounts or analytics. You can export a backup and restore your history. The development branch also has optional local sync between devices you explicitly pair. [Privacy policy](PRIVACY.md) · [Local sync](docs/SYNC-PROFILES-0.12.md)
+Ikna stores cards and review history on your device. It has no accounts or analytics. You can export a backup and restore your history. The development branch also has optional local sync between devices you explicitly pair. [Privacy policy](PRIVACY.md) · [Local sync](docs/contracts/SYNC-PROFILES-0.12.md)
 
 ## <img src="docs/assets/icons/interface.svg" width="28" height="28" align="absmiddle" alt=""> Interface
 
@@ -135,7 +135,7 @@ Ikna is free software under the [GNU General Public License, version 3 or later]
 2. **Открой значение.** «Можешь присмотреть за моей сумкой?»
 3. **Ответь.** Выбери «знаю» или «не знаю». По ответу Икна назначит следующий повтор.
 
-Повторы планирует FSRS‑6. Сколько нового материала взять сегодня, решает `riar-manage`. После дневного плана знакомый материал можно почитать в режиме «Чтение». [Учебный движок](docs/LEARNING-ENGINE.md) · [Дневная нагрузка](docs/GOVERNOR.md)
+Повторы планирует FSRS‑6. Сколько нового материала взять сегодня, решает `riar-manage`. После дневного плана знакомый материал можно почитать в режиме «Чтение». [Учебный движок](docs/contracts/LEARNING-ENGINE.md) · [Дневная нагрузка](docs/contracts/GOVERNOR.md)
 
 <a name="скачать"></a>
 
@@ -150,17 +150,17 @@ Ikna is free software under the [GNU General Public License, version 3 or later]
 | Windows x64 | [Установщик](https://github.com/d1d2dopamine/ikna/releases/download/v0.12.0-press/ikna-windows-x64-setup.exe) · [Portable ZIP](https://github.com/d1d2dopamine/ikna/releases/download/v0.12.0-press/ikna-windows-x64-portable.zip) |
 | Linux x86_64 | [AppImage](https://github.com/d1d2dopamine/ikna/releases/download/v0.12.0-press/ikna-linux-x86_64.AppImage) |
 
-Установщик Windows ставит Икну для текущего пользователя. Portable-версия Windows и AppImage для Linux поставляются со своей средой запуска. В Linux перед первым запуском дай AppImage право на выполнение. [Установка на ПК](docs/DESKTOP.md) · [Обновления](docs/UPDATES.md)
+Установщик Windows ставит Икну для текущего пользователя. Portable-версия Windows и AppImage для Linux поставляются со своей средой запуска. В Linux перед первым запуском дай AppImage право на выполнение. [Установка на ПК](docs/contracts/DESKTOP.md) · [Обновления](docs/contracts/UPDATES.md)
 
 ## <img src="docs/assets/icons/decks.svg" width="28" height="28" align="absmiddle" alt=""> Колоды
 
-- [Каталог](docs/SOURCES.md). Выбери готовую колоду. В карточках каталога сохраняются сведения об источнике и лицензии.
-- [Своя колода](docs/DECKS.md). Вставь строки в формате `фраза | предложение с ней | значение`. Икна также может подготовить запрос для выбранного тобой ИИ.
-- [Импорт из Anki](docs/ANKI.md). Открой `.apkg`, чтобы перенести поддерживаемые текстовые карточки вместе с историей ответов. Изображения и аудио остаются в Anki.
+- [Каталог](docs/contracts/SOURCES.md). Выбери готовую колоду. В карточках каталога сохраняются сведения об источнике и лицензии.
+- [Своя колода](docs/contracts/DECKS.md). Вставь строки в формате `фраза | предложение с ней | значение`. Икна также может подготовить запрос для выбранного тобой ИИ.
+- [Импорт из Anki](docs/contracts/ANKI.md). Открой `.apkg`, чтобы перенести поддерживаемые текстовые карточки вместе с историей ответов. Изображения и аудио остаются в Anki.
 
 ## <img src="docs/assets/icons/privacy.svg" width="28" height="28" align="absmiddle" alt=""> Приватность и данные
 
-Икна хранит карточки и историю ответов на устройстве. Аккаунтов и аналитики нет. Историю можно сохранить в резервную копию и восстановить из неё. В ветке разработки также есть локальная синхронизация, которую можно включить для сопряжённых устройств. [Политика приватности](PRIVACY.md) · [Локальная синхронизация](docs/SYNC-PROFILES-0.12.md)
+Икна хранит карточки и историю ответов на устройстве. Аккаунтов и аналитики нет. Историю можно сохранить в резервную копию и восстановить из неё. В ветке разработки также есть локальная синхронизация, которую можно включить для сопряжённых устройств. [Политика приватности](PRIVACY.md) · [Локальная синхронизация](docs/contracts/SYNC-PROFILES-0.12.md)
 
 ## <img src="docs/assets/icons/interface.svg" width="28" height="28" align="absmiddle" alt=""> Интерфейс
 

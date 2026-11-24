@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.toArgb
@@ -46,7 +50,6 @@ import dev.ikna.ui.theme.IknaTextField
 import dev.ikna.ui.theme.IknaWideButton
 import dev.ikna.ui.theme.LocalIknaPalette
 import dev.ikna.ui.theme.Space
-import dev.ikna.ui.theme.iknaCardShape
 import dev.ikna.ui.theme.iknaNumberStyle
 import dev.ikna.ui.theme.iknaTileShape
 import java.time.Instant
@@ -108,16 +111,20 @@ data class ProfileStatsCardData(
         }
 
     val studyTimeText: String
-        get() = formatStudyMinutes(studyMinutes30d)
+        get() = formatStudyMinutesLocalized(studyMinutes30d)
 }
 
-internal fun formatStudyMinutes(minutes: Int): String = when {
-    minutes <= 0 -> "0m"
-    minutes < 60 -> "${minutes}m"
-    else -> {
-        val h = minutes / 60
-        val m = minutes % 60
-        if (m == 0) "${h}h" else "${h}h ${m}m"
+internal fun formatStudyMinutesLocalized(minutes: Int): String {
+    val uMin = S.t("prof.unit_min")
+    val uHour = S.t("prof.unit_hour")
+    return when {
+        minutes <= 0 -> "0 $uMin"
+        minutes < 60 -> "$minutes $uMin"
+        else -> {
+            val h = minutes / 60
+            val m = minutes % 60
+            if (m == 0) "$h $uHour" else "$h $uHour $m $uMin"
+        }
     }
 }
 
@@ -198,16 +205,15 @@ fun buildProfileStatsCardData(
 }
 
 /**
- * Displays the user's custom local avatar photo, or a crisp '+' tile to pick one.
+ * Circular user avatar photo, or a quiet recessed '+' circle to choose a photo from the device.
  */
 @Composable
 fun IknaProfileAvatar(
     avatarPath: String,
-    size: Dp = 64.dp,
+    size: Dp = 68.dp,
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colorScheme
-    val shape = iknaTileShape()
     val bitmap = remember(avatarPath) {
         if (avatarPath.isBlank()) null else loadProfileAvatarBitmap(avatarPath)
     }
@@ -215,9 +221,9 @@ fun IknaProfileAvatar(
     Box(
         modifier = modifier
             .size(size)
-            .clip(shape)
-            .background(colors.background, shape)
-            .border(1.dp, if (bitmap != null) colors.outline else colors.primary.copy(alpha = 0.65f), shape),
+            .clip(CircleShape)
+            .background(colors.surface, CircleShape)
+            .border(1.dp, colors.outline.copy(alpha = 0.55f), CircleShape),
         contentAlignment = Alignment.Center
     ) {
         if (bitmap != null) {
@@ -231,17 +237,17 @@ fun IknaProfileAvatar(
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val cx = this.size.width / 2f
                 val cy = this.size.height / 2f
-                val arm = this.size.minDimension * 0.20f
-                val stroke = 2.4.dp.toPx()
+                val arm = this.size.minDimension * 0.16f
+                val stroke = 2.dp.toPx()
                 drawLine(
-                    color = colors.primary,
+                    color = colors.onSurfaceVariant,
                     start = Offset(cx - arm, cy),
                     end = Offset(cx + arm, cy),
                     strokeWidth = stroke,
                     cap = StrokeCap.Round
                 )
                 drawLine(
-                    color = colors.primary,
+                    color = colors.onSurfaceVariant,
                     start = Offset(cx, cy - arm),
                     end = Offset(cx, cy + arm),
                     strokeWidth = stroke,
@@ -253,10 +259,8 @@ fun IknaProfileAvatar(
 }
 
 /**
- * Full local-only Profile & Deep Analytics dashboard.
- * Custom photo avatar (+), nickname, optional study focus, 4 FSRS KPIs,
- * memory maturity bar, 12-week activity heatmap, 7-day forecast, top decks,
- * and 1-tap rich 1200x720 PNG snapshot export.
+ * Open, editorial Local Profile & Learning Overview — zero nested card boxes,
+ * true 1:1 square activity heatmap, slender forecast bars, and clean typographic hierarchy.
  */
 @Composable
 fun IknaLocalProfileCard(
@@ -276,7 +280,7 @@ fun IknaLocalProfileCard(
 ) {
     val colors = MaterialTheme.colorScheme
     val palette = LocalIknaPalette.current
-    val shape = iknaCardShape()
+    val hairline = colors.outline.copy(alpha = 0.42f)
     var editing by remember { mutableStateOf(false) }
     var draftName by remember(profileName) { mutableStateOf(profileName) }
     var draftBio by remember(profileBio) { mutableStateOf(profileBio) }
@@ -291,81 +295,111 @@ fun IknaLocalProfileCard(
     }
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(colors.surface, shape)
-            .border(1.dp, colors.outline, shape)
-            .padding(Space.md),
-        verticalArrangement = Arrangement.spacedBy(Space.md)
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Space.lg)
     ) {
-        // 1. Profile Header with '+' custom photo avatar
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IknaProfileAvatar(
-                avatarPath = profileAvatar,
-                size = 64.dp,
-                modifier = if (onPickAvatar != null) Modifier.clickable(onClick = onPickAvatar) else Modifier
-            )
-            Spacer(Modifier.width(Space.md))
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    text = S.t("prof.title"),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.primary
+        // 1. Open Profile Header (directly on page canvas — no card wrapper, no redundant eyebrow)
+        Column(verticalArrangement = Arrangement.spacedBy(Space.sm)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IknaProfileAvatar(
+                    avatarPath = profileAvatar,
+                    size = 68.dp,
+                    modifier = if (onPickAvatar != null) Modifier.clickable(onClick = onPickAvatar) else Modifier
                 )
-                Text(
-                    text = profileName.trim().ifEmpty { S.t("prof.default_name") },
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colors.onBackground,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                Spacer(Modifier.width(Space.md))
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(
+                        text = profileName.trim().ifEmpty { S.t("prof.default_name") },
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.onBackground,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = profileBio.trim().ifEmpty { S.t("prof.local_note") },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Space.md),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IknaTextButton(
+                    label = S.t(if (editing) "prof.cancel" else "prof.edit_name"),
+                    color = colors.primary,
+                    horizontalPadding = 0.dp,
+                    onClick = {
+                        draftName = profileName
+                        draftBio = profileBio
+                        editing = !editing
+                    }
                 )
+                if (snapshot != null) {
+                    IknaTextButton(
+                        label = S.t("prof.download_png"),
+                        enabled = !exportingPng,
+                        color = colors.onSurfaceVariant,
+                        horizontalPadding = 0.dp,
+                        onClick = {
+                            onExportPng(
+                                buildProfileStatsCardData(
+                                    profileName = profileName,
+                                    snapshot = snapshot,
+                                    palette = palette,
+                                    paletteDisplayName = paletteDisplayName,
+                                    profileBio = profileBio,
+                                    profileAvatar = profileAvatar
+                                )
+                            )
+                        }
+                    )
+                }
+            }
+
+            if (!pngStatus.isNullOrBlank()) {
                 Text(
-                    text = profileBio.trim().ifEmpty { S.t("prof.local_note") },
+                    text = pngStatus,
                     style = MaterialTheme.typography.bodySmall,
-                    color = colors.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    color = colors.onSurfaceVariant
                 )
             }
-            IknaTextButton(
-                label = S.t(if (editing) "prof.cancel" else "prof.edit_name"),
-                color = colors.onSurfaceVariant,
-                onClick = {
-                    draftName = profileName
-                    draftBio = profileBio
-                    editing = !editing
-                }
-            )
         }
 
-        // 2. Inline Profile Editor (Custom Photo + Nickname + Bio)
+        // 2. Quiet Inline Profile Editor
         if (editing) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(colors.background.copy(alpha = 0.55f), iknaTileShape())
-                    .border(1.dp, colors.outline.copy(alpha = 0.6f), iknaTileShape())
-                    .padding(Space.sm),
+                    .background(colors.surface, iknaTileShape())
+                    .padding(Space.md),
                 verticalArrangement = Arrangement.spacedBy(Space.sm)
             ) {
                 if (onPickAvatar != null) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(Space.md),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IknaTextButton(
                             label = S.t("prof.pick_avatar"),
+                            horizontalPadding = 0.dp,
                             onClick = onPickAvatar
                         )
                         if (profileAvatar.isNotBlank() && onRemoveAvatar != null) {
                             IknaTextButton(
                                 label = S.t("prof.remove_avatar"),
                                 color = colors.onSurfaceVariant,
+                                horizontalPadding = 0.dp,
                                 onClick = onRemoveAvatar
                             )
                         }
@@ -396,7 +430,6 @@ fun IknaLocalProfileCard(
             }
         }
 
-        // 3. Rich Analytics Dashboard
         if (snapshot != null) {
             val month = snapshot.month
             val ins = snapshot.insights
@@ -405,203 +438,141 @@ fun IknaLocalProfileCard(
             } else {
                 "—"
             }
-            val paceSuffix = if (ins.medianSecPerCard30d > 0) " · ${ins.medianSecPerCard30d}s" else ""
-            val avgStabText = if (ins.avgStabilityDays >= 1.0) " · ~${ins.avgStabilityDays.roundToInt()}d" else ""
+            val uDay = S.t("prof.unit_day")
+            val stabNote = if (ins.avgStabilityDays >= 1.0) "~${ins.avgStabilityDays.roundToInt()} $uDay" else ""
+            val recallNote = if (month.repeatAnswers >= 5) "${month.recalledRepeatAnswers}/${month.repeatAnswers}" else ""
 
-            Column(verticalArrangement = Arrangement.spacedBy(Space.sm)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Space.sm)
-                ) {
-                    ProfileStatPill(
-                        value = ins.matureCards.toString(),
-                        label = S.t("prof.kpi_mature"),
-                        sub = "${month.targets} ${S.t("prof.pill_targets").lowercase()}",
-                        accent = true,
-                        modifier = Modifier.weight(1f)
-                    )
-                    ProfileStatPill(
-                        value = recallText,
-                        label = S.t("prof.pill_recall"),
-                        sub = if (month.repeatAnswers >= 5) "${month.recalledRepeatAnswers}/${month.repeatAnswers}" else "${month.answers} ${S.t("prof.pill_answers").lowercase()}",
-                        accent = true,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Space.sm)
-                ) {
-                    ProfileStatPill(
-                        value = formatStudyMinutes(ins.studyMinutes30d),
-                        label = S.t("prof.kpi_time"),
-                        sub = "${month.answers} ${S.t("prof.pill_answers").lowercase()}$paceSuffix",
-                        accent = false,
-                        modifier = Modifier.weight(1f)
-                    )
-                    ProfileStatPill(
-                        value = "${ins.activeDays30d}/30",
-                        label = S.t("prof.kpi_active_days"),
-                        sub = "${S.t("prof.avg_stability")}$avgStabText",
-                        accent = false,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
+            Box(Modifier.fillMaxWidth().height(1.dp).background(hairline))
 
-            // Memory Maturity Segmented Bar
-            val studiedTotal = ins.matureCards + ins.youngCards + ins.learningCards
-            if (studiedTotal > 0) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            // 3. Open Typographic Metric Strip (zero boxes, aligned columns)
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val wide = maxWidth >= 520.dp
+                if (wide) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.spacedBy(Space.lg)
                     ) {
-                        Text(
-                            text = S.t("prof.maturity_title"),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = colors.onSurfaceVariant
+                        ProfileMetricColumn(
+                            value = ins.matureCards.toString(),
+                            label = S.t("prof.kpi_mature"),
+                            detail = stabNote,
+                            emphasized = ins.matureCards > 0,
+                            modifier = Modifier.weight(1f)
                         )
-                        Text(
-                            text = "$studiedTotal",
-                            style = iknaNumberStyle(MaterialTheme.typography.labelSmall),
-                            color = colors.onSurfaceVariant
+                        ProfileMetricColumn(
+                            value = recallText,
+                            label = S.t("prof.pill_recall"),
+                            detail = recallNote,
+                            emphasized = month.repeatAnswers >= 5,
+                            modifier = Modifier.weight(1f)
                         )
-                    }
-                    Canvas(modifier = Modifier.fillMaxWidth().height(10.dp)) {
-                        val totalF = studiedTotal.toFloat().coerceAtLeast(1f)
-                        val mW = size.width * (ins.matureCards / totalF)
-                        val yW = size.width * (ins.youngCards / totalF)
-                        val lW = (size.width - mW - yW).coerceAtLeast(0f)
-                        val r = CornerRadius(4.dp.toPx(), 4.dp.toPx())
-                        drawRoundRect(colors.outline.copy(alpha = 0.25f), size = size, cornerRadius = r)
-                        if (mW > 0f) drawRect(colors.primary, topLeft = Offset.Zero, size = Size(mW, size.height))
-                        if (yW > 0f) drawRect(colors.primary.copy(alpha = 0.45f), topLeft = Offset(mW, 0f), size = Size(yW, size.height))
-                        if (lW > 0f) drawRect(colors.onSurfaceVariant.copy(alpha = 0.35f), topLeft = Offset(mW + yW, 0f), size = Size(lW, size.height))
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "${S.t("prof.kpi_mature")}: ${ins.matureCards}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = colors.primary
+                        ProfileMetricColumn(
+                            value = formatStudyMinutesLocalized(ins.studyMinutes30d),
+                            label = S.t("prof.kpi_time"),
+                            detail = "${month.answers}",
+                            emphasized = false,
+                            modifier = Modifier.weight(1f)
                         )
-                        Text(
-                            text = "${S.t("prof.stage_young")}: ${ins.youngCards}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = colors.onSurfaceVariant
-                        )
-                        Text(
-                            text = "${S.t("prof.stage_learning")}: ${ins.learningCards}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = colors.onSurfaceVariant
+                        ProfileMetricColumn(
+                            value = "${ins.activeDays30d}/30",
+                            label = S.t("prof.kpi_active_days"),
+                            detail = "",
+                            emphasized = false,
+                            modifier = Modifier.weight(1f)
                         )
                     }
-                }
-            }
-
-            // 12-Week Calm Activity Heatmap (84 days)
-            if (ins.dailyActivity84d.size == 84) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = S.t("prof.heatmap_title"),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = colors.onSurfaceVariant
-                        )
-                        Text(
-                            text = "${ins.activeDays84d}/84",
-                            style = iknaNumberStyle(MaterialTheme.typography.labelSmall),
-                            color = colors.onSurfaceVariant
-                        )
-                    }
-                    val maxDay = (ins.dailyActivity84d.maxOrNull() ?: 0).coerceAtLeast(1)
-                    Canvas(modifier = Modifier.fillMaxWidth().height(86.dp)) {
-                        val cols = 12
-                        val rows = 7
-                        val gap = 3.dp.toPx()
-                        val cellW = (size.width - gap * (cols - 1)) / cols
-                        val cellH = (size.height - gap * (rows - 1)) / rows
-                        val corner = CornerRadius(2.dp.toPx(), 2.dp.toPx())
-                        for (i in 0 until 84) {
-                            val col = i / 7
-                            val row = i % 7
-                            val count = ins.dailyActivity84d[i]
-                            val level = when {
-                                count <= 0 -> 0
-                                count <= maxDay / 4 -> 1
-                                count <= maxDay / 2 -> 2
-                                count <= (maxDay * 3) / 4 -> 3
-                                else -> 4
-                            }
-                            val fill = when (level) {
-                                0 -> colors.outline.copy(alpha = 0.22f)
-                                1 -> colors.primary.copy(alpha = 0.30f)
-                                2 -> colors.primary.copy(alpha = 0.52f)
-                                3 -> colors.primary.copy(alpha = 0.76f)
-                                else -> colors.primary
-                            }
-                            drawRoundRect(
-                                color = fill,
-                                topLeft = Offset(col * (cellW + gap), row * (cellH + gap)),
-                                size = Size(cellW, cellH),
-                                cornerRadius = corner
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(Space.md)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(Space.md)
+                        ) {
+                            ProfileMetricColumn(
+                                value = ins.matureCards.toString(),
+                                label = S.t("prof.kpi_mature"),
+                                detail = stabNote,
+                                emphasized = ins.matureCards > 0,
+                                modifier = Modifier.weight(1f)
+                            )
+                            ProfileMetricColumn(
+                                value = recallText,
+                                label = S.t("prof.pill_recall"),
+                                detail = recallNote,
+                                emphasized = month.repeatAnswers >= 5,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(Space.md)
+                        ) {
+                            ProfileMetricColumn(
+                                value = formatStudyMinutesLocalized(ins.studyMinutes30d),
+                                label = S.t("prof.kpi_time"),
+                                detail = "${month.answers}",
+                                emphasized = false,
+                                modifier = Modifier.weight(1f)
+                            )
+                            ProfileMetricColumn(
+                                value = "${ins.activeDays30d}/30",
+                                label = S.t("prof.kpi_active_days"),
+                                detail = "",
+                                emphasized = false,
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }
                 }
             }
 
-            // 7-Day Upcoming Workload Forecast
-            if (ins.forecastNext7d.size == 7 && ins.forecastNext7d.any { it > 0 }) {
-                val maxDue = (ins.forecastNext7d.maxOrNull() ?: 1).coerceAtLeast(1)
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            // 4. Activity Grid — TRUE 1:1 SQUARE CELLS, never stretched wide bars!
+            if (ins.dailyActivity84d.size == 84) {
+                Box(Modifier.fillMaxWidth().height(1.dp).background(hairline))
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = S.t("prof.forecast_title"),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = colors.onSurfaceVariant
+                            text = S.t("prof.heatmap_title"),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = colors.onBackground
                         )
                         Text(
-                            text = "${ins.forecastNext7d.sum()}",
-                            style = iknaNumberStyle(MaterialTheme.typography.labelSmall),
+                            text = "${ins.activeDays84d} / 84 $uDay",
+                            style = iknaNumberStyle(MaterialTheme.typography.bodySmall),
                             color = colors.onSurfaceVariant
                         )
                     }
-                    Row(
-                        modifier = Modifier.fillMaxWidth().height(48.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        ins.forecastNext7d.forEachIndexed { idx, due ->
-                            val frac = (due.toFloat() / maxDue.toFloat()).coerceIn(0.08f, 1f)
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Bottom
-                            ) {
-                                Text(
-                                    text = if (due > 0) due.toString() else "·",
-                                    style = iknaNumberStyle(MaterialTheme.typography.labelSmall),
-                                    color = if (idx == 0) colors.primary else colors.onSurfaceVariant
-                                )
-                                Spacer(Modifier.height(2.dp))
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height((24f * frac).dp)
-                                        .background(
-                                            if (idx == 0) colors.primary else colors.primary.copy(alpha = 0.42f),
-                                            iknaTileShape()
-                                        )
+                    val maxDay = (ins.dailyActivity84d.maxOrNull() ?: 0).coerceAtLeast(1)
+                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                        val cols = 12
+                        val rows = 7
+                        val gapDp = 4.dp
+                        val maxCell = ((maxWidth - gapDp * (cols - 1)) / cols).coerceIn(10.dp, 18.dp)
+                        val gridWidth = maxCell * cols + gapDp * (cols - 1)
+                        val gridHeight = maxCell * rows + gapDp * (rows - 1)
+                        Canvas(modifier = Modifier.size(width = gridWidth, height = gridHeight)) {
+                            val cellPx = maxCell.toPx()
+                            val gapPx = gapDp.toPx()
+                            val corner = CornerRadius(3.dp.toPx(), 3.dp.toPx())
+                            for (i in 0 until 84) {
+                                val col = i / 7
+                                val row = i % 7
+                                val count = ins.dailyActivity84d[i]
+                                val fill = when {
+                                    count <= 0 -> colors.surface
+                                    count <= maxDay / 4 -> colors.primary.copy(alpha = 0.28f)
+                                    count <= maxDay / 2 -> colors.primary.copy(alpha = 0.52f)
+                                    count <= (maxDay * 3) / 4 -> colors.primary.copy(alpha = 0.78f)
+                                    else -> colors.primary
+                                }
+                                drawRoundRect(
+                                    color = fill,
+                                    topLeft = Offset(col * (cellPx + gapPx), row * (cellPx + gapPx)),
+                                    size = Size(cellPx, cellPx),
+                                    cornerRadius = corner
                                 )
                             }
                         }
@@ -609,47 +580,90 @@ fun IknaLocalProfileCard(
                 }
             }
 
-            // Top Active Decks Progress
+            // 5. Memory Maturity & 7-Day Forecast (clean hairline sections, slender vertical bars)
+            val studiedTotal = ins.matureCards + ins.youngCards + ins.learningCards
+            val hasForecast = ins.forecastNext7d.size == 7 && ins.forecastNext7d.any { it > 0 }
+            if (studiedTotal > 0 || hasForecast) {
+                Box(Modifier.fillMaxWidth().height(1.dp).background(hairline))
+                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                    val sideBySide = maxWidth >= 560.dp && studiedTotal > 0 && hasForecast
+                    if (sideBySide) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(Space.xl),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            MemoryMaturitySection(
+                                mature = ins.matureCards,
+                                young = ins.youngCards,
+                                learning = ins.learningCards,
+                                modifier = Modifier.weight(1f)
+                            )
+                            ForecastBarsSection(
+                                forecast = ins.forecastNext7d,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(Space.lg)) {
+                            if (studiedTotal > 0) {
+                                MemoryMaturitySection(
+                                    mature = ins.matureCards,
+                                    young = ins.youngCards,
+                                    learning = ins.learningCards
+                                )
+                            }
+                            if (hasForecast) {
+                                ForecastBarsSection(forecast = ins.forecastNext7d)
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 6. Active Decks Mastery (clean open rows, thin 3dp progress bars)
             if (ins.topDecks.isNotEmpty()) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Box(Modifier.fillMaxWidth().height(1.dp).background(hairline))
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(
                         text = S.t("prof.decks_title"),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colors.onSurfaceVariant
+                        style = MaterialTheme.typography.titleSmall,
+                        color = colors.onBackground
                     )
                     ins.topDecks.forEach { deck ->
                         val frac = if (deck.total > 0) (deck.known.toFloat() / deck.total.toFloat()).coerceIn(0f, 1f) else 0f
-                        Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
                                     text = deck.title,
-                                    style = MaterialTheme.typography.bodySmall,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = colors.onBackground,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier.weight(1f)
                                 )
-                                Spacer(Modifier.width(8.dp))
+                                Spacer(Modifier.width(Space.sm))
                                 Text(
-                                    text = "${deck.known}/${deck.total}",
-                                    style = iknaNumberStyle(MaterialTheme.typography.labelSmall),
+                                    text = "${deck.known} / ${deck.total}",
+                                    style = iknaNumberStyle(MaterialTheme.typography.bodySmall),
                                     color = colors.onSurfaceVariant
                                 )
                             }
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(5.dp)
+                                    .height(3.dp)
                                     .background(colors.outline.copy(alpha = 0.25f))
                             ) {
                                 if (frac > 0f) {
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth(frac)
-                                            .height(5.dp)
+                                            .height(3.dp)
                                             .background(colors.primary)
                                     )
                                 }
@@ -658,72 +672,187 @@ fun IknaLocalProfileCard(
                     }
                 }
             }
-
-            IknaWideButton(
-                label = S.t("prof.download_png"),
-                enabled = !exportingPng,
-                height = 46.dp,
-                onClick = {
-                    onExportPng(
-                        buildProfileStatsCardData(
-                            profileName = profileName,
-                            snapshot = snapshot,
-                            palette = palette,
-                            paletteDisplayName = paletteDisplayName,
-                            profileBio = profileBio,
-                            profileAvatar = profileAvatar
-                        )
-                    )
-                }
-            )
         }
+    }
+}
 
-        if (!pngStatus.isNullOrBlank()) {
+@Composable
+private fun ProfileMetricColumn(
+    value: String,
+    label: String,
+    detail: String,
+    emphasized: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val colors = MaterialTheme.colorScheme
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+            text = value,
+            style = iknaNumberStyle(MaterialTheme.typography.headlineMedium, strong = true),
+            color = if (emphasized) colors.primary else colors.onBackground,
+            maxLines = 1
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        if (detail.isNotBlank()) {
             Text(
-                text = pngStatus,
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.onSurfaceVariant
+                text = detail,
+                style = iknaNumberStyle(MaterialTheme.typography.labelSmall),
+                color = colors.onSurfaceVariant.copy(alpha = 0.78f),
+                maxLines = 1
             )
         }
     }
 }
 
 @Composable
-private fun ProfileStatPill(
-    value: String,
-    label: String,
-    sub: String = "",
-    accent: Boolean = false,
+private fun MemoryMaturitySection(
+    mature: Int,
+    young: Int,
+    learning: Int,
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colorScheme
-    Column(
-        modifier = modifier
-            .background(colors.background.copy(alpha = 0.55f), iknaCardShape())
-            .border(1.dp, colors.outline.copy(alpha = 0.55f), iknaCardShape())
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
-    ) {
-        Text(
-            text = value,
-            style = iknaNumberStyle(MaterialTheme.typography.titleLarge, strong = true),
-            color = if (accent) colors.primary else colors.onBackground
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = colors.onBackground,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        if (sub.isNotBlank()) {
+    val studied = (mature + young + learning).coerceAtLeast(1)
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
-                text = sub,
-                style = MaterialTheme.typography.labelSmall,
-                color = colors.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                text = S.t("prof.maturity_title"),
+                style = MaterialTheme.typography.titleSmall,
+                color = colors.onBackground
             )
+            Text(
+                text = studied.toString(),
+                style = iknaNumberStyle(MaterialTheme.typography.bodySmall),
+                color = colors.onSurfaceVariant
+            )
+        }
+        Canvas(modifier = Modifier.fillMaxWidth().height(6.dp)) {
+            val totalF = studied.toFloat()
+            val mW = size.width * (mature / totalF)
+            val yW = size.width * (young / totalF)
+            val lW = (size.width - mW - yW).coerceAtLeast(0f)
+            drawRect(colors.outline.copy(alpha = 0.22f), size = size)
+            if (mW > 0f) drawRect(colors.primary, topLeft = Offset.Zero, size = Size(mW, size.height))
+            if (yW > 0f) drawRect(colors.primary.copy(alpha = 0.48f), topLeft = Offset(mW, 0f), size = Size(yW, size.height))
+            if (lW > 0f) drawRect(colors.onSurfaceVariant.copy(alpha = 0.42f), topLeft = Offset(mW + yW, 0f), size = Size(lW, size.height))
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Space.md)
+        ) {
+            MaturityLegendItem(colors.primary, S.t("prof.kpi_mature"), mature)
+            MaturityLegendItem(colors.primary.copy(alpha = 0.48f), S.t("prof.stage_young"), young)
+            MaturityLegendItem(colors.onSurfaceVariant.copy(alpha = 0.42f), S.t("prof.stage_learning"), learning)
+        }
+    }
+}
+
+@Composable
+private fun MaturityLegendItem(dotColor: Color, label: String, count: Int) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(modifier = Modifier.size(6.dp).background(dotColor, CircleShape))
+        Text(
+            text = "$label $count",
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun ForecastBarsSection(
+    forecast: List<Int>,
+    modifier: Modifier = Modifier
+) {
+    val colors = MaterialTheme.colorScheme
+    val maxDue = (forecast.maxOrNull() ?: 1).coerceAtLeast(1)
+    val barShape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp)
+    val uDay = S.t("prof.unit_day")
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = S.t("prof.forecast_title"),
+                style = MaterialTheme.typography.titleSmall,
+                color = colors.onBackground
+            )
+            Text(
+                text = forecast.sum().toString(),
+                style = iknaNumberStyle(MaterialTheme.typography.bodySmall),
+                color = colors.onSurfaceVariant
+            )
+        }
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                forecast.forEachIndexed { idx, due ->
+                    val barHeight = if (due > 0) (34f * (due.toFloat() / maxDue.toFloat())).coerceAtLeast(4f).dp else 2.dp
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        if (due > 0) {
+                            Text(
+                                text = due.toString(),
+                                style = iknaNumberStyle(MaterialTheme.typography.labelSmall),
+                                color = if (idx == 0) colors.primary else colors.onSurfaceVariant
+                            )
+                            Spacer(Modifier.height(3.dp))
+                        }
+                        Box(
+                            modifier = Modifier
+                                .width(14.dp)
+                                .height(barHeight)
+                                .background(
+                                    color = when {
+                                        due <= 0 -> colors.outline.copy(alpha = 0.25f)
+                                        idx == 0 -> colors.primary
+                                        else -> colors.primary.copy(alpha = 0.45f)
+                                    },
+                                    shape = barShape
+                                )
+                        )
+                    }
+                }
+            }
+            Box(Modifier.fillMaxWidth().height(1.dp).background(colors.outline.copy(alpha = 0.35f)))
+            Spacer(Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                forecast.indices.forEach { idx ->
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = if (idx == 0) S.t("prof.today_short") else "+$idx$uDay",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colors.onSurfaceVariant.copy(alpha = 0.72f)
+                        )
+                    }
+                }
+            }
         }
     }
 }

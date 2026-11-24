@@ -18,15 +18,15 @@ Before changing code, read the document closest to the area you are touching:
 
 - application structure: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 - product behaviour: [`docs/DESIGN.md`](docs/DESIGN.md)
-- learning-engine responsibilities: [`docs/LEARNING-ENGINE.md`](docs/LEARNING-ENGINE.md)
-- evidence labels and learning claims: [`docs/SCIENCE.md`](docs/SCIENCE.md)
-- governor: [`docs/GOVERNOR.md`](docs/GOVERNOR.md)
-- grading: [`docs/GRADING.md`](docs/GRADING.md)
-- FSRS fitting: [`docs/FSRS-OPTIMIZER.md`](docs/FSRS-OPTIMIZER.md)
-- Catalogue v2: [`docs/CATALOGUE-V2.md`](docs/CATALOGUE-V2.md)
-- morphology: [`docs/MORPHOLOGY.md`](docs/MORPHOLOGY.md)
-- corpus/licence policy: [`docs/SOURCES.md`](docs/SOURCES.md)
-- desktop packaging: [`docs/DESKTOP.md`](docs/DESKTOP.md)
+- learning-engine responsibilities: [`docs/contracts/LEARNING-ENGINE.md`](docs/contracts/LEARNING-ENGINE.md)
+- evidence labels and learning claims: [`docs/contracts/SCIENCE.md`](docs/contracts/SCIENCE.md)
+- governor: [`docs/contracts/GOVERNOR.md`](docs/contracts/GOVERNOR.md)
+- grading: [`docs/contracts/GRADING.md`](docs/contracts/GRADING.md)
+- FSRS fitting: [`docs/contracts/FSRS-OPTIMIZER.md`](docs/contracts/FSRS-OPTIMIZER.md)
+- Catalogue v2: [`docs/contracts/CATALOGUE-V2.md`](docs/contracts/CATALOGUE-V2.md)
+- morphology: [`docs/contracts/MORPHOLOGY.md`](docs/contracts/MORPHOLOGY.md)
+- corpus/licence policy: [`docs/contracts/SOURCES.md`](docs/contracts/SOURCES.md)
+- desktop packaging: [`docs/contracts/DESKTOP.md`](docs/contracts/DESKTOP.md)
 - release/version rules: [`docs/VERSIONS.md`](docs/VERSIONS.md)
 
 Use [`docs/PLAN-0.12.md`](docs/PLAN-0.12.md) as the active cycle checkpoint.
@@ -98,7 +98,7 @@ ARM as described in the build files.
 ### Builds on memory-constrained machines
 
 A prior local run exhausted the owner's laptop memory (dated evidence in
-[`docs/test-cli.md`](docs/test-cli.md)). Run one Gradle session at a time,
+[`docs/completed/test-cli.md`](docs/completed/test-cli.md)). Run one Gradle session at a time,
 including Hot Reload: stop that session before starting another build. Check
 available memory first and bound workers/heaps instead of launching overlapping
 compilers. A conservative focused run is:
@@ -181,7 +181,7 @@ python3 tools/catalog/test_selection_diagnostic_pool.py
 ```
 
 For a saved Everyday preview audit, use the bounded offline command in
-[EVERYDAY-POOL.md](docs/EVERYDAY-POOL.md). Its generated card viewer can be checked
+[EVERYDAY-POOL.md](docs/planned/EVERYDAY-POOL.md). Its generated card viewer can be checked
 with `node tools/catalog/test_selection_review.cjs <path-to-CARDS.html>` when
 Node is available. This tests data/navigation logic with a DOM stub, not actual
 browser rendering, full-pool quality or application builds.
@@ -254,7 +254,7 @@ The user-facing collections are categories, not permanent aliases for one corpus
 - `Knowledge` — WikiMatrix/Wikipedia-derived material, using direct source pairs rather than hidden translation pivots;
 - `World` — Global Voices once record-level attribution is available.
 
-The fixed 0.11 corpus scope and admission rules are in [`docs/CORPORA-0.11.md`](docs/CORPORA-0.11.md). Do not add a new corpus to fix a thin deck without first changing that policy deliberately.
+The fixed 0.11 corpus scope and admission rules are in [`docs/contracts/CORPORA-0.11.md`](docs/contracts/CORPORA-0.11.md). Do not add a new corpus to fix a thin deck without first changing that policy deliberately.
 
 Study sentences must come from the source corpus. Do not generate filler
 sentences to reach a quota.
@@ -276,7 +276,7 @@ app. Rule version 1 does not change `targetId`. A future morphology-aware target
 identity is a separate identity-version change and needs migration/evidence work.
 
 When evidence conflicts, prefer leaving a token unresolved over a false merge.
-See [`docs/MORPHOLOGY.md`](docs/MORPHOLOGY.md).
+See [`docs/contracts/MORPHOLOGY.md`](docs/contracts/MORPHOLOGY.md).
 
 ### Publication
 
@@ -311,7 +311,7 @@ report. Do not publish merely because the workflow succeeded.
 The accepted round-15 Everyday **selected intermediate** is not a built pack
 directory. Measure it offline with `tools/catalog/selected_storage_experiment.py`
 and its exact snapshot passport; the command is in
-[EVERYDAY-POOL.md](docs/EVERYDAY-POOL.md#selected-snapshot-storage-measurement).
+[EVERYDAY-POOL.md](docs/planned/EVERYDAY-POOL.md#selected-snapshot-storage-measurement).
 That experiment preserves every field/context/origin and verifies reconstruction
 from serialized output. Its layouts are not app assets, final download sizes or
 permission to change the reader. Use the built-pack experiment below only after
@@ -402,7 +402,7 @@ transient failures. Large corpus downloads use retry/resume logic; do not replac
 that with a bare one-shot `curl` in a workflow.
 
 User-facing network access remains limited to static files and public source
-links described in [`PRIVACY.md`](PRIVACY.md) and [`docs/UPDATES.md`](docs/UPDATES.md).
+links described in [`PRIVACY.md`](PRIVACY.md) and [`docs/contracts/UPDATES.md`](docs/contracts/UPDATES.md).
 
 ## 🏷️ Versioning and release
 
