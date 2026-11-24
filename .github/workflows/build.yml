@@ -5,14 +5,45 @@ on:
     branches: [main]
   workflow_dispatch:
 
-jobs:
-  grading:
-    uses: ./.github/workflows/grading.yml
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 
-  # The Android application. Every step here is the one that was here
-  # before the desktop build existed.
+jobs:
+  # Fast path detector: only spin up the 8-minute Android API 35 emulator when
+  # database, schema, migration, restore, or workflow files actually changed.
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run_migrations: ${{ steps.detect.outputs.run_migrations }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+      - id: detect
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || ! git rev-parse HEAD~1 >/dev/null 2>&1; then
+            echo "run_migrations=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed=$(git diff --name-only HEAD~1 HEAD)
+          if echo "$changed" | grep -Eq '^(shared/src/.*/data/db/|app/schemas/|shared/src/.*/data/repo/RestoreRepository\.kt|app/src/androidTest/|\.github/workflows/grading\.yml)'; then
+            echo "run_migrations=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_migrations=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  grading:
+    needs: changes
+    uses: ./.github/workflows/grading.yml
+    with:
+      run_migrations: ${{ needs.changes.outputs.run_migrations == 'true' }}
+
+  # The Android application. Runs in parallel with grading on push to main;
+  # release.yml still gates publication strictly on needs: grading.
   android:
-    needs: grading
     runs-on: ubuntu-latest
 
     # A build that cannot finish should say so instead of sitting there.
@@ -117,8 +148,8 @@ jobs:
             exit 1
           fi
 
-      - name: Unit tests
-        run: gradle --no-daemon --stacktrace testReleaseUnitTest
+      - name: Unit tests and release lint
+        run: gradle --no-daemon --stacktrace testReleaseUnitTest lintVitalRelease
 
       - name: Test report
         if: always()
@@ -128,13 +159,6 @@ jobs:
           path: app/build/reports/tests/testReleaseUnitTest
           if-no-files-found: ignore
 
-      # The APK above is a debug build, which does not run lint. A release
-      # build does, and lint can fail it on things a debug build never sees
-      # (manifest and resource rules, for one). Run that check here so a tag
-      # is never pushed onto a commit the release workflow cannot build.
-      - name: Release lint
-        run: gradle --no-daemon --stacktrace lintVitalRelease
-
   # ---------------------------------------------------------------------------
   # The Windows application.
   #
@@ -143,7 +167,6 @@ jobs:
   # roughly double the wait for a result.
   # ---------------------------------------------------------------------------
   windows:
-    needs: grading
     runs-on: windows-latest
 
     # Longer than the Android job: a Windows runner is slower, the Gradle cache
@@ -183,14 +206,8 @@ jobs:
         shell: bash
         run: bash tools/catalog/fetch-bundled-pack.sh
 
-      - name: Windows private sync storage regression
-        run: gradle --no-daemon --stacktrace :shared:desktopTest --tests "dev.ikna.sync.PrivateSyncFilesWindowsTest"
-
-      # createReleaseDistributable produces the runnable application folder --
-      # Ikna.exe plus a trimmed Java runtime. It needs no WiX, so this is the
-      # step that must succeed.
-      - name: Build the Windows application
-        run: gradle --no-daemon --stacktrace :desktop:createReleaseDistributable
+      - name: Windows private sync storage regression and build
+        run: gradle --no-daemon --stacktrace :shared:desktopTest --tests "dev.ikna.sync.PrivateSyncFilesWindowsTest" :desktop:createReleaseDistributable
 
       # Uploaded as a folder: an artifact download is itself a zip, so zipping
       # here would only produce a zip inside a zip.
@@ -293,7 +310,6 @@ jobs:
   # anything another one produces.
   # ---------------------------------------------------------------------------
   linux:
-    needs: grading
     runs-on: ubuntu-latest
 
     # Longer than the Android job on the same image: jpackage has to assemble a

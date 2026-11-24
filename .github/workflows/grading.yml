@@ -2,6 +2,12 @@ name: grading-validation
 
 on:
   workflow_call:
+    inputs:
+      run_migrations:
+        description: "Run Android API 35 emulator migration suite"
+        required: false
+        type: boolean
+        default: true
   workflow_dispatch:
   pull_request:
 
@@ -87,10 +93,11 @@ jobs:
         shell: bash
         run: |
           for scenario in verified immature noise; do
-            gradle --no-daemon :desktop:gradingLab \
+            gradle :desktop:gradingLab \
               -Pgrading.input="tools/grading/fixtures/synthetic-$scenario.jsonl" \
               -Pgrading.output="build/grading/$scenario.txt"
           done
+          gradle --stop || true
           python3 tools/grading/check_reports.py build/grading
       - name: Capture the Kotlin study reference for migration
         run: bash tools/ci/run-gradle.sh ci-logs/study-reference.log :desktop:studyMigrationReference
@@ -118,6 +125,7 @@ jobs:
           if-no-files-found: warn
 
   migrations:
+    if: ${{ github.event_name != 'workflow_call' || inputs.run_migrations }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
