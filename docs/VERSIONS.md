@@ -106,3 +106,19 @@ the release page cannot drift apart.
   Linux x86_64 AppImage
 - catalogue: the published catalogue remains v1 under the fixed `catalog` tag;
   Catalogue v2 replenishment and freeze remain tracked in `docs/planned/`
+
+## 0.13.0 press
+
+- `versionName`: `0.13.0 press`
+- `versionCode`: `200130000`
+- release tag: `v0.13.0-press`
+- release title: `ikna 0.13.0 press`
+- desktop package version: `0.13.0`
+- database schema: 10 (unchanged from 0.12.0 press)
+- scheduler: FSRS-6 / scheduler version 6
+- clean-install palette: Frost (with Moss/Olive replacing Cobalt)
+- release targets: Android arm64 + legacy32, Windows x64 (setup + portable),
+  Linux x86_64 AppImage
+- catalogue: 3-collection tabs (Everyday / Knowledge / World) in app UI;
+  published catalogue remains under `catalog` while Knowledge and World finish
+  verification

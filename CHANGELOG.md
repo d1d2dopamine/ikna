@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.13.0 press
+
+See [docs/RELEASE-NOTES-0.13.0.md](docs/RELEASE-NOTES-0.13.0.md) for the full release summary.
+
+- Redesign **Profile** and **1200×720 PNG snapshot cards** on Desktop and Android with an open editorial canvas, circular avatars, side-by-side 12-week heatmap & maturity/forecast layout, calm deck status without `0/3000` totals, and a collapsible detailed 7d/30d journal.
+- Remove the full-width empty top bar and horizontal divider line on Windows so app content fills the full window height with compact overlaid top-right window controls.
+- Fix LAN QR and `.ikna-sync` device synchronization across versions, differing local decks, and pack versions (v3/v4 protocol negotiation, 30s exchange timeout, conflict-safe adoption, `skipMissingTargets`, in-app Android QR camera, real device names, Wi-Fi `192.168.*` priority, and `16 MiB / 200,000 rows` transfer limit).
+- Add Catalogue v2 **Everyday / Knowledge / World** collection tabs across Android, Desktop, and all 7 locales.
+- Replace Cobalt with **Moss/Olive**, add smooth palette color crossfades, boost deck-background contrast on pure-black Zero dark palette, fix Android UI sound playback, smooth mobile swipe exit, and redesign Desktop/Android update dialogs.
+
 ## 0.12.0 press
 
 See [docs/RELEASE-NOTES-0.12.0.md](docs/RELEASE-NOTES-0.12.0.md) for the full release summary.

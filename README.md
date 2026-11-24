@@ -45,14 +45,14 @@ FSRS‑6 schedules reviews. `riar-manage` decides how much new material fits in 
 
 ## <img src="docs/assets/icons/download.svg" width="28" height="28" align="absmiddle" alt=""> Download
 
-These files are from [the published 0.12.0 press release](https://github.com/d1d2dopamine/ikna/releases/tag/v0.12.0-press). See [release notes](docs/RELEASE-NOTES-0.12.0.md) for what's new.
+These files are from [the published 0.13.0 press release](https://github.com/d1d2dopamine/ikna/releases/tag/v0.13.0-press). See [release notes](docs/RELEASE-NOTES-0.13.0.md) for what's new.
 
 | Platform | Download |
 | --- | --- |
-| Android 10+ (arm64) | [APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.12.0-press/ikna-android-arm64.apk) |
-| Android 10+ (32-bit ARM) | [32-bit APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.12.0-press/ikna-android-legacy32.apk) |
-| Windows x64 | [Installer](https://github.com/d1d2dopamine/ikna/releases/download/v0.12.0-press/ikna-windows-x64-setup.exe) · [Portable ZIP](https://github.com/d1d2dopamine/ikna/releases/download/v0.12.0-press/ikna-windows-x64-portable.zip) |
-| Linux x86_64 | [AppImage](https://github.com/d1d2dopamine/ikna/releases/download/v0.12.0-press/ikna-linux-x86_64.AppImage) |
+| Android 10+ (arm64) | [APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-android-arm64.apk) |
+| Android 10+ (32-bit ARM) | [32-bit APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-android-legacy32.apk) |
+| Windows x64 | [Installer](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-windows-x64-setup.exe) · [Portable ZIP](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-windows-x64-portable.zip) |
+| Linux x86_64 | [AppImage](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-linux-x86_64.AppImage) |
 
 The Windows installer runs per user. The portable Windows build and the Linux AppImage ship with their runtime. On Linux, mark the AppImage executable before opening it. [Desktop setup](docs/contracts/DESKTOP.md) · [Updates](docs/contracts/UPDATES.md)
 
@@ -141,14 +141,14 @@ Ikna is free software under the [GNU General Public License, version 3 or later]
 
 ## <img src="docs/assets/icons/download.svg" width="28" height="28" align="absmiddle" alt=""> Скачать
 
-В таблице файлы [опубликованного релиза 0.12.0 press](https://github.com/d1d2dopamine/ikna/releases/tag/v0.12.0-press). Список изменений — в [описании релиза](docs/RELEASE-NOTES-0.12.0.md).
+В таблице файлы [опубликованного релиза 0.13.0 press](https://github.com/d1d2dopamine/ikna/releases/tag/v0.13.0-press). Список изменений — в [описании релиза](docs/RELEASE-NOTES-0.13.0.md).
 
 | Платформа | Скачать |
 | --- | --- |
-| Android 10+ (arm64) | [Основной APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.12.0-press/ikna-android-arm64.apk) |
-| Android 10+ (32-bit ARM) | [APK для старых устройств](https://github.com/d1d2dopamine/ikna/releases/download/v0.12.0-press/ikna-android-legacy32.apk) |
-| Windows x64 | [Установщик](https://github.com/d1d2dopamine/ikna/releases/download/v0.12.0-press/ikna-windows-x64-setup.exe) · [Portable ZIP](https://github.com/d1d2dopamine/ikna/releases/download/v0.12.0-press/ikna-windows-x64-portable.zip) |
-| Linux x86_64 | [AppImage](https://github.com/d1d2dopamine/ikna/releases/download/v0.12.0-press/ikna-linux-x86_64.AppImage) |
+| Android 10+ (arm64) | [Основной APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-android-arm64.apk) |
+| Android 10+ (32-bit ARM) | [APK для старых устройств](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-android-legacy32.apk) |
+| Windows x64 | [Установщик](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-windows-x64-setup.exe) · [Portable ZIP](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-windows-x64-portable.zip) |
+| Linux x86_64 | [AppImage](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-linux-x86_64.AppImage) |
 
 Установщик Windows ставит Икну для текущего пользователя. Portable-версия Windows и AppImage для Linux поставляются со своей средой запуска. В Linux перед первым запуском дай AppImage право на выполнение. [Установка на ПК](docs/contracts/DESKTOP.md) · [Обновления](docs/contracts/UPDATES.md)
 

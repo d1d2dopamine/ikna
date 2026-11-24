@@ -84,9 +84,9 @@ compose.desktop {
 
             // jpackage refuses anything that is not MAJOR.MINOR.PATCH, so this
             // cannot simply be appVersionName from app/build.gradle.kts, which
-            // is "0.12.0 press". Keep the numbers in step by hand when the
+            // is "0.13.0 press". Keep the numbers in step by hand when the
             // Android version changes.
-            packageVersion = "0.12.0"
+            packageVersion = "0.13.0"
 
             description = "Ikna"
             vendor = "Ikna"
