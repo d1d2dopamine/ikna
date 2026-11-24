@@ -433,8 +433,8 @@ class PairedLanTransport(
         const val MAX_FRAME = 48 * 1024 * 1024
         const val MAX_PEERS = 4
         const val COMPACT_INVITATION_PREFIX = "ikna-pair:1:"
-        private const val SOCKET_MS = 15_000
-        private const val DEADLINE_MS = 45_000L
+        private const val SOCKET_MS = 5_000
+        private const val DEADLINE_MS = 30_000L
         private const val INVITATION_MS = 300_000L
         private const val MAX_PAIR_ATTEMPTS = 8
         private const val MAX_INVITATION_JSON_BYTES = 8192

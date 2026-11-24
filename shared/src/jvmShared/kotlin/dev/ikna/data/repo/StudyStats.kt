@@ -10,7 +10,29 @@ data class StudyStats(
     val month: StudyPeriod,
     val zone: String,
     val dayStartHour: Int,
-    val nextDueAt: Long? = null
+    val nextDueAt: Long? = null,
+    val insights: ProfileInsights = ProfileInsights()
+)
+
+data class ProfileDeckProgress(
+    val title: String,
+    val known: Int,
+    val total: Int
+)
+
+data class ProfileInsights(
+    val matureCards: Int = 0,
+    val youngCards: Int = 0,
+    val learningCards: Int = 0,
+    val totalCards: Int = 0,
+    val avgStabilityDays: Double = 0.0,
+    val studyMinutes30d: Int = 0,
+    val medianSecPerCard30d: Int = 0,
+    val activeDays30d: Int = 0,
+    val activeDays84d: Int = 0,
+    val dailyActivity84d: List<Int> = emptyList(),
+    val forecastNext7d: List<Int> = emptyList(),
+    val topDecks: List<ProfileDeckProgress> = emptyList()
 )
 
 data class StudyPeriod(

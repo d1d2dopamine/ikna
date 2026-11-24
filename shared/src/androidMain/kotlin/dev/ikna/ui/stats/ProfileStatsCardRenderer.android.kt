@@ -4,13 +4,15 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.Typeface
 import java.io.ByteArrayOutputStream
+import kotlin.math.roundToInt
 
 actual fun renderProfileStatsCardPng(data: ProfileStatsCardData): ByteArray {
     val w = 1200
-    val h = 675
+    val h = 720
     val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
 
@@ -21,10 +23,7 @@ actual fun renderProfileStatsCardPng(data: ProfileStatsCardData): ByteArray {
     val muted = data.mutedArgb
     val accent = data.accentArgb
 
-    // Base fill
     canvas.drawColor(bg)
-
-    // Subtle tilted Ikna pixel-emblem backdrop
     drawAndroidBackdropEmblem(canvas, w, h, bg, ink, accent)
 
     val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
@@ -34,94 +33,324 @@ actual fun renderProfileStatsCardPng(data: ProfileStatsCardData): ByteArray {
     }
     val textPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    // Top eyebrow + accent bar
+    // Top eyebrow
     fillPaint.color = accent
-    canvas.drawRoundRect(RectF(68f, 56f, 112f, 60f), 4f, 4f, fillPaint)
+    canvas.drawRoundRect(RectF(64f, 44f, 108f, 48f), 4f, 4f, fillPaint)
 
     textPaint.typeface = Typeface.MONOSPACE
-    textPaint.textSize = 17f
+    textPaint.textSize = 16f
     textPaint.color = accent
-    canvas.drawText(data.headerText, 126f, 64f, textPaint)
+    canvas.drawText(data.headerText, 122f, 52f, textPaint)
 
     textPaint.color = muted
     val dateW = textPaint.measureText(data.generatedDate)
-    canvas.drawText(data.generatedDate, w - 68f - dateW, 64f, textPaint)
+    canvas.drawText(data.generatedDate, w - 64f - dateW, 52f, textPaint)
 
-    // Profile name + subtitle
+    // Avatar badge (82x82) + Name + Bio/Subtitle
+    drawAndroidAvatarBadge(canvas, 64f, 76f, 82f, data, bg, panel, line, ink, muted, accent)
+
     textPaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
-    textPaint.textSize = 48f
+    textPaint.textSize = 42f
     textPaint.color = ink
-    canvas.drawText(data.profileName.take(28), 68f, 134f, textPaint)
+    canvas.drawText(ellipsize(textPaint, data.profileName, 840f), 166f, 118f, textPaint)
 
     textPaint.typeface = Typeface.SANS_SERIF
-    textPaint.textSize = 22f
+    textPaint.textSize = 20f
     textPaint.color = muted
-    canvas.drawText(data.subtitle, 68f, 170f, textPaint)
+    val subLine = if (data.profileBio.isNotBlank()) "${data.profileBio}  ·  ${data.subtitle}" else data.subtitle
+    canvas.drawText(ellipsize(textPaint, subLine, 960f), 166f, 150f, textPaint)
 
-    // Divider
+    // Header divider
     strokePaint.color = withAlpha(line, 140)
-    canvas.drawLine(68f, 200f, (w - 68).toFloat(), 200f, strokePaint)
+    canvas.drawLine(64f, 184f, (w - 64).toFloat(), 184f, strokePaint)
 
-    // 4 metric tiles in 2x2 grid
+    // LEFT COLUMN (x: 64..628): 2x2 Rich KPI Grid + Memory Maturity Bar
+    val leftX = 64f
+    val leftW = 564f
+    val gap = 18f
+    val tileW = (leftW - gap) / 2f
+    val tileH = 132f
+    val gridY = 210f
+
+    val paceStr = if (data.medianSecPerCard30d > 0) " · ${data.medianSecPerCard30d}s" else ""
+    val stabStr = if (data.avgStabilityDays >= 1.0) " · ~${data.avgStabilityDays.roundToInt()}d" else ""
     val tiles = listOf(
-        Triple(data.targets.toString(), data.labelTargets, true),
-        Triple(data.firstRecorded.toString(), data.labelNew, false),
-        Triple(data.answers.toString(), data.labelAnswers, false),
+        Triple(data.matureCards.toString(), data.labelMature.ifBlank { data.labelTargets }, "${data.targets} ${data.labelTargets}"),
         Triple(
             data.recallPercentText,
-            if (data.repeatAnswers >= 5) "${data.labelRecall} (${data.recalledRepeatAnswers}/${data.repeatAnswers})" else data.labelRecall,
-            true
-        )
+            data.labelRecall,
+            if (data.repeatAnswers >= 5) "${data.recalledRepeatAnswers}/${data.repeatAnswers}" else "${data.answers} ${data.labelAnswers}"
+        ),
+        Triple(data.studyTimeText, data.labelStudyTime.ifBlank { data.labelAnswers }, "${data.answers} ${data.labelAnswers}$paceStr"),
+        Triple("${data.activeDays30d}/30", data.labelActiveDays.ifBlank { data.periodLabel }, "FSRS$stabStr")
     )
-    val gap = 24f
-    val tileW = (w - 136f - gap) / 2f
-    val tileH = 162f
-    val startY = 232f
 
-    tiles.forEachIndexed { idx, (value, label, highlight) ->
+    tiles.forEachIndexed { idx, (value, label, detail) ->
         val col = idx % 2
         val row = idx / 2
-        val x = 68f + col * (tileW + gap)
-        val y = startY + row * (tileH + gap)
+        val x = leftX + col * (tileW + gap)
+        val y = gridY + row * (tileH + gap)
         val rect = RectF(x, y, x + tileW, y + tileH)
 
         fillPaint.color = panel
-        canvas.drawRoundRect(rect, 18f, 18f, fillPaint)
+        canvas.drawRoundRect(rect, 14f, 14f, fillPaint)
         strokePaint.color = withAlpha(line, 155)
-        canvas.drawRoundRect(rect, 18f, 18f, strokePaint)
+        canvas.drawRoundRect(rect, 14f, 14f, strokePaint)
 
-        fillPaint.color = if (highlight) accent else withAlpha(muted, 170)
-        canvas.drawRoundRect(RectF(x + 26f, y + 30f, x + 30f, y + 74f), 4f, 4f, fillPaint)
+        fillPaint.color = if (idx < 2) accent else withAlpha(muted, 175)
+        canvas.drawRoundRect(RectF(x + 20f, y + 22f, x + 24f, y + 62f), 3f, 3f, fillPaint)
 
         textPaint.typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
-        textPaint.textSize = 46f
+        textPaint.textSize = 38f
+        textPaint.color = if (idx < 2) accent else ink
+        canvas.drawText(value, x + 36f, y + 58f, textPaint)
+
+        textPaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+        textPaint.textSize = 15f
         textPaint.color = ink
-        canvas.drawText(value, x + 46f, y + 72f, textPaint)
+        canvas.drawText(ellipsize(textPaint, label, tileW - 40f), x + 20f, y + 90f, textPaint)
 
         textPaint.typeface = Typeface.SANS_SERIF
-        textPaint.textSize = 19f
+        textPaint.textSize = 14f
         textPaint.color = muted
-        canvas.drawText(ellipsize(textPaint, label, tileW - 56f), x + 28f, y + 124f, textPaint)
+        canvas.drawText(ellipsize(textPaint, detail, tileW - 40f), x + 20f, y + 114f, textPaint)
+    }
+
+    // Memory Maturity Panel (left bottom, y: 506..626)
+    val matRect = RectF(leftX, 506f, leftX + leftW, 626f)
+    fillPaint.color = panel
+    canvas.drawRoundRect(matRect, 14f, 14f, fillPaint)
+    strokePaint.color = withAlpha(line, 155)
+    canvas.drawRoundRect(matRect, 14f, 14f, strokePaint)
+
+    val studied = (data.matureCards + data.youngCards + data.learningCards).coerceAtLeast(0)
+    textPaint.typeface = Typeface.MONOSPACE
+    textPaint.textSize = 14f
+    textPaint.color = muted
+    canvas.drawText(data.labelMaturity.ifBlank { "MEMORY MATURITY" }.uppercase(), leftX + 22f, 536f, textPaint)
+    val totStr = studied.toString()
+    canvas.drawText(totStr, leftX + leftW - 22f - textPaint.measureText(totStr), 536f, textPaint)
+
+    val barX = leftX + 22f
+    val barY = 554f
+    val barW = leftW - 44f
+    val barH = 18f
+    fillPaint.color = withAlpha(line, 90)
+    canvas.drawRoundRect(RectF(barX, barY, barX + barW, barY + barH), 6f, 6f, fillPaint)
+    if (studied > 0) {
+        val mW = barW * (data.matureCards.toFloat() / studied)
+        val yW = barW * (data.youngCards.toFloat() / studied)
+        val lW = (barW - mW - yW).coerceAtLeast(0f)
+        if (mW > 0f) {
+            fillPaint.color = accent
+            canvas.drawRect(barX, barY, barX + mW, barY + barH, fillPaint)
+        }
+        if (yW > 0f) {
+            fillPaint.color = withAlpha(accent, 130)
+            canvas.drawRect(barX + mW, barY, barX + mW + yW, barY + barH, fillPaint)
+        }
+        if (lW > 0f) {
+            fillPaint.color = withAlpha(muted, 110)
+            canvas.drawRect(barX + mW + yW, barY, barX + barW, barY + barH, fillPaint)
+        }
+    }
+    textPaint.typeface = Typeface.SANS_SERIF
+    textPaint.textSize = 14f
+    textPaint.color = accent
+    canvas.drawText("${data.labelMature.ifBlank { "Mature" }}: ${data.matureCards}", barX, 604f, textPaint)
+    textPaint.color = muted
+    val midLeg = "${data.labelYoung.ifBlank { "Young" }}: ${data.youngCards}"
+    canvas.drawText(midLeg, leftX + (leftW - textPaint.measureText(midLeg)) / 2f, 604f, textPaint)
+    val rightLeg = "${data.labelLearning.ifBlank { "Learning" }}: ${data.learningCards}"
+    canvas.drawText(rightLeg, leftX + leftW - 22f - textPaint.measureText(rightLeg), 604f, textPaint)
+
+    // RIGHT COLUMN (x: 654..1136, width 482): 12-Week Activity Heatmap + Top Decks
+    val rightX = 654f
+    val rightW = 482f
+
+    // Heatmap panel (y: 210..428)
+    val heatRect = RectF(rightX, 210f, rightX + rightW, 428f)
+    fillPaint.color = panel
+    canvas.drawRoundRect(heatRect, 14f, 14f, fillPaint)
+    strokePaint.color = withAlpha(line, 155)
+    canvas.drawRoundRect(heatRect, 14f, 14f, strokePaint)
+
+    textPaint.typeface = Typeface.MONOSPACE
+    textPaint.textSize = 14f
+    textPaint.color = muted
+    canvas.drawText(data.labelHeatmap.ifBlank { "12-WEEK ACTIVITY" }.uppercase(), rightX + 22f, 240f, textPaint)
+
+    val days = if (data.dailyActivity84d.size == 84) data.dailyActivity84d else List(84) { 0 }
+    val maxDay = (days.maxOrNull() ?: 0).coerceAtLeast(1)
+    val cols = 12
+    val rows = 7
+    val hGap = 6f
+    val hmX = rightX + 22f
+    val hmY = 258f
+    val hmW = rightW - 44f
+    val hmH = 148f
+    val cW = (hmW - hGap * (cols - 1)) / cols
+    val cH = (hmH - hGap * (rows - 1)) / rows
+    for (i in 0 until 84) {
+        val c = i / 7
+        val r = i % 7
+        val cnt = days[i]
+        fillPaint.color = when {
+            cnt <= 0 -> withAlpha(line, 80)
+            cnt <= maxDay / 4 -> withAlpha(accent, 90)
+            cnt <= maxDay / 2 -> withAlpha(accent, 145)
+            cnt <= (maxDay * 3) / 4 -> withAlpha(accent, 200)
+            else -> accent
+        }
+        val cx = hmX + c * (cW + hGap)
+        val cy = hmY + r * (cH + hGap)
+        canvas.drawRoundRect(RectF(cx, cy, cx + cW, cy + cH), 4f, 4f, fillPaint)
+    }
+
+    // Top Decks panel (y: 446..626)
+    val deckRect = RectF(rightX, 446f, rightX + rightW, 626f)
+    fillPaint.color = panel
+    canvas.drawRoundRect(deckRect, 14f, 14f, fillPaint)
+    strokePaint.color = withAlpha(line, 155)
+    canvas.drawRoundRect(deckRect, 14f, 14f, strokePaint)
+
+    textPaint.typeface = Typeface.MONOSPACE
+    textPaint.textSize = 14f
+    textPaint.color = muted
+    canvas.drawText(data.labelDecks.ifBlank { "ACTIVE DECKS" }.uppercase(), rightX + 22f, 476f, textPaint)
+
+    val decks = data.topDecks.take(3)
+    decks.forEachIndexed { idx, deck ->
+        val dy = 508f + idx * 40f
+        textPaint.typeface = Typeface.SANS_SERIF
+        textPaint.textSize = 15f
+        textPaint.color = ink
+        val countText = "${deck.known}/${deck.total}"
+        val cw = textPaint.measureText(countText)
+        canvas.drawText(ellipsize(textPaint, deck.title, rightW - 60f - cw), rightX + 22f, dy, textPaint)
+        textPaint.color = muted
+        canvas.drawText(countText, rightX + rightW - 22f - cw, dy, textPaint)
+
+        val frac = if (deck.total > 0) (deck.known.toFloat() / deck.total.toFloat()).coerceIn(0f, 1f) else 0f
+        val dBarY = dy + 8f
+        val dBarW = rightW - 44f
+        fillPaint.color = withAlpha(line, 90)
+        canvas.drawRoundRect(RectF(rightX + 22f, dBarY, rightX + 22f + dBarW, dBarY + 6f), 3f, 3f, fillPaint)
+        if (frac > 0f) {
+            fillPaint.color = accent
+            canvas.drawRoundRect(RectF(rightX + 22f, dBarY, rightX + 22f + dBarW * frac, dBarY + 6f), 3f, 3f, fillPaint)
+        }
     }
 
     // Footer
     strokePaint.color = withAlpha(line, 120)
-    canvas.drawLine(68f, (h - 72).toFloat(), (w - 68).toFloat(), (h - 72).toFloat(), strokePaint)
+    canvas.drawLine(64f, (h - 62).toFloat(), (w - 64).toFloat(), (h - 62).toFloat(), strokePaint)
 
     textPaint.typeface = Typeface.MONOSPACE
     textPaint.textSize = 15f
     textPaint.color = muted
-    canvas.drawText(data.footerText, 68f, (h - 38).toFloat(), textPaint)
+    canvas.drawText(data.footerText, 64f, (h - 28).toFloat(), textPaint)
 
-    val recoveredNote = data.recoveredText
-    val rw = textPaint.measureText(recoveredNote)
+    val rw = textPaint.measureText(data.recoveredText)
     textPaint.color = accent
-    canvas.drawText(recoveredNote, w - 68f - rw, (h - 38).toFloat(), textPaint)
+    canvas.drawText(data.recoveredText, w - 64f - rw, (h - 28).toFloat(), textPaint)
 
     val out = ByteArrayOutputStream()
     bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
     bitmap.recycle()
     return out.toByteArray()
+}
+
+private fun drawAndroidAvatarBadge(
+    canvas: Canvas,
+    x: Float,
+    y: Float,
+    size: Float,
+    data: ProfileStatsCardData,
+    bg: Int,
+    panel: Int,
+    line: Int,
+    ink: Int,
+    muted: Int,
+    accent: Int
+) {
+    val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = panel }
+    val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 2f; color = withAlpha(line, 180) }
+    val rect = RectF(x, y, x + size, y + size)
+    canvas.drawRoundRect(rect, 14f, 14f, fill)
+    canvas.drawRoundRect(rect, 14f, 14f, stroke)
+
+    when (data.profileAvatar) {
+        "monogram" -> {
+            val tp = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+                textSize = 30f
+                color = accent
+                textAlign = Paint.Align.CENTER
+            }
+            val fm = tp.fontMetrics
+            canvas.drawText(profileInitials(data.profileName), x + size / 2f, y + size / 2f - (fm.ascent + fm.descent) / 2f, tp)
+        }
+        "rings" -> {
+            val cx = x + size / 2f
+            val cy = y + size / 2f
+            stroke.strokeWidth = 3f
+            stroke.color = withAlpha(line, 210)
+            canvas.drawCircle(cx, cy, size * 0.34f, stroke)
+            stroke.color = withAlpha(ink, 190)
+            canvas.drawCircle(cx, cy, size * 0.22f, stroke)
+            fill.color = accent
+            canvas.drawCircle(cx, cy, size * 0.10f, fill)
+        }
+        "prism" -> {
+            val cx = x + size / 2f
+            val cy = y + size / 2f
+            val r = size * 0.32f
+            val outer = Path().apply {
+                moveTo(cx, cy - r); lineTo(cx + r, cy); lineTo(cx, cy + r); lineTo(cx - r, cy); close()
+            }
+            stroke.strokeWidth = 3f
+            stroke.color = withAlpha(ink, 200)
+            canvas.drawPath(outer, stroke)
+            val ir = size * 0.17f
+            val inner = Path().apply {
+                moveTo(cx, cy - ir); lineTo(cx + ir, cy); lineTo(cx, cy + ir); lineTo(cx - ir, cy); close()
+            }
+            fill.color = accent
+            canvas.drawPath(inner, fill)
+        }
+        "waves" -> {
+            stroke.strokeWidth = 3.5f
+            stroke.strokeCap = Paint.Cap.ROUND
+            listOf(0.32f to withAlpha(line, 210), 0.50f to withAlpha(ink, 200), 0.68f to accent).forEach { (yf, col) ->
+                stroke.color = col
+                val p = Path().apply {
+                    moveTo(x + size * 0.2f, y + size * yf)
+                    cubicTo(x + size * 0.4f, y + size * (yf - 0.12f), x + size * 0.6f, y + size * (yf + 0.12f), x + size * 0.8f, y + size * yf)
+                }
+                canvas.drawPath(p, stroke)
+            }
+        }
+        else -> {
+            // Ikna pixel emblem (for "lattice" and "cat" fallback)
+            val pad = size * 0.20f
+            val cell = (size - pad * 2f) / 7f
+            val ox = x + (size - cell * 6f) / 2f
+            val oy = y + (size - cell * 7f) / 2f
+            for (r in PROFILE_CARD_EMBLEM.indices) {
+                val row = PROFILE_CARD_EMBLEM[r]
+                for (c in row.indices) {
+                    val ch = row[c]
+                    if (ch == '.') continue
+                    fill.color = if (ch == 'A') accent else ink
+                    canvas.drawRoundRect(
+                        RectF(ox + c * cell, oy + r * cell, ox + (c + 1) * cell - 1.5f, oy + (r + 1) * cell - 1.5f),
+                        2f, 2f, fill
+                    )
+                }
+            }
+        }
+    }
 }
 
 private fun drawAndroidBackdropEmblem(canvas: Canvas, w: Int, h: Int, bg: Int, ink: Int, accent: Int) {
@@ -171,9 +400,9 @@ private fun blendArgb(a: Int, b: Int, t: Float): Int = Color.rgb(
 
 private fun ellipsize(paint: Paint, text: String, maxWidth: Float): String {
     if (paint.measureText(text) <= maxWidth) return text
-    var end = text.length
-    while (end > 1 && paint.measureText(text.substring(0, end) + "…") > maxWidth) {
-        end--
+    var s = text
+    while (s.length > 3 && paint.measureText("$s…") > maxWidth) {
+        s = s.dropLast(1)
     }
-    return text.substring(0, end) + "…"
+    return "$s…"
 }

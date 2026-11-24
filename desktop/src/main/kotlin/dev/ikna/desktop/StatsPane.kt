@@ -62,11 +62,20 @@ fun StatsPane(
     DesktopScrollablePane(S.t("stats.001"), onBack, icon = dev.ikna.ui.theme.IknaGlyph.BARS) {
         IknaLocalProfileCard(
             profileName = settings.profileName,
+            profileBio = settings.profileBio,
+            profileAvatar = settings.profileAvatar,
             snapshot = snapshot,
             paletteDisplayName = S.t(paletteSpec(settings.paletteId).nameKey),
             exportingPng = exportingPng,
             pngStatus = pngStatus,
             onSaveName = { name -> scope.launch { container.settings.setProfileName(name) } },
+            onSaveProfile = { name, bio, avatar ->
+                scope.launch {
+                    container.settings.setProfileName(name)
+                    container.settings.setProfileBio(bio)
+                    container.settings.setProfileAvatar(avatar)
+                }
+            },
             onExportPng = { cardData ->
                 val chooser = JFileChooser().apply { selectedFile = File("ikna-profile-stats.png") }
                 if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {

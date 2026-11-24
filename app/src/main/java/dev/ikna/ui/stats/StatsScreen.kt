@@ -77,7 +77,9 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
                         profileName = currentSettings.profileName,
                         snapshot = currentSnapshot,
                         palette = activePalette,
-                        paletteDisplayName = S.t(paletteSpec(currentSettings.paletteId).nameKey)
+                        paletteDisplayName = S.t(paletteSpec(currentSettings.paletteId).nameKey),
+                        profileBio = currentSettings.profileBio,
+                        profileAvatar = currentSettings.profileAvatar
                     )
                     val bytes = withContext(Dispatchers.Default) { renderProfileStatsCardPng(card) }
                     withContext(Dispatchers.IO) {
@@ -148,11 +150,20 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
             Spacer(Modifier.height(16.dp))
             IknaLocalProfileCard(
                 profileName = settings.profileName,
+                profileBio = settings.profileBio,
+                profileAvatar = settings.profileAvatar,
                 snapshot = snapshot,
                 paletteDisplayName = S.t(paletteSpec(settings.paletteId).nameKey),
                 exportingPng = exportingPng,
                 pngStatus = pngStatus,
                 onSaveName = { name -> scope.launch { container.settings.setProfileName(name) } },
+                onSaveProfile = { name, bio, avatar ->
+                    scope.launch {
+                        container.settings.setProfileName(name)
+                        container.settings.setProfileBio(bio)
+                        container.settings.setProfileAvatar(avatar)
+                    }
+                },
                 onExportPng = {
                     pendingPngExport = true
                     savePng.launch("ikna-profile-stats.png")

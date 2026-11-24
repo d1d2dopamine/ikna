@@ -294,7 +294,9 @@ data class IknaSettings(
     /** When the last check happened, epoch millis. Zero means never. */
     val updateCheckedAt: Long = 0L,
     /** Optional local-only profile display name. Empty by default; never sent anywhere. */
-    val profileName: String = ""
+    val profileName: String = "",
+    val profileBio: String = "",
+    val profileAvatar: String = "cat"
 )
 
 class SettingsStore(private val store: DataStore<Preferences>) {
@@ -361,6 +363,8 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val updateSkipped = stringPreferencesKey("updateSkipped")
         val updateCheckedAt = longPreferencesKey("updateCheckedAt")
         val profileName = stringPreferencesKey("profileName")
+        val profileBio = stringPreferencesKey("profileBio")
+        val profileAvatar = stringPreferencesKey("profileAvatar")
         // Internal Browse ledger. It is not a user preference and is not
         // restored from a settings backup, so an imported file cannot mint
         // passive cards without completing this installation's plans.
@@ -437,7 +441,9 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             updateCheck = p[Keys.updateCheck] ?: defaults.updateCheck,
             updateSkipped = p[Keys.updateSkipped] ?: defaults.updateSkipped,
             updateCheckedAt = p[Keys.updateCheckedAt] ?: defaults.updateCheckedAt,
-            profileName = p[Keys.profileName] ?: defaults.profileName
+            profileName = p[Keys.profileName] ?: defaults.profileName,
+            profileBio = p[Keys.profileBio] ?: defaults.profileBio,
+            profileAvatar = p[Keys.profileAvatar] ?: defaults.profileAvatar
         )
     }
 
@@ -609,6 +615,15 @@ class SettingsStore(private val store: DataStore<Preferences>) {
 
     suspend fun setProfileName(name: String) = put {
         it[Keys.profileName] = name.trim().take(48)
+    }
+
+    suspend fun setProfileBio(bio: String) = put {
+        it[Keys.profileBio] = bio.trim().take(80)
+    }
+
+    suspend fun setProfileAvatar(avatarId: String) = put {
+        val clean = avatarId.trim().lowercase().take(24)
+        it[Keys.profileAvatar] = clean.ifEmpty { "cat" }
     }
 
     /**

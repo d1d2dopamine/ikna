@@ -7,7 +7,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import java.time.Instant
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 /** A single read-only snapshot; no tracking, settings, schedule or history writes. */
 class StudyStatsRepository(private val db: IknaDatabase, private val dayStartHour: Int = 4) {
@@ -36,8 +38,11 @@ class StudyStatsRepository(private val db: IknaDatabase, private val dayStartHou
             caller.ensureActive()
             val snapshot = db.useReaderConnection { connection ->
                 connection.deferredTransaction {
+                    val heatmapDays = 84
+                    val heatmapStart = studyWindowStart(now, heatmapDays, zone, dayStartHour)
                     val monthStart = studyWindowStart(now, 30, zone, dayStartHour)
-                    val rows = db.reviewDao().studyAnswersBetween(monthStart, now)
+                    val rows84 = db.reviewDao().studyAnswersBetween(heatmapStart, now)
+                    val rows = rows84.filter { it.ts >= monthStart }
                     val evidence = listOf(7, 30).associateWith { days ->
                         studyEvidence(rows, studyWindowStart(now, days, zone, dayStartHour), now)
                     }
@@ -57,7 +62,92 @@ class StudyStatsRepository(private val db: IknaDatabase, private val dayStartHou
                             facts.repeats, facts.recalled, facts.unclassified,
                             targets(facts.recovered), targets(facts.attention))
                     }
-                    StudyStats(period(7), period(30), zone.id, dayStartHour, db.cardDao().nextDueAt(now))
+
+                    // Rich factual profile insights from existing local cards, packs, and 84d journal.
+                    val localNow = Instant.ofEpochMilli(now).atZone(zone)
+                    val todayStudyDate = if (localNow.hour < dayStartHour) localNow.toLocalDate().minusDays(1) else localNow.toLocalDate()
+                    val firstHeatmapDate = todayStudyDate.minusDays((heatmapDays - 1).toLong())
+                    val dailyCounts = IntArray(heatmapDays)
+                    for (r in rows84) {
+                        if (r.undoOf != null || r.rating !in 1..4) continue
+                        val zdt = Instant.ofEpochMilli(r.ts).atZone(zone)
+                        val d = if (zdt.hour < dayStartHour) zdt.toLocalDate().minusDays(1) else zdt.toLocalDate()
+                        val idx = ChronoUnit.DAYS.between(firstHeatmapDate, d).toInt()
+                        if (idx in 0 until heatmapDays) dailyCounts[idx]++
+                    }
+                    val activeDays84d = dailyCounts.count { it > 0 }
+                    val activeDays30d = dailyCounts.drop(heatmapDays - 30).count { it > 0 }
+
+                    val validMonth = rows.filter { it.undoOf == null && it.rating in 1..4 }
+                    val totalMs30d = validMonth.sumOf { it.durationMs.coerceIn(0L, 120_000L) }
+                    val studyMinutes30d = ((totalMs30d + 30_000L) / 60_000L).toInt()
+                    val durationsSec = validMonth
+                        .map { it.durationMs.coerceIn(0L, 120_000L) }
+                        .filter { it > 0L }
+                        .sorted()
+                    val medianSecPerCard30d = if (durationsSec.isNotEmpty()) {
+                        ((durationsSec[durationsSec.size / 2] + 500L) / 1000L).toInt().coerceAtLeast(1)
+                    } else 0
+
+                    val allCards = db.cardDao().all().filter { it.level == 0 }
+                    var mature = 0
+                    var young = 0
+                    var learning = 0
+                    var stabilitySum = 0.0
+                    var stabilityCount = 0
+                    val forecast = IntArray(7)
+                    val tomorrowStart = todayStudyDate.plusDays(1).atTime(dayStartHour, 0).atZone(zone).toInstant().toEpochMilli()
+                    val dayMs = 86_400_000L
+                    for (c in allCards) {
+                        if (!c.isNew && c.reps > 0) {
+                            when {
+                                c.stability >= 21.0 -> mature++
+                                c.stability >= 3.0 -> young++
+                                else -> learning++
+                            }
+                            if (c.stability > 0.0) {
+                                stabilitySum += c.stability
+                                stabilityCount++
+                            }
+                        }
+                        if (!c.inAmnesty && !c.isNew) {
+                            val bucket = when {
+                                c.dueAt < tomorrowStart -> 0
+                                else -> (((c.dueAt - tomorrowStart) / dayMs) + 1L).toInt()
+                            }
+                            if (bucket in 0..6) forecast[bucket]++
+                        }
+                    }
+                    val avgStability = if (stabilityCount > 0) stabilitySum / stabilityCount else 0.0
+
+                    val packs = db.chunkDao().packs()
+                    val deckProgress = packs.mapNotNull { pack ->
+                        val total = db.chunkDao().chunkCountFor(pack.id)
+                        if (total <= 0) null
+                        else {
+                            val known = db.chunkDao().knownCountFor(pack.id, 21.0)
+                            val label = pack.title?.trim()?.takeIf { it.isNotEmpty() } ?: pack.id
+                            ProfileDeckProgress(title = label, known = known.coerceAtMost(total), total = total)
+                        }
+                    }.sortedWith(compareByDescending<ProfileDeckProgress> { it.known }.thenByDescending { it.total })
+                        .take(4)
+
+                    val insights = ProfileInsights(
+                        matureCards = mature,
+                        youngCards = young,
+                        learningCards = learning,
+                        totalCards = allCards.size,
+                        avgStabilityDays = avgStability,
+                        studyMinutes30d = studyMinutes30d,
+                        medianSecPerCard30d = medianSecPerCard30d,
+                        activeDays30d = activeDays30d,
+                        activeDays84d = activeDays84d,
+                        dailyActivity84d = dailyCounts.toList(),
+                        forecastNext7d = forecast.toList(),
+                        topDecks = deckProgress
+                    )
+
+                    StudyStats(period(7), period(30), zone.id, dayStartHour, db.cardDao().nextDueAt(now), insights)
                 }
             }
             caller.ensureActive()

@@ -105,7 +105,9 @@ data class SettingsSnapshot(
     val suppressed: String = "",
     // Desktop review keys are portable token names, not machine key codes.
     val hotkeys: String = DEFAULT_HOTKEYS,
-    val profileName: String = ""
+    val profileName: String = "",
+    val profileBio: String = "",
+    val profileAvatar: String = "cat"
 )
 
 object SettingsBackup {
@@ -150,7 +152,9 @@ object SettingsBackup {
         deckPhonetics = settings.deckPhonetics,
         suppressed = settings.suppressed,
         hotkeys = settings.hotkeys,
-        profileName = settings.profileName
+        profileName = settings.profileName,
+        profileBio = settings.profileBio,
+        profileAvatar = settings.profileAvatar
     )
 
     fun encode(settings: IknaSettings, synthetic: Boolean = false): String = json.encodeToString(
@@ -233,5 +237,7 @@ object SettingsBackup {
         store.setSuppressed(snapshot.suppressed)
         store.setHotkeys(snapshot.hotkeys)
         store.setProfileName(snapshot.profileName)
+        store.setProfileBio(snapshot.profileBio)
+        store.setProfileAvatar(snapshot.profileAvatar)
     }
 }
