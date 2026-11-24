@@ -60,8 +60,8 @@ class GridTest {
     fun a_harder_throw_leaves_the_screen_faster() {
         val gentle = (Motion.thrown(0f) as TweenSpec<Float>).durationMillis
         val hard = (Motion.thrown(6000f) as TweenSpec<Float>).durationMillis
-        assertEquals(220, gentle)
-        assertEquals(120, hard)
+        assertEquals(320, gentle)
+        assertEquals(210, hard)
         assertTrue(hard < gentle)
     }
 
@@ -69,7 +69,7 @@ class GridTest {
     fun throw_duration_stays_inside_its_bounds() {
         listOf(-9000f, 0f, 100f, 1200f, 99999f).forEach { speed ->
             val ms = (Motion.thrown(speed) as TweenSpec<Float>).durationMillis
-            assertTrue(speed.toString(), ms in 120..220)
+            assertTrue(speed.toString(), ms in 210..320)
         }
     }
 
@@ -95,7 +95,7 @@ class GridTest {
         listOf(0f, 500f, 99999f).forEach { speed ->
             listOf(0f, 0.58f, 0.72f, 1f, 1.25f, 1.55f).forEach { haste ->
                 val ms = (Motion.thrown(speed, haste) as TweenSpec<Float>).durationMillis
-                assertTrue("$speed/$haste", ms in 90..340)
+                assertTrue("$speed/$haste", ms in 180..380)
             }
         }
     }
