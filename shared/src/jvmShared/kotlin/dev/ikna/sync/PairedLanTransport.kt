@@ -31,6 +31,7 @@ data class HistoryBinding(val groupId: String, val epoch: String, val freshStart
 data class PairingInvitation(
     val version: Int = 1, val host: String, val port: Int, val certificate: String,
     val binding: HistoryBinding, val secret: String, val expiresAtMillis: Long,
+    val deviceName: String = "",
 ) {
     override fun toString(): String = "PairingInvitation(version=$version, accessGrant=<redacted>)"
 }
@@ -42,6 +43,7 @@ class PairedLanTransport(
     private val callbacks: PayloadCallbacks,
     private val onStatus: (Status) -> Unit = {},
     private val intervalMillis: Long = 15_000,
+    private val localDeviceName: () -> String = { defaultDeviceDisplayName() },
 ) : AutoCloseable {
     interface PayloadCallbacks {
         /** Called off the UI thread; implementations must cooperate with coroutine cancellation. */
@@ -54,6 +56,7 @@ class PairedLanTransport(
     data class PeerStatus(
         val id: String, val fingerprint: String, val address: String,
         val lastSuccessAtMillis: Long? = null, val lastError: String? = null,
+        val name: String = "",
     ) {
         override fun toString(): String = "PeerStatus(identity=<redacted>, address=<redacted>, lastSuccessAtMillis=$lastSuccessAtMillis, lastError=$lastError)"
     }
@@ -61,12 +64,14 @@ class PairedLanTransport(
         val lastSuccessAtMillis: Long? = null, val peers: List<PeerStatus> = emptyList())
     @Serializable private data class Peer(
         val id: String, val host: String, val port: Int, val certificate: String, val credential: String,
+        val name: String = "",
     )
     @Serializable private data class Saved(val version: Int = 1, val binding: HistoryBinding, val peers: List<Peer>)
     @Serializable private data class Wire(
         val version: Int = 1, val operation: String, val binding: HistoryBinding,
         val id: String, val credential: String, val challenge: String,
         val certificate: String = "", val port: Int = 0, val payload: String = "",
+        val deviceName: String = "",
     )
     private class PayloadTooLargeException : IllegalArgumentException()
     private data class Pending(val invitation: PairingInvitation, val deadlineNanos: Long = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(INVITATION_MS), var attempts: Int = 0)
@@ -90,7 +95,7 @@ class PairedLanTransport(
     @Volatile private var lastSuccessAtMillis: Long? = null
     val status: Status get() = synchronized(gate) { Status(running, peers.size, lastError, lastSuccessAtMillis,
         peers.map { peer -> PeerStatus(peer.id, peer.id.chunked(4).joinToString(" "), "${peer.host}:${peer.port}",
-            peerResults[peer.id]?.first, peerResults[peer.id]?.second) }) }
+            peerResults[peer.id]?.first, peerResults[peer.id]?.second, peer.name) }) }
 
     init {
         require(intervalMillis in 100..300_000)
@@ -140,7 +145,8 @@ class PairedLanTransport(
         LanSyncSecurity.address(host)
         val invitation = PairingInvitation(host = host, port = listener!!.localPort,
             certificate = identity.certificatePem(), binding = binding,
-            secret = LanSyncSecurity.secret(), expiresAtMillis = System.currentTimeMillis() + INVITATION_MS)
+            secret = LanSyncSecurity.secret(), expiresAtMillis = System.currentTimeMillis() + INVITATION_MS,
+            deviceName = sanitizeDeviceName(localDeviceName()))
         pending = Pending(invitation)
         json.encodeToString(invitation)
     }
@@ -164,10 +170,12 @@ class PairedLanTransport(
                 val challenge = readText(socket, 128)
                 pairingContext.ensureActive()
                 write(socket, Wire(operation = "pair", binding = binding, id = deviceId,
-                    credential = invite.secret, challenge = challenge, certificate = identity.certificatePem(), port = ownPort))
+                    credential = invite.secret, challenge = challenge, certificate = identity.certificatePem(),
+                    port = ownPort, deviceName = sanitizeDeviceName(localDeviceName())))
                 val response = read(socket)
                 require(response.version == 1 && response.operation == "paired" && response.binding == binding && response.challenge == challenge)
-                val peer = Peer(response.id, invite.host, invite.port, invite.certificate, response.credential)
+                val peerName = sanitizeDeviceName(response.deviceName.ifBlank { invite.deviceName })
+                val peer = Peer(response.id, invite.host, invite.port, invite.certificate, response.credential, peerName)
                 validatePeer(peer)
                 pairingContext.ensureActive()
                 synchronized(gate) {
@@ -268,7 +276,10 @@ class PairedLanTransport(
                 error("Pairing expired")
             }
             require(LanSyncSecurity.equal(invitation.invitation.secret, request.credential))
-            val peer = Peer(request.id, host, request.port, request.certificate, LanSyncSecurity.secret())
+            val peer = Peer(
+                request.id, host, request.port, request.certificate, LanSyncSecurity.secret(),
+                sanitizeDeviceName(request.deviceName)
+            )
             validatePeer(peer)
             require(peer.id != deviceId && peers.size < MAX_PEERS && peers.none { it.id == peer.id })
             // Consume before persistence; failed persistence cannot leave a reusable invitation.
@@ -276,7 +287,8 @@ class PairedLanTransport(
             save(peers + peer)
             peers += peer
             write(socket, Wire(operation = "paired", binding = binding, id = deviceId,
-                credential = peer.credential, challenge = request.challenge))
+                credential = peer.credential, challenge = request.challenge,
+                deviceName = sanitizeDeviceName(localDeviceName())))
         }
         publish()
     }
@@ -417,15 +429,43 @@ class PairedLanTransport(
     private fun publish() { runCatching { onStatus(status) } }
 
     companion object {
-        const val MAX_PAYLOAD = 4 * 1024 * 1024
-        const val MAX_FRAME = 6 * 1024 * 1024
+        const val MAX_PAYLOAD = 32 * 1024 * 1024
+        const val MAX_FRAME = 48 * 1024 * 1024
         const val MAX_PEERS = 4
         const val COMPACT_INVITATION_PREFIX = "ikna-pair:1:"
-        private const val SOCKET_MS = 5_000
-        private const val DEADLINE_MS = 15_000L
+        private const val SOCKET_MS = 15_000
+        private const val DEADLINE_MS = 45_000L
         private const val INVITATION_MS = 300_000L
         private const val MAX_PAIR_ATTEMPTS = 8
         private const val MAX_INVITATION_JSON_BYTES = 8192
+
+        fun sanitizeDeviceName(raw: String): String =
+            raw.trim().replace(Regex("[\\r\\n\\t]+"), " ").take(48)
+
+        fun defaultDeviceDisplayName(): String {
+            val androidModel = runCatching {
+                val build = Class.forName("android.os.Build")
+                val manufacturer = (build.getField("MANUFACTURER").get(null) as? String).orEmpty().trim()
+                val model = (build.getField("MODEL").get(null) as? String).orEmpty().trim()
+                when {
+                    model.isEmpty() -> ""
+                    manufacturer.isNotEmpty() && !model.startsWith(manufacturer, ignoreCase = true) ->
+                        "${manufacturer.replaceFirstChar { it.uppercase() }} $model"
+                    else -> model
+                }
+            }.getOrDefault("")
+            if (androidModel.isNotBlank()) return sanitizeDeviceName(androidModel)
+            val host = runCatching { java.net.InetAddress.getLocalHost().hostName }.getOrDefault("").trim()
+            val os = System.getProperty("os.name").orEmpty().trim()
+            return sanitizeDeviceName(
+                when {
+                    host.isNotBlank() && os.isNotBlank() -> "$host ($os)"
+                    host.isNotBlank() -> host
+                    os.isNotBlank() -> os
+                    else -> "Ikna"
+                }
+            )
+        }
 
         /** Compresses a JSON invitation into a shorter QR-friendly string without losing compatibility. */
         fun encodeCompactInvitation(rawJson: String): String {

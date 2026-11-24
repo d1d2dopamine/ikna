@@ -32,6 +32,7 @@ enum class DeviceSyncError { NETWORK, INVALID_INVITATION, EXPIRED_INVITATION, UN
 data class DeviceSyncPeerUiState(
     val id: String, val fingerprint: String, val address: String,
     val lastSuccessText: String? = null, val error: String? = null,
+    val name: String = "",
 ) {
     override fun toString(): String = "DeviceSyncPeerUiState(device=<redacted>)"
 }
@@ -271,14 +272,20 @@ fun DeviceSyncPanel(
         }
         if (state.peers.isNotEmpty()) {
             Text(S.t("sync.devices"), style = MaterialTheme.typography.titleSmall)
-            Text(S.t("sync.devices_scope"), style = MaterialTheme.typography.bodySmall)
             state.peers.forEach { peer ->
+                val displayName = peer.name.ifBlank { peer.address }
+                val shortId = peer.fingerprint.replace(" ", "").take(8).chunked(4).joinToString(" ")
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    SelectionContainer {
-                        Text(S.t("sync.device_fingerprint").replace("{fingerprint}", peer.fingerprint),
-                            style = MaterialTheme.typography.bodySmall)
-                    }
-                    Text(S.t("sync.device_address").replace("{address}", peer.address), style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        text = displayName,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Text(
+                        text = "${peer.address} · #$shortId",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     Text(peer.lastSuccessText?.let { S.t("sync.device_success").replace("{time}", it) }
                         ?: S.t("sync.device_no_exchange"), style = MaterialTheme.typography.bodySmall)
                     if (peer.error != null) Text(S.t("sync.device_error"),

@@ -605,5 +605,5 @@ class DeviceSyncController(
             }
         }
     }
-    companion object { const val MAX_BYTES = 4 * 1024 * 1024; const val MAX_RECORDS = 50_000 }
+    companion object { const val MAX_BYTES = 32 * 1024 * 1024; const val MAX_RECORDS = 500_000 }
 }

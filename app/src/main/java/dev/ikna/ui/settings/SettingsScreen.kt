@@ -1024,6 +1024,11 @@ fun SettingsScreen(
                         S.t("set.053"),
                         icon = iknaSettingsSectionGlyph(ID_DATA)
                     ) {
+                        LocalProfileSettingsCard(
+                            profileName = settings.profileName,
+                            onSaveName = { name -> scope.launch { container.settings.setProfileName(name) } }
+                        )
+                        Spacer(Modifier.height(16.dp))
                         if (!container.isDeveloperMode) {
                             DeviceSyncSettings(
                                 controller = container.deviceSync,
@@ -1035,7 +1040,8 @@ fun SettingsScreen(
                                     } else {
                                         cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                                     }
-                                }
+                                },
+                                localProfileName = settings.profileName
                             )
                             SyncFilePanel(
                                 busy = syncFileBusy,

@@ -28,8 +28,8 @@ object SyncDeltaFile {
     const val FILE_EXTENSION = "ikna-sync"
     const val MIME_TYPE = "application/octet-stream"
     const val FORMAT_VERSION = 1
-    const val MAX_COMPRESSED_BYTES = 4 * 1024 * 1024
-    private const val MAX_DECOMPRESSED_BYTES = 24 * 1024 * 1024
+    const val MAX_COMPRESSED_BYTES = 16 * 1024 * 1024
+    private const val MAX_DECOMPRESSED_BYTES = 64 * 1024 * 1024
     private val json = Json { ignoreUnknownKeys = false; isLenient = false; encodeDefaults = true }
 
     @Serializable

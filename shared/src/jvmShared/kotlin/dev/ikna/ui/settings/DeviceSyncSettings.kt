@@ -3,8 +3,10 @@ package dev.ikna.ui.settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.ikna.sync.DeviceSyncController
+import dev.ikna.sync.PairedLanTransport
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -16,10 +18,18 @@ fun DeviceSyncSettings(
     controller: DeviceSyncController,
     scannedCode: String? = null,
     onScannedCodeConsumed: () -> Unit = {},
-    onScanQr: (() -> Unit)? = null
+    onScanQr: (() -> Unit)? = null,
+    localProfileName: String = ""
 ) {
     val current by controller.state.collectAsState()
     val scope = rememberCoroutineScope()
+    val defaultName = remember { PairedLanTransport.defaultDeviceDisplayName() }
+    val thisDeviceLabel = localProfileName.trim().ifBlank { defaultName }
+    val peerDeviceLabel = current.devices
+        .firstOrNull { it.id == current.profileConsent.peerId }
+        ?.let { it.name.ifBlank { it.address } }
+        ?: current.devices.firstOrNull()?.let { it.name.ifBlank { it.address } }
+        ?: ""
     val state = DeviceSyncUiState(
         enabled = current.enabled, paired = current.peers > 0,
         status = deviceSyncStatus(current),
@@ -27,7 +37,7 @@ fun DeviceSyncSettings(
             DeviceSyncPeerUiState(peer.id, peer.fingerprint, peer.address,
                 peer.lastSuccessAtMillis?.let { time ->
                     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(time))
-                }, peer.lastError)
+                }, peer.lastError, peer.name)
         },
         localAddresses = current.addresses,
         invitation = current.invitation,
@@ -40,11 +50,15 @@ fun DeviceSyncSettings(
         blockedAfterReset = current.blocked,
         canStartNewHistory = current.boundaryReady,
     )
-    ProfileConsentPanel(current.profileConsent,
+    ProfileConsentPanel(
+        state = current.profileConsent,
+        thisDeviceName = thisDeviceLabel,
+        peerDeviceName = peerDeviceLabel,
         onProposeMerge = { scope.launch { controller.proposeMerge(it) } },
         onProposeAdoption = { peer, useThis -> scope.launch { controller.proposeAdoption(peer, useThis) } },
         onApprove = { scope.launch { controller.approveProfile(it) } },
-        onCancel = { scope.launch { controller.cancelProfile() } })
+        onCancel = { scope.launch { controller.cancelProfile() } }
+    )
     DeviceSyncPanel(state,
         onEnabledChange = { scope.launch { controller.setEnabled(it) } },
         onCreateInvitation = { scope.launch { controller.createInvitation(it) } },

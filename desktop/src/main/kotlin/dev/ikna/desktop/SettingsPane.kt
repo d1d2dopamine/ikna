@@ -430,8 +430,16 @@ fun SettingsPane(
             }
             item(key = "data", contentType = "settings-section") {
                 IknaSettingsSection(S.t("set.052"), null, icon = iknaSettingsSectionGlyph("data")) {
+                    LocalProfileSettingsCard(
+                        profileName = settings.profileName,
+                        onSaveName = { name -> save { container.settings.setProfileName(name) } }
+                    )
+                    Spacer(Modifier.height(16.dp))
                     if (!container.isDeveloperMode) {
-                        DeviceSyncSettings(container.deviceSync)
+                        DeviceSyncSettings(
+                            controller = container.deviceSync,
+                            localProfileName = settings.profileName
+                        )
                         dev.ikna.ui.settings.SyncFilePanel(
                             busy = syncFileBusy,
                             statusMessage = syncFileStatus,
