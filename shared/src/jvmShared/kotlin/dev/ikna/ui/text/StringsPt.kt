@@ -13,7 +13,7 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "sync.error.journal_item_too_large" to "Um evento do histórico é grande demais para um lote. O histórico é preservado; não o apague para sincronizar. Este evento precisa de suporte à transferência de registros maiores.",
     "sync.error.journal_reconciliation" to "Não foi possível verificar o ponto de sincronização salvo. O histórico é preservado. Revogue o pareamento nos dois dispositivos e revise os perfis novamente; o limite do perfil inicial continua válido. Não apague o histórico para reconectar.",
     "sync.error.protocol" to "As versões de sincronização são incompatíveis. Atualize o aplicativo nos dois dispositivos e revise e aprove os perfis novamente. O histórico local é preservado.",
-    "sync.error.profile_too_large" to "O perfil inicial excede o limite atual (16 MiB ou 150.000 linhas por tabela). Os dados não são truncados. Não apague o histórico; perfis iniciais maiores ainda não são compatíveis.",
+    "sync.error.profile_too_large" to "O perfil inicial excede o limite atual (16 MiB ou 200.000 linhas por tabela). Os dados não são truncados. Não apague o histórico; perfis iniciais maiores ainda não são compatíveis.",
     "sync.error.adoption" to "A mudança de perfil não foi concluída. Se aparecer o ecrã de reinício, feche e reabra o Ikna. A base original é preservada; não há reposição automática.",
     "sync.profile.recover" to "Recuperar base anterior",
     "sync.profile.recovery_confirm" to "Quero recuperar a base anterior e revogar os emparelhamentos",

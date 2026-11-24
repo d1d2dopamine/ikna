@@ -12,7 +12,7 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "sync.error.journal_item_too_large" to "Ein Verlaufseintrag ist zu groß für ein Synchronisierungspaket. Der Verlauf bleibt erhalten; lösche ihn nicht für die Synchronisierung. Für diesen Eintrag wird die Übertragung größerer Datensätze benötigt.",
     "sync.error.journal_reconciliation" to "Der gespeicherte Synchronisierungsstand konnte nicht geprüft werden. Der Verlauf bleibt erhalten. Widerrufe die Kopplung auf beiden Geräten und prüfe die Profile erneut; das Größenlimit für Ausgangsprofile gilt weiterhin. Lösche keinen Verlauf für die Verbindung.",
     "sync.error.protocol" to "Die Apps verwenden inkompatible Synchronisierungsversionen. Aktualisiere beide Geräte und prüfe und bestätige die Profile erneut. Der lokale Verlauf bleibt erhalten.",
-    "sync.error.profile_too_large" to "Das Ausgangsprofil überschreitet das aktuelle Limit (16 MiB oder 150.000 Zeilen je Tabelle). Daten werden nicht gekürzt. Lösche keinen Verlauf; größere Ausgangsprofile werden noch nicht unterstützt.",
+    "sync.error.profile_too_large" to "Das Ausgangsprofil überschreitet das aktuelle Limit (16 MiB oder 200.000 Zeilen je Tabelle). Daten werden nicht gekürzt. Lösche keinen Verlauf; größere Ausgangsprofile werden noch nicht unterstützt.",
     "sync.error.adoption" to "Der Profilwechsel wurde nicht abgeschlossen. Falls der Neustartbildschirm angezeigt wird, Ikna schließen und erneut öffnen. Die ursprüngliche Datenbank bleibt erhalten; kein automatischer Rückwechsel.",
     "sync.profile.recover" to "Vorherige Datenbank wiederherstellen",
     "sync.profile.recovery_confirm" to "Ich möchte die vorherige Datenbank wiederherstellen und Kopplungen widerrufen",

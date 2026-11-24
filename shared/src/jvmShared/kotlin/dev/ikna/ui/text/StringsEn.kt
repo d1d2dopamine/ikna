@@ -12,7 +12,7 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "sync.error.journal_item_too_large" to "A history event is too large for a sync batch. Your history is kept; do not delete it to enable sync. This event needs a larger-item transfer feature.",
     "sync.error.journal_reconciliation" to "The saved sync checkpoint could not be verified. History is kept. Revoke pairing on both devices and review the profiles again; the initial-profile size limit still applies. Do not delete history to reconnect.",
     "sync.error.protocol" to "The apps use incompatible sync versions. Update both devices, then review and approve their profiles again. Your local history is kept.",
-    "sync.error.profile_too_large" to "The initial profile exceeds the current limit (16 MiB or 150,000 rows per table). Data is not truncated. Do not delete history to enable sync; larger initial profiles are not supported yet.",
+    "sync.error.profile_too_large" to "The initial profile exceeds the current limit (16 MiB or 200,000 rows per table). Data is not truncated. Do not delete history to enable sync; larger initial profiles are not supported yet.",
     "sync.error.adoption" to "Profile change could not finish. If the restart screen is shown, close and reopen Ikna. The original database is retained; no automatic fallback is performed.",
     "sync.profile.recover" to "Restore previous database",
     "sync.profile.recovery_confirm" to "I want to restore the previous database and revoke pairing",

@@ -12,7 +12,7 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "sync.error.journal_item_too_large" to "Zdarzenie historii jest zbyt duże dla jednej partii synchronizacji. Historia zostaje zachowana; nie usuwaj jej w celu synchronizacji. To zdarzenie wymaga obsługi większych rekordów.",
     "sync.error.journal_reconciliation" to "Nie można zweryfikować zapisanego punktu synchronizacji. Historia zostaje zachowana. Cofnij parowanie na obu urządzeniach i ponownie sprawdź profile; limit profilu początkowego nadal obowiązuje. Nie usuwaj historii, aby połączyć urządzenia.",
     "sync.error.protocol" to "Wersje synchronizacji są niezgodne. Zaktualizuj aplikację na obu urządzeniach, a następnie ponownie sprawdź i zatwierdź profile. Lokalna historia zostaje zachowana.",
-    "sync.error.profile_too_large" to "Profil początkowy przekracza obecny limit (16 MiB lub 150 000 wierszy na tabelę). Dane nie są obcinane. Nie usuwaj historii; większe profile początkowe nie są jeszcze obsługiwane.",
+    "sync.error.profile_too_large" to "Profil początkowy przekracza obecny limit (16 MiB lub 200 000 wierszy na tabelę). Dane nie są obcinane. Nie usuwaj historii; większe profile początkowe nie są jeszcze obsługiwane.",
     "sync.error.adoption" to "Zmiana profilu nie została zakończona. Jeśli wyświetlono ekran ponownego uruchomienia, zamknij i otwórz Ikna. Oryginalna baza zostaje zachowana; nie ma automatycznego cofania.",
     "sync.profile.recover" to "Przywróć poprzednią bazę",
     "sync.profile.recovery_confirm" to "Chcę przywrócić poprzednią bazę i odwołać parowania",
