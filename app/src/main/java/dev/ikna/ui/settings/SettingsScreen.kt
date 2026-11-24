@@ -1042,20 +1042,20 @@ fun SettingsScreen(
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(palette.surface)
-                                    .border(1.dp, palette.line)
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .border(1.dp, MaterialTheme.colorScheme.outline)
                                     .padding(14.dp),
                                 verticalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 Text(
                                     text = S.t("sync.title"),
                                     style = MaterialTheme.typography.titleMedium,
-                                    color = palette.ink
+                                    color = MaterialTheme.colorScheme.onBackground
                                 )
                                 Text(
                                     text = S.t("sync.dev_notice"),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = palette.muted
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             Spacer(Modifier.height(16.dp))

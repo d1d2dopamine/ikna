@@ -502,7 +502,7 @@ fun SettingsPane(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(palette.surface)
+                                .background(palette.panel)
                                 .border(1.dp, palette.line)
                                 .padding(14.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp)
