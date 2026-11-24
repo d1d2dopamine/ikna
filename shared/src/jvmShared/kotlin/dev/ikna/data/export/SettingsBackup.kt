@@ -107,7 +107,7 @@ data class SettingsSnapshot(
     val hotkeys: String = DEFAULT_HOTKEYS,
     val profileName: String = "",
     val profileBio: String = "",
-    val profileAvatar: String = "cat"
+    val profileAvatar: String = ""
 )
 
 object SettingsBackup {

@@ -61,6 +61,36 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
     var exportingPng by remember { mutableStateOf(false) }
     var pngStatus by remember { mutableStateOf<String?>(null) }
     var snapshot by remember { mutableStateOf<StudyStats?>(null) }
+    val pickAvatar = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val savedPath = withContext(Dispatchers.IO) {
+                runCatching {
+                    val decoded = context.contentResolver.openInputStream(uri)?.use {
+                        android.graphics.BitmapFactory.decodeStream(it)
+                    } ?: return@runCatching null
+                    val side = minOf(decoded.width, decoded.height)
+                    val sx = (decoded.width - side) / 2
+                    val sy = (decoded.height - side) / 2
+                    val square = android.graphics.Bitmap.createBitmap(decoded, sx, sy, side, side)
+                    val scaled = android.graphics.Bitmap.createScaledBitmap(square, 256, 256, true)
+                    if (square !== decoded) decoded.recycle()
+                    if (scaled !== square) square.recycle()
+                    val dir = java.io.File(context.filesDir, "avatars").apply { mkdirs() }
+                    dir.listFiles()?.forEach { it.delete() }
+                    val outFile = java.io.File(dir, "avatar-${System.currentTimeMillis()}.png")
+                    outFile.outputStream().use { scaled.compress(android.graphics.Bitmap.CompressFormat.PNG, 95, it) }
+                    scaled.recycle()
+                    outFile.absolutePath
+                }.getOrNull()
+            }
+            if (!savedPath.isNullOrBlank()) {
+                container.settings.setProfileAvatar(savedPath)
+            }
+        }
+    }
     val savePng = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("image/png")
     ) { uri ->
@@ -157,11 +187,19 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
                 exportingPng = exportingPng,
                 pngStatus = pngStatus,
                 onSaveName = { name -> scope.launch { container.settings.setProfileName(name) } },
-                onSaveProfile = { name, bio, avatar ->
+                onSaveProfile = { name, bio ->
                     scope.launch {
                         container.settings.setProfileName(name)
                         container.settings.setProfileBio(bio)
-                        container.settings.setProfileAvatar(avatar)
+                    }
+                },
+                onPickAvatar = { pickAvatar.launch("image/*") },
+                onRemoveAvatar = {
+                    scope.launch {
+                        withContext(Dispatchers.IO) {
+                            runCatching { java.io.File(context.filesDir, "avatars").deleteRecursively() }
+                        }
+                        container.settings.setProfileAvatar("")
                     }
                 },
                 onExportPng = {

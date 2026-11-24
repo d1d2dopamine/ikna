@@ -81,10 +81,10 @@ class StringsCatalogTest {
     }
 
     @Test
-    fun `the screen is called statistics in all three`() {
-        assertEquals("\u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430", STRINGS_RU["stats.001"])
-        assertEquals("Statistics", STRINGS_EN["stats.001"])
-        assertEquals("Statystyka", STRINGS_PL["stats.001"])
+    fun `the screen is called profile in all three`() {
+        assertEquals("\u041f\u0440\u043e\u0444\u0438\u043b\u044c", STRINGS_RU["stats.001"])
+        assertEquals("Profile", STRINGS_EN["stats.001"])
+        assertEquals("Profil", STRINGS_PL["stats.001"])
     }
 }
 

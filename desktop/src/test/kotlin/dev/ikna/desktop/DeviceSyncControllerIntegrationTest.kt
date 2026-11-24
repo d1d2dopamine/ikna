@@ -608,7 +608,7 @@ class DeviceSyncControllerIntegrationTest {
             a.enable(); b.enable(); pair(a, b)
             val operation = a.controller.state.value.profileConsent.operationId
             a.controller.setForeground(false); b.controller.setForeground(false)
-            val padding = "__TECHNICAL_DIAGNOSTIC_PADDING__".padEnd(4096, 'x')
+            val padding = "__TECHNICAL_DIAGNOSTIC_PADDING__".padEnd(16_384, 'x')
             val left = (0 until 1100).map { answer("paged-left-$it").copy(timingDiscardReason = padding) }
             val right = (0 until 17).map { answer("paged-right-$it") }
             a.repository.mergeJournal(left, a.controller.historyBoundary() ?: 0L, a.controller.boundaryToken())

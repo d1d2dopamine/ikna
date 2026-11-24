@@ -1,6 +1,7 @@
 package dev.ikna.ui.stats
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,14 +25,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -40,7 +41,6 @@ import dev.ikna.data.repo.ProfileDeckProgress
 import dev.ikna.data.repo.StudyStats
 import dev.ikna.ui.text.S
 import dev.ikna.ui.theme.IknaPalette
-import dev.ikna.ui.theme.IknaReadingCat
 import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaTextField
 import dev.ikna.ui.theme.IknaWideButton
@@ -55,12 +55,10 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
 
-val PROFILE_AVATAR_IDS: List<String> = listOf("cat", "monogram", "lattice", "rings", "prism", "waves")
-
 data class ProfileStatsCardData(
     val profileName: String,
     val profileBio: String = "",
-    val profileAvatar: String = "cat",
+    val profileAvatar: String = "",
     val headerText: String,
     val subtitle: String,
     val periodLabel: String,
@@ -123,17 +121,11 @@ internal fun formatStudyMinutes(minutes: Int): String = when {
     }
 }
 
-internal fun profileInitials(name: String): String {
-    val parts = name.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
-    return when {
-        parts.isEmpty() -> "IK"
-        parts.size == 1 -> parts[0].take(2).uppercase(Locale.ROOT)
-        else -> "${parts[0].first()}${parts[1].first()}".uppercase(Locale.ROOT)
-    }
-}
-
 /** Platform PNG renderer (1200x720) in the active Ikna palette. */
 expect fun renderProfileStatsCardPng(data: ProfileStatsCardData): ByteArray
+
+/** Loads a user-picked local avatar image file into a Compose ImageBitmap, or null if absent. */
+expect fun loadProfileAvatarBitmap(path: String): ImageBitmap?
 
 internal val PROFILE_CARD_EMBLEM: Array<String> = arrayOf(
     "###.#A",
@@ -151,7 +143,7 @@ fun buildProfileStatsCardData(
     palette: IknaPalette,
     paletteDisplayName: String,
     profileBio: String = "",
-    profileAvatar: String = "cat"
+    profileAvatar: String = ""
 ): ProfileStatsCardData {
     val period = snapshot.month
     val ins = snapshot.insights
@@ -161,7 +153,7 @@ fun buildProfileStatsCardData(
     return ProfileStatsCardData(
         profileName = profileName.trim().ifEmpty { S.t("prof.default_name") },
         profileBio = profileBio.trim(),
-        profileAvatar = profileAvatar.ifBlank { "cat" },
+        profileAvatar = profileAvatar.trim(),
         headerText = S.t("prof.card_header"),
         subtitle = "$paletteDisplayName · ${S.t("study.002")}",
         periodLabel = S.t("study.002"),
@@ -206,103 +198,65 @@ fun buildProfileStatsCardData(
 }
 
 /**
- * Vector avatar rendered in the active Ikna palette (zero external assets, works on Android & Desktop).
+ * Displays the user's custom local avatar photo, or a crisp '+' tile to pick one.
  */
 @Composable
 fun IknaProfileAvatar(
-    avatarId: String,
-    profileName: String,
-    size: Dp = 60.dp,
-    selected: Boolean = false,
+    avatarPath: String,
+    size: Dp = 64.dp,
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colorScheme
     val shape = iknaTileShape()
-    val borderColor = if (selected) colors.primary else colors.outline
-    val borderWidth = if (selected) 2.dp else 1.dp
+    val bitmap = remember(avatarPath) {
+        if (avatarPath.isBlank()) null else loadProfileAvatarBitmap(avatarPath)
+    }
 
     Box(
         modifier = modifier
             .size(size)
+            .clip(shape)
             .background(colors.background, shape)
-            .border(borderWidth, borderColor, shape),
+            .border(1.dp, if (bitmap != null) colors.outline else colors.primary.copy(alpha = 0.65f), shape),
         contentAlignment = Alignment.Center
     ) {
-        when (avatarId) {
-            "cat" -> IknaReadingCat(size = size * 0.86f, paper = colors.background)
-            "monogram" -> Text(
-                text = profileInitials(profileName),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = colors.primary
+        if (bitmap != null) {
+            Image(
+                bitmap = bitmap,
+                contentDescription = S.t("prof.pick_avatar"),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
             )
-            "lattice" -> Canvas(modifier = Modifier.fillMaxSize().padding(size * 0.18f)) {
-                val cell = minOf(this.size.width / 6f, this.size.height / 7f)
-                val gap = cell * 0.16f
-                val d = (cell - gap).coerceAtLeast(1f)
-                val ox = (this.size.width - cell * 6f) / 2f + gap / 2f
-                val oy = (this.size.height - cell * 7f) / 2f + gap / 2f
-                for (r in PROFILE_CARD_EMBLEM.indices) {
-                    val row = PROFILE_CARD_EMBLEM[r]
-                    for (c in row.indices) {
-                        val ch = row[c]
-                        if (ch == '.') continue
-                        drawRoundRect(
-                            color = if (ch == 'A') colors.primary else colors.onBackground,
-                            topLeft = Offset(ox + c * cell, oy + r * cell),
-                            size = Size(d, d),
-                            cornerRadius = CornerRadius(d * 0.2f, d * 0.2f)
-                        )
-                    }
-                }
-            }
-            "rings" -> Canvas(modifier = Modifier.fillMaxSize().padding(size * 0.16f)) {
-                val c = Offset(this.size.width / 2f, this.size.height / 2f)
-                val maxR = this.size.minDimension / 2f
-                drawCircle(colors.outline, radius = maxR, center = c, style = Stroke(width = 2.dp.toPx()))
-                drawCircle(colors.onBackground.copy(alpha = 0.7f), radius = maxR * 0.66f, center = c, style = Stroke(width = 2.dp.toPx()))
-                drawCircle(colors.primary, radius = maxR * 0.30f, center = c)
-            }
-            "prism" -> Canvas(modifier = Modifier.fillMaxSize().padding(size * 0.18f)) {
-                val w = this.size.width
-                val h = this.size.height
-                val outer = Path().apply {
-                    moveTo(w / 2f, 0f)
-                    lineTo(w, h / 2f)
-                    lineTo(w / 2f, h)
-                    lineTo(0f, h / 2f)
-                    close()
-                }
-                drawPath(outer, color = colors.onBackground.copy(alpha = 0.8f), style = Stroke(width = 2.dp.toPx()))
-                val inner = Path().apply {
-                    moveTo(w / 2f, h * 0.22f)
-                    lineTo(w * 0.78f, h / 2f)
-                    lineTo(w / 2f, h * 0.78f)
-                    lineTo(w * 0.22f, h / 2f)
-                    close()
-                }
-                drawPath(inner, color = colors.primary)
-            }
-            else -> Canvas(modifier = Modifier.fillMaxSize().padding(size * 0.18f)) {
-                val w = this.size.width
-                val h = this.size.height
-                val stroke = Stroke(width = 2.4.dp.toPx(), cap = StrokeCap.Round)
-                listOf(0.28f to colors.outline, 0.52f to colors.onBackground.copy(alpha = 0.8f), 0.76f to colors.primary).forEach { (yf, col) ->
-                    val p = Path().apply {
-                        moveTo(0f, h * yf)
-                        cubicTo(w * 0.33f, h * (yf - 0.18f), w * 0.66f, h * (yf + 0.18f), w, h * yf)
-                    }
-                    drawPath(p, color = col, style = stroke)
-                }
+        } else {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val cx = this.size.width / 2f
+                val cy = this.size.height / 2f
+                val arm = this.size.minDimension * 0.20f
+                val stroke = 2.4.dp.toPx()
+                drawLine(
+                    color = colors.primary,
+                    start = Offset(cx - arm, cy),
+                    end = Offset(cx + arm, cy),
+                    strokeWidth = stroke,
+                    cap = StrokeCap.Round
+                )
+                drawLine(
+                    color = colors.primary,
+                    start = Offset(cx, cy - arm),
+                    end = Offset(cx, cy + arm),
+                    strokeWidth = stroke,
+                    cap = StrokeCap.Round
+                )
             }
         }
     }
 }
 
 /**
- * Full local-only Profile & Deep Analytics dashboard at the top of Statistics.
- * Includes editable avatar, nickname, optional study focus, 4 key FSRS KPIs,
- * memory maturity breakdown, 12-week calm activity heatmap, 7-day workload forecast,
- * top decks progress, and 1-tap rich 1200x720 PNG snapshot export.
+ * Full local-only Profile & Deep Analytics dashboard.
+ * Custom photo avatar (+), nickname, optional study focus, 4 FSRS KPIs,
+ * memory maturity bar, 12-week activity heatmap, 7-day forecast, top decks,
+ * and 1-tap rich 1200x720 PNG snapshot export.
  */
 @Composable
 fun IknaLocalProfileCard(
@@ -315,8 +269,10 @@ fun IknaLocalProfileCard(
     onExportPng: (ProfileStatsCardData) -> Unit,
     modifier: Modifier = Modifier,
     profileBio: String = "",
-    profileAvatar: String = "cat",
-    onSaveProfile: ((name: String, bio: String, avatar: String) -> Unit)? = null
+    profileAvatar: String = "",
+    onSaveProfile: ((name: String, bio: String) -> Unit)? = null,
+    onPickAvatar: (() -> Unit)? = null,
+    onRemoveAvatar: (() -> Unit)? = null
 ) {
     val colors = MaterialTheme.colorScheme
     val palette = LocalIknaPalette.current
@@ -324,11 +280,10 @@ fun IknaLocalProfileCard(
     var editing by remember { mutableStateOf(false) }
     var draftName by remember(profileName) { mutableStateOf(profileName) }
     var draftBio by remember(profileBio) { mutableStateOf(profileBio) }
-    var draftAvatar by remember(profileAvatar) { mutableStateOf(profileAvatar.ifBlank { "cat" }) }
 
     val saveProfile = {
         if (onSaveProfile != null) {
-            onSaveProfile(draftName.trim(), draftBio.trim(), draftAvatar)
+            onSaveProfile(draftName.trim(), draftBio.trim())
         } else {
             onSaveName(draftName.trim())
         }
@@ -343,22 +298,15 @@ fun IknaLocalProfileCard(
             .padding(Space.md),
         verticalArrangement = Arrangement.spacedBy(Space.md)
     ) {
-        // 1. Profile Header
+        // 1. Profile Header with '+' custom photo avatar
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IknaProfileAvatar(
-                avatarId = if (editing) draftAvatar else profileAvatar.ifBlank { "cat" },
-                profileName = if (editing) draftName else profileName,
-                size = 62.dp,
-                selected = editing,
-                modifier = Modifier.clickable {
-                    draftName = profileName
-                    draftBio = profileBio
-                    draftAvatar = profileAvatar.ifBlank { "cat" }
-                    editing = !editing
-                }
+                avatarPath = profileAvatar,
+                size = 64.dp,
+                modifier = if (onPickAvatar != null) Modifier.clickable(onClick = onPickAvatar) else Modifier
             )
             Spacer(Modifier.width(Space.md))
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -389,13 +337,12 @@ fun IknaLocalProfileCard(
                 onClick = {
                     draftName = profileName
                     draftBio = profileBio
-                    draftAvatar = profileAvatar.ifBlank { "cat" }
                     editing = !editing
                 }
             )
         }
 
-        // 2. Inline Profile Editor (Avatar + Nickname + Bio)
+        // 2. Inline Profile Editor (Custom Photo + Nickname + Bio)
         if (editing) {
             Column(
                 modifier = Modifier
@@ -405,23 +352,23 @@ fun IknaLocalProfileCard(
                     .padding(Space.sm),
                 verticalArrangement = Arrangement.spacedBy(Space.sm)
             ) {
-                Text(
-                    text = S.t("prof.avatar_label"),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.onSurfaceVariant
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    PROFILE_AVATAR_IDS.forEach { id ->
-                        IknaProfileAvatar(
-                            avatarId = id,
-                            profileName = draftName,
-                            size = 44.dp,
-                            selected = draftAvatar == id,
-                            modifier = Modifier.clickable { draftAvatar = id }
+                if (onPickAvatar != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IknaTextButton(
+                            label = S.t("prof.pick_avatar"),
+                            onClick = onPickAvatar
                         )
+                        if (profileAvatar.isNotBlank() && onRemoveAvatar != null) {
+                            IknaTextButton(
+                                label = S.t("prof.remove_avatar"),
+                                color = colors.onSurfaceVariant,
+                                onClick = onRemoveAvatar
+                            )
+                        }
                     }
                 }
                 IknaTextField(
@@ -461,7 +408,6 @@ fun IknaLocalProfileCard(
             val paceSuffix = if (ins.medianSecPerCard30d > 0) " · ${ins.medianSecPerCard30d}s" else ""
             val avgStabText = if (ins.avgStabilityDays >= 1.0) " · ~${ins.avgStabilityDays.roundToInt()}d" else ""
 
-            // 2x2 KPI Grid
             Column(verticalArrangement = Arrangement.spacedBy(Space.sm)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -556,7 +502,7 @@ fun IknaLocalProfileCard(
                 }
             }
 
-            // 12-Week Calm Activity Heatmap (84 days, zero streak pressure)
+            // 12-Week Calm Activity Heatmap (84 days)
             if (ins.dailyActivity84d.size == 84) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(
@@ -713,7 +659,6 @@ fun IknaLocalProfileCard(
                 }
             }
 
-            // 4. Rich PNG Snapshot Export
             IknaWideButton(
                 label = S.t("prof.download_png"),
                 enabled = !exportingPng,

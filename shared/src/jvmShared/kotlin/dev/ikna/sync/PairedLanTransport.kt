@@ -429,8 +429,8 @@ class PairedLanTransport(
     private fun publish() { runCatching { onStatus(status) } }
 
     companion object {
-        const val MAX_PAYLOAD = 32 * 1024 * 1024
-        const val MAX_FRAME = 48 * 1024 * 1024
+        const val MAX_PAYLOAD = 16 * 1024 * 1024
+        const val MAX_FRAME = 24 * 1024 * 1024
         const val MAX_PEERS = 4
         const val COMPACT_INVITATION_PREFIX = "ikna-pair:1:"
         private const val SOCKET_MS = 5_000
@@ -530,7 +530,28 @@ class PairedLanTransport(
             require(value.expiresAtMillis > System.currentTimeMillis() && value.expiresAtMillis <= System.currentTimeMillis() + INVITATION_MS + 30_000)
             return value
         }
-        fun localAddresses(): List<String> = Collections.list(NetworkInterface.getNetworkInterfaces()).flatMap { Collections.list(it.inetAddresses) }
-            .mapNotNull { it.hostAddress }.filter { !it.startsWith("127.") && runCatching { LanSyncSecurity.address(it) }.isSuccess }.distinct().sorted()
+        fun localAddresses(): List<String> {
+            val ifaces = runCatching { Collections.list(NetworkInterface.getNetworkInterfaces()) }.getOrDefault(emptyList())
+            return ifaces
+                .filter { runCatching { it.isUp && !it.isLoopback }.getOrDefault(true) }
+                .flatMap { Collections.list(it.inetAddresses) }
+                .mapNotNull { it.hostAddress }
+                .filter { !it.startsWith("127.") && runCatching { LanSyncSecurity.address(it) }.isSuccess }
+                .distinct()
+                .sortedWith(
+                    compareBy<String>(
+                        // Prefer typical home/office Wi-Fi subnets (192.168.x.x) over virtual/WSL/VPN bridges (172.x.x.x).
+                        { ip ->
+                            when {
+                                ip.startsWith("192.168.") -> 0
+                                ip.startsWith("10.") -> 1
+                                ip.startsWith("172.") -> 2
+                                else -> 3
+                            }
+                        },
+                        { it }
+                    )
+                )
+        }
     }
 }

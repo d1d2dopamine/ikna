@@ -361,7 +361,7 @@ class ProfileConsentProtocol(
         fun tupleDigest(proposal: Proposal): String = ProfileTransferCodec.digest(
             Json { encodeDefaults = true }.encodeToString(proposal).toByteArray(Charsets.UTF_8))
         const val TTL_MILLIS = 10 * 60 * 1000L
-        const val MAX_BYTES = 32 * 1024 * 1024
+        const val MAX_BYTES = 16 * 1024 * 1024
         private val HEX = Regex("[a-f0-9]{64}")
         private val ID = Regex("[A-Za-z0-9:_-]{1,128}")
     }

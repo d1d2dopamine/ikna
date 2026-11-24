@@ -296,7 +296,7 @@ data class IknaSettings(
     /** Optional local-only profile display name. Empty by default; never sent anywhere. */
     val profileName: String = "",
     val profileBio: String = "",
-    val profileAvatar: String = "cat"
+    val profileAvatar: String = ""
 )
 
 class SettingsStore(private val store: DataStore<Preferences>) {
@@ -621,9 +621,8 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         it[Keys.profileBio] = bio.trim().take(80)
     }
 
-    suspend fun setProfileAvatar(avatarId: String) = put {
-        val clean = avatarId.trim().lowercase().take(24)
-        it[Keys.profileAvatar] = clean.ifEmpty { "cat" }
+    suspend fun setProfileAvatar(avatarPath: String) = put {
+        it[Keys.profileAvatar] = avatarPath.trim().take(512)
     }
 
     /**

@@ -1,18 +1,24 @@
 package dev.ikna.ui.stats
 
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.toComposeImageBitmap
 import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.Font
 import java.awt.Graphics2D
 import java.awt.RenderingHints
-import java.awt.geom.CubicCurve2D
-import java.awt.geom.Ellipse2D
-import java.awt.geom.Path2D
 import java.awt.geom.RoundRectangle2D
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
+import java.io.File
 import javax.imageio.ImageIO
 import kotlin.math.roundToInt
+
+actual fun loadProfileAvatarBitmap(path: String): ImageBitmap? = runCatching {
+    val file = File(path)
+    if (!file.isFile) return null
+    ImageIO.read(file)?.toComposeImageBitmap()
+}.getOrNull()
 
 actual fun renderProfileStatsCardPng(data: ProfileStatsCardData): ByteArray {
     val w = 1200
@@ -261,79 +267,47 @@ private fun drawDesktopAvatarBadge(
     val rr = RoundRectangle2D.Float(x, y, size, size, 14f, 14f)
     g.color = panel
     g.fill(rr)
+
+    val customImg = data.profileAvatar.takeIf { it.isNotBlank() }?.let { path ->
+        runCatching {
+            val f = File(path)
+            if (f.isFile) ImageIO.read(f) else null
+        }.getOrNull()
+    }
+    if (customImg != null) {
+        val oldClip = g.clip
+        g.clip = rr
+        val side = minOf(customImg.width, customImg.height)
+        val sx = (customImg.width - side) / 2
+        val sy = (customImg.height - side) / 2
+        g.drawImage(
+            customImg,
+            x.toInt(), y.toInt(), (x + size).toInt(), (y + size).toInt(),
+            sx, sy, sx + side, sy + side,
+            null
+        )
+        g.clip = oldClip
+        g.color = withAlpha(line, 180)
+        g.stroke = BasicStroke(1.6f)
+        g.draw(rr)
+        return
+    }
+
     g.color = withAlpha(line, 180)
     g.stroke = BasicStroke(1.6f)
     g.draw(rr)
 
-    when (data.profileAvatar) {
-        "monogram" -> {
-            g.font = sansSemi.deriveFont(30f)
-            g.color = accent
-            val initials = profileInitials(data.profileName)
-            val fm = g.fontMetrics
-            val tx = x + (size - fm.stringWidth(initials)) / 2f
-            val ty = y + (size - fm.height) / 2f + fm.ascent
-            g.drawString(initials, tx, ty)
-        }
-        "rings" -> {
-            val cx = x + size / 2f
-            val cy = y + size / 2f
-            g.stroke = BasicStroke(2.6f)
-            g.color = withAlpha(line, 210)
-            val r1 = size * 0.34f
-            g.draw(Ellipse2D.Float(cx - r1, cy - r1, r1 * 2, r1 * 2))
-            g.color = withAlpha(ink, 190)
-            val r2 = size * 0.22f
-            g.draw(Ellipse2D.Float(cx - r2, cy - r2, r2 * 2, r2 * 2))
-            g.color = accent
-            val r3 = size * 0.10f
-            g.fill(Ellipse2D.Float(cx - r3, cy - r3, r3 * 2, r3 * 2))
-        }
-        "prism" -> {
-            val cx = x + size / 2f
-            val cy = y + size / 2f
-            val r = size * 0.32f
-            val outer = Path2D.Float().apply {
-                moveTo(cx, cy - r); lineTo(cx + r, cy); lineTo(cx, cy + r); lineTo(cx - r, cy); closePath()
-            }
-            g.stroke = BasicStroke(2.6f)
-            g.color = withAlpha(ink, 200)
-            g.draw(outer)
-            val ir = size * 0.17f
-            val inner = Path2D.Float().apply {
-                moveTo(cx, cy - ir); lineTo(cx + ir, cy); lineTo(cx, cy + ir); lineTo(cx - ir, cy); closePath()
-            }
-            g.color = accent
-            g.fill(inner)
-        }
-        "waves" -> {
-            g.stroke = BasicStroke(3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
-            listOf(0.32f to withAlpha(line, 210), 0.50f to withAlpha(ink, 200), 0.68f to accent).forEach { (yf, col) ->
-                g.color = col
-                g.draw(
-                    CubicCurve2D.Float(
-                        x + size * 0.2f, y + size * yf,
-                        x + size * 0.4f, y + size * (yf - 0.12f),
-                        x + size * 0.6f, y + size * (yf + 0.12f),
-                        x + size * 0.8f, y + size * yf
-                    )
-                )
-            }
-        }
-        else -> {
-            val pad = size * 0.20f
-            val cell = (size - pad * 2f) / 7f
-            val ox = x + (size - cell * 6f) / 2f
-            val oy = y + (size - cell * 7f) / 2f
-            for (r in PROFILE_CARD_EMBLEM.indices) {
-                val row = PROFILE_CARD_EMBLEM[r]
-                for (c in row.indices) {
-                    val ch = row[c]
-                    if (ch == '.') continue
-                    g.color = if (ch == 'A') accent else ink
-                    g.fill(RoundRectangle2D.Float(ox + c * cell, oy + r * cell, cell - 1.5f, cell - 1.5f, 2f, 2f))
-                }
-            }
+    val pad = size * 0.20f
+    val cell = (size - pad * 2f) / 7f
+    val ox = x + (size - cell * 6f) / 2f
+    val oy = y + (size - cell * 7f) / 2f
+    for (r in PROFILE_CARD_EMBLEM.indices) {
+        val row = PROFILE_CARD_EMBLEM[r]
+        for (c in row.indices) {
+            val ch = row[c]
+            if (ch == '.') continue
+            g.color = if (ch == 'A') accent else ink
+            g.fill(RoundRectangle2D.Float(ox + c * cell, oy + r * cell, cell - 1.5f, cell - 1.5f, 2f, 2f))
         }
     }
 }

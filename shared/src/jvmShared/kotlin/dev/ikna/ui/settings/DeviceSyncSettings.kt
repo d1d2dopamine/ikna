@@ -82,6 +82,8 @@ internal fun deviceSyncError(code: String): DeviceSyncError = when (code) {
     "profile-too-large", "payload_too_large" -> DeviceSyncError.PROFILE_TOO_LARGE
     "adoption-recovery-required" -> DeviceSyncError.ADOPTION
     "history-mismatch" -> DeviceSyncError.HISTORY_MISMATCH
+    "expired_invitation" -> DeviceSyncError.EXPIRED_INVITATION
+    "invalid_invitation" -> DeviceSyncError.INVALID_INVITATION
     "connection_failed" -> DeviceSyncError.NETWORK
     "unavailable" -> DeviceSyncError.UNAVAILABLE
     else -> DeviceSyncError.MERGE_FAILED

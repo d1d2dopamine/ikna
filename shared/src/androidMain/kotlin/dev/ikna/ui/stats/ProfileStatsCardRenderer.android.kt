@@ -1,14 +1,25 @@
 package dev.ikna.ui.stats
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import java.io.ByteArrayOutputStream
+import java.io.File
 import kotlin.math.roundToInt
+
+actual fun loadProfileAvatarBitmap(path: String): ImageBitmap? = runCatching {
+    val file = File(path)
+    if (!file.isFile) return null
+    BitmapFactory.decodeFile(file.absolutePath)?.asImageBitmap()
+}.getOrNull()
 
 actual fun renderProfileStatsCardPng(data: ProfileStatsCardData): ByteArray {
     val w = 1200
@@ -278,77 +289,46 @@ private fun drawAndroidAvatarBadge(
     val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 2f; color = withAlpha(line, 180) }
     val rect = RectF(x, y, x + size, y + size)
     canvas.drawRoundRect(rect, 14f, 14f, fill)
-    canvas.drawRoundRect(rect, 14f, 14f, stroke)
 
-    when (data.profileAvatar) {
-        "monogram" -> {
-            val tp = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
-                textSize = 30f
-                color = accent
-                textAlign = Paint.Align.CENTER
-            }
-            val fm = tp.fontMetrics
-            canvas.drawText(profileInitials(data.profileName), x + size / 2f, y + size / 2f - (fm.ascent + fm.descent) / 2f, tp)
+    val customBitmap = data.profileAvatar.takeIf { it.isNotBlank() }?.let { path ->
+        runCatching {
+            val f = File(path)
+            if (f.isFile) BitmapFactory.decodeFile(f.absolutePath) else null
+        }.getOrNull()
+    }
+    if (customBitmap != null) {
+        try {
+            val clipPath = Path().apply { addRoundRect(rect, 14f, 14f, Path.Direction.CW) }
+            canvas.save()
+            canvas.clipPath(clipPath)
+            val side = minOf(customBitmap.width, customBitmap.height)
+            val sx = (customBitmap.width - side) / 2
+            val sy = (customBitmap.height - side) / 2
+            val src = Rect(sx, sy, sx + side, sy + side)
+            canvas.drawBitmap(customBitmap, src, rect, Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG))
+            canvas.restore()
+        } finally {
+            customBitmap.recycle()
         }
-        "rings" -> {
-            val cx = x + size / 2f
-            val cy = y + size / 2f
-            stroke.strokeWidth = 3f
-            stroke.color = withAlpha(line, 210)
-            canvas.drawCircle(cx, cy, size * 0.34f, stroke)
-            stroke.color = withAlpha(ink, 190)
-            canvas.drawCircle(cx, cy, size * 0.22f, stroke)
-            fill.color = accent
-            canvas.drawCircle(cx, cy, size * 0.10f, fill)
-        }
-        "prism" -> {
-            val cx = x + size / 2f
-            val cy = y + size / 2f
-            val r = size * 0.32f
-            val outer = Path().apply {
-                moveTo(cx, cy - r); lineTo(cx + r, cy); lineTo(cx, cy + r); lineTo(cx - r, cy); close()
-            }
-            stroke.strokeWidth = 3f
-            stroke.color = withAlpha(ink, 200)
-            canvas.drawPath(outer, stroke)
-            val ir = size * 0.17f
-            val inner = Path().apply {
-                moveTo(cx, cy - ir); lineTo(cx + ir, cy); lineTo(cx, cy + ir); lineTo(cx - ir, cy); close()
-            }
-            fill.color = accent
-            canvas.drawPath(inner, fill)
-        }
-        "waves" -> {
-            stroke.strokeWidth = 3.5f
-            stroke.strokeCap = Paint.Cap.ROUND
-            listOf(0.32f to withAlpha(line, 210), 0.50f to withAlpha(ink, 200), 0.68f to accent).forEach { (yf, col) ->
-                stroke.color = col
-                val p = Path().apply {
-                    moveTo(x + size * 0.2f, y + size * yf)
-                    cubicTo(x + size * 0.4f, y + size * (yf - 0.12f), x + size * 0.6f, y + size * (yf + 0.12f), x + size * 0.8f, y + size * yf)
-                }
-                canvas.drawPath(p, stroke)
-            }
-        }
-        else -> {
-            // Ikna pixel emblem (for "lattice" and "cat" fallback)
-            val pad = size * 0.20f
-            val cell = (size - pad * 2f) / 7f
-            val ox = x + (size - cell * 6f) / 2f
-            val oy = y + (size - cell * 7f) / 2f
-            for (r in PROFILE_CARD_EMBLEM.indices) {
-                val row = PROFILE_CARD_EMBLEM[r]
-                for (c in row.indices) {
-                    val ch = row[c]
-                    if (ch == '.') continue
-                    fill.color = if (ch == 'A') accent else ink
-                    canvas.drawRoundRect(
-                        RectF(ox + c * cell, oy + r * cell, ox + (c + 1) * cell - 1.5f, oy + (r + 1) * cell - 1.5f),
-                        2f, 2f, fill
-                    )
-                }
-            }
+        canvas.drawRoundRect(rect, 14f, 14f, stroke)
+        return
+    }
+
+    canvas.drawRoundRect(rect, 14f, 14f, stroke)
+    val pad = size * 0.20f
+    val cell = (size - pad * 2f) / 7f
+    val ox = x + (size - cell * 6f) / 2f
+    val oy = y + (size - cell * 7f) / 2f
+    for (r in PROFILE_CARD_EMBLEM.indices) {
+        val row = PROFILE_CARD_EMBLEM[r]
+        for (c in row.indices) {
+            val ch = row[c]
+            if (ch == '.') continue
+            fill.color = if (ch == 'A') accent else ink
+            canvas.drawRoundRect(
+                RectF(ox + c * cell, oy + r * cell, ox + (c + 1) * cell - 1.5f, oy + (r + 1) * cell - 1.5f),
+                2f, 2f, fill
+            )
         }
     }
 }

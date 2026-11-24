@@ -592,18 +592,25 @@ class DeviceSyncController(
             catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
             catch (error: Exception) {
                 // No invitation, credential, peer data or raw exception is logged/displayed.
-                val safe = if (error is UnsupportedSyncProtocolException) "unsupported_sync_protocol"
-                else if (error is dev.ikna.data.export.JournalReconciliationRequiredException) "journal_reconciliation_required"
-                else if (error is dev.ikna.data.export.IncrementalJournalLimitException) "journal_item_too_large"
-                else if (error is dev.ikna.data.export.ProfileTransferLimitException) "profile-too-large" else when (error.message) {
-                    "history-mismatch", "fresh-history-reset-required", "reset-required", "history-blocked" -> "history-mismatch"
-                    "adoption-not-supported", "awaiting-profile", "profile-conflict-or-stale", "proposal-pending",
-                    "single-peer-required", "profile-too-large", "proposal-expired", "stale-proposal" -> error.message!!
+                val safe = when {
+                    error is UnsupportedSyncProtocolException -> "unsupported_sync_protocol"
+                    error is dev.ikna.data.export.JournalReconciliationRequiredException -> "journal_reconciliation_required"
+                    error is dev.ikna.data.export.IncrementalJournalLimitException -> "journal_item_too_large"
+                    error is dev.ikna.data.export.ProfileTransferLimitException -> "profile-too-large"
+                    error is java.io.IOException -> "connection_failed"
+                    error.message?.contains("expired", ignoreCase = true) == true -> "expired_invitation"
+                    error.message in setOf(
+                        "history-mismatch", "fresh-history-reset-required", "reset-required", "history-blocked"
+                    ) -> "history-mismatch"
+                    error.message in setOf(
+                        "adoption-not-supported", "awaiting-profile", "profile-conflict-or-stale", "proposal-pending",
+                        "single-peer-required", "profile-too-large", "proposal-expired", "stale-proposal"
+                    ) -> error.message!!
                     else -> "operation-failed"
                 }
                 publish(safe)
             }
         }
     }
-    companion object { const val MAX_BYTES = 32 * 1024 * 1024; const val MAX_RECORDS = 500_000 }
+    companion object { const val MAX_BYTES = 16 * 1024 * 1024; const val MAX_RECORDS = 150_000 }
 }

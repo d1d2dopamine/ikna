@@ -69,11 +69,55 @@ fun StatsPane(
             exportingPng = exportingPng,
             pngStatus = pngStatus,
             onSaveName = { name -> scope.launch { container.settings.setProfileName(name) } },
-            onSaveProfile = { name, bio, avatar ->
+            onSaveProfile = { name, bio ->
                 scope.launch {
                     container.settings.setProfileName(name)
                     container.settings.setProfileBio(bio)
-                    container.settings.setProfileAvatar(avatar)
+                }
+            },
+            onPickAvatar = {
+                val chooser = JFileChooser().apply {
+                    fileFilter = javax.swing.filechooser.FileNameExtensionFilter("Images", "png", "jpg", "jpeg", "bmp", "gif")
+                }
+                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    val src = chooser.selectedFile
+                    scope.launch {
+                        val savedPath = withContext(Dispatchers.IO) {
+                            runCatching {
+                                val loaded = javax.imageio.ImageIO.read(src) ?: return@runCatching null
+                                val side = minOf(loaded.width, loaded.height)
+                                val sx = (loaded.width - side) / 2
+                                val sy = (loaded.height - side) / 2
+                                val scaled = java.awt.image.BufferedImage(256, 256, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+                                val g = scaled.createGraphics()
+                                try {
+                                    g.setRenderingHint(
+                                        java.awt.RenderingHints.KEY_INTERPOLATION,
+                                        java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR
+                                    )
+                                    g.drawImage(loaded, 0, 0, 256, 256, sx, sy, sx + side, sy + side, null)
+                                } finally {
+                                    g.dispose()
+                                }
+                                val dir = File(System.getProperty("user.home"), ".ikna/avatars").apply { mkdirs() }
+                                dir.listFiles()?.forEach { it.delete() }
+                                val outFile = File(dir, "avatar-${System.currentTimeMillis()}.png")
+                                javax.imageio.ImageIO.write(scaled, "png", outFile)
+                                outFile.absolutePath
+                            }.getOrNull()
+                        }
+                        if (!savedPath.isNullOrBlank()) {
+                            container.settings.setProfileAvatar(savedPath)
+                        }
+                    }
+                }
+            },
+            onRemoveAvatar = {
+                scope.launch {
+                    withContext(Dispatchers.IO) {
+                        runCatching { File(System.getProperty("user.home"), ".ikna/avatars").deleteRecursively() }
+                    }
+                    container.settings.setProfileAvatar("")
                 }
             },
             onExportPng = { cardData ->
