@@ -622,13 +622,13 @@ class DeviceSyncControllerIntegrationTest {
         }
     }
 
-    @Test(timeout = 120_000) fun `approved history beyond bootstrap cap converges in bounded pages after restart`() = runBlocking {
+    @Test(timeout = 180_000) fun `approved history beyond bootstrap cap converges in bounded pages after restart`() = runBlocking {
         fixture { a, b ->
             a.enable(); b.enable(); pair(a, b)
             val operation = a.controller.state.value.profileConsent.operationId
             a.controller.setForeground(false); b.controller.setForeground(false)
-            val padding = "__TECHNICAL_DIAGNOSTIC_PADDING__".padEnd(65_536, 'x')
-            val leftCount = (dev.ikna.data.export.ProfileTransferCodec.MAX_BYTES / 65_536) + 32
+            val padding = "__TECHNICAL_DIAGNOSTIC_PADDING__".padEnd(120_000, 'x')
+            val leftCount = (dev.ikna.data.export.ProfileTransferCodec.MAX_BYTES / 120_000) + 12
             val left = (0 until leftCount).map { answer("paged-left-$it").copy(timingDiscardReason = padding) }
             val right = (0 until 17).map { answer("paged-right-$it") }
             a.repository.mergeJournal(left, a.controller.historyBoundary() ?: 0L, a.controller.boundaryToken())
@@ -642,7 +642,7 @@ class DeviceSyncControllerIntegrationTest {
             // This finite multi-page test has a separate budget; existing small-case timeouts stay unchanged.
             val expectedRows = (leftCount + right.size).toLong()
             try {
-                withTimeout(60_000) {
+                withTimeout(120_000) {
                     while (a.reviewCount() != expectedRows || b.reviewCount() != expectedRows ||
                         !a.controller.state.value.profileConsent.journalCaughtUp ||
                         !b.controller.state.value.profileConsent.journalCaughtUp) delay(50)

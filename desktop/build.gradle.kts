@@ -183,6 +183,9 @@ tasks.register<JavaExec>("studyMigrationReference") {
 // Match the Linux AppRun linker contract before Compose/Skiko native loading.
 // The Compose fixture opens bundled SQLite first, just like Main.kt startup.
 tasks.withType<Test>().configureEach {
+    // ProfileTransferResourceSafetyTest and ProfileTransferIntegrationTest exercise the 48 MiB
+    // profile transfer cap (including UTF-16 JSON expansion), which exceeds Gradle's 512m default.
+    maxHeapSize = "1536m"
     if (System.getProperty("os.name").startsWith("Linux", ignoreCase = true)) {
         environment("LD_BIND_NOW", "1")
     }
