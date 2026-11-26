@@ -759,4 +759,12 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "sync.profile.joiner_applying" to "Auswahl von {device} wird angewendet. Lasse Ikna geöffnet.",
     "sync.profile.choose_merge" to "Beide Geräte zusammenführen",
     "sync.profile.inviter_applying" to "Auswahl an {device} gesendet. Synchronisierung läuft...",
+    "sync.profile.device_summary" to "{device}: {decks} Decks · {targets} Karten · {events} Antworten",
+    "sync.profile.incoming_summary" to "Neu auf {device}: +{decks} Decks · +{targets} Karten · +{events} Antworten",
+    "sync.profile.outgoing_summary" to "Gesendet an {device}: +{decks} Decks · +{targets} Karten · +{events} Antworten",
+    "sync.profile.already_equal" to "Decks und Verlauf stimmen auf beiden Geräten bereits überein.",
+    "sync.log_show" to "PROTOKOLL ANZEIGEN ({count})",
+    "sync.log_hide" to "PROTOKOLL AUSBLENDEN ({count})",
+    "sync.log_copy" to "PROTOKOLL KOPIEREN",
+    "sync.log_copied" to "PROTOKOLL KOPIERT",
 )

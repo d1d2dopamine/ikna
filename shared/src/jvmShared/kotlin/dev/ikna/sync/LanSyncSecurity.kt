@@ -35,6 +35,11 @@ internal object LanSyncSecurity {
             .generateCertificate(pem.byteInputStream()) as X509Certificate
     }
 
+    fun encodeCertificatePem(cert: X509Certificate): String {
+        val body = Base64.getMimeEncoder(64, "\n".toByteArray()).encodeToString(cert.encoded)
+        return "-----BEGIN CERTIFICATE-----\n$body\n-----END CERTIFICATE-----\n"
+    }
+
     fun id(cert: X509Certificate): String = MessageDigest.getInstance("SHA-256")
         .digest(cert.encoded).joinToString("") { "%02x".format(it) }
 
@@ -52,7 +57,11 @@ internal object LanSyncSecurity {
 
     fun writePrivate(file: File, value: String) = privateFiles.write(file, value)
 
-    fun context(identity: HeldCertificate, pin: X509Certificate? = null): SSLContext {
+    fun context(
+        identity: HeldCertificate,
+        pin: X509Certificate? = null,
+        pinFingerprint: String? = null,
+    ): SSLContext {
         val store = KeyStore.getInstance(KeyStore.getDefaultType()).apply {
             load(null)
             setKeyEntry("device", identity.keyPair.private, CharArray(0), arrayOf(identity.certificate))
@@ -66,7 +75,12 @@ internal object LanSyncSecurity {
                 throw java.security.cert.CertificateException("Client certificates are not used")
             }
             override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {
-                if (pin == null || chain.size != 1 || !MessageDigest.isEqual(pin.encoded, chain[0].encoded)) {
+                if (chain.size != 1) {
+                    throw java.security.cert.CertificateException("Unpaired certificate")
+                }
+                val certMatches = pin != null && MessageDigest.isEqual(pin.encoded, chain[0].encoded)
+                val pinMatches = pinFingerprint != null && equal(pinFingerprint, id(chain[0]))
+                if (!certMatches && !pinMatches) {
                     throw java.security.cert.CertificateException("Unpaired certificate")
                 }
                 chain[0].checkValidity()

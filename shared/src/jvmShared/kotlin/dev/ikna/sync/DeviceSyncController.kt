@@ -80,6 +80,11 @@ class DeviceSyncController(
         CONFIRMING_PROFILE,
         SYNCING_JOURNAL,
     }
+    data class SyncLogEntry(
+        val timestampMillis: Long,
+        val isError: Boolean,
+        val message: String,
+    )
     @Serializable private data class Journal(val version: Int = 1, val records: List<ReviewRecord>)
     data class State(
         val enabled: Boolean = false, val running: Boolean = false, val peers: Int = 0,
@@ -94,6 +99,7 @@ class DeviceSyncController(
         val stageAttempt: Int = 0,
         val stageTotal: Int = 0,
         val peerRole: PairedLanTransport.PeerRole = PairedLanTransport.PeerRole.UNKNOWN,
+        val logs: List<SyncLogEntry> = emptyList(),
     ) {
         override fun toString(): String = "State(enabled=$enabled, running=$running, peers=$peers, blocked=$blocked, error=$error, stage=$stage, invitation=<redacted>)"
     }
@@ -112,8 +118,27 @@ class DeviceSyncController(
     @Volatile private var transport: PairedLanTransport? = null
     @Volatile private var permitted = false
     private val journalErrors = JournalErrorLatch()
+    private val logGate = Any()
+    private val logEntries = ArrayDeque<SyncLogEntry>()
     private val mutable = MutableStateFlow(State())
     val state: StateFlow<State> = mutable.asStateFlow()
+
+    /** Records a secret-free diagnostic line in memory so sync failures are never a black box. */
+    private fun recordLog(message: String, isError: Boolean = false) {
+        val clean = message.trim().replace(Regex("[\\r\\n]+"), " ").take(180)
+        if (clean.isEmpty()) return
+        val snapshot = synchronized(logGate) {
+            val last = logEntries.lastOrNull()
+            if (last != null && last.message == clean && last.isError == isError &&
+                System.currentTimeMillis() - last.timestampMillis < 2_000L) {
+                return
+            }
+            logEntries.addLast(SyncLogEntry(System.currentTimeMillis(), isError, clean))
+            while (logEntries.size > MAX_LOG_ENTRIES) logEntries.removeFirst()
+            logEntries.toList()
+        }
+        mutable.update { it.copy(logs = snapshot) }
+    }
 
     @Synchronized private fun load() {
         if (loaded) return
@@ -173,7 +198,8 @@ class DeviceSyncController(
             stage = stage,
             stageAttempt = activity.attempt,
             stageTotal = activity.total,
-            peerRole = peerRole) }
+            peerRole = peerRole,
+            logs = synchronized(logGate) { logEntries.toList() }) }
     }
 
     private fun computeStage(
@@ -234,7 +260,8 @@ class DeviceSyncController(
                 publish()
             }
         }, onStatus = { publish() }, intervalMillis = intervalMillis,
-        directLanSocketFactory = directLanSocketFactory
+        directLanSocketFactory = directLanSocketFactory,
+        onLog = { message, isError -> recordLog(message, isError) }
     ).also { transport = it }
 
     private fun journalAuthorization(operationId: String, digest: String, peerId: String = instance().status.peers.single().id): JournalAuthorization {
@@ -377,6 +404,7 @@ class DeviceSyncController(
         autoAcceptFromInviter = {
             transport?.status?.peers?.singleOrNull()?.role == PairedLanTransport.PeerRole.JOINER
         },
+        onLog = { message, isError -> recordLog(message, isError) },
     ).also { protocol = it }
 
     suspend fun proposeMerge(peerId: String) = action {
@@ -744,9 +772,14 @@ class DeviceSyncController(
                     ) -> error.message!!
                     else -> "operation-failed"
                 }
+                recordLog("Action failed: $safe (${error.javaClass.simpleName})", isError = true)
                 publish(safe)
             }
         }
     }
-    companion object { const val MAX_BYTES = 16 * 1024 * 1024; const val MAX_RECORDS = 200_000 }
+    companion object {
+        const val MAX_BYTES = 16 * 1024 * 1024
+        const val MAX_RECORDS = 200_000
+        private const val MAX_LOG_ENTRIES = 30
+    }
 }

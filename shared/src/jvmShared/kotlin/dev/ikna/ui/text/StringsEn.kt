@@ -1394,4 +1394,12 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "sync.profile.joiner_applying" to "Applying the choice made on {device}. Keep Ikna open.",
     "sync.profile.choose_merge" to "Merge both devices",
     "sync.profile.inviter_applying" to "Choice sent to {device}. Syncing...",
+    "sync.profile.device_summary" to "{device}: {decks} decks · {targets} cards · {events} answers",
+    "sync.profile.incoming_summary" to "Added to {device}: +{decks} decks · +{targets} cards · +{events} answers",
+    "sync.profile.outgoing_summary" to "Sent to {device}: +{decks} decks · +{targets} cards · +{events} answers",
+    "sync.profile.already_equal" to "Decks and history already match on both devices.",
+    "sync.log_show" to "SHOW LOG ({count})",
+    "sync.log_hide" to "HIDE LOG ({count})",
+    "sync.log_copy" to "COPY LOG",
+    "sync.log_copied" to "LOG COPIED",
 )

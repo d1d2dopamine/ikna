@@ -40,4 +40,15 @@ class QrCodeEncoderTest {
             QrCodeEncoder.encode("")
         }
     }
+
+    @Test
+    fun levelMEncodesCompactV2PayloadIntoSmallCrispMatrix() {
+        val sample = "ikna-pair:2:eJyrVkrLz1eyUsoqTVWyUqqOUUqvVNKpqQUAU0gHfQ"
+        val matrixM = QrCodeEncoder.encode(sample, QrErrorCorrection.M)
+        val matrixH = QrCodeEncoder.encode(sample, QrErrorCorrection.H)
+        assertTrue(matrixM.size in 21..177)
+        assertTrue(matrixM.size <= matrixH.size, "Level M should be at least as compact as Level H")
+        assertTrue(matrixM[0, 0] && matrixM[6, 6] && !matrixM[1, 1] && matrixM[3, 3])
+        assertTrue(matrixM[matrixM.size - 4, 3] && matrixM[3, matrixM.size - 4])
+    }
 }

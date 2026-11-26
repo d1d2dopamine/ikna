@@ -1394,4 +1394,12 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "sync.profile.joiner_applying" to "Stosowanie wyboru z {device}. Nie zamykaj Ikna.",
     "sync.profile.choose_merge" to "Połącz oba urządzenia",
     "sync.profile.inviter_applying" to "Wybór wysłany do {device}. Trwa synchronizacja...",
+    "sync.profile.device_summary" to "{device}: {decks} talii · {targets} kart · {events} odpowiedzi",
+    "sync.profile.incoming_summary" to "Dodane na {device}: +{decks} talii · +{targets} kart · +{events} odpowiedzi",
+    "sync.profile.outgoing_summary" to "Wysłane na {device}: +{decks} talii · +{targets} kart · +{events} odpowiedzi",
+    "sync.profile.already_equal" to "Talie i historia już zgadzają się na obu urządzeniach.",
+    "sync.log_show" to "POKAŻ DZIENNIK ({count})",
+    "sync.log_hide" to "UKRYJ DZIENNIK ({count})",
+    "sync.log_copy" to "KOPIUJ DZIENNIK",
+    "sync.log_copied" to "DZIENNIK SKOPIOWANY",
 )

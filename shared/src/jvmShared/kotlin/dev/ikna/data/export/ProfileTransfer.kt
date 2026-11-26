@@ -27,7 +27,16 @@ data class ProfileMergePreview(
     val addedTargets: Int,
     val addedReviews: Int,
     val conflicts: List<String>,
-    val canAdopt: Boolean = conflicts.isEmpty()
+    val canAdopt: Boolean = conflicts.isEmpty(),
+    val localPacks: Int = 0,
+    val localTargets: Int = 0,
+    val localReviews: Int = 0,
+    val remotePacks: Int = 0,
+    val remoteTargets: Int = 0,
+    val remoteReviews: Int = 0,
+    val outgoingPacks: Int = 0,
+    val outgoingTargets: Int = 0,
+    val outgoingReviews: Int = 0,
 ) {
     val canMerge: Boolean get() = conflicts.isEmpty()
 }

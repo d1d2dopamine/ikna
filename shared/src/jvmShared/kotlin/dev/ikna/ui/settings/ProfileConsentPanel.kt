@@ -83,10 +83,20 @@ fun ProfileConsentPanel(
                         detail = S.t("sync.profile.joiner_waiting").replace("{device}", otherLabel),
                     )
                     Text(
-                        text = S.t("sync.profile.counts")
-                            .replace("{decks}", preview.addedPacks.toString())
-                            .replace("{targets}", preview.addedTargets.toString())
-                            .replace("{events}", preview.addedReviews.toString()),
+                        text = S.t("sync.profile.device_summary")
+                            .replace("{device}", thisLabel)
+                            .replace("{decks}", preview.localPacks.toString())
+                            .replace("{targets}", preview.localTargets.toString())
+                            .replace("{events}", preview.localReviews.toString()),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = S.t("sync.profile.device_summary")
+                            .replace("{device}", otherLabel)
+                            .replace("{decks}", preview.remotePacks.toString())
+                            .replace("{targets}", preview.remoteTargets.toString())
+                            .replace("{events}", preview.remoteReviews.toString()),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -132,20 +142,77 @@ fun ProfileConsentPanel(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Text(
-                    text = S.t("sync.profile.counts")
-                        .replace("{decks}", preview.addedPacks.toString())
-                        .replace("{targets}", preview.addedTargets.toString())
-                        .replace("{events}", preview.addedReviews.toString()),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface, shape)
+                        .border(1.dp, MaterialTheme.colorScheme.outline, shape)
+                        .padding(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = S.t("sync.profile.device_summary")
+                            .replace("{device}", thisLabel)
+                            .replace("{decks}", preview.localPacks.toString())
+                            .replace("{targets}", preview.localTargets.toString())
+                            .replace("{events}", preview.localReviews.toString()),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Text(
+                        text = S.t("sync.profile.device_summary")
+                            .replace("{device}", otherLabel)
+                            .replace("{decks}", preview.remotePacks.toString())
+                            .replace("{targets}", preview.remoteTargets.toString())
+                            .replace("{events}", preview.remoteReviews.toString()),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    val hasIncoming = preview.addedPacks > 0 || preview.addedTargets > 0 || preview.addedReviews > 0
+                    val hasOutgoing = preview.outgoingPacks > 0 || preview.outgoingTargets > 0 || preview.outgoingReviews > 0
+                    if (hasIncoming) {
+                        Text(
+                            text = S.t("sync.profile.incoming_summary")
+                                .replace("{device}", thisLabel)
+                                .replace("{decks}", preview.addedPacks.toString())
+                                .replace("{targets}", preview.addedTargets.toString())
+                                .replace("{events}", preview.addedReviews.toString()),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    if (hasOutgoing) {
+                        Text(
+                            text = S.t("sync.profile.outgoing_summary")
+                                .replace("{device}", otherLabel)
+                                .replace("{decks}", preview.outgoingPacks.toString())
+                                .replace("{targets}", preview.outgoingTargets.toString())
+                                .replace("{events}", preview.outgoingReviews.toString()),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    if (!hasIncoming && !hasOutgoing) {
+                        Text(
+                            text = S.t("sync.profile.already_equal"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
                 if (preview.conflicts.isNotEmpty()) {
                     Text(
                         text = S.t("sync.profile.conflicts").replace("{count}", preview.conflicts.size.toString()),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall
                     )
+                    preview.conflicts.take(3).forEach { conflict ->
+                        Text(
+                            text = conflict,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
                 if (state.mode != null && state.mode != ProfileConsentProtocol.Mode.MERGE) {
                     val localSource = (state.mode == ProfileConsentProtocol.Mode.ADOPT_THIS && state.proposerFirst) ||

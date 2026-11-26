@@ -1086,4 +1086,12 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "sync.profile.joiner_applying" to "Aplicando a escolha feita em {device}. Mantenha o Ikna aberto.",
     "sync.profile.choose_merge" to "Mesclar ambos os dispositivos",
     "sync.profile.inviter_applying" to "Escolha enviada para {device}. Sincronizando...",
+    "sync.profile.device_summary" to "{device}: {decks} baralhos · {targets} cartões · {events} respostas",
+    "sync.profile.incoming_summary" to "Adicionado a {device}: +{decks} baralhos · +{targets} cartões · +{events} respostas",
+    "sync.profile.outgoing_summary" to "Enviado para {device}: +{decks} baralhos · +{targets} cartões · +{events} respostas",
+    "sync.profile.already_equal" to "Os baralhos e o histórico já são iguais nos dois dispositivos.",
+    "sync.log_show" to "MOSTRAR REGISTRO ({count})",
+    "sync.log_hide" to "OCULTAR REGISTRO ({count})",
+    "sync.log_copy" to "COPIAR REGISTRO",
+    "sync.log_copied" to "REGISTRO COPIADO",
 )

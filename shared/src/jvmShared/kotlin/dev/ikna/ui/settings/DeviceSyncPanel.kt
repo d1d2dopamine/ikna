@@ -81,6 +81,12 @@ data class DeviceSyncPeerUiState(
     override fun toString(): String = "DeviceSyncPeerUiState(device=<redacted>)"
 }
 
+data class DeviceSyncLogItem(
+    val time: String,
+    val isError: Boolean,
+    val message: String,
+)
+
 data class DeviceSyncUiState(
     val enabled: Boolean = false,
     val paired: Boolean = false,
@@ -94,6 +100,7 @@ data class DeviceSyncUiState(
     val canStartNewHistory: Boolean = false,
     val busy: Boolean = false,
     val progress: DeviceSyncProgressUi? = null,
+    val logs: List<DeviceSyncLogItem> = emptyList(),
 ) {
     // Invitations contain pairing credentials. Do not accidentally include them in logs.
     override fun toString(): String = "DeviceSyncUiState(enabled=$enabled, paired=$paired, status=$status, error=$error, blockedAfterReset=$blockedAfterReset, busy=$busy)"
@@ -427,22 +434,24 @@ fun DeviceSyncPanel(
                 )
             }
             state.invitation?.takeIf { it.isNotBlank() }?.let { invitation ->
-                val compact = remember(invitation) {
-                    runCatching { PairedLanTransport.encodeCompactInvitation(invitation) }.getOrDefault(invitation)
+                val qrCode = remember(invitation) {
+                    runCatching { PairedLanTransport.encodeQrInvitation(invitation) }
+                        .recoverCatching { PairedLanTransport.encodeCompactInvitation(invitation) }
+                        .getOrDefault(invitation)
                 }
                 @Suppress("DEPRECATION")
                 val clipboard = LocalClipboardManager.current
-                var copied by remember(compact) { mutableStateOf(false) }
-                var showRawCode by remember(compact) { mutableStateOf(false) }
+                var copied by remember(qrCode) { mutableStateOf(false) }
+                var showRawCode by remember(qrCode) { mutableStateOf(false) }
                 IknaBrandedQrCard(
-                    content = compact,
+                    content = qrCode,
                     subtitle = S.t("sync.qr_hint")
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     IknaTextButton(
                         label = S.t(if (copied) "sync.code_copied" else "sync.copy_code"),
                         onClick = {
-                            clipboard.setText(AnnotatedString(compact))
+                            clipboard.setText(AnnotatedString(qrCode))
                             copied = true
                         }
                     )
@@ -547,6 +556,61 @@ fun DeviceSyncPanel(
                                 onRevokePeer(peer.id)
                             }
                         })
+                }
+            }
+        }
+        if (state.logs.isNotEmpty()) {
+            var showLog by remember(state.error != null) { mutableStateOf(state.error != null) }
+            var copiedLog by remember(state.logs.size) { mutableStateOf(false) }
+            @Suppress("DEPRECATION")
+            val logClipboard = LocalClipboardManager.current
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IknaTextButton(
+                    label = S.t(if (showLog) "sync.log_hide" else "sync.log_show")
+                        .replace("{count}", state.logs.size.toString()),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    horizontalPadding = 0.dp,
+                    onClick = { showLog = !showLog }
+                )
+                if (showLog) {
+                    IknaTextButton(
+                        label = S.t(if (copiedLog) "sync.log_copied" else "sync.log_copy"),
+                        color = MaterialTheme.colorScheme.primary,
+                        horizontalPadding = 0.dp,
+                        onClick = {
+                            val text = state.logs.joinToString("\n") { entry ->
+                                val tag = if (entry.isError) "ERR" else "OK"
+                                "[${entry.time}] [$tag] ${entry.message}"
+                            }
+                            logClipboard.setText(AnnotatedString(text))
+                            copiedLog = true
+                        }
+                    )
+                }
+            }
+            if (showLog) {
+                val logShape = iknaTileShape()
+                SelectionContainer {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surface, logShape)
+                            .border(1.dp, MaterialTheme.colorScheme.outline, logShape)
+                            .padding(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        state.logs.asReversed().forEach { entry ->
+                            Text(
+                                text = "${entry.time} · ${entry.message}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (entry.isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
             }
         }

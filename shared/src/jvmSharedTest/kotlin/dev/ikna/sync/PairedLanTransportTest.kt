@@ -411,4 +411,44 @@ class PairedLanTransportTest {
         } finally { a.close(); b.close(); dirA.deleteRecursively(); dirB.deleteRecursively() }
     }
 
+    @Test fun `compact v2 fingerprint qr pairs over pinned TLS rejects tampered pin and survives restart`() = runBlocking {
+        val dirA = temp(); val dirB = temp()
+        val aData = Data("v2-from-A".toByteArray()); val bData = Data("v2-from-B".toByteArray())
+        var a = PairedLanTransport(dirA, binding, aData, intervalMillis = 100)
+        var b = PairedLanTransport(dirB, binding, bData, intervalMillis = 100)
+        try {
+            a.start(); b.start()
+            val rawInvite = a.createInvitation("127.0.0.1")
+            val qrV2 = PairedLanTransport.encodeQrInvitation(rawInvite)
+            assertTrue(qrV2.startsWith(PairedLanTransport.COMPACT_QR_PREFIX))
+            assertTrue(qrV2.length < rawInvite.length / 2, "QR v2 must drop the 700B PEM cert (${qrV2.length} vs ${rawInvite.length})")
+            val qrMatrix = QrCodeEncoder.encode(qrV2, QrErrorCorrection.M)
+            assertTrue(qrMatrix.size <= 69, "QR v2 Level-M matrix must stay low-density for monitor scanning (was ${qrMatrix.size})")
+
+            val parsedV2 = PairedLanTransport.parseInvitation(qrV2)
+            assertEquals("", parsedV2.certificate)
+            assertEquals(64, parsedV2.certPin.length)
+
+            // Tampered fingerprint must be rejected during TLS pin check.
+            val badPinInvite = Json.encodeToString(parsedV2.copy(certPin = "0".repeat(64)))
+            assertFails { b.pair(badPinInvite) }
+            assertEquals(0, b.status.peerCount)
+
+            // Valid QR v2 pairs cleanly and persists full verified peer cert across restart.
+            b.pair(qrV2)
+            waitFor { aData.received.contains("v2-from-B") && bData.received.contains("v2-from-A") }
+            assertEquals(1, a.status.peerCount)
+            assertEquals(1, b.status.peerCount)
+            assertEquals(PairedLanTransport.PeerRole.INVITER, a.status.peers.single().role)
+            assertEquals(PairedLanTransport.PeerRole.JOINER, b.status.peers.single().role)
+
+            a.close(); b.close()
+            aData.received.clear(); bData.received.clear()
+            a = PairedLanTransport(dirA, binding, aData, intervalMillis = 100)
+            b = PairedLanTransport(dirB, binding, bData, intervalMillis = 100)
+            a.start(); b.start()
+            waitFor { aData.received.contains("v2-from-B") && bData.received.contains("v2-from-A") }
+        } finally { a.close(); b.close(); dirA.deleteRecursively(); dirB.deleteRecursively() }
+    }
+
 }

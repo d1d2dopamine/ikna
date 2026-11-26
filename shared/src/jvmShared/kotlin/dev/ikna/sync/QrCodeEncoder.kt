@@ -32,15 +32,35 @@ import dev.ikna.ui.theme.iknaTileShape
 import kotlin.math.abs
 
 /**
- * Pure-Kotlin ISO/IEC 18004 QR Code encoder (Byte mode, Error Correction Level H — 30% recovery,
- * Versions 1..40). Level H allows placing the Ikna emblem cleanly in the center of the QR code
- * without hurting scan reliability. Zero external dependencies.
+ * Pure-Kotlin ISO/IEC 18004 QR Code encoder (Byte mode, Error Correction Levels M and H,
+ * Versions 1..40). Zero external dependencies.
  */
 class QrMatrix(val size: Int, private val modules: BooleanArray) {
     operator fun get(x: Int, y: Int): Boolean = modules[y * size + x]
 }
 
+enum class QrErrorCorrection(internal val formatIndicator: Int) {
+    M(0b00),
+    H(0b10),
+}
+
 object QrCodeEncoder {
+    // EC codewords per block and block counts for ISO/IEC 18004 Level M (15% recovery, versions 1..40).
+    private val EC_CODEWORDS_PER_BLOCK_M = intArrayOf(
+        -1,
+        10, 16, 26, 18, 24, 16, 18, 22, 22, 26,
+        30, 22, 22, 24, 24, 28, 28, 26, 26, 26,
+        26, 28, 28, 28, 28, 28, 28, 28, 28, 28,
+        28, 28, 28, 28, 28, 28, 28, 28, 28, 28
+    )
+    private val NUM_BLOCKS_M = intArrayOf(
+        -1,
+        1, 1, 1, 2, 2, 4, 4, 4, 5, 5,
+        5, 8, 9, 9, 10, 10, 11, 13, 14, 16,
+        17, 17, 18, 20, 21, 23, 25, 26, 28, 29,
+        31, 33, 35, 37, 38, 40, 43, 45, 47, 49
+    )
+
     // EC codewords per block and block counts for ISO/IEC 18004 Level H (30% recovery, versions 1..40).
     private val EC_CODEWORDS_PER_BLOCK_H = intArrayOf(
         -1,
@@ -57,11 +77,21 @@ object QrCodeEncoder {
         51, 54, 57, 60, 63, 66, 70, 74, 77, 81
     )
 
-    fun encode(text: String): QrMatrix {
+    private fun ecCodewordsPerBlock(version: Int, ecLevel: QrErrorCorrection): Int = when (ecLevel) {
+        QrErrorCorrection.M -> EC_CODEWORDS_PER_BLOCK_M[version]
+        QrErrorCorrection.H -> EC_CODEWORDS_PER_BLOCK_H[version]
+    }
+
+    private fun numBlocks(version: Int, ecLevel: QrErrorCorrection): Int = when (ecLevel) {
+        QrErrorCorrection.M -> NUM_BLOCKS_M[version]
+        QrErrorCorrection.H -> NUM_BLOCKS_H[version]
+    }
+
+    fun encode(text: String, ecLevel: QrErrorCorrection = QrErrorCorrection.H): QrMatrix {
         val dataBytes = text.toByteArray(Charsets.UTF_8)
         require(dataBytes.isNotEmpty()) { "QR payload must not be empty" }
-        val version = chooseVersion(dataBytes.size)
-        val totalDataCodewords = dataCodewordsFor(version)
+        val version = chooseVersion(dataBytes.size, ecLevel)
+        val totalDataCodewords = dataCodewordsFor(version, ecLevel)
 
         val bits = BitBuffer()
         // Byte mode indicator = 0100
@@ -82,12 +112,12 @@ object QrCodeEncoder {
         }
 
         val dataCodewords = bits.toByteArray()
-        val allCodewords = addEccAndInterleave(dataCodewords, version)
+        val allCodewords = addEccAndInterleave(dataCodewords, version, ecLevel)
 
         val size = version * 4 + 17
         val base = BooleanArray(size * size)
         val isFunction = BooleanArray(size * size)
-        drawFunctionPatterns(version, size, base, isFunction)
+        drawFunctionPatterns(version, size, ecLevel, base, isFunction)
         drawCodewords(size, allCodewords, base, isFunction)
 
         var bestMask = 0
@@ -96,7 +126,7 @@ object QrCodeEncoder {
         for (mask in 0..7) {
             val candidate = base.copyOf()
             applyMask(size, mask, candidate, isFunction)
-            drawFormatBits(size, mask, candidate, isFunction)
+            drawFormatBits(size, mask, ecLevel, candidate, isFunction)
             val penalty = penaltyScore(size, candidate)
             if (penalty < bestPenalty) {
                 bestPenalty = penalty
@@ -104,13 +134,13 @@ object QrCodeEncoder {
                 bestModules = candidate
             }
         }
-        drawFormatBits(size, bestMask, bestModules, isFunction)
+        drawFormatBits(size, bestMask, ecLevel, bestModules, isFunction)
         return QrMatrix(size, bestModules)
     }
 
-    private fun chooseVersion(byteLen: Int): Int {
+    private fun chooseVersion(byteLen: Int, ecLevel: QrErrorCorrection): Int {
         for (v in 1..40) {
-            val dataBits = dataCodewordsFor(v) * 8
+            val dataBits = dataCodewordsFor(v, ecLevel) * 8
             val headerBits = 4 + if (v <= 9) 8 else 16
             if (headerBits + byteLen * 8 <= dataBits) return v
         }
@@ -127,14 +157,14 @@ object QrCodeEncoder {
         return result
     }
 
-    private fun dataCodewordsFor(version: Int): Int {
+    private fun dataCodewordsFor(version: Int, ecLevel: QrErrorCorrection): Int {
         val totalCodewords = rawDataModules(version) / 8
-        return totalCodewords - EC_CODEWORDS_PER_BLOCK_H[version] * NUM_BLOCKS_H[version]
+        return totalCodewords - ecCodewordsPerBlock(version, ecLevel) * numBlocks(version, ecLevel)
     }
 
-    private fun addEccAndInterleave(data: ByteArray, version: Int): ByteArray {
-        val numBlocks = NUM_BLOCKS_H[version]
-        val blockEccLen = EC_CODEWORDS_PER_BLOCK_H[version]
+    private fun addEccAndInterleave(data: ByteArray, version: Int, ecLevel: QrErrorCorrection): ByteArray {
+        val numBlocks = numBlocks(version, ecLevel)
+        val blockEccLen = ecCodewordsPerBlock(version, ecLevel)
         val rawCodewords = rawDataModules(version) / 8
         val numShortBlocks = numBlocks - rawCodewords % numBlocks
         val shortBlockLen = rawCodewords / numBlocks
@@ -212,7 +242,13 @@ object QrCodeEncoder {
         fn[idx] = true
     }
 
-    private fun drawFunctionPatterns(version: Int, size: Int, mods: BooleanArray, fn: BooleanArray) {
+    private fun drawFunctionPatterns(
+        version: Int,
+        size: Int,
+        ecLevel: QrErrorCorrection,
+        mods: BooleanArray,
+        fn: BooleanArray
+    ) {
         // Timing patterns
         for (i in 0 until size) {
             setFunction(size, 6, i, i % 2 == 0, mods, fn)
@@ -233,7 +269,7 @@ object QrCodeEncoder {
         }
 
         // Reserve format bits (drawn after mask selection) and dark module
-        drawFormatBits(size, 0, mods, fn)
+        drawFormatBits(size, 0, ecLevel, mods, fn)
         // Version information (version >= 7)
         if (version >= 7) {
             var rem = version
@@ -285,9 +321,14 @@ object QrCodeEncoder {
         return result
     }
 
-    private fun drawFormatBits(size: Int, mask: Int, mods: BooleanArray, fn: BooleanArray) {
-        // Level H format indicator = 10
-        val data = (0b10 shl 3) or mask
+    private fun drawFormatBits(
+        size: Int,
+        mask: Int,
+        ecLevel: QrErrorCorrection,
+        mods: BooleanArray,
+        fn: BooleanArray
+    ) {
+        val data = (ecLevel.formatIndicator shl 3) or mask
         var rem = data
         for (i in 0 until 10) rem = (rem shl 1) xor ((rem ushr 9) * 0x537)
         val bits = ((data shl 10) or rem) xor 0x5412
@@ -463,77 +504,45 @@ fun IknaPixelEmblem(
 }
 
 /**
- * Renders a crisp high-contrast Level-H QR matrix with the Ikna pixel emblem centered
- * on a protective white badge, so cameras scan reliably under every Ikna palette.
+ * Renders a crisp, unobstructed ISO/IEC 18004 Level-M QR matrix with a full 4-module quiet zone
+ * so phone cameras scan desktop displays reliably without center-badge interference.
  */
 @Composable
 fun IknaQrCode(
     content: String,
     modifier: Modifier = Modifier,
-    maxSize: Dp = 228.dp
+    maxSize: Dp = 252.dp
 ) {
     val matrix = remember(content) {
-        runCatching { QrCodeEncoder.encode(content) }.getOrNull()
+        runCatching { QrCodeEncoder.encode(content, QrErrorCorrection.M) }.getOrNull()
     } ?: return
     val shape = iknaTileShape()
-    val accent = MaterialTheme.colorScheme.primary
     Box(
         modifier = modifier
             .sizeIn(maxWidth = maxSize, maxHeight = maxSize)
             .aspectRatio(1f)
             .background(Color.White, shape)
             .border(1.dp, MaterialTheme.colorScheme.outline, shape)
-            .padding(10.dp),
+            .padding(8.dp),
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val quiet = 2
+            val quiet = 4
             val total = matrix.size + quiet * 2
             val cell = minOf(size.width, size.height) / total
+            val seam = if (cell >= 3f) 0.2f else 0.08f
             val offsetX = (size.width - cell * total) / 2f
             val offsetY = (size.height - cell * total) / 2f
-            val ink = Color(0xFF101318)
+            val ink = Color(0xFF000000)
             for (y in 0 until matrix.size) {
                 for (x in 0 until matrix.size) {
                     if (matrix[x, y]) {
                         drawRect(
                             color = ink,
                             topLeft = Offset(offsetX + (x + quiet) * cell, offsetY + (y + quiet) * cell),
-                            size = Size(cell + 0.35f, cell + 0.35f)
+                            size = Size(cell + seam, cell + seam)
                         )
                     }
-                }
-            }
-            // Centered white badge (~19% width, safe under Level H 30% error recovery) + Ikna emblem
-            val badgeSide = (size.minDimension * 0.19f).coerceAtLeast(24f)
-            val badgeLeft = (size.width - badgeSide) / 2f
-            val badgeTop = (size.height - badgeSide) / 2f
-            val badgeCorner = CornerRadius(badgeSide * 0.22f, badgeSide * 0.22f)
-            drawRoundRect(
-                color = Color.White,
-                topLeft = Offset(badgeLeft, badgeTop),
-                size = Size(badgeSide, badgeSide),
-                cornerRadius = badgeCorner
-            )
-            val pad = badgeSide * 0.18f
-            val innerW = badgeSide - pad * 2f
-            val innerH = badgeSide - pad * 2f
-            val emCell = minOf(innerW / 6f, innerH / 7f)
-            val emGap = emCell * 0.14f
-            val emDraw = (emCell - emGap).coerceAtLeast(1f)
-            val emStartX = badgeLeft + (badgeSide - emCell * 6f) / 2f + emGap / 2f
-            val emStartY = badgeTop + (badgeSide - emCell * 7f) / 2f + emGap / 2f
-            for (r in IKNA_QR_EMBLEM.indices) {
-                val row = IKNA_QR_EMBLEM[r]
-                for (c in row.indices) {
-                    val ch = row[c]
-                    if (ch == '.') continue
-                    drawRoundRect(
-                        color = if (ch == 'A') accent else ink,
-                        topLeft = Offset(emStartX + c * emCell, emStartY + r * emCell),
-                        size = Size(emDraw, emDraw),
-                        cornerRadius = CornerRadius(emDraw * 0.18f, emDraw * 0.18f)
-                    )
                 }
             }
         }
@@ -541,8 +550,8 @@ fun IknaQrCode(
 }
 
 /**
- * Branded pairing card: Level-H QR code (with center Ikna emblem) paired alongside
- * the full Ikna logo lockup (emblem + wordmark + subtitle).
+ * Branded pairing card: high-contrast unobstructed QR code paired alongside
+ * the Ikna logo lockup (emblem + wordmark + subtitle).
  */
 @Composable
 fun IknaBrandedQrCard(
@@ -558,14 +567,14 @@ fun IknaBrandedQrCard(
             .border(1.dp, MaterialTheme.colorScheme.outline, shape)
             .padding(14.dp)
     ) {
-        val sideBySide = maxWidth >= 340.dp
+        val sideBySide = maxWidth >= 420.dp
         if (sideBySide) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IknaQrCode(content = content, maxSize = 204.dp, modifier = Modifier.size(204.dp))
+                IknaQrCode(content = content, maxSize = 248.dp, modifier = Modifier.size(248.dp))
                 Column(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp),

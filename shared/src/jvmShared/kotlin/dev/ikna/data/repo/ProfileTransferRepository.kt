@@ -282,12 +282,28 @@ class ProfileTransferRepository internal constructor(
             structuralErrors += msg
         }
         val localPackIds = local.packs.map { it.id }.toSet()
-        return ProfileMergePreview(localRevision, remoteRevision,
-            remote.packs.count { it.id !in localPackIds },
-            remote.chunks.count { it.id !in localTargets },
-            remoteRecords.map { it.eventId }.toSet().minus(localRecords.map { it.eventId }.toSet()).size,
-            errors.distinct().sorted(),
-            canAdopt = structuralErrors.isEmpty())
+        val remotePackIds = remote.packs.map { it.id }.toSet()
+        val remoteTargets = remote.chunks.map { it.id }.toSet()
+        val localEventIds = localRecords.map { it.eventId }.toSet()
+        val remoteEventIds = remoteRecords.map { it.eventId }.toSet()
+        return ProfileMergePreview(
+            localRevision = localRevision,
+            incomingRevision = remoteRevision,
+            addedPacks = remote.packs.count { it.id !in localPackIds },
+            addedTargets = remote.chunks.count { it.id !in localTargets },
+            addedReviews = remoteEventIds.minus(localEventIds).size,
+            conflicts = errors.distinct().sorted(),
+            canAdopt = structuralErrors.isEmpty(),
+            localPacks = local.packs.size,
+            localTargets = local.chunks.size,
+            localReviews = localRecords.size,
+            remotePacks = remote.packs.size,
+            remoteTargets = remote.chunks.size,
+            remoteReviews = remoteRecords.size,
+            outgoingPacks = local.packs.count { it.id !in remotePackIds },
+            outgoingTargets = local.chunks.count { it.id !in remoteTargets },
+            outgoingReviews = localEventIds.minus(remoteEventIds).size,
+        )
     }
 
     private fun boundaryIdentity(cutoff: Long, token: String?): String =

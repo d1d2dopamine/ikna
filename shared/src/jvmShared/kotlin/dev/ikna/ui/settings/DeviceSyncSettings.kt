@@ -60,6 +60,12 @@ fun DeviceSyncSettings(
         canStartNewHistory = current.boundaryReady,
         busy = current.busy,
         progress = deviceSyncProgress(current, peerDeviceLabel),
+        logs = current.logs.map { entry ->
+            val time = DateTimeFormatter.ofPattern("HH:mm:ss")
+                .withZone(ZoneId.systemDefault())
+                .format(Instant.ofEpochMilli(entry.timestampMillis))
+            DeviceSyncLogItem(time = time, isError = entry.isError, message = entry.message)
+        },
     )
     ProfileConsentPanel(
         state = current.profileConsent,

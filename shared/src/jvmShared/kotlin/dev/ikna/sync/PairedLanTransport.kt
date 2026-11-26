@@ -31,10 +31,11 @@ data class HistoryBinding(val groupId: String, val epoch: String, val freshStart
 /** Contains access-granting secret. Show only for deliberate pairing; never log or export it. */
 @Serializable
 data class PairingInvitation(
-    val version: Int = 1, val host: String, val port: Int, val certificate: String,
+    val version: Int = 1, val host: String, val port: Int, val certificate: String = "",
     val binding: HistoryBinding, val secret: String, val expiresAtMillis: Long,
     val deviceName: String = "",
     val hosts: List<String> = emptyList(),
+    val certPin: String = "",
 ) {
     override fun toString(): String = "PairingInvitation(version=$version, accessGrant=<redacted>)"
 }
@@ -51,6 +52,7 @@ class PairedLanTransport(
     private val intervalMillis: Long = 15_000,
     private val localDeviceName: () -> String = { defaultDeviceDisplayName() },
     private val directLanSocketFactory: ((target: InetAddress, port: Int, timeoutMs: Int) -> Socket?)? = null,
+    private val onLog: (String, Boolean) -> Unit = { _, _ -> },
 ) : AutoCloseable {
     @Serializable enum class PeerRole { INVITER, JOINER, UNKNOWN }
     enum class ActivityStage {
@@ -202,13 +204,14 @@ class PairedLanTransport(
     /** Explicit pairing action only; caller adopts binding first, only with no existing peers. */
     suspend fun pair(invitation: String) {
         val invite = parseInvitation(invitation)
+        val expectedPin = invite.certPin.ifBlank { LanSyncSecurity.id(LanSyncSecurity.certificate(invite.certificate)) }
         val session: Long
         val ownPort: Int
         synchronized(gate) {
             check(running && !closed && peers.size < MAX_PEERS)
             if (invite.binding != binding) throw SyncOperationException("history-mismatch")
             if (invite.expiresAtMillis <= System.currentTimeMillis()) throw SyncOperationException("expired_invitation")
-            if (peers.any { it.id == LanSyncSecurity.id(LanSyncSecurity.certificate(invite.certificate)) }) {
+            if (peers.any { it.id == expectedPin }) {
                 throw SyncOperationException("already_paired")
             }
             session = generation
@@ -216,11 +219,19 @@ class PairedLanTransport(
         }
         val candidates = (listOf(invite.host) + invite.hosts).distinct().take(MAX_CANDIDATE_HOSTS)
         val ownHosts = if (invite.host.startsWith("127.")) emptyList() else localAddresses().take(MAX_CANDIDATE_HOSTS)
+        onLog("Pairing: dialing ${candidates.joinToString(", ")}:${invite.port}", false)
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             val pairingContext = kotlin.coroutines.coroutineContext
             pairingContext.ensureActive()
             try {
-                connectAny(candidates, invite.port, invite.certificate, isPairing = true) { workingHost, socket ->
+                connectAny(candidates, invite.port, invite.certificate, certPin = expectedPin, isPairing = true) { workingHost, socket ->
+                    val serverCert = socket.session.peerCertificates.firstOrNull() as? java.security.cert.X509Certificate
+                        ?: throw SyncOperationException("tls_trust_failed")
+                    val verifiedCertPem = invite.certificate.ifBlank { LanSyncSecurity.encodeCertificatePem(serverCert) }
+                    if (LanSyncSecurity.id(LanSyncSecurity.certificate(verifiedCertPem)) != expectedPin) {
+                        throw SyncOperationException("tls_trust_failed")
+                    }
+                    onLog("TLS verified on $workingHost:${invite.port} (#${expectedPin.take(8)})", false)
                     val challenge = readText(socket, 128)
                     pairingContext.ensureActive()
                     write(socket, Wire(operation = "pair", binding = binding, id = deviceId,
@@ -230,13 +241,15 @@ class PairedLanTransport(
                         hosts = ownHosts))
                     val response = read(socket)
                     if (response.version == 1 && response.operation == "error" && response.challenge == challenge) {
-                        throw SyncOperationException(sanitizeRemoteErrorCode(response.payload))
+                        val remoteCode = sanitizeRemoteErrorCode(response.payload)
+                        onLog("Pairing rejected by peer: $remoteCode", true)
+                        throw SyncOperationException(remoteCode)
                     }
                     require(response.version == 1 && response.operation == "paired" && response.binding == binding && response.challenge == challenge)
                     val peerName = sanitizeDeviceName(response.deviceName.ifBlank { invite.deviceName })
                     val peerHosts = (listOf(workingHost) + candidates).distinct().take(MAX_CANDIDATE_HOSTS)
                     val peer = Peer(
-                        response.id, workingHost, invite.port, invite.certificate, response.credential,
+                        response.id, workingHost, invite.port, verifiedCertPem, response.credential,
                         peerName, peerHosts, PeerRole.JOINER
                     )
                     validatePeer(peer)
@@ -247,6 +260,7 @@ class PairedLanTransport(
                         save(peers + peer)
                         peers += peer
                     }
+                    onLog("Paired as JOINER with ${peerName.ifBlank { workingHost }} ($workingHost:${invite.port})", false)
                     syncNowRequested = true
                     publish()
                 }
@@ -373,6 +387,7 @@ class PairedLanTransport(
             write(socket, Wire(operation = "paired", binding = binding, id = deviceId,
                 credential = peer.credential, challenge = request.challenge,
                 deviceName = if (request.deviceName.isNotBlank()) sanitizeDeviceName(localDeviceName()) else ""))
+            onLog("Paired as INVITER with ${peer.name.ifBlank { host }} ($host:${request.port})", false)
         }
         syncNowRequested = true
         publish()
@@ -402,6 +417,7 @@ class PairedLanTransport(
             recordResult(peer, session, null)
         } catch (failure: Exception) {
             val code = errorCode(failure)
+            onLog("Incoming exchange error: $code (${failure.javaClass.simpleName})", true)
             if (code in REMOTE_REPORTABLE_ERRORS) {
                 runCatching {
                     write(socket, Wire(operation = "error", binding = binding, id = deviceId,
@@ -426,14 +442,16 @@ class PairedLanTransport(
                 if (active(session)) try {
                     val payload = callback(session) { callbacks.snapshotFor(peer.id) }
                     val candidates = (listOf(peer.host) + peer.hosts).distinct().take(MAX_CANDIDATE_HOSTS)
-                    val workingHost = connectAny(candidates, peer.port, peer.certificate, isPairing = false) { matchedHost, socket ->
+                    val workingHost = connectAny(candidates, peer.port, peer.certificate, certPin = peer.id, isPairing = false) { matchedHost, socket ->
                         setActivity(ActivityStage.EXCHANGING_DATA)
                         val challenge = readText(socket, 128)
                         write(socket, Wire(operation = "exchange", binding = binding, id = deviceId,
                             credential = peer.credential, challenge = challenge, payload = encodePayload(payload)))
                         val response = read(socket)
                         if (response.version == 1 && response.operation == "error" && response.challenge == challenge) {
-                            throw SyncOperationException(sanitizeRemoteErrorCode(response.payload))
+                            val remoteCode = sanitizeRemoteErrorCode(response.payload)
+                            onLog("Peer reported error: $remoteCode", true)
+                            throw SyncOperationException(remoteCode)
                         }
                         require(response.version == 1 && response.operation == "exchanged" && response.binding == binding &&
                             response.id == peer.id && response.challenge == challenge)
@@ -449,7 +467,12 @@ class PairedLanTransport(
                         promotePeerHost(peer.id, workingHost, session)
                     }
                     recordResult(peer, session, null)
-                } catch (failure: Exception) { failed = true; recordResult(peer, session, errorCode(failure)) }
+                } catch (failure: Exception) {
+                    failed = true
+                    val code = errorCode(failure)
+                    onLog("Outgoing exchange error (${peer.host}:${peer.port}): $code (${failure.javaClass.simpleName})", true)
+                    recordResult(peer, session, code)
+                }
                 finally { setActivity(ActivityStage.IDLE) }
             }
             if (current.isNotEmpty()) publish()
@@ -499,6 +522,7 @@ class PairedLanTransport(
         hosts: List<String>,
         port: Int,
         certificate: String,
+        certPin: String = "",
         isPairing: Boolean = false,
         action: (String, SSLSocket) -> T
     ): T {
@@ -510,7 +534,7 @@ class PairedLanTransport(
         for ((index, candidate) in candidates.withIndex()) {
             try {
                 setActivity(connectStage, index + 1, candidates.size)
-                return connect(candidate, port, certificate, onHandshake = {
+                return connect(candidate, port, certificate, certPin = certPin, onHandshake = {
                     setActivity(handshakeStage, index + 1, candidates.size)
                 }) { socket -> action(candidate, socket) }
             } catch (failure: Exception) {
@@ -526,11 +550,17 @@ class PairedLanTransport(
         host: String,
         port: Int,
         certificate: String,
+        certPin: String = "",
         onHandshake: () -> Unit = {},
         action: (SSLSocket) -> T
     ): T {
         val targetAddress = LanSyncSecurity.address(host)
-        val sslFactory = LanSyncSecurity.context(identity, LanSyncSecurity.certificate(certificate)).socketFactory
+        val pinnedCert = certificate.takeIf { it.isNotBlank() }?.let { LanSyncSecurity.certificate(it) }
+        val sslFactory = LanSyncSecurity.context(
+            identity,
+            pin = pinnedCert,
+            pinFingerprint = certPin.takeIf { it.isNotBlank() }
+        ).socketFactory
         val directRaw = if (LanSyncSecurity.isDirectLanAddress(targetAddress)) {
             openDirectLanSocket(targetAddress, port, SOCKET_MS)
         } else {
@@ -639,7 +669,8 @@ class PairedLanTransport(
         failure.message == "Unpaired device" -> "unpaired_device"
         failure.message == "Pairing expired" || failure.message == "Pairing closed" -> "expired_invitation"
         failure.message in setOf("profile-conflict-or-stale", "profile-content-conflict") -> "profile-conflict-or-stale"
-        failure.message in setOf("local-profile-stale", "remote-profile-stale", "stale-proposal", "proposal-expired", "proposal-cancelled") -> "profile_stale"
+        failure.message == "proposal-expired" -> "proposal-expired"
+        failure.message in setOf("local-profile-stale", "remote-profile-stale", "stale-proposal", "proposal-cancelled") -> "profile_stale"
         failure.message in setOf("history-mismatch", "fresh-history-reset-required") -> "history-mismatch"
         else -> "connection_failed"
     }
@@ -654,13 +685,33 @@ class PairedLanTransport(
         const val MAX_PEERS = 4
         const val MAX_CANDIDATE_HOSTS = 6
         const val COMPACT_INVITATION_PREFIX = "ikna-pair:1:"
+        const val COMPACT_QR_PREFIX = "ikna-pair:2:"
         private const val SOCKET_MS = 5_000
         private const val EXCHANGE_SOCKET_MS = 30_000
         private const val DEADLINE_MS = 60_000L
         private const val INVITATION_MS = 300_000L
+        private const val CLOCK_SKEW_MILLIS = 300_000L
         private const val MAX_PAIR_ATTEMPTS = 8
         private const val MAX_INVITATION_JSON_BYTES = 8192
+        private val HEX_64 = Regex("[a-f0-9]{64}")
         private val invitationJson = Json { ignoreUnknownKeys = true; isLenient = false }
+        @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
+        private val compactV2Json = Json { ignoreUnknownKeys = true; isLenient = false; encodeDefaults = false; explicitNulls = false }
+
+        @Serializable
+        private data class CompactQrV2(
+            val v: Int = 2,
+            val h: String,
+            val p: Int,
+            val f: String,
+            val g: String,
+            val e: String,
+            val r: Boolean = false,
+            val s: String,
+            val x: Long,
+            val n: String = "",
+            val a: List<String> = emptyList(),
+        )
 
         fun sanitizeDeviceName(raw: String): String =
             raw.trim().replace(Regex("[\\r\\n\\t]+"), " ").take(48)
@@ -690,9 +741,37 @@ class PairedLanTransport(
             )
         }
 
-        /** Compresses a JSON invitation into a shorter QR-friendly string without losing compatibility. */
+        /** Compresses a JSON invitation into a shorter v1 string (retaining full PEM for legacy peers). */
         fun encodeCompactInvitation(rawJson: String): String {
-            val input = rawJson.toByteArray(Charsets.UTF_8)
+            return deflateWithPrefix(rawJson, COMPACT_INVITATION_PREFIX)
+        }
+
+        /**
+         * Encodes an ultra-compact v2 QR invitation that replaces the ~700-byte PEM certificate
+         * with its 32-byte SHA-256 fingerprint, reducing QR module density by ~4x for reliable
+         * camera scanning from desktop displays while preserving identical TLS pinning security.
+         */
+        fun encodeQrInvitation(rawJson: String): String {
+            val invite = invitationJson.decodeFromString<PairingInvitation>(rawJson)
+            val pin = invite.certPin.ifBlank { LanSyncSecurity.id(LanSyncSecurity.certificate(invite.certificate)) }
+            val extraHosts = invite.hosts.filter { it != invite.host }.distinct().take(2)
+            val compact = CompactQrV2(
+                h = invite.host,
+                p = invite.port,
+                f = pin,
+                g = invite.binding.groupId,
+                e = invite.binding.epoch,
+                r = invite.binding.freshStart,
+                s = invite.secret,
+                x = invite.expiresAtMillis,
+                n = sanitizeDeviceName(invite.deviceName).take(24),
+                a = extraHosts,
+            )
+            return deflateWithPrefix(compactV2Json.encodeToString(compact), COMPACT_QR_PREFIX)
+        }
+
+        private fun deflateWithPrefix(text: String, prefix: String): String {
+            val input = text.toByteArray(Charsets.UTF_8)
             require(input.size in 1..MAX_INVITATION_JSON_BYTES)
             val deflater = java.util.zip.Deflater(java.util.zip.Deflater.BEST_COMPRESSION)
             return try {
@@ -705,14 +784,14 @@ class PairedLanTransport(
                     if (count <= 0) break
                     out.write(buf, 0, count)
                 }
-                COMPACT_INVITATION_PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(out.toByteArray())
+                prefix + Base64.getUrlEncoder().withoutPadding().encodeToString(out.toByteArray())
             } finally {
                 deflater.end()
             }
         }
 
-        private fun decodeCompactInvitation(compact: String): String {
-            val encoded = compact.removePrefix(COMPACT_INVITATION_PREFIX).trim()
+        private fun decodeDeflated(compact: String, prefix: String): String {
+            val encoded = compact.removePrefix(prefix).trim()
             require(encoded.isNotEmpty() && encoded.length <= MAX_INVITATION_JSON_BYTES)
             val compressed = Base64.getUrlDecoder().decode(encoded)
             val inflater = java.util.zip.Inflater()
@@ -740,7 +819,7 @@ class PairedLanTransport(
         private val REMOTE_REPORTABLE_ERRORS = setOf(
             "expired_invitation", "invalid_invitation", "unsupported_sync_protocol",
             "payload_too_large", "journal_item_too_large", "journal_reconciliation_required",
-            "profile-conflict-or-stale", "profile_stale", "history-mismatch"
+            "profile-conflict-or-stale", "profile_stale", "proposal-expired", "history-mismatch"
         )
 
         private fun sanitizeRemoteErrorCode(raw: String): String =
@@ -750,22 +829,49 @@ class PairedLanTransport(
             try {
                 val trimmed = text.trim()
                 require(trimmed.length <= MAX_INVITATION_JSON_BYTES)
-                val rawJson = if (trimmed.startsWith(COMPACT_INVITATION_PREFIX)) {
-                    decodeCompactInvitation(trimmed)
+                val value = if (trimmed.startsWith(COMPACT_QR_PREFIX)) {
+                    val v2Json = decodeDeflated(trimmed, COMPACT_QR_PREFIX)
+                    require(v2Json.length <= MAX_INVITATION_JSON_BYTES)
+                    val v2 = compactV2Json.decodeFromString<CompactQrV2>(v2Json)
+                    require(v2.v == 2 && v2.f.matches(HEX_64))
+                    PairingInvitation(
+                        version = 1,
+                        host = v2.h,
+                        port = v2.p,
+                        certificate = "",
+                        binding = HistoryBinding(v2.g, v2.e, v2.r),
+                        secret = v2.s,
+                        expiresAtMillis = v2.x,
+                        deviceName = sanitizeDeviceName(v2.n),
+                        hosts = (listOf(v2.h) + v2.a).distinct().take(MAX_CANDIDATE_HOSTS),
+                        certPin = v2.f,
+                    )
                 } else {
-                    trimmed
+                    val rawJson = if (trimmed.startsWith(COMPACT_INVITATION_PREFIX)) {
+                        decodeDeflated(trimmed, COMPACT_INVITATION_PREFIX)
+                    } else {
+                        trimmed
+                    }
+                    require(rawJson.length <= MAX_INVITATION_JSON_BYTES)
+                    invitationJson.decodeFromString<PairingInvitation>(rawJson)
                 }
-                require(rawJson.length <= MAX_INVITATION_JSON_BYTES)
-                val value = invitationJson.decodeFromString<PairingInvitation>(rawJson)
                 require(value.version == 1 && value.port in 1..65535 && value.secret.matches(Regex("[A-Za-z0-9_-]{43}")))
                 LanSyncSecurity.address(value.host)
                 require(value.hosts.size <= MAX_CANDIDATE_HOSTS)
                 value.hosts.forEach { LanSyncSecurity.address(it) }
-                LanSyncSecurity.certificate(value.certificate).checkValidity()
-                if (value.expiresAtMillis <= System.currentTimeMillis()) {
+                if (value.certificate.isNotBlank()) {
+                    LanSyncSecurity.certificate(value.certificate).checkValidity()
+                    if (value.certPin.isNotBlank()) {
+                        require(value.certPin == LanSyncSecurity.id(LanSyncSecurity.certificate(value.certificate)))
+                    }
+                } else {
+                    require(value.certPin.matches(HEX_64))
+                }
+                val nowMs = System.currentTimeMillis()
+                if (value.expiresAtMillis <= nowMs) {
                     throw SyncOperationException("expired_invitation")
                 }
-                require(value.expiresAtMillis <= System.currentTimeMillis() + INVITATION_MS + 30_000)
+                require(value.expiresAtMillis <= nowMs + INVITATION_MS + CLOCK_SKEW_MILLIS)
                 return value
             } catch (already: SyncOperationException) {
                 throw already

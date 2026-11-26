@@ -21,6 +21,7 @@ class ProfileConsentProtocol(
     savedCompletion: Completion? = null,
     savedInvalidation: String? = null,
     private val autoAcceptFromInviter: () -> Boolean = { false },
+    private val onLog: (String, Boolean) -> Unit = { _, _ -> },
 ) {
     interface Store {
         suspend fun snapshot(): ProfileTransferSnapshot
@@ -162,12 +163,23 @@ class ProfileConsentProtocol(
     }
     private suspend fun proposeLocked(peerId: String, mode: Mode, approveImmediately: Boolean): State {
         clearCurrentCatchUp()
-        checkPeer(peerId); validateCompletion(); expire(); check(completion == null) { "profile-already-connected" }; check(proposal == null) { "proposal-pending" }
+        checkPeer(peerId); validateCompletion(); expire(); check(completion == null) { "profile-already-connected" }
+        if (approveImmediately && proposal != null && receipt == null && !adoptionPending) {
+            clearPending()
+        }
+        check(proposal == null) { "proposal-pending" }
         val incoming = checkNotNull(remote) { "awaiting-profile" }
         val own = offer()
         val checked = if (mode == Mode.MERGE) store.preview(incoming.snapshot) else store.previewAdoption(incoming.snapshot)
         val allowed = if (mode == Mode.MERGE) checked.canMerge else checked.canAdopt
-        require(checked.localRevision == own.revision && allowed) { "profile-conflict-or-stale" }
+        if (checked.localRevision != own.revision) {
+            onLog("Proposal rejected: local profile changed before choice", true)
+            throw IllegalArgumentException("profile-conflict-or-stale")
+        }
+        if (!allowed) {
+            onLog("Proposal rejected (${mode.name}): ${checked.conflicts.take(2).joinToString("; ")}", true)
+            throw IllegalArgumentException("profile-conflict-or-stale")
+        }
         proposal = Proposal(operationId = UUID.randomUUID().toString(), mode = mode,
             firstDevice = deviceId, secondDevice = peerId, binding = binding,
             firstSnapshot = ProfileTransferCodec.revision(own.snapshot),
@@ -177,6 +189,7 @@ class ProfileConsentProtocol(
         preview = checked
         if (approveImmediately) {
             localApproved = true
+            onLog("Inviter chose ${mode.name} (local ${checked.localPacks}d/${checked.localReviews}r, peer ${checked.remotePacks}d/${checked.remoteReviews}r)", false)
         }
         publish()
         return state
@@ -227,7 +240,12 @@ class ProfileConsentProtocol(
                 listOf(p.firstSnapshot, p.secondSnapshot, p.firstRevision, p.secondRevision).all { it.matches(HEX) }) {
                 "invalid-profile-proposal"
             }
-            require(p.expiresAtMillis > now() && p.expiresAtMillis <= now() + TTL_MILLIS) { "proposal-expired" }
+            val currentNow = now()
+            if (p.expiresAtMillis <= currentNow || p.expiresAtMillis > currentNow + TTL_MILLIS + CLOCK_SKEW_MILLIS) {
+                val skewSec = (p.expiresAtMillis - (currentNow + TTL_MILLIS)) / 1000L
+                onLog("Proposal rejected: expired or clock skew (${skewSec}s)", true)
+                throw IllegalArgumentException("proposal-expired")
+            }
             require(p.operationId !in rejected) { "proposal-cancelled" }
             if (completion != null) {
                 val incoming = requireNotNull(wire.snapshot) { "missing-profile" }
@@ -301,7 +319,12 @@ class ProfileConsentProtocol(
                 listOf(p.firstSnapshot, p.secondSnapshot, p.firstRevision, p.secondRevision).all { it.matches(HEX) }) {
                 "invalid-profile-proposal"
             }
-            require(state.complete || (p.expiresAtMillis > now() && p.expiresAtMillis <= now() + TTL_MILLIS)) { "proposal-expired" }
+            val currentNow = now()
+            if (!state.complete && (p.expiresAtMillis <= currentNow || p.expiresAtMillis > currentNow + TTL_MILLIS + CLOCK_SKEW_MILLIS)) {
+                val skewSec = (p.expiresAtMillis - (currentNow + TTL_MILLIS)) / 1000L
+                onLog("Proposal rejected: expired or clock skew (${skewSec}s)", true)
+                throw IllegalArgumentException("proposal-expired")
+            }
             require(p.operationId !in rejected) { "proposal-cancelled" }
             require(proposal == null || proposal == p) { "proposal-conflict" }
             val isFirst = p.firstDevice == deviceId
@@ -323,6 +346,7 @@ class ProfileConsentProtocol(
             remoteReceipt = wire.receipt
             if (autoAcceptFromInviter() && p.firstDevice == peerId && remoteApproved &&
                 !localApproved && receipt == null && !adoptionPending) {
+                onLog("Auto-applying inviter choice (${p.mode.name})", false)
                 if (p.mode != Mode.MERGE && !localIsSource(p)) {
                     store.prepareAdoptionRecipient()
                 }
@@ -332,8 +356,17 @@ class ProfileConsentProtocol(
             if (receipt != null && receipt == remoteReceipt) finish()
         } else if (proposal == null) {
             require(!wire.approved && wire.receipt == null && wire.journal == null) { "missing-profile-proposal" }
+            val hadPreview = preview != null
             remote = incoming
-            preview = store.preview(incoming.snapshot)
+            val computed = store.preview(incoming.snapshot)
+            preview = computed
+            if (!hadPreview) {
+                onLog(
+                    "Snapshot compared: local ${computed.localPacks}d/${computed.localReviews}r, " +
+                        "peer ${computed.remotePacks}d/${computed.remoteReviews}r, conflicts=${computed.conflicts.size}",
+                    computed.conflicts.isNotEmpty()
+                )
+            }
         } else {
             // Peer has restarted/cancelled: never silently retain its previous approval.
             remoteApproved = false; remoteReceipt = null
@@ -378,6 +411,7 @@ class ProfileConsentProtocol(
         completion = Completion(proposal!!, receipt!!, store.committedContentIdentity(proposal!!.operationId))
         store.saveCompletion(completion)
         persistInvalidation(null)
+        onLog("Profile sync completed (${proposal!!.mode.name})", false)
         // Retain no raw profile after the bilateral durable receipts are verified.
         local = null; remote = null; preview = null
         completionConfirmed = true
@@ -391,9 +425,11 @@ class ProfileConsentProtocol(
             val digest = tupleDigest(p)
             if (p.mode == Mode.MERGE) {
                 receipt = store.commit(remote!!.snapshot, preview!!, p.operationId, digest)
+                onLog("Merged profile committed locally", false)
             } else {
                 receipt = store.adopt(remote!!.snapshot, preview!!, p, localIsSource(p))
                 adoptionPending = receipt == null
+                onLog(if (adoptionPending) "Profile adoption staged (restart pending)" else "Donor profile committed locally", false)
             }
         }
     }
@@ -408,6 +444,8 @@ class ProfileConsentProtocol(
         fun tupleDigest(proposal: Proposal): String = ProfileTransferCodec.digest(
             Json { encodeDefaults = true }.encodeToString(proposal).toByteArray(Charsets.UTF_8))
         const val TTL_MILLIS = 10 * 60 * 1000L
+        /** Tolerates real-world Windows/Android clock drift without allowing stale replays. */
+        const val CLOCK_SKEW_MILLIS = 5 * 60 * 1000L
         const val MAX_BYTES = 16 * 1024 * 1024
         private val HEX = Regex("[a-f0-9]{64}")
         private val ID = Regex("[A-Za-z0-9:_-]{1,128}")

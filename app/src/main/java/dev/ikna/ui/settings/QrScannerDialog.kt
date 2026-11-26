@@ -39,6 +39,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.google.zxing.BarcodeFormat
+import com.google.zxing.DecodeHintType
 import com.journeyapps.barcodescanner.BarcodeCallback
 import com.journeyapps.barcodescanner.BarcodeResult
 import com.journeyapps.barcodescanner.DecoratedBarcodeView
@@ -100,7 +101,15 @@ fun IknaQrScannerDialog(
                     DecoratedBarcodeView(ctx).apply {
                         statusView?.visibility = View.GONE
                         viewFinder?.visibility = View.GONE
-                        barcodeView.decoderFactory = DefaultDecoderFactory(listOf(BarcodeFormat.QR_CODE))
+                        barcodeView.decoderFactory = DefaultDecoderFactory(
+                            listOf(BarcodeFormat.QR_CODE),
+                            mapOf(
+                                DecodeHintType.TRY_HARDER to true,
+                                DecodeHintType.CHARACTER_SET to "UTF-8"
+                            ),
+                            null,
+                            0
+                        )
                         decodeContinuous(object : BarcodeCallback {
                             override fun barcodeResult(result: BarcodeResult?) {
                                 if (delivered) return

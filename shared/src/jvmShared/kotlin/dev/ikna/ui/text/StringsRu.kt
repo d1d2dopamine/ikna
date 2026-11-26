@@ -1095,4 +1095,12 @@ val STRINGS_RU: Map<String, String> = mapOf(
     "sync.profile.joiner_applying" to "Применяется выбор, сделанный на {device}. Не закрывайте Ikna.",
     "sync.profile.choose_merge" to "Объединить данные обоих устройств",
     "sync.profile.inviter_applying" to "Выбор отправлен на {device}. Идёт синхронизация...",
+    "sync.profile.device_summary" to "{device}: {decks} колод · {targets} карточек · {events} ответов",
+    "sync.profile.incoming_summary" to "На {device} добавится: +{decks} колод · +{targets} карточек · +{events} ответов",
+    "sync.profile.outgoing_summary" to "На {device} отправится: +{decks} колод · +{targets} карточек · +{events} ответов",
+    "sync.profile.already_equal" to "Наборы колод и ответов на обоих устройствах уже совпадают.",
+    "sync.log_show" to "ПОКАЗАТЬ ЖУРНАЛ ({count})",
+    "sync.log_hide" to "СКРЫТЬ ЖУРНАЛ ({count})",
+    "sync.log_copy" to "КОПИРОВАТЬ ЖУРНАЛ",
+    "sync.log_copied" to "ЖУРНАЛ СКОПИРОВАН",
 )

@@ -549,4 +549,24 @@ class ProfileConsentProtocolTest {
         assertEquals(1, rightStore.commits)
     }
 
+    @Test fun `proposal tolerates realistic clock skew between desktop and phone`() = runBlocking {
+        val leftStore = FakeStore()
+        val rightStore = FakeStore()
+        val baseTime = 1_700_000_000_000L
+        // Inviter (PC) clock is 90 seconds ahead of joiner (phone) clock.
+        val inviter = ProfileConsentProtocol("a", binding, leftStore, { baseTime + 90_000L }, autoAcceptFromInviter = { false })
+        val joiner = ProfileConsentProtocol("b", binding, rightStore, { baseTime }, autoAcceptFromInviter = { true })
+        suspend fun exchange() {
+            joiner.receiveFrom("a", inviter.snapshotFor("b"))
+            inviter.receiveFrom("b", joiner.snapshotFor("a"))
+        }
+        exchange()
+        inviter.proposeAndApprove("b", ProfileConsentProtocol.Mode.MERGE)
+        repeat(3) { exchange() }
+        assertTrue(inviter.state.complete)
+        assertTrue(joiner.state.complete)
+        assertEquals(1, leftStore.commits)
+        assertEquals(1, rightStore.commits)
+    }
+
 }
