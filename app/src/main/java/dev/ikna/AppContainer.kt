@@ -82,7 +82,10 @@ class AppContainer(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     val optimizer = dev.ikna.data.repo.LocalOptimizer(settings,
         FsrsParams(desiredRetention = config.desiredRetention), scope,
-        loadHistory = { db.reviewDao().optimizerHistory(dev.ikna.domain.fsrs.FsrsOptimizer.MAX_ANSWERS, System.currentTimeMillis()) })
+        loadHistory = {
+            val cutoff = db.historyBoundaryDao().current()?.afterLocalId ?: 0L
+            db.reviewDao().optimizerHistoryAfter(cutoff, dev.ikna.domain.fsrs.FsrsOptimizer.MAX_ANSWERS, System.currentTimeMillis())
+        })
 
     val packLoader = PackLoader(context, db.chunkDao())
 

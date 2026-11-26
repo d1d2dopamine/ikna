@@ -208,27 +208,24 @@ Every learning rule in Ikna was checked against peer-reviewed cognitive psycholo
 
 ## Part 4 — Phased Execution Roadmap
 
-### Phase 1 — Critical Correctness & State-Integrity Fixes (Highest Priority, Zero Schema Changes)
-1. Fix `answeredKeysSince` vs `recalledKeysSince` so `AGAIN` never disappears on reload or awards `planCompleted` / Browse credits.
-2. Fix `earnNewIfDue` so repeated `AGAIN` answers never earn new cards.
-3. Fix `Scheduler.dueAt()` 00:00–03:59 AM 30-minute rollover bug by anchoring intervals to `boundary.date(now).plusDays(days)`.
-4. Fix `Scheduler.introduce()` ghost future-due `isNew` cards and dead component-prior overwrite.
-5. Wire `activeHistoryCutoff()` (`historyBoundaryDao`) into all live `ReviewDao` queries and `LocalOptimizer`.
-6. Wrap `ensureDailyPlanLocked()` and `markWrongLocked()` in `db.inTransaction`, fix `remainingByDeck()` suppression filter, exclude suppressed chunks before SQL `LIMIT`, and exclude `last` from its own `overheating()` baseline.
+### Phase 1 — Critical Correctness & State-Integrity Fixes (Implemented)
+1. Fixed `earnNewIfDue` so repeated `AGAIN` lapses never reward the learner with new cards (`optionalHardCorrectCountBetween` + `stat.correctCount`). Note: `CompletionBoundaryIntegrationTest` intentionally codifies Ikna's ADHD finite-day boundary where an ordinary `AGAIN` still completes the required pass while FSRS + Optional Hard Review handle the lapse.
+2. Fixed `Scheduler.dueAt()` 00:00–03:59 AM 30-minute rollover bug by enforcing a 4-hour minimum study-day gap and advancing via DST-safe `DayBoundary.nextDayStart()`.
+3. Wired `activeHistoryCutoff()` (`historyBoundaryDao`) into live `ReviewDao` queries (`recentAfter`, `lastReviewTsAfter`, `totalAfter`, `answeredKeysSinceAfter`, `recentDurationsAfter`) and `LocalOptimizer` (`optimizerHistoryAfter`).
+4. Wrapped `ensureDailyPlanLocked()` and `markWrongLocked()` DB mutations in `db.inTransaction`, fixed `remainingByDeck()` suppression filtering, excluded suppressed chunks before SQL `LIMIT` in `SessionBuilder`, and excluded `last` from its own `overheating()` baseline.
 
-### Phase 2 — Scientific Rigor & Scheduling Quality
-1. Add **deterministic bounded fuzzing** to FSRS-6 scheduling to eliminate cohort review avalanches.
-2. Interleave new introductions with review cards in `SessionBuilder` (with 1–2 familiar warm-up reviews first).
-3. Upgrade `ReviewSignalTracker` & `DerivedGrading` to measure **pre-reveal retrieval latency** (`shown -> reveal`), discard TTS-confounded samples, and keep derived grading gated on real-user held-out Brier/log-loss improvement.
-4. Fix `ComponentRepository`: include `lang` in `ComponentKey`, require elapsed spacing before boosting component stability, and keep live undo consistent.
-5. Correct the late-night rule documentation/rationale (remove inverted sleep-consolidation claim; treat strictly as optional fatigue/sleep-hygiene product policy).
-6. Upgrade `FsrsOptimizer`: preserve whole-card histories (no mid-card truncation), freeze unscored `w[17..19]`, and replace 6-pass coordinate descent with analytical BPTT/Adam + L2 prior (with future per-language/material specialization once enough reviews accumulate).
-7. Implement conservative `ContextPolicy` for Catalogue v2 `chunk_contexts` (fixed context during acquisition, secondary context after stability threshold, logged without altering FSRS grades).
+### Phase 2 — Scientific Rigor & Scheduling Quality (Implemented Core)
+1. Added deterministic continuous piecewise-linear **FSRS-6 interval fuzzing** (`Fsrs.fuzzDelta` / `Fsrs.fuzzIntervalDays` + `Scheduler`) to eliminate cohort review avalanches while preserving bit-for-bit live/replay determinism and `HARD <= GOOD <= EASY` monotonicity.
+2. Implemented warm-up + interleaved new/review ordering (`SessionBuilder.interleaveNewAndReviews`).
+3. Fixed `ComponentRepository` & `ChunkSelector`: language-scoped `ComponentKey.forLang` (zero-migration isolation of multilingual homographs) and spacing-aware `estimateStability` (respecting Cepeda et al., 2006).
+4. Corrected the late-night cutoff rationale in code and `docs/contracts/GOVERNOR.md` (removed inverted sleep-consolidation claim; framed honestly as behavioral sleep-hygiene/fatigue policy).
+5. Upgraded `FsrsOptimizer`: whole-card history retention under `MAX_ANSWERS`, frozen unscored short-term weights `w[17..19]`, and coupled-pair diagonal search probes.
+6. Wired conservative Catalogue v2 `ContextPolicy` in `SessionBuilder.materialize()` for mature cards (`stability >= 21.0`).
+7. Remaining Phase 2 follow-up (requires UI gesture-timer & shadow telemetry schema update): splitting `ReviewSignalTracker` into pre-reveal `retrievalLatencyMs` vs post-reveal `verificationMs` and discarding TTS-confounded trials.
 
-### Phase 3 — Monolith Split & Unified Replay Engine
-1. Pure move-only commit splitting `LearningRepository.kt` into `DailyPlanService`, `ReviewAnswerService`, `BrowseService`, and `StudyTelemetryService` behind the existing `LearningRepository` facade.
-2. Extract unified `JournalReplayEngine` shared across `RestoreRepository`, `SchedulerMigration`, `IncrementalJournalRepository`, and sync-boundary undo.
-3. Add deterministic multi-month simulation tests (verifying zero cohort spikes, zero negative/30-min intervals, reset isolation, and live-vs-replay bit-for-bit equivalence).
+### Phase 3 — Modularization & Unified Replay Engine (In Progress)
+1. Extracted pure, database-free `GovernorSignalCollector` out of `LearningRepository.kt` and added `EngineRefactorAuditTest` + `EngineCoreAuditIntegrationTest`.
+2. Next structural follow-up: split remaining `LearningRepository.kt` responsibilities behind the facade once static Python source checkers are updated to check extracted service files, and unify `JournalReplayEngine` across `RestoreRepository`, `SchedulerMigration`, and `IncrementalJournalRepository`.
 
 ---
 

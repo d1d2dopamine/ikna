@@ -1,15 +1,19 @@
 package dev.ikna.data.repo
 
 import dev.ikna.data.db.ChunkDao
+import dev.ikna.data.db.ChunkEntity
+import dev.ikna.data.db.ChunkTokenEntity
 import dev.ikna.data.db.ComponentDao
 import dev.ikna.data.db.ComponentEntity
 import dev.ikna.data.db.ReviewDao
 import dev.ikna.data.db.IknaDatabase
 import dev.ikna.data.db.inTransaction
+import dev.ikna.domain.fsrs.DAY_MS
 import dev.ikna.domain.governor.ComponentKey
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.pow
 
 /**
@@ -31,7 +35,29 @@ class ComponentRepository(
 ) {
 
     suspend fun componentsFor(lemmas: List<String>): Map<ComponentKey, ComponentEntity> =
-        componentDao.byLemmas(lemmas.distinct()).associateBy { ComponentKey(it.lemma, it.pos) }
+        lemmas.distinct()
+            .chunked(TOKEN_QUERY_BATCH)
+            .flatMap { componentDao.byLemmas(it) }
+            .associateBy { ComponentKey(it.lemma, it.pos) }
+
+    /**
+     * Loads language-scoped components (plus legacy unscoped fallback rows)
+     * for a batch of candidate chunks, isolating homographs across languages.
+     */
+    suspend fun componentsForChunks(
+        chunks: List<ChunkEntity>,
+        tokensByChunk: Map<String, List<ChunkTokenEntity>>
+    ): Map<ComponentKey, ComponentEntity> {
+        val keys = ArrayList<String>()
+        for (chunk in chunks) {
+            for (t in tokensByChunk[chunk.id].orEmpty()) {
+                val scoped = ComponentKey.scopedLemma(chunk.lang, t.lemma)
+                keys += scoped
+                if (scoped != t.lemma) keys += t.lemma
+            }
+        }
+        return componentsFor(keys)
+    }
 
     suspend fun all(): Map<ComponentKey, ComponentEntity> =
         componentDao.all().associateBy { ComponentKey(it.lemma, it.pos) }
@@ -40,22 +66,26 @@ class ComponentRepository(
         val tokens = chunkDao.tokensFor(listOf(chunkId)).filter { it.weight > 0.0 }
         if (tokens.isEmpty()) return
 
+        val lang = chunkDao.chunk(chunkId)?.lang.orEmpty()
+        val scopedLemmas = tokens.map { ComponentKey.scopedLemma(lang, it.lemma) }.distinct()
         val existing = componentDao
-            .byLemmas(tokens.map { it.lemma })
+            .byLemmas(scopedLemmas)
             .associateBy { ComponentKey(it.lemma, it.pos) }
 
         val success = if (rating >= 3) 1.0 else 0.0
         val updates = tokens.map { t ->
-            val key = ComponentKey(t.lemma, t.pos)
+            val storedLemma = ComponentKey.scopedLemma(lang, t.lemma)
+            val key = ComponentKey(storedLemma, t.pos)
             val prev = existing[key]
+            val elapsedDays = prev?.lastSeenAt?.let { (ts - it).coerceAtLeast(0L).toDouble() / DAY_MS }
             val exposures = (prev?.exposures ?: 0.0) + t.weight
             val successes = (prev?.successes ?: 0.0) + t.weight * success
             ComponentEntity(
-                lemma = t.lemma,
+                lemma = storedLemma,
                 pos = t.pos,
                 exposures = exposures,
                 successes = successes,
-                stabilityEst = estimateStability(exposures, successes, prev?.stabilityEst, success),
+                stabilityEst = estimateStability(exposures, successes, prev?.stabilityEst, elapsedDays, success),
                 firstSeenAt = prev?.firstSeenAt ?: ts,
                 lastSeenAt = ts
             )
@@ -64,20 +94,30 @@ class ComponentRepository(
     }
 
     /**
-     * Deliberately crude: an exponentially growing half-life on success, a hard
-     * cut on failure. Good enough to seed a prior and to rank candidate chunks,
-     * which is all this layer is allowed to influence.
+     * Spacing-aware lexical stability heuristic (Cepeda et al., 2006).
+     *
+     * Massed repetitions inside the same session (< 6 hours apart) yield only
+     * a tiny nudge so ten exposures in one evening cannot inflate stability to
+     * 350+ days. Spaced retrievals across days receive full growth proportional
+     * to elapsed time relative to current stability.
      */
-    private fun estimateStability(
+    internal fun estimateStability(
         exposures: Double,
         successes: Double,
         previous: Double?,
+        elapsedDays: Double?,
         success: Double
     ): Double {
         val base = previous ?: 1.0
         return if (success > 0.0) {
             val rate = (successes / max(exposures, 0.001)).coerceIn(0.0, 1.0)
-            (base * (1.35 + rate * 0.45)).coerceAtMost(365.0)
+            val spacingFactor = when {
+                previous == null || elapsedDays == null -> 1.0
+                elapsedDays < SAME_SESSION_THRESHOLD_DAYS -> MASSED_GROWTH_SCALE
+                else -> min(1.0, elapsedDays / max(base * 0.5, 1.0))
+            }
+            val multiplier = 1.0 + spacingFactor * (0.35 + rate * 0.45)
+            (base * multiplier).coerceAtMost(365.0)
         } else {
             max(1.0, base * 0.45)
         }
@@ -139,8 +179,12 @@ class ComponentRepository(
         // inline, so a suspend call cannot appear inside it. List.flatMap is
         // inline and runs here and now, which keeps the suspend context. The
         // sequence version did not compile.
-        val tokens = answers.map { it.chunkId }
-            .distinct()
+        val chunkIds = answers.map { it.chunkId }.distinct()
+        val langByChunk = chunkIds
+            .chunked(TOKEN_QUERY_BATCH)
+            .flatMap { checkCancellation(); chunkDao.chunks(it) }
+            .associate { it.id to it.lang }
+        val tokens = chunkIds
             .chunked(TOKEN_QUERY_BATCH)
             .flatMap { checkCancellation(); chunkDao.tokensFor(it) }
             .filter { it.weight > 0.0 }
@@ -150,18 +194,21 @@ class ComponentRepository(
         for (r in answers) {
             checkCancellation()
             val success = if (r.outcomeRating >= 3) 1.0 else 0.0
+            val lang = langByChunk[r.chunkId].orEmpty()
             for (t in tokens[r.chunkId].orEmpty()) {
-                val key = ComponentKey(t.lemma, t.pos)
+                val storedLemma = ComponentKey.scopedLemma(lang, t.lemma)
+                val key = ComponentKey(storedLemma, t.pos)
                 val prev = acc[key]
+                val elapsedDays = prev?.lastSeenAt?.let { (r.ts - it).coerceAtLeast(0L).toDouble() / DAY_MS }
                 val exposures = (prev?.exposures ?: 0.0) + t.weight
                 val successes = (prev?.successes ?: 0.0) + t.weight * success
                 acc[key] = ComponentEntity(
-                    lemma = t.lemma,
+                    lemma = storedLemma,
                     pos = t.pos,
                     exposures = exposures,
                     successes = successes,
                     stabilityEst =
-                        estimateStability(exposures, successes, prev?.stabilityEst, success),
+                        estimateStability(exposures, successes, prev?.stabilityEst, elapsedDays, success),
                     firstSeenAt = prev?.firstSeenAt ?: r.ts,
                     lastSeenAt = r.ts
                 )
@@ -184,5 +231,9 @@ class ComponentRepository(
         /** SQLite refuses an IN list longer than 999 bound arguments. */
         const val TOKEN_QUERY_BATCH = 400
         const val UPSERT_BATCH = 500
+        /** Reviews separated by less than 6 hours are treated as massed practice. */
+        const val SAME_SESSION_THRESHOLD_DAYS = 0.25
+        /** Small cap on same-session stability gain to respect the spacing effect. */
+        const val MASSED_GROWTH_SCALE = 0.05
     }
 }

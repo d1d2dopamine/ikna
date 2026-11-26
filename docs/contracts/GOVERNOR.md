@@ -191,8 +191,10 @@ everywhere: the daily plan, `daily_stats`, the activity ratio the governor reads
 on the progress screen, and the replay that rebuilds stats from an imported log.
 
 It also widens the night rule. `nightCutoffHour` alone said "nothing new after 23:00", which
-reopened the gate at 00:00 — the worst possible time to meet a chunk for the first time. New
-material is now blocked from `nightCutoffHour` until `dayStartHour`; reviews are never blocked.
+reopened the gate at 00:00. New material is blocked from `nightCutoffHour` until `dayStartHour`;
+reviews are never blocked. Note that this is a behavioral sleep-hygiene and fatigue policy (keeping
+late-night sessions short and low-friction so study does not eat into sleep), not a claim that
+pre-sleep encoding weakens overnight memory consolidation (Rasch & Born, 2013; Payne et al., 2012).
 
 The arithmetic lives in `dev.ikna.domain.time.DayBoundary`, which has no Android dependency and is
 covered by `DayBoundaryTest` — date maths is easy to get subtly wrong and cheap to test.
@@ -200,9 +202,9 @@ covered by `DayBoundaryTest` — date maths is easy to get subtly wrong and chea
 It is also where intervals land. A due time is the start of the study day the interval falls in, not
 the clock time of the answer plus the interval: otherwise a card answered at 23:00 comes back at
 23:00 the next night, an evening session misses it, and the interval FSRS chose is stretched by up to
-a day on every review. Snapping only ever moves a due time earlier, so nothing is hidden longer than
-intended, and intervals are floored at one full day so it can never move one into the past
-(`Scheduler.dueAt`, `SchedulerDueDayTest`).
+a day on every review. When answering right before `dayStartHour` (e.g. 00:01–03:59 with a 1-day
+interval), `Scheduler.dueAt` also enforces a 4-hour minimum gap before a "next study day" boundary
+activates so a 1-day interval never collapses to 30 minutes (`Scheduler.dueAt`, `SchedulerDueDayTest`).
 
 ## Everything new goes through `allowedNew`
 

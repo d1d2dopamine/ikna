@@ -34,6 +34,7 @@ import dev.ikna.domain.governor.CleanStreak
 import dev.ikna.domain.governor.GovernorConfig
 import dev.ikna.domain.governor.GovernorDecision
 import dev.ikna.domain.governor.GovernorReason
+import dev.ikna.domain.governor.GovernorSignalCollector
 import dev.ikna.domain.governor.GovernorSignals
 import dev.ikna.domain.governor.RiarManage
 import dev.ikna.domain.governor.dailyNewRoom
@@ -201,6 +202,15 @@ class LearningRepository(
     private suspend fun suppressedNow(): Set<String> =
         suppressedChunks?.invoke() ?: emptySet()
 
+    /**
+     * Single source of truth for the active review-history cutoff after a
+     * progress reset. Archived pre-reset reviews stay in the append-only table
+     * for export/history, but never leak into live scheduling, governor signals,
+     * daily completion, or local optimization.
+     */
+    private suspend fun activeHistoryCutoff(): Long =
+        db.historyBoundaryDao().current()?.afterLocalId ?: syncHistoryBoundary?.invoke() ?: 0L
+
 
     // Rebuilt per call so a config change takes effect immediately.
     private val boundary: DayBoundary
@@ -240,130 +250,100 @@ class LearningRepository(
             return active
         }
 
-        // What the user actually set, straight from storage. Without this the
-        // switch only reached the plan if some screen had already collected it.
+        // Read DataStore-backed preferences outside the SQLite write transaction.
         loadSettings?.invoke()?.let { stored ->
             autoLoad = stored.auto
             if (!stored.auto) dailyTargetOverride = stored.manual
         }
+        val hidden = suppressedNow()
 
-        // The measured norm is refreshed once a day, right here, so today's
-        // capacity reflects the last two weeks of real behaviour.
-        if (autoLoad) dailyTargetOverride = autoTarget()
+        return db.inTransaction {
+            val rechecked = planDao.plan(day)
+            if (rechecked != null) {
+                val active = rechecked.classicOnly()
+                if (active != rechecked) planDao.upsert(active)
+                return@inTransaction active
+            }
 
-        // Overdue cards leave the visible queue. They are not forgiven, only
-        // hidden: FSRS still recomputes their stability from real elapsed time.
-        cardDao.moveOverdueToAmnesty(now - config.amnestyAfterDays * DAY_MS)
+            // The measured norm is refreshed once a day, right here, so today's
+            // capacity reflects the last two weeks of real behaviour.
+            if (autoLoad) dailyTargetOverride = autoTarget()
 
-        val signals = collectSignals(now)
-        val decision = withNightRule(governor().decide(signals), now)
+            // Overdue cards leave the visible queue. They are not forgiven, only
+            // hidden: FSRS still recomputes their stability from real elapsed time.
+            cardDao.moveOverdueToAmnesty(now - config.amnestyAfterDays * DAY_MS)
 
-        // The day's load belongs to the day, not to the plan row.
-        //
-        // This is the fix for a bug that could be triggered from the deck list
-        // in about three seconds: switch a deck off, open "today", switch the
-        // deck back on, and the day had grown by a handful of cards. Each of
-        // those three actions drops the plan row (invalidatePlan), the next
-        // screen rebuilds it, and the rebuild used to rule afresh and introduce
-        // `allowedNew` new chunks all over again. The governor had decided the
-        // day's dose once; the user was handed it three times, the ceiling that
-        // protects tomorrow was bypassed, and the number at the top of the
-        // screen climbed while nothing had been answered.
-        //
-        // Two facts outlive the plan row, and both are read here: the governor
-        // log knows what the day was first ruled, and the daily statistics know
-        // how much new material has already gone out. A rebuild is therefore a
-        // top-up to the same ceiling rather than a second allowance -- and when
-        // nothing is left, it is a re-pick of the same day with no new cards in
-        // it at all.
-        //
-        // Read before the row below is written, or the day would find itself.
-        val ruledEarlier = governorDao.firstForDay(day)
-        val authorisedNew = ruledOnceToday(ruledEarlier?.allowedNew, decision.allowedNew)
-        val authorisedCapacity = ruledOnceToday(ruledEarlier?.capacity, decision.capacity)
-        val roomNew = dailyNewRoom(authorisedNew, statsDao.day(day)?.newIntroduced ?: 0)
-        // What the plan is actually built from. The governor's own numbers are
-        // still logged untouched below, so the log keeps saying what the model
-        // computed and the plan keeps to what the day may spend.
-        val authorised = decision.copy(
-            capacity = authorisedCapacity,
-            allowedNew = authorisedNew
-        )
+            val signals = collectSignals(now)
+            val decision = withNightRule(governor().decide(signals), now)
 
-        governorDao.insert(
-            GovernorLogEntity(
-                ts = now,
-                day = day,
-                dueToday = signals.dueToday,
-                forecastAvg3d = signals.forecastAvg3d,
-                backlog = signals.backlog,
-                accuracyRecent = signals.accuracyRecent,
-                daysSinceLastSession = signals.daysSinceLastSession,
-                reviewsDoneToday = signals.reviewsDoneToday,
-                capacity = decision.capacity,
-                headroom = decision.headroom,
-                allowedNew = decision.allowedNew,
-                // The valve's own name plus what it overrode. A log saying
-                // only SAFETY_VALVE cannot answer the one question worth
-                // asking about the valve: why it had to open again.
-                reason = decision.gate
-                    ?.let { decision.reason.name + "/" + it.name }
-                    ?: decision.reason.name,
-                // Everything the decision was actually made from. Kept as its
-                // own columns rather than folded into `reason` so that the log
-                // can be read as data -- "what did activity look like on the
-                // days that were capped" is a query, not an exercise in
-                // parsing strings.
-                activityRatio = signals.activityRatio,
-                daysSinceStart = signals.daysSinceStart,
-                cleanDays = signals.cleanDays,
-                newIntroducedLastWeek = signals.newIntroducedLastWeek,
-                totalReviews = signals.totalReviews,
-                daysSinceReturn = signals.daysSinceReturn,
-                overheated = signals.overheated,
-                newCeiling = decision.newCeiling,
-                gate = decision.gate?.name
+            // Read before the row below is written, or the day would find itself.
+            val ruledEarlier = governorDao.firstForDay(day)
+            val authorisedNew = ruledOnceToday(ruledEarlier?.allowedNew, decision.allowedNew)
+            val authorisedCapacity = ruledOnceToday(ruledEarlier?.capacity, decision.capacity)
+            val roomNew = dailyNewRoom(authorisedNew, statsDao.day(day)?.newIntroduced ?: 0)
+            val authorised = decision.copy(
+                capacity = authorisedCapacity,
+                allowedNew = authorisedNew
             )
-        )
 
-        // New chunks are introduced exactly once per day, here and nowhere else.
-        // `roomNew`, not the fresh ruling: a plan rebuilt later in the day may
-        // only spend what the morning left unspent.
-        val introduced = if (roomNew > 0) introduce(roomNew, now) else emptyList()
+            governorDao.insert(
+                GovernorLogEntity(
+                    ts = now,
+                    day = day,
+                    dueToday = signals.dueToday,
+                    forecastAvg3d = signals.forecastAvg3d,
+                    backlog = signals.backlog,
+                    accuracyRecent = signals.accuracyRecent,
+                    daysSinceLastSession = signals.daysSinceLastSession,
+                    reviewsDoneToday = signals.reviewsDoneToday,
+                    capacity = decision.capacity,
+                    headroom = decision.headroom,
+                    allowedNew = decision.allowedNew,
+                    reason = decision.gate
+                        ?.let { decision.reason.name + "/" + it.name }
+                        ?: decision.reason.name,
+                    activityRatio = signals.activityRatio,
+                    daysSinceStart = signals.daysSinceStart,
+                    cleanDays = signals.cleanDays,
+                    newIntroducedLastWeek = signals.newIntroducedLastWeek,
+                    totalReviews = signals.totalReviews,
+                    daysSinceReturn = signals.daysSinceReturn,
+                    overheated = signals.overheated,
+                    newCeiling = decision.newCeiling,
+                    gate = decision.gate?.name
+                )
+            )
 
-        // The introductions are handed to the builder rather than left for it to
-        // find. A fresh card is written with dueAt = now, so a "soonest first"
-        // query sorts it behind every overdue review and the capacity limit cut
-        // it first: the governor spent the day's new-material budget, the
-        // counter recorded that new material had arrived — which is what closes
-        // the safety valve for a week — and the user was shown none of it.
-        // A card marked wrong never reaches a plan again, on any day.
-        val picked = builder().pickForDay(authorised, now, introduced)
-            .filterNot { it.chunkId in suppressedNow() }
-        val plannedKeys = picked.map { it.key }.toSet()
+            // New chunks are introduced at most up to today's remaining budget.
+            val introduced = if (roomNew > 0) introduce(roomNew, now, hidden = hidden) else emptyList()
 
-        // Whatever still did not fit is deleted rather than left behind as a
-        // card nobody has ever seen but which counts as introduced, and only
-        // what actually reached the plan is counted.
-        val placed = introduced.count { it.key in plannedKeys }
-        for (card in introduced) {
-            if (card.key !in plannedKeys) cardDao.delete(card.chunkId, card.level)
+            val picked = builder().pickForDay(authorised, now, introduced, suppressedChunkIds = hidden)
+                .filterNot { it.chunkId in hidden }
+            val plannedKeys = picked.map { it.key }.toSet()
+
+            // Whatever still did not fit is deleted rather than left behind as a
+            // card nobody has ever seen, and only what reached the plan is counted.
+            val placed = introduced.count { it.key in plannedKeys }
+            for (card in introduced) {
+                if (card.key !in plannedKeys) cardDao.delete(card.chunkId, card.level)
+            }
+            countIntroduced(now, placed)
+
+            val cutoff = activeHistoryCutoff()
+            val alreadyAnswered = reviewDao.answeredKeysSinceAfter(startOfDay(now), cutoff).toSet()
+            val ids = picked.map { it.key }.filterNot { it in alreadyAnswered }
+
+            storePlan(
+                day = day,
+                ids = ids,
+                capacity = authorised.capacity,
+                // Retain today's authorisation across plan invalidation/rebuild.
+                allowedNew = authorised.allowedNew,
+                amnestyQuota = decision.amnestyQuota,
+                reason = decision.reason,
+                now = now
+            )
         }
-        countIntroduced(now, placed)
-
-        val alreadyAnswered = reviewDao.answeredKeysSince(startOfDay(now)).toSet()
-        val ids = picked.map { it.key }.filterNot { it in alreadyAnswered }
-
-        return storePlan(
-            day = day,
-            ids = ids,
-            capacity = authorised.capacity,
-            // Retain today's authorisation across plan invalidation/rebuild.
-            allowedNew = authorised.allowedNew,
-            amnestyQuota = decision.amnestyQuota,
-            reason = decision.reason,
-            now = now
-        )
     }
 
     /** Kept for the nightly worker, which only needs the side effects. */
@@ -437,44 +417,24 @@ class LearningRepository(
     suspend fun activityRatio(now: Long = System.currentTimeMillis(), targetOverride: Int? = null): Double {
         val window = config.activityWindowDays
         val all = statsDao.lastDays(window * 3)
-        if (all.isEmpty()) return 1.0
-
-        val cutoff = dayKey(now - (window - 1) * DAY_MS)
-        val inWindow = all.filter { it.day >= cutoff }
-
-        val today = LocalDate.parse(dayKey(now))
-        val firstEver = runCatching { LocalDate.parse(all.last().day) }.getOrNull()
-        val span = if (firstEver == null) window
-        else (ChronoUnit.DAYS.between(firstEver, today).toInt() + 1).coerceIn(1, window)
-
-        val expected = expectedForCredit(targetOverride)
-        val used = inWindow.sumOf { (it.reviewsDone / expected).coerceIn(0.0, 1.0) }
-        // The norm is weekly, not daily. Dividing by the whole window made an
-        // entirely ordinary week — four full days, three off — read as 0.57,
-        // one quiet evening away from the gate that stops new chunks. Four or
-        // five used days now count as a week that went fine.
-        val need = minOf(span.toDouble(), config.activeDaysPerWeek).coerceAtLeast(1.0)
-        return (used / need).coerceIn(0.0, 1.0)
+        return GovernorSignalCollector.computeActivityRatio(
+            recentDays = all,
+            todayKey = dayKey(now),
+            cutoffKey = dayKey(now - (window - 1) * DAY_MS),
+            windowDays = window,
+            activeDaysPerWeek = config.activeDaysPerWeek,
+            expectedForCredit = expectedForCredit(targetOverride)
+        )
     }
 
     /**
      * The measured size of a normal day.
      *
      * Median of cards actually answered on active days over the last two weeks,
-     * plus a little headroom so a good stretch can still grow the load. Median
-     * rather than mean because one heroic evening should not become the new
-     * standard. Fewer than three active days means there is nothing to measure
-     * yet, so it starts deliberately small.
+     * plus a little headroom so a good stretch can still grow the load.
      */
-    suspend fun autoTarget(): Int {
-        val done = statsDao.lastDays(AUTO_WINDOW_DAYS)
-            .map { it.reviewsDone }
-            .filter { it > 0 }
-            .sorted()
-        if (done.size < 3) return AUTO_COLD_START
-        val median = done[done.size / 2]
-        return (median * AUTO_HEADROOM).toInt().coerceIn(AUTO_MIN, AUTO_MAX)
-    }
+    suspend fun autoTarget(): Int =
+        GovernorSignalCollector.computeAutoTarget(statsDao.lastDays(AUTO_WINDOW_DAYS))
 
     /** What today's plan is aiming at. Shown on the progress screen. */
     suspend fun currentDailyTarget(): Int =
@@ -514,11 +474,12 @@ class LearningRepository(
         }
         val forecastAvg = forecastTotal.toDouble() / max(1, config.forecastHorizonDays)
 
-        val recent = reviewDao.recent(config.recentWindowSize)
+        val cutoff = activeHistoryCutoff()
+        val recent = reviewDao.recentAfter(cutoff, config.recentWindowSize)
         val accuracy = if (recent.isEmpty()) 1.0
         else recent.count { it.outcomeRating >= 3 }.toDouble() / recent.size
 
-        val lastTs = reviewDao.lastReviewTs()
+        val lastTs = reviewDao.lastReviewTsAfter(cutoff)
         val daysSince = if (lastTs == null) 0
         else ((startOfDay(now) - startOfDay(lastTs)) / DAY_MS).toInt()
 
@@ -539,75 +500,27 @@ class LearningRepository(
             reviewsDoneToday = today?.reviewsDone ?: 0,
             cleanDays = cleanDays,
             newIntroducedLastWeek = statsDao.newIntroducedSince(valveWindowStart) ?: 0,
-            totalReviews = reviewDao.total(),
+            totalReviews = reviewDao.totalAfter(cutoff),
             hasScheduledCards = cardDao.hasAny(),
             daysSinceReturn = daysSinceReturn(now),
             overheated = overheating(now)
         )
     }
 
-    /**
-     * Whether the last day of work looks like one that cost more than it gave.
-     *
-     * Three things have to agree, because any one of them alone is an ordinary
-     * day: the day was well above the median size, and either its accuracy fell
-     * away from the usual or its plan was abandoned. A big accurate day that
-     * was finished is a good day and is left alone.
-     *
-     * The median is what makes this readable at all: one outlier is exactly
-     * what a median does not move, so "far above the median" means the day
-     * stood out rather than the habit having grown.
-     *
-     * This is deliberately blunt. The sharper signals -- where in the session
-     * accuracy fell, how long the gaps between answers grew -- need a
-     * per-answer record that does not exist yet, and inventing one badly is
-     * worse than reading the three columns that are already trustworthy.
-     */
-    private suspend fun overheating(now: Long): Boolean {
-        val days = statsDao.lastDays(config.activityWindowDays * 2)
-            .filter { it.reviewsDone > 0 }
-        if (days.size < 4) return false
+    private suspend fun overheating(now: Long): Boolean =
+        GovernorSignalCollector.isOverheated(
+            recentActiveDays = statsDao.lastDays(config.activityWindowDays * 2),
+            todayKey = dayKey(now),
+            overheatRatio = config.overheatRatio,
+            overheatAccuracyDrop = config.overheatAccuracyDrop
+        )
 
-        val counts = days.map { it.reviewsDone }.sorted()
-        val median = counts[counts.size / 2]
-        if (median <= 0) return false
-
-        // Today is still being lived in, so it is not the day being judged.
-        val today = dayKey(now)
-        val last = days.firstOrNull { it.day != today } ?: return false
-        if (last.reviewsDone <= median * config.overheatRatio) return false
-
-        val usual = days.map { it.accuracy }.average()
-        val sloppy = last.accuracy < usual - config.overheatAccuracyDrop
-        return sloppy || !last.planCompleted
-    }
-
-    /**
-     * Days since the first session after the last real absence, or null if the
-     * history has no gap that long in it.
-     *
-     * Return mode is supposed to last a few days, and the only way to know it is
-     * still running is to find where it started: the most recent gap in the
-     * activity history that was long enough to count as being away. Reading it
-     * from the history rather than storing a flag means it survives a restore
-     * and cannot be left switched on by a crash.
-     */
-    private suspend fun daysSinceReturn(now: Long): Int? {
-        // Newest first, and a yyyy-MM-dd key sorts the same way as the date.
-        val active = statsDao.lastDays(RETURN_SCAN_DAYS)
-            .filter { it.reviewsDone > 0 }
-            .mapNotNull { runCatching { LocalDate.parse(it.day) }.getOrNull() }
-        if (active.size < 2) return null
-
-        val today = runCatching { LocalDate.parse(dayKey(now)) }.getOrNull() ?: return null
-        for (i in 0 until active.size - 1) {
-            val gap = ChronoUnit.DAYS.between(active[i + 1], active[i]).toInt()
-            if (gap >= config.returnModeGapDays) {
-                return ChronoUnit.DAYS.between(active[i], today).toInt().coerceAtLeast(0)
-            }
-        }
-        return null
-    }
+    private suspend fun daysSinceReturn(now: Long): Int? =
+        GovernorSignalCollector.daysSinceReturn(
+            recentDaysNewestFirst = statsDao.lastDays(RETURN_SCAN_DAYS),
+            todayKey = dayKey(now),
+            returnModeGapDays = config.returnModeGapDays
+        )
 
     /**
      * Days since the first day with any activity. Zero on a fresh install, so a
@@ -621,16 +534,16 @@ class LearningRepository(
     }
 
     /**
-     * Nothing new between [GovernorConfig.nightCutoffHour] and the hour the
-     * day rolls over.
+     * Behavioral sleep-hygiene & fatigue policy: pause new introductions between
+     * [GovernorConfig.nightCutoffHour] and [GovernorConfig.dayStartHour].
      *
-     * A chunk met once at midnight gets the worst possible first contact:
-     * overnight consolidation is weaker here than it is for most people, so that
-     * single late pass is largely wasted and the chunk comes back tomorrow as
-     * something unfamiliar that already carries a schedule. Reviews are
-     * untouched — only the introduction waits for the morning. A first ever
-     * session is exempt: an empty first screen is worse than anything this rule
-     * protects against.
+     * Note on memory science: encoding shortly before sleep actually supports
+     * declarative consolidation compared to daytime wakefulness (Rasch & Born,
+     * 2013; Payne et al., 2012), whereas sleep deprivation and late-night
+     * fatigue impair attention and encoding quality. This rule is therefore a
+     * product-level sleep-hygiene guard — keeping late-night sessions short and
+     * low-effort (reviews stay available) rather than claiming weak overnight
+     * consolidation. First-ever sessions are exempt so onboarding is never empty.
      */
     private fun withNightRule(decision: GovernorDecision, now: Long): GovernorDecision {
         if (decision.allowedNew <= 0 || decision.reason == GovernorReason.FIRST_RUN) {
@@ -661,18 +574,18 @@ class LearningRepository(
     private suspend fun introduce(
         count: Int,
         now: Long,
-        packId: String? = null
+        packId: String? = null,
+        hidden: Set<String>? = null
     ): List<CardEntity> {
-        val hidden = suppressedNow()
+        val suppressed = hidden ?: suppressedNow()
         val candidates = (
             if (packId == null) chunkDao.unintroducedByFrequency(count * 12)
             else chunkDao.unintroducedByFrequencyFor(packId, count * 12)
-            ).filterNot { it.id in hidden }
+            ).filterNot { it.id in suppressed }
         if (candidates.isEmpty()) return emptyList()
 
         val tokens = chunkDao.tokensFor(candidates.map { it.id }).groupBy { it.chunkId }
-        val lemmas = tokens.values.flatten().map { it.lemma }
-        val comps = components.componentsFor(lemmas)
+        val comps = components.componentsForChunks(candidates, tokens)
 
         // A subject deck is taken strictly in the order it was written.
         //
@@ -751,8 +664,9 @@ class LearningRepository(
         caller.ensureActive()
         db.inTransaction {
             val plan = planDao.plan(dayKey(now))?.classicOnly() ?: return@inTransaction false
+            val cutoff = activeHistoryCutoff()
             BrowsePolicy.requiredComplete(requiredIds(plan),
-                reviewDao.answeredKeysSince(startOfDay(now)).toSet())
+                reviewDao.answeredKeysSinceAfter(startOfDay(now), cutoff).toSet())
         }.also { caller.ensureActive() }
     }
 
@@ -771,10 +685,11 @@ class LearningRepository(
         db.inTransaction {
             val day = dayKey(now)
             val start = startOfDay(now)
+            val cutoff = activeHistoryCutoff()
             val stored = planDao.plan(day)
             val observation = SessionObservation(day, start, reviewDao.maxId(), reviewDao.rawCount(),
                 stored, db.historyBoundaryDao().current(), syncHistoryBoundary?.invoke(), historyBoundaryToken?.invoke())
-            val answered = reviewDao.answeredKeysSince(start).toSet()
+            val answered = reviewDao.answeredKeysSinceAfter(start, cutoff).toSet()
             val factual = statsDao.day(day)?.reviewsDone ?: 0
             val goal = admissionReviewsDone(factual, now)
             val active = stored?.classicOnly()
@@ -871,8 +786,9 @@ class LearningRepository(
     private suspend fun optionalHardComplete(now: Long): Boolean {
         val plan = planDao.plan(dayKey(now))?.classicOnly() ?: return false
         val required = requiredIds(plan)
+        val cutoff = activeHistoryCutoff()
         return required.isNotEmpty() && BrowsePolicy.requiredComplete(required,
-            reviewDao.answeredKeysSince(startOfDay(now)).toSet())
+            reviewDao.answeredKeysSinceAfter(startOfDay(now), cutoff).toSet())
     }
 
     private suspend fun optionalHardCandidates(deckId: String?, limit: Int): List<CardEntity> =
@@ -907,7 +823,8 @@ class LearningRepository(
         now: Long = System.currentTimeMillis()
     ): SessionPlan {
         val plan = ensureDailyPlan(now)
-        val answered = reviewDao.answeredKeysSince(startOfDay(now)).toSet()
+        val cutoff = activeHistoryCutoff()
+        val answered = reviewDao.answeredKeysSinceAfter(startOfDay(now), cutoff).toSet()
 
         // The whole plan is materialised here, not just its pending part, because
         // a deck session has to know how much of its own share is already done —
@@ -941,8 +858,13 @@ class LearningRepository(
 
         val access = developerAccess?.invoke() ?: DeveloperAccess.NONE
         val forcedCards = if (pending.isEmpty() && access.active) {
-            val extras = builder().pickExtra(emptyList(), config.dailyMinimumCards.coerceAtLeast(20), now, deckId)
-                .filterNot { it.chunkId in hiddenNow }
+            val extras = builder().pickExtra(
+                emptyList(),
+                config.dailyMinimumCards.coerceAtLeast(20),
+                now,
+                deckId,
+                suppressedChunkIds = hiddenNow
+            ).filterNot { it.chunkId in hiddenNow }
             builder().materialize(extras.map { it.key })
         } else emptyList()
         val forced = forcedCards.isNotEmpty()
@@ -984,7 +906,8 @@ class LearningRepository(
     /** Home and the widget share the same unique global queue. */
     suspend fun todayStudySummary(now: Long = System.currentTimeMillis()): TodayStudySummary {
         val plan = ensureDailyPlan(now)
-        val answered = reviewDao.answeredKeysSince(startOfDay(now)).toSet()
+        val cutoff = activeHistoryCutoff()
+        val answered = reviewDao.answeredKeysSinceAfter(startOfDay(now), cutoff).toSet()
         val hidden = suppressedNow()
         val materialized = builder().materialize(plan.ids)
         val pending = materialized.filterNot { it.chunk.id in hidden || it.card.key in answered }
@@ -1009,9 +932,11 @@ class LearningRepository(
      */
     suspend fun remainingByDeck(now: Long = System.currentTimeMillis()): Map<String, Int> {
         val plan = ensureDailyPlan(now)
-        val answered = reviewDao.answeredKeysSince(startOfDay(now)).toSet()
+        val cutoff = activeHistoryCutoff()
+        val answered = reviewDao.answeredKeysSinceAfter(startOfDay(now), cutoff).toSet()
+        val hidden = suppressedNow()
         val pending = builder().materialize(plan.ids)
-            .filterNot { it.card.key in answered }
+            .filterNot { it.chunk.id in hidden || it.card.key in answered }
         if (pending.isEmpty()) return emptyMap()
         val memberships = chunkDao.membershipsFor(pending.map { it.chunk.id }.distinct())
             .groupBy { it.chunkId }
@@ -1102,7 +1027,8 @@ class LearningRepository(
     private suspend fun browseGate(plan: DailyPlanEntity, now: Long): BrowseGate {
         val blockers = mutableListOf<BrowseUnavailableReason>()
         val required = requiredIds(plan)
-        val answered = reviewDao.answeredKeysSince(startOfDay(now)).toSet()
+        val cutoff = activeHistoryCutoff()
+        val answered = reviewDao.answeredKeysSinceAfter(startOfDay(now), cutoff).toSet()
         val missing = BrowsePolicy.remainingRequired(required, answered)
         val planComplete = missing == 0
         if (!planComplete) blockers += BrowseUnavailableReason.PLAN_NOT_COMPLETE
@@ -1284,10 +1210,11 @@ class LearningRepository(
         deckId: String?,
         now: Long
     ): List<CardEntity> {
-        val answered = reviewDao.answeredKeysSince(startOfDay(now))
+        val cutoff = activeHistoryCutoff()
+        val answered = reviewDao.answeredKeysSinceAfter(startOfDay(now), cutoff)
         val exclude = (plan.ids + answered).distinct()
         val hidden = suppressedNow()
-        return builder().pickExtra(exclude, count, now, deckId)
+        return builder().pickExtra(exclude, count, now, deckId, suppressedChunkIds = hidden)
             .filterNot { it.chunkId in hidden }
             .take(count)
     }
@@ -1320,39 +1247,41 @@ class LearningRepository(
         val chunkId = sessionCard.chunk.id
         onSuppress?.invoke(chunkId)
 
-        val plan = planDao.plan(dayKey(now))?.classicOnly() ?: return
-        // Every level of the chunk leaves the plan, not just the one on screen.
-        val requiredCount = (plan.ids.size - plan.extraRequested).coerceAtLeast(0)
-        val required = plan.ids.take(requiredCount)
-        val extras = plan.ids.drop(requiredCount)
-        val keptRequired = required.filterNot { it.substringBeforeLast(':') == chunkId }
-        val keptExtras = extras.filterNot { it.substringBeforeLast(':') == chunkId }
-        val kept = keptRequired + keptExtras
-        val removed = plan.ids.size - kept.size
-        if (removed > 0) {
-            planDao.upsert(
-                plan.copy(
-                    plannedIds = kept.joinToString(","),
-                    plannedTotal = kept.size,
-                    extraRequested = keptExtras.size
-                )
-            )
-            statsDao.day(plan.day)?.let { stat ->
-                statsDao.upsert(
-                    stat.copy(
-                        planCompleted = planCompleted(plan.day, stat.reviewsDone, now)
+        db.inTransaction {
+            val plan = planDao.plan(dayKey(now))?.classicOnly() ?: return@inTransaction
+            // Every level of the chunk leaves the plan, not just the one on screen.
+            val requiredCount = (plan.ids.size - plan.extraRequested).coerceAtLeast(0)
+            val required = plan.ids.take(requiredCount)
+            val extras = plan.ids.drop(requiredCount)
+            val keptRequired = required.filterNot { it.substringBeforeLast(':') == chunkId }
+            val keptExtras = extras.filterNot { it.substringBeforeLast(':') == chunkId }
+            val kept = keptRequired + keptExtras
+            val removed = plan.ids.size - kept.size
+            if (removed > 0) {
+                planDao.upsert(
+                    plan.copy(
+                        plannedIds = kept.joinToString(","),
+                        plannedTotal = kept.size,
+                        extraRequested = keptExtras.size
                     )
                 )
+                statsDao.day(plan.day)?.let { stat ->
+                    statsDao.upsert(
+                        stat.copy(
+                            planCompleted = planCompleted(plan.day, stat.reviewsDone, now)
+                        )
+                    )
+                }
             }
-        }
 
-        // A chunk met for the first time today and thrown away was never learned,
-        // so the day's new-material budget is handed back and a real card can take
-        // its place. A chunk from an earlier day keeps its history: those answers
-        // happened, whatever the card turned out to be.
-        val card = cardDao.card(chunkId, sessionCard.level.value)
-        if (card != null && card.isNew && dayKey(card.introducedAt) == dayKey(now)) {
-            uncountIntroduced(now)
+            // A chunk met for the first time today and thrown away was never learned,
+            // so the day's new-material budget is handed back and a real card can take
+            // its place. A chunk from an earlier day keeps its history: those answers
+            // happened, whatever the card turned out to be.
+            val card = cardDao.card(chunkId, sessionCard.level.value)
+            if (card != null && card.isNew && dayKey(card.introducedAt) == dayKey(now)) {
+                uncountIntroduced(now)
+            }
         }
     }
 
@@ -1501,7 +1430,9 @@ class LearningRepository(
         val stat = statsDao.day(day) ?: return
         val obligation = (plan.plannedTotal - plan.extraRequested)
             .coerceAtLeast(config.dailyMinimumCards)
-        val beyond = admissionReviewsDone(stat.reviewsDone, now) - obligation
+        // Only recalled ordinary answers (GOOD/EASY) earn extra new material;
+        // repeated AGAIN lapses must never reward the learner with new cards.
+        val beyond = admissionCorrectReviewsDone(stat.correctCount, now) - obligation
         if (beyond <= 0) return
 
         val gov = governor()
@@ -1688,16 +1619,23 @@ class LearningRepository(
         val plan = planDao.plan(day)?.classicOnly()
             ?: return admissionReviewsDone(done, ts) >= config.dailyMinimumCards
         val required = requiredIds(plan)
-        val answered = reviewDao.answeredKeysSince(startOfDay(ts)).toSet()
+        val cutoff = activeHistoryCutoff()
+        val answered = reviewDao.answeredKeysSinceAfter(startOfDay(ts), cutoff).toSet()
         return BrowsePolicy.requiredComplete(required, answered)
     }
 
     /** Keep historical/cached normal totals unchanged; optional credit is derived from the journal. */
     private suspend fun admissionReviewsDone(factualDone: Int, ts: Long): Int {
-        val until = boundary.date(ts).plusDays(1).atStartOfDay(ZoneId.systemDefault())
-            .plusHours(config.dayStartHour.toLong()).toInstant().toEpochMilli()
-        val cutoff = db.historyBoundaryDao().current()?.afterLocalId ?: syncHistoryBoundary?.invoke() ?: 0L
+        val until = boundary.nextDayStart(ts)
+        val cutoff = activeHistoryCutoff()
         return (factualDone - reviewDao.optionalHardCountBetween(startOfDay(ts), until, cutoff)).coerceAtLeast(0)
+    }
+
+    /** Recalled ordinary answers (GOOD+), excluding optional hard sessions. */
+    private suspend fun admissionCorrectReviewsDone(factualCorrect: Int, ts: Long): Int {
+        val until = boundary.nextDayStart(ts)
+        val cutoff = activeHistoryCutoff()
+        return (factualCorrect - reviewDao.optionalHardCorrectCountBetween(startOfDay(ts), until, cutoff)).coerceAtLeast(0)
     }
 
     private fun startOfDay(ts: Long): Long = boundary.startOfDay(ts)
@@ -1705,7 +1643,8 @@ class LearningRepository(
     /** DEV inspection reads state without creating plans, awarding credits or recording answers. */
     suspend fun developerDiagnostics(now: Long = System.currentTimeMillis()): DeveloperDiagnostics = writeLock.withLock {
         val plan = planDao.plan(dayKey(now))?.classicOnly()
-        val answered = reviewDao.answeredKeysSince(startOfDay(now)).toSet()
+        val cutoff = activeHistoryCutoff()
+        val answered = reviewDao.answeredKeysSinceAfter(startOfDay(now), cutoff).toSet()
         val hidden = suppressedNow()
         val pending = builder().materialize(plan?.ids.orEmpty())
             .count { it.card.key !in answered && it.chunk.id !in hidden }
@@ -1724,7 +1663,7 @@ class LearningRepository(
             allowedNew = decision.allowedNew, capacity = decision.capacity,
             pending = pending, planSize = plan?.plannedTotal ?: 0,
             due = signals.dueToday, backlog = signals.backlog,
-            reviewRows = reviewDao.total(), retiredCards = cardDao.retiredCount(),
+            reviewRows = reviewDao.totalAfter(cutoff), retiredCards = cardDao.retiredCount(),
             overrideEnabled = developerAccess?.invoke()?.active == true,
             decks = chunkDao.packs().map { dev.ikna.data.dev.DeveloperDeck(it.id, it.title ?: it.id) }
         )
@@ -1822,7 +1761,8 @@ class LearningRepository(
      * without discarding the session.
      */
     suspend fun medianAnswerMs(): Long? {
-        val samples = reviewDao.recentDurations(DURATION_SAMPLE)
+        val cutoff = activeHistoryCutoff()
+        val samples = reviewDao.recentDurationsAfter(cutoff, DURATION_SAMPLE)
             .filter { it in MIN_SANE_ANSWER_MS..MAX_SANE_ANSWER_MS }
         if (samples.size < DURATION_MIN_SAMPLES) return null
         val sorted = samples.sorted()
@@ -1838,7 +1778,8 @@ class LearningRepository(
      * SQLite would have to be taught and Kotlin already knows.
      */
     suspend fun statsDigest(now: Long = System.currentTimeMillis()): StatsDigest {
-        val answers = reviewDao.since(now - STATS_WINDOW_DAYS * DAY_MS)
+        val cutoff = activeHistoryCutoff()
+        val answers = reviewDao.sinceAfter(now - STATS_WINDOW_DAYS * DAY_MS, cutoff)
 
         // Only real reviews count towards retention. A first contact cannot be
         // "forgotten", so counting it would quietly inflate every figure here.

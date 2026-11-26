@@ -70,19 +70,24 @@ class SessionBuilder(
     suspend fun pickForDay(
         decision: GovernorDecision,
         now: Long,
-        introduced: List<CardEntity> = emptyList()
+        introduced: List<CardEntity> = emptyList(),
+        suppressedChunkIds: Set<String> = emptySet()
     ): List<CardEntity> {
         val capacity = decision.capacity
         if (capacity <= 0) return emptyList()
 
-        val reserved = introduced.filter { it.level == 0 }.take(capacity)
+        val reserved = introduced
+            .filter { it.level == 0 && it.chunkId !in suppressedChunkIds }
+            .take(capacity)
         val room = capacity - reserved.size
         if (room <= 0) return reserved
 
         val amnestyQuota = decision.amnestyQuota.coerceIn(0, room)
-        // Never offer the same question twice: the reserved cards are due now
-        // and would otherwise come back out of the due query as well.
-        val exclude = reserved.map { it.key }.ifEmpty { listOf("") }
+        // Exclude both reserved new cards and suppressed chunks BEFORE SQL LIMIT
+        // so suppressed cards never steal review capacity slots.
+        val exclude = (reserved.map { it.key } + suppressedChunkIds.map { "$it:0" })
+            .distinct()
+            .ifEmpty { listOf("") }
 
         val dueRoom = room - amnestyQuota
         val due =
@@ -91,9 +96,11 @@ class SessionBuilder(
             if (amnestyQuota > 0) cardDao.amnestyCardsExcluding(exclude, amnestyQuota)
             else emptyList()
 
-        // New chunks first, then the day's repetitions. The reserved cards are
-        // prepended, so new material still lands while attention is freshest.
-        return reserved + interleave(due + amnesty).take(room)
+        // Warm-up + interleaving (Storm, Bjork & Storm 2010; ADHD task initiation):
+        // start with up to 2 familiar reviews when available, then spread new cards
+        // evenly across the review queue to reduce proactive interference.
+        val reviews = interleave(due + amnesty).take(room)
+        return interleaveNewAndReviews(reserved, reviews)
     }
 
     /**
@@ -109,10 +116,13 @@ class SessionBuilder(
         exclude: List<String>,
         count: Int,
         now: Long,
-        packId: String? = null
+        packId: String? = null,
+        suppressedChunkIds: Set<String> = emptySet()
     ): List<CardEntity> {
         if (count <= 0) return emptyList()
-        val safeExclude = if (exclude.isEmpty()) listOf("") else exclude
+        val safeExclude = (exclude + suppressedChunkIds.map { "$it:0" })
+            .distinct()
+            .ifEmpty { listOf("") }
 
         val due =
             if (packId == null) cardDao.dueCardsExcluding(now, safeExclude, count)
@@ -145,9 +155,24 @@ class SessionBuilder(
         val ordered = keys.mapNotNull { cards[it] }
         if (ordered.isEmpty()) return emptyList()
 
-        val chunks = chunkDao.chunks(ordered.map { it.chunkId }.distinct()).associateBy { it.id }
+        val chunkIds = ordered.map { it.chunkId }.distinct()
+        val chunks = chunkDao.chunks(chunkIds).associateBy { it.id }
+        val matureChunkIds = ordered
+            .filter { !it.isNew && it.stability >= ContextPolicy.DIVERSITY_MIN_STABILITY_DAYS }
+            .map { it.chunkId }
+            .distinct()
+        val contextsByChunk = if (matureChunkIds.isEmpty()) {
+            emptyMap()
+        } else {
+            matureChunkIds.chunked(400).flatMap { chunkDao.contextsForChunks(it) }.groupBy { it.chunkId }
+        }
         return ordered.mapNotNull { card ->
-            val chunk = chunks[card.chunkId] ?: return@mapNotNull null
+            val baseChunk = chunks[card.chunkId] ?: return@mapNotNull null
+            val chunk = ContextPolicy.resolveChunk(
+                chunk = baseChunk,
+                card = card,
+                contexts = contextsByChunk[card.chunkId].orEmpty()
+            )
             SessionCard(
                 card = card,
                 chunk = chunk,
@@ -155,6 +180,37 @@ class SessionBuilder(
                 fromAmnesty = card.inAmnesty
             )
         }
+    }
+
+    /**
+     * Warm-up + interleaved ordering: open with up to two familiar reviews
+     * when available, then weave newly introduced cards evenly among the
+     * remaining reviews so new items are not clustered in one interference block.
+     */
+    fun interleaveNewAndReviews(
+        newCards: List<CardEntity>,
+        reviews: List<CardEntity>
+    ): List<CardEntity> {
+        if (newCards.isEmpty()) return reviews
+        if (reviews.isEmpty()) return newCards
+
+        val warmUpCount = minOf(2, reviews.size)
+        val warmUp = reviews.take(warmUpCount)
+        val restReviews = reviews.drop(warmUpCount)
+        if (restReviews.isEmpty()) return warmUp + newCards
+
+        val out = ArrayList<CardEntity>(newCards.size + reviews.size)
+        out += warmUp
+        val step = (restReviews.size.toDouble() / newCards.size).coerceAtLeast(1.0).roundToInt()
+        var n = 0
+        restReviews.forEachIndexed { idx, rev ->
+            if (idx % step == 0 && n < newCards.size) {
+                out += newCards[n++]
+            }
+            out += rev
+        }
+        while (n < newCards.size) out += newCards[n++]
+        return out
     }
 
     /**

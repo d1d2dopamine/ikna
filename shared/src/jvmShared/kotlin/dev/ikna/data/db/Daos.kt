@@ -117,6 +117,9 @@ interface ChunkDao {
     @Query("SELECT * FROM chunk_contexts WHERE chunkId = :chunkId ORDER BY packId, freqRank, contextId")
     suspend fun contextsFor(chunkId: String): List<ChunkContextEntity>
 
+    @Query("SELECT * FROM chunk_contexts WHERE chunkId IN (:chunkIds) ORDER BY packId, freqRank, contextId")
+    suspend fun contextsForChunks(chunkIds: List<String>): List<ChunkContextEntity>
+
     @Query("SELECT * FROM chunks WHERE id = :id")
     suspend fun chunk(id: String): ChunkEntity?
 
@@ -523,6 +526,9 @@ interface ReviewDao {
     @Query("SELECT * FROM reviews WHERE " + NOT_RETRACTED + " ORDER BY ts DESC, COALESCE(eventId, printf('%020d', id)) DESC LIMIT :limit")
     suspend fun recent(limit: Int): List<ReviewEntity>
 
+    @Query("SELECT * FROM reviews WHERE id > :afterLocalId AND " + NOT_RETRACTED + " ORDER BY ts DESC, COALESCE(eventId, printf('%020d', id)) DESC LIMIT :limit")
+    suspend fun recentAfter(afterLocalId: Long, limit: Int): List<ReviewEntity>
+
     @Query("SELECT * FROM reviews WHERE " + NOT_RETRACTED + " ORDER BY ts ASC, COALESCE(eventId, printf('%020d', id)) ASC")
     suspend fun allAnswers(): List<ReviewEntity>
 
@@ -537,18 +543,30 @@ interface ReviewDao {
     @Query("SELECT * FROM reviews WHERE ts >= :from AND " + NOT_RETRACTED + " ORDER BY ts ASC, COALESCE(eventId, printf('%020d', id)) ASC")
     suspend fun since(from: Long): List<ReviewEntity>
 
+    @Query("SELECT * FROM reviews WHERE id > :afterLocalId AND ts >= :from AND " + NOT_RETRACTED + " ORDER BY ts ASC, COALESCE(eventId, printf('%020d', id)) ASC")
+    suspend fun sinceAfter(from: Long, afterLocalId: Long): List<ReviewEntity>
+
     @Query("SELECT COUNT(*) FROM reviews WHERE ts >= :from AND " + NOT_RETRACTED)
     suspend fun countSince(from: Long): Int
 
     @Query("SELECT MAX(ts) FROM reviews WHERE " + NOT_RETRACTED)
     suspend fun lastReviewTs(): Long?
 
+    @Query("SELECT MAX(ts) FROM reviews WHERE id > :afterLocalId AND " + NOT_RETRACTED)
+    suspend fun lastReviewTsAfter(afterLocalId: Long): Long?
+
     @Query("SELECT COUNT(*) FROM reviews WHERE " + NOT_RETRACTED)
     suspend fun total(): Int
+
+    @Query("SELECT COUNT(*) FROM reviews WHERE id > :afterLocalId AND " + NOT_RETRACTED)
+    suspend fun totalAfter(afterLocalId: Long): Int
 
     /** Global learning targets that have ever received a real answer. */
     @Query("SELECT COUNT(DISTINCT chunkId) FROM reviews WHERE " + NOT_RETRACTED)
     suspend fun distinctTargetCount(): Int
+
+    @Query("SELECT COUNT(DISTINCT chunkId) FROM reviews WHERE id > :afterLocalId AND " + NOT_RETRACTED)
+    suspend fun distinctTargetCountAfter(afterLocalId: Long): Int
 
     /** Statistics uses one bounded, chronological, undo-aware journal snapshot. */
     @Query("SELECT * FROM reviews WHERE ts BETWEEN :from AND :until AND " + NOT_RETRACTED +
@@ -572,10 +590,21 @@ interface ReviewDao {
     )
     suspend fun answeredKeysSince(from: Long): List<String>
 
+    @Query(
+        "SELECT DISTINCT chunkId || ':' || level FROM reviews " +
+            "WHERE id > :afterLocalId AND ts >= :from AND purpose IS NULL AND " + NOT_RETRACTED
+    )
+    suspend fun answeredKeysSinceAfter(from: Long, afterLocalId: Long): List<String>
+
     /** Factual totals retain optional answers; admission/completion credit subtracts them. */
     @Query("SELECT COUNT(*) FROM reviews WHERE id > :afterLocalId AND ts >= :from AND ts < :until " +
         "AND purpose = 'optional_hard' AND " + NOT_RETRACTED)
     suspend fun optionalHardCountBetween(from: Long, until: Long, afterLocalId: Long): Int
+
+    /** Optional answers whose learner input was recalled (GOOD+), subtracted from earned-new credit. */
+    @Query("SELECT COUNT(*) FROM reviews WHERE id > :afterLocalId AND ts >= :from AND ts < :until " +
+        "AND purpose = 'optional_hard' AND COALESCE(inputRating, rating) >= 3 AND " + NOT_RETRACTED)
+    suspend fun optionalHardCorrectCountBetween(from: Long, until: Long, afterLocalId: Long): Int
 
     @Query("SELECT * FROM reviews WHERE " + NOT_RETRACTED + " ORDER BY ts DESC, COALESCE(eventId, printf('%020d', id)) DESC LIMIT 1")
     suspend fun lastAnswer(): ReviewEntity?
@@ -587,11 +616,23 @@ interface ReviewDao {
     )
     suspend fun recentDurations(limit: Int): List<Long>
 
+    @Query(
+        "SELECT durationMs FROM reviews WHERE id > :afterLocalId AND " + NOT_RETRACTED +
+            " AND durationMs > 0 ORDER BY ts DESC, COALESCE(eventId, printf('%020d', id)) DESC LIMIT :limit"
+    )
+    suspend fun recentDurationsAfter(afterLocalId: Long, limit: Int): List<Long>
+
     /** All input modes, newest valid answers in one bounded SQLite snapshot. */
     @Query("SELECT * FROM reviews WHERE " + NOT_RETRACTED +
         " AND rating BETWEEN 1 AND 4 AND ts BETWEEN 1 AND :beforeTs" +
         " ORDER BY ts DESC, COALESCE(eventId, printf('%020d', id)) DESC LIMIT :limit")
     suspend fun optimizerHistory(limit: Int, beforeTs: Long): List<ReviewEntity>
+
+    /** Boundary-aware optimizer history so post-reset archived reviews never pollute fitting. */
+    @Query("SELECT * FROM reviews WHERE id > :afterLocalId AND " + NOT_RETRACTED +
+        " AND rating BETWEEN 1 AND 4 AND ts BETWEEN 1 AND :beforeTs" +
+        " ORDER BY ts DESC, COALESCE(eventId, printf('%020d', id)) DESC LIMIT :limit")
+    suspend fun optimizerHistoryAfter(afterLocalId: Long, limit: Int, beforeTs: Long): List<ReviewEntity>
 
     /** Latest usable timings for one native input modality, excluding undo. */
     @Query(

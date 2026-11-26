@@ -206,25 +206,36 @@ object FsrsOptimizer {
     }
 
     /**
-     * Groups answers into one ordered history per card, newest
-     * [MAX_ANSWERS] first kept.
+     * Groups answers into complete per-card chronological histories, retaining
+     * the most recently active whole cards up to [MAX_ANSWERS] total reviews.
      *
-     * The cap is there so that a decade-long log cannot turn a background job
-     * into a battery complaint; it keeps the most recent answers, which are also
-     * the ones that describe the memory the user has now.
+     * Slicing raw reviews chronologically would cut active mature cards in half
+     * and force the replay to treat a mid-history review as `Fsrs.initial()`.
+     * Selecting whole card histories by recency keeps the budget bounded while
+     * preserving every kept card's true initial state.
      */
     fun histories(samples: List<ReviewSample>): List<List<ReviewSample>> {
-        val byTime = samples.sortedBy { it.ts }
-        val recent = if (byTime.size > MAX_ANSWERS) {
-            byTime.subList(byTime.size - MAX_ANSWERS, byTime.size)
-        } else {
-            byTime
-        }
-        return recent
-            .sortedWith(compareBy({ it.cardKey }, { it.ts }))
+        if (samples.isEmpty()) return emptyList()
+        val grouped = samples
             .groupBy { it.cardKey }
             .values
-            .toList()
+            .map { list -> list.sortedBy { it.ts } }
+            .sortedWith(compareByDescending<List<ReviewSample>> { it.last().ts }.thenBy { it.first().cardKey })
+
+        val kept = ArrayList<List<ReviewSample>>(grouped.size)
+        var total = 0
+        for (history in grouped) {
+            if (kept.isNotEmpty() && total + history.size > MAX_ANSWERS) continue
+            val slice = if (history.size > MAX_ANSWERS) {
+                history.subList(history.size - MAX_ANSWERS, history.size)
+            } else {
+                history
+            }
+            kept += slice
+            total += slice.size
+            if (total >= MAX_ANSWERS) break
+        }
+        return kept.sortedBy { it.first().cardKey }
     }
 
     /**
@@ -334,14 +345,29 @@ object FsrsOptimizer {
     }
 
     /**
-     * Coordinate descent from the defaults: try each weight up and down, keep
-     * what helps, halve the step, repeat.
+     * Indices actually identified by the >= 1 day recall log-loss.
      *
-     * Not gradient descent, on purpose. The gradient of this loss through the
-     * replay is not available in closed form, numerical gradients cost the same
-     * as these probes, and this version has no learning rate to tune and no way
-     * to diverge. It is also short enough to read, which for a number that
-     * decides someone's schedule is worth more than elegance.
+     * Short-term same-day weights w[17..19] are excluded from fitting because
+     * answers under [MIN_ELAPSED_DAYS] are intentionally unscored; keeping them
+     * pinned at published FSRS-6 defaults avoids fitting noise and speeds up
+     * on-device optimisation.
+     */
+    private val OPTIMISABLE_INDICES: List<Int> = (0..16).toList() + listOf(20)
+
+    /** Strongest coupled FSRS-6 parameter pairs for diagonal ridge probes. */
+    private val COUPLED_PAIRS: List<Pair<Int, Int>> = listOf(
+        8 to 9,   // recall growth vs stability diminishing returns
+        8 to 10,  // recall growth vs retrievability gain
+        11 to 13, // post-lapse base vs previous stability exponent
+        4 to 5    // initial difficulty vs grade slope
+    )
+
+    /**
+     * Deterministic coordinate + coupled-pair search from the defaults.
+     *
+     * Keeps the stability and zero-hyperparameter safety of coordinate descent
+     * while adding diagonal probes along the strongest coupled FSRS-6 valleys
+     * and freezing unscored short-term parameters w[17..19].
      */
     private fun descend(
         histories: List<List<ReviewSample>>,
@@ -356,7 +382,7 @@ object FsrsOptimizer {
         repeat(MAX_PASSES) {
             checkCancelled()
             var moved = false
-            for (index in w.indices) {
+            for (index in OPTIMISABLE_INDICES) {
                 val range = BOUNDS[index]
                 val span = range.endInclusive - range.start
                 for (scale in listOf(step, -step, step * 0.25, -step * 0.25)) {
@@ -370,6 +396,35 @@ object FsrsOptimizer {
                         moved = true
                     } else {
                         w[index] = current
+                    }
+                }
+            }
+            for ((i, j) in COUPLED_PAIRS) {
+                val rangeI = BOUNDS[i]
+                val rangeJ = BOUNDS[j]
+                val spanI = rangeI.endInclusive - rangeI.start
+                val spanJ = rangeJ.endInclusive - rangeJ.start
+                val curI = w[i]
+                val curJ = w[j]
+                for ((si, sj) in listOf(
+                    step to step,
+                    -step to -step,
+                    step to -step,
+                    -step to step
+                )) {
+                    val candI = clamp(curI + si * spanI, rangeI)
+                    val candJ = clamp(curJ + sj * spanJ, rangeJ)
+                    if (candI == curI && candJ == curJ) continue
+                    w[i] = candI
+                    w[j] = candJ
+                    val score = objective(w, histories, cut, desiredRetention, checkCancelled)
+                    if (score < best) {
+                        best = score
+                        moved = true
+                        break
+                    } else {
+                        w[i] = curI
+                        w[j] = curJ
                     }
                 }
             }
@@ -397,13 +452,13 @@ object FsrsOptimizer {
      */
     private fun penalty(w: List<Double>): Double {
         var sum = 0.0
-        for (index in w.indices) {
+        for (index in OPTIMISABLE_INDICES) {
             val range = BOUNDS[index]
             val span = range.endInclusive - range.start
             val delta = (w[index] - FsrsParams.DEFAULT_W[index]) / span
             sum += delta * delta
         }
-        return REGULARISATION * sum / w.size
+        return REGULARISATION * sum / OPTIMISABLE_INDICES.size
     }
 
     private fun clamp(value: Double, range: ClosedFloatingPointRange<Double>): Double =

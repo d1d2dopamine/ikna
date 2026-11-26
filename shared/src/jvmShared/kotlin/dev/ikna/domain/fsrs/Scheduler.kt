@@ -57,7 +57,7 @@ class Scheduler(
             Fsrs.next(before, elapsedDays, rating, params)
         }
 
-        val interval = Fsrs.intervalDays(after.stability, params.desiredRetention, params)
+        val interval = fuzzedInterval(after.stability, card)
         val updated = card.copy(
             stability = after.stability,
             difficulty = after.difficulty,
@@ -93,7 +93,7 @@ class Scheduler(
         val high = if (rating == Rating.EASY) 1.3 else 1.0
         val after = boundDerivedMemoryV1(good.after, raw.after, rating)
         val stability = after.stability
-        val interval = Fsrs.intervalDays(stability, params.desiredRetention, params)
+        val interval = fuzzedInterval(stability, card)
         val candidate = dueAt(now, interval)
         val baseDelay = (good.card.dueAt - now).coerceAtLeast(0L)
         val minDelay = kotlin.math.ceil(baseDelay * low).toLong()
@@ -161,10 +161,45 @@ class Scheduler(
      * 24 hours behind the moment it precedes. The [max] is there so that this
      * stays true if that floor is ever lowered.
      */
+    /**
+     * Deterministic FSRS-6 fuzzing keyed solely by card identity and review
+     * history counters (never wall-clock or rating), so live and replay agree
+     * bit-for-bit and HARD <= GOOD <= EASY ordering is strictly preserved.
+     */
+    private fun fuzzedInterval(stability: Double, card: CardEntity): Double {
+        val raw = Fsrs.intervalDays(stability, params.desiredRetention, params)
+        return Fsrs.fuzzIntervalDays(raw, fuzzSeed(card))
+    }
+
+    private fun fuzzSeed(card: CardEntity): Long {
+        var h = -3750763034362895579L // FNV-1a 64-bit offset basis
+        for (ch in card.chunkId) {
+            h = (h xor ch.code.toLong()) * 1099511628211L
+        }
+        h = (h xor card.level.toLong()) * 1099511628211L
+        h = (h xor card.reps.toLong()) * 1099511628211L
+        h = (h xor card.lapses.toLong()) * 1099511628211L
+        return h
+    }
+
     private fun dueAt(now: Long, intervalDays: Double): Long {
         val target = now + (intervalDays * DAY_MS).roundToLong()
-        val dayStart = boundary?.startOfDay(target) ?: return target
+        val b = boundary ?: return target
+        var dayStart = b.startOfDay(target)
+        // Studying in the late-night window right before dayStartHour (e.g. 03:30
+        // when dayStartHour = 4) with a 1-day interval would otherwise snap to
+        // 04:00 of the same morning -- 30 minutes later. Require at least a
+        // 4-hour gap before a "next study day" boundary activates (23:00 -> 04:00
+        // is 5 hours and stays on the next morning; 00:01..03:59 -> 04:00 is under
+        // 4 hours and advances to the following study day).
+        if (intervalDays >= 1.0 && dayStart - now < MIN_STUDY_DAY_GAP_MS) {
+            dayStart = b.nextDayStart(dayStart)
+        }
         return max(dayStart, now)
+    }
+
+    private companion object {
+        const val MIN_STUDY_DAY_GAP_MS = 4 * 3_600_000L
     }
 }
 

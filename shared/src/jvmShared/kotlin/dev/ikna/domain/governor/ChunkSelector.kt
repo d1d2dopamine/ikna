@@ -60,7 +60,8 @@ class ChunkSelector(
             val weak = ArrayList<String>()
 
             for (t in tokens) {
-                val c = components[ComponentKey(t.lemma, t.pos)]
+                val c = components[ComponentKey.forLang(chunk.lang, t.lemma, t.pos)]
+                    ?: components[ComponentKey(t.lemma, t.pos)]
                 if (c == null) {
                     unknown++
                     continue
@@ -104,4 +105,20 @@ class ChunkSelector(
         (1.0 + (19.0 / 81.0) * elapsedDays / max(stability, 0.1)).pow(-0.5)
 }
 
-data class ComponentKey(val lemma: String, val pos: String)
+data class ComponentKey(val lemma: String, val pos: String) {
+    companion object {
+        /**
+         * Encodes a language prefix into the stored lemma key when a real
+         * language code is present, isolating homographs across languages
+         * (e.g. EN "gift" vs DE "gift", EN "pan" vs ES "pan") without altering
+         * the Room v14 `components` primary key schema.
+         */
+        fun scopedLemma(lang: String, lemma: String): String {
+            val cleanLang = lang.trim().lowercase()
+            return if (cleanLang.isEmpty() || cleanLang == "none") lemma else "$cleanLang:$lemma"
+        }
+
+        fun forLang(lang: String, lemma: String, pos: String): ComponentKey =
+            ComponentKey(scopedLemma(lang, lemma), pos)
+    }
+}

@@ -95,6 +95,43 @@ object Fsrs {
         stability / factor(p) * (desiredRetention.pow(1.0 / decay(p)) - 1.0)
     )
 
+    /**
+     * Official FSRS-6 continuous piecewise-linear fuzz half-width.
+     *
+     * Intervals under 2.5 days are never fuzzed. Above 2.5 days, integrating
+     * slopes (0.15 on [2.5, 7], 0.10 on [7, 20], 0.05 above 20) guarantees
+     * that `intervalDays + u * fuzzDelta(intervalDays)` is strictly monotonic
+     * in `intervalDays` for every fixed `u in [-1, 1]`, preventing review-cohort
+     * avalanches without ever inverting HARD <= GOOD <= EASY ordering.
+     */
+    fun fuzzDelta(intervalDays: Double): Double {
+        if (!intervalDays.isFinite() || intervalDays <= 2.5) return 0.0
+        var delta = 0.0
+        delta += 0.15 * (min(intervalDays, 7.0) - 2.5)
+        if (intervalDays > 7.0) delta += 0.10 * (min(intervalDays, 20.0) - 7.0)
+        if (intervalDays > 20.0) delta += 0.05 * (intervalDays - 20.0)
+        return delta
+    }
+
+    /**
+     * Deterministic FSRS-6 interval fuzzing.
+     *
+     * Uses SplitMix64 mixing on [seed] so live scheduling, backup restore,
+     * sync replay, and scheduler migration always agree bit-for-bit while
+     * spreading cards introduced on the same day across neighbouring dates.
+     */
+    fun fuzzIntervalDays(intervalDays: Double, seed: Long): Double {
+        val delta = fuzzDelta(intervalDays)
+        if (delta <= 0.0) return max(1.0, intervalDays)
+        var z = seed + -7046029254386353131L // 0x9E3779B97F4A7C15
+        z = (z xor (z ushr 30)) * -4658895280553007687L // 0xBF58476D1CE4E5B9
+        z = (z xor (z ushr 27)) * -7723592293110705685L // 0x94D049BB133111EB
+        z = z xor (z ushr 31)
+        // Map top 53 bits uniformly into [-1.0, 1.0].
+        val unit = ((z ushr 11).toDouble() / (1L shl 53).toDouble()) * 2.0 - 1.0
+        return max(1.0, intervalDays + unit * delta)
+    }
+
     fun initialStability(rating: Rating, p: FsrsParams): Double =
         clampStability(p.w[rating.value - 1])
 

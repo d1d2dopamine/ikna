@@ -36,6 +36,10 @@ class DayBoundary(
     fun startOfDay(ts: Long): Long =
         date(ts).atStartOfDay(zone).plusHours(startHour.toLong()).toInstant().toEpochMilli()
 
+    /** The moment the following study day begins, DST-safe via local calendar arithmetic. */
+    fun nextDayStart(ts: Long): Long =
+        date(ts).plusDays(1).atStartOfDay(zone).plusHours(startHour.toLong()).toInstant().toEpochMilli()
+
     /**
      * The stretch where no new material is handed out: from the cutoff in the
      * evening until the day rolls over. Reviews are never blocked.
