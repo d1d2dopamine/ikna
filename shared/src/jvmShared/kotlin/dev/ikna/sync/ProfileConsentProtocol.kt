@@ -76,6 +76,7 @@ class ProfileConsentProtocol(
     private var completion: Completion? = savedCompletion
     private var completionConfirmed = false
     private var invalidatedOperationId: String? = savedInvalidation?.also { require(it.matches(ID)) }
+    private var cancelledOperationId: String? = null
     private var peer: String? = null
     private var local: Offer? = null
     private var remote: Offer? = null
@@ -106,8 +107,13 @@ class ProfileConsentProtocol(
             } else 0,
             archivedLocalReviews = if (p != null && p.mode != Mode.MERGE && !localIsSource(p)) local?.snapshot?.reviews?.size ?: 0 else 0)
     }
-    private fun clearPending() {
-        proposal?.let { rejected.add(it.operationId) }
+    private fun clearPending(recordRejection: Boolean = true) {
+        proposal?.let {
+            if (recordRejection) {
+                rejected.add(it.operationId)
+                cancelledOperationId = it.operationId
+            }
+        }
         while (rejected.size > 128) rejected.remove(rejected.first())
         proposal = null; preview = null; localApproved = false; remoteApproved = false
         receipt = null; remoteReceipt = null; adoptionPending = false; local = null; incremental = null; journalObserved = false; publish()
@@ -150,7 +156,7 @@ class ProfileConsentProtocol(
         val offer = offer()
         publish()
         encode(Wire(snapshot = offer.snapshot, revision = offer.revision,
-            invalidatedOperationId = invalidatedOperationId,
+            invalidatedOperationId = invalidatedOperationId ?: cancelledOperationId,
             proposal = proposal, approved = localApproved, receipt = receipt,
             journal = null))
     }
@@ -311,6 +317,13 @@ class ProfileConsentProtocol(
         require(revision.matches(HEX)) { "invalid-profile-revision" }
         ProfileTransferCodec.encode(snapshot)
         val incoming = Offer(snapshot, revision)
+        // If peer explicitly cancelled our uncompleted pending proposal, drop it cleanly so
+        // both devices return to fresh discovery instead of deadlocking on proposal-conflict.
+        val pendingBefore = proposal
+        if (pendingBefore != null && !adoptionPending && wire.invalidatedOperationId == pendingBefore.operationId) {
+            onLog("Peer cancelled pending proposal (${pendingBefore.operationId.take(8)}); resetting", false)
+            clearPending(recordRejection = false)
+        }
         val p = wire.proposal
         if (p != null) {
             require(p.protocol == 3 && p.binding == binding &&
@@ -325,19 +338,52 @@ class ProfileConsentProtocol(
                 onLog("Proposal rejected: expired or clock skew (${skewSec}s)", true)
                 throw IllegalArgumentException("proposal-expired")
             }
-            require(p.operationId !in rejected) { "proposal-cancelled" }
-            require(proposal == null || proposal == p) { "proposal-conflict" }
+            if (p.operationId in rejected) {
+                if (proposal == null && p.firstDevice == deviceId) {
+                    // Peer echoed our own cancelled proposal before learning it was cancelled.
+                    // Keep cancelledOperationId so our immediate response clears it on the peer.
+                    onLog("Cleared echoed cancelled proposal (${p.operationId.take(8)})", false)
+                    cancelledOperationId = p.operationId
+                    remote = incoming
+                    preview = store.preview(incoming.snapshot)
+                    publish()
+                    return@withLock
+                }
+                onLog("Rejected: proposal-cancelled (${p.operationId.take(8)})", true)
+                throw IllegalArgumentException("proposal-cancelled")
+            }
+            if (proposal != null && proposal != p) {
+                if (autoAcceptFromInviter() && p.firstDevice == peerId && !adoptionPending) {
+                    onLog("Inviter replaced pending proposal (${proposal!!.operationId.take(8)} -> ${p.operationId.take(8)})", false)
+                    clearPending(recordRejection = false)
+                } else {
+                    onLog("Rejected: proposal-conflict (local=${proposal!!.operationId.take(8)}, peer=${p.operationId.take(8)})", true)
+                    throw IllegalArgumentException("proposal-conflict")
+                }
+            }
             val isFirst = p.firstDevice == deviceId
             val remoteDigest = if (isFirst) p.secondSnapshot else p.firstSnapshot
             val remoteRevision = if (isFirst) p.secondRevision else p.firstRevision
-            require(ProfileTransferCodec.revision(incoming.snapshot) == remoteDigest && incoming.revision == remoteRevision) { "remote-profile-stale" }
+            val remoteSnapMatch = ProfileTransferCodec.revision(incoming.snapshot) == remoteDigest
+            val remoteRevMatch = incoming.revision == remoteRevision
+            if (!remoteSnapMatch || !remoteRevMatch) {
+                onLog("Rejected: remote-profile-stale (snap=$remoteSnapMatch, rev=$remoteRevMatch)", true)
+                throw IllegalArgumentException("remote-profile-stale")
+            }
             if (proposal == null) {
                 val own = offer()
-                require(ProfileTransferCodec.revision(own.snapshot) == (if (isFirst) p.firstSnapshot else p.secondSnapshot) &&
-                    own.revision == (if (isFirst) p.firstRevision else p.secondRevision)) { "local-profile-stale" }
+                val localSnapMatch = ProfileTransferCodec.revision(own.snapshot) == (if (isFirst) p.firstSnapshot else p.secondSnapshot)
+                val localRevMatch = own.revision == (if (isFirst) p.firstRevision else p.secondRevision)
+                if (!localSnapMatch || !localRevMatch) {
+                    onLog("Rejected: local-profile-stale (snap=$localSnapMatch, rev=$localRevMatch)", true)
+                    throw IllegalArgumentException("local-profile-stale")
+                }
                 val checked = if (p.mode == Mode.MERGE) store.preview(incoming.snapshot) else store.previewAdoption(incoming.snapshot)
                 val allowed = if (p.mode == Mode.MERGE) checked.canMerge else checked.canAdopt
-                require(checked.localRevision == own.revision && allowed) { "profile-conflict-or-stale" }
+                if (checked.localRevision != own.revision || !allowed) {
+                    onLog("Rejected: profile-conflict-or-stale (conflicts=${checked.conflicts.size})", true)
+                    throw IllegalArgumentException("profile-conflict-or-stale")
+                }
                 proposal = p; preview = checked
             }
             remote = incoming
@@ -411,6 +457,7 @@ class ProfileConsentProtocol(
         completion = Completion(proposal!!, receipt!!, store.committedContentIdentity(proposal!!.operationId))
         store.saveCompletion(completion)
         persistInvalidation(null)
+        cancelledOperationId = null
         onLog("Profile sync completed (${proposal!!.mode.name})", false)
         // Retain no raw profile after the bilateral durable receipts are verified.
         local = null; remote = null; preview = null

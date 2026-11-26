@@ -53,6 +53,7 @@ class PairedLanTransport(
     private val localDeviceName: () -> String = { defaultDeviceDisplayName() },
     private val directLanSocketFactory: ((target: InetAddress, port: Int, timeoutMs: Int) -> Socket?)? = null,
     private val onLog: (String, Boolean) -> Unit = { _, _ -> },
+    private val fastPoll: () -> Boolean = { false },
 ) : AutoCloseable {
     @Serializable enum class PeerRole { INVITER, JOINER, UNKNOWN }
     enum class ActivityStage {
@@ -116,6 +117,7 @@ class PairedLanTransport(
     private var closed = false
     private val peers = mutableListOf<Peer>()
     private val peerResults = mutableMapOf<String, Pair<Long?, String?>>()
+    private val lastIncomingNanos = ConcurrentHashMap<String, Long>()
     @Volatile private var running = false
     @Volatile private var lastError: String? = null
     @Volatile private var lastSuccessAtMillis: Long? = null
@@ -388,6 +390,7 @@ class PairedLanTransport(
                 credential = peer.credential, challenge = request.challenge,
                 deviceName = if (request.deviceName.isNotBlank()) sanitizeDeviceName(localDeviceName()) else ""))
             onLog("Paired as INVITER with ${peer.name.ifBlank { host }} ($host:${request.port})", false)
+            lastIncomingNanos[peer.id] = System.nanoTime()
         }
         syncNowRequested = true
         publish()
@@ -399,6 +402,7 @@ class PairedLanTransport(
             peers.singleOrNull { it.id == request.id && LanSyncSecurity.equal(it.credential, request.credential) }
                 ?: error("Unpaired device")
         }
+        lastIncomingNanos[peer.id] = System.nanoTime()
         setActivity(ActivityStage.EXCHANGING_DATA)
         try {
             val payload = decodePayload(request.payload)
@@ -414,10 +418,11 @@ class PairedLanTransport(
             require(acknowledgment.version == 1 && acknowledgment.operation == "received" &&
                 acknowledgment.binding == binding && acknowledgment.id == peer.id &&
                 acknowledgment.challenge == request.challenge && LanSyncSecurity.equal(acknowledgment.credential, peer.credential))
+            lastIncomingNanos[peer.id] = System.nanoTime()
             recordResult(peer, session, null)
         } catch (failure: Exception) {
             val code = errorCode(failure)
-            onLog("Incoming exchange error: $code (${failure.javaClass.simpleName})", true)
+            onLog("Incoming exchange error: $code${safeFailureTag(failure)}", true)
             if (code in REMOTE_REPORTABLE_ERRORS) {
                 runCatching {
                     write(socket, Wire(operation = "error", binding = binding, id = deviceId,
@@ -468,16 +473,26 @@ class PairedLanTransport(
                     }
                     recordResult(peer, session, null)
                 } catch (failure: Exception) {
-                    failed = true
                     val code = errorCode(failure)
-                    onLog("Outgoing exchange error (${peer.host}:${peer.port}): $code (${failure.javaClass.simpleName})", true)
-                    recordResult(peer, session, code)
+                    val recentInbound = intervalMillis >= 1_000L &&
+                        peer.role == PeerRole.INVITER &&
+                        (code == "connection_timeout" || code == "connection_refused") &&
+                        lastIncomingNanos[peer.id]?.let { System.nanoTime() - it < TimeUnit.SECONDS.toNanos(30) } == true
+                    if (recentInbound) {
+                        onLog("Outbound to ${peer.host}:${peer.port} timed out; waiting for peer's inbound check-in", false)
+                    } else {
+                        failed = true
+                        onLog("Outgoing exchange error (${peer.host}:${peer.port}): $code${safeFailureTag(failure)}", true)
+                        recordResult(peer, session, code)
+                    }
                 }
                 finally { setActivity(ActivityStage.IDLE) }
             }
             if (current.isNotEmpty()) publish()
             failures = if (failed) (failures + 1).coerceAtMost(4) else 0
-            val until = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos((intervalMillis * (1L shl failures)).coerceAtMost(120_000))
+            val baseInterval = if (fastPoll()) minOf(intervalMillis, FAST_POLL_MS) else intervalMillis
+            val delayMs = (baseInterval * (1L shl failures)).coerceAtMost(if (fastPoll()) 10_000L else 120_000L)
+            val until = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(delayMs)
             try {
                 while (active(session) && System.nanoTime() < until) {
                     if (syncNowRequested) {
@@ -652,6 +667,12 @@ class PairedLanTransport(
         require(peer.port in 1..65535 && peer.credential.matches(Regex("[A-Za-z0-9_-]{43}")))
         require(peer.id == LanSyncSecurity.id(LanSyncSecurity.certificate(peer.certificate)))
     }
+    private fun safeFailureTag(failure: Exception): String {
+        val msg = failure.message
+        if (msg != null && msg in SAFE_LOG_REASONS) return " [$msg]"
+        return " (${failure.javaClass.simpleName})"
+    }
+
     private fun errorCode(failure: Exception): String = when {
         failure is SyncOperationException -> failure.code
         failure is UnsupportedSyncProtocolException -> "unsupported_sync_protocol"
@@ -687,6 +708,7 @@ class PairedLanTransport(
         const val COMPACT_INVITATION_PREFIX = "ikna-pair:1:"
         const val COMPACT_QR_PREFIX = "ikna-pair:2:"
         private const val SOCKET_MS = 5_000
+        private const val FAST_POLL_MS = 1_500L
         private const val EXCHANGE_SOCKET_MS = 30_000
         private const val DEADLINE_MS = 60_000L
         private const val INVITATION_MS = 300_000L
@@ -694,6 +716,13 @@ class PairedLanTransport(
         private const val MAX_PAIR_ATTEMPTS = 8
         private const val MAX_INVITATION_JSON_BYTES = 8192
         private val HEX_64 = Regex("[a-f0-9]{64}")
+        private val SAFE_LOG_REASONS = setOf(
+            "proposal-cancelled", "proposal-conflict", "proposal-expired", "stale-proposal",
+            "local-profile-stale", "remote-profile-stale", "profile-conflict-or-stale",
+            "profile-content-conflict", "profile-receipt-mismatch", "invalid-profile-proposal",
+            "initial-consent-required", "missing-profile-proposal", "history-mismatch",
+            "Unpaired device", "Pairing expired", "Pairing closed", "single-peer-required"
+        )
         private val invitationJson = Json { ignoreUnknownKeys = true; isLenient = false }
         @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
         private val compactV2Json = Json { ignoreUnknownKeys = true; isLenient = false; encodeDefaults = false; explicitNulls = false }

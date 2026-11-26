@@ -261,7 +261,12 @@ class DeviceSyncController(
             }
         }, onStatus = { publish() }, intervalMillis = intervalMillis,
         directLanSocketFactory = directLanSocketFactory,
-        onLog = { message, isError -> recordLog(message, isError) }
+        onLog = { message, isError -> recordLog(message, isError) },
+        fastPoll = {
+            val count = transport?.status?.peerCount ?: 0
+            val consentState = protocol?.state
+            count > 0 && (consentState == null || !consentState.complete || consentState.journalPending)
+        }
     ).also { transport = it }
 
     private fun journalAuthorization(operationId: String, digest: String, peerId: String = instance().status.peers.single().id): JournalAuthorization {

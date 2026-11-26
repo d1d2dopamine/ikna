@@ -569,4 +569,41 @@ class ProfileConsentProtocolTest {
         assertEquals(1, rightStore.commits)
     }
 
+    @Test fun `lost reply after joiner commit plus inviter cancel and retry recovers without deadlock`() = runBlocking {
+        val leftStore = FakeStore()
+        val rightStore = FakeStore()
+        val inviter = ProfileConsentProtocol("a", binding, leftStore, { 1000L }, autoAcceptFromInviter = { false })
+        val joiner = ProfileConsentProtocol("b", binding, rightStore, { 1000L }, autoAcceptFromInviter = { true })
+        suspend fun exchange() {
+            joiner.receiveFrom("a", inviter.snapshotFor("b"))
+            inviter.receiveFrom("b", joiner.snapshotFor("a"))
+        }
+        exchange()
+
+        // 1. Inviter picks MERGE (op1); joiner receives & commits op1, then reply is lost (timeout).
+        val op1 = inviter.proposeAndApprove("b", ProfileConsentProtocol.Mode.MERGE).operationId!!
+        joiner.receiveFrom("a", inviter.snapshotFor("b"))
+        val lostReply = joiner.snapshotFor("a") // Contains op1 + receipt; dropped by network timeout.
+        assertEquals(1, rightStore.commits)
+        assertEquals(0, leftStore.commits)
+
+        // 2. Inviter cancels op1 (puts op1 into rejected), then receives joiner's echoed op1.
+        inviter.pause()
+        inviter.receiveFrom("b", lostReply)
+        assertNotNull(inviter.state.preview)
+
+        // 3. Inviter replies with invalidated op1; joiner drops stale op1 cleanly.
+        joiner.receiveFrom("a", inviter.snapshotFor("b"))
+        assertNull(joiner.state.operationId)
+
+        // 4. Inviter clicks MERGE again (op2); both sides converge cleanly without deadlock!
+        val op2 = inviter.proposeAndApprove("b", ProfileConsentProtocol.Mode.MERGE).operationId!!
+        assertNotEquals(op1, op2)
+        repeat(3) { exchange() }
+        assertTrue(inviter.state.complete)
+        assertTrue(joiner.state.complete)
+        assertEquals(op2, inviter.state.operationId)
+        assertEquals(op2, joiner.state.operationId)
+    }
+
 }
