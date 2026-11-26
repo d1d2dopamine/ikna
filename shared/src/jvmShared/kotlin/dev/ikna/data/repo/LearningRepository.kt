@@ -194,6 +194,54 @@ class LearningRepository(
     private fun governor() = RiarManage(config)
     private fun builder() = SessionBuilder(cardDao, chunkDao, config)
 
+    private val introductionService by lazy {
+        ChunkIntroductionService(
+            cardDao = cardDao,
+            chunkDao = chunkDao,
+            statsDao = statsDao,
+            components = components,
+            scheduler = scheduler,
+            selector = selector,
+            boundary = boundary,
+            configProvider = { config },
+            suppressedNow = { suppressedNow() }
+        )
+    }
+
+    private val statsService by lazy {
+        LearningStatsService(
+            cardDao = cardDao,
+            chunkDao = chunkDao,
+            reviewDao = reviewDao,
+            statsDao = statsDao,
+            boundary = boundary,
+            activeHistoryCutoff = { activeHistoryCutoff() }
+        )
+    }
+
+    private val optionalHardService by lazy {
+        OptionalHardReviewService(
+            db = db,
+            cardDao = cardDao,
+            reviewDao = reviewDao,
+            planDao = planDao,
+            writeLock = writeLock,
+            leechMinLapses = LEECH_MIN_LAPSES,
+            builder = { builder() },
+            dayKey = { dayKey(it) },
+            startOfDay = { startOfDay(it) },
+            activeHistoryCutoff = { activeHistoryCutoff() },
+            suppressedNow = { suppressedNow() },
+            checkHistoryWritable = { checkHistoryWritable() },
+            syncHistoryBoundary = { syncHistoryBoundary?.invoke() },
+            historyBoundaryToken = { historyBoundaryToken?.invoke() },
+            answerLocked = { card, rating, durationMs, now, signals, purpose ->
+                answerLocked(card, rating, durationMs, now, signals, purpose)
+            },
+            undoLastLocked = { now, expectedId -> undoLastLocked(now, expectedId) }
+        )
+    }
+
     /**
      * What must never be asked again. Empty when nothing is wired, which is the
      * safe direction: a missing correction shows a card, a missing card cannot be
@@ -456,13 +504,8 @@ class LearningRepository(
      * A map, not a chain: the progress screen draws these as separate marks so a
      * gap is a gap and not a broken streak.
      */
-    suspend fun activityMap(days: Int = 30, now: Long = System.currentTimeMillis()): List<Boolean> {
-        val active = statsDao.lastDays(days)
-            .filter { it.reviewsDone > 0 }
-            .map { it.day }
-            .toSet()
-        return (0 until days).map { d -> dayKey(now - d * DAY_MS) in active }
-    }
+    suspend fun activityMap(days: Int = 30, now: Long = System.currentTimeMillis()): List<Boolean> =
+        statsService.activityMap(days, now)
 
     suspend fun collectSignals(now: Long, targetOverride: Int? = null): GovernorSignals {
         val dueToday = cardDao.dueCount(now)
@@ -485,8 +528,6 @@ class LearningRepository(
 
         val today = statsDao.day(dayKey(now))
         val cleanDays = countCleanDays(now)
-        // The safety valve window, taken from the config instead of a 7
-        // hard-coded next to a setting called safetyValveDays.
         val valveWindowStart = dayKey(now - config.safetyValveDays * DAY_MS)
 
         return GovernorSignals(
@@ -507,151 +548,29 @@ class LearningRepository(
         )
     }
 
-    private suspend fun overheating(now: Long): Boolean =
-        GovernorSignalCollector.isOverheated(
-            recentActiveDays = statsDao.lastDays(config.activityWindowDays * 2),
-            todayKey = dayKey(now),
-            overheatRatio = config.overheatRatio,
-            overheatAccuracyDrop = config.overheatAccuracyDrop
-        )
+    private suspend fun overheating(now: Long): Boolean = introductionService.overheating(now)
 
-    private suspend fun daysSinceReturn(now: Long): Int? =
-        GovernorSignalCollector.daysSinceReturn(
-            recentDaysNewestFirst = statsDao.lastDays(RETURN_SCAN_DAYS),
-            todayKey = dayKey(now),
-            returnModeGapDays = config.returnModeGapDays
-        )
+    private suspend fun daysSinceReturn(now: Long): Int? = introductionService.daysSinceReturn(now, RETURN_SCAN_DAYS)
 
-    /**
-     * Days since the first day with any activity. Zero on a fresh install, so a
-     * new account is inside the settling window by definition.
-     */
-    private suspend fun daysSinceStart(now: Long): Int {
-        val first = statsDao.firstDay() ?: return 0
-        return runCatching {
-            ChronoUnit.DAYS.between(LocalDate.parse(first), LocalDate.parse(dayKey(now))).toInt()
-        }.getOrDefault(0)
-    }
+    private suspend fun daysSinceStart(now: Long): Int = introductionService.daysSinceStart(now)
 
-    /**
-     * Behavioral sleep-hygiene & fatigue policy: pause new introductions between
-     * [GovernorConfig.nightCutoffHour] and [GovernorConfig.dayStartHour].
-     *
-     * Note on memory science: encoding shortly before sleep actually supports
-     * declarative consolidation compared to daytime wakefulness (Rasch & Born,
-     * 2013; Payne et al., 2012), whereas sleep deprivation and late-night
-     * fatigue impair attention and encoding quality. This rule is therefore a
-     * product-level sleep-hygiene guard — keeping late-night sessions short and
-     * low-effort (reviews stay available) rather than claiming weak overnight
-     * consolidation. First-ever sessions are exempt so onboarding is never empty.
-     */
-    private fun withNightRule(decision: GovernorDecision, now: Long): GovernorDecision {
-        if (decision.allowedNew <= 0 || decision.reason == GovernorReason.FIRST_RUN) {
-            return decision
-        }
-        if (!boundary.isNight(now, config.nightCutoffHour)) return decision
-        return decision.copy(allowedNew = 0, reason = GovernorReason.LATE_NIGHT)
-    }
+    private fun withNightRule(decision: GovernorDecision, now: Long): GovernorDecision =
+        introductionService.withNightRule(decision, now)
 
-    /**
-     * Consecutive days whose plan was finished. Days, not rows: see
-     * [CleanStreak], which is where the counting lives and is tested.
-     */
-    private suspend fun countCleanDays(now: Long): Int {
-        val finished = statsDao.lastDays(CLEAN_DAY_SCAN)
-            .associate { it.day to it.planCompleted }
-        val days = (0 until CLEAN_DAY_SCAN).map { d -> dayKey(now - d * DAY_MS) }
-        return CleanStreak.count(days, finished)
-    }
+    private suspend fun countCleanDays(now: Long): Int = introductionService.countCleanDays(now, CLEAN_DAY_SCAN)
 
-    /**
-     * Creates the cards the governor authorised and returns them.
-     *
-     * Deliberately does not touch the daily counter any more: a chunk counts as
-     * introduced when it reaches the plan, not when a row is written. See
-     * [ensureDailyPlanLocked].
-     */
     private suspend fun introduce(
         count: Int,
         now: Long,
         packId: String? = null,
         hidden: Set<String>? = null
-    ): List<CardEntity> {
-        val suppressed = hidden ?: suppressedNow()
-        val candidates = (
-            if (packId == null) chunkDao.unintroducedByFrequency(count * 12)
-            else chunkDao.unintroducedByFrequencyFor(packId, count * 12)
-            ).filterNot { it.id in suppressed }
-        if (candidates.isEmpty()) return emptyList()
+    ): List<CardEntity> = introductionService.introduce(count, now, packId, hidden)
 
-        val tokens = chunkDao.tokensFor(candidates.map { it.id }).groupBy { it.chunkId }
-        val comps = components.componentsForChunks(candidates, tokens)
+    private suspend fun uncountIntroduced(ts: Long) = introductionService.uncountIntroduced(ts)
 
-        // A subject deck is taken strictly in the order it was written.
-        //
-        // Everything the selector does is a statement about language: how new the
-        // words are, which weak components a phrase would repair, how common the
-        // phrase is. None of that holds for a deck about neuroscience or a
-        // programming language, where line forty may be meaningless before line
-        // thirty-nine. There the author's order IS the curriculum, and it is
-        // already recorded -- the importer writes each line's position into
-        // freqRank.
-        //
-        // When both kinds of deck are active the day's new material is split, so
-        // switching a subject deck on never silences a language deck or the
-        // other way round.
-        val subject = candidates.filter { it.lang == NO_LANG }.sortedBy { it.freqRank }
-        val language = candidates.filterNot { it.lang == NO_LANG }
-        val share = if (subject.isEmpty() || language.isEmpty()) count else (count + 1) / 2
-        val fromSubject = subject.take(share.coerceAtMost(count))
-
-        // A subject card carries no lexical prior: its sentence is a definition,
-        // and "how many of these words are already known" says nothing useful
-        // about how hard the concept will be. One unknown component, no head start.
-        val subjectPrior = ComponentPrior(
-            knownRatio = 0.0,
-            unknownContentTokens = 1,
-            weakLemmas = emptyList()
-        )
-        val chosen = selector.select(language, tokens, comps, now, count - fromSubject.size)
-        val cards = fromSubject.map { chunk ->
-            scheduler.introduce(chunk.id, level = 0, componentPrior = subjectPrior, now = now)
-        } + chosen.map { sc ->
-            scheduler.introduce(sc.chunk.id, level = 0, componentPrior = sc.prior, now = now)
-        }
-        cardDao.upsertAll(cards)
-        return cards
-    }
-
-    /** Returns the new-material budget a retracted promotion had spent. */
-    private suspend fun uncountIntroduced(ts: Long) {
-        val day = dayKey(ts)
-        val stat = statsDao.day(day) ?: return
-        statsDao.upsert(stat.copy(newIntroduced = (stat.newIntroduced - 1).coerceAtLeast(0)))
-    }
-
-    /** Records chunks that actually reached today's plan. */
-    private suspend fun countIntroduced(now: Long, added: Int) {
-        if (added <= 0) return
-        val day = dayKey(now)
-        val stat = statsDao.day(day)
-        statsDao.upsert(
-            (stat ?: DailyStatEntity(day, 0, 0, 0L, 1.0, false))
-                .copy(newIntroduced = (stat?.newIntroduced ?: 0) + added)
-        )
-    }
+    private suspend fun countIntroduced(now: Long, added: Int) = introductionService.countIntroduced(now, added)
 
     // ---- session ----------------------------------------------------------
-
-    private data class OptionalHardState(
-        val batch: OptionalHardBatch,
-        val dayStart: Long,
-        val boundary: dev.ikna.data.db.HistoryBoundaryEntity?,
-        val configuredCutoff: Long?,
-        val configuredToken: String?,
-        val committed: MutableList<Pair<String, Long>> = mutableListOf()
-    )
-    private var optionalHardState: OptionalHardState? = null
 
     /**
      * Read the existing global required prefix, independently of this screen's
@@ -717,100 +636,23 @@ class LearningRepository(
 
     /** Read-only gate: viewing this affordance never creates a plan or spends allowance. */
     suspend fun optionalHardAvailable(deckId: String? = null, now: Long = System.currentTimeMillis()): Boolean =
-        writeLock.withLock {
-            db.inTransaction {
-                optionalHardComplete(now) && optionalHardCandidates(deckId, 1).isNotEmpty()
-            }
-        }
+        optionalHardService.available(deckId, now)
 
     /** Explicit entry replaces an abandoned ephemeral batch, never the daily plan. */
     suspend fun startOptionalHardReview(deckId: String? = null, now: Long = System.currentTimeMillis()): OptionalHardBatch? =
-        writeLock.withLock {
-            checkHistoryWritable()
-            val caller = currentCoroutineContext()
-            caller.ensureActive()
-            val state = db.inTransaction {
-                checkHistoryWritable()
-                if (!optionalHardComplete(now)) return@inTransaction null
-                val cards = builder().materialize(optionalHardCandidates(deckId, 5).map { it.key })
-                if (cards.isEmpty()) return@inTransaction null
-                OptionalHardState(OptionalHardBatch(java.util.UUID.randomUUID().toString(), dayKey(now), deckId, cards),
-                    startOfDay(now), db.historyBoundaryDao().current(), syncHistoryBoundary?.invoke(), historyBoundaryToken?.invoke())
-                    .also { caller.ensureActive() }
-            }
-            optionalHardState = state
-            state?.batch
-        }
+        optionalHardService.start(deckId, now)
 
-    suspend fun cancelOptionalHardReview(batch: OptionalHardBatch) = writeLock.withLock {
-        if (optionalHardState?.batch?.token == batch.token) optionalHardState = null
-    }
+    suspend fun cancelOptionalHardReview(batch: OptionalHardBatch) =
+        optionalHardService.cancel(batch)
 
     suspend fun answerOptionalHard(
         batch: OptionalHardBatch, card: SessionCard, rating: Rating, durationMs: Long, now: Long,
         signals: ReviewSignals = ReviewSignals()
-    ) = writeLock.withLock {
-        val caller = currentCoroutineContext()
-        caller.ensureActive()
-        val state = requireOptionalHardState(batch)
-        val key = card.card.key
-        check(state.committed.none { it.first == key }) { "Optional review already answered" }
-        val id = db.inTransaction {
-            val fresh = validateOptionalHard(state, key, now)
-            answerLocked(fresh, rating, durationMs, now, signals, ReviewPurpose.OPTIONAL_HARD)
-                .also { caller.ensureActive() }
-        }
-        // Do not mutate the ephemeral token until every database write has committed.
-        state.committed += key to id
-    }
+    ) = optionalHardService.answer(batch, card, rating, durationMs, now, signals)
 
     /** Only this batch's latest retained answer may be undone; no ordinary queue rebuild. */
     suspend fun undoOptionalHard(batch: OptionalHardBatch, now: Long = System.currentTimeMillis()): SessionCard? =
-        writeLock.withLock {
-            val state = requireOptionalHardState(batch)
-            val previous = state.committed.lastOrNull() ?: return@withLock null
-            val caller = currentCoroutineContext()
-            caller.ensureActive()
-            val restored = db.inTransaction {
-                validateOptionalHard(state, previous.first, now)
-                val key = undoLastLocked(now, expectedId = previous.second) ?: return@inTransaction null
-                builder().materialize(listOf(key)).singleOrNull().also { caller.ensureActive() }
-            }
-            if (restored != null) state.committed.removeAt(state.committed.lastIndex)
-            restored
-        }
-
-    private fun requireOptionalHardState(batch: OptionalHardBatch): OptionalHardState =
-        checkNotNull(optionalHardState?.takeIf { it.batch == batch }) { "Optional review batch is no longer valid" }
-
-    private suspend fun optionalHardComplete(now: Long): Boolean {
-        val plan = planDao.plan(dayKey(now))?.classicOnly() ?: return false
-        val required = requiredIds(plan)
-        val cutoff = activeHistoryCutoff()
-        return required.isNotEmpty() && BrowsePolicy.requiredComplete(required,
-            reviewDao.answeredKeysSinceAfter(startOfDay(now), cutoff).toSet())
-    }
-
-    private suspend fun optionalHardCandidates(deckId: String?, limit: Int): List<CardEntity> =
-        cardDao.optionalHardCards(deckId, suppressedNow().toList().ifEmpty { listOf("") }, LEECH_MIN_LAPSES, limit)
-
-    private suspend fun validateOptionalHard(state: OptionalHardState, key: String, now: Long): SessionCard {
-        checkHistoryWritable()
-        check(state.batch.day == dayKey(now) && state.dayStart == startOfDay(now) &&
-            state.boundary == db.historyBoundaryDao().current() &&
-            state.configuredCutoff == syncHistoryBoundary?.invoke() &&
-            state.configuredToken == historyBoundaryToken?.invoke() && optionalHardComplete(now)) {
-            "Optional review batch is no longer valid"
-        }
-        val original = state.batch.cards.singleOrNull { it.card.key == key }
-        check(original != null && original.chunk.id !in suppressedNow() &&
-            cardDao.optionalHardEligible(original.chunk.id, state.batch.deckId, LEECH_MIN_LAPSES)) {
-            "Optional review target is no longer eligible"
-        }
-        val fresh = builder().materialize(listOf(key)).singleOrNull()
-        check(fresh != null && fresh.chunk == original.chunk) { "Optional review target changed" }
-        return fresh
-    }
+        optionalHardService.undo(batch, now)
 
 
     /**
@@ -1697,6 +1539,7 @@ class LearningRepository(
             lastId
         }
         clearBrowseCredits?.invoke()
+        optionalHardService.clear()
         boundary
     }
 
@@ -1732,7 +1575,7 @@ class LearningRepository(
     suspend fun governorLog(limit: Int = 30) = governorDao.recent(limit)
 
     suspend fun forecast(days: Int, now: Long = System.currentTimeMillis()): List<Int> =
-        (1..days).map { d -> cardDao.dueBetween(now + (d - 1) * DAY_MS, now + d * DAY_MS) }
+        statsService.forecast(days, now)
 
     /** Read-only presentation count, excluding optional work from minimum completion. */
     suspend fun goalAnswersToday(now: Long = System.currentTimeMillis()): Int = writeLock.withLock {
@@ -1742,66 +1585,18 @@ class LearningRepository(
     suspend fun answeredToday(now: Long = System.currentTimeMillis()): Int =
         statsDao.day(dayKey(now))?.reviewsDone ?: 0
 
-    /**
-     * How long one answer actually takes, so the queue can be shown in
-     * minutes instead of card counts.
-     *
-     * Median rather than mean, and mis-swipes and put-the-phone-down pauses
-     * are dropped, so one interrupted evening cannot inflate the estimate.
-     * Null until there is enough history: an invented number is worse than
-     * no number, because the whole point is that the estimate can be
-     * trusted.
-     *
-     * The bounds started at 0.8s and one minute and threw away almost
-     * everything: a phrase that is recognised on sight is answered faster than
-     * that, and a phrase that is being thought about takes longer, so a real
-     * session often left fewer than the eight samples the estimate needed and no
-     * minutes were shown at all. What the bounds are for is discarding a
-     * mis-swipe and a phone put face-down, and 0.4s to two minutes does that
-     * without discarding the session.
-     */
-    suspend fun medianAnswerMs(): Long? {
-        val cutoff = activeHistoryCutoff()
-        val samples = reviewDao.recentDurationsAfter(cutoff, DURATION_SAMPLE)
-            .filter { it in MIN_SANE_ANSWER_MS..MAX_SANE_ANSWER_MS }
-        if (samples.size < DURATION_MIN_SAMPLES) return null
-        val sorted = samples.sorted()
-        return sorted[sorted.size / 2]
-    }
+    suspend fun medianAnswerMs(): Long? =
+        statsService.medianAnswerMs(DURATION_SAMPLE, DURATION_MIN_SAMPLES, MIN_SANE_ANSWER_MS, MAX_SANE_ANSWER_MS)
 
-    /**
-     * Evidence-backed measurements for the statistics screen, in one read.
-     *
-     * Deliberately computed here rather than in SQL: the day starts at 04:00,
-     * the hour of an answer depends on the phone's timezone, and a review has to
-     * be told apart from a first contact by its snapshot. All three are things
-     * SQLite would have to be taught and Kotlin already knows.
-     */
     suspend fun statsDigest(now: Long = System.currentTimeMillis()): StatsDigest {
         val cutoff = activeHistoryCutoff()
         val answers = reviewDao.sinceAfter(now - STATS_WINDOW_DAYS * DAY_MS, cutoff)
-
-        // Only real reviews count towards retention. A first contact cannot be
-        // "forgotten", so counting it would quietly inflate every figure here.
-        // Rows written before the undo schema carry no snapshot and are skipped.
         val reviews = answers.filter { it.prevIsNew == false }
         val recalled = reviews.count { it.rating >= Rating.HARD.value }
         val retention =
             if (reviews.size >= RETENTION_MIN_SAMPLE) recalled.toDouble() / reviews.size else null
 
-        val zone = ZoneId.systemDefault()
-        val buckets = HashMap<Int, IntArray>()
-        reviews.forEach { review ->
-            val hour = Instant.ofEpochMilli(review.ts).atZone(zone).hour
-            val slot = buckets.getOrPut(hour) { IntArray(2) }
-            slot[0]++
-            if (review.rating >= Rating.HARD.value) slot[1]++
-        }
-        val hours = buckets.entries
-            .sortedBy { it.key }
-            .map { (hour, slot) ->
-                HourSlice(hour = hour, answers = slot[0], accuracy = slot[1].toDouble() / slot[0])
-            }
+        val hours = statsService.hourlySlices(reviews)
         val confidentHours = hours.filter { it.answers >= HOUR_MIN_SAMPLE }
         val bestHour = if (confidentHours.size >= HOUR_MIN_BUCKETS) {
             confidentHours
@@ -1809,20 +1604,7 @@ class LearningRepository(
                 ?.hour
         } else null
 
-        val leechCards = cardDao.leeches(LEECH_MIN_LAPSES, LEECH_LIMIT)
-        val chunks = chunkDao.chunks(leechCards.map { it.chunkId }.distinct()).associateBy { it.id }
-        val leeches = leechCards
-            .mapNotNull { card ->
-                val chunk = chunks[card.chunkId] ?: return@mapNotNull null
-                LeechItem(
-                    text = chunk.text,
-                    translation = chunk.translation,
-                    lapses = card.lapses
-                )
-            }
-            // The same phrase can be a leech at two levels. It is one phrase to
-            // the person reading the list.
-            .distinctBy { it.text }
+        val leeches = statsService.leeches(LEECH_MIN_LAPSES, LEECH_LIMIT)
 
         return StatsDigest(
             targetsWithHistory = reviewDao.distinctTargetCount(),

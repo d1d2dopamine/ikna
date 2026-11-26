@@ -153,13 +153,16 @@ class FullGradingChecks(unittest.TestCase):
         self.assertIn("if (review.outcomeRating >= 3)", live)
         self.assertIn("components.recordAnswer(sessionCard.chunk.id, rating.value, now)", live)
         self.assert_normalized_input_accounting(live)
-        for name in ("RestoreRepository", "ComponentRepository"):
+        for name in ("JournalReplayEngine", "ComponentRepository"):
             self.assertIn("if (r.outcomeRating >= 3)", (SHARED / f"data/repo/{name}.kt").read_text())
         restore = (SHARED / "data/repo/RestoreRepository.kt").read_text()
         self.assertIn("val replayScheduler = if (sync) Scheduler(dayStartHour = config.dayStartHour) else scheduler", restore)
-        self.assertIn("replayScheduler.applyRecordedReview(card, r)", restore)
-        self.assertIn("scheduler.applyRecordedReview(card, answer)",
-                      (SHARED / "data/repo/SchedulerMigration.kt").read_text())
+        self.assertIn("JournalReplayEngine.replayFullHistory(", restore)
+        migration = (SHARED / "data/repo/SchedulerMigration.kt").read_text()
+        self.assertIn("JournalReplayEngine.replayExistingCards(", migration)
+        engine = (SHARED / "data/repo/JournalReplayEngine.kt").read_text()
+        self.assertIn("scheduler.applyRecordedReview(card, r)", engine)
+        self.assertIn("scheduler.applyRecordedReview(card, answer)", engine)
 
     def test_legacy_preference_cannot_override_automatic_policy(self):
         settings = (SHARED / "data/prefs/SettingsStore.kt").read_text()

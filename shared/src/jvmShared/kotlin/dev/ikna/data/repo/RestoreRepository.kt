@@ -424,89 +424,20 @@ class RestoreRepository(
         } else emptyMap()
         val answers = if (sync) rawAnswers.sortedWith(compareBy<ReviewEntity> { it.ts }.thenBy { identities[it.id] }) else rawAnswers
         val replayScheduler = if (sync) Scheduler(dayStartHour = config.dayStartHour) else scheduler
-        val boundary = DayBoundary(config.dayStartHour)
-        val cards = LinkedHashMap<String, CardEntity>()
-        val days = LinkedHashMap<String, DailyStatEntity>()
-        val seen = HashSet<String>()
-        if (sync) {
-            // A clock rollback can timestamp a later observation before its own
-            // predecessor. Select the least advanced known ORIGINAL pre-state,
-            // including retracted answers, rather than double-counting a later
-            // snapshot's reps. Missing legacy snapshots retain the historical
-            // zero baseline; a wholly partial known history retains its prior reps.
-            val originals = reviewDao.afterId(afterLocalId).filter { it.undoOf == null }
-                .groupBy { it.chunkId + ":" + it.level }
-            val baselineOrder = compareBy<ReviewEntity> { it.prevReps ?: 0 }
-                .thenBy { if (it.prevIsNew == true) 0 else 1 }
-                .thenBy { it.ts }.thenBy { identities[it.id] }
-            for ((key, history) in originals) {
-                val r = history.minWith(baselineOrder)
-                cards[key] = CardEntity(r.chunkId, r.level,
-                    r.prevStability ?: r.stabilityBefore, r.prevDifficulty ?: r.difficultyBefore,
-                    r.prevDueAt ?: r.ts, r.prevLastReviewAt, history.minOf { it.ts }, r.prevReps ?: 0,
-                    r.prevLapses ?: 0, localCards[key]?.inAmnesty ?: false, r.prevIsNew ?: true)
-            }
-        }
-
-        for (r in answers) {
-            caller.ensureActive()
-            val key = r.chunkId + ":" + r.level
-            val card = cards[key] ?: CardEntity(
-                chunkId = r.chunkId,
-                level = r.level,
-                stability = r.prevStability ?: r.stabilityBefore,
-                difficulty = r.prevDifficulty ?: r.difficultyBefore,
-                dueAt = r.ts,
-                lastReviewAt = r.prevLastReviewAt,
-                introducedAt = r.ts,
-                reps = r.prevReps ?: 0,
-                lapses = r.prevLapses ?: 0,
-                inAmnesty = false,
-                isNew = r.prevIsNew ?: true
-            )
-            val firstTime = if (sync) seen.add(key) else !cards.containsKey(key)
-            cards[key] = replayScheduler.applyRecordedReview(card, r).card.let { rebuilt ->
-                if (sync) {
-                    require(rebuilt.stability.isFinite() && rebuilt.difficulty.isFinite() &&
-                        rebuilt.dueAt >= 0 && rebuilt.reps >= 0 && rebuilt.lapses >= 0) { "Invalid replay state" }
-                    rebuilt.copy(inAmnesty = localCards[key]?.inAmnesty ?: false)
-                } else rebuilt
-            }
-
-            // Same boundary as the live counters, or a restore would rebuild
-            // stats that disagree with the app that wrote them.
-            val day = boundary.key(r.ts)
-            val stat = days[day] ?: DailyStatEntity(day, 0, 0, 0L, 1.0, false)
-            val done = Math.addExact(stat.reviewsDone, 1)
-            val correct = Math.addExact(stat.correctCount, if (r.outcomeRating >= 3) 1 else 0)
-            days[day] = stat.copy(
-                reviewsDone = done,
-                correctCount = correct,
-                newIntroduced = Math.addExact(stat.newIntroduced, if (firstTime && r.purpose == null) 1 else 0),
-                activeMs = Math.addExact(stat.activeMs, r.durationMs),
-                accuracy = correct.toDouble() / done,
-                // Deliberately false, and deliberately not guessed.
-                //
-                // planCompleted means "the plan the governor built that day was
-                // finished", and the plan is nowhere in the log — it is not an
-                // answer, so it is not exported. Setting it from a card count
-                // would invent five clean days out of a restore and hand the
-                // user a larger daily target on their first evening back. The
-                // accelerator restarts instead, and earns its way up again.
-                planCompleted = if (sync) localDays[day]?.planCompleted ?: false else false
-            )
-        }
-
-        if (sync) {
-            // Introductions spend local governor budget before any review exists.
-            // Never refund those admissions merely because a journal arrived.
-            for ((day, old) in localDays) {
-                val rebuilt = days[day]
-                days[day] = if (rebuilt == null) old.copy(
-                    reviewsDone = 0, correctCount = 0, activeMs = 0, accuracy = 1.0)
-                else rebuilt.copy(newIntroduced = maxOf(rebuilt.newIntroduced, old.newIntroduced))
-            }
-        }
+        val syncOriginals = if (sync) reviewDao.afterId(afterLocalId) else emptyList()
+        val replayed = JournalReplayEngine.replayFullHistory(
+            answers = answers,
+            scheduler = replayScheduler,
+            dayStartHour = config.dayStartHour,
+            sync = sync,
+            syncOriginals = syncOriginals,
+            syncIdentities = identities,
+            localCards = localCards,
+            localDays = localDays,
+            onStep = { caller.ensureActive() }
+        )
+        val cards = replayed.cards
+        val days = replayed.days
         cards.values.chunked(WRITE_BATCH).forEach {
             caller.ensureActive()
             cardDao.upsertAll(it)

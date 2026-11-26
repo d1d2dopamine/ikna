@@ -573,7 +573,7 @@ fun SettingsScreen(
                         }
                         if (settings.theme == ThemeMode.CUSTOM) {
                             Spacer(Modifier.height(16.dp))
-                            CustomColors(
+                            SettingsCustomColors(
                                 settings = settings,
                                 onChange = { background, ink, muted, accent ->
                                     scope.launch {
@@ -683,135 +683,19 @@ fun SettingsScreen(
 
                 item(key = ID_SPEECH, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
                     IknaSettingsSection(
-                        // Marked beta in the heading and off by default. The feature
-                        // works, but how good it sounds is decided by an engine this
-                        // app did not write and cannot inspect, so it is offered
-                        // rather than assumed.
                         S.t("set.026") + " · " + S.t("set.123"),
                         S.t("set.124") + " " + S.t("set.027"),
                         icon = iknaSettingsSectionGlyph(ID_SPEECH)
                     ) {
-                        IknaSettingsToggleRow(
-                            title = S.t("set.028"),
-                            subtitle = S.t("set.029"),
-                            checked = settings.speechEnabled,
-                            onCheckedChange = { on ->
-                                scope.launch {
-                                    container.settings.setSpeechEnabled(on)
-                                    if (!on) container.speaker.stop()
-                                }
-                            }
+                        SettingsSpeechSectionContent(
+                            context = context,
+                            container = container,
+                            settings = settings,
+                            speechStatus = speechStatus,
+                            scope = scope,
+                            onOpenVoice = onOpenVoice,
+                            onMessage = { message = it }
                         )
-
-                        // Which voice actually speaks -- the phone's own engine or a
-                        // model somebody added -- has a screen of its own now. It used
-                        // to have nowhere at all, which is how an APK with a model
-                        // inside came to look exactly like one without.
-                        Spacer(Modifier.height(12.dp))
-                        IknaWideButton(
-                            label = S.t("voice.001"),
-                            onClick = onOpenVoice
-                        )
-
-                        if (settings.speechEnabled) {
-                            // The phone's engine, as one switch. Speed, pitch and a
-                            // voice per language were three controls over an engine
-                            // this app did not write: pitch did nothing on most of
-                            // them, and both numbers were part of the name of every
-                            // cached rendering, which is what left the first card of
-                            // a session silent. A model of one's own keeps its own
-                            // speed, on the voice screen, where it belongs.
-                            Spacer(Modifier.height(12.dp))
-                            IknaSettingsToggleRow(
-                                title = S.t("set.130"),
-                                subtitle = S.t("set.131"),
-                                checked = settings.phoneVoice,
-                                onCheckedChange = { on ->
-                                    scope.launch {
-                                        container.settings.setPhoneVoice(on)
-                                        // Told directly as well as through settings,
-                                        // so an open session obeys it on the next card.
-                                        container.speaker.setPhoneVoice(on)
-                                        if (!on) container.speaker.stop()
-                                    }
-                                }
-                            )
-                            IknaSettingsToggleRow(
-                                title = S.t("set.132"),
-                                subtitle = if (settings.autoSpeakEvery) S.t("set.133")
-                                else S.t("set.134"),
-                                checked = settings.autoSpeakEvery,
-                                onCheckedChange = { on ->
-                                    scope.launch { container.settings.setAutoSpeakEvery(on) }
-                                }
-                            )
-
-                            when (speechStatus) {
-                                SpeakerStatus.UNKNOWN -> {
-                                    Spacer(Modifier.height(12.dp))
-                                    Text(
-                                        text = S.t("set.030"),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-
-                                SpeakerStatus.NO_ENGINE -> {
-                                    Spacer(Modifier.height(12.dp))
-                                    Text(
-                                        text = S.t("set.031"),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Spacer(Modifier.height(8.dp))
-                                    IknaTextButton(
-                                        label = S.t("set.032"),
-                                        onClick = {
-                                            if (!openTtsSettings(context)) {
-                                                message = S.t("set.033")
-                                            }
-                                        }
-                                    )
-                                }
-
-                                SpeakerStatus.NO_VOICE -> {
-                                    Spacer(Modifier.height(12.dp))
-                                    Text(
-                                        text = S.t("set.034"),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Spacer(Modifier.height(8.dp))
-                                    IknaTextButton(
-                                        label = S.t("set.035"),
-                                        onClick = {
-                                            if (!installVoices(context)) {
-                                                message = S.t("set.036")
-                                            }
-                                        }
-                                    )
-                                }
-
-                                SpeakerStatus.READY -> {
-                                    Spacer(Modifier.height(16.dp))
-                                    IknaTextButton(
-                                        label = S.t("set.032"),
-                                        onClick = {
-                                            if (!openTtsSettings(context)) {
-                                                message = S.t("set.033")
-                                            }
-                                        }
-                                    )
-
-                                    Spacer(Modifier.height(12.dp))
-                                    Text(
-                                        text = S.t("set.039"),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
                     }
                 }
 
@@ -821,199 +705,42 @@ fun SettingsScreen(
                         S.t("set.041"),
                         icon = iknaSettingsSectionGlyph(ID_FONT)
                     ) {
-                        Text(
-                            text = when (settings.fontMode) {
-                                FontMode.GEOLOGICA -> S.t("set.042")
-                                FontMode.CUSTOM -> S.t("set.043") + settings.fontName.uppercase()
-                            },
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            IknaChip(
-                                label = S.t("set.150"),
-                                selected = settings.fontMode == FontMode.GEOLOGICA,
-                                onClick = { scope.launch { container.settings.setFontMode(FontMode.GEOLOGICA) } }
-                            )
-                            if (settings.fontName.isNotBlank()) {
-                                IknaChip(
-                                    label = settings.fontName.uppercase(),
-                                    selected = settings.fontMode == FontMode.CUSTOM,
-                                    onClick = { scope.launch { container.settings.setFontMode(FontMode.CUSTOM) } }
-                                )
-                            }
-                        }
-                        Spacer(Modifier.height(12.dp))
-                        IknaWideButton(
-                            label = S.t("set.044"),
-                            modifier = Modifier.fillMaxWidth(),
-                            height = 52.dp,
-                            enabled = !busy,
-                            onClick = { fontPicker.launch(arrayOf("*/*")) }
+                        SettingsFontSectionContent(
+                            container = container,
+                            settings = settings,
+                            busy = busy,
+                            scope = scope,
+                            onPickFont = { fontPicker.launch(arrayOf("*/*")) }
                         )
                     }
                 }
 
                 item(key = ID_REMINDER, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
                     IknaSettingsSection(S.t("set.047"), null, icon = iknaSettingsSectionGlyph(ID_REMINDER)) {
-                        IknaSettingsToggleRow(
-                            title = S.t("set.049"),
-                            subtitle = if (settings.reminderEnabled)
-                                S.t("set.050") + timeText(settings.reminderHour, settings.reminderMinute)
-                            else S.t("set.051"),
-                            checked = settings.reminderEnabled,
-                            onCheckedChange = { enabled ->
-                                scope.launch {
-                                    container.settings.setReminder(
-                                        enabled,
-                                        settings.reminderHour,
-                                        settings.reminderMinute
-                                    )
-                                    WorkScheduler.scheduleReminder(
-                                        context,
-                                        !container.isDeveloperMode && enabled,
-                                        settings.reminderHour,
-                                        settings.reminderMinute
-                                    )
-                                }
-                                if (enabled && !container.isDeveloperMode && Build.VERSION.SDK_INT >= 33) {
-                                    notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                }
-                            }
+                        SettingsReminderSectionContent(
+                            context = context,
+                            container = container,
+                            settings = settings,
+                            scope = scope,
+                            onRequestNotificationPermission = { notificationPermission.launch(it) }
                         )
-                        if (settings.reminderEnabled) {
-                            Spacer(Modifier.height(8.dp))
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                REMINDER_TIMES.forEach { time ->
-                                    val hour = time.first
-                                    val minute = time.second
-                                    IknaChip(
-                                        label = timeText(hour, minute),
-                                        selected = settings.reminderHour == hour &&
-                                            settings.reminderMinute == minute,
-                                        onClick = {
-                                            scope.launch {
-                                                container.settings.setReminder(true, hour, minute)
-                                                WorkScheduler.scheduleReminder(
-                                                    context,
-                                                    !container.isDeveloperMode,
-                                                    hour,
-                                                    minute
-                                                )
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        }
                     }
                 }
 
-                // Updates.
-                //
-                // The window that offers a new version can be waved away, and a
-                // person who waved it away and then changed their mind had nowhere
-                // to go: the offer was gone until the release after it. So the same
-                // check lives here, on demand, and here the skipped version is
-                // ignored -- pressing the button is the change of mind.
                 item(key = ID_UPDATE, contentType = SETTINGS_SECTION_CONTENT_TYPE) {
                     IknaSettingsSection(S.t("set.138"), S.t("set.139"), icon = iknaSettingsSectionGlyph(ID_UPDATE)) {
-                        Text(
-                            text = S.t("upd.011") + installedVersion(context),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        if (settings.updateSkipped.isNotEmpty()) {
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = S.t("upd.015") + settings.updateSkipped,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Spacer(Modifier.height(12.dp))
-                        IknaSettingsToggleRow(
-                            title = S.t("upd.008"),
-                            subtitle = S.t("upd.009"),
-                            checked = settings.updateCheck,
-                            onCheckedChange = { on ->
-                                scope.launch { container.settings.setUpdateCheck(on) }
-                            }
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        IknaWideButton(
-                            label = if (updateBusy) S.t("upd.014") else S.t("upd.010"),
-                            height = 52.dp,
-                            enabled = !updateBusy,
-                            onClick = {
-                                scope.launch {
-                                    updateBusy = true
-                                    updateNote = null
-                                    val now = System.currentTimeMillis()
-                                    val release = UpdateCheck(
-                                        installedVersion(context),
-                                        has64Bit()
-                                    ).latest()
-                                    container.settings.markUpdateChecked(now)
-                                    updateBusy = false
-                                    updateFound = release
-                                    // A failed request and an up-to-date install both
-                                    // arrive as nothing, and the app cannot honestly
-                                    // tell them apart from here, so the line says both.
-                                    updateNote = if (release == null) S.t("upd.012") else null
-                                }
-                            }
-                        )
-                        val offered = updateFound
-                        if (offered != null) {
-                            Spacer(Modifier.height(16.dp))
-                            Text(
-                                text = S.t("upd.016") + offered.version,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = S.t("upd.002") + megabytes(offered.sizeBytes) +
-                                    " " + S.t("upd.003"),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(Modifier.height(8.dp))
-                            if (updateDownload.phase == UpdatePhase.IDLE) {
-                                IknaWideButton(
-                                    label = S.t("upd.005"),
-                                    height = 52.dp,
-                                    onClick = { updateDownload.start(offered) }
-                                )
-                            } else {
-                                UpdateDownloadPanel(
-                                    state = updateDownload,
-                                    release = offered,
-                                    onBrowser = { openInBrowser(context, offered.apkUrl) }
-                                )
-                            }
-                        }
-                        val note = updateNote
-                        if (note != null) {
-                            Spacer(Modifier.height(8.dp))
-                            Text(
-                                text = note,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Spacer(Modifier.height(8.dp))
-                        // The way out when the check itself cannot work: no network
-                        // here, a rate limit there, or simply wanting to read the
-                        // whole release rather than its first paragraphs.
-                        IknaTextButton(
-                            label = S.t("upd.013"),
-                            onClick = { openInBrowser(context, UpdateCheck.RELEASES_PAGE) },
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        SettingsUpdateSectionContent(
+                            context = context,
+                            container = container,
+                            settings = settings,
+                            scope = scope,
+                            updateBusy = updateBusy,
+                            updateFound = updateFound,
+                            updateNote = updateNote,
+                            updateDownload = updateDownload,
+                            onUpdateBusyChange = { updateBusy = it },
+                            onUpdateFoundChange = { updateFound = it },
+                            onUpdateNoteChange = { updateNote = it }
                         )
                     }
                 }
@@ -1481,91 +1208,6 @@ fun SettingsScreen(
 
 
 
-/**
- * Four colours, typed, with their contrast printed underneath.
- *
- * Not a colour wheel: a wheel is a circle, and this app does not draw circles.
- * More to the point, a wheel cannot tell you that the text colour you just
- * picked is unreadable on the background you picked two taps ago. These are the
- * standard contrast ratios; below 4.5 the app says so plainly and still applies
- * the colour, because it is the user's own screen and not a compliance audit.
- */
-@Composable
-private fun CustomColors(
-    settings: IknaSettings,
-    onChange: (Int, Int, Int, Int) -> Unit
-) {
-    val background = Color(settings.customBackground)
-    val ink = Color(settings.customInk)
-    val muted = Color(settings.customMuted)
-    val accent = Color(settings.customAccent)
-
-    ColorRow(S.t("set.083"), background) {
-        onChange(it, settings.customInk, settings.customMuted, settings.customAccent)
-    }
-    ColorRow(S.t("set.084"), ink) {
-        onChange(settings.customBackground, it, settings.customMuted, settings.customAccent)
-    }
-    ColorRow(S.t("set.085"), muted) {
-        onChange(settings.customBackground, settings.customInk, it, settings.customAccent)
-    }
-    ColorRow(S.t("set.086"), accent) {
-        onChange(settings.customBackground, settings.customInk, settings.customMuted, it)
-    }
-
-    Spacer(Modifier.height(12.dp))
-
-    val inkRatio = contrastRatio(ink, background)
-    val mutedRatio = contrastRatio(muted, background)
-    val accentRatio = contrastRatio(accent, background)
-    Text(
-        text = S.t("set.087") + ratioText(inkRatio) +
-            S.t("set.088") + ratioText(mutedRatio) +
-            S.t("set.089") + ratioText(accentRatio),
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
-
-    if (minOf(inkRatio, mutedRatio, accentRatio) < MIN_READABLE_CONTRAST) {
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = S.t("set.090"),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.error
-        )
-    }
-}
-
-@Composable
-private fun ColorRow(label: String, color: Color, onColor: (Int) -> Unit) {
-    // Seeded from the stored colour and written back only when the text is a
-    // complete one, so half-typed hex never repaints the whole app.
-    var text by remember(color) { mutableStateOf(hexOf(color)) }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IknaSwatch(color = color)
-        Spacer(Modifier.width(12.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f)
-        )
-        IknaHexField(
-            value = text,
-            onValueChange = { typed ->
-                text = typed
-                parseHexColor(typed)?.let { onColor(it.toArgb()) }
-            },
-            modifier = Modifier.width(104.dp)
-        )
-    }
-}
-
 private const val SETTINGS_SECTION_CONTENT_TYPE = "settings-section"
 
 private const val ID_LOAD = "load"
@@ -1579,11 +1221,6 @@ private const val ID_UPDATE = "update"
 
 private const val ID_ADVANCED = "advanced"
 
-/**
- * Order is by how often a thing is actually touched, not by how important it
- * sounds. The load and the look are changed in the first week; the wipe button
- * is changed once, by someone who came looking for it.
- */
 private val JUMPS = listOf(
     ID_LOAD to "set.091",
     ID_LOOK to "set.092",
@@ -1598,83 +1235,13 @@ private val JUMPS = listOf(
 
 private val SPEECH_SECTION_INDEX = JUMPS.indexOfFirst { it.first == ID_SPEECH }
 
-/**
- * Interface languages. English and Polish are here because the app is used in
- * both directions: the person learning Polish from Russian today is the person
- * learning English tomorrow, and an interface stuck in one language turns the
- * other deck into homework in translation.
- */
 private val LANGUAGES = listOf(
     LANGUAGE_SYSTEM
 ) + UI_LANGUAGES.map { it.code }
 
-/**
- * How many language chips are shown before the rest go behind one tap.
- *
- * Six is three rows of two, which is the most this section can hold and still
- * read as a setting rather than as a list of everything the app was ever
- * translated into.
- */
 private const val LANGUAGE_FOLD = 6
 
-/**
- * Language names stay in their own language: a person looking for Polish looks
- * for "POLSKI", not for its translation. Only "as in the system" is translated,
- * because it is a sentence about the phone rather than a name.
- */
 private fun languageLabel(code: String): String = when (code) {
     LANGUAGE_SYSTEM -> S.t("set.099")
     else -> uiLanguageLabel(code) ?: code.uppercase(Locale.getDefault())
-}
-
-private val REMINDER_TIMES = listOf(9 to 0, 13 to 0, 20 to 0, 22 to 0)
-
-private fun themeLabel(mode: ThemeMode): String = when (mode) {
-    ThemeMode.DARK -> S.t("set.101")
-    ThemeMode.GREY -> S.t("set.102")
-    // Reuses the language section's "как в системе": it is the same promise about
-    // the same phone setting, and two different wordings for it would read as two
-    // different behaviours.
-    ThemeMode.SYSTEM -> S.t("set.099")
-    ThemeMode.CUSTOM -> S.t("set.103")
-}
-
-private fun timeText(hour: Int, minute: Int): String =
-    String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
-
-
-/**
- * Opens the phone's speech settings. Not every ROM has this screen, so the
- * caller is told whether it worked instead of the app throwing.
- */
-private fun openTtsSettings(context: Context): Boolean = runCatching {
-    context.startActivity(
-        Intent("com.android.settings.TTS_SETTINGS").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    )
-    true
-}.getOrDefault(false)
-
-/** Asks the installed engine to fetch its voice data. Same caveat as above. */
-private fun installVoices(context: Context): Boolean = runCatching {
-    context.startActivity(
-        Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    )
-    true
-}.getOrDefault(false)
-
-/** The picked file's own name, for showing which font is in use. */
-private fun displayNameOf(context: Context, uri: Uri): String {
-    runCatching {
-        context.contentResolver
-            .query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
-            ?.use { cursor ->
-                val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                if (index >= 0 && cursor.moveToFirst()) {
-                    val name = cursor.getString(index)
-                    if (!name.isNullOrBlank()) return name
-                }
-            }
-    }
-    return uri.lastPathSegment?.substringAfterLast('/').orEmpty().ifBlank { S.t("set.110") }
 }
