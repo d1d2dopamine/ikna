@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -338,35 +339,38 @@ fun IknaDeckProgress(
 }
 
 /**
- * Two letters in a square, and the square is the whole signal.
+ * Two letters in a dark square with a deterministic pixel-seal pattern.
  *
- * Filled means this deck wants something today. Hollow means it is done or
- * resting: the letters and the faint seal carry the shape without a border --
- * the owner removed the frame from the marks entirely.
+ * Never floods the tile with a solid white/accent block (especially important in Palette 0 "Zero").
+ * Changing a deck's tint color always tints the inner seal in both active and resting states:
+ * - Active (owes cards today): subtly elevated dark tinted obsidian tile, luminous colored pixel-seal,
+ *   and full-contrast letters.
+ * - Resting (done for today): pure background tile, softer colored pixel-seal, and calmer letters.
  */
 @Composable
 fun IknaDeckMark(deck: DeckSummary, owes: Boolean, look: DeckLook, compact: Boolean = false) {
     val accent = deckTintColor(look.tint, MaterialTheme.colorScheme.primary)
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val background = MaterialTheme.colorScheme.background
+    val onBackground = MaterialTheme.colorScheme.onBackground
 
-    val fill = if (owes) accent else background
+    val fill = if (owes) accent.copy(alpha = 0.09f).compositeOver(background) else background
     val ink = when {
-        owes -> background
-        deck.isActive -> MaterialTheme.colorScheme.onBackground
-        else -> muted.copy(alpha = 0.6f)
+        owes -> onBackground
+        deck.isActive -> onBackground.copy(alpha = 0.72f)
+        else -> muted.copy(alpha = 0.55f)
     }
     val patternCells = remember(deck.id, deck.installedAt) { deckSealCells(deck.id, deck.installedAt) }
     val highlightCells = remember(deck.id, deck.installedAt) { deckSealHighlights(deck.id, deck.installedAt) }
     val pattern = when {
-        owes -> background.copy(alpha = 0.16f)
-        deck.isActive -> accent.copy(alpha = 0.18f)
-        else -> muted.copy(alpha = 0.10f)
+        owes -> accent.copy(alpha = 0.26f)
+        deck.isActive -> accent.copy(alpha = 0.13f)
+        else -> muted.copy(alpha = 0.08f)
     }
     val highlight = when {
-        owes -> background.copy(alpha = 0.34f)
-        deck.isActive -> accent.copy(alpha = 0.40f)
-        else -> muted.copy(alpha = 0.20f)
+        owes -> accent.copy(alpha = 0.62f)
+        deck.isActive -> accent.copy(alpha = 0.30f)
+        else -> muted.copy(alpha = 0.16f)
     }
 
     Box(

@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
@@ -64,7 +65,10 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.math.PI
+import kotlin.math.cos
 import kotlin.math.roundToInt
+import kotlin.math.sin
 
 enum class ProfileTab { OVERVIEW, ANALYTICS }
 
@@ -548,15 +552,15 @@ fun IknaLocalProfileCard(
                     ) {
                         PROFILE_BANNER_PRESETS.forEach { preset ->
                             val isSelected = activePreset == preset.id
-                            val swatchShape = RoundedCornerShape(8.dp)
+                            val swatchShape = iknaTileShape()
                             Box(
                                 modifier = Modifier
-                                    .width(72.dp)
-                                    .height(34.dp)
+                                    .width(76.dp)
+                                    .height(36.dp)
                                     .clip(swatchShape)
                                     .border(
-                                        width = if (isSelected) 2.dp else 1.dp,
-                                        color = if (isSelected) colors.primary else colors.outline.copy(alpha = 0.40f),
+                                        width = if (isSelected) 1.5.dp else 1.dp,
+                                        color = if (isSelected) colors.primary else colors.outline.copy(alpha = 0.38f),
                                         shape = swatchShape
                                     )
                                     .clickable { onSelectBannerPreset(preset.id) }
@@ -896,173 +900,251 @@ private fun ProfileCoverBanner(
     }
 }
 
+private val BANNER_PIXEL_EMBLEM: Array<String> = arrayOf(
+    "###.#A",
+    "#.##.#",
+    ".##.A#",
+    "A..##.",
+    "##..#.",
+    "..#.#.",
+    "..A..."
+)
+
 @Composable
 private fun ProfileBannerPresetCanvas(
     presetId: String,
     modifier: Modifier = Modifier
 ) {
-    val colors = MaterialTheme.colorScheme
+    val palette = LocalIknaPalette.current
     Canvas(modifier = modifier) {
         val w = size.width
         val h = size.height
-        val stroke = 1.dp.toPx()
+        if (w <= 0f || h <= 0f) return@Canvas
+        val bg = palette.background
+        val ink = palette.ink
+        val accent = palette.accent
+        fun tint(fg: Color, alpha: Float): Color = fg.copy(alpha = alpha).compositeOver(bg)
+        val surface = tint(ink, 0.06f)
+        val deepSurface = tint(ink, 0.03f)
+        val hairline = (h * 0.008f).coerceIn(0.75.dp.toPx(), 1.25.dp.toPx())
+
         when (presetId) {
             "horizon" -> {
-                drawRect(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            colors.primary.copy(alpha = 0.24f),
-                            colors.surface,
-                            colors.background.copy(alpha = 0.92f)
-                        )
-                    )
+                // Editorial linen strata: quiet stepped horizontal bands + single golden-ratio horizon rule.
+                val bands = floatArrayOf(0f, 0.24f, 0.46f, 0.64f, 0.82f, 1f)
+                val tones = arrayOf(
+                    tint(ink, 0.03f),
+                    tint(ink, 0.055f),
+                    tint(ink, 0.085f),
+                    tint(accent, 0.075f),
+                    tint(ink, 0.035f)
                 )
-                val ridge1 = Path().apply {
-                    moveTo(0f, h * 0.68f)
-                    cubicTo(w * 0.28f, h * 0.40f, w * 0.62f, h * 0.84f, w, h * 0.48f)
-                    lineTo(w, h)
-                    lineTo(0f, h)
-                    close()
+                for (i in tones.indices) {
+                    val y0 = h * bands[i]
+                    val y1 = h * bands[i + 1]
+                    drawRect(tones[i], Offset(0f, y0), Size(w, y1 - y0 + 0.5f))
                 }
-                drawPath(ridge1, color = colors.primary.copy(alpha = 0.14f))
-                val ridge2 = Path().apply {
-                    moveTo(0f, h * 0.82f)
-                    cubicTo(w * 0.35f, h * 0.62f, w * 0.72f, h * 0.92f, w, h * 0.66f)
-                    lineTo(w, h)
-                    lineTo(0f, h)
-                    close()
+                for (i in 1 until bands.size - 1) {
+                    val y = h * bands[i]
+                    val isHorizon = i == 3
+                    drawLine(
+                        color = if (isHorizon) accent.copy(alpha = 0.58f) else ink.copy(alpha = 0.09f),
+                        start = Offset(0f, y),
+                        end = Offset(w, y),
+                        strokeWidth = if (isHorizon) hairline * 1.3f else hairline
+                    )
                 }
-                drawPath(ridge2, color = colors.surface.copy(alpha = 0.75f))
+                // Crisp registration tick at right edge of the horizon line.
+                val tickH = h * 0.14f
+                val hy = h * bands[3]
                 drawLine(
-                    color = colors.primary.copy(alpha = 0.34f),
-                    start = Offset(0f, h * 0.68f),
-                    end = Offset(w, h * 0.48f),
-                    strokeWidth = stroke
+                    color = accent.copy(alpha = 0.72f),
+                    start = Offset(w * 0.88f, hy - tickH * 0.5f),
+                    end = Offset(w * 0.88f, hy + tickH * 0.5f),
+                    strokeWidth = hairline * 1.2f
                 )
             }
             "aurora" -> {
-                drawRect(color = colors.surface)
-                drawRect(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colors.primary.copy(alpha = 0.34f), Color.Transparent),
-                        center = Offset(w * 0.26f, h * 0.25f),
-                        radius = w * 0.58f
-                    )
-                )
-                drawRect(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colors.secondary.copy(alpha = 0.26f), Color.Transparent),
-                        center = Offset(w * 0.78f, h * 0.72f),
-                        radius = w * 0.52f
-                    )
-                )
-                val ribbon = Path().apply {
-                    moveTo(0f, h * 0.64f)
-                    cubicTo(w * 0.30f, h * 0.18f, w * 0.66f, h * 0.88f, w, h * 0.26f)
+                // Swiss halftone pixel-wave: crisp square matrix modulated by a calm diagonal density field.
+                drawRect(deepSurface)
+                val cols = 28
+                val rows = 9
+                val stepX = w / cols
+                val stepY = h / rows
+                val maxCell = minOf(stepX, stepY) * 0.62f
+                for (r in 0 until rows) {
+                    for (c in 0 until cols) {
+                        val nx = (c + 0.5f) / cols
+                        val ny = (r + 0.5f) / rows
+                        // Keep bottom-left calm behind the overlapping profile avatar.
+                        val avatarClear = ((nx - 0.14f) * (nx - 0.14f) * 2.2f + (ny - 0.88f) * (ny - 0.88f) * 2.6f)
+                        val wave = 0.5f + 0.5f * sin((nx * 2.4f - ny * 1.3f) * PI.toFloat())
+                        val ridge = 0.5f + 0.5f * cos((nx * 1.7f + ny * 2.1f) * PI.toFloat())
+                        val density = (wave * 0.65f + ridge * 0.35f) * (nx * 0.75f + 0.25f)
+                        if (avatarClear < 0.09f || density < 0.24f) continue
+                        val cell = maxCell * ((density - 0.20f) / 0.80f).coerceIn(0.22f, 1f)
+                        val cx = (c + 0.5f) * stepX - cell / 2f
+                        val cy = (r + 0.5f) * stepY - cell / 2f
+                        val isAccentBand = density > 0.78f && ((c + r) % 2 == 0)
+                        val color = if (isAccentBand) {
+                            accent.copy(alpha = (0.34f + (density - 0.78f) * 1.4f).coerceAtMost(0.68f))
+                        } else {
+                            ink.copy(alpha = (0.05f + density * 0.14f).coerceAtMost(0.20f))
+                        }
+                        drawRect(color, Offset(cx, cy), Size(cell, cell))
+                    }
                 }
-                drawPath(
-                    path = ribbon,
-                    color = colors.primary.copy(alpha = 0.26f),
-                    style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
-                )
             }
             "topo" -> {
-                drawRect(
-                    brush = Brush.linearGradient(
-                        colors = listOf(colors.surface, colors.primary.copy(alpha = 0.12f), colors.surface),
-                        start = Offset(0f, h),
-                        end = Offset(w, 0f)
-                    )
-                )
-                val center = Offset(w * 0.82f, h * 0.22f)
-                for (i in 1..6) {
-                    drawCircle(
-                        color = if (i % 2 == 0) colors.primary.copy(alpha = 0.22f) else colors.outline.copy(alpha = 0.20f),
-                        radius = w * (0.09f * i),
-                        center = center,
-                        style = Stroke(width = stroke)
-                    )
-                }
-                val center2 = Offset(w * 0.16f, h * 0.92f)
-                for (i in 1..3) {
-                    drawCircle(
-                        color = colors.outline.copy(alpha = 0.15f),
-                        radius = w * (0.08f * i),
-                        center = center2,
-                        style = Stroke(width = stroke)
+                // Swiss cartographic ridgelines: crisp parallel harmonic contour engravings across the banner.
+                drawRect(surface)
+                val lineCount = 7
+                val samples = 64
+                for (i in 0 until lineCount) {
+                    val t = i.toFloat() / (lineCount - 1)
+                    val baseY = h * (0.20f + t * 0.66f)
+                    val amp1 = h * (0.065f + (1f - t) * 0.045f)
+                    val amp2 = h * 0.032f
+                    val phase = i * 0.42f
+                    val path = Path()
+                    for (s in 0..samples) {
+                        val u = s.toFloat() / samples
+                        val x = u * w
+                        val envelope = 0.35f + 0.65f * sin(u * PI.toFloat())
+                        val dy = (sin(u * 2.6f * PI.toFloat() + phase) * amp1 +
+                            cos(u * 5.2f * PI.toFloat() - phase * 0.7f) * amp2) * envelope
+                        val y = baseY + dy
+                        if (s == 0) path.moveTo(x, y) else path.lineTo(x, y)
+                    }
+                    val isFocal = i == 3
+                    drawPath(
+                        path = path,
+                        color = if (isFocal) accent.copy(alpha = 0.56f) else ink.copy(alpha = 0.08f + (1f - kotlin.math.abs(t - 0.5f) * 2f) * 0.10f),
+                        style = Stroke(
+                            width = if (isFocal) hairline * 1.45f else hairline,
+                            cap = StrokeCap.Round,
+                            join = StrokeJoin.Round
+                        )
                     )
                 }
             }
             "grid" -> {
+                // Precision drafting index card: micro crosshair intersections + architectural framing + focal cluster.
+                drawRect(deepSurface)
+                val cols = 12
+                val rows = 4
+                val stepX = w / cols
+                val stepY = h / rows
+                val crossArm = minOf(stepX, stepY) * 0.11f
+                // Fine horizontal baseline rules (index-card rhythm)
+                for (r in 1 until rows) {
+                    val y = r * stepY
+                    drawLine(ink.copy(alpha = 0.07f), Offset(0f, y), Offset(w, y), strokeWidth = hairline * 0.8f)
+                }
+                // Precision '+' registration crosshairs at intersections
+                for (r in 1 until rows) {
+                    for (c in 1 until cols) {
+                        val ix = c * stepX
+                        val iy = r * stepY
+                        val emphasis = c >= cols - 4 && r <= 2
+                        val markColor = if (emphasis) accent.copy(alpha = 0.42f) else ink.copy(alpha = 0.18f)
+                        drawLine(markColor, Offset(ix - crossArm, iy), Offset(ix + crossArm, iy), hairline)
+                        drawLine(markColor, Offset(ix, iy - crossArm), Offset(ix, iy + crossArm), hairline)
+                    }
+                }
+                // Highlighted coordinate cell on upper-right
+                val cellX = (cols - 3) * stepX
+                val cellY = 1f * stepY
                 drawRect(
-                    brush = Brush.linearGradient(
-                        colors = listOf(colors.surface, colors.background.copy(alpha = 0.92f)),
-                        start = Offset.Zero,
-                        end = Offset(w, h)
-                    )
+                    color = accent.copy(alpha = 0.10f),
+                    topLeft = Offset(cellX, cellY),
+                    size = Size(stepX, stepY)
                 )
-                val step = 22.dp.toPx().coerceAtLeast(10f)
-                val gridColor = colors.outline.copy(alpha = 0.16f)
-                var x = step
-                while (x < w) {
-                    drawLine(gridColor, Offset(x, 0f), Offset(x, h), strokeWidth = stroke * 0.7f)
-                    x += step
-                }
-                var y = step
-                while (y < h) {
-                    drawLine(gridColor, Offset(0f, y), Offset(w, y), strokeWidth = stroke * 0.7f)
-                    y += step
-                }
-                drawCircle(colors.primary.copy(alpha = 0.65f), radius = 3.dp.toPx(), center = Offset(w * 0.72f, h * 0.36f))
-                drawCircle(colors.primary.copy(alpha = 0.35f), radius = 10.dp.toPx(), center = Offset(w * 0.72f, h * 0.36f), style = Stroke(stroke))
-                drawCircle(colors.primary.copy(alpha = 0.45f), radius = 2.5.dp.toPx(), center = Offset(w * 0.42f, h * 0.62f))
+                drawRect(
+                    color = accent.copy(alpha = 0.45f),
+                    topLeft = Offset(cellX, cellY),
+                    size = Size(stepX, stepY),
+                    style = Stroke(width = hairline)
+                )
             }
             "prism" -> {
-                drawRect(color = colors.surface)
-                val shard1 = Path().apply {
-                    moveTo(w * 0.46f, 0f)
-                    lineTo(w, 0f)
-                    lineTo(w, h)
-                    lineTo(w * 0.28f, h)
-                    close()
+                // Bauhaus architectural louvers: golden-proportion vertical pillars + narrow accent light slit.
+                drawRect(bg)
+                val cuts = floatArrayOf(0f, 0.14f, 0.25f, 0.41f, 0.53f, 0.68f, 0.705f, 0.83f, 1f)
+                val alphas = floatArrayOf(0.02f, 0.05f, 0.03f, 0.07f, 0.04f, -1f, 0.08f, 0.035f)
+                for (i in alphas.indices) {
+                    val x0 = w * cuts[i]
+                    val x1 = w * cuts[i + 1]
+                    val fillColor = if (alphas[i] < 0f) {
+                        tint(accent, 0.22f)
+                    } else {
+                        tint(ink, alphas[i])
+                    }
+                    drawRect(fillColor, Offset(x0, 0f), Size(x1 - x0 + 0.5f, h))
+                    if (i > 0) {
+                        val isSlitEdge = alphas[i] < 0f || (i > 0 && alphas[i - 1] < 0f)
+                        drawLine(
+                            color = if (isSlitEdge) accent.copy(alpha = 0.55f) else ink.copy(alpha = 0.08f),
+                            start = Offset(x0, 0f),
+                            end = Offset(x0, h),
+                            strokeWidth = hairline
+                        )
+                    }
                 }
-                drawPath(shard1, color = colors.primary.copy(alpha = 0.12f))
-                val shard2 = Path().apply {
-                    moveTo(w * 0.66f, 0f)
-                    lineTo(w, 0f)
-                    lineTo(w, h * 0.72f)
-                    lineTo(w * 0.54f, h)
-                    close()
-                }
-                drawPath(shard2, color = colors.primary.copy(alpha = 0.14f))
-                drawLine(colors.primary.copy(alpha = 0.30f), Offset(w * 0.46f, 0f), Offset(w * 0.28f, h), stroke)
-                drawLine(colors.outline.copy(alpha = 0.28f), Offset(w * 0.66f, 0f), Offset(w * 0.54f, h), stroke)
+                // Subtle architectural top/bottom ticks aligning the focal column
+                val slitCenter = w * ((cuts[5] + cuts[6]) * 0.5f)
+                drawLine(accent.copy(alpha = 0.70f), Offset(slitCenter, 0f), Offset(slitCenter, h * 0.16f), hairline * 1.4f)
             }
             else -> {
-                // "obsidian" default: calm layered gradient + subtle radial glow + architectural lines
+                // "obsidian" default: calm Ikna bookplate featuring the signature pixel emblem on the right third.
                 drawRect(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            colors.surface,
-                            colors.primary.copy(alpha = 0.18f),
-                            colors.surface
-                        ),
-                        start = Offset(0f, 0f),
-                        end = Offset(w, h)
+                    brush = Brush.verticalGradient(
+                        colors = listOf(surface, deepSurface, bg)
                     )
                 )
-                drawRect(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colors.primary.copy(alpha = 0.20f), Color.Transparent),
-                        center = Offset(w * 0.78f, h * 0.22f),
-                        radius = w * 0.55f
-                    )
+                // Quiet architectural rule anchoring the bottom third
+                val ruleY = h * 0.74f
+                drawLine(
+                    color = ink.copy(alpha = 0.10f),
+                    start = Offset(w * 0.06f, ruleY),
+                    end = Offset(w * 0.94f, ruleY),
+                    strokeWidth = hairline
                 )
-                val lineColor = colors.primary.copy(alpha = 0.22f)
-                val mutedLine = colors.outline.copy(alpha = 0.18f)
-                drawLine(mutedLine, Offset(w * 0.56f, 0f), Offset(w * 0.44f, h), stroke)
-                drawLine(lineColor, Offset(w * 0.72f, 0f), Offset(w * 0.60f, h), stroke)
-                drawLine(mutedLine, Offset(w * 0.86f, 0f), Offset(w * 0.74f, h), stroke)
+                // Crisp Ikna 6x7 pixel emblem rendered in architectural scale on the right side
+                val rows = BANNER_PIXEL_EMBLEM.size
+                val cols = BANNER_PIXEL_EMBLEM[0].length
+                val blockH = h * 0.64f
+                val step = blockH / rows
+                val cell = step * 0.74f
+                val originX = w * 0.92f - cols * step
+                val originY = (h - rows * step) * 0.44f
+                for (r in 0 until rows) {
+                    val rowStr = BANNER_PIXEL_EMBLEM[r]
+                    for (c in 0 until cols) {
+                        val ch = rowStr[c]
+                        if (ch == '.') continue
+                        val x = originX + c * step + (step - cell) * 0.5f
+                        val y = originY + r * step + (step - cell) * 0.5f
+                        val color = if (ch == 'A') accent.copy(alpha = 0.62f) else ink.copy(alpha = 0.15f)
+                        drawRect(color, Offset(x, y), Size(cell, cell))
+                    }
+                }
+                // Subtle secondary echo grid on upper-center for depth without clutter
+                val echoStep = step * 0.55f
+                val echoCell = echoStep * 0.68f
+                val echoX = originX - cols * echoStep - w * 0.06f
+                val echoY = originY + h * 0.08f
+                for (r in 0 until rows) {
+                    val rowStr = BANNER_PIXEL_EMBLEM[r]
+                    for (c in 0 until cols) {
+                        val ch = rowStr[c]
+                        if (ch == '.') continue
+                        val x = echoX + c * echoStep
+                        val y = echoY + r * echoStep
+                        val color = if (ch == 'A') accent.copy(alpha = 0.22f) else ink.copy(alpha = 0.06f)
+                        drawRect(color, Offset(x, y), Size(echoCell, echoCell))
+                    }
+                }
             }
         }
     }
