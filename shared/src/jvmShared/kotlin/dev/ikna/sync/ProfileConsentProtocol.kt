@@ -499,7 +499,7 @@ class ProfileConsentProtocol(
         const val TTL_MILLIS = 10 * 60 * 1000L
         /** Tolerates real-world Windows/Android clock drift without allowing stale replays. */
         const val CLOCK_SKEW_MILLIS = 5 * 60 * 1000L
-        const val MAX_BYTES = 16 * 1024 * 1024
+        const val MAX_BYTES = 48 * 1024 * 1024
         private val HEX = Regex("[a-f0-9]{64}")
         private val ID = Regex("[A-Za-z0-9:_-]{1,128}")
     }

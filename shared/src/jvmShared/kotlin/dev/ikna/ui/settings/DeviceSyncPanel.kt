@@ -255,7 +255,8 @@ fun DeviceSyncPanel(
     onSyncNow: (() -> Unit)? = null,
     scannedCode: String? = null,
     onScannedCodeConsumed: () -> Unit = {},
-    onScanQr: (() -> Unit)? = null
+    onScanQr: (() -> Unit)? = null,
+    consentSlot: (@Composable () -> Unit)? = null,
 ) {
     var revokeId by remember(state.peers.map { it.id }) { mutableStateOf<String?>(null) }
     var pasted by remember(state.enabled, state.paired, state.blockedAfterReset) { mutableStateOf("") }
@@ -367,6 +368,7 @@ fun DeviceSyncPanel(
                 }
             }
         }
+        consentSlot?.invoke()
         if (state.blockedAfterReset) {
             Text(S.t("sync.reset_blocked"), style = MaterialTheme.typography.bodySmall)
             if (!state.canStartNewHistory) {

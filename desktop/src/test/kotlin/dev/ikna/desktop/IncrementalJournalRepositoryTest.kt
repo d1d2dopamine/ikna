@@ -323,12 +323,13 @@ class IncrementalJournalRepositoryTest {
     @Test fun `content identity never queries reviews and postconsent oversized history remains pageable`() = runBlocking {
         fixtures { a, b ->
             consent(a, b)
-            a.db.reviewDao().insertAll((1..1050).map { answer("event-$it", TS + it).copy(timingDiscardReason = "x".repeat(16_384)).toEntity() })
+            val oversizedCount = (ProfileTransferCodec.MAX_BYTES / 65_536) + 32
+            a.db.reviewDao().insertAll((1..oversizedCount).map { answer("event-$it", TS + it).copy(timingDiscardReason = "x".repeat(65_536)).toEntity() })
             a.trace.reset(); a.repo().profileTransfer.contentIdentity()
             assertFalse(a.trace.snapshot().any { Regex("(?i)\\b(reviews|journal_event_index)\\b").containsMatchIn(it) })
             try { a.repo().profileTransfer.snapshot(); fail("Expected bootstrap byte cap") } catch (_: ProfileTransferLimitException) {}
             val high = head(a)
-            assertEquals(1050L, high.highWater.sequence)
+            assertEquals(oversizedCount.toLong(), high.highWater.sequence)
             val zero = b.repo().incrementalJournal.checkpoint(b.auth(), high).cursor
             val page = a.repo().incrementalJournal.inventory(a.auth(), zero, high.highWater)!!
             assertTrue(page.entries.size in 1..127)

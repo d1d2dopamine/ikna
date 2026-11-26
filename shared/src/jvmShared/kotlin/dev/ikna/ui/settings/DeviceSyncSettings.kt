@@ -3,8 +3,10 @@ package dev.ikna.ui.settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import dev.ikna.sync.DeviceSyncController
 import dev.ikna.sync.PairedLanTransport
 import kotlinx.coroutines.launch
@@ -67,17 +69,14 @@ fun DeviceSyncSettings(
             DeviceSyncLogItem(time = time, isError = entry.isError, message = entry.message)
         },
     )
-    ProfileConsentPanel(
-        state = current.profileConsent,
-        peerRole = current.peerRole,
-        stage = current.stage,
-        thisDeviceName = thisDeviceLabel,
-        peerDeviceName = peerDeviceLabel,
-        onChooseMerge = { scope.launch { controller.chooseMerge(it) } },
-        onChooseAdoption = { peer, useThis -> scope.launch { controller.chooseAdoption(peer, useThis) } },
-        onApprove = { scope.launch { controller.approveProfile(it) } },
-        onCancel = { scope.launch { controller.cancelProfile() } }
-    )
+    val previewKey = current.profileConsent.preview?.let { p ->
+        "${current.profileConsent.peerId}|${p.localRevision}|${p.incomingRevision}"
+    }
+    var dismissedPreviewKey by remember { mutableStateOf<String?>(null) }
+    val showConsentInline = current.profileConsent.operationId != null ||
+        current.profileConsent.applied ||
+        current.profileConsent.adoptionPending ||
+        (previewKey != null && dismissedPreviewKey != previewKey)
     DeviceSyncPanel(
         state = state,
         onEnabledChange = { scope.launch { controller.setEnabled(it) } },
@@ -86,10 +85,32 @@ fun DeviceSyncSettings(
         onRevoke = { scope.launch { controller.revoke() } },
         onRevokePeer = { scope.launch { controller.revokePeer(it) } },
         onStartNewHistory = { scope.launch { controller.startNewHistory() } },
-        onSyncNow = { scope.launch { controller.syncNow() } },
+        onSyncNow = {
+            dismissedPreviewKey = null
+            scope.launch { controller.syncNow() }
+        },
         scannedCode = scannedCode,
         onScannedCodeConsumed = onScannedCodeConsumed,
-        onScanQr = onScanQr
+        onScanQr = onScanQr,
+        consentSlot = if (showConsentInline) {
+            {
+                ProfileConsentPanel(
+                    state = current.profileConsent,
+                    peerRole = current.peerRole,
+                    stage = current.stage,
+                    thisDeviceName = thisDeviceLabel,
+                    peerDeviceName = peerDeviceLabel,
+                    onChooseMerge = { scope.launch { controller.chooseMerge(it) } },
+                    onChooseAdoption = { peer, useThis -> scope.launch { controller.chooseAdoption(peer, useThis) } },
+                    onApprove = { scope.launch { controller.approveProfile(it) } },
+                    onCancel = {
+                        dismissedPreviewKey = previewKey
+                        scope.launch { controller.cancelProfile() }
+                    },
+                    onDismiss = { dismissedPreviewKey = previewKey },
+                )
+            }
+        } else null
     )
     if (current.recoveryAvailable) ProfileRecoveryPanel {
         scope.launch { controller.recoverProfile() }

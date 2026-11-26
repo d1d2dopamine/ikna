@@ -627,8 +627,9 @@ class DeviceSyncControllerIntegrationTest {
             a.enable(); b.enable(); pair(a, b)
             val operation = a.controller.state.value.profileConsent.operationId
             a.controller.setForeground(false); b.controller.setForeground(false)
-            val padding = "__TECHNICAL_DIAGNOSTIC_PADDING__".padEnd(16_384, 'x')
-            val left = (0 until 1100).map { answer("paged-left-$it").copy(timingDiscardReason = padding) }
+            val padding = "__TECHNICAL_DIAGNOSTIC_PADDING__".padEnd(65_536, 'x')
+            val leftCount = (dev.ikna.data.export.ProfileTransferCodec.MAX_BYTES / 65_536) + 32
+            val left = (0 until leftCount).map { answer("paged-left-$it").copy(timingDiscardReason = padding) }
             val right = (0 until 17).map { answer("paged-right-$it") }
             a.repository.mergeJournal(left, a.controller.historyBoundary() ?: 0L, a.controller.boundaryToken())
             b.repository.mergeJournal(right, b.controller.historyBoundary() ?: 0L, b.controller.boundaryToken())
@@ -639,9 +640,10 @@ class DeviceSyncControllerIntegrationTest {
             // Fresh controller/Room instances exercise durable consent and stream metadata.
             a.restart(); b.restart()
             // This finite multi-page test has a separate budget; existing small-case timeouts stay unchanged.
+            val expectedRows = (leftCount + right.size).toLong()
             try {
                 withTimeout(60_000) {
-                    while (a.reviewCount() != 1117L || b.reviewCount() != 1117L ||
+                    while (a.reviewCount() != expectedRows || b.reviewCount() != expectedRows ||
                         !a.controller.state.value.profileConsent.journalCaughtUp ||
                         !b.controller.state.value.profileConsent.journalCaughtUp) delay(50)
                 }
@@ -670,8 +672,8 @@ class DeviceSyncControllerIntegrationTest {
             }
             assertEquals(callbacks, a.merged.get() to b.merged.get())
             assertEquals(cards, a.db.cardDao().all())
-            assertEquals(1117, a.db.reviewDao().all().size)
-            assertEquals(1117, b.db.reviewDao().all().size)
+            assertEquals(expectedRows.toInt(), a.db.reviewDao().all().size)
+            assertEquals(expectedRows.toInt(), b.db.reviewDao().all().size)
         }
     }
 

@@ -53,8 +53,8 @@ class ProfileTransferLimitException(val limit: Limit) : IllegalArgumentException
 
 /** Exact Unicode/content, without name-based identity or lossy text normalization. */
 object ProfileTransferCodec {
-    const val MAX_BYTES = 16 * 1024 * 1024
-    const val MAX_ROWS = 200_000
+    const val MAX_BYTES = 48 * 1024 * 1024
+    const val MAX_ROWS = 450_000
     val json = Json { ignoreUnknownKeys = false; isLenient = false; encodeDefaults = true }
 
     fun canonical(snapshot: ProfileTransferSnapshot): ProfileTransferSnapshot = snapshot.copy(

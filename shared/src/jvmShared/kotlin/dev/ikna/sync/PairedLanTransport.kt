@@ -6,6 +6,8 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.File
@@ -20,6 +22,8 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
+import java.util.zip.GZIPInputStream
+import java.util.zip.GZIPOutputStream
 import javax.net.ssl.SSLServerSocket
 import javax.net.ssl.SSLSocket
 
@@ -99,6 +103,7 @@ class PairedLanTransport(
         val certificate: String = "", val port: Int = 0, val payload: String = "",
         val deviceName: String = "",
         val hosts: List<String> = emptyList(),
+        val payloadEncoding: String = "",
     )
     private class PayloadTooLargeException : IllegalArgumentException()
     private data class Pending(val invitation: PairingInvitation, val deadlineNanos: Long = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(INVITATION_MS), var attempts: Int = 0)
@@ -405,14 +410,16 @@ class PairedLanTransport(
         lastIncomingNanos[peer.id] = System.nanoTime()
         setActivity(ActivityStage.EXCHANGING_DATA)
         try {
-            val payload = decodePayload(request.payload)
+            val payload = decodePayload(request.payload, request.payloadEncoding)
             callback(session) { callbacks.receiveFrom(peer.id, payload) }
             val response = callback(session) { callbacks.snapshotFor(peer.id) }
+            val (encodedResponse, responseEncoding) = encodePayloadWithEncoding(response)
             synchronized(gate) {
                 checkActive(session)
                 require(peers.contains(peer))
                 write(socket, Wire(operation = "exchanged", binding = binding, id = deviceId,
-                    credential = "", challenge = request.challenge, payload = encodePayload(response)))
+                    credential = "", challenge = request.challenge, payload = encodedResponse,
+                    payloadEncoding = responseEncoding))
             }
             val acknowledgment = read(socket)
             require(acknowledgment.version == 1 && acknowledgment.operation == "received" &&
@@ -446,12 +453,14 @@ class PairedLanTransport(
             current.forEach { peer ->
                 if (active(session)) try {
                     val payload = callback(session) { callbacks.snapshotFor(peer.id) }
+                    val (encodedPayload, payloadEncoding) = encodePayloadWithEncoding(payload)
                     val candidates = (listOf(peer.host) + peer.hosts).distinct().take(MAX_CANDIDATE_HOSTS)
                     val workingHost = connectAny(candidates, peer.port, peer.certificate, certPin = peer.id, isPairing = false) { matchedHost, socket ->
                         setActivity(ActivityStage.EXCHANGING_DATA)
                         val challenge = readText(socket, 128)
                         write(socket, Wire(operation = "exchange", binding = binding, id = deviceId,
-                            credential = peer.credential, challenge = challenge, payload = encodePayload(payload)))
+                            credential = peer.credential, challenge = challenge, payload = encodedPayload,
+                            payloadEncoding = payloadEncoding))
                         val response = read(socket)
                         if (response.version == 1 && response.operation == "error" && response.challenge == challenge) {
                             val remoteCode = sanitizeRemoteErrorCode(response.payload)
@@ -460,7 +469,7 @@ class PairedLanTransport(
                         }
                         require(response.version == 1 && response.operation == "exchanged" && response.binding == binding &&
                             response.id == peer.id && response.challenge == challenge)
-                        callback(session) { callbacks.receiveFrom(peer.id, decodePayload(response.payload)) }
+                        callback(session) { callbacks.receiveFrom(peer.id, decodePayload(response.payload, response.payloadEncoding)) }
                         synchronized(gate) {
                             checkActive(session)
                             write(socket, Wire(operation = "received", binding = binding, id = deviceId,
@@ -652,13 +661,36 @@ class PairedLanTransport(
         require(bytes.size in 1..MAX_FRAME)
         DataOutputStream(socket.getOutputStream()).apply { writeInt(bytes.size); write(bytes); flush() }
     }
-    private fun encodePayload(payload: ByteArray): String {
+    private fun encodePayloadWithEncoding(payload: ByteArray): Pair<String, String> {
         if (payload.size > MAX_PAYLOAD) throw PayloadTooLargeException()
-        return Base64.getEncoder().encodeToString(payload)
+        if (payload.size >= GZIP_MIN_BYTES) {
+            val out = ByteArrayOutputStream(minOf(payload.size / 4, 65_536))
+            GZIPOutputStream(out).use { it.write(payload) }
+            val compressed = out.toByteArray()
+            if (compressed.size < payload.size) {
+                return Base64.getEncoder().encodeToString(compressed) to PAYLOAD_ENCODING_GZIP
+            }
+        }
+        return Base64.getEncoder().encodeToString(payload) to ""
     }
-    private fun decodePayload(payload: String): ByteArray {
+    private fun decodePayload(payload: String, encoding: String = ""): ByteArray {
+        require(encoding.isEmpty() || encoding == PAYLOAD_ENCODING_GZIP) { "unsupported-payload-encoding" }
         if (payload.length > (MAX_PAYLOAD + 2) / 3 * 4) throw PayloadTooLargeException()
-        return Base64.getDecoder().decode(payload).also { if (it.size > MAX_PAYLOAD) throw PayloadTooLargeException() }
+        val raw = Base64.getDecoder().decode(payload).also { if (it.size > MAX_PAYLOAD) throw PayloadTooLargeException() }
+        if (encoding.isEmpty()) return raw
+        val out = ByteArrayOutputStream(minOf(raw.size * 4, 256 * 1024))
+        val buf = ByteArray(8192)
+        GZIPInputStream(ByteArrayInputStream(raw)).use { gzip ->
+            var total = 0
+            while (true) {
+                val read = gzip.read(buf)
+                if (read < 0) break
+                total += read
+                if (total > MAX_PAYLOAD) throw PayloadTooLargeException()
+                out.write(buf, 0, read)
+            }
+        }
+        return out.toByteArray()
     }
     private fun validatePeer(peer: Peer) {
         LanSyncSecurity.address(peer.host)
@@ -668,6 +700,9 @@ class PairedLanTransport(
         require(peer.id == LanSyncSecurity.id(LanSyncSecurity.certificate(peer.certificate)))
     }
     private fun safeFailureTag(failure: Exception): String {
+        if (failure is dev.ikna.data.export.ProfileTransferLimitException) {
+            return " [limit=${failure.limit}]"
+        }
         val msg = failure.message
         if (msg != null && msg in SAFE_LOG_REASONS) return " [$msg]"
         return " (${failure.javaClass.simpleName})"
@@ -701,12 +736,14 @@ class PairedLanTransport(
     private fun publish() { runCatching { onStatus(status) } }
 
     companion object {
-        const val MAX_PAYLOAD = 16 * 1024 * 1024
-        const val MAX_FRAME = 24 * 1024 * 1024
+        const val MAX_PAYLOAD = 48 * 1024 * 1024
+        const val MAX_FRAME = 68 * 1024 * 1024
         const val MAX_PEERS = 4
         const val MAX_CANDIDATE_HOSTS = 6
         const val COMPACT_INVITATION_PREFIX = "ikna-pair:1:"
         const val COMPACT_QR_PREFIX = "ikna-pair:2:"
+        private const val PAYLOAD_ENCODING_GZIP = "gzip"
+        private const val GZIP_MIN_BYTES = 4096
         private const val SOCKET_MS = 5_000
         private const val FAST_POLL_MS = 1_500L
         private const val EXCHANGE_SOCKET_MS = 30_000

@@ -451,4 +451,21 @@ class PairedLanTransportTest {
         } finally { a.close(); b.close(); dirA.deleteRecursively(); dirB.deleteRecursively() }
     }
 
+    @Test fun `large compressible JSON payload exchanges cleanly with gzip compression`() = runBlocking {
+        val dirA = temp(); val dirB = temp()
+        val bigJsonA = "{\"packs\":[" + List(20_000) { "{\"id\":\"deck-a-$it\",\"text\":\"sample phrase $it\"}" }.joinToString(",") + "]}"
+        val bigJsonB = "{\"packs\":[" + List(20_000) { "{\"id\":\"deck-b-$it\",\"text\":\"other phrase $it\"}" }.joinToString(",") + "]}"
+        val aData = Data(bigJsonA.toByteArray(Charsets.UTF_8))
+        val bData = Data(bigJsonB.toByteArray(Charsets.UTF_8))
+        val a = PairedLanTransport(dirA, binding, aData, intervalMillis = 100)
+        val b = PairedLanTransport(dirB, binding, bData, intervalMillis = 100)
+        try {
+            a.start(); b.start()
+            b.pair(a.createInvitation("127.0.0.1"))
+            waitFor { aData.received.contains(bigJsonB) && bData.received.contains(bigJsonA) }
+            assertEquals(bigJsonB, aData.received.last())
+            assertEquals(bigJsonA, bData.received.last())
+        } finally { a.close(); b.close(); dirA.deleteRecursively(); dirB.deleteRecursively() }
+    }
+
 }

@@ -777,14 +777,19 @@ class DeviceSyncController(
                     ) -> error.message!!
                     else -> "operation-failed"
                 }
-                recordLog("Action failed: $safe (${error.javaClass.simpleName})", isError = true)
+                val detailTag = if (error is dev.ikna.data.export.ProfileTransferLimitException) {
+                    " [limit=${error.limit}]"
+                } else {
+                    " (${error.javaClass.simpleName})"
+                }
+                recordLog("Action failed: $safe$detailTag", isError = true)
                 publish(safe)
             }
         }
     }
     companion object {
-        const val MAX_BYTES = 16 * 1024 * 1024
-        const val MAX_RECORDS = 200_000
+        const val MAX_BYTES = 48 * 1024 * 1024
+        const val MAX_RECORDS = 450_000
         private const val MAX_LOG_ENTRIES = 30
     }
 }
