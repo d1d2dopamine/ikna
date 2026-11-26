@@ -5,183 +5,80 @@
 <h1 align="center" id="ikna">ikna</h1>
 
 <p align="center">
-  <strong>English</strong> · <a href="#русский">Русский</a>
+  <strong>English</strong> · <a href="README.ru.md">Русский</a>
 </p>
 
 <p align="center">
-  Flashcards for learning a language in context.<br>
-  Read a phrase in a sentence, reveal its meaning, and answer “know” or “don’t know”. Ikna schedules reviews and decides how much new material fits today.
+  Language flashcards built around real sentences.<br>
+  You answer "know" or "don't know", and Ikna paces your daily queue so a missed week never turns into a wall of overdue cards.
 </p>
 
 <p align="center">
-  <a href="#download"><strong>Download</strong></a> · Android, Windows and Linux
+  <a href="#download"><strong>Download (0.13.0)</strong></a> · Android, Windows and Linux
 </p>
 
 <p align="center">
   <a href="https://github.com/d1d2dopamine/ikna/releases/latest"><img src="https://img.shields.io/github/v/release/d1d2dopamine/ikna?style=for-the-badge&amp;label=release&amp;color=0078D4&amp;labelColor=5A6672" alt="release"></a>
   <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&amp;label=build&amp;style=for-the-badge&amp;color=0078D4&amp;labelColor=5A6672" alt="build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-5A6672?style=for-the-badge&amp;color=5A6672&amp;labelColor=5A6672" alt="license"></a>
-  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/made%20with-Kotlin-5A6672?style=for-the-badge&amp;logo=kotlin&amp;logoColor=white&amp;color=5A6672&amp;labelColor=5A6672" alt="kotlin"></a>
+  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Kotlin-Android%20%7C%20Windows%20%7C%20Linux-5A6672?style=for-the-badge&amp;logo=kotlin&amp;logoColor=white&amp;color=5A6672&amp;labelColor=5A6672" alt="Kotlin"></a>
 </p>
-<p align="center">
-  <img src="https://img.shields.io/badge/Android-10%2B-3DDC84?style=for-the-badge&amp;logo=android&amp;logoColor=white&amp;color=3DDC84&amp;labelColor=5A6672" alt="android">
-  <img src="https://img.shields.io/badge/Windows-x64-0078D4?style=for-the-badge&amp;logo=windows&amp;logoColor=white&amp;color=0078D4&amp;labelColor=5A6672" alt="windows x64">
-  <img src="https://img.shields.io/badge/AppImage-x86__64-F7A41D?style=for-the-badge&amp;logo=appimage&amp;logoColor=white&amp;color=F7A41D&amp;labelColor=5A6672" alt="AppImage x86_64">
-</p>
-
-## <img src="docs/assets/icons/what-is-ikna.svg" width="28" height="28" align="absmiddle" alt=""> What is Ikna?
-
-Ikna builds a daily plan from the cards you have due and your recent study history. You can start with the included beginner English deck for Russian speakers, pick a deck from the catalogue, or bring your own.
-
-## <img src="docs/assets/icons/how-it-works.svg" width="28" height="28" align="absmiddle" alt=""> How it works
-
-1. **Read.** “Can you **keep an eye on** my bag?”
-2. **Reveal.** “Can you watch my bag for a moment?”
-3. **Grade.** Choose “know” or “don’t know”. Ikna uses your answer to schedule the next review.
-
-FSRS‑6 schedules reviews. `riar-manage` decides how much new material fits in the day. After the daily plan, you can read familiar material in Browse. [Learning engine](docs/contracts/LEARNING-ENGINE.md) · [Daily workload](docs/contracts/GOVERNOR.md)
-
-<a name="download"></a>
-
-## <img src="docs/assets/icons/download.svg" width="28" height="28" align="absmiddle" alt=""> Download
-
-These files are from [the published 0.13.0 press release](https://github.com/d1d2dopamine/ikna/releases/tag/v0.13.0-press). See [release notes](docs/RELEASE-NOTES-0.13.0.md) for what's new.
-
-| Platform | Download |
-| --- | --- |
-| Android 10+ (arm64) | [APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-android-arm64.apk) |
-| Android 10+ (32-bit ARM) | [32-bit APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-android-legacy32.apk) |
-| Windows x64 | [Installer](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-windows-x64-setup.exe) · [Portable ZIP](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-windows-x64-portable.zip) |
-| Linux x86_64 | [AppImage](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-linux-x86_64.AppImage) |
-
-The Windows installer runs per user. The portable Windows build and the Linux AppImage ship with their runtime. On Linux, mark the AppImage executable before opening it. [Desktop setup](docs/contracts/DESKTOP.md) · [Updates](docs/contracts/UPDATES.md)
-
-## <img src="docs/assets/icons/decks.svg" width="28" height="28" align="absmiddle" alt=""> Decks
-
-- [Catalogue](docs/contracts/SOURCES.md). Choose a ready-made deck. Catalogue cards retain source and licence information.
-- [Your own deck](docs/contracts/DECKS.md). Paste rows in the form `phrase | example sentence | meaning`. Ikna can also prepare a prompt for an AI tool you choose.
-- [Anki import](docs/contracts/ANKI.md). Open an `.apkg` to import supported text cards and their review history. Images and audio are left out.
-
-## <img src="docs/assets/icons/privacy.svg" width="28" height="28" align="absmiddle" alt=""> Privacy and data
-
-Ikna stores cards and review history on your device. It has no accounts or analytics. You can export a backup and restore your history. The development branch also has optional local sync between devices you explicitly pair. [Privacy policy](PRIVACY.md) · [Local sync](docs/contracts/SYNC-PROFILES-0.12.md)
-
-## <img src="docs/assets/icons/interface.svg" width="28" height="28" align="absmiddle" alt=""> Interface
-
-Choose a palette, angular or rounded controls, and whether animations are on. Android includes a widget and a daily reminder. The interface is available in Russian, English, Polish, Spanish, French, German and Brazilian Portuguese. [Interface design](docs/DESIGN.md)
 
 https://github.com/user-attachments/assets/c90d603c-693f-4c9d-9915-55f04d7c0f5b
 
-| Review | Themes & settings |
+| Review | Themes and settings |
 | :---: | :---: |
 | ![Review screen](docs/assets/screenshots/01-review.png) | ![Themes and settings](docs/assets/screenshots/02-palettes.png) |
 | **Catalogue** | **About Ikna** |
 | ![Deck catalogue](docs/assets/screenshots/03-catalogue.png) | ![About Ikna](docs/assets/screenshots/04-about.png) |
 
-## <img src="docs/assets/icons/build.svg" width="28" height="28" align="absmiddle" alt=""> Build
+## <img src="docs/assets/icons/how-it-works.svg" width="28" height="28" align="absmiddle" alt=""> How a session works
 
-[GitHub Actions](https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml) builds Android, Windows and Linux. The [contributor guide](CONTRIBUTING.md) covers building locally and running tests.
+1. Read a phrase inside a sentence: "Can you **keep an eye on** my bag?"
+2. Reveal the meaning: "Can you watch my bag for a moment?"
+3. Pick "know" or "don't know".
 
-## <img src="docs/assets/icons/documentation.svg" width="28" height="28" align="absmiddle" alt=""> Documentation
+Ikna builds one finite plan for the day from cards that are due and your recent study pace. Reviews are scheduled with FSRS-6, while `riar-manage` decides how many new cards fit without overloading next week. Once you finish the daily plan, you can stop there, practice difficult cards, or read familiar material in Browse. [Learning engine](docs/contracts/LEARNING-ENGINE.md) · [Daily workload](docs/contracts/GOVERNOR.md)
 
-[Architecture](docs/ARCHITECTURE.md) · [Changelog](CHANGELOG.md) · [0.12 working plan](docs/PLAN-0.12.md) · [Repository instructions](AGENTS.md)
+## <img src="docs/assets/icons/what-is-ikna.svg" width="28" height="28" align="absmiddle" alt=""> Why Ikna feels different
 
-## <img src="docs/assets/icons/license.svg" width="28" height="28" align="absmiddle" alt=""> License
+Most flashcard apps punish you for taking a break. Miss ten days and you open the app to 400 overdue cards and a broken streak. Ikna handles gaps differently: overdue cards move into an amnesty pool and come back in small pieces alongside regular reviews, and there are no streaks to lose.
 
-Ikna is free software under the [GNU General Public License, version 3 or later](LICENSE).
+Every card asks for a simple binary choice ("know" or "don't know") instead of four overlapping buttons. Cards teach phrases inside natural sentences, and once a card matures, Ikna can rotate through additional sentences from the catalogue so you recognize the phrase outside one memorized line.
 
----
+Everything runs offline on your device. There are no accounts, subscriptions, ads, or analytics. You get a local profile with activity and retention stats, optional PNG progress card export, full history backups, and optional direct sync between paired devices on your own network.
 
-<a name="русский"></a>
+<a name="download"></a>
 
-<p align="center">
-  <img src="docs/assets/brand/ikna-banner.png" alt="ikna" width="800">
-</p>
+## <img src="docs/assets/icons/download.svg" width="28" height="28" align="absmiddle" alt=""> Download
 
-<h1 align="center">Икна</h1>
+Files from [release 0.13.0 press](https://github.com/d1d2dopamine/ikna/releases/tag/v0.13.0-press) ([release notes](docs/RELEASE-NOTES-0.13.0.md)):
 
-<p align="center">
-  <a href="#ikna">English</a> · <strong>Русский</strong>
-</p>
+| Platform | File | Which one to pick |
+| --- | --- | --- |
+| Android 10+ (arm64) | [APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-android-arm64.apk) | Almost all modern Android phones |
+| Android 10+ (32-bit ARM) | [32-bit APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-android-legacy32.apk) | Older 32-bit Android devices |
+| Windows x64 | [Installer](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-windows-x64-setup.exe) · [Portable ZIP](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-windows-x64-portable.zip) | Installer for normal setup, ZIP to run without installing |
+| Linux x86_64 | [AppImage](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-linux-x86_64.AppImage) | Mark executable (`chmod +x`) before opening |
 
-<p align="center">
-  Карточки для изучения языка в контексте.<br>
-  Прочитай фразу в предложении, открой её значение и ответь «знаю» или «не знаю». Икна сама назначает повторы и решает, сколько нового материала добавить на сегодня.
-</p>
+The Windows installer installs for the current user only. Both the portable Windows build and the Linux AppImage include their own runtime. [Desktop setup](docs/contracts/DESKTOP.md) · [Updates](docs/contracts/UPDATES.md)
 
-<p align="center">
-  <a href="#скачать"><strong>Скачать</strong></a> · Android, Windows и Linux
-</p>
+## <img src="docs/assets/icons/decks.svg" width="28" height="28" align="absmiddle" alt=""> Decks and Anki import
 
-<p align="center">
-  <a href="https://github.com/d1d2dopamine/ikna/releases/latest"><img src="https://img.shields.io/github/v/release/d1d2dopamine/ikna?style=for-the-badge&amp;label=release&amp;color=0078D4&amp;labelColor=5A6672" alt="release"></a>
-  <a href="https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/d1d2dopamine/ikna/build.yml?branch=main&amp;label=build&amp;style=for-the-badge&amp;color=0078D4&amp;labelColor=5A6672" alt="build"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-5A6672?style=for-the-badge&amp;color=5A6672&amp;labelColor=5A6672" alt="license"></a>
-  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/made%20with-Kotlin-5A6672?style=for-the-badge&amp;logo=kotlin&amp;logoColor=white&amp;color=5A6672&amp;labelColor=5A6672" alt="kotlin"></a>
-</p>
-<p align="center">
-  <img src="https://img.shields.io/badge/Android-10%2B-3DDC84?style=for-the-badge&amp;logo=android&amp;logoColor=white&amp;color=3DDC84&amp;labelColor=5A6672" alt="android">
-  <img src="https://img.shields.io/badge/Windows-x64-0078D4?style=for-the-badge&amp;logo=windows&amp;logoColor=white&amp;color=0078D4&amp;labelColor=5A6672" alt="windows x64">
-  <img src="https://img.shields.io/badge/AppImage-x86__64-F7A41D?style=for-the-badge&amp;logo=appimage&amp;logoColor=white&amp;color=F7A41D&amp;labelColor=5A6672" alt="AppImage x86_64">
-</p>
+You can start immediately with the bundled English beginner deck (for Russian speakers), install ready-made decks from the [catalogue](docs/contracts/SOURCES.md) with source and licence metadata preserved on each card, or paste your own rows in the format `phrase | example sentence | meaning`. Ikna can also generate a prompt you can paste into any AI tool to draft a custom deck. [Custom decks](docs/contracts/DECKS.md)
 
-## <img src="docs/assets/icons/what-is-ikna.svg" width="28" height="28" align="absmiddle" alt=""> Что такое Икна
+If you already use Anki, open any `.apkg` file to import supported text cards together with their review history. Images and audio stay in Anki. [Anki import](docs/contracts/ANKI.md)
 
-Икна собирает дневной план из карточек, которые пора повторить, и учитывает, как ты занимался в последние дни. Можно начать со встроенной колоды английского для начинающих с переводом на русский, выбрать колоду в каталоге или добавить свою.
+## <img src="docs/assets/icons/interface.svg" width="28" height="28" align="absmiddle" alt=""> Interface and privacy
 
-## <img src="docs/assets/icons/how-it-works.svg" width="28" height="28" align="absmiddle" alt=""> Как это устроено
+You can switch colour palettes, choose angular or rounded controls, pick custom deck backgrounds, turn animations on or off, and listen to cards with offline voice playback. Android includes a home screen widget and a daily reminder. The interface supports Russian, English, Polish, Spanish, French, German, and Brazilian Portuguese. [Interface design](docs/DESIGN.md)
 
-1. **Прочитай.** “Can you **keep an eye on** my bag?”
-2. **Открой значение.** «Можешь присмотреть за моей сумкой?»
-3. **Ответь.** Выбери «знаю» или «не знаю». По ответу Икна назначит следующий повтор.
+All cards, review logs, and profile data stay local on your device. You can export and restore your full history at any time, or pair two of your own devices for direct local sync. [Privacy policy](PRIVACY.md) · [Local sync](docs/contracts/SYNC-PROFILES-0.12.md)
 
-Повторы планирует FSRS‑6. Сколько нового материала взять сегодня, решает `riar-manage`. После дневного плана знакомый материал можно почитать в режиме «Чтение». [Учебный движок](docs/contracts/LEARNING-ENGINE.md) · [Дневная нагрузка](docs/contracts/GOVERNOR.md)
+## <img src="docs/assets/icons/build.svg" width="28" height="28" align="absmiddle" alt=""> Build, docs and license
 
-<a name="скачать"></a>
+[GitHub Actions](https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml) builds Android, Windows, and Linux. See [CONTRIBUTING.md](CONTRIBUTING.md) for local builds and tests.
 
-## <img src="docs/assets/icons/download.svg" width="28" height="28" align="absmiddle" alt=""> Скачать
+[Documentation index](docs/DOCUMENTATION.md) · [Architecture](docs/ARCHITECTURE.md) · [Changelog](CHANGELOG.md) · [Repository instructions](AGENTS.md)
 
-В таблице файлы [опубликованного релиза 0.13.0 press](https://github.com/d1d2dopamine/ikna/releases/tag/v0.13.0-press). Список изменений — в [описании релиза](docs/RELEASE-NOTES-0.13.0.md).
-
-| Платформа | Скачать |
-| --- | --- |
-| Android 10+ (arm64) | [Основной APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-android-arm64.apk) |
-| Android 10+ (32-bit ARM) | [APK для старых устройств](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-android-legacy32.apk) |
-| Windows x64 | [Установщик](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-windows-x64-setup.exe) · [Portable ZIP](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-windows-x64-portable.zip) |
-| Linux x86_64 | [AppImage](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-linux-x86_64.AppImage) |
-
-Установщик Windows ставит Икну для текущего пользователя. Portable-версия Windows и AppImage для Linux поставляются со своей средой запуска. В Linux перед первым запуском дай AppImage право на выполнение. [Установка на ПК](docs/contracts/DESKTOP.md) · [Обновления](docs/contracts/UPDATES.md)
-
-## <img src="docs/assets/icons/decks.svg" width="28" height="28" align="absmiddle" alt=""> Колоды
-
-- [Каталог](docs/contracts/SOURCES.md). Выбери готовую колоду. В карточках каталога сохраняются сведения об источнике и лицензии.
-- [Своя колода](docs/contracts/DECKS.md). Вставь строки в формате `фраза | предложение с ней | значение`. Икна также может подготовить запрос для выбранного тобой ИИ.
-- [Импорт из Anki](docs/contracts/ANKI.md). Открой `.apkg`, чтобы перенести поддерживаемые текстовые карточки вместе с историей ответов. Изображения и аудио остаются в Anki.
-
-## <img src="docs/assets/icons/privacy.svg" width="28" height="28" align="absmiddle" alt=""> Приватность и данные
-
-Икна хранит карточки и историю ответов на устройстве. Аккаунтов и аналитики нет. Историю можно сохранить в резервную копию и восстановить из неё. В ветке разработки также есть локальная синхронизация, которую можно включить для сопряжённых устройств. [Политика приватности](PRIVACY.md) · [Локальная синхронизация](docs/contracts/SYNC-PROFILES-0.12.md)
-
-## <img src="docs/assets/icons/interface.svg" width="28" height="28" align="absmiddle" alt=""> Интерфейс
-
-Можно выбрать палитру, угловатые или скруглённые элементы и отключить анимации. На Android есть виджет и ежедневное напоминание. Интерфейс доступен на русском, английском, польском, испанском, французском, немецком и бразильском португальском. [Дизайн интерфейса](docs/DESIGN.md)
-
-https://github.com/user-attachments/assets/c90d603c-693f-4c9d-9915-55f04d7c0f5b
-
-| Повторение карточек | Палитры и настройки |
-| :---: | :---: |
-| ![Экран повторения](docs/assets/screenshots/01-review.png) | ![Палитры и настройки](docs/assets/screenshots/02-palettes.png) |
-| **Каталог колод** | **Об Икне** |
-| ![Каталог колод](docs/assets/screenshots/03-catalogue.png) | ![Об Икне](docs/assets/screenshots/04-about.png) |
-
-## <img src="docs/assets/icons/build.svg" width="28" height="28" align="absmiddle" alt=""> Сборка
-
-[GitHub Actions](https://github.com/d1d2dopamine/ikna/actions/workflows/build.yml) собирает Икну для Android, Windows и Linux. Локальная сборка и запуск тестов описаны в [руководстве для разработчиков](CONTRIBUTING.md).
-
-## <img src="docs/assets/icons/documentation.svg" width="28" height="28" align="absmiddle" alt=""> Документация
-
-[Архитектура](docs/ARCHITECTURE.md) · [История изменений](CHANGELOG.md) · [План 0.12](docs/PLAN-0.12.md) · [Инструкции для контрибьюторов](AGENTS.md)
-
-## <img src="docs/assets/icons/license.svg" width="28" height="28" align="absmiddle" alt=""> Лицензия
-
-Икна распространяется по [GNU General Public License версии 3 или более поздней](LICENSE).
+Ikna is free software licensed under the [GNU General Public License, version 3 or later](LICENSE).
