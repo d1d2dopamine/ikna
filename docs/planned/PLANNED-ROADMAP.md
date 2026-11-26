@@ -9,11 +9,13 @@ for the current cycle unless explicitly promoted into an active cycle plan.
 
 Two core Kotlin files have grown well past comfortable maintenance boundaries
 and are scheduled to be split cleanly as part of a dedicated major refactor
-cycle (see [REFACTOR.md](REFACTOR.md)):
+cycle (see [REFACTOR.md](REFACTOR.md) and the full scientific/engineering audit
+in [ENGINE-CORE-REFACTOR-AUDIT.md](ENGINE-CORE-REFACTOR-AUDIT.md)):
 
 - `shared/src/jvmShared/kotlin/dev/ikna/data/repo/LearningRepository.kt`
-  (~1,180+ lines) — split into focused responsibilities (deck queries, review
-  execution, session/due selection, journal/sync boundaries).
+  (~1,941 lines) — split into focused responsibilities (`DailyPlanService`,
+  `ReviewAnswerService`, `BrowseService`, `StudyTelemetryService`, plus a
+  unified `JournalReplayEngine`).
 - `app/src/main/java/dev/ikna/ui/settings/SettingsScreen.kt` (~1,600+ lines) —
   extract individual settings sections into self-contained composables sharing
   the common `SettingsChrome` and panel primitives with Desktop.

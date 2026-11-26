@@ -41,6 +41,7 @@ runbooks use English; dated historical records retain their original language.
 | Document | Owns |
 | --- | --- |
 | [planned/PLANNED-ROADMAP.md](planned/PLANNED-ROADMAP.md) | Consolidated open post-0.12 roadmap: major refactor, deferred Rust core, Voice/TTS, Catalogue v2. |
+| [planned/ENGINE-CORE-REFACTOR-AUDIT.md](planned/ENGINE-CORE-REFACTOR-AUDIT.md) | Deep engineering & scientific audit of FSRS-6, optimizer, `riar-manage`, grading, component memory, and `LearningRepository` refactor plan. |
 | [planned/REFACTOR.md](planned/REFACTOR.md) | Planned split of oversized `LearningRepository.kt` and `SettingsScreen.kt`. |
 | [planned/RUST-CORE-PLAN.md](planned/RUST-CORE-PLAN.md) | Deferred optional Rust compute core (`ikna-core`), scheduled after the major refactor. |
 | [planned/UNSCHEDULED.md](planned/UNSCHEDULED.md) | Optional ideas, explicitly not commitments. |
