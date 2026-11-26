@@ -137,7 +137,7 @@ internal class OptionalHardReviewService(
         )
     }
 
-    private suspend fun candidates(deckId: String?, limit: Int): List<CardEntity> =
+    internal suspend fun candidates(deckId: String?, limit: Int): List<CardEntity> =
         cardDao.optionalHardCards(
             deckId,
             suppressedNow().toList().ifEmpty { listOf("") },

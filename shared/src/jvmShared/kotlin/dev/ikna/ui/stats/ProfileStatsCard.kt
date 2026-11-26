@@ -359,7 +359,7 @@ fun IknaLocalProfileCard(
         }
     }
 
-    val badges = remember(snapshot, zone) {
+    val badges = remember(snapshot, zone, S.lang, S.pseudo) {
         buildFactualProfileBadges(snapshot?.insights, zone, dateFmt)
     }
     val earnedBadges = remember(badges) { badges.filter { it.earned } }

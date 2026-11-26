@@ -628,7 +628,7 @@ class LearningRepository(
                     sessionTotal = scope.size, sessionDone = scope.size - pending.size,
                     goalAnswersToday = goal)
             }
-            val optional = complete && !required.isNullOrEmpty() && optionalHardCandidates(deckId, 1).isNotEmpty()
+            val optional = complete && !required.isNullOrEmpty() && optionalHardService.candidates(deckId, 1).isNotEmpty()
             caller.ensureActive()
             CommittedSessionSnapshot(observation, plan, answered, complete, factual, goal, optional)
         }.also { caller.ensureActive() }
