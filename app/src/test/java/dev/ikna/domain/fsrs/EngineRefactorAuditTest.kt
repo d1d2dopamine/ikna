@@ -198,11 +198,12 @@ class EngineRefactorAuditTest {
 
     @Test
     fun `overheating excludes the candidate day from its own accuracy and volume baseline`() {
-        // 3 calm baseline days (20 reviews, 95% accuracy) + 1 overheated day yesterday (35 reviews, 81% accuracy).
-        // If yesterday were included in its own average, usual = (0.95*3 + 0.81)/4 = 0.915 and drop = 0.105 < 0.12 (missed!).
-        // Excluding yesterday gives usual = 0.95 and drop = 0.14 >= 0.12 -> detected!
+        // 3 calm baseline days (20 reviews, 95% accuracy) + 1 overheated day yesterday (35 reviews, 78% accuracy).
+        // Default GovernorConfig has overheatRatio = 1.6 (35 > 32) and overheatAccuracyDrop = 0.15.
+        // If yesterday were included in its own average, usual = (0.95*3 + 0.78)/4 = 0.9075 and drop = 0.1275 < 0.15 (missed!).
+        // Excluding yesterday gives usual = 0.95 and drop = 0.17 >= 0.15 -> detected!
         val days = listOf(
-            DailyStatEntity("2026-03-09", reviewsDone = 35, newIntroduced = 2, activeMs = 60_000, accuracy = 0.81, planCompleted = true),
+            DailyStatEntity("2026-03-09", reviewsDone = 35, newIntroduced = 2, activeMs = 60_000, accuracy = 0.78, planCompleted = true),
             DailyStatEntity("2026-03-08", reviewsDone = 20, newIntroduced = 2, activeMs = 40_000, accuracy = 0.95, planCompleted = true),
             DailyStatEntity("2026-03-07", reviewsDone = 20, newIntroduced = 2, activeMs = 40_000, accuracy = 0.95, planCompleted = true),
             DailyStatEntity("2026-03-06", reviewsDone = 20, newIntroduced = 2, activeMs = 40_000, accuracy = 0.95, planCompleted = true)
