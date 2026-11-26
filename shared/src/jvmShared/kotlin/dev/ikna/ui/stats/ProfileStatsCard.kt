@@ -327,17 +327,23 @@ fun IknaLocalProfileCard(
     val dateFmt = remember { DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ROOT) }
     val monthYearFmt = remember { DateTimeFormatter.ofPattern("yyyy-MM", Locale.ROOT) }
 
-    val identityMeta = remember(snapshot, zone) {
-        val ins = snapshot?.insights ?: return@remember ""
-        val parts = mutableListOf<String>()
-        ins.memberSinceMs?.let { ts ->
-            val label = monthYearFmt.format(Instant.ofEpochMilli(ts).atZone(zone))
-            parts += S.t("prof.since").replace("{date}", label)
+    val sinceFmt = S.t("prof.since")
+    val totalAnswersFmt = S.t("prof.total_answers_short")
+    val identityMeta = remember(snapshot, zone, sinceFmt, totalAnswersFmt) {
+        val ins = snapshot?.insights
+        if (ins == null) {
+            ""
+        } else {
+            val parts = mutableListOf<String>()
+            ins.memberSinceMs?.let { ts ->
+                val label = monthYearFmt.format(Instant.ofEpochMilli(ts).atZone(zone))
+                parts += sinceFmt.replace("{date}", label)
+            }
+            if (ins.totalAnswersAllTime > 0) {
+                parts += totalAnswersFmt.replace("{count}", ins.totalAnswersAllTime.toString())
+            }
+            parts.joinToString(" · ")
         }
-        if (ins.totalAnswersAllTime > 0) {
-            parts += S.t("prof.total_answers_short").replace("{count}", ins.totalAnswersAllTime.toString())
-        }
-        parts.joinToString(" · ")
     }
 
     Column(
@@ -352,9 +358,9 @@ fun IknaLocalProfileCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(104.dp)
-                        .let { base ->
-                            if (editing && onPickBanner != null) base.clickable(onClick = onPickBanner) else base
-                        }
+                        .then(
+                            if (editing && onPickBanner != null) Modifier.clickable(onClick = onPickBanner) else Modifier
+                        )
                 )
 
                 // Overlapping avatar + name/bio/actions row
@@ -603,7 +609,7 @@ fun IknaLocalProfileCard(
                 }
 
                 val hasRhythm = ins.rhythmBuckets.size == 4 && ins.rhythmBuckets.any { it > 0 }
-                val milestones = buildList {
+                val milestones = buildList<Pair<String, String>> {
                     ins.memberSinceMs?.let { add(S.t("prof.milestone_first") to dateFmt.format(Instant.ofEpochMilli(it).atZone(zone))) }
                     ins.firstMatureAtMs?.let { add(S.t("prof.milestone_mature") to dateFmt.format(Instant.ofEpochMilli(it).atZone(zone))) }
                     ins.hundredthAnswerAtMs?.let { add(S.t("prof.milestone_hundred") to dateFmt.format(Instant.ofEpochMilli(it).atZone(zone))) }
