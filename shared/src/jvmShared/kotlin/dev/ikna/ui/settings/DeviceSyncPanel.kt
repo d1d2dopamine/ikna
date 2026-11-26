@@ -1,9 +1,12 @@
 package dev.ikna.ui.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,23 +19,64 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import dev.ikna.sync.DeviceSyncController
 import dev.ikna.sync.IknaBrandedQrCard
 import dev.ikna.sync.PairedLanTransport
 import dev.ikna.ui.text.S
+import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaTextField
 import dev.ikna.ui.theme.IknaWideButton
+import dev.ikna.ui.theme.Space
+import dev.ikna.ui.theme.iknaNumberStyle
+import dev.ikna.ui.theme.iknaTileShape
+import kotlin.math.roundToInt
 
 /** Transport-independent presentation states; never display raw transport exceptions. */
 enum class DeviceSyncStatus { OFF, UNPAIRED, WAITING, CONNECTING, SYNCING, UP_TO_DATE, ERROR }
-enum class DeviceSyncError { NETWORK, INVALID_INVITATION, EXPIRED_INVITATION, UNTRUSTED_DEVICE, MERGE_FAILED, UNAVAILABLE, HISTORY_MISMATCH, CONTENT_MISSING, ADOPTION, PROFILE_TOO_LARGE, INCOMPATIBLE_PROTOCOL, JOURNAL_ITEM_TOO_LARGE, JOURNAL_RECONCILIATION }
+enum class DeviceSyncError {
+    CONNECTION_TIMEOUT,
+    CONNECTION_REFUSED,
+    NETWORK_UNREACHABLE,
+    PEER_CLOSED_CONNECTION,
+    NETWORK,
+    INVALID_INVITATION,
+    EXPIRED_INVITATION,
+    ALREADY_PAIRED,
+    PORT_UNAVAILABLE,
+    UNTRUSTED_DEVICE,
+    PROFILE_CONFLICT,
+    PROFILE_STALE,
+    MERGE_FAILED,
+    UNAVAILABLE,
+    HISTORY_MISMATCH,
+    CONTENT_MISSING,
+    ADOPTION,
+    PROFILE_TOO_LARGE,
+    INCOMPATIBLE_PROTOCOL,
+    JOURNAL_ITEM_TOO_LARGE,
+    JOURNAL_RECONCILIATION,
+}
+
+data class DeviceSyncProgressUi(
+    val stage: DeviceSyncController.SyncStage,
+    val fraction: Float,
+    val attempt: Int = 0,
+    val total: Int = 0,
+    val peerName: String = "",
+)
 
 data class DeviceSyncPeerUiState(
     val id: String, val fingerprint: String, val address: String,
     val lastSuccessText: String? = null, val error: String? = null,
     val name: String = "",
+    val role: PairedLanTransport.PeerRole = PairedLanTransport.PeerRole.UNKNOWN,
 ) {
     override fun toString(): String = "DeviceSyncPeerUiState(device=<redacted>)"
 }
@@ -48,10 +92,142 @@ data class DeviceSyncUiState(
     val error: DeviceSyncError? = null,
     val blockedAfterReset: Boolean = false,
     val canStartNewHistory: Boolean = false,
-    val busy: Boolean = false
+    val busy: Boolean = false,
+    val progress: DeviceSyncProgressUi? = null,
 ) {
     // Invitations contain pairing credentials. Do not accidentally include them in logs.
     override fun toString(): String = "DeviceSyncUiState(enabled=$enabled, paired=$paired, status=$status, error=$error, blockedAfterReset=$blockedAfterReset, busy=$busy)"
+}
+
+internal fun syncErrorTitleKey(error: DeviceSyncError): String = when (error) {
+    DeviceSyncError.CONNECTION_TIMEOUT -> "sync.error.timeout"
+    DeviceSyncError.CONNECTION_REFUSED -> "sync.error.refused"
+    DeviceSyncError.NETWORK_UNREACHABLE -> "sync.error.unreachable"
+    DeviceSyncError.PEER_CLOSED_CONNECTION -> "sync.error.peer_closed"
+    DeviceSyncError.NETWORK -> "sync.error.network"
+    DeviceSyncError.INVALID_INVITATION -> "sync.error.invalid"
+    DeviceSyncError.EXPIRED_INVITATION -> "sync.error.expired"
+    DeviceSyncError.ALREADY_PAIRED -> "sync.error.already_paired"
+    DeviceSyncError.PORT_UNAVAILABLE -> "sync.error.port_unavailable"
+    DeviceSyncError.UNTRUSTED_DEVICE -> "sync.error.trust"
+    DeviceSyncError.PROFILE_CONFLICT -> "sync.error.profile_conflict"
+    DeviceSyncError.PROFILE_STALE -> "sync.error.profile_stale"
+    DeviceSyncError.MERGE_FAILED -> "sync.error.merge"
+    DeviceSyncError.UNAVAILABLE -> "sync.error.unavailable"
+    DeviceSyncError.HISTORY_MISMATCH -> "sync.error.history_mismatch"
+    DeviceSyncError.CONTENT_MISSING -> "sync.error.content_missing"
+    DeviceSyncError.ADOPTION -> "sync.error.adoption"
+    DeviceSyncError.PROFILE_TOO_LARGE -> "sync.error.profile_too_large"
+    DeviceSyncError.INCOMPATIBLE_PROTOCOL -> "sync.error.protocol"
+    DeviceSyncError.JOURNAL_ITEM_TOO_LARGE -> "sync.error.journal_item_too_large"
+    DeviceSyncError.JOURNAL_RECONCILIATION -> "sync.error.journal_reconciliation"
+}
+
+internal fun syncErrorFixKey(error: DeviceSyncError): String = when (error) {
+    DeviceSyncError.CONNECTION_TIMEOUT -> "sync.fix.timeout"
+    DeviceSyncError.CONNECTION_REFUSED -> "sync.fix.refused"
+    DeviceSyncError.NETWORK_UNREACHABLE -> "sync.fix.unreachable"
+    DeviceSyncError.PEER_CLOSED_CONNECTION -> "sync.fix.peer_closed"
+    DeviceSyncError.NETWORK -> "sync.fix.network"
+    DeviceSyncError.INVALID_INVITATION -> "sync.fix.invalid"
+    DeviceSyncError.EXPIRED_INVITATION -> "sync.fix.expired"
+    DeviceSyncError.ALREADY_PAIRED -> "sync.fix.already_paired"
+    DeviceSyncError.PORT_UNAVAILABLE -> "sync.fix.port_unavailable"
+    DeviceSyncError.UNTRUSTED_DEVICE -> "sync.fix.trust"
+    DeviceSyncError.PROFILE_CONFLICT -> "sync.fix.profile_conflict"
+    DeviceSyncError.PROFILE_STALE -> "sync.fix.profile_stale"
+    DeviceSyncError.MERGE_FAILED -> "sync.fix.merge"
+    DeviceSyncError.UNAVAILABLE -> "sync.fix.unavailable"
+    DeviceSyncError.HISTORY_MISMATCH -> "sync.fix.history_mismatch"
+    DeviceSyncError.CONTENT_MISSING -> "sync.fix.content_missing"
+    DeviceSyncError.ADOPTION -> "sync.fix.adoption"
+    DeviceSyncError.PROFILE_TOO_LARGE -> "sync.fix.profile_too_large"
+    DeviceSyncError.INCOMPATIBLE_PROTOCOL -> "sync.fix.protocol"
+    DeviceSyncError.JOURNAL_ITEM_TOO_LARGE -> "sync.fix.journal_item_too_large"
+    DeviceSyncError.JOURNAL_RECONCILIATION -> "sync.fix.journal_reconciliation"
+}
+
+internal fun syncStageLabel(progress: DeviceSyncProgressUi): String {
+    val device = progress.peerName.ifBlank { S.t("sync.other_device") }
+    return when (progress.stage) {
+        DeviceSyncController.SyncStage.IDLE -> ""
+        DeviceSyncController.SyncStage.PAIRING_CONNECTING -> {
+            if (progress.total > 1) {
+                S.t("sync.stage.pairing_connecting_attempt")
+                    .replace("{attempt}", progress.attempt.toString())
+                    .replace("{total}", progress.total.toString())
+            } else {
+                S.t("sync.stage.pairing_connecting")
+            }
+        }
+        DeviceSyncController.SyncStage.PAIRING_HANDSHAKE -> S.t("sync.stage.pairing_handshake")
+        DeviceSyncController.SyncStage.CONNECTING_PEER -> {
+            if (progress.total > 1) {
+                S.t("sync.stage.connecting_peer_attempt")
+                    .replace("{attempt}", progress.attempt.toString())
+                    .replace("{total}", progress.total.toString())
+            } else {
+                S.t("sync.stage.connecting_peer")
+            }
+        }
+        DeviceSyncController.SyncStage.HANDSHAKING_PEER -> S.t("sync.stage.handshaking_peer")
+        DeviceSyncController.SyncStage.EXCHANGING_PROFILES -> S.t("sync.stage.exchanging_profiles")
+        DeviceSyncController.SyncStage.WAITING_FOR_INVITER ->
+            S.t("sync.stage.waiting_for_inviter").replace("{device}", device)
+        DeviceSyncController.SyncStage.APPLYING_PROFILE -> S.t("sync.stage.applying_profile")
+        DeviceSyncController.SyncStage.CONFIRMING_PROFILE -> S.t("sync.stage.confirming_profile")
+        DeviceSyncController.SyncStage.SYNCING_JOURNAL -> S.t("sync.stage.syncing_journal")
+    }
+}
+
+/** Matches the deck-installation progress line in [dev.ikna.ui.catalog.IknaCatalogDeckRow]. */
+@Composable
+internal fun IknaSyncProgressStrip(
+    label: String,
+    fraction: Float,
+    detail: String? = null,
+    modifier: Modifier = Modifier,
+) {
+    val ink = MaterialTheme.colorScheme.onBackground
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    val percent = (fraction.coerceIn(0f, 1f) * 100f).roundToInt()
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics { liveRegion = LiveRegionMode.Polite },
+        verticalArrangement = Arrangement.spacedBy(Space.sm)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color = ink,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = "$percent%",
+                style = iknaNumberStyle(MaterialTheme.typography.labelLarge),
+                color = muted
+            )
+        }
+        IknaProgress(
+            fraction = fraction,
+            height = 6.dp,
+            color = ink,
+            track = true
+        )
+        if (!detail.isNullOrBlank()) {
+            Text(
+                text = detail,
+                style = MaterialTheme.typography.bodySmall,
+                color = muted
+            )
+        }
+    }
 }
 
 /**
@@ -123,29 +299,66 @@ fun DeviceSyncPanel(
             }),
             style = MaterialTheme.typography.bodyMedium
         )
+        state.progress?.let { progress ->
+            IknaSyncProgressStrip(
+                label = syncStageLabel(progress),
+                fraction = progress.fraction,
+                detail = S.t("sync.stage.keep_open"),
+            )
+        }
         state.lastSuccessText?.let {
             Text(S.t("sync.last_success").replace("{time}", it), style = MaterialTheme.typography.bodySmall)
         }
-        state.error?.let {
-            Text(
-                text = S.t(when (it) {
-                    DeviceSyncError.NETWORK -> "sync.error.network"
-                    DeviceSyncError.INVALID_INVITATION -> "sync.error.invalid"
-                    DeviceSyncError.EXPIRED_INVITATION -> "sync.error.expired"
-                    DeviceSyncError.UNTRUSTED_DEVICE -> "sync.error.trust"
-                    DeviceSyncError.MERGE_FAILED -> "sync.error.merge"
-                    DeviceSyncError.UNAVAILABLE -> "sync.error.unavailable"
-                    DeviceSyncError.HISTORY_MISMATCH -> "sync.error.history_mismatch"
-                    DeviceSyncError.CONTENT_MISSING -> "sync.error.content_missing"
-                    DeviceSyncError.ADOPTION -> "sync.error.adoption"
-                    DeviceSyncError.PROFILE_TOO_LARGE -> "sync.error.profile_too_large"
-                    DeviceSyncError.INCOMPATIBLE_PROTOCOL -> "sync.error.protocol"
-                    DeviceSyncError.JOURNAL_ITEM_TOO_LARGE -> "sync.error.journal_item_too_large"
-                    DeviceSyncError.JOURNAL_RECONCILIATION -> "sync.error.journal_reconciliation"
-                }),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error
+        state.error?.let { err ->
+            val cardShape = iknaTileShape()
+            val retryable = err in setOf(
+                DeviceSyncError.CONNECTION_TIMEOUT,
+                DeviceSyncError.CONNECTION_REFUSED,
+                DeviceSyncError.NETWORK_UNREACHABLE,
+                DeviceSyncError.PEER_CLOSED_CONNECTION,
+                DeviceSyncError.NETWORK,
+                DeviceSyncError.MERGE_FAILED,
             )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics { liveRegion = LiveRegionMode.Polite }
+                    .background(MaterialTheme.colorScheme.surface, cardShape)
+                    .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.65f), cardShape)
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    text = S.t(syncErrorTitleKey(err)),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.error
+                )
+                Text(
+                    text = S.t("sync.fix_title"),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = S.t(syncErrorFixKey(err)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                if (retryable && state.enabled && state.paired && !state.blockedAfterReset && onSyncNow != null) {
+                    IknaTextButton(
+                        label = S.t("sync.retry_now"),
+                        enabled = !state.busy,
+                        horizontalPadding = 0.dp,
+                        onClick = onSyncNow
+                    )
+                } else if (err == DeviceSyncError.EXPIRED_INVITATION && canPair && address.isNotBlank()) {
+                    IknaTextButton(
+                        label = S.t("sync.show_qr_btn"),
+                        horizontalPadding = 0.dp,
+                        onClick = { onCreateInvitation(address) }
+                    )
+                }
+            }
         }
         if (state.blockedAfterReset) {
             Text(S.t("sync.reset_blocked"), style = MaterialTheme.typography.bodySmall)
@@ -206,6 +419,13 @@ fun DeviceSyncPanel(
                 enabled = canPair && address.isNotBlank(),
                 onClick = { if (canPair && address.isNotBlank()) onCreateInvitation(address) }
             )
+            if (address.isBlank()) {
+                Text(
+                    text = S.t("sync.no_network_hint"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             state.invitation?.takeIf { it.isNotBlank() }?.let { invitation ->
                 val compact = remember(invitation) {
                     runCatching { PairedLanTransport.encodeCompactInvitation(invitation) }.getOrDefault(invitation)
@@ -304,8 +524,14 @@ fun DeviceSyncPanel(
                     )
                     Text(peer.lastSuccessText?.let { S.t("sync.device_success").replace("{time}", it) }
                         ?: S.t("sync.device_no_exchange"), style = MaterialTheme.typography.bodySmall)
-                    if (peer.error != null) Text(S.t("sync.device_error"),
-                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                    peer.error?.let { rawError ->
+                        val mappedPeerError = deviceSyncError(rawError)
+                        Text(
+                            text = S.t(syncErrorTitleKey(mappedPeerError)),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                     IknaSettingsToggleRow(
                         title = S.t("sync.device_revoke_confirm"),
                         subtitle = S.t("sync.device_revoke_scope"),

@@ -39,6 +39,9 @@ data class PairingInvitation(
     override fun toString(): String = "PairingInvitation(version=$version, accessGrant=<redacted>)"
 }
 
+/** Safe, allowlisted sync failure code without secrets or raw network/exception details. */
+class SyncOperationException(val code: String) : IllegalStateException(code)
+
 /** Foreground-only LAN exchange. All application data remains opaque to the transport. */
 class PairedLanTransport(
     private val privateDirectory: File,
@@ -49,6 +52,16 @@ class PairedLanTransport(
     private val localDeviceName: () -> String = { defaultDeviceDisplayName() },
     private val directLanSocketFactory: ((target: InetAddress, port: Int, timeoutMs: Int) -> Socket?)? = null,
 ) : AutoCloseable {
+    @Serializable enum class PeerRole { INVITER, JOINER, UNKNOWN }
+    enum class ActivityStage {
+        IDLE, PAIRING_CONNECTING, PAIRING_HANDSHAKE,
+        CONNECTING_PEER, HANDSHAKING_PEER, EXCHANGING_DATA
+    }
+    data class Activity(
+        val stage: ActivityStage = ActivityStage.IDLE,
+        val attempt: Int = 0,
+        val total: Int = 0,
+    )
     interface PayloadCallbacks {
         /** Called off the UI thread; implementations must cooperate with coroutine cancellation. */
         suspend fun snapshot(): ByteArray
@@ -61,15 +74,20 @@ class PairedLanTransport(
         val id: String, val fingerprint: String, val address: String,
         val lastSuccessAtMillis: Long? = null, val lastError: String? = null,
         val name: String = "",
+        val role: PeerRole = PeerRole.UNKNOWN,
     ) {
         override fun toString(): String = "PeerStatus(identity=<redacted>, address=<redacted>, lastSuccessAtMillis=$lastSuccessAtMillis, lastError=$lastError)"
     }
-    data class Status(val running: Boolean, val peerCount: Int, val lastError: String?,
-        val lastSuccessAtMillis: Long? = null, val peers: List<PeerStatus> = emptyList())
+    data class Status(
+        val running: Boolean, val peerCount: Int, val lastError: String?,
+        val lastSuccessAtMillis: Long? = null, val peers: List<PeerStatus> = emptyList(),
+        val activity: Activity = Activity(),
+    )
     @Serializable private data class Peer(
         val id: String, val host: String, val port: Int, val certificate: String, val credential: String,
         val name: String = "",
         val hosts: List<String> = emptyList(),
+        val role: PeerRole = PeerRole.UNKNOWN,
     )
     @Serializable private data class Saved(val version: Int = 1, val binding: HistoryBinding, val peers: List<Peer>)
     @Serializable private data class Wire(
@@ -100,9 +118,19 @@ class PairedLanTransport(
     @Volatile private var lastError: String? = null
     @Volatile private var lastSuccessAtMillis: Long? = null
     @Volatile private var syncNowRequested = false
+    @Volatile private var activity: Activity = Activity()
     val status: Status get() = synchronized(gate) { Status(running, peers.size, lastError, lastSuccessAtMillis,
         peers.map { peer -> PeerStatus(peer.id, peer.id.chunked(4).joinToString(" "), "${peer.host}:${peer.port}",
-            peerResults[peer.id]?.first, peerResults[peer.id]?.second, peer.name) }) }
+            peerResults[peer.id]?.first, peerResults[peer.id]?.second, peer.name, peer.role) },
+        activity) }
+
+    private fun setActivity(stage: ActivityStage, attempt: Int = 0, total: Int = 0) {
+        val next = Activity(stage, attempt, total)
+        if (activity != next) {
+            activity = next
+            publish()
+        }
+    }
 
     init {
         require(intervalMillis in 100..300_000)
@@ -118,7 +146,7 @@ class PairedLanTransport(
     }
 
     /** Never called implicitly: caller must have persisted explicit user opt-in. */
-    @Synchronized fun start(port: Int = 0): Int = synchronized(gate) {
+    @Synchronized fun start(port: Int = 0, bindAddress: InetAddress? = null): Int = synchronized(gate) {
         check(!closed)
         listener?.let { return@synchronized it.localPort }
         require(port in 0..65535)
@@ -132,13 +160,15 @@ class PairedLanTransport(
             LanSyncSecurity.readPrivate(portFile, 5).toInt().also { require(it in 1..65535) }
         } else port
         try {
-            server.bind(InetSocketAddress(desiredPort), 4)
+            val endpoint = if (bindAddress != null) InetSocketAddress(bindAddress, desiredPort) else InetSocketAddress(desiredPort)
+            server.bind(endpoint, 4)
             LanSyncSecurity.writePrivate(portFile, server.localPort.toString())
         } catch (failure: Exception) { server.close(); throw failure }
         listener = server
         peerResults.clear()
         lastSuccessAtMillis = null
         lastError = null
+        activity = Activity()
         running = true
         val session = ++generation
         workers.submit { serve(server, session) }
@@ -176,8 +206,11 @@ class PairedLanTransport(
         val ownPort: Int
         synchronized(gate) {
             check(running && !closed && peers.size < MAX_PEERS)
-            require(invite.binding == binding && invite.expiresAtMillis > System.currentTimeMillis())
-            require(peers.none { it.id == LanSyncSecurity.id(LanSyncSecurity.certificate(invite.certificate)) })
+            if (invite.binding != binding) throw SyncOperationException("history-mismatch")
+            if (invite.expiresAtMillis <= System.currentTimeMillis()) throw SyncOperationException("expired_invitation")
+            if (peers.any { it.id == LanSyncSecurity.id(LanSyncSecurity.certificate(invite.certificate)) }) {
+                throw SyncOperationException("already_paired")
+            }
             session = generation
             ownPort = listener!!.localPort
         }
@@ -186,29 +219,39 @@ class PairedLanTransport(
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             val pairingContext = kotlin.coroutines.coroutineContext
             pairingContext.ensureActive()
-            connectAny(candidates, invite.port, invite.certificate) { workingHost, socket ->
-                val challenge = readText(socket, 128)
-                pairingContext.ensureActive()
-                write(socket, Wire(operation = "pair", binding = binding, id = deviceId,
-                    credential = invite.secret, challenge = challenge, certificate = identity.certificatePem(),
-                    port = ownPort,
-                    deviceName = if (invite.deviceName.isNotBlank()) sanitizeDeviceName(localDeviceName()) else "",
-                    hosts = ownHosts))
-                val response = read(socket)
-                require(response.version == 1 && response.operation == "paired" && response.binding == binding && response.challenge == challenge)
-                val peerName = sanitizeDeviceName(response.deviceName.ifBlank { invite.deviceName })
-                val peerHosts = (listOf(workingHost) + candidates).distinct().take(MAX_CANDIDATE_HOSTS)
-                val peer = Peer(response.id, workingHost, invite.port, invite.certificate, response.credential, peerName, peerHosts)
-                validatePeer(peer)
-                pairingContext.ensureActive()
-                synchronized(gate) {
-                    checkActive(session)
-                    require(peers.size < MAX_PEERS && peers.none { it.id == peer.id })
-                    save(peers + peer)
-                    peers += peer
+            try {
+                connectAny(candidates, invite.port, invite.certificate, isPairing = true) { workingHost, socket ->
+                    val challenge = readText(socket, 128)
+                    pairingContext.ensureActive()
+                    write(socket, Wire(operation = "pair", binding = binding, id = deviceId,
+                        credential = invite.secret, challenge = challenge, certificate = identity.certificatePem(),
+                        port = ownPort,
+                        deviceName = if (invite.deviceName.isNotBlank()) sanitizeDeviceName(localDeviceName()) else "",
+                        hosts = ownHosts))
+                    val response = read(socket)
+                    if (response.version == 1 && response.operation == "error" && response.challenge == challenge) {
+                        throw SyncOperationException(sanitizeRemoteErrorCode(response.payload))
+                    }
+                    require(response.version == 1 && response.operation == "paired" && response.binding == binding && response.challenge == challenge)
+                    val peerName = sanitizeDeviceName(response.deviceName.ifBlank { invite.deviceName })
+                    val peerHosts = (listOf(workingHost) + candidates).distinct().take(MAX_CANDIDATE_HOSTS)
+                    val peer = Peer(
+                        response.id, workingHost, invite.port, invite.certificate, response.credential,
+                        peerName, peerHosts, PeerRole.JOINER
+                    )
+                    validatePeer(peer)
+                    pairingContext.ensureActive()
+                    synchronized(gate) {
+                        checkActive(session)
+                        require(peers.size < MAX_PEERS && peers.none { it.id == peer.id })
+                        save(peers + peer)
+                        peers += peer
+                    }
+                    syncNowRequested = true
+                    publish()
                 }
-                syncNowRequested = true
-                publish()
+            } finally {
+                setActivity(ActivityStage.IDLE)
             }
         }
     }
@@ -219,6 +262,7 @@ class PairedLanTransport(
             running = false
             generation++
             pending = null
+            activity = Activity()
             listener?.close()
             listener = null
             sockets.forEach { runCatching { it.close() } }
@@ -292,15 +336,24 @@ class PairedLanTransport(
     }
 
     private fun acceptPair(socket: SSLSocket, host: String, request: Wire, session: Long) {
+        fun sendPairError(code: String): Nothing {
+            runCatching {
+                write(socket, Wire(operation = "error", binding = binding, id = deviceId,
+                    credential = "", challenge = request.challenge, payload = code))
+            }
+            throw SyncOperationException(code)
+        }
         synchronized(gate) {
             checkActive(session)
-            val invitation = pending ?: error("Pairing closed")
+            val invitation = pending ?: sendPairError("expired_invitation")
             invitation.attempts++
             if (invitation.attempts > MAX_PAIR_ATTEMPTS || System.nanoTime() >= invitation.deadlineNanos || invitation.invitation.expiresAtMillis <= System.currentTimeMillis()) {
                 pending = null
-                error("Pairing expired")
+                sendPairError("expired_invitation")
             }
-            require(LanSyncSecurity.equal(invitation.invitation.secret, request.credential))
+            if (!LanSyncSecurity.equal(invitation.invitation.secret, request.credential)) {
+                sendPairError("invalid_invitation")
+            }
             val candidatePeerHosts = (listOf(host) + request.hosts)
                 .filter { runCatching { LanSyncSecurity.address(it) }.isSuccess }
                 .distinct()
@@ -308,7 +361,8 @@ class PairedLanTransport(
             val peer = Peer(
                 request.id, host, request.port, request.certificate, LanSyncSecurity.secret(),
                 sanitizeDeviceName(request.deviceName),
-                candidatePeerHosts
+                candidatePeerHosts,
+                PeerRole.INVITER
             )
             validatePeer(peer)
             require(peer.id != deviceId && peers.size < MAX_PEERS && peers.none { it.id == peer.id })
@@ -320,6 +374,7 @@ class PairedLanTransport(
                 credential = peer.credential, challenge = request.challenge,
                 deviceName = if (request.deviceName.isNotBlank()) sanitizeDeviceName(localDeviceName()) else ""))
         }
+        syncNowRequested = true
         publish()
     }
 
@@ -329,6 +384,7 @@ class PairedLanTransport(
             peers.singleOrNull { it.id == request.id && LanSyncSecurity.equal(it.credential, request.credential) }
                 ?: error("Unpaired device")
         }
+        setActivity(ActivityStage.EXCHANGING_DATA)
         try {
             val payload = decodePayload(request.payload)
             callback(session) { callbacks.receiveFrom(peer.id, payload) }
@@ -345,8 +401,17 @@ class PairedLanTransport(
                 acknowledgment.challenge == request.challenge && LanSyncSecurity.equal(acknowledgment.credential, peer.credential))
             recordResult(peer, session, null)
         } catch (failure: Exception) {
-            recordResult(peer, session, errorCode(failure))
+            val code = errorCode(failure)
+            if (code in REMOTE_REPORTABLE_ERRORS) {
+                runCatching {
+                    write(socket, Wire(operation = "error", binding = binding, id = deviceId,
+                        credential = "", challenge = request.challenge, payload = code))
+                }
+            }
+            recordResult(peer, session, code)
             throw failure
+        } finally {
+            setActivity(ActivityStage.IDLE)
         }
         publish()
     }
@@ -361,11 +426,15 @@ class PairedLanTransport(
                 if (active(session)) try {
                     val payload = callback(session) { callbacks.snapshotFor(peer.id) }
                     val candidates = (listOf(peer.host) + peer.hosts).distinct().take(MAX_CANDIDATE_HOSTS)
-                    val workingHost = connectAny(candidates, peer.port, peer.certificate) { matchedHost, socket ->
+                    val workingHost = connectAny(candidates, peer.port, peer.certificate, isPairing = false) { matchedHost, socket ->
+                        setActivity(ActivityStage.EXCHANGING_DATA)
                         val challenge = readText(socket, 128)
                         write(socket, Wire(operation = "exchange", binding = binding, id = deviceId,
                             credential = peer.credential, challenge = challenge, payload = encodePayload(payload)))
                         val response = read(socket)
+                        if (response.version == 1 && response.operation == "error" && response.challenge == challenge) {
+                            throw SyncOperationException(sanitizeRemoteErrorCode(response.payload))
+                        }
                         require(response.version == 1 && response.operation == "exchanged" && response.binding == binding &&
                             response.id == peer.id && response.challenge == challenge)
                         callback(session) { callbacks.receiveFrom(peer.id, decodePayload(response.payload)) }
@@ -381,6 +450,7 @@ class PairedLanTransport(
                     }
                     recordResult(peer, session, null)
                 } catch (failure: Exception) { failed = true; recordResult(peer, session, errorCode(failure)) }
+                finally { setActivity(ActivityStage.IDLE) }
             }
             if (current.isNotEmpty()) publish()
             failures = if (failed) (failures + 1).coerceAtMost(4) else 0
@@ -429,14 +499,20 @@ class PairedLanTransport(
         hosts: List<String>,
         port: Int,
         certificate: String,
+        isPairing: Boolean = false,
         action: (String, SSLSocket) -> T
     ): T {
         val candidates = hosts.distinct().take(MAX_CANDIDATE_HOSTS)
         require(candidates.isNotEmpty())
         var lastFailure: Exception? = null
-        for (candidate in candidates) {
+        val connectStage = if (isPairing) ActivityStage.PAIRING_CONNECTING else ActivityStage.CONNECTING_PEER
+        val handshakeStage = if (isPairing) ActivityStage.PAIRING_HANDSHAKE else ActivityStage.HANDSHAKING_PEER
+        for ((index, candidate) in candidates.withIndex()) {
             try {
-                return connect(candidate, port, certificate) { socket -> action(candidate, socket) }
+                setActivity(connectStage, index + 1, candidates.size)
+                return connect(candidate, port, certificate, onHandshake = {
+                    setActivity(handshakeStage, index + 1, candidates.size)
+                }) { socket -> action(candidate, socket) }
             } catch (failure: Exception) {
                 lastFailure = failure
                 // Protocol/auth/size errors are authoritative; only network/connect failures try fallback hosts.
@@ -446,7 +522,13 @@ class PairedLanTransport(
         throw lastFailure ?: java.io.IOException("No reachable host")
     }
 
-    private fun <T> connect(host: String, port: Int, certificate: String, action: (SSLSocket) -> T): T {
+    private fun <T> connect(
+        host: String,
+        port: Int,
+        certificate: String,
+        onHandshake: () -> Unit = {},
+        action: (SSLSocket) -> T
+    ): T {
         val targetAddress = LanSyncSecurity.address(host)
         val sslFactory = LanSyncSecurity.context(identity, LanSyncSecurity.certificate(certificate)).socketFactory
         val directRaw = if (LanSyncSecurity.isDirectLanAddress(targetAddress)) {
@@ -473,6 +555,7 @@ class PairedLanTransport(
         }
         return useSocket(socket) {
             socket.enabledProtocols = socket.supportedProtocols.filter { it == "TLSv1.3" || it == "TLSv1.2" }.toTypedArray()
+            onHandshake()
             socket.startHandshake()
             socket.soTimeout = EXCHANGE_SOCKET_MS
             action(socket)
@@ -539,11 +622,25 @@ class PairedLanTransport(
         require(peer.port in 1..65535 && peer.credential.matches(Regex("[A-Za-z0-9_-]{43}")))
         require(peer.id == LanSyncSecurity.id(LanSyncSecurity.certificate(peer.certificate)))
     }
-    private fun errorCode(failure: Exception): String = when (failure) {
-        is UnsupportedSyncProtocolException -> "unsupported_sync_protocol"
-        is dev.ikna.data.export.JournalReconciliationRequiredException -> "journal_reconciliation_required"
-        is dev.ikna.data.export.IncrementalJournalLimitException -> "journal_item_too_large"
-        is PayloadTooLargeException, is dev.ikna.data.export.ProfileTransferLimitException -> "payload_too_large"
+    private fun errorCode(failure: Exception): String = when {
+        failure is SyncOperationException -> failure.code
+        failure is UnsupportedSyncProtocolException -> "unsupported_sync_protocol"
+        failure is dev.ikna.data.export.JournalReconciliationRequiredException -> "journal_reconciliation_required"
+        failure is dev.ikna.data.export.IncrementalJournalLimitException -> "journal_item_too_large"
+        failure is PayloadTooLargeException || failure is dev.ikna.data.export.ProfileTransferLimitException -> "payload_too_large"
+        failure is java.net.SocketTimeoutException -> "connection_timeout"
+        failure is java.net.ConnectException -> "connection_refused"
+        failure is java.net.NoRouteToHostException || failure is java.net.UnknownHostException -> "network_unreachable"
+        failure is javax.net.ssl.SSLException -> "tls_trust_failed"
+        failure is java.io.EOFException -> "peer_closed_connection"
+        failure is java.net.BindException -> "port_unavailable"
+        failure is java.net.SocketException -> "connection_interrupted"
+        failure is java.io.IOException -> "connection_failed"
+        failure.message == "Unpaired device" -> "unpaired_device"
+        failure.message == "Pairing expired" || failure.message == "Pairing closed" -> "expired_invitation"
+        failure.message in setOf("profile-conflict-or-stale", "profile-content-conflict") -> "profile-conflict-or-stale"
+        failure.message in setOf("local-profile-stale", "remote-profile-stale", "stale-proposal", "proposal-expired", "proposal-cancelled") -> "profile_stale"
+        failure.message in setOf("history-mismatch", "fresh-history-reset-required") -> "history-mismatch"
         else -> "connection_failed"
     }
     private fun save(values: List<Peer>) = LanSyncSecurity.writePrivate(File(privateDirectory, "peers.json"), json.encodeToString(Saved(binding = binding, peers = values)))
@@ -640,23 +737,41 @@ class PairedLanTransport(
             }
         }
 
+        private val REMOTE_REPORTABLE_ERRORS = setOf(
+            "expired_invitation", "invalid_invitation", "unsupported_sync_protocol",
+            "payload_too_large", "journal_item_too_large", "journal_reconciliation_required",
+            "profile-conflict-or-stale", "profile_stale", "history-mismatch"
+        )
+
+        private fun sanitizeRemoteErrorCode(raw: String): String =
+            if (raw in REMOTE_REPORTABLE_ERRORS) raw else "connection_failed"
+
         fun parseInvitation(text: String): PairingInvitation {
-            val trimmed = text.trim()
-            require(trimmed.length <= MAX_INVITATION_JSON_BYTES)
-            val rawJson = if (trimmed.startsWith(COMPACT_INVITATION_PREFIX)) {
-                decodeCompactInvitation(trimmed)
-            } else {
-                trimmed
+            try {
+                val trimmed = text.trim()
+                require(trimmed.length <= MAX_INVITATION_JSON_BYTES)
+                val rawJson = if (trimmed.startsWith(COMPACT_INVITATION_PREFIX)) {
+                    decodeCompactInvitation(trimmed)
+                } else {
+                    trimmed
+                }
+                require(rawJson.length <= MAX_INVITATION_JSON_BYTES)
+                val value = invitationJson.decodeFromString<PairingInvitation>(rawJson)
+                require(value.version == 1 && value.port in 1..65535 && value.secret.matches(Regex("[A-Za-z0-9_-]{43}")))
+                LanSyncSecurity.address(value.host)
+                require(value.hosts.size <= MAX_CANDIDATE_HOSTS)
+                value.hosts.forEach { LanSyncSecurity.address(it) }
+                LanSyncSecurity.certificate(value.certificate).checkValidity()
+                if (value.expiresAtMillis <= System.currentTimeMillis()) {
+                    throw SyncOperationException("expired_invitation")
+                }
+                require(value.expiresAtMillis <= System.currentTimeMillis() + INVITATION_MS + 30_000)
+                return value
+            } catch (already: SyncOperationException) {
+                throw already
+            } catch (_: Exception) {
+                throw SyncOperationException("invalid_invitation")
             }
-            require(rawJson.length <= MAX_INVITATION_JSON_BYTES)
-            val value = invitationJson.decodeFromString<PairingInvitation>(rawJson)
-            require(value.version == 1 && value.port in 1..65535 && value.secret.matches(Regex("[A-Za-z0-9_-]{43}")))
-            LanSyncSecurity.address(value.host)
-            require(value.hosts.size <= MAX_CANDIDATE_HOSTS)
-            value.hosts.forEach { LanSyncSecurity.address(it) }
-            LanSyncSecurity.certificate(value.certificate).checkValidity()
-            require(value.expiresAtMillis > System.currentTimeMillis() && value.expiresAtMillis <= System.currentTimeMillis() + INVITATION_MS + 30_000)
-            return value
         }
 
         private val VPN_OR_VIRTUAL_TOKENS = listOf(

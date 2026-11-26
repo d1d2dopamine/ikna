@@ -11,7 +11,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.intOrNull
 import java.util.UUID
 
-/** One authenticated peer, bounded transient staging, and no mutation before two exact approvals.
+/** One authenticated peer, bounded transient staging, and safe profile convergence.
  * Pending consent is transient; completed consent is verified against durable Room receipts. */
 class ProfileConsentProtocol(
     private val deviceId: String,
@@ -20,6 +20,7 @@ class ProfileConsentProtocol(
     private val now: () -> Long = System::currentTimeMillis,
     savedCompletion: Completion? = null,
     savedInvalidation: String? = null,
+    private val autoAcceptFromInviter: () -> Boolean = { false },
 ) {
     interface Store {
         suspend fun snapshot(): ProfileTransferSnapshot
@@ -30,6 +31,7 @@ class ProfileConsentProtocol(
         suspend fun commit(incoming: ProfileTransferSnapshot, preview: ProfileMergePreview,
                            operationId: String, tupleDigest: String): String
         suspend fun previewAdoption(incoming: ProfileTransferSnapshot): ProfileMergePreview = preview(incoming)
+        suspend fun prepareAdoptionRecipient() {}
         /** Recipient schedules adoption outside the network callback and returns null until restart. */
         suspend fun adopt(incoming: ProfileTransferSnapshot, preview: ProfileMergePreview,
                           proposal: Proposal, localIsSource: Boolean): String? = error("adoption-not-supported")
@@ -152,6 +154,13 @@ class ProfileConsentProtocol(
             journal = null))
     }
     suspend fun propose(peerId: String, mode: Mode = Mode.MERGE): State = mutex.withLock {
+        proposeLocked(peerId, mode, approveImmediately = false)
+    }
+    /** Single-click inviter choice: creates the exact proposal and marks local approval in one step. */
+    suspend fun proposeAndApprove(peerId: String, mode: Mode = Mode.MERGE): State = mutex.withLock {
+        proposeLocked(peerId, mode, approveImmediately = true)
+    }
+    private suspend fun proposeLocked(peerId: String, mode: Mode, approveImmediately: Boolean): State {
         clearCurrentCatchUp()
         checkPeer(peerId); validateCompletion(); expire(); check(completion == null) { "profile-already-connected" }; check(proposal == null) { "proposal-pending" }
         val incoming = checkNotNull(remote) { "awaiting-profile" }
@@ -166,13 +175,27 @@ class ProfileConsentProtocol(
             firstRevision = own.revision, secondRevision = incoming.revision,
             expiresAtMillis = now() + TTL_MILLIS)
         preview = checked
-        publish(); state
+        if (approveImmediately) {
+            localApproved = true
+        }
+        publish()
+        return state
     }
     suspend fun approve(operationId: String): State = mutex.withLock {
         clearCurrentCatchUp()
         expire()
+        completion?.let { c ->
+            if (c.proposal.operationId == operationId) {
+                publish()
+                return@withLock state
+            }
+        }
         val p = checkNotNull(proposal) { "no-proposal" }
         require(p.operationId == operationId) { "stale-proposal" }
+        if (localApproved && (receipt != null || adoptionPending)) {
+            publish()
+            return@withLock state
+        }
         require(receipt == null) { "already-applied" }
         val current = if (p.mode == Mode.MERGE) store.preview(remote!!.snapshot) else store.previewAdoption(remote!!.snapshot)
         val allowed = if (p.mode == Mode.MERGE) current.canMerge else current.canAdopt
@@ -298,6 +321,13 @@ class ProfileConsentProtocol(
             remoteApproved = wire.approved
             require(wire.receipt == null || (wire.approved && wire.receipt.matches(HEX))) { "invalid-profile-receipt" }
             remoteReceipt = wire.receipt
+            if (autoAcceptFromInviter() && p.firstDevice == peerId && remoteApproved &&
+                !localApproved && receipt == null && !adoptionPending) {
+                if (p.mode != Mode.MERGE && !localIsSource(p)) {
+                    store.prepareAdoptionRecipient()
+                }
+                localApproved = true
+            }
             applyIfApproved()
             if (receipt != null && receipt == remoteReceipt) finish()
         } else if (proposal == null) {

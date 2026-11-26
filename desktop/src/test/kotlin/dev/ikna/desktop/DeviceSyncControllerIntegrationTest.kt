@@ -152,11 +152,13 @@ class DeviceSyncControllerIntegrationTest {
     }
 
     private suspend fun approveMerge(a: Device, b: Device) {
-        val operation = propose(a, b)
-        a.controller.approveProfile(operation)
-        b.controller.approveProfile(operation)
+        eventually("Inviter must receive the peer profile before making a one-click choice") {
+            a.controller.state.value.profileConsent.preview != null
+        }
+        a.controller.chooseMerge(a.controller.state.value.devices.single().id)
+        val operation = requireNotNull(a.controller.state.value.profileConsent.operationId)
         try {
-            eventually("Both exact approvals and durable receipts must complete") {
+            eventually("Inviter choice must auto-apply on joiner and complete durable receipts") {
                 a.controller.state.value.profileConsent.complete && b.controller.state.value.profileConsent.complete
             }
         } catch (failure: AssertionError) {
@@ -218,7 +220,7 @@ class DeviceSyncControllerIntegrationTest {
         }
     }
 
-    @Test(timeout = 60_000) fun `pair and one approval cannot mutate either profile then unique decks and history merge`() = runBlocking {
+    @Test(timeout = 60_000) fun `pair and joiner approval cannot mutate inviter then inviter choice merges automatically`() = runBlocking {
         fixture { a, b ->
             a.seed("__ONLY_A__", "__PACK_A__"); b.seed("__ONLY_B__", "__PACK_B__")
             a.append("unique-a", "__ONLY_A__"); b.append("unique-b", "__ONLY_B__")
@@ -228,22 +230,26 @@ class DeviceSyncControllerIntegrationTest {
             delay(350)
             assertEquals(beforeA, a.repository.profileTransfer.snapshot())
             assertEquals(beforeB, b.repository.profileTransfer.snapshot())
+            assertEquals(PairedLanTransport.PeerRole.INVITER, a.controller.state.value.peerRole)
+            assertEquals(PairedLanTransport.PeerRole.JOINER, b.controller.state.value.peerRole)
             val operation = propose(a, b)
             assertEquals(1, a.controller.state.value.profileConsent.preview!!.addedPacks)
             assertEquals(1, b.controller.state.value.profileConsent.preview!!.addedReviews)
             a.controller.approveProfile("__WRONG_OPERATION__")
             assertEquals("stale-proposal", a.controller.state.value.error)
             assertFalse(a.controller.state.value.profileConsent.localApproved)
-            a.controller.approveProfile(operation)
-            eventually("Peer must observe the first approval without applying") {
-                b.controller.state.value.profileConsent.remoteApproved
+            // Joiner approving alone cannot force mutation on the inviter.
+            b.controller.approveProfile(operation)
+            eventually("Inviter must observe joiner approval without mutating") {
+                a.controller.state.value.profileConsent.remoteApproved
             }
             assertEquals(beforeA, a.repository.profileTransfer.snapshot())
             assertEquals(beforeB, b.repository.profileTransfer.snapshot())
             assertNull(a.repository.profileTransfer.appliedOperation(operation))
             assertNull(b.repository.profileTransfer.appliedOperation(operation))
-            b.controller.approveProfile(operation)
-            eventually("Both explicitly approved profiles must converge") {
+            // Once the inviter approves, both profiles converge automatically.
+            a.controller.approveProfile(operation)
+            eventually("Inviter approval must converge both profiles") {
                 a.controller.state.value.profileConsent.complete && b.controller.state.value.profileConsent.complete
             }
             assertEquals(3, a.db.chunkDao().packs().size)
@@ -300,8 +306,10 @@ class DeviceSyncControllerIntegrationTest {
             b.append("unapproved-event")
             a.enable(); b.enable(); pair(a, b, consent = false)
             val operation = propose(a, b)
+            b.controller.setForeground(false)
             a.controller.approveProfile(operation)
             a.controller.revokePeer(a.controller.state.value.devices.single().id)
+            b.controller.setForeground(true)
             assertEquals(0, a.controller.state.value.peers)
             assertNull(a.controller.state.value.profileConsent.operationId)
             a.controller.approveProfile(operation)
@@ -315,23 +323,28 @@ class DeviceSyncControllerIntegrationTest {
         }
     }
 
-    @Test(timeout = 60_000) fun `restart discards pending approval and requires a fresh bilateral operation`() = runBlocking {
+    @Test(timeout = 60_000) fun `restart discards pending approval and requires a fresh choice`() = runBlocking {
         fixture { a, b ->
             b.append("pending-before-restart")
             a.enable(); b.enable(); pair(a, b, consent = false)
             val old = propose(a, b)
+            b.controller.setForeground(false)
             a.controller.approveProfile(old)
             a.restart()
+            b.controller.setForeground(true)
             delay(350)
             assertTrue(a.repository.snapshotJournal().isEmpty())
             assertNull(a.repository.profileTransfer.appliedOperation(old))
             assertFalse(a.controller.state.value.profileConsent.localApproved)
-            // Explicitly cancel the surviving peer's pending proposal before proposing again.
+            // Explicitly cancel the surviving peer's pending proposal before choosing again.
             a.controller.cancelProfile(); b.controller.cancelProfile()
-            val next = propose(a, b)
+            eventually("Inviter must see peer preview after restart") {
+                a.controller.state.value.profileConsent.preview != null
+            }
+            a.controller.chooseMerge(a.controller.state.value.devices.single().id)
+            val next = requireNotNull(a.controller.state.value.profileConsent.operationId)
             assertNotEquals(old, next)
-            a.controller.approveProfile(next); b.controller.approveProfile(next)
-            eventually("Fresh bilateral consent must finish after pending restart") {
+            eventually("Fresh inviter choice must auto-apply and finish after pending restart") {
                 a.controller.state.value.profileConsent.complete && b.controller.state.value.profileConsent.complete
             }
             assertEquals(listOf("pending-before-restart"), a.repository.snapshotJournal().map { it.eventId })

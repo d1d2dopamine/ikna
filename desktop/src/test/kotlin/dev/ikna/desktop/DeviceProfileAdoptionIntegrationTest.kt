@@ -122,15 +122,16 @@ class DeviceProfileAdoptionIntegrationTest {
         return operation
     }
 
-    @Test(timeout = 60_000) fun `bilateral adoption selects source journal retains content and recovery then reconnects`() = runBlocking {
+    @Test(timeout = 60_000) fun `inviter adoption selects source journal retains content and recovery then reconnects`() = runBlocking {
         fixture { source, recipient ->
             val old = recipient.repository.profileTransfer.snapshot()
             val operation = propose(source, recipient)
-            source.controller.approveProfile(operation)
             delay(300)
+            // Unapproved proposal alone must never mutate the recipient.
             assertEquals(old, recipient.repository.profileTransfer.snapshot())
             assertEquals(recipient.original, recipient.slots.selection().active)
-            recipient.controller.approveProfile(operation)
+            // Inviter approval alone triggers automatic adoption on the joiner.
+            source.controller.approveProfile(operation)
             withTimeout(15_000) { recipient.adoptionFinished.await() }
             assertEquals(ProfileAdoptionService.State.RESTART_REQUIRED, recipient.service.state)
             assertEquals(recipient.original, recipient.slots.selection().recovery)
@@ -168,7 +169,7 @@ class DeviceProfileAdoptionIntegrationTest {
         fixture(failBeforePointer = true) { source, recipient ->
             val old = recipient.repository.profileTransfer.snapshot()
             val operation = propose(source, recipient)
-            source.controller.approveProfile(operation); recipient.controller.approveProfile(operation)
+            source.controller.approveProfile(operation)
             try {
                 withTimeout(15_000) { recipient.adoptionFinished.await() }
                 fail("Expected injected activation interruption")
@@ -187,7 +188,7 @@ class DeviceProfileAdoptionIntegrationTest {
     @Test(timeout = 60_000) fun `ambiguous failure after selector commit reconciles exact adoption on restart`() = runBlocking {
         fixture(failAfterSelection = true) { source, recipient ->
             val operation = propose(source, recipient)
-            source.controller.approveProfile(operation); recipient.controller.approveProfile(operation)
+            source.controller.approveProfile(operation)
             try {
                 withTimeout(15_000) { recipient.adoptionFinished.await() }
                 fail("Expected synthetic post-commit interruption")
@@ -208,7 +209,7 @@ class DeviceProfileAdoptionIntegrationTest {
     @Test(timeout = 60_000) fun `history reset waiting behind adoption cannot invalidate the selected profile`() = runBlocking {
         fixture(blockActivation = true) { source, recipient ->
             val operation = propose(source, recipient)
-            source.controller.approveProfile(operation); recipient.controller.approveProfile(operation)
+            source.controller.approveProfile(operation)
             withTimeout(15_000) { recipient.activationEntered.await() }
             val reset = async(Dispatchers.Default) { runCatching { recipient.controller.beforeHistoryChange() } }
             delay(100)
@@ -240,7 +241,6 @@ class DeviceProfileAdoptionIntegrationTest {
             assertFalse(source.controller.state.value.profileConsent.preview!!.canMerge)
             assertTrue(source.controller.state.value.profileConsent.preview!!.canAdopt)
             source.controller.approveProfile(operation)
-            recipient.controller.approveProfile(operation)
             withTimeout(15_000) { recipient.adoptionFinished.await() }
             recipient.restart()
             eventually("Authoritative adoption with conflicting deck must converge") {

@@ -367,14 +367,47 @@ class PairedLanTransportTest {
         val a = PairedLanTransport(dirA, binding, aData, intervalMillis = 100)
         val b = PairedLanTransport(dirB, binding, bData, intervalMillis = 100)
         try {
-            a.start(); b.start()
+            // Bind specifically to 127.0.0.1 so 127.0.0.2 is refused on Linux as well as Windows.
+            a.start(bindAddress = java.net.InetAddress.getByName("127.0.0.1")); b.start()
             val rawInvite = PairedLanTransport.parseInvitation(a.createInvitation("127.0.0.1"))
-            // Primary host is an unused loopback IP that refuses connection; fallback is 127.0.0.1.
+            // Primary host refuses connection on this port; fallback is 127.0.0.1.
             val multiHostInvite = rawInvite.copy(host = "127.0.0.2", hosts = listOf("127.0.0.2", "127.0.0.1"))
             b.pair(Json.encodeToString(multiHostInvite))
             waitFor { aData.received.contains("fallback-B") && bData.received.contains("fallback-A") }
             assertEquals(1, b.status.peerCount)
             assertTrue(b.status.peers.single().address.startsWith("127.0.0.1:"))
+        } finally { a.close(); b.close(); dirA.deleteRecursively(); dirB.deleteRecursively() }
+    }
+
+    @Test fun `inviter and joiner roles persist across restart and invalid or expired invitations report specific codes`() = runBlocking {
+        val dirA = temp(); val dirB = temp()
+        val aData = Data("from-A".toByteArray()); val bData = Data("from-B".toByteArray())
+        var a = PairedLanTransport(dirA, binding, aData, intervalMillis = 100)
+        var b = PairedLanTransport(dirB, binding, bData, intervalMillis = 100)
+        try {
+            a.start(); b.start()
+            val invalidErr = kotlin.test.assertFailsWith<SyncOperationException> {
+                PairedLanTransport.parseInvitation("not-a-valid-ikna-invitation")
+            }
+            assertEquals("invalid_invitation", invalidErr.code)
+
+            val inviteText = a.createInvitation("127.0.0.1")
+            val parsed = PairedLanTransport.parseInvitation(inviteText)
+            val expiredErr = kotlin.test.assertFailsWith<SyncOperationException> {
+                PairedLanTransport.parseInvitation(Json.encodeToString(parsed.copy(expiresAtMillis = 1L)))
+            }
+            assertEquals("expired_invitation", expiredErr.code)
+
+            b.pair(inviteText)
+            waitFor { aData.received.contains("from-B") && bData.received.contains("from-A") }
+            assertEquals(PairedLanTransport.PeerRole.INVITER, a.status.peers.single().role)
+            assertEquals(PairedLanTransport.PeerRole.JOINER, b.status.peers.single().role)
+
+            a.close(); b.close()
+            a = PairedLanTransport(dirA, binding, aData, intervalMillis = 100)
+            b = PairedLanTransport(dirB, binding, bData, intervalMillis = 100)
+            assertEquals(PairedLanTransport.PeerRole.INVITER, a.status.peers.single().role)
+            assertEquals(PairedLanTransport.PeerRole.JOINER, b.status.peers.single().role)
         } finally { a.close(); b.close(); dirA.deleteRecursively(); dirB.deleteRecursively() }
     }
 

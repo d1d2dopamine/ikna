@@ -68,6 +68,18 @@ class DeviceSyncController(
     var isRestartRequired: () -> Boolean = { false }
     var adoptionHandler: (suspend (AdoptionRequest) -> Unit)? = null
     @Volatile private var adoptionInProgress = false
+    enum class SyncStage {
+        IDLE,
+        PAIRING_CONNECTING,
+        PAIRING_HANDSHAKE,
+        CONNECTING_PEER,
+        HANDSHAKING_PEER,
+        EXCHANGING_PROFILES,
+        WAITING_FOR_INVITER,
+        APPLYING_PROFILE,
+        CONFIRMING_PROFILE,
+        SYNCING_JOURNAL,
+    }
     @Serializable private data class Journal(val version: Int = 1, val records: List<ReviewRecord>)
     data class State(
         val enabled: Boolean = false, val running: Boolean = false, val peers: Int = 0,
@@ -77,8 +89,13 @@ class DeviceSyncController(
         val devices: List<PairedLanTransport.PeerStatus> = emptyList(),
         val profileConsent: ProfileConsentProtocol.State = ProfileConsentProtocol.State(),
         val recoveryAvailable: Boolean = false,
+        val busy: Boolean = false,
+        val stage: SyncStage = SyncStage.IDLE,
+        val stageAttempt: Int = 0,
+        val stageTotal: Int = 0,
+        val peerRole: PairedLanTransport.PeerRole = PairedLanTransport.PeerRole.UNKNOWN,
     ) {
-        override fun toString(): String = "State(enabled=$enabled, running=$running, peers=$peers, blocked=$blocked, error=$error, invitation=<redacted>)"
+        override fun toString(): String = "State(enabled=$enabled, running=$running, peers=$peers, blocked=$blocked, error=$error, stage=$stage, invitation=<redacted>)"
     }
     private val json = Json { ignoreUnknownKeys = false; isLenient = false; encodeDefaults = true }
     private val operation = Mutex()
@@ -90,6 +107,7 @@ class DeviceSyncController(
     @Volatile private var loaded = false
     @Volatile private var foreground = false
     @Volatile private var foregroundRequested = false
+    @Volatile private var busyAction = false
     private val lifecycleScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     @Volatile private var transport: PairedLanTransport? = null
     @Volatile private var permitted = false
@@ -127,6 +145,19 @@ class DeviceSyncController(
             JournalErrorLatch.Scope(configuration.binding, status.peers.single().id, consentState.operationId)
         else null
         val retainedError = journalErrors.update(errorScope, consentState.journalCaughtUp, error ?: transportError)
+        val effectiveError = error ?: retainedError ?: transportError
+        val peerRole = status?.peers?.singleOrNull()?.role ?: PairedLanTransport.PeerRole.UNKNOWN
+        val activity = status?.activity ?: PairedLanTransport.Activity()
+        val stage = computeStage(
+            enabled = configuration.enabled,
+            blocked = configuration.blocked,
+            running = status?.running == true,
+            peers = status?.peerCount ?: 0,
+            activity = activity,
+            consent = consentState,
+            peerRole = peerRole,
+            hasError = effectiveError != null,
+        )
         mutable.update { it.copy(enabled = configuration.enabled,
             running = status?.running == true, peers = status?.peerCount ?: 0,
             devices = status?.peers ?: emptyList(),
@@ -134,10 +165,57 @@ class DeviceSyncController(
             lastSuccessAtMillis = if (protocol?.state?.complete != true) null
                 else if (protocol?.state?.journalCaughtUp == true && status != null) status.lastSuccessAtMillis
                 else it.lastSuccessAtMillis,
-            profileConsent = protocol?.state ?: ProfileConsentProtocol.State(),
+            profileConsent = consentState,
             recoveryAvailable = canRecoverProfile,
-            error = error ?: retainedError ?: transportError, blocked = configuration.blocked,
-            boundaryReady = configuration.boundaryReady) }
+            error = effectiveError, blocked = configuration.blocked,
+            boundaryReady = configuration.boundaryReady,
+            busy = busyAction || activity.stage != PairedLanTransport.ActivityStage.IDLE,
+            stage = stage,
+            stageAttempt = activity.attempt,
+            stageTotal = activity.total,
+            peerRole = peerRole) }
+    }
+
+    private fun computeStage(
+        enabled: Boolean,
+        blocked: Boolean,
+        running: Boolean,
+        peers: Int,
+        activity: PairedLanTransport.Activity,
+        consent: ProfileConsentProtocol.State,
+        peerRole: PairedLanTransport.PeerRole,
+        hasError: Boolean,
+    ): SyncStage {
+        if (!enabled || blocked) return SyncStage.IDLE
+        when (activity.stage) {
+            PairedLanTransport.ActivityStage.PAIRING_CONNECTING -> return SyncStage.PAIRING_CONNECTING
+            PairedLanTransport.ActivityStage.PAIRING_HANDSHAKE -> return SyncStage.PAIRING_HANDSHAKE
+            PairedLanTransport.ActivityStage.CONNECTING_PEER -> return SyncStage.CONNECTING_PEER
+            PairedLanTransport.ActivityStage.HANDSHAKING_PEER -> return SyncStage.HANDSHAKING_PEER
+            PairedLanTransport.ActivityStage.EXCHANGING_DATA -> {
+                return when {
+                    consent.complete -> SyncStage.SYNCING_JOURNAL
+                    consent.adoptionPending -> SyncStage.APPLYING_PROFILE
+                    consent.applied -> SyncStage.CONFIRMING_PROFILE
+                    consent.operationId != null && consent.localApproved -> SyncStage.APPLYING_PROFILE
+                    else -> SyncStage.EXCHANGING_PROFILES
+                }
+            }
+            PairedLanTransport.ActivityStage.IDLE -> Unit
+        }
+        if (!running || peers == 0) return SyncStage.IDLE
+        if (hasError) return SyncStage.IDLE
+        if (!consent.complete) {
+            return when {
+                consent.adoptionPending -> SyncStage.APPLYING_PROFILE
+                consent.applied -> SyncStage.CONFIRMING_PROFILE
+                consent.operationId != null && consent.localApproved -> SyncStage.APPLYING_PROFILE
+                consent.preview == null -> SyncStage.EXCHANGING_PROFILES
+                consent.operationId == null && peerRole == PairedLanTransport.PeerRole.JOINER -> SyncStage.WAITING_FOR_INVITER
+                else -> SyncStage.IDLE
+            }
+        }
+        return if (consent.journalPending) SyncStage.SYNCING_JOURNAL else SyncStage.IDLE
     }
     private fun instance(): PairedLanTransport = transport ?: PairedLanTransport(
         File(directory, "transport"), configuration.binding,
@@ -187,6 +265,9 @@ class DeviceSyncController(
             }
             override suspend fun previewAdoption(incoming: ProfileTransferSnapshot) =
                 repository.profileTransfer.previewAdoption(incoming, configuration.afterLocalId, configuration.boundaryToken)
+            override suspend fun prepareAdoptionRecipient() {
+                adoptionPreflight?.invoke()
+            }
             override suspend fun adopt(incoming: ProfileTransferSnapshot, preview: ProfileMergePreview,
                                        proposal: ProfileConsentProtocol.Proposal, localIsSource: Boolean): String? {
                 check(permitted && !configuration.blocked) { "paused" }
@@ -293,16 +374,37 @@ class DeviceSyncController(
             require(invalidationFile.length() <= 128) { "invalid-profile-state" }
             LanSyncSecurity.readPrivate(invalidationFile, 128).also { require(it.matches(Regex("[A-Za-z0-9:_-]{1,128}"))) }
         } else null,
+        autoAcceptFromInviter = {
+            transport?.status?.peers?.singleOrNull()?.role == PairedLanTransport.PeerRole.JOINER
+        },
     ).also { protocol = it }
 
     suspend fun proposeMerge(peerId: String) = action {
         check(permitted && instance().status.peerCount == 1) { "paused" }
         consent().propose(peerId)
+        instance().triggerSyncNow()
     }
     suspend fun proposeAdoption(peerId: String, useThisDevice: Boolean) = action {
         check(permitted && instance().status.peerCount == 1 && adoptionHandler != null) { "adoption-unavailable" }
         if (!useThisDevice) adoptionPreflight?.invoke()
         consent().propose(peerId, if (useThisDevice) ProfileConsentProtocol.Mode.ADOPT_THIS else ProfileConsentProtocol.Mode.ADOPT_OTHER)
+        instance().triggerSyncNow()
+    }
+    /** Inviter one-click merge: proposes and approves locally, then triggers immediate exchange. */
+    suspend fun chooseMerge(peerId: String) = action {
+        check(permitted && instance().status.peerCount == 1) { "paused" }
+        consent().proposeAndApprove(peerId, ProfileConsentProtocol.Mode.MERGE)
+        instance().triggerSyncNow()
+    }
+    /** Inviter one-click profile selection: proposes and approves locally, then triggers immediate exchange. */
+    suspend fun chooseAdoption(peerId: String, useThisDevice: Boolean) = action {
+        check(permitted && instance().status.peerCount == 1 && adoptionHandler != null) { "adoption-unavailable" }
+        if (!useThisDevice) adoptionPreflight?.invoke()
+        consent().proposeAndApprove(
+            peerId,
+            if (useThisDevice) ProfileConsentProtocol.Mode.ADOPT_THIS else ProfileConsentProtocol.Mode.ADOPT_OTHER
+        )
+        instance().triggerSyncNow()
     }
     /** Called after closed candidate verification, before the startup pointer is published. */
     fun prepareProfileActivation(slot: String, operationId: String, digest: String) {
@@ -369,6 +471,7 @@ class DeviceSyncController(
             (state.mode == ProfileConsentProtocol.Mode.ADOPT_OTHER && state.proposerFirst)
         if (recipient) adoptionPreflight?.invoke()
         consent().approve(operationId)
+        instance().triggerSyncNow()
     }
     suspend fun cancelProfile() = action(checkBoundary = false) { consent().clear() }
     private suspend fun clearConsent() {
@@ -599,15 +702,36 @@ class DeviceSyncController(
     }
     private suspend fun action(checkBoundary: Boolean = true, block: suspend () -> Unit) = withContext(Dispatchers.IO) {
         operation.withLock {
-            try { load(); if (checkBoundary) detectTransferredHistory(); block(); publish() }
-            catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+            busyAction = true
+            publish()
+            try {
+                load()
+                if (checkBoundary) detectTransferredHistory()
+                block()
+                busyAction = false
+                publish()
+            }
+            catch (cancelled: kotlinx.coroutines.CancellationException) {
+                busyAction = false
+                publish()
+                throw cancelled
+            }
             catch (error: Exception) {
+                busyAction = false
                 // No invitation, credential, peer data or raw exception is logged/displayed.
                 val safe = when {
+                    error is SyncOperationException -> error.code
                     error is UnsupportedSyncProtocolException -> "unsupported_sync_protocol"
                     error is dev.ikna.data.export.JournalReconciliationRequiredException -> "journal_reconciliation_required"
                     error is dev.ikna.data.export.IncrementalJournalLimitException -> "journal_item_too_large"
                     error is dev.ikna.data.export.ProfileTransferLimitException -> "profile-too-large"
+                    error is java.net.SocketTimeoutException -> "connection_timeout"
+                    error is java.net.ConnectException -> "connection_refused"
+                    error is java.net.NoRouteToHostException || error is java.net.UnknownHostException -> "network_unreachable"
+                    error is javax.net.ssl.SSLException -> "tls_trust_failed"
+                    error is java.io.EOFException -> "peer_closed_connection"
+                    error is java.net.BindException -> "port_unavailable"
+                    error is java.net.SocketException -> "connection_interrupted"
                     error is java.io.IOException -> "connection_failed"
                     error.message?.contains("expired", ignoreCase = true) == true -> "expired_invitation"
                     error.message in setOf(
@@ -615,7 +739,8 @@ class DeviceSyncController(
                     ) -> "history-mismatch"
                     error.message in setOf(
                         "adoption-not-supported", "awaiting-profile", "profile-conflict-or-stale", "proposal-pending",
-                        "single-peer-required", "profile-too-large", "proposal-expired", "stale-proposal"
+                        "single-peer-required", "profile-too-large", "proposal-expired", "stale-proposal",
+                        "local-profile-stale", "remote-profile-stale", "proposal-cancelled"
                     ) -> error.message!!
                     else -> "operation-failed"
                 }

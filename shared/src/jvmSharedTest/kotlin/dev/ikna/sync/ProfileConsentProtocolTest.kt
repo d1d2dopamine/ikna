@@ -518,4 +518,35 @@ class ProfileConsentProtocolTest {
         assertTrue(captured, "Near-limit data must be emitted through actual consent encoding")
     }
 
+    @Test fun `inviter one click choice auto applies on joiner while joiner cannot override inviter`() = runBlocking {
+        val leftStore = FakeStore()
+        val rightStore = FakeStore()
+        val inviter = ProfileConsentProtocol("a", binding, leftStore, { 1000L }, autoAcceptFromInviter = { false })
+        val joiner = ProfileConsentProtocol("b", binding, rightStore, { 1000L }, autoAcceptFromInviter = { true })
+        suspend fun exchange() {
+            joiner.receiveFrom("a", inviter.snapshotFor("b"))
+            inviter.receiveFrom("b", joiner.snapshotFor("a"))
+        }
+        exchange()
+
+        // Joiner proposing and approving must never auto-apply on the inviter.
+        joiner.proposeAndApprove("a", ProfileConsentProtocol.Mode.MERGE)
+        exchange()
+        assertEquals(0, leftStore.commits)
+        assertEquals(0, rightStore.commits)
+        assertFalse(inviter.state.localApproved)
+        joiner.clear()
+        inviter.clear()
+        exchange()
+
+        // Inviter one-click choice auto-applies on the joiner and completes without a second click.
+        val state = inviter.proposeAndApprove("b", ProfileConsentProtocol.Mode.MERGE)
+        assertTrue(state.localApproved)
+        repeat(3) { exchange() }
+        assertTrue(inviter.state.complete)
+        assertTrue(joiner.state.complete)
+        assertEquals(1, leftStore.commits)
+        assertEquals(1, rightStore.commits)
+    }
+
 }
