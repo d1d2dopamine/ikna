@@ -23,11 +23,13 @@ operations require authorization for the actual action.
 ## Repository skills
 
 - [ikna-development](skills/ikna-development/SKILL.md) is the shared contributor
-  protocol. Use it for repository work when the tool supports skills.
+  protocol (including [agent-pitfalls.md](skills/ikna-development/references/agent-pitfalls.md)
+  and [check-matrix.md](skills/ikna-development/references/check-matrix.md)).
+  Workspace discovery is registered via `.agents/skills.json`.
 - [ikna-owner-workflow](skills/ikna-owner-workflow/SKILL.md) adds the owner's
-  personal workflow and full-ZIP delivery. Load it only when the owner explicitly
-  selects it; do not impose it on other contributors.
+  personal workflow (Russian default, fast local checks without heavy Gradle,
+  `gh` CI workflow, and optional ZIP packaging). Load it only when the owner
+  explicitly selects it; do not impose it on other contributors.
 
 Both skills live in source control. Tools without skill support should follow
-this file, CONTRIBUTING and the same owning contracts. Merely storing a skill
-in the repository does not install it into an external service.
+this file, CONTRIBUTING and the same owning contracts.

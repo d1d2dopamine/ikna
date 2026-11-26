@@ -1,72 +1,71 @@
 ---
 name: ikna-owner-workflow
-description: Apply the ikna project owner's personal development and delivery workflow when the owner explicitly selects it. Use together with ikna-development to work from the current project snapshot, follow the active plan, and deliver all requested modifications as one verified complete repository ZIP. Do not apply these personal delivery rules to ordinary contributors automatically.
+description: Apply the ikna project owner's personal development, verification, and Git/CI delivery workflow when the owner explicitly selects it. Use together with ikna-development for Russian communication, fast no-Gradle local checks, GitHub CI inspection via gh CLI, zero infinite polling timers, and optional full-ZIP delivery only when explicitly requested. Do not apply these personal rules to ordinary contributors automatically.
 ---
 
 # Ikna Owner Workflow
 
 Apply this personal workflow only when selected by the project owner. Read
-`../ikna-development/SKILL.md` and its relevant resources first; use its common
+`../ikna-development/SKILL.md`, `../ikna-development/references/agent-pitfalls.md`,
+and `../ikna-development/references/check-matrix.md` first; use the common
 data-safety, scope and verification rules. Keep both skills alongside each other
 in the repository. Do not duplicate learning or corpus contracts here.
 
 ## Work with the owner
 
-- Use Russian by default unless the owner asks for another language.
-- Work from the current verified snapshot, including all previous accepted
-  changes. Do not start a later task from an older output archive.
-- Follow the active working plan linked from CONTRIBUTING. Re-read the plan and
-  owner decisions before choosing the next task. Keep the planning cycle distinct
-  from the version currently stored in build files.
-- Use the active plan's allocation between Catalogue v2 and application work
-  across planned batches; do not force every individual patch to touch both.
-- Complete authorized reversible work without repeated permission requests.
-  Respect action-specific authorization for publishing and destructive actions.
-- Use the supplied files or an authorized connected GitHub source. Do not install
-  Git, create a new local repository or set up a checkout merely to prepare a ZIP.
-  Set up additional tooling only when the owner requests or authorizes it.
-- Describe results, checks and limitations plainly. Do not present fixture-only
-  checks as release evidence or imply an unavailable platform was tested.
+- Communicate in Russian by default (concise, direct, no fluff), while keeping
+  code, commits, release titles/notes, and technical docs in English unless the
+  owner asks otherwise.
+- Work from the current verified `origin/main` checkout (run `git fetch` /
+  check ahead-behind before editing when multiple chats may push to the repo).
+- Follow the active working plan linked from `CONTRIBUTING.md` and the owner's
+  latest instructions. Newer owner decisions override stale plan checkboxes.
+- Complete authorized reversible work cleanly without asking for repeated
+  permission on every minor step. Respect explicit authorization for tags,
+  releases, public Catalogue publication, and destructive actions.
+- Respect the owner's product principles strictly: calm, clean UI, zero empty
+  gamification/streaks, zero duplicate lists, zero silent failures.
+- Describe results, checks and limitations plainly. Never present static checks
+  as full compilation or device-test evidence.
 
-## Deliver one complete project ZIP after modifications
+## Local verification & CI rules (owner machine)
 
-After modifying the project, return one full ZIP containing the complete current
-source tree with all requested changes already applied. Include both repository
-skills. Treat the archive as the owner's default code deliverable, not as a
-contributor-wide requirement.
+- **Prefer fast local checks over heavy local Gradle:** Unless the owner
+  explicitly asks for a local Gradle build/test run, do NOT run full Gradle
+  compilation, Android APK builds, or hot-reload locally. Run the fast local
+  pre-push gate from `check-matrix.md` (`check_localization.py`,
+  `check_text.py`, `check_design_parity.py`, `check_grading.py`,
+  `tools/grading/check_full.py`, `check_optimizer.py`, `check_classic_cards.py`,
+  `check_android_ci.py`, `check_palettes.py`, `SettingsSourceContracts.java`,
+  `git diff --check`) plus `git grep` on every moved/renamed symbol.
+- **Let GitHub Actions CI be the real compile & test gate:** Group related
+  changes into clean, logical commits and push to `origin/main` when authorized.
+- **Inspect CI via `gh` CLI — never a browser:** Use `gh run list` and
+  `gh run view <id> --log-failed` to diagnose CI failures directly.
+- **Never set infinite timers or polling loops:** Do not schedule recurring
+  cron/timer loops or shell sleeps waiting for CI to finish. Push, report what
+  was verified locally, and stop.
 
-- Combine changes from the same task in one verified tree and one archive.
-  Create separate variants only if the owner asks for them.
-- Do not deliver `.patch` or `.diff` artifacts unless explicitly requested.
-- Preserve every tracked source file unless its deletion is an explicit part of
-  the task. Preserve `ikna.keystore` and other tracked binary/signing/schema
-  assets according to the repository contracts.
-- With an existing Git checkout, exclude `.git` and ignored/untracked
-  machine-local clutter. Do not apply an extra category denylist to tracked files.
-- With a supplied ZIP, preserve its complete source manifest. Explicitly list
-  every added source file; do not infer source additions from a recursive scan
-  that can accidentally include build outputs or local caches.
-- Review the diff before packaging. Keep the output archive outside the source
-  tree so it cannot include or overwrite itself.
-- For an existing checkout, run
-  `scripts/package_repo.py <repo-root> <output.zip>`. For an archive workflow,
-  run the same script with `--source-archive <input.zip>` and repeat
-  `--add <relative-path>` for every added source file. Require exact source/ZIP
-  manifest agreement, byte verification and ZIP integrity.
-- Use `--allow-delete <path>` only for a tracked deletion explicitly included in
-  the requested change.
-- When `.git` is missing, use the supplied project ZIP as the authoritative
-  source manifest. Verify the source baseline before editing and review changed
-  bytes/paths against it before packaging. Do not create Git metadata for this.
-- If a full archive cannot be produced, report the limitation. Do not silently
-  substitute a patch.
+## Delivery mode
 
-For a read-only review, return the findings; no new project ZIP is required.
-Return the archive through the delivery mechanism available in the current tool.
-Keeping these skills in the repository does not install them into any service or
-personal skill directory.
+- **Default (Git checkout):** Commit cleanly and push to `origin/main` (when
+  authorized for the task), summarizing changed files with clickable links and
+  the exact checks run.
+- **Optional full-ZIP delivery (only when explicitly requested or in an offline
+  archive-only session without Git):**
+  - Run `scripts/package_repo.py <repo-root> <output.zip>` (or with
+    `--source-archive <input.zip>` and `--add <relative-path>` for every added
+    file when `.git` is absent).
+  - Preserve every tracked file including `ikna.keystore` and schemas; exclude
+    `.git` and machine-local build clutter; keep the archive outside the source
+    tree.
+  - Use `--allow-delete <path>` only for explicitly requested tracked deletions.
+
+For a read-only audit or discussion, do not modify repository files and do not
+create commits or archives.
 
 ## Resource
 
-- `scripts/package_repo.py`: package tracked files and new non-ignored files;
-  reject unexplained deletions and verify the finished archive.
+- `scripts/package_repo.py`: package tracked files and new non-ignored files for
+  explicit ZIP-delivery sessions; reject unexplained deletions and verify the
+  finished archive.

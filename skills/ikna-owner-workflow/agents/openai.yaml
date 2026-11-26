@@ -1,7 +1,7 @@
 interface:
   display_name: "Ikna Owner Workflow"
-  short_description: "Owner workflow with one complete project ZIP delivery"
-  default_prompt: "Use $ikna-owner-workflow with $ikna-development to complete the requested ikna changes and return one verified project ZIP."
+  short_description: "Owner workflow: Russian UI, fast local checks, Git/gh CI, optional ZIP"
+  default_prompt: "Use $ikna-owner-workflow with $ikna-development to complete the requested ikna changes, run fast local contract checks, and deliver via Git/CI (or ZIP if requested)."
   icon_small: "./assets/icon.svg"
   icon_large: "./assets/icon.svg"
 policy:
