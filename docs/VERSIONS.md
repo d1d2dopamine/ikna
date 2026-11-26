@@ -122,3 +122,17 @@ the release page cannot drift apart.
 - catalogue: 3-collection tabs (Everyday / Knowledge / World) in app UI;
   published catalogue remains under `catalog` while Knowledge and World finish
   verification
+
+## 0.14.0 press
+
+- `versionName`: `0.14.0 press`
+- `versionCode`: `200140000`
+- release tag: `v0.14.0-press`
+- release title: `ikna 0.14.0 press`
+- desktop package version: `0.14.0`
+- database schema: 14 (unchanged from 0.13.0 press)
+- scheduler: FSRS-6 / scheduler version 6 (with deterministic continuous fuzzing)
+- focus: fixing scientific errors and critical bugs in the learning engine/core,
+  redesigned local Profile, and updated user-facing README
+- release targets: Android arm64 + legacy32, Windows x64 (setup + portable),
+  Linux x86_64 AppImage

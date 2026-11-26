@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <a href="#скачать"><strong>Скачать (0.13.0)</strong></a> · Android, Windows и Linux
+  <a href="#скачать"><strong>Скачать (0.14.0)</strong></a> · Android, Windows и Linux
 </p>
 
 <p align="center">
@@ -52,14 +52,14 @@ https://github.com/user-attachments/assets/c90d603c-693f-4c9d-9915-55f04d7c0f5b
 
 ## <img src="docs/assets/icons/download.svg" width="28" height="28" align="absmiddle" alt=""> Скачать
 
-Файлы [релиза 0.13.0 press](https://github.com/d1d2dopamine/ikna/releases/tag/v0.13.0-press) ([список изменений](docs/RELEASE-NOTES-0.13.0.md)):
+Файлы [релиза 0.14.0 press](https://github.com/d1d2dopamine/ikna/releases/tag/v0.14.0-press) ([список изменений](docs/RELEASE-NOTES-0.14.0.md)):
 
 | Платформа | Файл | Какой выбрать |
 | --- | --- | --- |
-| Android 10+ (arm64) | [Основной APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-android-arm64.apk) | Подойдёт почти для всех современных телефонов |
-| Android 10+ (32-bit ARM) | [32-bit APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-android-legacy32.apk) | Для старых 32-битных устройств |
-| Windows x64 | [Установщик](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-windows-x64-setup.exe) · [Portable ZIP](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-windows-x64-portable.zip) | Установщик для обычной установки, ZIP для запуска без неё |
-| Linux x86_64 | [AppImage](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-linux-x86_64.AppImage) | Перед первым запуском дай право на выполнение (`chmod +x`) |
+| Android 10+ (arm64) | [Основной APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.14.0-press/ikna-android-arm64.apk) | Подойдёт почти для всех современных телефонов |
+| Android 10+ (32-bit ARM) | [32-bit APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.14.0-press/ikna-android-legacy32.apk) | Для старых 32-битных устройств |
+| Windows x64 | [Установщик](https://github.com/d1d2dopamine/ikna/releases/download/v0.14.0-press/ikna-windows-x64-setup.exe) · [Portable ZIP](https://github.com/d1d2dopamine/ikna/releases/download/v0.14.0-press/ikna-windows-x64-portable.zip) | Установщик для обычной установки, ZIP для запуска без неё |
+| Linux x86_64 | [AppImage](https://github.com/d1d2dopamine/ikna/releases/download/v0.14.0-press/ikna-linux-x86_64.AppImage) | Перед первым запуском дай право на выполнение (`chmod +x`) |
 
 Установщик Windows ставит Икну только для текущего пользователя. Portable-версия Windows и AppImage для Linux уже содержат нужную среду запуска. [Установка на ПК](docs/contracts/DESKTOP.md) · [Обновления](docs/contracts/UPDATES.md)
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.14.0 press
+
+See [docs/RELEASE-NOTES-0.14.0.md](docs/RELEASE-NOTES-0.14.0.md) for the full release summary.
+
+- Fix critical learning-engine bugs: stop `AGAIN` lapses from earning new cards, fix the 00:00 to 03:59 30-minute interval rollover in `Scheduler.dueAt()`, enforce `historyBoundary` across live governor/session/optimizer queries after a reset, wrap plan and suppression updates in Room transactions, filter suppressed chunks before SQL `LIMIT` and in `remainingByDeck()`, and exclude the candidate day from its own overheating baseline.
+- Apply scientific scheduling upgrades: deterministic monotonic FSRS-6 interval fuzzing, warm-up + interleaved new/review session ordering, spacing-aware multilingual component memory, whole-card `FsrsOptimizer` history slicing with frozen unscored `w[17..19]` and coupled-pair probes, Catalogue v2 `ContextPolicy` for mature cards, and honest late-night fatigue policy documentation.
+- Redesign the local Profile with a Profile icon, cover banner hero, `Profile` / `Analytics` tabs, and live learner insights (languages, recently practiced phrases, study rhythm, milestones).
+- Rewrite `README.md` for everyday users and add `README.ru.md`.
+
 ## 0.13.0 press
 
 See [docs/RELEASE-NOTES-0.13.0.md](docs/RELEASE-NOTES-0.13.0.md) for the full release summary.

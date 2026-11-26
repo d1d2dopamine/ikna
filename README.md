@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <a href="#download"><strong>Download (0.13.0)</strong></a> · Android, Windows and Linux
+  <a href="#download"><strong>Download (0.14.0)</strong></a> · Android, Windows and Linux
 </p>
 
 <p align="center">
@@ -52,14 +52,14 @@ Everything runs offline on your device. There are no accounts, subscriptions, ad
 
 ## <img src="docs/assets/icons/download.svg" width="28" height="28" align="absmiddle" alt=""> Download
 
-Files from [release 0.13.0 press](https://github.com/d1d2dopamine/ikna/releases/tag/v0.13.0-press) ([release notes](docs/RELEASE-NOTES-0.13.0.md)):
+Files from [release 0.14.0 press](https://github.com/d1d2dopamine/ikna/releases/tag/v0.14.0-press) ([release notes](docs/RELEASE-NOTES-0.14.0.md)):
 
 | Platform | File | Which one to pick |
 | --- | --- | --- |
-| Android 10+ (arm64) | [APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-android-arm64.apk) | Almost all modern Android phones |
-| Android 10+ (32-bit ARM) | [32-bit APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-android-legacy32.apk) | Older 32-bit Android devices |
-| Windows x64 | [Installer](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-windows-x64-setup.exe) · [Portable ZIP](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-windows-x64-portable.zip) | Installer for normal setup, ZIP to run without installing |
-| Linux x86_64 | [AppImage](https://github.com/d1d2dopamine/ikna/releases/download/v0.13.0-press/ikna-linux-x86_64.AppImage) | Mark executable (`chmod +x`) before opening |
+| Android 10+ (arm64) | [APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.14.0-press/ikna-android-arm64.apk) | Almost all modern Android phones |
+| Android 10+ (32-bit ARM) | [32-bit APK](https://github.com/d1d2dopamine/ikna/releases/download/v0.14.0-press/ikna-android-legacy32.apk) | Older 32-bit Android devices |
+| Windows x64 | [Installer](https://github.com/d1d2dopamine/ikna/releases/download/v0.14.0-press/ikna-windows-x64-setup.exe) · [Portable ZIP](https://github.com/d1d2dopamine/ikna/releases/download/v0.14.0-press/ikna-windows-x64-portable.zip) | Installer for normal setup, ZIP to run without installing |
+| Linux x86_64 | [AppImage](https://github.com/d1d2dopamine/ikna/releases/download/v0.14.0-press/ikna-linux-x86_64.AppImage) | Mark executable (`chmod +x`) before opening |
 
 The Windows installer installs for the current user only. Both the portable Windows build and the Linux AppImage include their own runtime. [Desktop setup](docs/contracts/DESKTOP.md) · [Updates](docs/contracts/UPDATES.md)
 

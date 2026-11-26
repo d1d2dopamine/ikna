@@ -29,8 +29,8 @@ runbooks use English; dated historical records retain their original language.
 - [ARCHITECTURE.md](ARCHITECTURE.md) — layers, learning-engine seams, data-safety rules, Developer isolation.
 - [DESIGN.md](DESIGN.md) — product behaviour and visual language (12 palettes, motion, typography).
 - [PLAN-0.12.md](PLAN-0.12.md) & [modern_PLAN-0.12.md](modern_PLAN-0.12.md) — active 0.12 working cycle.
-- [RELEASE-NOTES-0.13.0.md](RELEASE-NOTES-0.13.0.md) · [RELEASE-NOTES-0.12.0.md](RELEASE-NOTES-0.12.0.md) — GitHub release notes for `v0.13.0-press` and `v0.12.0-press`.
-- [VERSIONS.md](VERSIONS.md) — version/epoch scheme and shipped release registry (`0.10`–`0.13`).
+- [RELEASE-NOTES-0.14.0.md](RELEASE-NOTES-0.14.0.md) · [RELEASE-NOTES-0.13.0.md](RELEASE-NOTES-0.13.0.md) · [RELEASE-NOTES-0.12.0.md](RELEASE-NOTES-0.12.0.md) — GitHub release notes for `v0.14.0-press`, `v0.13.0-press` and `v0.12.0-press`.
+- [VERSIONS.md](VERSIONS.md) — version/epoch scheme and shipped release registry (`0.10`–`0.14`).
 - [HOT-RELOAD.md](HOT-RELOAD.md) — desktop hot-reload toolchain pins.
 - [IKNA-MCP.md](IKNA-MCP.md) — local MCP deck-import guide.
 

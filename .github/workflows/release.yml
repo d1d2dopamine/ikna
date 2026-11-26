@@ -120,8 +120,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: out/*.apk
-          name: ikna 0.13.0 press
-          body_path: docs/RELEASE-NOTES-0.13.0.md
+          name: ikna 0.14.0 press
+          body_path: docs/RELEASE-NOTES-0.14.0.md
 
   # The Windows build, attached to the same release as the APKs.
   #
@@ -196,8 +196,8 @@ jobs:
           files: |
             out/*.zip
             out/*-setup.exe
-          name: ikna 0.13.0 press
-          body_path: docs/RELEASE-NOTES-0.13.0.md
+          name: ikna 0.14.0 press
+          body_path: docs/RELEASE-NOTES-0.14.0.md
 
   # ---------------------------------------------------------------------------
   # The Linux file on the release page.
@@ -273,5 +273,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: out/*.AppImage
-          name: ikna 0.13.0 press
-          body_path: docs/RELEASE-NOTES-0.13.0.md
+          name: ikna 0.14.0 press
+          body_path: docs/RELEASE-NOTES-0.14.0.md

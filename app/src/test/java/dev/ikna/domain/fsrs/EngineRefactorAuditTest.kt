@@ -117,7 +117,7 @@ class EngineRefactorAuditTest {
     }
 
     @Test
-    fun `FsrsOptimizer keeps unscored short-term weights w17..w19 pinned to defaults`() {
+    fun `FsrsOptimizer keeps unscored short-term weights w17 to w19 pinned to defaults`() {
         val samples = ArrayList<ReviewSample>()
         val start = 1_700_000_000_000L
         // Build 120 cards with 8 spaced reviews each (840 scored reviews >= MIN_SCORED_ANSWERS).
