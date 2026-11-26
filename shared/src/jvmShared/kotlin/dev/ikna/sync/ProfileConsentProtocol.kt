@@ -246,13 +246,16 @@ class ProfileConsentProtocol(
                 listOf(p.firstSnapshot, p.secondSnapshot, p.firstRevision, p.secondRevision).all { it.matches(HEX) }) {
                 "invalid-profile-proposal"
             }
-            val currentNow = now()
-            if (p.expiresAtMillis <= currentNow || p.expiresAtMillis > currentNow + TTL_MILLIS + CLOCK_SKEW_MILLIS) {
-                val skewSec = (p.expiresAtMillis - (currentNow + TTL_MILLIS)) / 1000L
-                onLog("Proposal rejected: expired or clock skew (${skewSec}s)", true)
-                throw IllegalArgumentException("proposal-expired")
+            val echoedOwnCancelled = completion == null && p.operationId in rejected && p.firstDevice == deviceId
+            if (!echoedOwnCancelled) {
+                val currentNow = now()
+                if (p.expiresAtMillis <= currentNow || p.expiresAtMillis > currentNow + TTL_MILLIS + CLOCK_SKEW_MILLIS) {
+                    val skewSec = (p.expiresAtMillis - (currentNow + TTL_MILLIS)) / 1000L
+                    onLog("Proposal rejected: expired or clock skew (${skewSec}s)", true)
+                    throw IllegalArgumentException("proposal-expired")
+                }
+                require(p.operationId !in rejected) { "proposal-cancelled" }
             }
-            require(p.operationId !in rejected) { "proposal-cancelled" }
             if (completion != null) {
                 val incoming = requireNotNull(wire.snapshot) { "missing-profile" }
                 val first = p.firstDevice == deviceId
@@ -332,25 +335,28 @@ class ProfileConsentProtocol(
                 listOf(p.firstSnapshot, p.secondSnapshot, p.firstRevision, p.secondRevision).all { it.matches(HEX) }) {
                 "invalid-profile-proposal"
             }
-            val currentNow = now()
-            if (!state.complete && (p.expiresAtMillis <= currentNow || p.expiresAtMillis > currentNow + TTL_MILLIS + CLOCK_SKEW_MILLIS)) {
-                val skewSec = (p.expiresAtMillis - (currentNow + TTL_MILLIS)) / 1000L
-                onLog("Proposal rejected: expired or clock skew (${skewSec}s)", true)
-                throw IllegalArgumentException("proposal-expired")
-            }
             if (p.operationId in rejected) {
-                if (proposal == null && p.firstDevice == deviceId) {
-                    // Peer echoed our own cancelled proposal before learning it was cancelled.
+                if (p.firstDevice == deviceId) {
+                    // Peer echoed our own cancelled proposal before learning it was cancelled
+                    // (or before learning we already replaced it with a newer proposal).
                     // Keep cancelledOperationId so our immediate response clears it on the peer.
                     onLog("Cleared echoed cancelled proposal (${p.operationId.take(8)})", false)
                     cancelledOperationId = p.operationId
-                    remote = incoming
-                    preview = store.preview(incoming.snapshot)
+                    if (proposal == null) {
+                        remote = incoming
+                        preview = store.preview(incoming.snapshot)
+                    }
                     publish()
                     return@withLock
                 }
                 onLog("Rejected: proposal-cancelled (${p.operationId.take(8)})", true)
                 throw IllegalArgumentException("proposal-cancelled")
+            }
+            val currentNow = now()
+            if (!state.complete && (p.expiresAtMillis <= currentNow || p.expiresAtMillis > currentNow + TTL_MILLIS + CLOCK_SKEW_MILLIS)) {
+                val skewSec = (p.expiresAtMillis - (currentNow + TTL_MILLIS)) / 1000L
+                onLog("Proposal rejected: expired or clock skew (${skewSec}s)", true)
+                throw IllegalArgumentException("proposal-expired")
             }
             if (proposal != null && proposal != p) {
                 if (autoAcceptFromInviter() && p.firstDevice == peerId && !adoptionPending) {

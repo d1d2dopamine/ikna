@@ -606,4 +606,37 @@ class ProfileConsentProtocolTest {
         assertEquals(op2, joiner.state.operationId)
     }
 
+    @Test fun `inbound echoed cancelled proposal after inviter already chose a newer proposal still delivers replacement`() = runBlocking {
+        val leftStore = FakeStore()
+        val rightStore = FakeStore()
+        val inviter = ProfileConsentProtocol("a", binding, leftStore, { 1000L }, autoAcceptFromInviter = { false })
+        val joiner = ProfileConsentProtocol("b", binding, rightStore, { 1000L }, autoAcceptFromInviter = { true })
+        suspend fun exchange() {
+            joiner.receiveFrom("a", inviter.snapshotFor("b"))
+            inviter.receiveFrom("b", joiner.snapshotFor("a"))
+        }
+        exchange()
+
+        // 1. Inviter chooses op1; joiner commits op1, reply is lost.
+        val op1 = inviter.proposeAndApprove("b", ProfileConsentProtocol.Mode.MERGE).operationId!!
+        joiner.receiveFrom("a", inviter.snapshotFor("b"))
+        val echoedOp1 = joiner.snapshotFor("a")
+
+        // 2. Inviter replaces op1 with op2 directly before hearing back from joiner.
+        val op2 = inviter.proposeAndApprove("b", ProfileConsentProtocol.Mode.MERGE).operationId!!
+        assertNotEquals(op1, op2)
+
+        // 3. Joiner initiates inbound poll carrying stale op1; inviter accepts it and replies with op2 + invalidation of op1.
+        inviter.receiveFrom("b", echoedOp1)
+        joiner.receiveFrom("a", inviter.snapshotFor("b"))
+        assertEquals(op2, joiner.state.operationId)
+
+        // 4. Subsequent polls converge cleanly to op2.
+        repeat(3) { exchange() }
+        assertTrue(inviter.state.complete)
+        assertTrue(joiner.state.complete)
+        assertEquals(op2, inviter.state.operationId)
+        assertEquals(op2, joiner.state.operationId)
+    }
+
 }
