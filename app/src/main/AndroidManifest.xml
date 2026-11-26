@@ -31,6 +31,7 @@
         and docs/SYNC-0.12.md.
     -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <!--
         Asking to install the file that was just downloaded.

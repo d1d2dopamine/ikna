@@ -282,6 +282,7 @@ class SessionViewModel(
                 // settings take effect on the very next press, without leaving the
                 // session to do it.
                 speaker.setPhoneVoice(prefs.phoneVoice)
+                reviewSignals.speechStarted()
                 speaker.speak(spokenText(card), card.chunk.lang)
             }
         }
@@ -330,6 +331,7 @@ class SessionViewModel(
                 // no sound at all.
                 val speaks = prefs.autoSpeakEvery || card.isFirstContact
                 if (version == presentationVersion && speaks && _state.value.current?.card?.key == key) {
+                    reviewSignals.speechStarted()
                     speaker.speakIfReady(spokenText(card), lang)
                 }
 

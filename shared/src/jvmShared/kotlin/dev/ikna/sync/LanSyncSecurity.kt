@@ -75,16 +75,29 @@ internal object LanSyncSecurity {
         return SSLContext.getInstance("TLS").apply { init(keys.keyManagers, arrayOf<TrustManager>(trust), SecureRandom()) }
     }
 
-    /** No DNS resolution: literal IPv4 RFC1918/link-local/loopback only in protocol v1. */
+    /** No DNS resolution: literal IPv4 RFC1918/RFC6598(overlay VPN)/link-local/loopback only. */
     fun address(host: String): InetAddress {
         val parts = host.split('.')
         require(parts.size == 4 && parts.all { it.isNotEmpty() && it.length <= 3 && it.all(Char::isDigit) })
         val numbers = parts.map { it.toInt().also { n -> require(n in 0..255) } }
         require(parts.zip(numbers).all { (text, value) -> text == value.toString() })
         require(numbers[0] == 10 || numbers[0] == 127 ||
+            (numbers[0] == 100 && numbers[1] in 64..127) ||
             (numbers[0] == 172 && numbers[1] in 16..31) ||
             (numbers[0] == 192 && numbers[1] == 168) ||
             (numbers[0] == 169 && numbers[1] == 254))
         return InetAddress.getByAddress(numbers.map(Int::toByte).toByteArray())
+    }
+
+    /** True for local RFC1918 / link-local LAN targets that should prefer physical Wi-Fi/Ethernet over a VPN tunnel. */
+    fun isDirectLanAddress(address: InetAddress): Boolean {
+        val raw = address.address
+        if (raw.size != 4) return false
+        val b0 = raw[0].toInt() and 0xFF
+        val b1 = raw[1].toInt() and 0xFF
+        return (b0 == 192 && b1 == 168) ||
+            (b0 == 10) ||
+            (b0 == 172 && b1 in 16..31) ||
+            (b0 == 169 && b1 == 254)
     }
 }

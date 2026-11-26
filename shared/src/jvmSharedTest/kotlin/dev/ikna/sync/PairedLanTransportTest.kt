@@ -335,4 +335,47 @@ class PairedLanTransportTest {
         } finally { a.close(); b.close(); dirA.deleteRecursively(); dirB.deleteRecursively() }
     }
 
+    @Test fun `overlay VPN CGNAT addresses are allowed while public space stays rejected`() {
+        listOf("100.64.0.1", "100.100.100.100", "100.127.255.254").forEach {
+            assertEquals(it, LanSyncSecurity.address(it).hostAddress)
+            assertFalse(LanSyncSecurity.isDirectLanAddress(LanSyncSecurity.address(it)))
+        }
+        listOf("100.63.255.255", "100.128.0.1").forEach {
+            assertFails(it) { LanSyncSecurity.address(it) }
+        }
+        assertTrue(LanSyncSecurity.isDirectLanAddress(LanSyncSecurity.address("192.168.1.10")))
+        assertFalse(LanSyncSecurity.isDirectLanAddress(LanSyncSecurity.address("127.0.0.1")))
+    }
+
+    @Test fun `VPN and virtual interfaces rank behind physical LAN interfaces`() {
+        assertTrue(PairedLanTransport.isLikelyVpnOrVirtualInterface("tun0", "WireGuard Tunnel"))
+        assertTrue(PairedLanTransport.isLikelyVpnOrVirtualInterface("eth3", "vEthernet (WSL)"))
+        assertTrue(PairedLanTransport.isLikelyVpnOrVirtualInterface("utun4", "Tailscale"))
+        assertFalse(PairedLanTransport.isLikelyVpnOrVirtualInterface("wlan0", "Wi-Fi"))
+        assertFalse(PairedLanTransport.isLikelyVpnOrVirtualInterface("eth0", "Intel Ethernet"))
+
+        val wifiRank = PairedLanTransport.rankCandidateAddress("192.168.1.42", isVpnOrVirtual = false)
+        val vpnOverlayRank = PairedLanTransport.rankCandidateAddress("100.64.0.5", isVpnOrVirtual = true)
+        val vpnVirtualLanRank = PairedLanTransport.rankCandidateAddress("192.168.50.1", isVpnOrVirtual = true)
+        assertTrue(wifiRank < vpnOverlayRank)
+        assertTrue(vpnOverlayRank < vpnVirtualLanRank)
+    }
+
+    @Test fun `multi-host invitation falls back cleanly when primary host is unreachable`() = runBlocking {
+        val dirA = temp(); val dirB = temp()
+        val aData = Data("fallback-A".toByteArray()); val bData = Data("fallback-B".toByteArray())
+        val a = PairedLanTransport(dirA, binding, aData, intervalMillis = 100)
+        val b = PairedLanTransport(dirB, binding, bData, intervalMillis = 100)
+        try {
+            a.start(); b.start()
+            val rawInvite = PairedLanTransport.parseInvitation(a.createInvitation("127.0.0.1"))
+            // Primary host is an unused loopback IP that refuses connection; fallback is 127.0.0.1.
+            val multiHostInvite = rawInvite.copy(host = "127.0.0.2", hosts = listOf("127.0.0.2", "127.0.0.1"))
+            b.pair(Json.encodeToString(multiHostInvite))
+            waitFor { aData.received.contains("fallback-B") && bData.received.contains("fallback-A") }
+            assertEquals(1, b.status.peerCount)
+            assertTrue(b.status.peers.single().address.startsWith("127.0.0.1:"))
+        } finally { a.close(); b.close(); dirA.deleteRecursively(); dirB.deleteRecursively() }
+    }
+
 }

@@ -69,6 +69,7 @@ fun DeviceSyncPanel(
     onRevokePeer: (String) -> Unit,
     onStartNewHistory: () -> Unit,
     modifier: Modifier = Modifier,
+    onSyncNow: (() -> Unit)? = null,
     scannedCode: String? = null,
     onScannedCodeConsumed: () -> Unit = {},
     onScanQr: (() -> Unit)? = null
@@ -78,6 +79,7 @@ fun DeviceSyncPanel(
     var showManualInput by remember(state.enabled, state.paired, state.blockedAfterReset) {
         mutableStateOf(onScanQr == null)
     }
+    var showAddressPicker by remember(state.localAddresses) { mutableStateOf(false) }
     var confirmNewHistory by remember(state.blockedAfterReset, state.canStartNewHistory) { mutableStateOf(false) }
     var address by remember(state.localAddresses) { mutableStateOf(state.localAddresses.firstOrNull().orEmpty()) }
     val canPair = state.enabled && !state.paired && !state.blockedAfterReset && !state.busy
@@ -181,15 +183,22 @@ fun DeviceSyncPanel(
                 )
             }
             if (state.localAddresses.size > 1) {
-                Text(S.t("sync.address"), style = MaterialTheme.typography.bodySmall)
-                state.localAddresses.forEach { candidate ->
-                    IknaSettingsToggleRow(
-                        title = candidate,
-                        subtitle = null,
-                        checked = address == candidate,
-                        enabled = !state.busy,
-                        onCheckedChange = { if (it) address = candidate }
-                    )
+                IknaTextButton(
+                    label = S.t("sync.address") + " · " + address,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    horizontalPadding = 0.dp,
+                    onClick = { showAddressPicker = !showAddressPicker }
+                )
+                if (showAddressPicker) {
+                    state.localAddresses.forEach { candidate ->
+                        IknaSettingsToggleRow(
+                            title = candidate,
+                            subtitle = null,
+                            checked = address == candidate,
+                            enabled = !state.busy,
+                            onCheckedChange = { if (it) { address = candidate; showAddressPicker = false } }
+                        )
+                    }
                 }
             }
             IknaWideButton(
@@ -269,6 +278,13 @@ fun DeviceSyncPanel(
                     )
                 }
             }
+        }
+        if (state.enabled && state.paired && !state.blockedAfterReset && onSyncNow != null) {
+            IknaWideButton(
+                label = S.t("sync.sync_now"),
+                enabled = !state.busy,
+                onClick = onSyncNow
+            )
         }
         if (state.peers.isNotEmpty()) {
             Text(S.t("sync.devices"), style = MaterialTheme.typography.titleSmall)

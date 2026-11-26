@@ -64,7 +64,9 @@ data class CatalogDeck(
     /** Catalogue v2 source-family id used for structured provenance. */
     val sourceFamily: String = "",
     /** Pinned morphology dataset ids used to enrich this deck, if any. */
-    val morphologySources: List<String> = emptyList()
+    val morphologySources: List<String> = emptyList(),
+    /** Optional lowercase SHA-256 hex digest of the downloaded asset bytes. */
+    val sha256: String = ""
 )
 
 /**

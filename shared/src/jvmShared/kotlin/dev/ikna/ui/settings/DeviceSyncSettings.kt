@@ -66,6 +66,7 @@ fun DeviceSyncSettings(
         onRevoke = { scope.launch { controller.revoke() } },
         onRevokePeer = { scope.launch { controller.revokePeer(it) } },
         onStartNewHistory = { scope.launch { controller.startNewHistory() } },
+        onSyncNow = { scope.launch { controller.syncNow() } },
         scannedCode = scannedCode,
         onScannedCodeConsumed = onScannedCodeConsumed,
         onScanQr = onScanQr)

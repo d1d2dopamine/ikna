@@ -136,9 +136,22 @@ class DesktopContainer(
         components = componentRepository,
         scheduler = scheduler,
         config = config,
-        beforeExternalRestore = { deviceSync.beforeExternalRestore() },
+        beforeExternalRestore = {
+            if (!isDeveloperMode) {
+                dev.ikna.data.export.LocalSafetySnapshot.capture(home, db.reviewDao(), "restore")
+            }
+            deviceSync.beforeExternalRestore()
+        },
         afterExternalRestore = { generation -> deviceSync.afterExternalRestore(generation) }
     )
+
+    val activeDatabaseSizeKb: Long
+        get() = runCatching { activeDatabaseFile.length() / 1024L }.getOrDefault(-1L)
+
+    val safetySnapshotCount: Int
+        get() = dev.ikna.data.export.LocalSafetySnapshot.count(home)
+
+    suspend fun totalReviewCount(): Int = db.reviewDao().total()
 
     val deviceSync: dev.ikna.sync.DeviceSyncController by lazy {
         dev.ikna.sync.DeviceSyncController(
@@ -193,9 +206,13 @@ class DesktopContainer(
     }
 
     suspend fun resetProgress() {
+        if (!isDeveloperMode) {
+            dev.ikna.data.export.LocalSafetySnapshot.capture(home, db.reviewDao(), "reset")
+        }
         val mutation = deviceSync.beforeHistoryChange()
         val boundary = learningRepository.resetProgressWithBoundary()
         deviceSync.afterProgressReset(boundary, mutation)
+        sessionChanges.notifyCommitted()
     }
 
     val developerTools: dev.ikna.data.dev.DeveloperTools? by lazy {
@@ -284,6 +301,9 @@ class DesktopContainer(
      * caller keeps the operation off the UI thread.
      */
     suspend fun wipeAllData() {
+        if (!isDeveloperMode) {
+            dev.ikna.data.export.LocalSafetySnapshot.capture(home, db.reviewDao(), "wipe")
+        }
         val mutation = deviceSync.beforeHistoryChange()
         optimizerScope.coroutineContext[kotlinx.coroutines.Job]?.cancelAndJoin()
         learningRepository.withJournalWriteLock {

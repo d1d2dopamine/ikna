@@ -9,6 +9,8 @@ import kotlinx.serialization.json.Json
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.File
+import java.net.Inet4Address
+import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.NetworkInterface
 import java.net.Socket
@@ -32,6 +34,7 @@ data class PairingInvitation(
     val version: Int = 1, val host: String, val port: Int, val certificate: String,
     val binding: HistoryBinding, val secret: String, val expiresAtMillis: Long,
     val deviceName: String = "",
+    val hosts: List<String> = emptyList(),
 ) {
     override fun toString(): String = "PairingInvitation(version=$version, accessGrant=<redacted>)"
 }
@@ -44,6 +47,7 @@ class PairedLanTransport(
     private val onStatus: (Status) -> Unit = {},
     private val intervalMillis: Long = 15_000,
     private val localDeviceName: () -> String = { defaultDeviceDisplayName() },
+    private val directLanSocketFactory: ((target: InetAddress, port: Int, timeoutMs: Int) -> Socket?)? = null,
 ) : AutoCloseable {
     interface PayloadCallbacks {
         /** Called off the UI thread; implementations must cooperate with coroutine cancellation. */
@@ -65,6 +69,7 @@ class PairedLanTransport(
     @Serializable private data class Peer(
         val id: String, val host: String, val port: Int, val certificate: String, val credential: String,
         val name: String = "",
+        val hosts: List<String> = emptyList(),
     )
     @Serializable private data class Saved(val version: Int = 1, val binding: HistoryBinding, val peers: List<Peer>)
     @Serializable private data class Wire(
@@ -72,6 +77,7 @@ class PairedLanTransport(
         val id: String, val credential: String, val challenge: String,
         val certificate: String = "", val port: Int = 0, val payload: String = "",
         val deviceName: String = "",
+        val hosts: List<String> = emptyList(),
     )
     private class PayloadTooLargeException : IllegalArgumentException()
     private data class Pending(val invitation: PairingInvitation, val deadlineNanos: Long = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(INVITATION_MS), var attempts: Int = 0)
@@ -93,6 +99,7 @@ class PairedLanTransport(
     @Volatile private var running = false
     @Volatile private var lastError: String? = null
     @Volatile private var lastSuccessAtMillis: Long? = null
+    @Volatile private var syncNowRequested = false
     val status: Status get() = synchronized(gate) { Status(running, peers.size, lastError, lastSuccessAtMillis,
         peers.map { peer -> PeerStatus(peer.id, peer.id.chunked(4).joinToString(" "), "${peer.host}:${peer.port}",
             peerResults[peer.id]?.first, peerResults[peer.id]?.second, peer.name) }) }
@@ -143,12 +150,23 @@ class PairedLanTransport(
     fun createInvitation(host: String): String = synchronized(gate) {
         check(running && !closed && peers.size < MAX_PEERS)
         LanSyncSecurity.address(host)
+        val fallbackHosts = if (host.startsWith("127.")) {
+            emptyList()
+        } else {
+            (listOf(host) + localAddresses()).distinct().take(MAX_CANDIDATE_HOSTS)
+        }
         val invitation = PairingInvitation(host = host, port = listener!!.localPort,
             certificate = identity.certificatePem(), binding = binding,
             secret = LanSyncSecurity.secret(), expiresAtMillis = System.currentTimeMillis() + INVITATION_MS,
-            deviceName = sanitizeDeviceName(localDeviceName()))
+            deviceName = sanitizeDeviceName(localDeviceName()),
+            hosts = fallbackHosts)
         pending = Pending(invitation)
         json.encodeToString(invitation)
+    }
+
+    /** Wakes the background poll loop immediately and resets exponential backoff. */
+    fun triggerSyncNow() {
+        syncNowRequested = true
     }
 
     /** Explicit pairing action only; caller adopts binding first, only with no existing peers. */
@@ -163,20 +181,24 @@ class PairedLanTransport(
             session = generation
             ownPort = listener!!.localPort
         }
+        val candidates = (listOf(invite.host) + invite.hosts).distinct().take(MAX_CANDIDATE_HOSTS)
+        val ownHosts = if (invite.host.startsWith("127.")) emptyList() else localAddresses().take(MAX_CANDIDATE_HOSTS)
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             val pairingContext = kotlin.coroutines.coroutineContext
             pairingContext.ensureActive()
-            connect(invite.host, invite.port, invite.certificate) { socket ->
+            connectAny(candidates, invite.port, invite.certificate) { workingHost, socket ->
                 val challenge = readText(socket, 128)
                 pairingContext.ensureActive()
                 write(socket, Wire(operation = "pair", binding = binding, id = deviceId,
                     credential = invite.secret, challenge = challenge, certificate = identity.certificatePem(),
                     port = ownPort,
-                    deviceName = if (invite.deviceName.isNotBlank()) sanitizeDeviceName(localDeviceName()) else ""))
+                    deviceName = if (invite.deviceName.isNotBlank()) sanitizeDeviceName(localDeviceName()) else "",
+                    hosts = ownHosts))
                 val response = read(socket)
                 require(response.version == 1 && response.operation == "paired" && response.binding == binding && response.challenge == challenge)
                 val peerName = sanitizeDeviceName(response.deviceName.ifBlank { invite.deviceName })
-                val peer = Peer(response.id, invite.host, invite.port, invite.certificate, response.credential, peerName)
+                val peerHosts = (listOf(workingHost) + candidates).distinct().take(MAX_CANDIDATE_HOSTS)
+                val peer = Peer(response.id, workingHost, invite.port, invite.certificate, response.credential, peerName, peerHosts)
                 validatePeer(peer)
                 pairingContext.ensureActive()
                 synchronized(gate) {
@@ -185,6 +207,7 @@ class PairedLanTransport(
                     save(peers + peer)
                     peers += peer
                 }
+                syncNowRequested = true
                 publish()
             }
         }
@@ -278,9 +301,14 @@ class PairedLanTransport(
                 error("Pairing expired")
             }
             require(LanSyncSecurity.equal(invitation.invitation.secret, request.credential))
+            val candidatePeerHosts = (listOf(host) + request.hosts)
+                .filter { runCatching { LanSyncSecurity.address(it) }.isSuccess }
+                .distinct()
+                .take(MAX_CANDIDATE_HOSTS)
             val peer = Peer(
                 request.id, host, request.port, request.certificate, LanSyncSecurity.secret(),
-                sanitizeDeviceName(request.deviceName)
+                sanitizeDeviceName(request.deviceName),
+                candidatePeerHosts
             )
             validatePeer(peer)
             require(peer.id != deviceId && peers.size < MAX_PEERS && peers.none { it.id == peer.id })
@@ -326,12 +354,14 @@ class PairedLanTransport(
     private fun poll(session: Long) {
         var failures = 0
         while (active(session)) {
+            syncNowRequested = false
             val current = synchronized(gate) { peers.toList() }
             var failed = false
             current.forEach { peer ->
                 if (active(session)) try {
                     val payload = callback(session) { callbacks.snapshotFor(peer.id) }
-                    connect(peer.host, peer.port, peer.certificate) { socket ->
+                    val candidates = (listOf(peer.host) + peer.hosts).distinct().take(MAX_CANDIDATE_HOSTS)
+                    val workingHost = connectAny(candidates, peer.port, peer.certificate) { matchedHost, socket ->
                         val challenge = readText(socket, 128)
                         write(socket, Wire(operation = "exchange", binding = binding, id = deviceId,
                             credential = peer.credential, challenge = challenge, payload = encodePayload(payload)))
@@ -344,6 +374,10 @@ class PairedLanTransport(
                             write(socket, Wire(operation = "received", binding = binding, id = deviceId,
                                 credential = peer.credential, challenge = challenge))
                         }
+                        matchedHost
+                    }
+                    if (workingHost != peer.host) {
+                        promotePeerHost(peer.id, workingHost, session)
                     }
                     recordResult(peer, session, null)
                 } catch (failure: Exception) { failed = true; recordResult(peer, session, errorCode(failure)) }
@@ -352,13 +386,32 @@ class PairedLanTransport(
             failures = if (failed) (failures + 1).coerceAtMost(4) else 0
             val until = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos((intervalMillis * (1L shl failures)).coerceAtMost(120_000))
             try {
-                while (active(session) && System.nanoTime() < until) Thread.sleep(100)
+                while (active(session) && System.nanoTime() < until) {
+                    if (syncNowRequested) {
+                        failures = 0
+                        break
+                    }
+                    Thread.sleep(100)
+                }
             } catch (_: InterruptedException) { return }
         }
     }
 
+    private fun promotePeerHost(peerId: String, workingHost: String, session: Long) = synchronized(gate) {
+        if (!running || generation != session) return@synchronized
+        val index = peers.indexOfFirst { it.id == peerId }
+        if (index < 0) return@synchronized
+        val existing = peers[index]
+        if (existing.host == workingHost) return@synchronized
+        val reordered = (listOf(workingHost) + existing.hosts + existing.host).distinct().take(MAX_CANDIDATE_HOSTS)
+        val updated = existing.copy(host = workingHost, hosts = reordered)
+        val next = peers.toMutableList().apply { set(index, updated) }
+        runCatching { save(next) }
+        peers[index] = updated
+    }
+
     private fun recordResult(peer: Peer, session: Long, error: String?) = synchronized(gate) {
-        if (running && generation == session && peers.contains(peer)) {
+        if (running && generation == session && peers.any { it.id == peer.id }) {
             val success = if (error == null) System.currentTimeMillis() else peerResults[peer.id]?.first
             peerResults[peer.id] = success to error
             lastError = error
@@ -372,14 +425,79 @@ class PairedLanTransport(
         try { runBlocking(job) { kotlinx.coroutines.withTimeout(DEADLINE_MS) { action() } } } finally { jobs -= job; job.cancel() }
     }
 
+    private fun <T> connectAny(
+        hosts: List<String>,
+        port: Int,
+        certificate: String,
+        action: (String, SSLSocket) -> T
+    ): T {
+        val candidates = hosts.distinct().take(MAX_CANDIDATE_HOSTS)
+        require(candidates.isNotEmpty())
+        var lastFailure: Exception? = null
+        for (candidate in candidates) {
+            try {
+                return connect(candidate, port, certificate) { socket -> action(candidate, socket) }
+            } catch (failure: Exception) {
+                lastFailure = failure
+                // Protocol/auth/size errors are authoritative; only network/connect failures try fallback hosts.
+                if (failure !is java.io.IOException) throw failure
+            }
+        }
+        throw lastFailure ?: java.io.IOException("No reachable host")
+    }
+
     private fun <T> connect(host: String, port: Int, certificate: String, action: (SSLSocket) -> T): T {
-        val socket = LanSyncSecurity.context(identity, LanSyncSecurity.certificate(certificate)).socketFactory.createSocket() as SSLSocket
+        val targetAddress = LanSyncSecurity.address(host)
+        val sslFactory = LanSyncSecurity.context(identity, LanSyncSecurity.certificate(certificate)).socketFactory
+        val directRaw = if (LanSyncSecurity.isDirectLanAddress(targetAddress)) {
+            openDirectLanSocket(targetAddress, port, SOCKET_MS)
+        } else {
+            null
+        }
+        val socket = if (directRaw != null) {
+            try {
+                sslFactory.createSocket(directRaw, host, port, true) as SSLSocket
+            } catch (failure: Exception) {
+                runCatching { directRaw.close() }
+                throw failure
+            }
+        } else {
+            (sslFactory.createSocket() as SSLSocket).also { rawSsl ->
+                try {
+                    rawSsl.connect(InetSocketAddress(targetAddress, port), SOCKET_MS)
+                } catch (failure: Exception) {
+                    runCatching { rawSsl.close() }
+                    throw failure
+                }
+            }
+        }
         return useSocket(socket) {
             socket.enabledProtocols = socket.supportedProtocols.filter { it == "TLSv1.3" || it == "TLSv1.2" }.toTypedArray()
-            socket.connect(InetSocketAddress(LanSyncSecurity.address(host), port), SOCKET_MS)
             socket.startHandshake()
             socket.soTimeout = EXCHANGE_SOCKET_MS
             action(socket)
+        }
+    }
+
+    /**
+     * Attempts a direct TCP connect bound to the physical LAN interface before falling back to
+     * system default routing. This bypasses full-tunnel VPNs on both Android (via ConnectivityManager
+     * non-VPN Wi-Fi/Ethernet Network.socketFactory) and Desktop (via same-subnet physical NIC bind).
+     */
+    private fun openDirectLanSocket(target: InetAddress, port: Int, timeoutMs: Int): Socket? {
+        directLanSocketFactory?.let { factory ->
+            val platformSocket = runCatching { factory(target, port, timeoutMs) }.getOrNull()
+            if (platformSocket != null) return platformSocket
+        }
+        val localLan = findMatchingPhysicalLanAddress(target) ?: return null
+        val raw = Socket()
+        return try {
+            raw.bind(InetSocketAddress(localLan, 0))
+            raw.connect(InetSocketAddress(target, port), timeoutMs)
+            raw
+        } catch (_: Exception) {
+            runCatching { raw.close() }
+            null
         }
     }
 
@@ -416,6 +534,8 @@ class PairedLanTransport(
     }
     private fun validatePeer(peer: Peer) {
         LanSyncSecurity.address(peer.host)
+        require(peer.hosts.size <= MAX_CANDIDATE_HOSTS)
+        peer.hosts.forEach { LanSyncSecurity.address(it) }
         require(peer.port in 1..65535 && peer.credential.matches(Regex("[A-Za-z0-9_-]{43}")))
         require(peer.id == LanSyncSecurity.id(LanSyncSecurity.certificate(peer.certificate)))
     }
@@ -435,6 +555,7 @@ class PairedLanTransport(
         const val MAX_PAYLOAD = 16 * 1024 * 1024
         const val MAX_FRAME = 24 * 1024 * 1024
         const val MAX_PEERS = 4
+        const val MAX_CANDIDATE_HOSTS = 6
         const val COMPACT_INVITATION_PREFIX = "ikna-pair:1:"
         private const val SOCKET_MS = 5_000
         private const val EXCHANGE_SOCKET_MS = 30_000
@@ -531,32 +652,88 @@ class PairedLanTransport(
             val value = invitationJson.decodeFromString<PairingInvitation>(rawJson)
             require(value.version == 1 && value.port in 1..65535 && value.secret.matches(Regex("[A-Za-z0-9_-]{43}")))
             LanSyncSecurity.address(value.host)
+            require(value.hosts.size <= MAX_CANDIDATE_HOSTS)
+            value.hosts.forEach { LanSyncSecurity.address(it) }
             LanSyncSecurity.certificate(value.certificate).checkValidity()
             require(value.expiresAtMillis > System.currentTimeMillis() && value.expiresAtMillis <= System.currentTimeMillis() + INVITATION_MS + 30_000)
             return value
         }
+
+        private val VPN_OR_VIRTUAL_TOKENS = listOf(
+            "tun", "tap", "wg", "wintun", "wireguard", "tailscale", "zerotier", "clash", "sing",
+            "meta", "nekoray", "amnezia", "vethernet", "hyper-v", "docker", "wsl", "vmware",
+            "vbox", "virtual", "nordlynx", "proton", "mullvad", "outline", "utun", "ppp",
+            "dummy", "bridge", "vpn", "radmin", "hamachi", "xray", "v2ray", "mihomo"
+        )
+
+        internal fun isLikelyVpnOrVirtualInterface(name: String, displayName: String): Boolean {
+            val combined = "${name.lowercase()} ${displayName.lowercase()}"
+            return VPN_OR_VIRTUAL_TOKENS.any { token -> combined.contains(token) }
+        }
+
+        internal fun rankCandidateAddress(ip: String, isVpnOrVirtual: Boolean): Int {
+            val isOverlayCgnat = ip.startsWith("100.")
+            return when {
+                !isVpnOrVirtual && ip.startsWith("192.168.") -> 0
+                !isVpnOrVirtual && ip.startsWith("10.") -> 1
+                !isVpnOrVirtual && ip.startsWith("172.") -> 2
+                !isVpnOrVirtual && ip.startsWith("169.254.") -> 3
+                isOverlayCgnat -> 4
+                ip.startsWith("192.168.") -> 5
+                ip.startsWith("10.") -> 6
+                ip.startsWith("172.") -> 7
+                else -> 8
+            }
+        }
+
+        private fun findMatchingPhysicalLanAddress(target: InetAddress): Inet4Address? {
+            val targetBytes = (target as? Inet4Address)?.address ?: return null
+            val ifaces = runCatching { Collections.list(NetworkInterface.getNetworkInterfaces()) }.getOrDefault(emptyList())
+            var bestMatch: Pair<Int, Inet4Address>? = null
+            for (iface in ifaces) {
+                val up = runCatching { iface.isUp && !iface.isLoopback }.getOrDefault(false)
+                if (!up) continue
+                if (isLikelyVpnOrVirtualInterface(iface.name.orEmpty(), iface.displayName.orEmpty())) continue
+                for (ifAddr in iface.interfaceAddresses) {
+                    val addr = ifAddr.address as? Inet4Address ?: continue
+                    val localBytes = addr.address
+                    val prefix = ifAddr.networkPrefixLength.toInt().coerceIn(8, 30)
+                    if (sameIpv4Subnet(localBytes, targetBytes, prefix)) {
+                        if (bestMatch == null || prefix > bestMatch.first) {
+                            bestMatch = prefix to addr
+                        }
+                    }
+                }
+            }
+            return bestMatch?.second
+        }
+
+        internal fun sameIpv4Subnet(a: ByteArray, b: ByteArray, prefixBits: Int): Boolean {
+            if (a.size != 4 || b.size != 4 || prefixBits !in 1..32) return false
+            val mask = if (prefixBits == 32) -1 else (-1 shl (32 - prefixBits))
+            val ai = ((a[0].toInt() and 0xFF) shl 24) or ((a[1].toInt() and 0xFF) shl 16) or
+                ((a[2].toInt() and 0xFF) shl 8) or (a[3].toInt() and 0xFF)
+            val bi = ((b[0].toInt() and 0xFF) shl 24) or ((b[1].toInt() and 0xFF) shl 16) or
+                ((b[2].toInt() and 0xFF) shl 8) or (b[3].toInt() and 0xFF)
+            return (ai and mask) == (bi and mask)
+        }
+
         fun localAddresses(): List<String> {
             val ifaces = runCatching { Collections.list(NetworkInterface.getNetworkInterfaces()) }.getOrDefault(emptyList())
-            return ifaces
-                .filter { runCatching { it.isUp && !it.isLoopback }.getOrDefault(true) }
-                .flatMap { Collections.list(it.inetAddresses) }
-                .mapNotNull { it.hostAddress }
-                .filter { !it.startsWith("127.") && runCatching { LanSyncSecurity.address(it) }.isSuccess }
+            val ranked = mutableListOf<Pair<Int, String>>()
+            for (iface in ifaces) {
+                if (!runCatching { iface.isUp && !iface.isLoopback }.getOrDefault(true)) continue
+                val vpnOrVirtual = isLikelyVpnOrVirtualInterface(iface.name.orEmpty(), iface.displayName.orEmpty())
+                for (addr in Collections.list(iface.inetAddresses)) {
+                    val ip = addr.hostAddress ?: continue
+                    if (ip.startsWith("127.") || runCatching { LanSyncSecurity.address(ip) }.isFailure) continue
+                    ranked += rankCandidateAddress(ip, vpnOrVirtual) to ip
+                }
+            }
+            return ranked
+                .sortedWith(compareBy<Pair<Int, String>>({ it.first }, { it.second }))
+                .map { it.second }
                 .distinct()
-                .sortedWith(
-                    compareBy<String>(
-                        // Prefer typical home/office Wi-Fi subnets (192.168.x.x) over virtual/WSL/VPN bridges (172.x.x.x).
-                        { ip ->
-                            when {
-                                ip.startsWith("192.168.") -> 0
-                                ip.startsWith("10.") -> 1
-                                ip.startsWith("172.") -> 2
-                                else -> 3
-                            }
-                        },
-                        { it }
-                    )
-                )
         }
     }
 }

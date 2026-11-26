@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.security.MessageDigest
 import java.util.zip.GZIPInputStream
 
 /*
@@ -247,6 +248,11 @@ class CatalogFetch(
 
 /** Pure decoder so the compressed catalogue contract is unit-testable without a socket. */
 fun decodeCatalogDeckBytes(bytes: ByteArray, deck: CatalogDeck): String? {
+    val expectedHash = deck.sha256.trim().lowercase()
+    if (expectedHash.isNotEmpty()) {
+        if (!expectedHash.matches(Regex("[0-9a-f]{64}"))) return null
+        if (catalogSha256Hex(bytes) != expectedHash) return null
+    }
     val compressed = deck.compression.equals("gzip", ignoreCase = true) ||
         deck.file.endsWith(".gz", ignoreCase = true)
     if (!compressed) {
@@ -317,3 +323,6 @@ fun progressFractionOf(read: Long, total: Long): Float {
     if (total <= 0L || read <= 0L) return 0f
     return (read.toFloat() / total.toFloat()).coerceIn(0f, 1f)
 }
+
+internal fun catalogSha256Hex(bytes: ByteArray): String =
+    MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }

@@ -951,6 +951,8 @@ internal val APP_VERSION: String by lazy {
 private suspend fun diagnosticsText(container: DesktopContainer): String {
     val decks = container.deckRepository.decks()
     val known = runCatching { container.componentRepository.knownWordCount() }.getOrNull()
+    val reviews = runCatching { container.totalReviewCount() }.getOrDefault(-1)
+    val optimizerState = if (container.optimizer.state.value.usingOptimized) "personalized" else "default"
     val runtime = Runtime.getRuntime()
     val megabyte = 1024L * 1024L
     return buildString {
@@ -963,11 +965,15 @@ private suspend fun diagnosticsText(container: DesktopContainer): String {
             "java: " + System.getProperty("java.version") + " " +
                 System.getProperty("java.vm.name")
         )
+        appendLine("database: v" + dev.ikna.data.db.IKNA_DATABASE_VERSION + " (" + container.activeDatabaseSizeKb + " kb)")
+        appendLine("scheduler: FSRS-" + dev.ikna.data.repo.CURRENT_SCHEDULER_VERSION + " · optimizer=" + optimizerState)
         appendLine("home: " + container.home.absolutePath)
-        appendLine("decks: " + decks.size)
+        appendLine("decks: " + decks.size + " (active: " + decks.count { it.isActive } + ")")
         appendLine("cards: " + decks.sumOf { it.total })
         appendLine("introduced: " + decks.sumOf { it.introduced })
         appendLine("known: " + (known ?: -1))
+        if (reviews >= 0) appendLine("reviews: " + reviews)
+        appendLine("safetySnapshots: " + container.safetySnapshotCount)
         appendLine(
             "heap: " + (runtime.totalMemory() / megabyte) + " of " +
                 (runtime.maxMemory() / megabyte) + " mb"

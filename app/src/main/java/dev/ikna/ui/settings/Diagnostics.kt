@@ -24,7 +24,11 @@ internal data class DiagnosticsSnapshot(
     val activeDeckCount: Int,
     val chunkCount: Int,
     val introducedCount: Int,
-    val knownCount: Int
+    val knownCount: Int,
+    val databaseSizeKb: Long = -1L,
+    val reviewCount: Int = -1,
+    val optimizerStatus: String = "default",
+    val safetySnapshots: Int = 0
 )
 
 internal fun diagnosticsText(value: DiagnosticsSnapshot): String = buildString {
@@ -34,13 +38,17 @@ internal fun diagnosticsText(value: DiagnosticsSnapshot): String = buildString {
     appendLine("android=${value.androidRelease} (SDK ${value.androidSdk})")
     appendLine("abi=${value.abi}")
     appendLine("database=${value.databaseVersion}")
+    if (value.databaseSizeKb >= 0L) appendLine("databaseSizeKb=${value.databaseSizeKb}")
     appendLine("scheduler=FSRS-${value.schedulerVersion}")
+    appendLine("optimizer=${value.optimizerStatus}")
     appendLine("interface=${value.interfaceLanguage}")
     appendLine("decks=${value.deckCount}")
     appendLine("activeDecks=${value.activeDeckCount}")
     appendLine("chunks=${value.chunkCount}")
     appendLine("introduced=${value.introducedCount}")
-    append("known=${value.knownCount}")
+    appendLine("known=${value.knownCount}")
+    if (value.reviewCount >= 0) appendLine("reviews=${value.reviewCount}")
+    append("safetySnapshots=${value.safetySnapshots}")
 }
 
 internal suspend fun collectDiagnostics(
@@ -50,6 +58,8 @@ internal suspend fun collectDiagnostics(
     val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
     val settings = container.settings.current()
     val decks = container.deckRepository.decks()
+    val reviews = runCatching { container.totalReviewCount() }.getOrDefault(-1)
+    val optimizerState = if (container.optimizer.state.value.usingOptimized) "personalized" else "default"
     return diagnosticsText(
         DiagnosticsSnapshot(
             versionName = packageInfo.versionName.orEmpty(),
@@ -64,7 +74,11 @@ internal suspend fun collectDiagnostics(
             activeDeckCount = decks.count { it.isActive },
             chunkCount = decks.sumOf { it.total },
             introducedCount = decks.sumOf { it.introduced },
-            knownCount = decks.sumOf { it.known }
+            knownCount = decks.sumOf { it.known },
+            databaseSizeKb = container.activeDatabaseSizeKb,
+            reviewCount = reviews,
+            optimizerStatus = optimizerState,
+            safetySnapshots = container.safetySnapshotCount
         )
     )
 }

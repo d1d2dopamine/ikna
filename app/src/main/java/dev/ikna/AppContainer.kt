@@ -139,11 +139,24 @@ class AppContainer(
         components = componentRepository,
         scheduler = scheduler,
         config = config,
-        beforeExternalRestore = { deviceSync.beforeExternalRestore() },
+        beforeExternalRestore = {
+            if (!isDeveloperMode) {
+                dev.ikna.data.export.LocalSafetySnapshot.capture(appContext.filesDir, db.reviewDao(), "restore")
+            }
+            deviceSync.beforeExternalRestore()
+        },
         afterExternalRestore = { generation -> deviceSync.afterExternalRestore(generation) }
     )
 
     val sessionChanges = dev.ikna.domain.session.CommittedSessionChanges()
+
+    val activeDatabaseSizeKb: Long
+        get() = runCatching { activeDatabaseFile.length() / 1024L }.getOrDefault(-1L)
+
+    val safetySnapshotCount: Int
+        get() = dev.ikna.data.export.LocalSafetySnapshot.count(appContext.filesDir)
+
+    suspend fun totalReviewCount(): Int = db.reviewDao().total()
 
     val deviceSync: dev.ikna.sync.DeviceSyncController by lazy {
         dev.ikna.sync.DeviceSyncController(
@@ -152,7 +165,10 @@ class AppContainer(
             currentDatabaseSlot = syncProfileSlots.slotId(activeDatabaseFile),
             canRecoverProfile = selectedSyncProfile?.recovery != null,
             currentSlotOperationId = selectedSyncProfile?.operationId,
-            currentSlotOperationDigest = selectedSyncProfile?.operationDigest)
+            currentSlotOperationDigest = selectedSyncProfile?.operationDigest,
+            directLanSocketFactory = { target, port, timeoutMs ->
+                openAndroidDirectLanSocket(appContext, target, port, timeoutMs)
+            })
     }
 
     private val profileAdoption by lazy {
@@ -202,9 +218,13 @@ class AppContainer(
     }
 
     suspend fun resetProgress() {
+        if (!isDeveloperMode) {
+            dev.ikna.data.export.LocalSafetySnapshot.capture(appContext.filesDir, db.reviewDao(), "reset")
+        }
         val mutation = deviceSync.beforeHistoryChange()
         val boundary = learningRepository.resetProgressWithBoundary()
         deviceSync.afterProgressReset(boundary, mutation)
+        sessionChanges.notifyCommitted()
     }
 
     val developerTools: dev.ikna.data.dev.DeveloperTools? by lazy {
@@ -266,6 +286,9 @@ class AppContainer(
      * singletons and in-memory session state outlive the tables otherwise.
      */
     suspend fun wipeDatabase() {
+        if (!isDeveloperMode) {
+            dev.ikna.data.export.LocalSafetySnapshot.capture(appContext.filesDir, db.reviewDao(), "wipe")
+        }
         val mutation = deviceSync.beforeHistoryChange()
         scope.coroutineContext[kotlinx.coroutines.Job]?.cancelAndJoin()
         learningRepository.withJournalWriteLock {
@@ -414,4 +437,38 @@ class AppContainer(
             SchedulerMigrationState.Running -> error("unreachable")
         }
     }
+}
+
+/**
+ * Binds local RFC1918 LAN sync sockets directly to the active physical Wi-Fi or Ethernet network
+ * (excluding TRANSPORT_VPN) so full-tunnel Android VPNs do not hijack local device-to-device sync.
+ * Returns null if unavailable so the transport transparently falls back to default routing.
+ */
+@Suppress("DEPRECATION")
+private fun openAndroidDirectLanSocket(
+    context: Context,
+    target: java.net.InetAddress,
+    port: Int,
+    timeoutMs: Int
+): java.net.Socket? {
+    val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? android.net.ConnectivityManager
+        ?: return null
+    val networks = runCatching { cm.allNetworks }.getOrNull().orEmpty()
+    val physicalLanNetworks = networks.filter { network ->
+        val caps = runCatching { cm.getNetworkCapabilities(network) }.getOrNull() ?: return@filter false
+        val isLan = caps.hasTransport(android.net.NetworkCapabilities.TRANSPORT_WIFI) ||
+            caps.hasTransport(android.net.NetworkCapabilities.TRANSPORT_ETHERNET)
+        val isVpn = caps.hasTransport(android.net.NetworkCapabilities.TRANSPORT_VPN)
+        isLan && !isVpn
+    }
+    for (network in physicalLanNetworks) {
+        val socket = runCatching { network.socketFactory.createSocket() }.getOrNull() ?: continue
+        try {
+            socket.connect(java.net.InetSocketAddress(target, port), timeoutMs)
+            return socket
+        } catch (_: Exception) {
+            runCatching { socket.close() }
+        }
+    }
+    return null
 }

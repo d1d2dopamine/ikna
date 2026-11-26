@@ -41,6 +41,7 @@ class DeviceSyncController(
     private val canRecoverProfile: Boolean = false,
     private val currentSlotOperationId: String? = null,
     private val currentSlotOperationDigest: String? = null,
+    private val directLanSocketFactory: ((java.net.InetAddress, Int, Int) -> java.net.Socket?)? = null,
 ) {
     @Serializable private data class Configuration(
         val version: Int = 1,
@@ -154,7 +155,8 @@ class DeviceSyncController(
                 consent().receiveFrom(peerId, payload)
                 publish()
             }
-        }, onStatus = { publish() }, intervalMillis = intervalMillis
+        }, onStatus = { publish() }, intervalMillis = intervalMillis,
+        directLanSocketFactory = directLanSocketFactory
     ).also { transport = it }
 
     private fun journalAuthorization(operationId: String, digest: String, peerId: String = instance().status.peers.single().id): JournalAuthorization {
@@ -467,6 +469,14 @@ class DeviceSyncController(
         permitted = configuration.enabled && foreground && !configuration.blocked
         if (permitted) instance().start()
         publish()
+    }
+
+    /** Triggers an immediate sync cycle without waiting for poll backoff (e.g. after toggling Wi-Fi or VPN). */
+    suspend fun syncNow() = action(checkBoundary = false) {
+        if (!configuration.enabled || !foreground || configuration.blocked || adoptionInProgress) return@action
+        permitted = true
+        instance().start()
+        instance().triggerSyncNow()
     }
 
     /** Fail closed while reset outcome/cutoff is not yet durably known. */

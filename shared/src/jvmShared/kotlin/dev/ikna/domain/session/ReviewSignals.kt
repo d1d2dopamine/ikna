@@ -20,7 +20,9 @@ data class ReviewSignals(
     val peeked: Boolean? = null,
     val timingDiscardReason: String? = null,
     val inputMethod: String? = null,
-    val peekSemantics: String? = null
+    val peekSemantics: String? = null,
+    /** Pre-reveal retrieval time (shown -> back reveal), separate from post-reveal verification. */
+    val retrievalLatencyMs: Long? = null
 )
 
 /** Stable strings in the export format. Unknown future reasons must stay readable. */
@@ -36,6 +38,7 @@ object TimingDiscardReason {
     const val MIXED_INPUT = "mixed_input"
     const val ANSWER_NOT_REVEALED = "answer_not_revealed"
     const val REVEAL_NOT_VERIFIED = "reveal_not_verified"
+    const val TTS_ACTIVE = "tts_active"
 }
 
 /**
@@ -73,6 +76,11 @@ class ReviewSignalTracker(
 
     fun interrupt(reason: String) {
         if (discarded == null) discarded = reason
+    }
+
+    /** Excludes cards where TTS playback altered listening/reading pace from timing calibration. */
+    fun speechStarted() {
+        interrupt(TimingDiscardReason.TTS_ACTIVE)
     }
 
     /** Final pointer answer gesture, never the exploratory pull that reveals. */
@@ -122,7 +130,8 @@ class ReviewSignalTracker(
             peeked = peeked,
             timingDiscardReason = reason,
             inputMethod = inputMethod,
-            peekSemantics = PEEK_REQUIRED
+            peekSemantics = PEEK_REQUIRED,
+            retrievalLatencyMs = revealedAtMs
         )
     }
 
