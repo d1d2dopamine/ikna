@@ -1028,4 +1028,12 @@ val STRINGS_ES: Map<String, String> = mapOf(
     "cat.053" to "Esta colección está pendiente de comprobaciones de atribución antes de publicarse. Cuando esté lista, aparecerá aquí automáticamente.",
     "cat.054" to "Abrir Cotidiano",
     "cat.055" to "contextos",
+    "prof.in_memory_short" to "{count} en memoria",
+    "prof.active_days_short" to "{count} días activos",
+    "prof.banner_presets" to "Portadas incluidas",
+    "prof.badges_title" to "Insignias",
+    "prof.badge_multilingual" to "2+ idiomas",
+    "prof.badge_unearned" to "Pendiente",
+    "prof.milestone_five_hundred" to "500 respuestas",
+    "sync.sync_now" to "Sincronizar ahora",
 )

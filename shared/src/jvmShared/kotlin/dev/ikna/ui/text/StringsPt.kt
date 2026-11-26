@@ -1028,4 +1028,12 @@ val STRINGS_PT: Map<String, String> = linkedMapOf(
     "cat.053" to "Esta coleção aguarda a verificação de atribuição das fontes antes do lançamento. Quando for publicada, aparecerá aqui automaticamente.",
     "cat.054" to "Abrir Cotidiano",
     "cat.055" to "contextos",
+    "prof.in_memory_short" to "{count} na memória",
+    "prof.active_days_short" to "{count} dias ativos",
+    "prof.banner_presets" to "Capas incluídas",
+    "prof.badges_title" to "Insígnias",
+    "prof.badge_multilingual" to "2+ idiomas",
+    "prof.badge_unearned" to "Ainda não",
+    "prof.milestone_five_hundred" to "500 respostas",
+    "sync.sync_now" to "Sincronizar agora",
 )

@@ -1336,4 +1336,12 @@ val STRINGS_EN: Map<String, String> = mapOf(
     "cat.053" to "This collection is waiting for source attribution checks before release. Once published, its decks will appear here automatically.",
     "cat.054" to "Open Everyday",
     "cat.055" to "contexts",
+    "prof.in_memory_short" to "{count} in memory",
+    "prof.active_days_short" to "{count} active days",
+    "prof.banner_presets" to "Built-in covers",
+    "prof.badges_title" to "Badges",
+    "prof.badge_multilingual" to "2+ languages",
+    "prof.badge_unearned" to "Not yet",
+    "prof.milestone_five_hundred" to "500 answers",
+    "sync.sync_now" to "Sync now",
 )

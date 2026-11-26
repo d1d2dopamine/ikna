@@ -721,4 +721,12 @@ val STRINGS_FR: Map<String, String> = mapOf(
     "cat.053" to "Cette collection attend la vérification d'attribution des sources avant publication. Dès qu'elle sera prête, elle apparaîtra ici automatiquement.",
     "cat.054" to "Ouvrir Quotidien",
     "cat.055" to "contextes",
+    "prof.in_memory_short" to "{count} en mémoire",
+    "prof.active_days_short" to "{count} jours actifs",
+    "prof.banner_presets" to "Couvertures intégrées",
+    "prof.badges_title" to "Badges",
+    "prof.badge_multilingual" to "2+ langues",
+    "prof.badge_unearned" to "À venir",
+    "prof.milestone_five_hundred" to "500 réponses",
+    "sync.sync_now" to "Synchroniser maintenant",
 )

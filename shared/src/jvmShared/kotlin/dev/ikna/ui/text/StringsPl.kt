@@ -1336,4 +1336,12 @@ val STRINGS_PL: Map<String, String> = mapOf(
     "cat.053" to "Ta kolekcja czeka na weryfikację autorstwa źródeł przed wydaniem. Po publikacji talie pojawią się tu automatycznie.",
     "cat.054" to "Otwórz Codzienny",
     "cat.055" to "kontekstów",
+    "prof.in_memory_short" to "{count} w pamięci",
+    "prof.active_days_short" to "{count} aktywnych dni",
+    "prof.banner_presets" to "Wbudowane okładki",
+    "prof.badges_title" to "Odznaki",
+    "prof.badge_multilingual" to "2+ języki",
+    "prof.badge_unearned" to "Jeszcze przed Tobą",
+    "prof.milestone_five_hundred" to "500 odpowiedzi",
+    "sync.sync_now" to "Synchronizuj teraz",
 )

@@ -53,6 +53,7 @@ data class ProfileInsights(
     val totalAnswersAllTime: Int = 0,
     val firstMatureAtMs: Long? = null,
     val hundredthAnswerAtMs: Long? = null,
+    val fiveHundredthAnswerAtMs: Long? = null,
     val rhythmBuckets: List<Int> = emptyList(),
     val languages: List<ProfileLanguageSummary> = emptyList(),
     val recentLearned: List<ProfileLearnedPhrase> = emptyList()

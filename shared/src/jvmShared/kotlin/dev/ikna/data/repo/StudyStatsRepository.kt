@@ -6,6 +6,8 @@ import dev.ikna.data.db.IknaDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.ZoneId
@@ -13,6 +15,11 @@ import java.time.temporal.ChronoUnit
 
 /** A single read-only snapshot; no tracking, settings, schedule or history writes. */
 class StudyStatsRepository(private val db: IknaDatabase, private val dayStartHour: Int = 4) {
+    /** Emits whenever reviews or card states change so Profile/Analytics stay live without polling. */
+    fun observeChanges(): Flow<Long> = combine(
+        db.reviewDao().observeOptimizerChanges(),
+        db.cardDao().cardCountFlow()
+    ) { reviews, cards -> (reviews shl 20) xor cards.toLong() }
     suspend fun export(days: Int?, format: StatsExportFormat, now: Long = System.currentTimeMillis(),
         zone: ZoneId = ZoneId.systemDefault()): String = withContext(Dispatchers.IO) {
         require(days == null || days == 7 || days == 30)
@@ -167,6 +174,7 @@ class StudyStatsRepository(private val db: IknaDatabase, private val dayStartHou
                     val memberSinceMs = validAll.firstOrNull()?.ts
                     val firstMatureAtMs = validAll.firstOrNull { it.stabilityAfter >= 21.0 }?.ts
                     val hundredthAnswerAtMs = validAll.getOrNull(99)?.ts
+                    val fiveHundredthAnswerAtMs = validAll.getOrNull(499)?.ts
 
                     // Study rhythm buckets over last 84 days: Morning (5-11), Afternoon (12-17), Evening (18-22), Night (23-4)
                     val rhythm = IntArray(4)
@@ -226,6 +234,7 @@ class StudyStatsRepository(private val db: IknaDatabase, private val dayStartHou
                         totalAnswersAllTime = validAll.size,
                         firstMatureAtMs = firstMatureAtMs,
                         hundredthAnswerAtMs = hundredthAnswerAtMs,
+                        fiveHundredthAnswerAtMs = fiveHundredthAnswerAtMs,
                         rhythmBuckets = rhythm.toList(),
                         languages = languages,
                         recentLearned = recentLearned

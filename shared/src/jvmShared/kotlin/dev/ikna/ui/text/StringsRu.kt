@@ -1037,4 +1037,12 @@ val STRINGS_RU: Map<String, String> = mapOf(
     "cat.053" to "Эта коллекция проходит проверку авторства источников перед выпуском. После публикации колоды появятся здесь автоматически.",
     "cat.054" to "Открыть «Повседневный»",
     "cat.055" to "примеров",
+    "prof.in_memory_short" to "{count} в памяти",
+    "prof.active_days_short" to "{count} активных дней",
+    "prof.banner_presets" to "Встроенные обложки",
+    "prof.badges_title" to "Значки",
+    "prof.badge_multilingual" to "2+ языка",
+    "prof.badge_unearned" to "Ещё впереди",
+    "prof.milestone_five_hundred" to "500 ответов",
+    "sync.sync_now" to "Синхронизировать сейчас",
 )

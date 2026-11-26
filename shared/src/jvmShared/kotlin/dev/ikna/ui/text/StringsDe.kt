@@ -701,4 +701,12 @@ val STRINGS_DE: Map<String, String> = mapOf(
     "cat.053" to "Diese Sammlung wartet vor der Veröffentlichung noch auf die Quellenprüfung. Sobald sie bereit ist, erscheint sie hier automatisch.",
     "cat.054" to "Alltag öffnen",
     "cat.055" to "Kontexte",
+    "prof.in_memory_short" to "{count} im Gedächtnis",
+    "prof.active_days_short" to "{count} aktive Tage",
+    "prof.banner_presets" to "Vorlagen",
+    "prof.badges_title" to "Abzeichen",
+    "prof.badge_multilingual" to "2+ Sprachen",
+    "prof.badge_unearned" to "Noch offen",
+    "prof.milestone_five_hundred" to "500 Antworten",
+    "sync.sync_now" to "Jetzt synchronisieren",
 )

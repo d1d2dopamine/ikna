@@ -37,7 +37,10 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -296,6 +299,7 @@ fun IknaLocalProfileCard(
     onRemoveAvatar: (() -> Unit)? = null,
     onPickBanner: (() -> Unit)? = null,
     onRemoveBanner: (() -> Unit)? = null,
+    onSelectBannerPreset: ((String) -> Unit)? = null,
     selectedTab: ProfileTab? = null,
     onSelectTab: ((ProfileTab) -> Unit)? = null
 ) {
@@ -329,7 +333,9 @@ fun IknaLocalProfileCard(
 
     val sinceFmt = S.t("prof.since")
     val totalAnswersFmt = S.t("prof.total_answers_short")
-    val identityMeta = remember(snapshot, zone, sinceFmt, totalAnswersFmt) {
+    val inMemoryFmt = S.t("prof.in_memory_short")
+    val activeDaysFmt = S.t("prof.active_days_short")
+    val identityMeta = remember(snapshot, zone, sinceFmt, totalAnswersFmt, inMemoryFmt, activeDaysFmt) {
         val ins = snapshot?.insights
         if (ins == null) {
             ""
@@ -342,44 +348,56 @@ fun IknaLocalProfileCard(
             if (ins.totalAnswersAllTime > 0) {
                 parts += totalAnswersFmt.replace("{count}", ins.totalAnswersAllTime.toString())
             }
+            val inMemory = ins.matureCards + ins.youngCards + ins.learningCards
+            if (inMemory > 0) {
+                parts += inMemoryFmt.replace("{count}", inMemory.toString())
+            }
+            if (ins.activeDays84d > 0) {
+                parts += activeDaysFmt.replace("{count}", ins.activeDays84d.toString())
+            }
             parts.joinToString(" · ")
         }
     }
+
+    val badges = remember(snapshot, zone) {
+        buildFactualProfileBadges(snapshot?.insights, zone, dateFmt)
+    }
+    val earnedBadges = remember(badges) { badges.filter { it.earned } }
 
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(Space.lg)
     ) {
-        // 1. Hero Profile Header: cover banner + overlapping circular avatar + balanced actions
+        // 1. Hero Profile Header (X / Discord-inspired silhouette, quiet Ikna craft)
         Column(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 ProfileCoverBanner(
                     bannerPath = profileBanner,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(104.dp)
+                        .height(136.dp)
                         .then(
                             if (editing && onPickBanner != null) Modifier.clickable(onClick = onPickBanner) else Modifier
                         )
                 )
 
-                // Overlapping avatar + name/bio/actions row
+                // Overlapping avatar + top-right badge tray & outlined pill actions
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 66.dp, start = 16.dp, end = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(Space.md),
-                    verticalAlignment = Alignment.Top
+                        .padding(top = 92.dp, start = 16.dp, end = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(82.dp)
+                            .size(88.dp)
                             .background(colors.background, CircleShape)
-                            .padding(3.dp)
+                            .padding(4.dp)
                     ) {
                         IknaProfileAvatar(
                             avatarPath = profileAvatar,
-                            size = 76.dp,
+                            size = 80.dp,
                             modifier = if (onPickAvatar != null) {
                                 Modifier.clickable(onClick = onPickAvatar)
                             } else {
@@ -388,111 +406,75 @@ fun IknaLocalProfileCard(
                         )
                     }
 
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(top = 42.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    Row(
+                        modifier = Modifier.padding(bottom = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                            val stacked = maxWidth < 340.dp
-                            if (stacked) {
-                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    Text(
-                                        text = displayName,
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = colors.onBackground,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    ProfileHeaderActions(
-                                        editing = editing,
-                                        snapshot = snapshot,
-                                        exportingPng = exportingPng,
-                                        onToggleEdit = {
-                                            editing = !editing
-                                            if (editing) {
-                                                draftName = profileName
-                                                draftBio = profileBio
-                                            }
-                                        },
-                                        onExportPng = { snap ->
-                                            onExportPng(
-                                                buildProfileStatsCardData(
-                                                    profileName = profileName,
-                                                    snapshot = snap,
-                                                    palette = palette,
-                                                    paletteDisplayName = paletteDisplayName,
-                                                    profileBio = profileBio,
-                                                    profileAvatar = profileAvatar
-                                                )
-                                            )
-                                        }
-                                    )
+                        if (earnedBadges.isNotEmpty()) {
+                            ProfileHeaderBadgeTray(earnedBadges = earnedBadges)
+                        }
+                        ProfileHeaderActions(
+                            editing = editing,
+                            snapshot = snapshot,
+                            exportingPng = exportingPng,
+                            onToggleEdit = {
+                                editing = !editing
+                                if (editing) {
+                                    draftName = profileName
+                                    draftBio = profileBio
                                 }
-                            } else {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = displayName,
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = colors.onBackground,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.weight(1f)
+                            },
+                            onExportPng = { snap ->
+                                onExportPng(
+                                    buildProfileStatsCardData(
+                                        profileName = profileName,
+                                        snapshot = snap,
+                                        palette = palette,
+                                        paletteDisplayName = paletteDisplayName,
+                                        profileBio = profileBio,
+                                        profileAvatar = profileAvatar
                                     )
-                                    Spacer(Modifier.width(Space.sm))
-                                    ProfileHeaderActions(
-                                        editing = editing,
-                                        snapshot = snapshot,
-                                        exportingPng = exportingPng,
-                                        onToggleEdit = {
-                                            editing = !editing
-                                            if (editing) {
-                                                draftName = profileName
-                                                draftBio = profileBio
-                                            }
-                                        },
-                                        onExportPng = { snap ->
-                                            onExportPng(
-                                                buildProfileStatsCardData(
-                                                    profileName = profileName,
-                                                    snapshot = snap,
-                                                    palette = palette,
-                                                    paletteDisplayName = paletteDisplayName,
-                                                    profileBio = profileBio,
-                                                    profileAvatar = profileAvatar
-                                                )
-                                            )
-                                        }
-                                    )
-                                }
+                                )
                             }
-                        }
-
-                        Text(
-                            text = profileBio.trim().ifEmpty { S.t("prof.local_note") },
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = colors.onSurfaceVariant,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
                         )
-
-                        if (identityMeta.isNotBlank()) {
-                            Text(
-                                text = identityMeta,
-                                style = iknaNumberStyle(MaterialTheme.typography.labelSmall),
-                                color = colors.onSurfaceVariant.copy(alpha = 0.78f),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
                     }
+                }
+            }
+
+            // Identity block directly beneath avatar row (X-style clarity, zero clutter)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp, start = 4.dp, end = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = displayName,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colors.onBackground,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Text(
+                    text = profileBio.trim().ifEmpty { S.t("prof.local_note") },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                if (identityMeta.isNotBlank()) {
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        text = identityMeta,
+                        style = iknaNumberStyle(MaterialTheme.typography.labelSmall),
+                        color = colors.onSurfaceVariant.copy(alpha = 0.80f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
 
@@ -506,7 +488,7 @@ fun IknaLocalProfileCard(
             }
         }
 
-        // 2. Inline Profile Editor (Avatar + Cover Banner + Name + Bio)
+        // 2. Inline Profile Editor (Avatar + Cover Banner Presets / Upload + Name + Bio)
         if (editing) {
             Column(
                 modifier = Modifier
@@ -553,6 +535,40 @@ fun IknaLocalProfileCard(
                         )
                     }
                 }
+                if (onSelectBannerPreset != null) {
+                    Text(
+                        text = S.t("prof.banner_presets"),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.onSurfaceVariant
+                    )
+                    val activePreset = resolveBannerPresetId(profileBanner)
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        PROFILE_BANNER_PRESETS.forEach { preset ->
+                            val isSelected = activePreset == preset.id
+                            val swatchShape = RoundedCornerShape(8.dp)
+                            Box(
+                                modifier = Modifier
+                                    .width(72.dp)
+                                    .height(34.dp)
+                                    .clip(swatchShape)
+                                    .border(
+                                        width = if (isSelected) 2.dp else 1.dp,
+                                        color = if (isSelected) colors.primary else colors.outline.copy(alpha = 0.40f),
+                                        shape = swatchShape
+                                    )
+                                    .clickable { onSelectBannerPreset(preset.id) }
+                            ) {
+                                ProfileBannerPresetCanvas(
+                                    presetId = preset.id,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                        }
+                    }
+                }
                 IknaTextField(
                     value = draftName,
                     onValueChange = { draftName = it.take(48) },
@@ -591,21 +607,17 @@ fun IknaLocalProfileCard(
             )
 
             if (activeTab == ProfileTab.OVERVIEW) {
-                // OVERVIEW TAB: Languages + Recently Practiced Phrases + Decks + Study Rhythm + Milestones
+                // OVERVIEW TAB: Languages + Factual Badges + Study Rhythm + Milestones in clean panels
                 if (ins.languages.isNotEmpty()) {
-                    LanguagesSection(languages = ins.languages)
-                }
-
-                if (ins.recentLearned.isNotEmpty()) {
-                    if (ins.languages.isNotEmpty()) {
-                        Box(Modifier.fillMaxWidth().height(1.dp).background(hairline))
+                    ProfileSurfacePanel(hairline = hairline) {
+                        LanguagesSection(languages = ins.languages)
                     }
-                    RecentPhrasesSection(phrases = ins.recentLearned, hairline = hairline)
                 }
 
-                if (ins.topDecks.isNotEmpty()) {
-                    Box(Modifier.fillMaxWidth().height(1.dp).background(hairline))
-                    ProfileDecksSection(decks = ins.topDecks, hairline = hairline)
+                if (badges.isNotEmpty()) {
+                    ProfileSurfacePanel(hairline = hairline) {
+                        ProfileBadgesSection(badges = badges)
+                    }
                 }
 
                 val hasRhythm = ins.rhythmBuckets.size == 4 && ins.rhythmBuckets.any { it > 0 }
@@ -613,43 +625,41 @@ fun IknaLocalProfileCard(
                     ins.memberSinceMs?.let { add(S.t("prof.milestone_first") to dateFmt.format(Instant.ofEpochMilli(it).atZone(zone))) }
                     ins.firstMatureAtMs?.let { add(S.t("prof.milestone_mature") to dateFmt.format(Instant.ofEpochMilli(it).atZone(zone))) }
                     ins.hundredthAnswerAtMs?.let { add(S.t("prof.milestone_hundred") to dateFmt.format(Instant.ofEpochMilli(it).atZone(zone))) }
+                    ins.fiveHundredthAnswerAtMs?.let { add(S.t("prof.milestone_five_hundred") to dateFmt.format(Instant.ofEpochMilli(it).atZone(zone))) }
                 }
 
                 if (hasRhythm || milestones.isNotEmpty()) {
-                    Box(Modifier.fillMaxWidth().height(1.dp).background(hairline))
                     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                         val sideBySide = maxWidth >= 560.dp && hasRhythm && milestones.isNotEmpty()
                         if (sideBySide) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(Space.xl),
+                                horizontalArrangement = Arrangement.spacedBy(Space.md),
                                 verticalAlignment = Alignment.Top
                             ) {
-                                StudyRhythmSection(
-                                    buckets = ins.rhythmBuckets,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                MilestonesSection(
-                                    milestones = milestones,
-                                    hairline = hairline,
-                                    modifier = Modifier.weight(1f)
-                                )
+                                ProfileSurfacePanel(hairline = hairline, modifier = Modifier.weight(1f)) {
+                                    StudyRhythmSection(buckets = ins.rhythmBuckets)
+                                }
+                                ProfileSurfacePanel(hairline = hairline, modifier = Modifier.weight(1f)) {
+                                    MilestonesSection(milestones = milestones, hairline = hairline)
+                                }
                             }
                         } else {
-                            Column(verticalArrangement = Arrangement.spacedBy(Space.lg)) {
-                                if (hasRhythm) StudyRhythmSection(buckets = ins.rhythmBuckets)
-                                if (milestones.isNotEmpty()) MilestonesSection(milestones = milestones, hairline = hairline)
+                            Column(verticalArrangement = Arrangement.spacedBy(Space.md)) {
+                                if (hasRhythm) {
+                                    ProfileSurfacePanel(hairline = hairline) {
+                                        StudyRhythmSection(buckets = ins.rhythmBuckets)
+                                    }
+                                }
+                                if (milestones.isNotEmpty()) {
+                                    ProfileSurfacePanel(hairline = hairline) {
+                                        MilestonesSection(milestones = milestones, hairline = hairline)
+                                    }
+                                }
                             }
                         }
                     }
                 }
-
-                Box(Modifier.fillMaxWidth().height(1.dp).background(hairline.copy(alpha = 0.5f)))
-                Text(
-                    text = S.t("prof.device_local_footer"),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.onSurfaceVariant.copy(alpha = 0.72f)
-                )
             } else {
                 // ANALYTICS TAB: KPI Strip + Side-by-side 12-Week Heatmap, Maturity & 7-Day Forecast
                 val recallText = if (month.repeatAnswers >= 5) {
@@ -804,6 +814,42 @@ fun IknaLocalProfileCard(
     }
 }
 
+internal data class ProfileBannerPreset(val id: String)
+
+internal val PROFILE_BANNER_PRESETS: List<ProfileBannerPreset> = listOf(
+    ProfileBannerPreset("obsidian"),
+    ProfileBannerPreset("horizon"),
+    ProfileBannerPreset("aurora"),
+    ProfileBannerPreset("topo"),
+    ProfileBannerPreset("grid"),
+    ProfileBannerPreset("prism")
+)
+
+internal fun resolveBannerPresetId(bannerPath: String): String? = when {
+    bannerPath.isBlank() -> "obsidian"
+    bannerPath.startsWith("preset:") -> bannerPath.removePrefix("preset:").ifBlank { "obsidian" }
+    else -> null
+}
+
+@Composable
+private fun ProfileSurfacePanel(
+    hairline: Color,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    val colors = MaterialTheme.colorScheme
+    val shape = iknaTileShape()
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(colors.surface.copy(alpha = 0.84f), shape)
+            .border(1.dp, hairline, shape)
+            .padding(Space.md)
+    ) {
+        content()
+    }
+}
+
 @Composable
 private fun ProfileCoverBanner(
     bannerPath: String,
@@ -811,8 +857,9 @@ private fun ProfileCoverBanner(
 ) {
     val colors = MaterialTheme.colorScheme
     val shape = iknaTileShape()
-    val bitmap = remember(bannerPath) {
-        if (bannerPath.isBlank()) null else loadProfileAvatarBitmap(bannerPath)
+    val presetId = remember(bannerPath) { resolveBannerPresetId(bannerPath) }
+    val bitmap = remember(bannerPath, presetId) {
+        if (presetId != null || bannerPath.isBlank()) null else loadProfileAvatarBitmap(bannerPath)
     }
 
     Box(
@@ -841,39 +888,181 @@ private fun ProfileCoverBanner(
                     )
             )
         } else {
-            Canvas(modifier = Modifier.fillMaxSize()) {
+            ProfileBannerPresetCanvas(
+                presetId = presetId ?: "obsidian",
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProfileBannerPresetCanvas(
+    presetId: String,
+    modifier: Modifier = Modifier
+) {
+    val colors = MaterialTheme.colorScheme
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        val stroke = 1.dp.toPx()
+        when (presetId) {
+            "horizon" -> {
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            colors.primary.copy(alpha = 0.24f),
+                            colors.surface,
+                            colors.background.copy(alpha = 0.92f)
+                        )
+                    )
+                )
+                val ridge1 = Path().apply {
+                    moveTo(0f, h * 0.68f)
+                    cubicTo(w * 0.28f, h * 0.40f, w * 0.62f, h * 0.84f, w, h * 0.48f)
+                    lineTo(w, h)
+                    lineTo(0f, h)
+                    close()
+                }
+                drawPath(ridge1, color = colors.primary.copy(alpha = 0.14f))
+                val ridge2 = Path().apply {
+                    moveTo(0f, h * 0.82f)
+                    cubicTo(w * 0.35f, h * 0.62f, w * 0.72f, h * 0.92f, w, h * 0.66f)
+                    lineTo(w, h)
+                    lineTo(0f, h)
+                    close()
+                }
+                drawPath(ridge2, color = colors.surface.copy(alpha = 0.75f))
+                drawLine(
+                    color = colors.primary.copy(alpha = 0.34f),
+                    start = Offset(0f, h * 0.68f),
+                    end = Offset(w, h * 0.48f),
+                    strokeWidth = stroke
+                )
+            }
+            "aurora" -> {
+                drawRect(color = colors.surface)
+                drawRect(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colors.primary.copy(alpha = 0.34f), Color.Transparent),
+                        center = Offset(w * 0.26f, h * 0.25f),
+                        radius = w * 0.58f
+                    )
+                )
+                drawRect(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colors.secondary.copy(alpha = 0.26f), Color.Transparent),
+                        center = Offset(w * 0.78f, h * 0.72f),
+                        radius = w * 0.52f
+                    )
+                )
+                val ribbon = Path().apply {
+                    moveTo(0f, h * 0.64f)
+                    cubicTo(w * 0.30f, h * 0.18f, w * 0.66f, h * 0.88f, w, h * 0.26f)
+                }
+                drawPath(
+                    path = ribbon,
+                    color = colors.primary.copy(alpha = 0.26f),
+                    style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
+                )
+            }
+            "topo" -> {
+                drawRect(
+                    brush = Brush.linearGradient(
+                        colors = listOf(colors.surface, colors.primary.copy(alpha = 0.12f), colors.surface),
+                        start = Offset(0f, h),
+                        end = Offset(w, 0f)
+                    )
+                )
+                val center = Offset(w * 0.82f, h * 0.22f)
+                for (i in 1..6) {
+                    drawCircle(
+                        color = if (i % 2 == 0) colors.primary.copy(alpha = 0.22f) else colors.outline.copy(alpha = 0.20f),
+                        radius = w * (0.09f * i),
+                        center = center,
+                        style = Stroke(width = stroke)
+                    )
+                }
+                val center2 = Offset(w * 0.16f, h * 0.92f)
+                for (i in 1..3) {
+                    drawCircle(
+                        color = colors.outline.copy(alpha = 0.15f),
+                        radius = w * (0.08f * i),
+                        center = center2,
+                        style = Stroke(width = stroke)
+                    )
+                }
+            }
+            "grid" -> {
+                drawRect(
+                    brush = Brush.linearGradient(
+                        colors = listOf(colors.surface, colors.background.copy(alpha = 0.92f)),
+                        start = Offset.Zero,
+                        end = Offset(w, h)
+                    )
+                )
+                val step = 22.dp.toPx().coerceAtLeast(10f)
+                val gridColor = colors.outline.copy(alpha = 0.16f)
+                var x = step
+                while (x < w) {
+                    drawLine(gridColor, Offset(x, 0f), Offset(x, h), strokeWidth = stroke * 0.7f)
+                    x += step
+                }
+                var y = step
+                while (y < h) {
+                    drawLine(gridColor, Offset(0f, y), Offset(w, y), strokeWidth = stroke * 0.7f)
+                    y += step
+                }
+                drawCircle(colors.primary.copy(alpha = 0.65f), radius = 3.dp.toPx(), center = Offset(w * 0.72f, h * 0.36f))
+                drawCircle(colors.primary.copy(alpha = 0.35f), radius = 10.dp.toPx(), center = Offset(w * 0.72f, h * 0.36f), style = Stroke(stroke))
+                drawCircle(colors.primary.copy(alpha = 0.45f), radius = 2.5.dp.toPx(), center = Offset(w * 0.42f, h * 0.62f))
+            }
+            "prism" -> {
+                drawRect(color = colors.surface)
+                val shard1 = Path().apply {
+                    moveTo(w * 0.46f, 0f)
+                    lineTo(w, 0f)
+                    lineTo(w, h)
+                    lineTo(w * 0.28f, h)
+                    close()
+                }
+                drawPath(shard1, color = colors.primary.copy(alpha = 0.12f))
+                val shard2 = Path().apply {
+                    moveTo(w * 0.66f, 0f)
+                    lineTo(w, 0f)
+                    lineTo(w, h * 0.72f)
+                    lineTo(w * 0.54f, h)
+                    close()
+                }
+                drawPath(shard2, color = colors.primary.copy(alpha = 0.14f))
+                drawLine(colors.primary.copy(alpha = 0.30f), Offset(w * 0.46f, 0f), Offset(w * 0.28f, h), stroke)
+                drawLine(colors.outline.copy(alpha = 0.28f), Offset(w * 0.66f, 0f), Offset(w * 0.54f, h), stroke)
+            }
+            else -> {
+                // "obsidian" default: calm layered gradient + subtle radial glow + architectural lines
                 drawRect(
                     brush = Brush.linearGradient(
                         colors = listOf(
                             colors.surface,
-                            colors.primary.copy(alpha = 0.14f),
+                            colors.primary.copy(alpha = 0.18f),
                             colors.surface
                         ),
                         start = Offset(0f, 0f),
-                        end = Offset(size.width, size.height)
+                        end = Offset(w, h)
                     )
                 )
-                val lineColor = colors.primary.copy(alpha = 0.16f)
+                drawRect(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colors.primary.copy(alpha = 0.20f), Color.Transparent),
+                        center = Offset(w * 0.78f, h * 0.22f),
+                        radius = w * 0.55f
+                    )
+                )
+                val lineColor = colors.primary.copy(alpha = 0.22f)
                 val mutedLine = colors.outline.copy(alpha = 0.18f)
-                val stroke = 1.dp.toPx()
-                drawLine(
-                    color = mutedLine,
-                    start = Offset(size.width * 0.56f, 0f),
-                    end = Offset(size.width * 0.44f, size.height),
-                    strokeWidth = stroke
-                )
-                drawLine(
-                    color = lineColor,
-                    start = Offset(size.width * 0.72f, 0f),
-                    end = Offset(size.width * 0.60f, size.height),
-                    strokeWidth = stroke
-                )
-                drawLine(
-                    color = mutedLine,
-                    start = Offset(size.width * 0.86f, 0f),
-                    end = Offset(size.width * 0.74f, size.height),
-                    strokeWidth = stroke
-                )
+                drawLine(mutedLine, Offset(w * 0.56f, 0f), Offset(w * 0.44f, h), stroke)
+                drawLine(lineColor, Offset(w * 0.72f, 0f), Offset(w * 0.60f, h), stroke)
+                drawLine(mutedLine, Offset(w * 0.86f, 0f), Offset(w * 0.74f, h), stroke)
             }
         }
     }
@@ -888,26 +1077,313 @@ private fun ProfileHeaderActions(
     onExportPng: (StudyStats) -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
+    val pillShape = RoundedCornerShape(999.dp)
     Row(
-        horizontalArrangement = Arrangement.spacedBy(Space.md),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IknaTextButton(
-            label = S.t(if (editing) "prof.cancel" else "prof.edit_name"),
-            color = colors.onBackground,
-            horizontalPadding = 0.dp,
-            onClick = onToggleEdit
-        )
+        Box(
+            modifier = Modifier
+                .clip(pillShape)
+                .background(if (editing) colors.primary.copy(alpha = 0.14f) else colors.surface.copy(alpha = 0.85f), pillShape)
+                .border(1.dp, if (editing) colors.primary.copy(alpha = 0.65f) else colors.outline.copy(alpha = 0.55f), pillShape)
+                .clickable(onClick = onToggleEdit)
+                .padding(horizontal = 14.dp, vertical = 7.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = S.t(if (editing) "prof.cancel" else "prof.edit_name"),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Medium,
+                color = if (editing) colors.primary else colors.onBackground,
+                maxLines = 1,
+                softWrap = false
+            )
+        }
         if (snapshot != null) {
-            IknaTextButton(
-                label = if (exportingPng) S.t("bk.005") else S.t("prof.download_png"),
-                enabled = !exportingPng,
-                color = colors.onSurfaceVariant,
-                horizontalPadding = 0.dp,
-                onClick = { onExportPng(snapshot) }
+            Box(
+                modifier = Modifier
+                    .clip(pillShape)
+                    .background(colors.surface.copy(alpha = 0.72f), pillShape)
+                    .border(1.dp, colors.outline.copy(alpha = 0.40f), pillShape)
+                    .then(if (!exportingPng) Modifier.clickable { onExportPng(snapshot) } else Modifier)
+                    .padding(horizontal = 12.dp, vertical = 7.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = if (exportingPng) S.t("bk.005") else S.t("prof.download_png"),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = colors.onSurfaceVariant,
+                    maxLines = 1,
+                    softWrap = false
+                )
+            }
+        }
+    }
+}
+
+internal enum class ProfileBadgeKind {
+    FIRST_SESSION,
+    HUNDRED_ANSWERS,
+    FIRST_MATURE,
+    MULTILINGUAL,
+    FIVE_HUNDRED_ANSWERS
+}
+
+internal data class FactualProfileBadge(
+    val kind: ProfileBadgeKind,
+    val title: String,
+    val detail: String,
+    val earned: Boolean
+)
+
+internal fun buildFactualProfileBadges(
+    ins: dev.ikna.data.repo.ProfileInsights?,
+    zone: ZoneId,
+    dateFmt: DateTimeFormatter
+): List<FactualProfileBadge> {
+    if (ins == null) return emptyList()
+    fun dateOrEmpty(ms: Long?) = ms?.let { dateFmt.format(Instant.ofEpochMilli(it).atZone(zone)) }.orEmpty()
+    val pending = S.t("prof.badge_unearned")
+    return listOf(
+        FactualProfileBadge(
+            kind = ProfileBadgeKind.FIRST_SESSION,
+            title = S.t("prof.milestone_first"),
+            detail = dateOrEmpty(ins.memberSinceMs).ifBlank { pending },
+            earned = ins.memberSinceMs != null
+        ),
+        FactualProfileBadge(
+            kind = ProfileBadgeKind.HUNDRED_ANSWERS,
+            title = S.t("prof.milestone_hundred"),
+            detail = if (ins.totalAnswersAllTime >= 100) {
+                dateOrEmpty(ins.hundredthAnswerAtMs).ifBlank { "${ins.totalAnswersAllTime}" }
+            } else {
+                "${ins.totalAnswersAllTime}/100"
+            },
+            earned = ins.totalAnswersAllTime >= 100
+        ),
+        FactualProfileBadge(
+            kind = ProfileBadgeKind.FIRST_MATURE,
+            title = S.t("prof.milestone_mature"),
+            detail = if (ins.matureCards > 0 || ins.firstMatureAtMs != null) {
+                dateOrEmpty(ins.firstMatureAtMs).ifBlank { "${ins.matureCards}" }
+            } else {
+                pending
+            },
+            earned = ins.matureCards > 0 || ins.firstMatureAtMs != null
+        ),
+        FactualProfileBadge(
+            kind = ProfileBadgeKind.MULTILINGUAL,
+            title = S.t("prof.badge_multilingual"),
+            detail = if (ins.languages.size >= 2) {
+                ins.languages.joinToString(" · ") { it.lang.uppercase(Locale.ROOT) }
+            } else {
+                "${ins.languages.size}/2"
+            },
+            earned = ins.languages.size >= 2
+        ),
+        FactualProfileBadge(
+            kind = ProfileBadgeKind.FIVE_HUNDRED_ANSWERS,
+            title = S.t("prof.milestone_five_hundred"),
+            detail = if (ins.totalAnswersAllTime >= 500) {
+                dateOrEmpty(ins.fiveHundredthAnswerAtMs).ifBlank { "${ins.totalAnswersAllTime}" }
+            } else {
+                "${ins.totalAnswersAllTime}/500"
+            },
+            earned = ins.totalAnswersAllTime >= 500
+        )
+    )
+}
+
+@Composable
+private fun ProfileHeaderBadgeTray(earnedBadges: List<FactualProfileBadge>) {
+    val colors = MaterialTheme.colorScheme
+    val pillShape = RoundedCornerShape(999.dp)
+    Row(
+        modifier = Modifier
+            .background(colors.surface.copy(alpha = 0.85f), pillShape)
+            .border(1.dp, colors.outline.copy(alpha = 0.40f), pillShape)
+            .padding(horizontal = 8.dp, vertical = 5.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        earnedBadges.take(5).forEach { badge ->
+            ProfileBadgeEmblem(
+                kind = badge.kind,
+                earned = true,
+                size = 16.dp
             )
         }
     }
+}
+
+@Composable
+private fun ProfileBadgeEmblem(
+    kind: ProfileBadgeKind,
+    earned: Boolean,
+    size: Dp = 20.dp
+) {
+    val colors = MaterialTheme.colorScheme
+    val tint = if (earned) colors.primary else colors.onSurfaceVariant.copy(alpha = 0.38f)
+    Canvas(modifier = Modifier.size(size)) {
+        val w = this.size.width
+        val h = this.size.height
+        val cx = w / 2f
+        val cy = h / 2f
+        val stroke = Stroke(width = 1.6.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+        when (kind) {
+            ProfileBadgeKind.FIRST_SESSION -> {
+                // Compass / seed node
+                drawCircle(color = tint, radius = w * 0.38f, style = stroke)
+                drawCircle(color = tint, radius = w * 0.13f)
+            }
+            ProfileBadgeKind.HUNDRED_ANSWERS -> {
+                // Crisp cadence diamond
+                val diamond = Path().apply {
+                    moveTo(cx, h * 0.10f)
+                    lineTo(w * 0.90f, cy)
+                    lineTo(cx, h * 0.90f)
+                    lineTo(w * 0.10f, cy)
+                    close()
+                }
+                drawPath(diamond, color = tint, style = stroke)
+                if (earned) {
+                    drawCircle(color = tint, radius = w * 0.12f)
+                }
+            }
+            ProfileBadgeKind.FIRST_MATURE -> {
+                // Deep memory hexagonal prism
+                val hex = Path().apply {
+                    moveTo(cx, h * 0.08f)
+                    lineTo(w * 0.86f, h * 0.29f)
+                    lineTo(w * 0.86f, h * 0.71f)
+                    lineTo(cx, h * 0.92f)
+                    lineTo(w * 0.14f, h * 0.71f)
+                    lineTo(w * 0.14f, h * 0.29f)
+                    close()
+                }
+                drawPath(hex, color = tint, style = stroke)
+                drawLine(tint, Offset(cx, h * 0.30f), Offset(cx, h * 0.70f), strokeWidth = 1.4.dp.toPx(), cap = StrokeCap.Round)
+            }
+            ProfileBadgeKind.MULTILINGUAL -> {
+                // Twin interlocked orbits
+                drawCircle(color = tint, radius = w * 0.28f, center = Offset(w * 0.37f, cy), style = stroke)
+                drawCircle(color = tint, radius = w * 0.28f, center = Offset(w * 0.63f, cy), style = stroke)
+            }
+            ProfileBadgeKind.FIVE_HUNDRED_ANSWERS -> {
+                // Archive lattice (3x3 geometric frame)
+                val pad = w * 0.16f
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(pad, pad),
+                    size = Size(w - pad * 2f, h - pad * 2f),
+                    cornerRadius = CornerRadius(3.dp.toPx(), 3.dp.toPx()),
+                    style = stroke
+                )
+                drawLine(tint, Offset(cx, pad), Offset(cx, h - pad), strokeWidth = 1.2.dp.toPx())
+                drawLine(tint, Offset(pad, cy), Offset(w - pad, cy), strokeWidth = 1.2.dp.toPx())
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ProfileBadgesSection(
+    badges: List<FactualProfileBadge>
+) {
+    val colors = MaterialTheme.colorScheme
+    val earnedCount = badges.count { it.earned }
+    val shape = RoundedCornerShape(10.dp)
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = S.t("prof.badges_title"),
+                style = MaterialTheme.typography.titleSmall,
+                color = colors.onBackground
+            )
+            Text(
+                text = "$earnedCount/${badges.size}",
+                style = iknaNumberStyle(MaterialTheme.typography.labelSmall),
+                color = colors.onSurfaceVariant
+            )
+        }
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            badges.forEach { badge ->
+                Row(
+                    modifier = Modifier
+                        .background(
+                            color = if (badge.earned) colors.primary.copy(alpha = 0.08f) else colors.background.copy(alpha = 0.42f),
+                            shape = shape
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = if (badge.earned) colors.primary.copy(alpha = 0.34f) else colors.outline.copy(alpha = 0.26f),
+                            shape = shape
+                        )
+                        .padding(horizontal = 10.dp, vertical = 7.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ProfileBadgeEmblem(
+                        kind = badge.kind,
+                        earned = badge.earned,
+                        size = 18.dp
+                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                        Text(
+                            text = badge.title,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = if (badge.earned) FontWeight.Medium else FontWeight.Normal,
+                            color = if (badge.earned) colors.onBackground else colors.onSurfaceVariant.copy(alpha = 0.65f),
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                        Text(
+                            text = badge.detail,
+                            style = iknaNumberStyle(MaterialTheme.typography.labelSmall),
+                            color = if (badge.earned) colors.primary.copy(alpha = 0.85f) else colors.onSurfaceVariant.copy(alpha = 0.55f),
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun cleanLanguageDisplayName(code: String): String = when (code.trim().lowercase(Locale.ROOT)) {
+    "en" -> "English"
+    "ru" -> "Русский"
+    "de" -> "Deutsch"
+    "es" -> "Español"
+    "fr" -> "Français"
+    "pl" -> "Polski"
+    "pt" -> "Português"
+    "zh" -> "中文"
+    "ja" -> "日本語"
+    "ko" -> "한국어"
+    "it" -> "Italiano"
+    "tr" -> "Türkçe"
+    "uk" -> "Українська"
+    "ar" -> "العربية"
+    "nl" -> "Nederlands"
+    "sv" -> "Svenska"
+    "cs" -> "Čeština"
+    "fi" -> "Suomi"
+    "el" -> "Ελληνικά"
+    "he" -> "עברית"
+    "hi" -> "हिन्दी"
+    "vi" -> "Tiếng Việt"
+    else -> code.trim().uppercase(Locale.ROOT)
 }
 
 @Composable
@@ -959,7 +1435,7 @@ private fun LanguagesSection(
     languages: List<ProfileLanguageSummary>
 ) {
     val colors = MaterialTheme.colorScheme
-    val shape = iknaTileShape()
+    val shape = RoundedCornerShape(999.dp)
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
             text = S.t("prof.languages_title"),
@@ -971,147 +1447,33 @@ private fun LanguagesSection(
             verticalArrangement = Arrangement.spacedBy(Space.sm)
         ) {
             languages.forEach { item ->
-                val status = when {
-                    item.mature > 0 -> S.t("prof.deck_mature_count").replace("{count}", item.mature.toString())
-                    item.studied > 0 -> S.t("prof.deck_in_progress").replace("{count}", item.studied.toString())
-                    else -> S.t("prof.deck_ready")
-                }
+                val code = item.lang.uppercase(Locale.ROOT)
+                val name = cleanLanguageDisplayName(item.lang)
                 Row(
                     modifier = Modifier
-                        .background(colors.surface.copy(alpha = 0.85f), shape)
+                        .background(colors.background.copy(alpha = 0.55f), shape)
                         .border(1.dp, colors.outline.copy(alpha = 0.35f), shape)
-                        .padding(horizontal = 12.dp, vertical = 7.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(7.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = item.lang.uppercase(Locale.ROOT),
+                        text = code,
                         style = iknaNumberStyle(MaterialTheme.typography.labelMedium, strong = true),
-                        color = if (item.mature > 0) colors.primary else colors.onBackground
-                    )
-                    Text(
-                        text = status,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colors.onSurfaceVariant,
+                        color = colors.primary,
                         maxLines = 1,
                         softWrap = false
                     )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun RecentPhrasesSection(
-    phrases: List<ProfileLearnedPhrase>,
-    hairline: Color
-) {
-    val colors = MaterialTheme.colorScheme
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(
-            text = S.t("prof.recent_phrases_title"),
-            style = MaterialTheme.typography.titleSmall,
-            color = colors.onBackground
-        )
-        phrases.forEachIndexed { idx, phrase ->
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .background(
-                            color = if (phrase.isMature) colors.primary else colors.onSurfaceVariant.copy(alpha = 0.45f),
-                            shape = CircleShape
-                        )
-                )
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(1.dp)
-                ) {
-                    Text(
-                        text = phrase.text,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = colors.onBackground,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    if (phrase.translation.isNotBlank()) {
+                    if (name != code) {
                         Text(
-                            text = phrase.translation,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = colors.onSurfaceVariant,
+                            text = name,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = colors.onBackground,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            softWrap = false
                         )
                     }
                 }
-                if (phrase.lang.isNotBlank()) {
-                    Text(
-                        text = phrase.lang.uppercase(Locale.ROOT),
-                        style = iknaNumberStyle(MaterialTheme.typography.labelSmall),
-                        color = colors.onSurfaceVariant.copy(alpha = 0.72f),
-                        maxLines = 1,
-                        softWrap = false
-                    )
-                }
-            }
-            if (idx < phrases.lastIndex) {
-                Box(Modifier.fillMaxWidth().height(1.dp).background(hairline.copy(alpha = 0.25f)))
-            }
-        }
-    }
-}
-
-@Composable
-private fun ProfileDecksSection(
-    decks: List<ProfileDeckProgress>,
-    hairline: Color
-) {
-    val colors = MaterialTheme.colorScheme
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(
-            text = S.t("prof.decks_title"),
-            style = MaterialTheme.typography.titleSmall,
-            color = colors.onBackground
-        )
-        decks.forEachIndexed { idx, deck ->
-            val statusText = formatDeckProgressQuiet(
-                deck = deck,
-                matureFmt = S.t("prof.deck_mature_count"),
-                studiedFmt = S.t("prof.deck_in_progress"),
-                readyLabel = S.t("prof.deck_ready")
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = deck.title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.onBackground,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-                if (statusText.isNotBlank()) {
-                    Spacer(Modifier.width(Space.md))
-                    Text(
-                        text = statusText,
-                        style = iknaNumberStyle(MaterialTheme.typography.bodySmall),
-                        color = if (deck.known > 0) colors.primary else colors.onSurfaceVariant,
-                        maxLines = 1,
-                        softWrap = false
-                    )
-                }
-            }
-            if (idx < decks.lastIndex) {
-                Box(Modifier.fillMaxWidth().height(1.dp).background(hairline.copy(alpha = 0.25f)))
             }
         }
     }

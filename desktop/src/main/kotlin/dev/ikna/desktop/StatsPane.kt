@@ -50,9 +50,10 @@ fun StatsPane(
     var reload by remember { mutableStateOf(0) }
     var selectedTab by remember { mutableStateOf(ProfileTab.OVERVIEW) }
     var showJournalDetails by remember { mutableStateOf(false) }
-    LaunchedEffect(reload) {
+    val changeToken by container.studyStatsRepository.observeChanges().collectAsState(initial = 0L)
+    val syncGeneration by container.sessionChanges.generation.collectAsState()
+    LaunchedEffect(reload, changeToken, syncGeneration) {
         failed = false
-        snapshot = null
         try {
             snapshot = container.studyStatsRepository.load()
         } catch (cancelled: CancellationException) {
@@ -182,6 +183,11 @@ fun StatsPane(
                         runCatching { File(System.getProperty("user.home"), ".ikna/banners").deleteRecursively() }
                     }
                     container.settings.setProfileBanner("")
+                }
+            },
+            onSelectBannerPreset = { presetId ->
+                scope.launch {
+                    container.settings.setProfileBanner("preset:$presetId")
                 }
             },
             onExportPng = { cardData ->
