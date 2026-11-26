@@ -91,6 +91,44 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
             }
         }
     }
+    val pickBanner = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val savedPath = withContext(Dispatchers.IO) {
+                runCatching {
+                    val decoded = context.contentResolver.openInputStream(uri)?.use {
+                        android.graphics.BitmapFactory.decodeStream(it)
+                    } ?: return@runCatching null
+                    val targetW = 1200
+                    val targetH = 360
+                    val targetRatio = targetW.toDouble() / targetH.toDouble()
+                    val srcRatio = decoded.width.toDouble() / decoded.height.toDouble()
+                    val (cropW, cropH) = if (srcRatio > targetRatio) {
+                        (decoded.height * targetRatio).toInt().coerceAtLeast(1) to decoded.height
+                    } else {
+                        decoded.width to (decoded.width / targetRatio).toInt().coerceAtLeast(1)
+                    }
+                    val sx = ((decoded.width - cropW) / 2).coerceAtLeast(0)
+                    val sy = ((decoded.height - cropH) / 2).coerceAtLeast(0)
+                    val cropped = android.graphics.Bitmap.createBitmap(decoded, sx, sy, cropW, cropH)
+                    val scaled = android.graphics.Bitmap.createScaledBitmap(cropped, targetW, targetH, true)
+                    if (cropped !== decoded) decoded.recycle()
+                    if (scaled !== cropped) cropped.recycle()
+                    val dir = java.io.File(context.filesDir, "banners").apply { mkdirs() }
+                    dir.listFiles()?.forEach { it.delete() }
+                    val outFile = java.io.File(dir, "banner-${System.currentTimeMillis()}.png")
+                    outFile.outputStream().use { scaled.compress(android.graphics.Bitmap.CompressFormat.PNG, 92, it) }
+                    scaled.recycle()
+                    outFile.absolutePath
+                }.getOrNull()
+            }
+            if (!savedPath.isNullOrBlank()) {
+                container.settings.setProfileBanner(savedPath)
+            }
+        }
+    }
     val savePng = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("image/png")
     ) { uri ->
@@ -151,6 +189,7 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
     }
     var failed by remember { mutableStateOf(false) }
     var reload by remember { mutableStateOf(0) }
+    var selectedTab by remember { mutableStateOf(ProfileTab.OVERVIEW) }
     var showJournalDetails by remember { mutableStateOf(false) }
     LaunchedEffect(reload) {
         failed = false
@@ -165,7 +204,7 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        dev.ikna.ui.theme.IknaBrandPatternBackdrop(intensity = 0.65f)
+        dev.ikna.ui.theme.IknaBrandPatternBackdrop(intensity = 0.26f)
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -183,10 +222,13 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
                 profileName = settings.profileName,
                 profileBio = settings.profileBio,
                 profileAvatar = settings.profileAvatar,
+                profileBanner = settings.profileBanner,
                 snapshot = snapshot,
                 paletteDisplayName = S.t(paletteSpec(settings.paletteId).nameKey),
                 exportingPng = exportingPng,
                 pngStatus = pngStatus,
+                selectedTab = selectedTab,
+                onSelectTab = { selectedTab = it },
                 onSaveName = { name -> scope.launch { container.settings.setProfileName(name) } },
                 onSaveProfile = { name, bio ->
                     scope.launch {
@@ -203,6 +245,15 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
                         container.settings.setProfileAvatar("")
                     }
                 },
+                onPickBanner = { pickBanner.launch("image/*") },
+                onRemoveBanner = {
+                    scope.launch {
+                        withContext(Dispatchers.IO) {
+                            runCatching { java.io.File(context.filesDir, "banners").deleteRecursively() }
+                        }
+                        container.settings.setProfileBanner("")
+                    }
+                },
                 onExportPng = {
                     pendingPngExport = true
                     savePng.launch("ikna-profile-stats.png")
@@ -212,7 +263,7 @@ fun StatsScreen(container: AppContainer, onBack: () -> Unit) {
             when {
                 failed -> IknaStatsLoadFailure { reload++ }
                 snapshot == null -> IknaLatticePlaceholder()
-                else -> {
+                selectedTab == ProfileTab.ANALYTICS -> {
                     dev.ikna.ui.theme.IknaRule()
                     Spacer(Modifier.height(8.dp))
                     dev.ikna.ui.theme.IknaTextButton(

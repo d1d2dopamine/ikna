@@ -107,7 +107,8 @@ data class SettingsSnapshot(
     val hotkeys: String = DEFAULT_HOTKEYS,
     val profileName: String = "",
     val profileBio: String = "",
-    val profileAvatar: String = ""
+    val profileAvatar: String = "",
+    val profileBanner: String = ""
 )
 
 object SettingsBackup {
@@ -154,7 +155,8 @@ object SettingsBackup {
         hotkeys = settings.hotkeys,
         profileName = settings.profileName,
         profileBio = settings.profileBio,
-        profileAvatar = settings.profileAvatar
+        profileAvatar = settings.profileAvatar,
+        profileBanner = settings.profileBanner
     )
 
     fun encode(settings: IknaSettings, synthetic: Boolean = false): String = json.encodeToString(
@@ -239,5 +241,6 @@ object SettingsBackup {
         store.setProfileName(snapshot.profileName)
         store.setProfileBio(snapshot.profileBio)
         store.setProfileAvatar(snapshot.profileAvatar)
+        store.setProfileBanner(snapshot.profileBanner)
     }
 }

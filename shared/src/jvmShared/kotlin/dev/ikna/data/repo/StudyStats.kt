@@ -18,7 +18,22 @@ data class ProfileDeckProgress(
     val title: String,
     val known: Int,
     val total: Int,
-    val studied: Int = known
+    val studied: Int = known,
+    val lang: String = ""
+)
+
+data class ProfileLanguageSummary(
+    val lang: String,
+    val decks: Int,
+    val mature: Int,
+    val studied: Int
+)
+
+data class ProfileLearnedPhrase(
+    val text: String,
+    val translation: String,
+    val lang: String,
+    val isMature: Boolean
 )
 
 data class ProfileInsights(
@@ -33,7 +48,14 @@ data class ProfileInsights(
     val activeDays84d: Int = 0,
     val dailyActivity84d: List<Int> = emptyList(),
     val forecastNext7d: List<Int> = emptyList(),
-    val topDecks: List<ProfileDeckProgress> = emptyList()
+    val topDecks: List<ProfileDeckProgress> = emptyList(),
+    val memberSinceMs: Long? = null,
+    val totalAnswersAllTime: Int = 0,
+    val firstMatureAtMs: Long? = null,
+    val hundredthAnswerAtMs: Long? = null,
+    val rhythmBuckets: List<Int> = emptyList(),
+    val languages: List<ProfileLanguageSummary> = emptyList(),
+    val recentLearned: List<ProfileLearnedPhrase> = emptyList()
 )
 
 data class StudyPeriod(

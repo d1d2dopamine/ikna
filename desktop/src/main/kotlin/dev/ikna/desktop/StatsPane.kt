@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import dev.ikna.data.prefs.IknaSettings
 import dev.ikna.data.repo.StudyStats
 import dev.ikna.ui.stats.IknaLocalProfileCard
+import dev.ikna.ui.stats.ProfileTab
 import dev.ikna.ui.stats.renderProfileStatsCardPng
 import dev.ikna.ui.theme.paletteSpec
 import kotlinx.coroutines.CancellationException
@@ -47,6 +48,7 @@ fun StatsPane(
     var snapshot by remember { mutableStateOf<StudyStats?>(null) }
     var failed by remember { mutableStateOf(false) }
     var reload by remember { mutableStateOf(0) }
+    var selectedTab by remember { mutableStateOf(ProfileTab.OVERVIEW) }
     var showJournalDetails by remember { mutableStateOf(false) }
     LaunchedEffect(reload) {
         failed = false
@@ -60,15 +62,23 @@ fun StatsPane(
             failed = true
         }
     }
-    DesktopScrollablePane(S.t("stats.001"), onBack, icon = dev.ikna.ui.theme.IknaGlyph.BARS) {
+    DesktopScrollablePane(
+        S.t("stats.001"),
+        onBack,
+        icon = dev.ikna.ui.theme.IknaGlyph.PROFILE,
+        backdropIntensity = 0.26f
+    ) {
         IknaLocalProfileCard(
             profileName = settings.profileName,
             profileBio = settings.profileBio,
             profileAvatar = settings.profileAvatar,
+            profileBanner = settings.profileBanner,
             snapshot = snapshot,
             paletteDisplayName = S.t(paletteSpec(settings.paletteId).nameKey),
             exportingPng = exportingPng,
             pngStatus = pngStatus,
+            selectedTab = selectedTab,
+            onSelectTab = { selectedTab = it },
             onSaveName = { name -> scope.launch { container.settings.setProfileName(name) } },
             onSaveProfile = { name, bio ->
                 scope.launch {
@@ -121,6 +131,59 @@ fun StatsPane(
                     container.settings.setProfileAvatar("")
                 }
             },
+            onPickBanner = {
+                val chooser = JFileChooser().apply {
+                    fileFilter = javax.swing.filechooser.FileNameExtensionFilter("Images", "png", "jpg", "jpeg", "bmp", "gif")
+                }
+                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    val src = chooser.selectedFile
+                    scope.launch {
+                        val savedPath = withContext(Dispatchers.IO) {
+                            runCatching {
+                                val loaded = javax.imageio.ImageIO.read(src) ?: return@runCatching null
+                                val targetW = 1200
+                                val targetH = 360
+                                val targetRatio = targetW.toDouble() / targetH.toDouble()
+                                val srcRatio = loaded.width.toDouble() / loaded.height.toDouble()
+                                val (cropW, cropH) = if (srcRatio > targetRatio) {
+                                    (loaded.height * targetRatio).toInt() to loaded.height
+                                } else {
+                                    loaded.width to (loaded.width / targetRatio).toInt()
+                                }
+                                val sx = ((loaded.width - cropW) / 2).coerceAtLeast(0)
+                                val sy = ((loaded.height - cropH) / 2).coerceAtLeast(0)
+                                val scaled = java.awt.image.BufferedImage(targetW, targetH, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+                                val g = scaled.createGraphics()
+                                try {
+                                    g.setRenderingHint(
+                                        java.awt.RenderingHints.KEY_INTERPOLATION,
+                                        java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR
+                                    )
+                                    g.drawImage(loaded, 0, 0, targetW, targetH, sx, sy, sx + cropW, sy + cropH, null)
+                                } finally {
+                                    g.dispose()
+                                }
+                                val dir = File(System.getProperty("user.home"), ".ikna/banners").apply { mkdirs() }
+                                dir.listFiles()?.forEach { it.delete() }
+                                val outFile = File(dir, "banner-${System.currentTimeMillis()}.png")
+                                javax.imageio.ImageIO.write(scaled, "png", outFile)
+                                outFile.absolutePath
+                            }.getOrNull()
+                        }
+                        if (!savedPath.isNullOrBlank()) {
+                            container.settings.setProfileBanner(savedPath)
+                        }
+                    }
+                }
+            },
+            onRemoveBanner = {
+                scope.launch {
+                    withContext(Dispatchers.IO) {
+                        runCatching { File(System.getProperty("user.home"), ".ikna/banners").deleteRecursively() }
+                    }
+                    container.settings.setProfileBanner("")
+                }
+            },
             onExportPng = { cardData ->
                 val chooser = JFileChooser().apply { selectedFile = File("ikna-profile-stats.png") }
                 if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
@@ -152,7 +215,7 @@ fun StatsPane(
         when {
             failed -> dev.ikna.ui.stats.IknaStatsLoadFailure { reload++ }
             snapshot == null -> IknaLatticePlaceholder()
-            else -> {
+            selectedTab == ProfileTab.ANALYTICS -> {
                 dev.ikna.ui.theme.IknaRule()
                 Spacer(Modifier.height(8.dp))
                 dev.ikna.ui.theme.IknaTextButton(

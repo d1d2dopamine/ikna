@@ -20,10 +20,11 @@ import androidx.compose.ui.unit.Dp
 fun DesktopPaneFrame(title: String, onBack: () -> Unit,
     titleStyle: TextStyle = MaterialTheme.typography.headlineSmall,
     icon: IknaGlyph? = null,
+    backdropIntensity: Float = 0.72f,
     content: @Composable ColumnScope.() -> Unit) {
     val unifiedFooter = LocalIknaUnifiedFooter.current
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).clipToBounds()) {
-        IknaBrandPatternBackdrop(intensity = 0.72f)
+        IknaBrandPatternBackdrop(intensity = backdropIntensity)
         Column(Modifier.fillMaxSize().padding(bottom = if (unifiedFooter) 0.dp else BarHeight)) {
             Row(Modifier.fillMaxWidth().height(BarHeight).padding(horizontal = 40.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -53,8 +54,9 @@ fun DesktopScrollablePane(title: String, onBack: () -> Unit,
     titleStyle: TextStyle = MaterialTheme.typography.headlineSmall,
     readingWidth: Dp = 760.dp,
     icon: IknaGlyph? = null,
+    backdropIntensity: Float = 0.72f,
     content: @Composable ColumnScope.() -> Unit) {
-    DesktopPaneFrame(title, onBack, titleStyle, icon = icon) {
+    DesktopPaneFrame(title, onBack, titleStyle, icon = icon, backdropIntensity = backdropIntensity) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 40.dp)) {
             Spacer(Modifier.height(Space.md))
             // The reading measure centres in the pane instead of hugging the

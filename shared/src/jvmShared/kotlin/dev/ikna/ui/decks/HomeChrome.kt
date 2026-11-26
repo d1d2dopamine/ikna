@@ -38,7 +38,7 @@ import dev.ikna.ui.theme.iknaInspect
 import dev.ikna.ui.theme.iknaTileShape
 
 enum class HomeDestination(val glyph: IknaGlyph, val labelKey: String) {
-    STATS(IknaGlyph.BARS, "a11y.003"),
+    STATS(IknaGlyph.PROFILE, "a11y.003"),
     SETTINGS(IknaGlyph.GEAR, "a11y.002"),
     SEARCH(IknaGlyph.SEARCH, "a11y.011"),
     ADD(IknaGlyph.PLUS, "a11y.004"),

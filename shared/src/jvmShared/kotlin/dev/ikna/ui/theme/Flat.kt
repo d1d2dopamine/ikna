@@ -99,7 +99,7 @@ import kotlin.math.floor
  * back through the side door.
  */
 enum class IknaGlyph {
-    SPARK, BROWSE, BARS, SLIDERS, GEAR, PLUS, BACK, FORWARD, SOUND, DOTS, SEARCH, DECK_PANEL, SUPPORT,
+    SPARK, BROWSE, BARS, PROFILE, SLIDERS, GEAR, PLUS, BACK, FORWARD, SOUND, DOTS, SEARCH, DECK_PANEL, SUPPORT,
     UNDO, CLOSE, CHECK, PALETTE, GLOBE, FONT, KEYBOARD, BELL, UPDATE, DATA, ADVANCED, LOCAL, PRIVACY, MEMORY
 }
 
@@ -173,6 +173,22 @@ fun IknaGlyphIcon(
                         markCorner
                     )
                 }
+            }
+            // Local learner profile: clean geometric head and shoulders outline.
+            IknaGlyph.PROFILE -> {
+                val stroke = s * 0.11f
+                drawCircle(
+                    color = color,
+                    radius = s * 0.19f,
+                    center = Offset(s * 0.5f, s * 0.30f),
+                    style = Stroke(width = stroke)
+                )
+                val shoulders = Path().apply {
+                    moveTo(s * 0.16f, s * 0.87f)
+                    quadraticTo(s * 0.16f, s * 0.58f, s * 0.50f, s * 0.58f)
+                    quadraticTo(s * 0.84f, s * 0.58f, s * 0.84f, s * 0.87f)
+                }
+                drawPath(shoulders, color, style = Stroke(width = stroke, cap = lineCap))
             }
             // Two rules with a knob each. Kept for anywhere that means
             // "adjust" rather than "settings".

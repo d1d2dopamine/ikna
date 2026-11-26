@@ -41,7 +41,8 @@ class StudyStatsRepository(private val db: IknaDatabase, private val dayStartHou
                     val heatmapDays = 84
                     val heatmapStart = studyWindowStart(now, heatmapDays, zone, dayStartHour)
                     val monthStart = studyWindowStart(now, 30, zone, dayStartHour)
-                    val rows84 = db.reviewDao().studyAnswersBetween(heatmapStart, now)
+                    val rowsAll = db.reviewDao().studyAnswersBetween(0L, now)
+                    val rows84 = rowsAll.filter { it.ts >= heatmapStart }
                     val rows = rows84.filter { it.ts >= monthStart }
                     val evidence = listOf(7, 30).associateWith { days ->
                         studyEvidence(rows, studyWindowStart(now, days, zone, dayStartHour), now)
@@ -121,7 +122,7 @@ class StudyStatsRepository(private val db: IknaDatabase, private val dayStartHou
                     val avgStability = if (stabilityCount > 0) stabilitySum / stabilityCount else 0.0
 
                     val packs = db.chunkDao().packs()
-                    val deckProgress = packs.mapNotNull { pack ->
+                    val allDeckProgress = packs.mapNotNull { pack ->
                         val total = db.chunkDao().chunkCountFor(pack.id)
                         if (total <= 0) null
                         else {
@@ -132,14 +133,81 @@ class StudyStatsRepository(private val db: IknaDatabase, private val dayStartHou
                                 title = label,
                                 known = known.coerceAtMost(total),
                                 total = total,
-                                studied = studied.coerceAtMost(total)
+                                studied = studied.coerceAtMost(total),
+                                lang = pack.lang.trim().lowercase()
                             )
                         }
                     }.sortedWith(
                         compareByDescending<ProfileDeckProgress> { it.known }
                             .thenByDescending { it.studied }
                             .thenBy { it.title.lowercase() }
-                    ).take(4)
+                    )
+                    val deckProgress = allDeckProgress.take(4)
+
+                    val languages = allDeckProgress
+                        .filter { it.lang.isNotBlank() }
+                        .groupBy { it.lang }
+                        .map { (lang, list) ->
+                            ProfileLanguageSummary(
+                                lang = lang,
+                                decks = list.size,
+                                mature = list.sumOf { it.known },
+                                studied = list.sumOf { it.studied }
+                            )
+                        }
+                        .sortedWith(
+                            compareByDescending<ProfileLanguageSummary> { it.mature }
+                                .thenByDescending { it.studied }
+                                .thenBy { it.lang }
+                        )
+
+                    val validAll = rowsAll
+                        .filter { it.undoOf == null && it.rating in 1..4 }
+                        .sortedBy { it.ts }
+                    val memberSinceMs = validAll.firstOrNull()?.ts
+                    val firstMatureAtMs = validAll.firstOrNull { it.stabilityAfter >= 21.0 }?.ts
+                    val hundredthAnswerAtMs = validAll.getOrNull(99)?.ts
+
+                    // Study rhythm buckets over last 84 days: Morning (5-11), Afternoon (12-17), Evening (18-22), Night (23-4)
+                    val rhythm = IntArray(4)
+                    for (r in rows84) {
+                        if (r.undoOf != null || r.rating !in 1..4) continue
+                        val hour = Instant.ofEpochMilli(r.ts).atZone(zone).hour
+                        val bucket = when (hour) {
+                            in 5..11 -> 0
+                            in 12..17 -> 1
+                            in 18..22 -> 2
+                            else -> 3
+                        }
+                        rhythm[bucket]++
+                    }
+
+                    // Recently learned / practiced real phrases from the learner's own cards
+                    val practicedCards = allCards
+                        .filter { !it.isNew && it.reps > 0 }
+                        .sortedWith(
+                            compareByDescending<dev.ikna.data.db.CardEntity> { it.stability >= 21.0 }
+                                .thenByDescending { it.stability >= 3.0 }
+                                .thenByDescending { it.lastReviewAt ?: 0L }
+                                .thenByDescending { it.stability }
+                        )
+                        .take(4)
+                    val recentChunkIds = practicedCards.map { it.chunkId }.distinct()
+                    val recentChunksMap = if (recentChunkIds.isEmpty()) {
+                        emptyMap()
+                    } else {
+                        db.chunkDao().chunks(recentChunkIds).associateBy { it.id }
+                    }
+                    val recentLearned = practicedCards.mapNotNull { card ->
+                        val ch = recentChunksMap[card.chunkId] ?: return@mapNotNull null
+                        if (ch.text.isBlank()) return@mapNotNull null
+                        ProfileLearnedPhrase(
+                            text = ch.text.trim(),
+                            translation = ch.translation.trim(),
+                            lang = ch.lang.trim().lowercase(),
+                            isMature = card.stability >= 21.0
+                        )
+                    }
 
                     val insights = ProfileInsights(
                         matureCards = mature,
@@ -153,7 +221,14 @@ class StudyStatsRepository(private val db: IknaDatabase, private val dayStartHou
                         activeDays84d = activeDays84d,
                         dailyActivity84d = dailyCounts.toList(),
                         forecastNext7d = forecast.toList(),
-                        topDecks = deckProgress
+                        topDecks = deckProgress,
+                        memberSinceMs = memberSinceMs,
+                        totalAnswersAllTime = validAll.size,
+                        firstMatureAtMs = firstMatureAtMs,
+                        hundredthAnswerAtMs = hundredthAnswerAtMs,
+                        rhythmBuckets = rhythm.toList(),
+                        languages = languages,
+                        recentLearned = recentLearned
                     )
 
                     StudyStats(period(7), period(30), zone.id, dayStartHour, db.cardDao().nextDueAt(now), insights)

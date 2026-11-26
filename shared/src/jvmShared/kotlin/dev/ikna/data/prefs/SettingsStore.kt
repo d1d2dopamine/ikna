@@ -296,7 +296,8 @@ data class IknaSettings(
     /** Optional local-only profile display name. Empty by default; never sent anywhere. */
     val profileName: String = "",
     val profileBio: String = "",
-    val profileAvatar: String = ""
+    val profileAvatar: String = "",
+    val profileBanner: String = ""
 )
 
 class SettingsStore(private val store: DataStore<Preferences>) {
@@ -365,6 +366,7 @@ class SettingsStore(private val store: DataStore<Preferences>) {
         val profileName = stringPreferencesKey("profileName")
         val profileBio = stringPreferencesKey("profileBio")
         val profileAvatar = stringPreferencesKey("profileAvatar")
+        val profileBanner = stringPreferencesKey("profileBanner")
         // Internal Browse ledger. It is not a user preference and is not
         // restored from a settings backup, so an imported file cannot mint
         // passive cards without completing this installation's plans.
@@ -443,7 +445,8 @@ class SettingsStore(private val store: DataStore<Preferences>) {
             updateCheckedAt = p[Keys.updateCheckedAt] ?: defaults.updateCheckedAt,
             profileName = p[Keys.profileName] ?: defaults.profileName,
             profileBio = p[Keys.profileBio] ?: defaults.profileBio,
-            profileAvatar = p[Keys.profileAvatar] ?: defaults.profileAvatar
+            profileAvatar = p[Keys.profileAvatar] ?: defaults.profileAvatar,
+            profileBanner = p[Keys.profileBanner] ?: defaults.profileBanner
         )
     }
 
@@ -623,6 +626,10 @@ class SettingsStore(private val store: DataStore<Preferences>) {
 
     suspend fun setProfileAvatar(avatarPath: String) = put {
         it[Keys.profileAvatar] = avatarPath.trim().take(512)
+    }
+
+    suspend fun setProfileBanner(bannerPath: String) = put {
+        it[Keys.profileBanner] = bannerPath.trim().take(512)
     }
 
     /**
