@@ -1445,7 +1445,7 @@ private fun ForecastBarsSection(
                     Column(
                         modifier = Modifier.weight(1f),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Alignment.Bottom
+                        verticalArrangement = Arrangement.Bottom
                     ) {
                         if (due > 0) {
                             Text(
