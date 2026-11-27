@@ -40,6 +40,7 @@ data class PairingInvitation(
     val deviceName: String = "",
     val hosts: List<String> = emptyList(),
     val certPin: String = "",
+    val relayUrl: String = "",
 ) {
     override fun toString(): String = "PairingInvitation(version=$version, accessGrant=<redacted>)"
 }
@@ -47,7 +48,7 @@ data class PairingInvitation(
 /** Safe, allowlisted sync failure code without secrets or raw network/exception details. */
 class SyncOperationException(val code: String) : IllegalStateException(code)
 
-/** Foreground-only LAN exchange. All application data remains opaque to the transport. */
+/** Foreground-only LAN + optional E2EE relay exchange. All application data remains opaque to transport. */
 class PairedLanTransport(
     private val privateDirectory: File,
     val binding: HistoryBinding,
@@ -58,6 +59,7 @@ class PairedLanTransport(
     private val directLanSocketFactory: ((target: InetAddress, port: Int, timeoutMs: Int) -> Socket?)? = null,
     private val onLog: (String, Boolean) -> Unit = { _, _ -> },
     private val fastPoll: () -> Boolean = { false },
+    private val autoPoll: () -> Boolean = { true },
 ) : AutoCloseable {
     @Serializable enum class PeerRole { INVITER, JOINER, UNKNOWN }
     enum class ActivityStage {
@@ -82,6 +84,7 @@ class PairedLanTransport(
         val lastSuccessAtMillis: Long? = null, val lastError: String? = null,
         val name: String = "",
         val role: PeerRole = PeerRole.UNKNOWN,
+        val hasRelay: Boolean = false,
     ) {
         override fun toString(): String = "PeerStatus(identity=<redacted>, address=<redacted>, lastSuccessAtMillis=$lastSuccessAtMillis, lastError=$lastError)"
     }
@@ -95,6 +98,7 @@ class PairedLanTransport(
         val name: String = "",
         val hosts: List<String> = emptyList(),
         val role: PeerRole = PeerRole.UNKNOWN,
+        val relayUrl: String = "",
     )
     @Serializable private data class Saved(val version: Int = 1, val binding: HistoryBinding, val peers: List<Peer>)
     @Serializable private data class Wire(
@@ -114,7 +118,7 @@ class PairedLanTransport(
     private val callbackGate = Any()
     private val sockets = ConcurrentHashMap.newKeySet<Socket>()
     private val jobs = ConcurrentHashMap.newKeySet<Job>()
-    private val workers = Executors.newFixedThreadPool(2) { r -> Thread(r, "ikna-lan-sync").apply { isDaemon = true } }
+    private val workers = Executors.newFixedThreadPool(3) { r -> Thread(r, "ikna-lan-sync").apply { isDaemon = true } }
     private val timer = Executors.newScheduledThreadPool(1) { r -> Thread(r, "ikna-lan-timeout").apply { isDaemon = true } }
     private var listener: SSLServerSocket? = null
     private var pending: Pending? = null
@@ -129,8 +133,12 @@ class PairedLanTransport(
     @Volatile private var syncNowRequested = false
     @Volatile private var activity: Activity = Activity()
     val status: Status get() = synchronized(gate) { Status(running, peers.size, lastError, lastSuccessAtMillis,
-        peers.map { peer -> PeerStatus(peer.id, peer.id.chunked(4).joinToString(" "), "${peer.host}:${peer.port}",
-            peerResults[peer.id]?.first, peerResults[peer.id]?.second, peer.name, peer.role) },
+        peers.map { peer ->
+            val addrText = if (peer.host.isNotBlank() && peer.port > 0) "${peer.host}:${peer.port}" else "relay"
+            PeerStatus(peer.id, peer.id.chunked(4).joinToString(" "), addrText,
+                peerResults[peer.id]?.first, peerResults[peer.id]?.second, peer.name, peer.role,
+                hasRelay = peer.relayUrl.isNotBlank())
+        },
         activity) }
 
     private fun setActivity(stage: ActivityStage, attempt: Int = 0, total: Int = 0) {
@@ -182,25 +190,41 @@ class PairedLanTransport(
         val session = ++generation
         workers.submit { serve(server, session) }
         workers.submit { poll(session) }
+        workers.submit { relayServe(session) }
         publish()
         server.localPort
     }
 
-    fun createInvitation(host: String): String = synchronized(gate) {
+    fun createInvitation(host: String, relayUrl: String = ""): String = synchronized(gate) {
         check(running && !closed && peers.size < MAX_PEERS)
-        LanSyncSecurity.address(host)
-        val fallbackHosts = if (host.startsWith("127.")) {
+        val cleanRelay = SyncRelayClient.normalizeRelayUrl(relayUrl)
+        val cleanHost = host.trim()
+        require(cleanHost.isNotBlank() || cleanRelay.isNotBlank()) { "invalid_invitation" }
+        if (cleanHost.isNotBlank()) LanSyncSecurity.address(cleanHost)
+        val fallbackHosts = if (cleanHost.isBlank() || cleanHost.startsWith("127.")) {
             emptyList()
         } else {
-            (listOf(host) + localAddresses()).distinct().take(MAX_CANDIDATE_HOSTS)
+            (listOf(cleanHost) + localAddresses()).distinct().take(MAX_CANDIDATE_HOSTS)
         }
-        val invitation = PairingInvitation(host = host, port = listener!!.localPort,
+        val invitation = PairingInvitation(host = cleanHost, port = if (cleanHost.isNotBlank()) listener!!.localPort else 0,
             certificate = identity.certificatePem(), binding = binding,
             secret = LanSyncSecurity.secret(), expiresAtMillis = System.currentTimeMillis() + INVITATION_MS,
             deviceName = sanitizeDeviceName(localDeviceName()),
-            hosts = fallbackHosts)
+            hosts = fallbackHosts,
+            relayUrl = cleanRelay)
         pending = Pending(invitation)
         json.encodeToString(invitation)
+    }
+
+    /** Updates the optional E2EE relay URL stored for all paired peers. */
+    @Synchronized fun updateRelayUrl(relayUrl: String) = synchronized(gate) {
+        val clean = SyncRelayClient.normalizeRelayUrl(relayUrl)
+        if (peers.isEmpty()) return@synchronized
+        val updated = peers.map { it.copy(relayUrl = clean) }
+        save(updated)
+        peers.clear()
+        peers.addAll(updated)
+        publish()
     }
 
     /** Wakes the background poll loop immediately and resets exponential backoff. */
@@ -224,57 +248,153 @@ class PairedLanTransport(
             session = generation
             ownPort = listener!!.localPort
         }
-        val candidates = (listOf(invite.host) + invite.hosts).distinct().take(MAX_CANDIDATE_HOSTS)
+        val candidates = (listOf(invite.host) + invite.hosts).filter { it.isNotBlank() }.distinct().take(MAX_CANDIDATE_HOSTS)
         val ownHosts = if (invite.host.startsWith("127.")) emptyList() else localAddresses().take(MAX_CANDIDATE_HOSTS)
-        onLog("Pairing: dialing ${candidates.joinToString(", ")}:${invite.port}", false)
+        if (candidates.isNotEmpty()) {
+            onLog("Pairing: dialing ${candidates.joinToString(", ")}:${invite.port}", false)
+        } else {
+            onLog("Pairing: connecting via E2EE relay", false)
+        }
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             val pairingContext = kotlin.coroutines.coroutineContext
             pairingContext.ensureActive()
             try {
-                connectAny(candidates, invite.port, invite.certificate, certPin = expectedPin, isPairing = true) { workingHost, socket ->
-                    val serverCert = socket.session.peerCertificates.firstOrNull() as? java.security.cert.X509Certificate
-                        ?: throw SyncOperationException("tls_trust_failed")
-                    val verifiedCertPem = invite.certificate.ifBlank { LanSyncSecurity.encodeCertificatePem(serverCert) }
-                    if (LanSyncSecurity.id(LanSyncSecurity.certificate(verifiedCertPem)) != expectedPin) {
-                        throw SyncOperationException("tls_trust_failed")
+                if (candidates.isEmpty() && invite.relayUrl.isNotBlank()) {
+                    pairViaRelay(invite, expectedPin, session, ownPort, ownHosts, candidates)
+                } else {
+                    try {
+                        connectAny(candidates, invite.port, invite.certificate, certPin = expectedPin, isPairing = true) { workingHost, socket ->
+                            val serverCert = socket.session.peerCertificates.firstOrNull() as? java.security.cert.X509Certificate
+                                ?: throw SyncOperationException("tls_trust_failed")
+                            val verifiedCertPem = invite.certificate.ifBlank { LanSyncSecurity.encodeCertificatePem(serverCert) }
+                            if (LanSyncSecurity.id(LanSyncSecurity.certificate(verifiedCertPem)) != expectedPin) {
+                                throw SyncOperationException("tls_trust_failed")
+                            }
+                            onLog("TLS verified on $workingHost:${invite.port} (#${expectedPin.take(8)})", false)
+                            val challenge = readText(socket, 128)
+                            pairingContext.ensureActive()
+                            write(socket, Wire(operation = "pair", binding = binding, id = deviceId,
+                                credential = invite.secret, challenge = challenge, certificate = identity.certificatePem(),
+                                port = ownPort,
+                                deviceName = if (invite.deviceName.isNotBlank()) sanitizeDeviceName(localDeviceName()) else "",
+                                hosts = ownHosts))
+                            val response = read(socket)
+                            if (response.version == 1 && response.operation == "error" && response.challenge == challenge) {
+                                val remoteCode = sanitizeRemoteErrorCode(response.payload)
+                                onLog("Pairing rejected by peer: $remoteCode", true)
+                                throw SyncOperationException(remoteCode)
+                            }
+                            require(response.version == 1 && response.operation == "paired" && response.binding == binding && response.challenge == challenge)
+                            val peerName = sanitizeDeviceName(response.deviceName.ifBlank { invite.deviceName })
+                            val peerHosts = (listOf(workingHost) + candidates).distinct().take(MAX_CANDIDATE_HOSTS)
+                            val peer = Peer(
+                                response.id, workingHost, invite.port, verifiedCertPem, response.credential,
+                                peerName, peerHosts, PeerRole.JOINER, relayUrl = invite.relayUrl
+                            )
+                            validatePeer(peer)
+                            pairingContext.ensureActive()
+                            synchronized(gate) {
+                                checkActive(session)
+                                require(peers.size < MAX_PEERS && peers.none { it.id == peer.id })
+                                save(peers + peer)
+                                peers += peer
+                            }
+                            onLog("Paired as JOINER with ${peerName.ifBlank { workingHost }} ($workingHost:${invite.port})", false)
+                            syncNowRequested = true
+                            publish()
+                        }
+                    } catch (lanFailure: java.io.IOException) {
+                        if (invite.relayUrl.isNotBlank() && lanFailure !is javax.net.ssl.SSLException) {
+                            onLog("LAN unreachable; pairing via E2EE relay", false)
+                            pairViaRelay(invite, expectedPin, session, ownPort, ownHosts, candidates)
+                        } else {
+                            throw lanFailure
+                        }
                     }
-                    onLog("TLS verified on $workingHost:${invite.port} (#${expectedPin.take(8)})", false)
-                    val challenge = readText(socket, 128)
-                    pairingContext.ensureActive()
-                    write(socket, Wire(operation = "pair", binding = binding, id = deviceId,
-                        credential = invite.secret, challenge = challenge, certificate = identity.certificatePem(),
-                        port = ownPort,
-                        deviceName = if (invite.deviceName.isNotBlank()) sanitizeDeviceName(localDeviceName()) else "",
-                        hosts = ownHosts))
-                    val response = read(socket)
-                    if (response.version == 1 && response.operation == "error" && response.challenge == challenge) {
-                        val remoteCode = sanitizeRemoteErrorCode(response.payload)
-                        onLog("Pairing rejected by peer: $remoteCode", true)
-                        throw SyncOperationException(remoteCode)
-                    }
-                    require(response.version == 1 && response.operation == "paired" && response.binding == binding && response.challenge == challenge)
-                    val peerName = sanitizeDeviceName(response.deviceName.ifBlank { invite.deviceName })
-                    val peerHosts = (listOf(workingHost) + candidates).distinct().take(MAX_CANDIDATE_HOSTS)
-                    val peer = Peer(
-                        response.id, workingHost, invite.port, verifiedCertPem, response.credential,
-                        peerName, peerHosts, PeerRole.JOINER
-                    )
-                    validatePeer(peer)
-                    pairingContext.ensureActive()
-                    synchronized(gate) {
-                        checkActive(session)
-                        require(peers.size < MAX_PEERS && peers.none { it.id == peer.id })
-                        save(peers + peer)
-                        peers += peer
-                    }
-                    onLog("Paired as JOINER with ${peerName.ifBlank { workingHost }} ($workingHost:${invite.port})", false)
-                    syncNowRequested = true
-                    publish()
                 }
             } finally {
                 setActivity(ActivityStage.IDLE)
             }
         }
+    }
+
+    private fun pairViaRelay(
+        invite: PairingInvitation,
+        expectedPin: String,
+        session: Long,
+        ownPort: Int,
+        ownHosts: List<String>,
+        candidates: List<String>,
+    ) {
+        setActivity(ActivityStage.PAIRING_CONNECTING)
+        val pairChan = SyncRelayClient.channelId("pair", invite.secret)
+        val pairKey = SyncRelayClient.deriveKey("pair", invite.secret)
+        val challenge = LanSyncSecurity.secret()
+        val request = Wire(
+            operation = "pair",
+            binding = binding,
+            id = deviceId,
+            credential = invite.secret,
+            challenge = challenge,
+            certificate = identity.certificatePem(),
+            port = ownPort,
+            deviceName = sanitizeDeviceName(localDeviceName()),
+            hosts = ownHosts,
+        )
+        SyncRelayClient.sendMessage(
+            relayBaseUrl = invite.relayUrl,
+            channelId = pairChan,
+            senderSlot = RELAY_PAIR_JOINER_SLOT,
+            recipientSlot = RELAY_PAIR_INVITER_SLOT,
+            key = pairKey,
+            plaintext = json.encodeToString(request).toByteArray(Charsets.UTF_8),
+        )
+        setActivity(ActivityStage.PAIRING_HANDSHAKE)
+        val replyBytes = SyncRelayClient.receiveMessage(
+            relayBaseUrl = invite.relayUrl,
+            channelId = pairChan,
+            mySlot = RELAY_PAIR_JOINER_SLOT,
+            expectedSenderSlot = RELAY_PAIR_INVITER_SLOT,
+            key = pairKey,
+            timeoutMs = RELAY_PAIR_TIMEOUT_MS,
+            maxPlaintextBytes = 32_768,
+            isActive = { active(session) },
+        ) ?: throw java.net.SocketTimeoutException("relay-pair-timeout")
+        val response = json.decodeFromString<Wire>(replyBytes.toString(Charsets.UTF_8))
+        if (response.version == 1 && response.operation == "error" && response.challenge == challenge) {
+            val remoteCode = sanitizeRemoteErrorCode(response.payload)
+            onLog("Pairing rejected by peer: $remoteCode", true)
+            throw SyncOperationException(remoteCode)
+        }
+        require(response.version == 1 && response.operation == "paired" && response.binding == binding && response.challenge == challenge)
+        val verifiedCertPem = invite.certificate.ifBlank { response.certificate }
+        if (verifiedCertPem.isBlank() || LanSyncSecurity.id(LanSyncSecurity.certificate(verifiedCertPem)) != expectedPin) {
+            throw SyncOperationException("tls_trust_failed")
+        }
+        val peerName = sanitizeDeviceName(response.deviceName.ifBlank { invite.deviceName })
+        val peerHost = candidates.firstOrNull().orEmpty()
+        val peerPort = if (peerHost.isNotBlank()) invite.port else 0
+        val peer = Peer(
+            id = response.id,
+            host = peerHost,
+            port = peerPort,
+            certificate = verifiedCertPem,
+            credential = response.credential,
+            name = peerName,
+            hosts = candidates,
+            role = PeerRole.JOINER,
+            relayUrl = invite.relayUrl,
+        )
+        validatePeer(peer)
+        synchronized(gate) {
+            checkActive(session)
+            require(peers.size < MAX_PEERS && peers.none { it.id == peer.id })
+            save(peers + peer)
+            peers += peer
+        }
+        onLog("Paired via E2EE relay as JOINER with ${peerName.ifBlank { "peer" }}", false)
+        syncNowRequested = true
+        publish()
     }
 
     /** Returns only after any already-entered import callback has completed/cancelled. */
@@ -383,7 +503,8 @@ class PairedLanTransport(
                 request.id, host, request.port, request.certificate, LanSyncSecurity.secret(),
                 sanitizeDeviceName(request.deviceName),
                 candidatePeerHosts,
-                PeerRole.INVITER
+                PeerRole.INVITER,
+                relayUrl = invitation.invitation.relayUrl
             )
             validatePeer(peer)
             require(peer.id != deviceId && peers.size < MAX_PEERS && peers.none { it.id == peer.id })
@@ -447,6 +568,12 @@ class PairedLanTransport(
     private fun poll(session: Long) {
         var failures = 0
         while (active(session)) {
+            if (!autoPoll() && !fastPoll() && !syncNowRequested) {
+                try {
+                    Thread.sleep(100)
+                } catch (_: InterruptedException) { return }
+                continue
+            }
             syncNowRequested = false
             val current = synchronized(gate) { peers.toList() }
             var failed = false
@@ -454,31 +581,44 @@ class PairedLanTransport(
                 if (active(session)) try {
                     val payload = callback(session) { callbacks.snapshotFor(peer.id) }
                     val (encodedPayload, payloadEncoding) = encodePayloadWithEncoding(payload)
-                    val candidates = (listOf(peer.host) + peer.hosts).distinct().take(MAX_CANDIDATE_HOSTS)
-                    val workingHost = connectAny(candidates, peer.port, peer.certificate, certPin = peer.id, isPairing = false) { matchedHost, socket ->
-                        setActivity(ActivityStage.EXCHANGING_DATA)
-                        val challenge = readText(socket, 128)
-                        write(socket, Wire(operation = "exchange", binding = binding, id = deviceId,
-                            credential = peer.credential, challenge = challenge, payload = encodedPayload,
-                            payloadEncoding = payloadEncoding))
-                        val response = read(socket)
-                        if (response.version == 1 && response.operation == "error" && response.challenge == challenge) {
-                            val remoteCode = sanitizeRemoteErrorCode(response.payload)
-                            onLog("Peer reported error: $remoteCode", true)
-                            throw SyncOperationException(remoteCode)
+                    val candidates = (listOf(peer.host) + peer.hosts).filter { it.isNotBlank() }.distinct().take(MAX_CANDIDATE_HOSTS)
+                    if (candidates.isEmpty() && peer.relayUrl.isNotBlank()) {
+                        exchangeViaRelay(peer, encodedPayload, payloadEncoding, session)
+                    } else {
+                        try {
+                            val workingHost = connectAny(candidates, peer.port, peer.certificate, certPin = peer.id, isPairing = false) { matchedHost, socket ->
+                                setActivity(ActivityStage.EXCHANGING_DATA)
+                                val challenge = readText(socket, 128)
+                                write(socket, Wire(operation = "exchange", binding = binding, id = deviceId,
+                                    credential = peer.credential, challenge = challenge, payload = encodedPayload,
+                                    payloadEncoding = payloadEncoding))
+                                val response = read(socket)
+                                if (response.version == 1 && response.operation == "error" && response.challenge == challenge) {
+                                    val remoteCode = sanitizeRemoteErrorCode(response.payload)
+                                    onLog("Peer reported error: $remoteCode", true)
+                                    throw SyncOperationException(remoteCode)
+                                }
+                                require(response.version == 1 && response.operation == "exchanged" && response.binding == binding &&
+                                    response.id == peer.id && response.challenge == challenge)
+                                callback(session) { callbacks.receiveFrom(peer.id, decodePayload(response.payload, response.payloadEncoding)) }
+                                synchronized(gate) {
+                                    checkActive(session)
+                                    write(socket, Wire(operation = "received", binding = binding, id = deviceId,
+                                        credential = peer.credential, challenge = challenge))
+                                }
+                                matchedHost
+                            }
+                            if (workingHost != peer.host) {
+                                promotePeerHost(peer.id, workingHost, session)
+                            }
+                        } catch (lanFailure: java.io.IOException) {
+                            if (peer.relayUrl.isNotBlank() && lanFailure !is javax.net.ssl.SSLException) {
+                                onLog("LAN unreachable; syncing via E2EE relay", false)
+                                exchangeViaRelay(peer, encodedPayload, payloadEncoding, session)
+                            } else {
+                                throw lanFailure
+                            }
                         }
-                        require(response.version == 1 && response.operation == "exchanged" && response.binding == binding &&
-                            response.id == peer.id && response.challenge == challenge)
-                        callback(session) { callbacks.receiveFrom(peer.id, decodePayload(response.payload, response.payloadEncoding)) }
-                        synchronized(gate) {
-                            checkActive(session)
-                            write(socket, Wire(operation = "received", binding = binding, id = deviceId,
-                                credential = peer.credential, challenge = challenge))
-                        }
-                        matchedHost
-                    }
-                    if (workingHost != peer.host) {
-                        promotePeerHost(peer.id, workingHost, session)
                     }
                     recordResult(peer, session, null)
                 } catch (failure: Exception) {
@@ -491,7 +631,8 @@ class PairedLanTransport(
                         onLog("Outbound to ${peer.host}:${peer.port} timed out; waiting for peer's inbound check-in", false)
                     } else {
                         failed = true
-                        onLog("Outgoing exchange error (${peer.host}:${peer.port}): $code${safeFailureTag(failure)}", true)
+                        val targetLabel = if (peer.host.isNotBlank()) "${peer.host}:${peer.port}" else "relay"
+                        onLog("Outgoing exchange error ($targetLabel): $code${safeFailureTag(failure)}", true)
                         recordResult(peer, session, code)
                     }
                 }
@@ -512,6 +653,242 @@ class PairedLanTransport(
                 }
             } catch (_: InterruptedException) { return }
         }
+    }
+
+    private fun relaySyncChannel(peer: Peer): Triple<String, ByteArray, Pair<String, String>> {
+        val chan = SyncRelayClient.channelId("sync:${binding.groupId}", peer.credential)
+        val key = SyncRelayClient.deriveKey("sync:${binding.groupId}", peer.credential)
+        return Triple(chan, key, SyncRelayClient.slotId(chan, "req:$deviceId") to SyncRelayClient.slotId(chan, "req:${peer.id}"))
+    }
+
+    private fun relayResponseSlots(chan: String, peerId: String): Pair<String, String> =
+        SyncRelayClient.slotId(chan, "res:$deviceId") to SyncRelayClient.slotId(chan, "res:$peerId")
+
+    private fun exchangeViaRelay(peer: Peer, encodedPayload: String, payloadEncoding: String, session: Long) {
+        setActivity(ActivityStage.EXCHANGING_DATA)
+        val (chan, key, reqSlots) = relaySyncChannel(peer)
+        val (myReqSlot, peerReqSlot) = reqSlots
+        val (myResSlot, peerResSlot) = relayResponseSlots(chan, peer.id)
+        val challenge = LanSyncSecurity.secret()
+        val request = Wire(
+            operation = "exchange",
+            binding = binding,
+            id = deviceId,
+            credential = peer.credential,
+            challenge = challenge,
+            payload = encodedPayload,
+            payloadEncoding = payloadEncoding,
+        )
+        SyncRelayClient.sendMessage(
+            relayBaseUrl = peer.relayUrl,
+            channelId = chan,
+            senderSlot = myReqSlot,
+            recipientSlot = peerReqSlot,
+            key = key,
+            plaintext = json.encodeToString(request).toByteArray(Charsets.UTF_8),
+        )
+        val replyBytes = SyncRelayClient.receiveMessage(
+            relayBaseUrl = peer.relayUrl,
+            channelId = chan,
+            mySlot = myResSlot,
+            expectedSenderSlot = peerResSlot,
+            key = key,
+            timeoutMs = RELAY_EXCHANGE_TIMEOUT_MS,
+            maxPlaintextBytes = MAX_FRAME,
+            isActive = { active(session) },
+        ) ?: throw java.net.SocketTimeoutException("relay-exchange-timeout")
+        val response = json.decodeFromString<Wire>(replyBytes.toString(Charsets.UTF_8))
+        if (response.version == 1 && response.operation == "error" && response.challenge == challenge) {
+            val remoteCode = sanitizeRemoteErrorCode(response.payload)
+            onLog("Peer reported error via relay: $remoteCode", true)
+            throw SyncOperationException(remoteCode)
+        }
+        require(response.version == 1 && response.operation == "exchanged" && response.binding == binding &&
+            response.id == peer.id && response.challenge == challenge)
+        callback(session) { callbacks.receiveFrom(peer.id, decodePayload(response.payload, response.payloadEncoding)) }
+    }
+
+    /** Background listener for incoming E2EE relay pairing and sync exchanges when a relay URL is active. */
+    private fun relayServe(session: Long) {
+        while (active(session)) {
+            var didWork = false
+            val currentPending = synchronized(gate) { pending?.takeIf { it.invitation.relayUrl.isNotBlank() } }
+            if (currentPending != null) {
+                didWork = true
+                try {
+                    pollRelayPairing(currentPending, session)
+                } catch (_: Exception) {
+                    // Best-effort relay listener; retry on next tick while invitation is active.
+                }
+            }
+            val relayPeers = synchronized(gate) { peers.filter { it.relayUrl.isNotBlank() } }
+            for (peer in relayPeers) {
+                if (!active(session)) break
+                didWork = true
+                try {
+                    pollRelayExchange(peer, session)
+                } catch (_: Exception) {
+                    // Back off briefly below on transient relay errors.
+                }
+            }
+            if (!didWork) {
+                try {
+                    Thread.sleep(250)
+                } catch (_: InterruptedException) { return }
+            }
+        }
+    }
+
+    private fun pollRelayPairing(currentPending: Pending, session: Long) {
+        val invite = currentPending.invitation
+        val pairChan = SyncRelayClient.channelId("pair", invite.secret)
+        val pairKey = SyncRelayClient.deriveKey("pair", invite.secret)
+        val reqBytes = SyncRelayClient.receiveMessage(
+            relayBaseUrl = invite.relayUrl,
+            channelId = pairChan,
+            mySlot = RELAY_PAIR_INVITER_SLOT,
+            expectedSenderSlot = RELAY_PAIR_JOINER_SLOT,
+            key = pairKey,
+            timeoutMs = 2_000,
+            maxPlaintextBytes = 32_768,
+            isActive = { active(session) && synchronized(gate) { pending != null } },
+        ) ?: return
+        val request = json.decodeFromString<Wire>(reqBytes.toString(Charsets.UTF_8))
+        require(request.version == 1 && request.operation == "pair" && request.binding == binding)
+        fun sendRelayPairError(code: String) {
+            runCatching {
+                val err = Wire(operation = "error", binding = binding, id = deviceId,
+                    credential = "", challenge = request.challenge, payload = code)
+                SyncRelayClient.sendMessage(
+                    invite.relayUrl, pairChan, RELAY_PAIR_INVITER_SLOT, RELAY_PAIR_JOINER_SLOT,
+                    pairKey, json.encodeToString(err).toByteArray(Charsets.UTF_8)
+                )
+            }
+        }
+        val responseWire: Wire
+        val peerLabel: String
+        synchronized(gate) {
+            checkActive(session)
+            val activeInvite = pending ?: run { sendRelayPairError("expired_invitation"); return }
+            activeInvite.attempts++
+            if (activeInvite.attempts > MAX_PAIR_ATTEMPTS || System.nanoTime() >= activeInvite.deadlineNanos ||
+                activeInvite.invitation.expiresAtMillis <= System.currentTimeMillis()) {
+                pending = null
+                sendRelayPairError("expired_invitation")
+                return
+            }
+            if (!LanSyncSecurity.equal(activeInvite.invitation.secret, request.credential)) {
+                sendRelayPairError("invalid_invitation")
+                return
+            }
+            val candidatePeerHosts = request.hosts
+                .filter { runCatching { LanSyncSecurity.address(it) }.isSuccess }
+                .distinct()
+                .take(MAX_CANDIDATE_HOSTS)
+            val primaryHost = candidatePeerHosts.firstOrNull().orEmpty()
+            val peerPort = if (primaryHost.isNotBlank() && request.port in 1..65535) request.port else 0
+            val peer = Peer(
+                id = request.id,
+                host = primaryHost,
+                port = peerPort,
+                certificate = request.certificate,
+                credential = LanSyncSecurity.secret(),
+                name = sanitizeDeviceName(request.deviceName),
+                hosts = candidatePeerHosts,
+                role = PeerRole.INVITER,
+                relayUrl = activeInvite.invitation.relayUrl,
+            )
+            validatePeer(peer)
+            require(peer.id != deviceId && peers.size < MAX_PEERS && peers.none { it.id == peer.id })
+            pending = null
+            save(peers + peer)
+            peers += peer
+            peerLabel = peer.name.ifBlank { "peer" }
+            responseWire = Wire(
+                operation = "paired",
+                binding = binding,
+                id = deviceId,
+                credential = peer.credential,
+                challenge = request.challenge,
+                certificate = identity.certificatePem(),
+                deviceName = sanitizeDeviceName(localDeviceName()),
+            )
+            lastIncomingNanos[peer.id] = System.nanoTime()
+        }
+        SyncRelayClient.sendMessage(
+            relayBaseUrl = invite.relayUrl,
+            channelId = pairChan,
+            senderSlot = RELAY_PAIR_INVITER_SLOT,
+            recipientSlot = RELAY_PAIR_JOINER_SLOT,
+            key = pairKey,
+            plaintext = json.encodeToString(responseWire).toByteArray(Charsets.UTF_8),
+        )
+        onLog("Paired via E2EE relay as INVITER with $peerLabel", false)
+        syncNowRequested = true
+        publish()
+    }
+
+    private fun pollRelayExchange(peer: Peer, session: Long) {
+        val (chan, key, reqSlots) = relaySyncChannel(peer)
+        val (myReqSlot, peerReqSlot) = reqSlots
+        val (myResSlot, peerResSlot) = relayResponseSlots(chan, peer.id)
+        val reqBytes = SyncRelayClient.receiveMessage(
+            relayBaseUrl = peer.relayUrl,
+            channelId = chan,
+            mySlot = myReqSlot,
+            expectedSenderSlot = peerReqSlot,
+            key = key,
+            timeoutMs = 2_000,
+            maxPlaintextBytes = MAX_FRAME,
+            isActive = { active(session) },
+        ) ?: return
+        val request = json.decodeFromString<Wire>(reqBytes.toString(Charsets.UTF_8))
+        require(request.version == 1 && request.operation == "exchange" && request.binding == binding &&
+            request.id == peer.id && LanSyncSecurity.equal(request.credential, peer.credential))
+        lastIncomingNanos[peer.id] = System.nanoTime()
+        setActivity(ActivityStage.EXCHANGING_DATA)
+        try {
+            val payload = decodePayload(request.payload, request.payloadEncoding)
+            callback(session) { callbacks.receiveFrom(peer.id, payload) }
+            val response = callback(session) { callbacks.snapshotFor(peer.id) }
+            val (encodedResponse, responseEncoding) = encodePayloadWithEncoding(response)
+            val reply = Wire(
+                operation = "exchanged",
+                binding = binding,
+                id = deviceId,
+                credential = "",
+                challenge = request.challenge,
+                payload = encodedResponse,
+                payloadEncoding = responseEncoding,
+            )
+            SyncRelayClient.sendMessage(
+                relayBaseUrl = peer.relayUrl,
+                channelId = chan,
+                senderSlot = myResSlot,
+                recipientSlot = peerResSlot,
+                key = key,
+                plaintext = json.encodeToString(reply).toByteArray(Charsets.UTF_8),
+            )
+            lastIncomingNanos[peer.id] = System.nanoTime()
+            recordResult(peer, session, null)
+        } catch (failure: Exception) {
+            val code = errorCode(failure)
+            onLog("Incoming relay exchange error: $code${safeFailureTag(failure)}", true)
+            if (code in REMOTE_REPORTABLE_ERRORS) {
+                runCatching {
+                    val err = Wire(operation = "error", binding = binding, id = deviceId,
+                        credential = "", challenge = request.challenge, payload = code)
+                    SyncRelayClient.sendMessage(
+                        peer.relayUrl, chan, myResSlot, peerResSlot,
+                        key, json.encodeToString(err).toByteArray(Charsets.UTF_8)
+                    )
+                }
+            }
+            recordResult(peer, session, code)
+        } finally {
+            setActivity(ActivityStage.IDLE)
+        }
+        publish()
     }
 
     private fun promotePeerHost(peerId: String, workingHost: String, session: Long) = synchronized(gate) {
@@ -693,10 +1070,19 @@ class PairedLanTransport(
         return out.toByteArray()
     }
     private fun validatePeer(peer: Peer) {
-        LanSyncSecurity.address(peer.host)
+        if (peer.relayUrl.isNotBlank()) {
+            SyncRelayClient.normalizeRelayUrl(peer.relayUrl)
+        }
+        require(peer.host.isNotBlank() || peer.relayUrl.isNotBlank())
+        if (peer.host.isNotBlank()) {
+            LanSyncSecurity.address(peer.host)
+            require(peer.port in 1..65535)
+        } else {
+            require(peer.port in 0..65535)
+        }
         require(peer.hosts.size <= MAX_CANDIDATE_HOSTS)
         peer.hosts.forEach { LanSyncSecurity.address(it) }
-        require(peer.port in 1..65535 && peer.credential.matches(Regex("[A-Za-z0-9_-]{43}")))
+        require(peer.credential.matches(Regex("[A-Za-z0-9_-]{43}")))
         require(peer.id == LanSyncSecurity.id(LanSyncSecurity.certificate(peer.certificate)))
     }
     private fun safeFailureTag(failure: Exception): String {
@@ -744,6 +1130,10 @@ class PairedLanTransport(
         const val COMPACT_QR_PREFIX = "ikna-pair:2:"
         private const val PAYLOAD_ENCODING_GZIP = "gzip"
         private const val GZIP_MIN_BYTES = 4096
+        private const val RELAY_PAIR_INVITER_SLOT = "inviter"
+        private const val RELAY_PAIR_JOINER_SLOT = "joiner"
+        private const val RELAY_PAIR_TIMEOUT_MS = 20_000
+        private const val RELAY_EXCHANGE_TIMEOUT_MS = 25_000
         private const val SOCKET_MS = 5_000
         private const val FAST_POLL_MS = 1_500L
         private const val EXCHANGE_SOCKET_MS = 30_000
@@ -767,8 +1157,8 @@ class PairedLanTransport(
         @Serializable
         private data class CompactQrV2(
             val v: Int = 2,
-            val h: String,
-            val p: Int,
+            val h: String = "",
+            val p: Int = 0,
             val f: String,
             val g: String,
             val e: String,
@@ -777,6 +1167,7 @@ class PairedLanTransport(
             val x: Long,
             val n: String = "",
             val a: List<String> = emptyList(),
+            val u: String = "",
         )
 
         fun sanitizeDeviceName(raw: String): String =
@@ -832,6 +1223,7 @@ class PairedLanTransport(
                 x = invite.expiresAtMillis,
                 n = sanitizeDeviceName(invite.deviceName).take(24),
                 a = extraHosts,
+                u = SyncRelayClient.normalizeRelayUrl(invite.relayUrl),
             )
             return deflateWithPrefix(compactV2Json.encodeToString(compact), COMPACT_QR_PREFIX)
         }
@@ -909,8 +1301,9 @@ class PairedLanTransport(
                         secret = v2.s,
                         expiresAtMillis = v2.x,
                         deviceName = sanitizeDeviceName(v2.n),
-                        hosts = (listOf(v2.h) + v2.a).distinct().take(MAX_CANDIDATE_HOSTS),
+                        hosts = (listOf(v2.h) + v2.a).filter { it.isNotBlank() }.distinct().take(MAX_CANDIDATE_HOSTS),
                         certPin = v2.f,
+                        relayUrl = SyncRelayClient.normalizeRelayUrl(v2.u),
                     )
                 } else {
                     val rawJson = if (trimmed.startsWith(COMPACT_INVITATION_PREFIX)) {
@@ -921,8 +1314,15 @@ class PairedLanTransport(
                     require(rawJson.length <= MAX_INVITATION_JSON_BYTES)
                     invitationJson.decodeFromString<PairingInvitation>(rawJson)
                 }
-                require(value.version == 1 && value.port in 1..65535 && value.secret.matches(Regex("[A-Za-z0-9_-]{43}")))
-                LanSyncSecurity.address(value.host)
+                val cleanRelay = SyncRelayClient.normalizeRelayUrl(value.relayUrl)
+                require(value.version == 1 && value.secret.matches(Regex("[A-Za-z0-9_-]{43}")))
+                require(value.host.isNotBlank() || cleanRelay.isNotBlank())
+                if (value.host.isNotBlank()) {
+                    require(value.port in 1..65535)
+                    LanSyncSecurity.address(value.host)
+                } else {
+                    require(value.port in 0..65535)
+                }
                 require(value.hosts.size <= MAX_CANDIDATE_HOSTS)
                 value.hosts.forEach { LanSyncSecurity.address(it) }
                 if (value.certificate.isNotBlank()) {

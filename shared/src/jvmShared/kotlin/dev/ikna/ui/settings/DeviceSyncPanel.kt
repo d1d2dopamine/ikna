@@ -29,6 +29,7 @@ import dev.ikna.sync.DeviceSyncController
 import dev.ikna.sync.IknaBrandedQrCard
 import dev.ikna.sync.PairedLanTransport
 import dev.ikna.ui.text.S
+import dev.ikna.ui.theme.IknaDialog
 import dev.ikna.ui.theme.IknaProgress
 import dev.ikna.ui.theme.IknaTextButton
 import dev.ikna.ui.theme.IknaTextField
@@ -62,6 +63,7 @@ enum class DeviceSyncError {
     INCOMPATIBLE_PROTOCOL,
     JOURNAL_ITEM_TOO_LARGE,
     JOURNAL_RECONCILIATION,
+    INVALID_RELAY,
 }
 
 data class DeviceSyncProgressUi(
@@ -101,9 +103,11 @@ data class DeviceSyncUiState(
     val busy: Boolean = false,
     val progress: DeviceSyncProgressUi? = null,
     val logs: List<DeviceSyncLogItem> = emptyList(),
+    val autoSync: Boolean = true,
+    val relayUrl: String = "",
 ) {
     // Invitations contain pairing credentials. Do not accidentally include them in logs.
-    override fun toString(): String = "DeviceSyncUiState(enabled=$enabled, paired=$paired, status=$status, error=$error, blockedAfterReset=$blockedAfterReset, busy=$busy)"
+    override fun toString(): String = "DeviceSyncUiState(enabled=$enabled, paired=$paired, status=$status, error=$error, blockedAfterReset=$blockedAfterReset, busy=$busy, autoSync=$autoSync)"
 }
 
 internal fun syncErrorTitleKey(error: DeviceSyncError): String = when (error) {
@@ -128,6 +132,7 @@ internal fun syncErrorTitleKey(error: DeviceSyncError): String = when (error) {
     DeviceSyncError.INCOMPATIBLE_PROTOCOL -> "sync.error.protocol"
     DeviceSyncError.JOURNAL_ITEM_TOO_LARGE -> "sync.error.journal_item_too_large"
     DeviceSyncError.JOURNAL_RECONCILIATION -> "sync.error.journal_reconciliation"
+    DeviceSyncError.INVALID_RELAY -> "sync.error.invalid_relay"
 }
 
 internal fun syncErrorFixKey(error: DeviceSyncError): String = when (error) {
@@ -152,6 +157,7 @@ internal fun syncErrorFixKey(error: DeviceSyncError): String = when (error) {
     DeviceSyncError.INCOMPATIBLE_PROTOCOL -> "sync.fix.protocol"
     DeviceSyncError.JOURNAL_ITEM_TOO_LARGE -> "sync.fix.journal_item_too_large"
     DeviceSyncError.JOURNAL_RECONCILIATION -> "sync.fix.journal_reconciliation"
+    DeviceSyncError.INVALID_RELAY -> "sync.fix.invalid_relay"
 }
 
 internal fun syncStageLabel(progress: DeviceSyncProgressUi): String {
@@ -257,16 +263,21 @@ fun DeviceSyncPanel(
     onScannedCodeConsumed: () -> Unit = {},
     onScanQr: (() -> Unit)? = null,
     consentSlot: (@Composable () -> Unit)? = null,
+    onAutoSyncChange: ((Boolean) -> Unit)? = null,
+    onRelayUrlSave: ((String) -> Unit)? = null,
 ) {
-    var revokeId by remember(state.peers.map { it.id }) { mutableStateOf<String?>(null) }
-    var pasted by remember(state.enabled, state.paired, state.blockedAfterReset) { mutableStateOf("") }
-    var showManualInput by remember(state.enabled, state.paired, state.blockedAfterReset) {
+    var unpairTarget by remember(state.peers.map { it.id }) { mutableStateOf<DeviceSyncPeerUiState?>(null) }
+    var pasted by remember(state.paired, state.blockedAfterReset) { mutableStateOf("") }
+    var showManualInput by remember(state.paired, state.blockedAfterReset) {
         mutableStateOf(onScanQr == null)
     }
     var showAddressPicker by remember(state.localAddresses) { mutableStateOf(false) }
+    var showRelayConfig by remember { mutableStateOf(false) }
+    var relayDraft by remember(state.relayUrl) { mutableStateOf(state.relayUrl) }
     var confirmNewHistory by remember(state.blockedAfterReset, state.canStartNewHistory) { mutableStateOf(false) }
     var address by remember(state.localAddresses) { mutableStateOf(state.localAddresses.firstOrNull().orEmpty()) }
-    val canPair = state.enabled && !state.paired && !state.blockedAfterReset && !state.busy
+    val canPair = !state.paired && !state.blockedAfterReset && !state.busy
+    val canInvite = canPair && (address.isNotBlank() || state.relayUrl.isNotBlank())
     LaunchedEffect(scannedCode, canPair) {
         val code = scannedCode?.trim().orEmpty()
         if (code.isNotEmpty()) {
@@ -287,26 +298,37 @@ fun DeviceSyncPanel(
             onPair(invitation)
         }
     }
+    unpairTarget?.let { target ->
+        val targetName = target.name.ifBlank { target.address }
+        IknaDialog(
+            title = S.t("sync.unpair_dialog_title").replace("{device}", targetName),
+            body = S.t("sync.device_revoke_scope"),
+            confirmLabel = S.t("sync.unpair_confirm"),
+            onConfirm = {
+                val id = target.id
+                unpairTarget = null
+                onRevokePeer(id)
+            },
+            dismissLabel = S.t("sync.unpair_cancel"),
+            onDismiss = { unpairTarget = null },
+            confirmColor = MaterialTheme.colorScheme.error,
+        )
+    }
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        IknaSettingsToggleRow(
-            title = S.t("sync.enabled"),
-            subtitle = S.t("sync.scope"),
-            checked = state.enabled,
-            enabled = !state.blockedAfterReset,
-            onCheckedChange = onEnabledChange
-        )
-        Text(
-            text = S.t(when (state.status) {
-                DeviceSyncStatus.OFF -> "sync.status.off"
-                DeviceSyncStatus.UNPAIRED -> "sync.status.unpaired"
-                DeviceSyncStatus.WAITING -> "sync.status.waiting"
-                DeviceSyncStatus.CONNECTING -> "sync.status.connecting"
-                DeviceSyncStatus.SYNCING -> "sync.status.syncing"
-                DeviceSyncStatus.UP_TO_DATE -> "sync.status.current"
-                DeviceSyncStatus.ERROR -> "sync.status.error"
-            }),
-            style = MaterialTheme.typography.bodyMedium
-        )
+        if (state.paired || state.status != DeviceSyncStatus.OFF) {
+            Text(
+                text = S.t(when (state.status) {
+                    DeviceSyncStatus.OFF -> "sync.status.off"
+                    DeviceSyncStatus.UNPAIRED -> "sync.status.unpaired"
+                    DeviceSyncStatus.WAITING -> "sync.status.waiting"
+                    DeviceSyncStatus.CONNECTING -> "sync.status.connecting"
+                    DeviceSyncStatus.SYNCING -> "sync.status.syncing"
+                    DeviceSyncStatus.UP_TO_DATE -> "sync.status.current"
+                    DeviceSyncStatus.ERROR -> "sync.status.error"
+                }),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
         state.progress?.let { progress ->
             IknaSyncProgressStrip(
                 label = syncStageLabel(progress),
@@ -352,14 +374,14 @@ fun DeviceSyncPanel(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onBackground
                 )
-                if (retryable && state.enabled && state.paired && !state.blockedAfterReset && onSyncNow != null) {
+                if (retryable && state.paired && !state.blockedAfterReset && onSyncNow != null) {
                     IknaTextButton(
                         label = S.t("sync.retry_now"),
                         enabled = !state.busy,
                         horizontalPadding = 0.dp,
                         onClick = onSyncNow
                     )
-                } else if (err == DeviceSyncError.EXPIRED_INVITATION && canPair && address.isNotBlank()) {
+                } else if (err == DeviceSyncError.EXPIRED_INVITATION && canInvite) {
                     IknaTextButton(
                         label = S.t("sync.show_qr_btn"),
                         horizontalPadding = 0.dp,
@@ -391,7 +413,7 @@ fun DeviceSyncPanel(
                     }
                 }
             )
-        } else if (state.enabled && !state.paired) {
+        } else if (!state.paired) {
             Text(
                 text = S.t("sync.quick_guide"),
                 style = MaterialTheme.typography.bodySmall,
@@ -425,10 +447,10 @@ fun DeviceSyncPanel(
             }
             IknaWideButton(
                 label = S.t("sync.show_qr_btn"),
-                enabled = canPair && address.isNotBlank(),
-                onClick = { if (canPair && address.isNotBlank()) onCreateInvitation(address) }
+                enabled = canInvite,
+                onClick = { if (canInvite) onCreateInvitation(address) }
             )
-            if (address.isBlank()) {
+            if (address.isBlank() && state.relayUrl.isBlank()) {
                 Text(
                     text = S.t("sync.no_network_hint"),
                     style = MaterialTheme.typography.bodySmall,
@@ -510,11 +532,22 @@ fun DeviceSyncPanel(
                 }
             }
         }
-        if (state.enabled && state.paired && !state.blockedAfterReset && onSyncNow != null) {
-            IknaWideButton(
-                label = S.t("sync.sync_now"),
+        if (state.paired && !state.blockedAfterReset) {
+            if (onSyncNow != null) {
+                IknaWideButton(
+                    label = S.t("sync.sync_now"),
+                    enabled = !state.busy,
+                    onClick = onSyncNow
+                )
+            }
+            IknaSettingsToggleRow(
+                title = S.t("sync.enabled"),
+                subtitle = S.t("sync.auto_scope"),
+                checked = if (onAutoSyncChange != null) state.autoSync else state.enabled,
                 enabled = !state.busy,
-                onClick = onSyncNow
+                onCheckedChange = { checked ->
+                    if (onAutoSyncChange != null) onAutoSyncChange(checked) else onEnabledChange(checked)
+                }
             )
         }
         if (state.peers.isNotEmpty()) {
@@ -543,21 +576,74 @@ fun DeviceSyncPanel(
                             color = MaterialTheme.colorScheme.error
                         )
                     }
-                    IknaSettingsToggleRow(
-                        title = S.t("sync.device_revoke_confirm"),
-                        subtitle = S.t("sync.device_revoke_scope"),
-                        checked = revokeId == peer.id,
+                    IknaTextButton(
+                        label = S.t("sync.device_revoke"),
+                        color = MaterialTheme.colorScheme.error,
                         enabled = !state.busy,
-                        onCheckedChange = { revokeId = if (it) peer.id else null }
+                        horizontalPadding = 0.dp,
+                        onClick = { unpairTarget = peer }
                     )
-                    IknaWideButton(label = S.t("sync.device_revoke"),
-                        enabled = revokeId == peer.id && !state.busy,
-                        onClick = {
-                            if (revokeId == peer.id && !state.busy) {
-                                revokeId = null
-                                onRevokePeer(peer.id)
-                            }
-                        })
+                }
+            }
+        }
+        if (onRelayUrlSave != null && !state.blockedAfterReset) {
+            val relayLabel = if (state.relayUrl.isNotBlank()) {
+                S.t("sync.relay_title") + " · " + S.t("sync.relay_active")
+            } else {
+                S.t("sync.relay_title")
+            }
+            IknaTextButton(
+                label = relayLabel,
+                color = if (state.relayUrl.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                horizontalPadding = 0.dp,
+                onClick = { showRelayConfig = !showRelayConfig }
+            )
+            if (showRelayConfig) {
+                val relayShape = iknaTileShape()
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface, relayShape)
+                        .border(1.dp, MaterialTheme.colorScheme.outline, relayShape)
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = S.t("sync.relay_scope"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    IknaTextField(
+                        value = relayDraft,
+                        onValueChange = { relayDraft = it.take(256) },
+                        placeholder = S.t("sync.relay_placeholder"),
+                        onSearch = { onRelayUrlSave(relayDraft.trim()) },
+                        modifier = Modifier.fillMaxWidth(),
+                        maxLength = 256
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IknaWideButton(
+                            label = S.t("sync.relay_save"),
+                            enabled = !state.busy && relayDraft.trim() != state.relayUrl,
+                            modifier = Modifier.weight(1f),
+                            onClick = { onRelayUrlSave(relayDraft.trim()) }
+                        )
+                        if (state.relayUrl.isNotBlank() || relayDraft.isNotBlank()) {
+                            IknaTextButton(
+                                label = S.t("sync.relay_clear"),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                enabled = !state.busy,
+                                onClick = {
+                                    relayDraft = ""
+                                    onRelayUrlSave("")
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -616,7 +702,7 @@ fun DeviceSyncPanel(
                 }
             }
         }
-        if (state.paired || state.invitation != null || state.blockedAfterReset) {
+        if (state.peers.size > 1 || state.invitation != null || state.blockedAfterReset) {
             IknaTextButton(label = S.t("sync.revoke"), onClick = onRevoke)
         }
     }

@@ -68,6 +68,8 @@ fun DeviceSyncSettings(
                 .format(Instant.ofEpochMilli(entry.timestampMillis))
             DeviceSyncLogItem(time = time, isError = entry.isError, message = entry.message)
         },
+        autoSync = current.autoSync,
+        relayUrl = current.relayUrl,
     )
     val previewKey = current.profileConsent.preview?.let { p ->
         "${current.profileConsent.peerId}|${p.localRevision}|${p.incomingRevision}"
@@ -80,6 +82,8 @@ fun DeviceSyncSettings(
     DeviceSyncPanel(
         state = state,
         onEnabledChange = { scope.launch { controller.setEnabled(it) } },
+        onAutoSyncChange = { scope.launch { controller.setAutoSync(it) } },
+        onRelayUrlSave = { scope.launch { controller.setRelayUrl(it) } },
         onCreateInvitation = { scope.launch { controller.createInvitation(it) } },
         onPair = { scope.launch { controller.pair(it) } },
         onRevoke = { scope.launch { controller.revoke() } },
@@ -139,6 +143,7 @@ internal fun deviceSyncError(code: String, hasProfileConflicts: Boolean = false)
     "profile_conflict", "profile-content-conflict" -> DeviceSyncError.PROFILE_CONFLICT
     "profile_stale", "stale-proposal", "proposal-expired", "proposal-cancelled",
     "local-profile-stale", "remote-profile-stale" -> DeviceSyncError.PROFILE_STALE
+    "invalid-relay-url" -> DeviceSyncError.INVALID_RELAY
     "unavailable" -> DeviceSyncError.UNAVAILABLE
     else -> DeviceSyncError.MERGE_FAILED
 }

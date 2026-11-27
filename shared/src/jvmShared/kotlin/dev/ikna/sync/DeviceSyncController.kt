@@ -59,6 +59,8 @@ class DeviceSyncController(
         val pendingRecoverySlot: String? = null,
         val pendingRecoveryOperationId: String? = null,
         val pendingAdoption: ProfileConsentProtocol.Proposal? = null,
+        val autoSync: Boolean = true,
+        val relayUrl: String = "",
     )
     data class AdoptionRequest(val incoming: ProfileTransferSnapshot, val preview: ProfileMergePreview,
         val proposal: ProfileConsentProtocol.Proposal, val afterLocalId: Long, val boundaryToken: String?,
@@ -100,6 +102,8 @@ class DeviceSyncController(
         val stageTotal: Int = 0,
         val peerRole: PairedLanTransport.PeerRole = PairedLanTransport.PeerRole.UNKNOWN,
         val logs: List<SyncLogEntry> = emptyList(),
+        val autoSync: Boolean = true,
+        val relayUrl: String = "",
     ) {
         override fun toString(): String = "State(enabled=$enabled, running=$running, peers=$peers, blocked=$blocked, error=$error, stage=$stage, invitation=<redacted>)"
     }
@@ -199,7 +203,9 @@ class DeviceSyncController(
             stageAttempt = activity.attempt,
             stageTotal = activity.total,
             peerRole = peerRole,
-            logs = synchronized(logGate) { logEntries.toList() }) }
+            logs = synchronized(logGate) { logEntries.toList() },
+            autoSync = configuration.autoSync,
+            relayUrl = configuration.relayUrl) }
     }
 
     private fun computeStage(
@@ -266,7 +272,8 @@ class DeviceSyncController(
             val count = transport?.status?.peerCount ?: 0
             val consentState = protocol?.state
             count > 0 && (consentState == null || !consentState.complete || consentState.journalPending)
-        }
+        },
+        autoPoll = { configuration.autoSync }
     ).also { transport = it }
 
     private fun journalAuthorization(operationId: String, digest: String, peerId: String = instance().status.peers.single().id): JournalAuthorization {
@@ -554,14 +561,39 @@ class DeviceSyncController(
         if (permitted) instance().start() else { transport?.stop(); protocol?.pause() }
         mutable.update { it.copy(invitation = null) }
     }
+    /** Toggles background automatic polling without locking pairing or manual sync. */
+    suspend fun setAutoSync(value: Boolean) = action(checkBoundary = false) {
+        check(!configuration.blocked) { "history-blocked" }
+        save(configuration.copy(autoSync = value))
+        if (value && configuration.enabled && foreground) {
+            permitted = true
+            instance().start()
+            instance().triggerSyncNow()
+        }
+    }
+    /** Saves or clears the optional zero-storage E2EE relay URL for VPN / cross-network sync. */
+    suspend fun setRelayUrl(rawUrl: String) = action(checkBoundary = false) {
+        val normalized = SyncRelayClient.normalizeRelayUrl(rawUrl)
+        save(configuration.copy(relayUrl = normalized))
+        transport?.updateRelayUrl(normalized)
+        recordLog(if (normalized.isNotEmpty()) "E2EE relay configured" else "E2EE relay cleared", false)
+    }
     suspend fun createInvitation(host: String) = action {
-        check(configuration.enabled && foreground && !configuration.blocked) { "paused" }
+        check(foreground && !configuration.blocked) { "paused" }
+        if (!configuration.enabled) {
+            save(configuration.copy(enabled = true, hasEnabled = true))
+        }
+        permitted = true
+        instance().start()
         check(instance().status.peerCount == 0) { "single-peer-required" }
-        val invitation = instance().createInvitation(host)
+        val invitation = instance().createInvitation(host, configuration.relayUrl)
         mutable.update { it.copy(invitation = invitation) }
     }
     suspend fun pair(text: String) = action {
-        check(configuration.enabled && foreground && !configuration.blocked) { "paused" }
+        check(foreground && !configuration.blocked) { "paused" }
+        if (!configuration.enabled) {
+            save(configuration.copy(enabled = true, hasEnabled = true))
+        }
         check(instance().status.peerCount == 0) { "single-peer-required" }
         val invite = PairedLanTransport.parseInvitation(text)
         if (invite.binding.freshStart && invite.binding != configuration.binding) {
@@ -582,6 +614,9 @@ class DeviceSyncController(
             clearConsent()
             save(configuration.copy(binding = invite.binding))
             mutable.update { it.copy(lastSuccessAtMillis = null) }
+        }
+        if (invite.relayUrl.isNotBlank() && configuration.relayUrl.isBlank()) {
+            save(configuration.copy(relayUrl = invite.relayUrl))
         }
         permitted = true
         instance().start()
@@ -607,9 +642,12 @@ class DeviceSyncController(
         publish()
     }
 
-    /** Triggers an immediate sync cycle without waiting for poll backoff (e.g. after toggling Wi-Fi or VPN). */
+    /** Triggers an immediate sync cycle without waiting for poll backoff (works even with auto-sync off). */
     suspend fun syncNow() = action(checkBoundary = false) {
-        if (!configuration.enabled || !foreground || configuration.blocked || adoptionInProgress) return@action
+        if (!foreground || configuration.blocked || adoptionInProgress) return@action
+        if (!configuration.enabled) {
+            save(configuration.copy(enabled = true, hasEnabled = true))
+        }
         permitted = true
         instance().start()
         instance().triggerSyncNow()
@@ -773,7 +811,7 @@ class DeviceSyncController(
                     error.message in setOf(
                         "adoption-not-supported", "awaiting-profile", "profile-conflict-or-stale", "proposal-pending",
                         "single-peer-required", "profile-too-large", "proposal-expired", "stale-proposal",
-                        "local-profile-stale", "remote-profile-stale", "proposal-cancelled"
+                        "local-profile-stale", "remote-profile-stale", "proposal-cancelled", "invalid-relay-url"
                     ) -> error.message!!
                     else -> "operation-failed"
                 }
