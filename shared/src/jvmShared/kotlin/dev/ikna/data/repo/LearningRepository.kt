@@ -52,7 +52,6 @@ import dev.ikna.domain.session.SessionCard
 import dev.ikna.domain.session.SessionPlan
 import dev.ikna.domain.session.CommittedSessionSnapshot
 import dev.ikna.domain.session.SessionObservation
-import dev.ikna.domain.session.OptionalHardBatch
 import dev.ikna.domain.session.ReviewPurpose
 import dev.ikna.domain.session.ReviewDuration
 import dev.ikna.domain.time.DayBoundary
@@ -216,29 +215,6 @@ class LearningRepository(
             statsDao = statsDao,
             boundary = boundary,
             activeHistoryCutoff = { activeHistoryCutoff() }
-        )
-    }
-
-    private val optionalHardService by lazy {
-        OptionalHardReviewService(
-            db = db,
-            cardDao = cardDao,
-            reviewDao = reviewDao,
-            planDao = planDao,
-            writeLock = writeLock,
-            leechMinLapses = LEECH_MIN_LAPSES,
-            builder = { builder() },
-            dayKey = { dayKey(it) },
-            startOfDay = { startOfDay(it) },
-            activeHistoryCutoff = { activeHistoryCutoff() },
-            suppressedNow = { suppressedNow() },
-            checkHistoryWritable = { checkHistoryWritable() },
-            syncHistoryBoundary = { syncHistoryBoundary?.invoke() },
-            historyBoundaryToken = { historyBoundaryToken?.invoke() },
-            answerLocked = { card, rating, durationMs, now, signals, purpose ->
-                answerLocked(card, rating, durationMs, now, signals, purpose)
-            },
-            undoLastLocked = { now, expectedId -> undoLastLocked(now, expectedId) }
         )
     }
 
@@ -628,32 +604,10 @@ class LearningRepository(
                     sessionTotal = scope.size, sessionDone = scope.size - pending.size,
                     goalAnswersToday = goal)
             }
-            val optional = complete && !required.isNullOrEmpty() && optionalHardService.candidates(deckId, 1).isNotEmpty()
             caller.ensureActive()
-            CommittedSessionSnapshot(observation, plan, answered, complete, factual, goal, optional)
+            CommittedSessionSnapshot(observation, plan, answered, complete, factual, goal)
         }.also { caller.ensureActive() }
     }
-
-    /** Read-only gate: viewing this affordance never creates a plan or spends allowance. */
-    suspend fun optionalHardAvailable(deckId: String? = null, now: Long = System.currentTimeMillis()): Boolean =
-        optionalHardService.available(deckId, now)
-
-    /** Explicit entry replaces an abandoned ephemeral batch, never the daily plan. */
-    suspend fun startOptionalHardReview(deckId: String? = null, now: Long = System.currentTimeMillis()): OptionalHardBatch? =
-        optionalHardService.start(deckId, now)
-
-    suspend fun cancelOptionalHardReview(batch: OptionalHardBatch) =
-        optionalHardService.cancel(batch)
-
-    suspend fun answerOptionalHard(
-        batch: OptionalHardBatch, card: SessionCard, rating: Rating, durationMs: Long, now: Long,
-        signals: ReviewSignals = ReviewSignals()
-    ) = optionalHardService.answer(batch, card, rating, durationMs, now, signals)
-
-    /** Only this batch's latest retained answer may be undone; no ordinary queue rebuild. */
-    suspend fun undoOptionalHard(batch: OptionalHardBatch, now: Long = System.currentTimeMillis()): SessionCard? =
-        optionalHardService.undo(batch, now)
-
 
     /**
      * Today's plan minus everything already answered today. Rebuilding this
@@ -1539,7 +1493,6 @@ class LearningRepository(
             lastId
         }
         clearBrowseCredits?.invoke()
-        optionalHardService.clear()
         boundary
     }
 

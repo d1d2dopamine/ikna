@@ -328,20 +328,6 @@ interface CardDao {
     )
     suspend fun leeches(minLapses: Int, limit: Int): List<CardEntity>
 
-    /** Learned classic targets only; scope/suppression precede the stable finite limit. */
-    @Query("SELECT * FROM cards WHERE level = 0 AND isNew = 0 AND lapses >= :minLapses " +
-        "AND chunkId NOT IN (:excluded) AND EXISTS (SELECT 1 FROM chunks c WHERE c.id = cards.chunkId) " +
-        "AND EXISTS (SELECT 1 FROM pack_chunks pc JOIN packs p ON p.id = pc.packId " +
-        "WHERE pc.chunkId = cards.chunkId AND (:packId IS NULL OR pc.packId = :packId)) " +
-        "ORDER BY lapses DESC, dueAt ASC, chunkId ASC LIMIT :limit")
-    suspend fun optionalHardCards(packId: String?, excluded: List<String>, minLapses: Int, limit: Int): List<CardEntity>
-
-    @Query("SELECT EXISTS(SELECT 1 FROM cards WHERE chunkId = :chunkId AND level = 0 " +
-        "AND isNew = 0 AND lapses >= :minLapses AND EXISTS " +
-        "(SELECT 1 FROM pack_chunks pc JOIN packs p ON p.id = pc.packId " +
-        "WHERE pc.chunkId = cards.chunkId AND (:packId IS NULL OR pc.packId = :packId)))")
-    suspend fun optionalHardEligible(chunkId: String, packId: String?, minLapses: Int): Boolean
-
     @Query(
         "SELECT * FROM cards WHERE level = 0 AND inAmnesty = 0 AND dueAt <= :until " +
             "ORDER BY dueAt ASC LIMIT :limit"

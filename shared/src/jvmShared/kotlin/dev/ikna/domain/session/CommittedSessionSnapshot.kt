@@ -22,6 +22,5 @@ data class CommittedSessionSnapshot(
     val answeredKeys: Set<String>,
     val requiredComplete: Boolean,
     val answeredToday: Int,
-    val goalAnswersToday: Int,
-    val optionalHardAvailable: Boolean
+    val goalAnswersToday: Int
 )

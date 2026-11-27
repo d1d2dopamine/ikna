@@ -33,26 +33,31 @@ decision with an older plan checkbox.
 
 ## Implement and verify
 
-1. Bound the change to one coherent task. Avoid unrelated cleanup.
-2. Inspect callers and exact declarations before changing shared APIs,
+1. **Never add unrequested features or silent changes.** Do not invent or add
+   new features, study modes, UI buttons, settings, or behaviour on your own
+   without explicit permission from the developer, and never slip in changes
+   without telling the developer. If you think an extra feature would help,
+   propose it first and wait for explicit approval before implementing it.
+2. Bound the change to one coherent task. Avoid unrelated cleanup.
+3. Inspect callers and exact declarations before changing shared APIs,
    persistence, identifiers, serialization, learning policy or release metadata.
    Never guess property, method, or Compose parameter names from memory.
-3. Implement in the smallest owning layer. Prefer shared code for behaviour
+4. Implement in the smallest owning layer. Prefer shared code for behaviour
    required on Android and desktop.
-4. After moving, renaming, or removing any symbol, run
+5. After moving, renaming, or removing any symbol, run
    `git grep -n "<symbol>" -- shared/ app/ desktop/` to verify zero dangling
    call sites across all modules.
-5. Add or update meaningful regression tests for changed behaviour. Keep JVM/DEX
+6. Add or update meaningful regression tests for changed behaviour. Keep JVM/DEX
    test names free of `.` and illegal bytecode characters. Do not add
    implementation-mirroring tests for an ordinary documentation edit.
-6. Select checks using [check-matrix.md](references/check-matrix.md) and live
+7. Select checks using [check-matrix.md](references/check-matrix.md) and live
    `CONTRIBUTING.md` commands. When full local Gradle builds are not run, run
    every applicable fast static contract checker and state clearly what CI
    still needs to compile and test.
-7. Review `git diff --check` and the final diff: inspect version/schema drift,
+8. Review `git diff --check` and the final diff: inspect version/schema drift,
    generated files, hard-coded strings, all 7 locales, publishing flags,
    destructive SQL, unexpected deletions and unrelated formatting.
-8. Report resulting behaviour, relevant checks and remaining limitations.
+9. Report resulting behaviour, relevant checks and remaining limitations.
    Never describe a check or build as passed unless it actually ran.
 
 Use the contributor's requested delivery method. Do not impose a ZIP, patch,

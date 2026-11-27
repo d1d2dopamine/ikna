@@ -2,14 +2,6 @@ package dev.ikna.ui.text
 
 /** Complete Brazilian Portuguese interface catalogue. */
 val STRINGS_PT: Map<String, String> = linkedMapOf(
-    "sess.hard.start" to "REVISÃO DIFÍCIL OPCIONAL · ATÉ 5",
-    "sess.hard.active" to "Revisão difícil opcional",
-    "sess.hard.finish" to "Terminar",
-    "sess.hard.done" to "Revisão opcional concluída",
-    "sess.hard.done_scope" to "A lição principal continua concluída. As respostas alteram as datas de revisão, mas não liberam cartões novos.",
-    "sess.hard.empty" to "Não há cartões difíceis elegíveis nesta seleção agora.",
-    "sess.hard.scope" to "Cartões já aprendidos com pelo menos quatro erros. Uma passagem; pare quando quiser. Avaliação normal; sem crédito para cartões novos.",
-
     "sync.error.journal_item_too_large" to "Um evento do histórico é grande demais para um lote. O histórico é preservado; não o apague para sincronizar. Este evento precisa de suporte à transferência de registros maiores.",
     "sync.error.journal_reconciliation" to "Não foi possível verificar o ponto de sincronização salvo. O histórico é preservado. Revogue o pareamento nos dois dispositivos e revise os perfis novamente; o limite do perfil inicial continua válido. Não apague o histórico para reconectar.",
     "sync.error.protocol" to "As versões de sincronização são incompatíveis. Atualize o aplicativo nos dois dispositivos e revise e aprove os perfis novamente. O histórico local é preservado.",

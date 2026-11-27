@@ -134,7 +134,7 @@ fun SessionScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         if (!state.loading && !state.loadFailed && !state.sessionChanged) {
-            IknaSessionTopBar(state = state, onFinishOptional = vm::finishOptionalHardReview)
+            IknaSessionTopBar(state = state)
             IknaTodayProgress(state = state)
         }
 
@@ -218,8 +218,7 @@ fun SessionScreen(
                     state = state,
                     animations = settings.animations,
                     onExtra = vm::addExtra,
-                    checkExtra = { now -> container.learningRepository.extraReviewAvailable(deckId, now) },
-                    onOptionalHard = vm::startOptionalHardReview
+                    checkExtra = { now -> container.learningRepository.extraReviewAvailable(deckId, now) }
                 )
             }
         }

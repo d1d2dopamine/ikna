@@ -68,7 +68,6 @@ import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.grading.INPUT_KEYBOARD
 import dev.ikna.domain.grading.INPUT_SWIPE
 import dev.ikna.domain.phonetics.Phonetics
-import dev.ikna.domain.session.OptionalHardBatch
 import dev.ikna.domain.session.SessionPlan
 import dev.ikna.domain.session.ReviewSignalTracker
 import dev.ikna.domain.session.ReviewSignals
@@ -162,10 +161,6 @@ private fun SessionPaneContent(
     var reportCopied by remember { mutableStateOf(false) }
     var reportCard by remember { mutableStateOf<SessionCard?>(null) }
     var noMoreExtra by remember { mutableStateOf(false) }
-    var optionalBatch by remember(deckId) { mutableStateOf<OptionalHardBatch?>(null) }
-    var optionalCards by remember(deckId) { mutableStateOf<List<SessionCard>>(emptyList()) }
-    var optionalAvailable by remember(deckId) { mutableStateOf(false) }
-    var optionalEmpty by remember(deckId) { mutableStateOf(false) }
     // Keep the same quiet Undo strip through a pause, until a later action or dismissal.
 
     suspend fun rememberActionObservation(generation: Long, change: SessionPlanChange = SessionPlanChange.Stable): Boolean {
@@ -200,13 +195,6 @@ private fun SessionPaneContent(
         reportCard = null
         heldReviewKeys.clear()
         cardLoadResult {
-            optionalBatch?.let {
-                container.learningRepository.cancelOptionalHardReview(it)
-                undoVisible = false
-                undoFailed = false
-            }
-            optionalBatch = null
-            optionalCards = emptyList()
             val loaded = container.learningRepository.buildSession(deckId = deckId)
             val snapshot = container.learningRepository.inspectSession(deckId)
             // Explicit developer sandbox entry keeps its pre-existing forced practice.
@@ -217,7 +205,6 @@ private fun SessionPaneContent(
                 if (generation == container.sessionChanges.generation.value && presentationGate.isCurrent(token)) {
                     plan = it.plan
                     sessionChanged = it.plan == null
-                    optionalAvailable = !sessionChanged && it.optionalHardAvailable
                     presentationGate.remember(token, it.observation)
                     observedGeneration = generation
                 } else {
@@ -257,9 +244,6 @@ private fun SessionPaneContent(
                     // A different day or replaced/missing persisted plan requires explicit admission.
                     sessionChanged = snapshot.plan == null || !SessionObservationPolicy.compatible(previous,
                         snapshot.observation, SessionPlanChange.Stable)
-                    optionalBatch?.let { container.learningRepository.cancelOptionalHardReview(it) }
-                    optionalBatch = null
-                    optionalCards = emptyList()
                     undoVisible = false
                     undoFailed = false
                     reportCard = null
@@ -269,8 +253,6 @@ private fun SessionPaneContent(
                     index = 0
                     answeredHere = 0
                     plan = if (sessionChanged) null else snapshot.plan
-                    optionalAvailable = !sessionChanged && snapshot.optionalHardAvailable
-                    optionalEmpty = false
                     shownNanos = System.nanoTime()
                     loadFailed = false
                 }
@@ -285,7 +267,7 @@ private fun SessionPaneContent(
         } finally { inspecting = false }
     }
 
-    val cards = if (optionalBatch != null) optionalCards else plan?.cards.orEmpty()
+    val cards = plan?.cards.orEmpty()
     val current = if (loading || loadFailed || invalidated || sessionChanged || inspecting) null else cards.getOrNull(index)
     // A clickable card can become the focused Compose node. Reclaim the
     // session's keyboard target after every reveal so A/D work identically
@@ -307,7 +289,7 @@ private fun SessionPaneContent(
         revealed = false
         programmaticSwipe = null
         shownNanos = System.nanoTime()
-        if (optionalBatch != null || index + 1 < cards.size) index += 1
+        if (index + 1 < cards.size) index += 1
         else { loading = true; reload += 1 }
         onChanged()
     }
@@ -320,16 +302,10 @@ private fun SessionPaneContent(
             val actionGeneration = container.sessionChanges.generation.value
             scope.launch {
                 val result = cardLoadResult {
-                    val batch = optionalBatch
-                    if (batch != null) {
-                        container.learningRepository.answerOptionalHard(batch, card, rating, took,
-                            now = System.currentTimeMillis(), signals = signals)
-                    } else {
-                        container.learningRepository.answer(card, rating, took,
-                            now = System.currentTimeMillis(), signals = signals)
-                    }
+                    container.learningRepository.answer(card, rating, took,
+                        now = System.currentTimeMillis(), signals = signals)
                 }
-                if (!rememberActionObservation(actionGeneration, if (optionalBatch == null) SessionPlanChange.AppendExtras else SessionPlanChange.Stable)) { saving = false; return@launch }
+                if (!rememberActionObservation(actionGeneration, SessionPlanChange.AppendExtras)) { saving = false; return@launch }
                 if (result.isSuccess) {
                     if (signals.inputMethod == "swipe") cardLoadResult { container.settings.bumpSwipe() }
                     if (actionGeneration != container.sessionChanges.generation.value) { saving = false; return@launch }
@@ -342,11 +318,8 @@ private fun SessionPaneContent(
                 } else {
                     logLine("answer failed: " + result.exceptionOrNull())
                     note = S.t("set.057")
-                    if (optionalBatch != null) {
-                        loadFailed = true
-                        optionalAvailable = false
-                        undoVisible = false
-                    }
+                    loadFailed = true
+                    undoVisible = false
                 }
                 saving = false
             }
@@ -365,27 +338,10 @@ private fun SessionPaneContent(
             saving = true
             val actionGeneration = container.sessionChanges.generation.value
             scope.launch {
-                val batch = optionalBatch
-                if (batch != null) {
-                    val restored = cardLoadResult { container.learningRepository.undoOptionalHard(batch) }.getOrNull()
-                    if (!rememberActionObservation(actionGeneration)) { saving = false; return@launch }
-                    undoFailed = restored == null
-                    if (restored != null) {
-                        val previous = (index - 1).coerceAtLeast(0)
-                        optionalCards = optionalCards.toMutableList().also { it[previous] = restored }
-                        index = previous
-                        answeredHere = (answeredHere - 1).coerceAtLeast(0)
-                        revealed = false
-                        programmaticSwipe = null
-                        shownNanos = System.nanoTime()
-                        onChanged()
-                    }
-                } else {
-                    val restored = cardLoadResult { container.learningRepository.undoLast() }.getOrNull()
-                    if (!rememberActionObservation(actionGeneration)) { saving = false; return@launch }
-                    undoFailed = restored == null
-                    if (restored != null) { loading = true; reload += 1; onChanged() }
-                }
+                val restored = cardLoadResult { container.learningRepository.undoLast() }.getOrNull()
+                if (!rememberActionObservation(actionGeneration)) { saving = false; return@launch }
+                undoFailed = restored == null
+                if (restored != null) { loading = true; reload += 1; onChanged() }
                 undoVisible = false
                 wrongMarked = false
                 saving = false
@@ -399,13 +355,6 @@ private fun SessionPaneContent(
             val actionGeneration = container.sessionChanges.generation.value
             scope.launch {
                 cardLoadResult {
-                    optionalBatch?.let {
-                        container.learningRepository.cancelOptionalHardReview(it)
-                        undoVisible = false
-                        undoFailed = false
-                    }
-                    optionalBatch = null
-                    optionalEmpty = false
                     container.learningRepository.addExtra(count = 5, deckId = deckId)
                 }.fold(
                     onSuccess = { added ->
@@ -422,57 +371,6 @@ private fun SessionPaneContent(
                 )
                 saving = false
             }
-        }
-    }
-
-    val startOptional: () -> Unit = {
-        if (!loading && !loadFailed && !saving && acceptsInput()) {
-            saving = true
-            val actionGeneration = container.sessionChanges.generation.value
-            scope.launch {
-                cardLoadResult {
-                    val batch = container.learningRepository.startOptionalHardReview(deckId)
-                    val answered = container.learningRepository.answeredToday()
-                    Triple(batch, answered, container.learningRepository.goalAnswersToday())
-                }.fold(
-                    onSuccess = { (batch, answered, goalAnswered) ->
-                        if (!rememberActionObservation(actionGeneration)) { saving = false; return@launch }
-                        optionalBatch = batch
-                        optionalCards = batch?.cards.orEmpty()
-                        optionalEmpty = batch == null
-                        optionalAvailable = batch != null
-                        if (batch != null) {
-                            plan = plan?.copy(answeredToday = answered, goalAnswersToday = goalAnswered)
-                            index = 0
-                            answeredHere = 0
-                            revealed = false
-                            programmaticSwipe = null
-                            shownNanos = System.nanoTime()
-                            undoVisible = false
-                            undoFailed = false
-                            wrongMarked = false
-                            noMoreExtra = false
-                            note = null
-                        } else {
-                            // A finished/replaced optional batch cannot become normal
-                            // goal credit through its transient answeredHere counter.
-                            undoVisible = false
-                            undoFailed = false
-                            loading = true
-                            reload += 1
-                        }
-                    },
-                    onFailure = { loadFailed = true; optionalAvailable = false; undoVisible = false }
-                )
-                saving = false
-            }
-        }
-    }
-    val finishOptional: () -> Unit = {
-        if (!loading && !saving && acceptsInput() && optionalBatch != null) {
-            // The normal reload cancels the ephemeral batch; saved answers remain.
-            loading = true
-            reload += 1
         }
     }
 
@@ -499,15 +397,13 @@ private fun SessionPaneContent(
     val presentation = SessionUiState(loading = loading || invalidated || inspecting, loadFailed = loadFailed, sessionChanged = sessionChanged, queue = cards, index = index,
         revealed = revealed, remaining = (cards.size - index).coerceAtLeast(0),
         answeredToday = (plan?.answeredToday ?: 0) + answeredHere,
-        goalAnswersToday = (plan?.goalAnswersToday ?: 0) + if (optionalBatch == null) answeredHere else 0,
+        goalAnswersToday = (plan?.goalAnswersToday ?: 0) + answeredHere,
         dailyMinimum = container.learningRepository.dailyMinimum(),
-        sessionDone = if (optionalBatch != null) index else (plan?.sessionDone ?: 0) + index,
-        sessionTotal = if (optionalBatch != null) optionalCards.size else plan?.sessionTotal ?: 0,
+        sessionDone = (plan?.sessionDone ?: 0) + index,
+        sessionTotal = plan?.sessionTotal ?: 0,
         deckTitle = plan?.deckTitle, perCardMs = settings.answerMs.takeIf { it > 0 }?.toLong(),
         reason = plan?.reason ?: dev.ikna.domain.governor.GovernorReason.OK,
-        nextDueAt = plan?.nextDueAt, noMoreExtra = noMoreExtra,
-        optionalHardReview = optionalBatch != null, optionalHardAvailable = optionalAvailable,
-        optionalHardEmpty = optionalEmpty)
+        nextDueAt = plan?.nextDueAt, noMoreExtra = noMoreExtra)
     val sessionDecks by produceState(emptyMap<String, DeckSummary>(), container) {
         value = runCatching { container.deckRepository.decks().associateBy { it.id } }.getOrDefault(emptyMap())
     }
@@ -562,7 +458,7 @@ private fun SessionPaneContent(
         // own row instead of drifting at a far edge.
         if (!loading && !loadFailed && !invalidated && !sessionChanged && !inspecting) {
             Column(Modifier.fillMaxWidth().widthIn(max = 680.dp).align(Alignment.CenterHorizontally)) {
-                IknaSessionTopBar(presentation, onFinishOptional = finishOptional)
+                IknaSessionTopBar(presentation)
                 IknaTodayProgress(state = presentation)
             }
 
@@ -589,8 +485,7 @@ private fun SessionPaneContent(
                 IknaSessionEmptyState(
                     presentation, settings.animations,
                     onExtra = addMore,
-                    checkExtra = { now -> container.learningRepository.extraReviewAvailable(deckId, now) },
-                    onOptionalHard = startOptional
+                    checkExtra = { now -> container.learningRepository.extraReviewAvailable(deckId, now) }
                 )
             } else {
                 val mode = settings.phoneticsFor(current.chunk.packId)

@@ -45,10 +45,9 @@ private val EDGE = 20.dp
 private var lastCelebratedAnswersToday: Int = 0
 
 @Composable
-fun IknaSessionTopBar(state: SessionUiState, onFinishOptional: (() -> Unit)? = null) {
+fun IknaSessionTopBar(state: SessionUiState) {
     val minimumJustMet = state.minimumMet && state.goalAnswersToday == state.dailyMinimum
     val text = when {
-        state.optionalHardReview -> S.t("sess.hard.active")
         state.index == 0 && !state.revealed && state.remaining > 0 -> startEstimate(state)
         minimumJustMet -> S.t("sess.003")
         else -> ""
@@ -72,9 +71,7 @@ fun IknaSessionTopBar(state: SessionUiState, onFinishOptional: (() -> Unit)? = n
                 .padding(start = 8.dp)
         )
 
-        if (state.optionalHardReview && onFinishOptional != null) {
-            IknaTextButton(label = S.t("sess.hard.finish"), onClick = onFinishOptional)
-        } else if (state.deckTitle != null) {
+        if (state.deckTitle != null) {
             Text(
                 text = state.deckTitle.uppercase(),
                 style = MaterialTheme.typography.labelSmall,
@@ -121,12 +118,11 @@ fun IknaSessionEmptyState(
     state: SessionUiState,
     animations: Boolean,
     onExtra: () -> Unit,
-    checkExtra: suspend (Long) -> Boolean,
-    onOptionalHard: (() -> Unit)? = null
+    checkExtra: suspend (Long) -> Boolean
 ) {
     val check by rememberUpdatedState(checkExtra)
     val availability by produceState<Pair<Instant, Boolean>?>(null, state.deckTitle,
-        state.answeredToday, state.noMoreExtra, state.optionalHardReview) {
+        state.answeredToday, state.noMoreExtra) {
         value = null
         while (true) {
             val now = Instant.now()
@@ -176,7 +172,6 @@ fun IknaSessionEmptyState(
 
         Text(
             text = when {
-                state.optionalHardReview -> S.t("sess.hard.done")
                 state.reason == GovernorReason.PACK_EXHAUSTED -> S.t("sess.004")
                 state.answeredToday > 0 -> S.t("sess.005")
                 else -> S.t("sess.006")
@@ -188,7 +183,7 @@ fun IknaSessionEmptyState(
         Spacer(Modifier.height(16.dp))
 
         Text(
-            text = if (result != null && !result.second && !state.optionalHardReview) {
+            text = if (result != null && !result.second) {
                 S.t(sessionFinishMessageKey(state, result.first))
             } else emptyExplanation(state),
             style = MaterialTheme.typography.bodyMedium,
@@ -207,18 +202,6 @@ fun IknaSessionEmptyState(
         }
 
         Spacer(Modifier.height(28.dp))
-
-        if (state.optionalHardEmpty) {
-            Text(S.t("sess.hard.empty"), style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
-            Spacer(Modifier.height(Space.md))
-        }
-        if (state.optionalHardAvailable && onOptionalHard != null) {
-            IknaTextButton(label = S.t("sess.hard.start"), onClick = onOptionalHard)
-            Text(S.t("sess.hard.scope"), style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
-            Spacer(Modifier.height(Space.md))
-        }
 
         if (result?.second == true) {
             IknaTextButton(label = S.t("sess.009"), onClick = onExtra)
@@ -470,7 +453,6 @@ fun IknaSessionUndoBar(
 }
 
 private fun emptyExplanation(state: SessionUiState): String = when {
-    state.optionalHardReview -> S.t("sess.hard.done_scope")
     state.reason == GovernorReason.PACK_EXHAUSTED -> reasonText(state.reason)
     state.answeredToday > 0 -> S.t("sess.018")
     else -> reasonText(state.reason)

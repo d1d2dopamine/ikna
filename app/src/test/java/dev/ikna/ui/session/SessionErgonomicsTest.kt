@@ -37,26 +37,15 @@ class SessionErgonomicsTest {
     }
 
     @Test
-    fun `optional hard review is explicit and uses separate finite answer and undo paths`() {
+    fun `optional hard review UI is removed leaving only standard extra review`() {
         val screen = source("dev/ikna/ui/session/SessionScreen.kt")
         val vm = source("dev/ikna/ui/session/SessionViewModel.kt")
-        assertTrue(screen.contains("onOptionalHard = vm::startOptionalHardReview"))
-        assertTrue(screen.contains("onFinishOptional = vm::finishOptionalHardReview"))
-        val start = vm.substringAfter("fun startOptionalHardReview()").substringBefore("fun finishOptionalHardReview()")
-        assertTrue(start.contains("!s.finished || !s.optionalHardAvailable"))
-        assertTrue(start.contains("repo.startOptionalHardReview(deckId)"))
-        assertFalse(start.contains("buildSession"))
-        val rate = vm.substringAfter("fun rate(").substringAfter("optionalBatch?.let { batch ->").substringBefore("answeredKeys += card.card.key")
-        assertTrue(rate.contains("repo.answerOptionalHard(batch, card, rating, duration, now, signals)"))
-        assertTrue(rate.contains("val next = s.index + 1"))
-        assertTrue(rate.contains("goalAnswersToday = repo.goalAnswersToday(now)"))
-        assertFalse(rate.contains("s.queue + card"))
-        val undo = vm.substringAfter("val restored = repo.undoOptionalHard(batch)").substringBefore("val key = repo.undoLast()")
-        assertTrue(undo.contains("queue = listOf(restored) + tail"))
-        assertFalse(undo.contains("buildSession"))
-        assertTrue(undo.contains("goalAnswersToday = repo.goalAnswersToday()"))
-        assertTrue(vm.contains("optionalBatch = null"))
-        assertTrue(vm.contains("failedLoad().copy(optionalHardReview = false"))
+        assertFalse(screen.contains("onOptionalHard"))
+        assertFalse(screen.contains("onFinishOptional"))
+        assertTrue(screen.contains("onExtra = vm::addExtra"))
+        assertFalse(vm.contains("startOptionalHardReview"))
+        assertFalse(vm.contains("finishOptionalHardReview"))
+        assertFalse(vm.contains("optionalBatch"))
     }
 
     private fun source(relative: String): String {

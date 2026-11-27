@@ -1,14 +1,6 @@
 package dev.ikna.ui.text
 
 val STRINGS_PL: Map<String, String> = mapOf(
-    "sess.hard.start" to "TRUDNE KARTY OPCJONALNIE · DO 5",
-    "sess.hard.active" to "Opcjonalna powtórka",
-    "sess.hard.finish" to "Zakończ",
-    "sess.hard.done" to "Opcjonalna powtórka zakończona",
-    "sess.hard.done_scope" to "Główna lekcja pozostaje ukończona. Odpowiedzi zmieniają terminy powtórek, ale nie odblokowują nowych kart.",
-    "sess.hard.empty" to "Teraz nie ma odpowiednich trudnych kart w tym wyborze.",
-    "sess.hard.scope" to "Wcześniej nauczone karty z co najmniej czterema błędami. Jedno przejście; możesz przerwać w każdej chwili. Zwykłe oceny; bez odblokowywania nowych kart.",
-
     "sync.error.journal_item_too_large" to "Zdarzenie historii jest zbyt duże dla jednej partii synchronizacji. Historia zostaje zachowana; nie usuwaj jej w celu synchronizacji. To zdarzenie wymaga obsługi większych rekordów.",
     "sync.error.journal_reconciliation" to "Nie można zweryfikować zapisanego punktu synchronizacji. Historia zostaje zachowana. Cofnij parowanie na obu urządzeniach i ponownie sprawdź profile; limit profilu początkowego nadal obowiązuje. Nie usuwaj historii, aby połączyć urządzenia.",
     "sync.error.protocol" to "Wersje synchronizacji są niezgodne. Zaktualizuj aplikację na obu urządzeniach, a następnie ponownie sprawdź i zatwierdź profile. Lokalna historia zostaje zachowana.",

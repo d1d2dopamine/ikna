@@ -1,14 +1,6 @@
 package dev.ikna.ui.text
 
 val STRINGS_FR: Map<String, String> = mapOf(
-    "sess.hard.start" to "RÉVISION DIFFICILE FACULTATIVE · JUSQU’À 5",
-    "sess.hard.active" to "Révision facultative",
-    "sess.hard.finish" to "Terminer",
-    "sess.hard.done" to "Révision facultative terminée",
-    "sess.hard.done_scope" to "La leçon principale reste terminée. Les réponses modifient les dates de révision, sans débloquer de nouvelles cartes.",
-    "sess.hard.empty" to "Aucune carte difficile admissible dans cette sélection pour le moment.",
-    "sess.hard.scope" to "Cartes déjà apprises avec au moins quatre oublis. Un passage ; arrêtez quand vous voulez. Évaluation normale ; aucun crédit pour de nouvelles cartes.",
-
     "sync.error.journal_item_too_large" to "Un événement de l’historique est trop volumineux pour un lot. L’historique est conservé ; ne le supprime pas pour synchroniser. Cet événement nécessite la prise en charge de données plus volumineuses.",
     "sync.error.journal_reconciliation" to "Le point de synchronisation enregistré n’a pas pu être vérifié. L’historique est conservé. Révoque l’association sur les deux appareils et vérifie à nouveau les profils ; la limite du profil initial reste applicable. Ne supprime pas l’historique pour reconnecter.",
     "sync.error.protocol" to "Les versions de synchronisation sont incompatibles. Mets à jour les deux appareils, puis vérifie et approuve à nouveau les profils. L’historique local est conservé.",

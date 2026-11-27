@@ -63,7 +63,7 @@ class SessionInspectionIntegrationTest {
             assertEquals(0, open.answeredToday)
             val committed = state(f)
             val read = f.learning.inspectSession(now = NOW)
-            assertNull(read.plan); assertFalse(read.requiredComplete); assertFalse(read.optionalHardAvailable)
+            assertNull(read.plan); assertFalse(read.requiredComplete)
             assertEquals(setOf("b:0"), read.answeredKeys)
             assertEquals(1, read.answeredToday); assertEquals(1, read.goalAnswersToday)
             assertEquals(1L, read.observation.reviewCount)
@@ -104,7 +104,7 @@ class SessionInspectionIntegrationTest {
             f.db.planDao().upsert(plan().copy(plannedIds = "", plannedTotal = 0, extraRequested = 0))
             before = state(f)
             val empty = f.learning.inspectSession(now = NOW)
-            assertNotNull(empty.plan); assertTrue(empty.requiredComplete); assertFalse(empty.optionalHardAvailable)
+            assertNotNull(empty.plan); assertTrue(empty.requiredComplete)
             val next = f.learning.inspectSession(now = NOW + 86400000)
             assertNull(next.plan); assertFalse(next.requiredComplete)
             assertNotEquals(empty.observation.day, next.observation.day)
@@ -138,26 +138,21 @@ class SessionInspectionIntegrationTest {
         }
     }
 
-    @Test fun `unchanged inspection preserves optional token and incoming optional purpose only increases factual totals`() = runBlocking {
+    @Test fun `incoming historical optional purpose only increases factual totals`() = runBlocking {
         fixture { f ->
             val open = f.learning.buildSession(now = NOW)
             for (card in open.cards.take(2)) f.learning.answer(card, Rating.GOOD, 100, NOW)
-            val batch = requireNotNull(f.learning.startOptionalHardReview(now = NOW + 1))
             val before = state(f)
             val inspected = f.learning.inspectSession(now = NOW + 1)
-            assertTrue(inspected.requiredComplete); assertTrue(inspected.optionalHardAvailable)
+            assertTrue(inspected.requiredComplete)
             assertEquals(before, state(f))
-            f.learning.answerOptionalHard(batch, batch.cards.single(), Rating.GOOD, 100, NOW + 2)
-            val local = f.learning.inspectSession(now = NOW + 3)
-            assertEquals(3, local.answeredToday); assertEquals(2, local.goalAnswersToday)
             f.restore.mergeJournal(listOf(answer("peer-optional", "hard", ReviewPurpose.OPTIONAL_HARD)))
             val committed = state(f)
             val remote = f.learning.inspectSession(now = NOW + 3)
-            assertNull(remote.plan); assertFalse(remote.optionalHardAvailable)
-            assertEquals(4, remote.answeredToday); assertEquals(2, remote.goalAnswersToday)
+            assertNull(remote.plan)
+            assertEquals(3, remote.answeredToday); assertEquals(2, remote.goalAnswersToday)
             assertEquals(setOf("a:0", "b:0"), remote.answeredKeys)
             assertEquals(committed, state(f))
-            f.learning.cancelOptionalHardReview(batch)
         }
     }
 

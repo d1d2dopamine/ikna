@@ -41,7 +41,6 @@ class ReviewDurationTest {
             assertFalse(ui.contains("shownNanos = System.currentTimeMillis()"))
             assertFalse(ui.contains("System.currentTimeMillis() - shown"))
             assertFalse(ui.contains("now - shown"))
-            assertTrue(ui.contains("answerOptionalHard"))
         }
         assertTrue(android.contains("val now = System.currentTimeMillis()"))
         assertTrue(android.contains("repo.answer(card, rating, duration, now, signals)"))

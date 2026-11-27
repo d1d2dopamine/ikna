@@ -1,14 +1,6 @@
 package dev.ikna.ui.text
 
 val STRINGS_ES: Map<String, String> = mapOf(
-    "sess.hard.start" to "REPASO DIFÍCIL OPCIONAL · HASTA 5",
-    "sess.hard.active" to "Repaso difícil opcional",
-    "sess.hard.finish" to "Terminar",
-    "sess.hard.done" to "Repaso opcional terminado",
-    "sess.hard.done_scope" to "La lección principal sigue completada. Las respuestas cambian las fechas de repaso, pero no desbloquean tarjetas nuevas.",
-    "sess.hard.empty" to "Ahora no hay tarjetas difíciles aptas en esta selección.",
-    "sess.hard.scope" to "Tarjetas ya aprendidas con al menos cuatro fallos. Una pasada; puedes parar cuando quieras. Evaluación normal; sin crédito para tarjetas nuevas.",
-
     "sync.error.journal_item_too_large" to "Un evento del historial es demasiado grande para un lote. El historial se conserva; no lo borres para sincronizar. Este evento necesita soporte para transferir registros más grandes.",
     "sync.error.journal_reconciliation" to "No se pudo verificar el punto de sincronización guardado. El historial se conserva. Revoca el emparejamiento en ambos dispositivos y revisa los perfiles de nuevo; el límite del perfil inicial sigue vigente. No borres el historial para reconectar.",
     "sync.error.protocol" to "Las versiones de sincronización son incompatibles. Actualiza la aplicación en ambos dispositivos y vuelve a revisar y aprobar los perfiles. El historial local se conserva.",

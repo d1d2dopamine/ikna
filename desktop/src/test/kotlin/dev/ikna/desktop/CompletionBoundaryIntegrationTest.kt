@@ -1,6 +1,7 @@
 package dev.ikna.desktop
 
 import dev.ikna.data.db.*
+import dev.ikna.data.export.ReviewRecord
 import dev.ikna.data.repo.*
 import dev.ikna.domain.fsrs.Rating
 import dev.ikna.domain.fsrs.Scheduler
@@ -65,7 +66,6 @@ class CompletionBoundaryIntegrationTest {
             assertEquals(oracle, f.db.cardDao().card("required", 0))
             val committed = state(f)
             assertTrue(repo.requiredPlanComplete(NOW))
-            assertTrue(repo.optionalHardAvailable(now = NOW))
             assertTrue(f.db.statsDao().day(DAY)!!.planCompleted)
             assertEquals(1, f.db.reviewDao().all().size)
             assertEquals(committed, state(f))
@@ -77,7 +77,6 @@ class CompletionBoundaryIntegrationTest {
             assertEquals("required:0", restarted.undoLast(NOW + 2))
             assertFalse(restarted.requiredPlanComplete(NOW + 2))
             assertFalse(f.db.statsDao().day(DAY)!!.planCompleted)
-            assertFalse(restarted.optionalHardAvailable(now = NOW + 2))
             assertEquals(listOf("required"), restarted.buildSession(now = NOW + 2).cards.map { it.chunk.id })
         }
     }
@@ -93,12 +92,11 @@ class CompletionBoundaryIntegrationTest {
             assertTrue(finishedDeck.cards.isEmpty())
             assertFalse(f.db.statsDao().day(DAY)!!.planCompleted)
             assertFalse(repo.requiredPlanComplete(NOW + 1))
-            assertFalse(repo.optionalHardAvailable(now = NOW + 1))
             assertEquals(listOf("other"), repo.buildSession(now = NOW + 1).cards.map { it.chunk.id })
         }
     }
 
-    @Test fun `missing versus empty existing plan is read only and does not offer optional hard on quiet day`() = runBlocking {
+    @Test fun `missing versus empty existing plan is read only`() = runBlocking {
         fixture { f ->
             val repo = f.repo()
             f.db.planDao().clear()
@@ -106,7 +104,7 @@ class CompletionBoundaryIntegrationTest {
             assertFalse(repo.requiredPlanComplete(NOW)); assertEquals(before, state(f))
             f.db.planDao().upsert(DailyPlanEntity(DAY, "", 0, 40, 0, 0, "NO_HEADROOM", 0, NOW))
             before = state(f)
-            assertTrue(repo.requiredPlanComplete(NOW)); assertFalse(repo.optionalHardAvailable(now = NOW))
+            assertTrue(repo.requiredPlanComplete(NOW))
             assertEquals(before, state(f))
             assertFalse(repo.requiredPlanComplete(NOW + 86_400_000L)); assertEquals(before, state(f))
         }
@@ -151,19 +149,21 @@ class CompletionBoundaryIntegrationTest {
             f.db.planDao().upsert(DailyPlanEntity(DAY, "other:0", 1, 40, 0, 0, "NO_HEADROOM", 1, NOW))
             val repo = f.repo(); val before = state(f)
             assertTrue(repo.requiredPlanComplete(NOW))
-            assertFalse(repo.optionalHardAvailable(now = NOW))
             assertEquals(before, state(f))
             assertEquals(listOf("other"), repo.buildSession(now = NOW).cards.map { it.chunk.id })
         }
     }
 
-    @Test fun `optional practice does not satisfy a later rebuilt required key`() = runBlocking {
+    @Test fun `historical optional practice does not satisfy a later rebuilt required key`() = runBlocking {
         fixture { f ->
             val repo = f.repo()
             repo.answer(repo.buildSession(now = NOW).cards.single(), Rating.GOOD, 100, NOW)
-            val batch = requireNotNull(repo.startOptionalHardReview(now = NOW + 1))
-            assertEquals(listOf("hard"), batch.cards.map { it.chunk.id })
-            repo.answerOptionalHard(batch, batch.cards.single(), Rating.GOOD, 100, NOW + 2)
+            f.db.reviewDao().insert(ReviewRecord(
+                chunkId = "hard", ts = NOW + 2, rating = Rating.GOOD.code,
+                durationMs = 100, eventId = "historical-optional-hard",
+                purpose = ReviewPurpose.OPTIONAL_HARD
+            ).toEntity())
+            f.db.statsDao().upsert(f.db.statsDao().day(DAY)!!.copy(reviewsDone = 2, correctCount = 2))
             assertTrue(repo.requiredPlanComplete(NOW + 2))
             val plan = f.db.planDao().plan(DAY)!!
             f.db.planDao().upsert(plan.copy(plannedIds = "required:0,hard:0", plannedTotal = 2))

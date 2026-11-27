@@ -61,24 +61,18 @@ data class SessionUiState(
      * when pressed is worse than a missing one.
      */
     val speechReady: Boolean = false,
-    val finished: Boolean = false,
-    /** Explicit, finite practice; never part of the required daily plan. */
-    val optionalHardReview: Boolean = false,
-    val optionalHardAvailable: Boolean = false,
-    val optionalHardEmpty: Boolean = false
+    val finished: Boolean = false
 ) {
     /** Hide any previous prompt immediately; retry always reads the saved plan. */
     fun beginLoad(): SessionUiState = copy(
         loading = true, loadFailed = false, sessionChanged = false, finished = false,
-        queue = emptyList(), revealed = false, undoVisible = false, canUndo = false,
-        optionalHardAvailable = false
+        queue = emptyList(), revealed = false, undoVisible = false, canUndo = false
     )
 
     /** A failed read or write cannot claim that a session was completed. */
     fun failedLoad(): SessionUiState = copy(
         loading = false, loadFailed = true, sessionChanged = false, finished = false,
-        queue = emptyList(), revealed = false, undoVisible = false, canUndo = false,
-        optionalHardAvailable = false
+        queue = emptyList(), revealed = false, undoVisible = false, canUndo = false
     )
 
     val current: SessionCard? get() = if (loading || loadFailed || sessionChanged) null else queue.getOrNull(index)

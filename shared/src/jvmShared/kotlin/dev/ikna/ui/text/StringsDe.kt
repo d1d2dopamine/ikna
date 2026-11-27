@@ -1,14 +1,6 @@
 package dev.ikna.ui.text
 
 val STRINGS_DE: Map<String, String> = mapOf(
-    "sess.hard.start" to "SCHWIERIGE KARTEN · BIS ZU 5",
-    "sess.hard.active" to "Freiwillige Wiederholung",
-    "sess.hard.finish" to "Beenden",
-    "sess.hard.done" to "Freiwillige Wiederholung beendet",
-    "sess.hard.done_scope" to "Deine Hauptlektion bleibt abgeschlossen. Antworten ändern Wiederholungstermine, schalten aber keine neuen Karten frei.",
-    "sess.hard.empty" to "Momentan gibt es hier keine passenden schwierigen Karten.",
-    "sess.hard.scope" to "Bereits gelernte Karten mit mindestens vier Fehlern. Ein Durchgang; jederzeit beenden. Normale Bewertung; keine Freischaltung neuer Karten.",
-
     "sync.error.journal_item_too_large" to "Ein Verlaufseintrag ist zu groß für ein Synchronisierungspaket. Der Verlauf bleibt erhalten; lösche ihn nicht für die Synchronisierung. Für diesen Eintrag wird die Übertragung größerer Datensätze benötigt.",
     "sync.error.journal_reconciliation" to "Der gespeicherte Synchronisierungsstand konnte nicht geprüft werden. Der Verlauf bleibt erhalten. Widerrufe die Kopplung auf beiden Geräten und prüfe die Profile erneut; das Größenlimit für Ausgangsprofile gilt weiterhin. Lösche keinen Verlauf für die Verbindung.",
     "sync.error.protocol" to "Die Apps verwenden inkompatible Synchronisierungsversionen. Aktualisiere beide Geräte und prüfe und bestätige die Profile erneut. Der lokale Verlauf bleibt erhalten.",

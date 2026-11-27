@@ -139,44 +139,26 @@ class ReviewDurationIntegrationTest {
         }
     }
 
-    @Test fun `optional duration clamp and undo never earn goal or new card credit`() = runBlocking {
-        fixture { f ->
-            plan(f)
-            val repo = f.learning()
-            repo.answer(f.card(), Rating.GOOD, 100, NOW)
-            val originalPlan = f.db.planDao().plan(DAY)
-            val batch = requireNotNull(repo.startOptionalHardReview(now = NOW + 1))
-            val cases = listOf(Long.MIN_VALUE to 0L, -1L to 0L, 0L to 0L, 1L to 1L,
-                120_000L to 120_000L, 120_001L to 120_000L, Long.MAX_VALUE to 120_000L)
-            cases.forEachIndexed { i, (raw, expected) ->
-                val now = NOW + 2 + i * 2
-                repo.answerOptionalHard(batch, batch.cards.single(), Rating.AGAIN, raw, now)
-                assertEquals(expected, f.db.reviewDao().all().last().durationMs)
-                assertEquals(ReviewPurpose.OPTIONAL_HARD, f.db.reviewDao().all().last().purpose)
-                assertEquals(100 + expected, f.db.statsDao().day(DAY)!!.activeMs)
-                assertEquals(2, repo.answeredToday(now)); assertEquals(1, repo.goalAnswersToday(now))
-                assertNull(f.db.cardDao().card("fresh", 0)); assertEquals(originalPlan, f.db.planDao().plan(DAY))
-                assertNotNull(repo.undoOptionalHard(batch, now + 1))
-                assertEquals(100L, f.db.statsDao().day(DAY)!!.activeMs)
-                assertEquals(1, repo.answeredToday(now + 1)); assertEquals(1, repo.goalAnswersToday(now + 1))
-            }
-            f.restore().replaySyncJournal(0)
-            repo.answer(f.card(), Rating.GOOD, Long.MAX_VALUE, NOW + 100)
-            assertEquals(120_100L, f.db.statsDao().day(DAY)!!.activeMs)
-            assertEquals(2, repo.goalAnswersToday(NOW + 100)); assertNull(f.db.cardDao().card("fresh", 0))
-        }
-    }
-
-    @Test fun `bounded ordinary optional and undo events survive profile export restore and incremental sync`() = runBlocking {
+    @Test fun `bounded ordinary historical optional and undo events survive profile export restore and incremental sync`() = runBlocking {
         fixture { source -> fixture { peer -> fixture { imported ->
             consent(source, peer)
             plan(source)
             val repo = source.learning()
             repo.answer(source.card(), Rating.GOOD, 300_000, NOW)
-            val batch = requireNotNull(repo.startOptionalHardReview(now = NOW + 1))
-            repo.answerOptionalHard(batch, batch.cards.single(), Rating.AGAIN, Long.MAX_VALUE, NOW + 2)
-            assertNotNull(repo.undoOptionalHard(batch, NOW + 3))
-            repo.answerOptionalHard(batch, batch.cards.single(), Rating.GOOD, Long.MIN_VALUE, NOW + 4)
+            repo.answer(source.card(), Rating.AGAIN, Long.MAX_VALUE, NOW + 2)
+            assertEquals("required:0", repo.undoLast(NOW + 3))
+            val hard = source.card("hard").card
+            val sched = Scheduler(dayStartHour = source.config.dayStartHour).apply(hard, Rating.GOOD, NOW + 4)
+            assertEquals(1, source.restore().mergeJournal(listOf(ReviewRecord(
+                chunkId = "hard", ts = NOW + 4, rating = Rating.GOOD.code, eventId = "historical-opt",
+                durationMs = 0L, elapsedDays = sched.elapsedDays,
+                stabilityBefore = hard.stability, stabilityAfter = sched.card.stability,
+                difficultyBefore = hard.difficulty, difficultyAfter = sched.card.difficulty,
+                prevStability = hard.stability, prevDifficulty = hard.difficulty,
+                prevLastReviewAt = hard.lastReviewAt, prevDueAt = hard.dueAt,
+                prevIsNew = false, prevReps = hard.reps, prevLapses = hard.lapses,
+                purpose = ReviewPurpose.OPTIONAL_HARD
+            ))).imported)
             repo.answer(source.card(), Rating.GOOD, 120_001, NOW + 5)
             val originalRows = source.db.reviewDao().all()
             assertEquals(listOf(120_000L, 120_000L, 0L, 0L, 120_000L), originalRows.map { it.durationMs })
@@ -245,24 +227,21 @@ class ReviewDurationIntegrationTest {
         }
     }
 
-    @Test fun `checked duration aggregate rolls back ordinary and optional answer atomically`() = runBlocking {
-        for (optional in listOf(false, true)) fixture { f ->
+    @Test fun `checked duration aggregate rolls back ordinary answer atomically`() = runBlocking {
+        fixture { f ->
             plan(f)
             val repo = f.learning()
             repo.answer(f.card(), Rating.GOOD, 100L, NOW)
-            val batch = if (optional) requireNotNull(repo.startOptionalHardReview(now = NOW + 1)) else null
             val normalStat = f.db.statsDao().day(DAY)!!
             f.db.statsDao().upsert(normalStat.copy(activeMs = Long.MAX_VALUE - 99))
             val before = state(f)
             try {
-                if (batch == null) repo.answer(f.card(), Rating.AGAIN, 100L, NOW + 2)
-                else repo.answerOptionalHard(batch, batch.cards.single(), Rating.AGAIN, 100L, NOW + 2)
+                repo.answer(f.card(), Rating.AGAIN, 100L, NOW + 2)
                 fail("Expected checked aggregate overflow")
             } catch (_: ArithmeticException) { }
             assertEquals(before, state(f))
             f.db.statsDao().upsert(normalStat)
-            if (batch == null) repo.answer(f.card(), Rating.AGAIN, 100L, NOW + 2)
-            else repo.answerOptionalHard(batch, batch.cards.single(), Rating.AGAIN, 100L, NOW + 2)
+            repo.answer(f.card(), Rating.AGAIN, 100L, NOW + 2)
             assertEquals(200L, f.db.statsDao().day(DAY)!!.activeMs)
             assertEquals(2, f.db.reviewDao().all().size)
         }

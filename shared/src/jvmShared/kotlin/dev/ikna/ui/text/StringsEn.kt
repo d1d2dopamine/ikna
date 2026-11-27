@@ -1,14 +1,6 @@
 package dev.ikna.ui.text
 
 val STRINGS_EN: Map<String, String> = mapOf(
-    "sess.hard.start" to "OPTIONAL HARD REVIEW · UP TO 5",
-    "sess.hard.active" to "Optional hard review",
-    "sess.hard.finish" to "Finish",
-    "sess.hard.done" to "Optional review finished",
-    "sess.hard.done_scope" to "Your main lesson stays complete. These answers update review dates, but do not earn new cards.",
-    "sess.hard.empty" to "No eligible hard cards in this selection right now.",
-    "sess.hard.scope" to "Previously learned cards with at least four lapses. One pass; stop whenever you want. Normal grading; no new-card credit.",
-
     "sync.error.journal_item_too_large" to "A history event is too large for a sync batch. Your history is kept; do not delete it to enable sync. This event needs a larger-item transfer feature.",
     "sync.error.journal_reconciliation" to "The saved sync checkpoint could not be verified. History is kept. Revoke pairing on both devices and review the profiles again; the initial-profile size limit still applies. Do not delete history to reconnect.",
     "sync.error.protocol" to "The apps use incompatible sync versions. Update both devices, then review and approve their profiles again. Your local history is kept.",
